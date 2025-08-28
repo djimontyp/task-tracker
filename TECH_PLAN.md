@@ -66,7 +66,7 @@
 ### **Модульна Архітектура:**
 - **Core Engine:** Typer CLI application
 - **CLI Interface:** Typer + Rich для interactive management
-- **Database:** Async SQLAlchemy + PostgreSQL
+- **Database:** SQLModel + PostgreSQL
 - **Migrations:** Alembic для schema evolution
 - **Task Queue:** TaskIQ для async processing
 - **Scheduler:** TaskIQ scheduler для periodic jobs
@@ -97,7 +97,7 @@
     └── pipeline.py
 ```
 
-### **Database Schema Design (Async SQLAlchemy):**
+### **Database Schema Design (SQLModel):**
 ```sql
 -- Core normalized schema
 sources (id, type, name, config, is_active, created_at)
@@ -129,12 +129,27 @@ llm_providers (id, name, type, config, is_active, usage_stats)
 - **Cross-platform:** Works на Windows, macOS, Linux
 - **Zero Dependencies:** Не потребує browser або web server
 
-### **Database Choice - SQLAlchemy + PostgreSQL:**
-- **SQLAlchemy ORM:** Type-safe database operations з async support
+### **Database Choice - SQLModel + PostgreSQL:**
+- **SQLModel ORM:** Type-safe database operations з async support
 - **Alembic:** Database migrations для schema evolution
 - **PostgreSQL:** Production-ready RDBMS з JSON support
 - **Async Support:** Повна async/await інтеграція з FastAPI
 - **ACID Transactions:** Reliable data consistency
+
+### **Technical Advantages:**
+- **Plugin Architecture vs Monolithic:** Extensible design для нових sources/outputs
+- **SQLModel vs Sync ORM:** High-performance concurrent operations
+- **pytest-asyncio vs Standard Testing:** Proper async workflow testing
+- **TaskIQ vs Celery:** Full async support, modern distributed processing
+- **Normalized Schema vs Document DB:** Proper relationships, ACID transactions
+- **Abstract Base Classes:** Type-safe plugin contracts з MyPy validation
+- **Pydantic Configuration:** Type-safe plugin config з validation
+- **Multi-Source Architecture:** Future-proof для Slack, Discord, Email integration
+- **Flexible Output System:** Adaptable для будь-які business requirements
+- **Source-Agnostic Processing:** Unified pipeline незалежно від джерела
+- **Dynamic Plugin Loading:** Runtime extensibility без restart
+- **Checkpoint System:** Reliable resume після failures з database persistence
+- **CLI-Native Performance:** Direct database access без HTTP overhead
 
 ### **Telegram Integration - python-telegram-bot:**
 - **High-level API:** Simplified Telegram Bot API interaction
@@ -171,7 +186,7 @@ tests/
 ├── integration/
 │   ├── test_full_pipeline.py          # End-to-end workflow
 │   ├── test_plugin_loading.py         # Dynamic plugin loading
-│   ├── test_async_database.py         # Async SQLAlchemy operations
+│   ├── test_sqlmodel_database.py         # SQLModel operations
 │   └── test_multi_source.py          # Multiple sources processing
 ├── fixtures/
 │   ├── async_database.py             # Async DB fixtures
@@ -183,10 +198,10 @@ tests/
 
 #### **Async Testing Patterns:**
 ```python
-# Async SQLAlchemy testing
+# SQLModel testing
 @pytest_asyncio.fixture
-async def async_db_session():
-    # Setup async database з transaction rollback
+async def sqlmodel_db_session():
+    # Setup SQLModel з transaction rollback
     
 # Plugin system testing  
 @pytest_asyncio.fixture
@@ -294,7 +309,7 @@ Custom    → Custom Adapter                                     → Webhook
 ```
 CLI Commands → Core Engine → Database/TaskIQ → Async Processing → Results
      ↓              ↓              ↓               ↓               ↓
-   Typer    → Business Logic → SQLAlchemy → Background Jobs → Rich Output
+   Typer    → Business Logic → SQLModel → Background Jobs → Rich Output
 ```
 
 ### **Processing Modes:**
@@ -402,7 +417,7 @@ class ProcessorConfig(BaseModel):
 
 ### **Must Have (MVP):**
 1. **Core Architecture:** Plugin system з abstract base classes
-2. **Telegram Source Adapter:** Повна implementation з async SQLAlchemy
+2. **Telegram Source Adapter:** Повна implementation з SQLModel
 3. **Task Creation Processor:** Basic output processor для створення задач  
 4. **Local LLM Provider:** Ollama integration
 5. **Interactive CLI:** Typer + Rich з source/processor management
@@ -430,7 +445,7 @@ class ProcessorConfig(BaseModel):
 
 ### **Won't Have (поза MVP):**
 1. **Discord/Email Source Adapters**
-2. **External Task Tracker Integrations** (Jira, Linear)
+2. **External Task Tracker Integrations** (Jira, etc.)
 3. **Multi-tenant Support**
 4. **Complex ML Features** (clustering, anomaly detection)
 5. **Real-time Dashboard UI**
@@ -456,7 +471,7 @@ class ProcessorConfig(BaseModel):
 **День 1-2 (4h):** Core Architecture + Plugin System
 - Repository structure з plugin architecture
 - Abstract base classes (SourceAdapter, OutputProcessor, LLMProvider)
-- Async SQLAlchemy models design
+- SQLModel models design
 - Alembic migrations setup для normalized schema
 - Pydantic models для plugin configurations
 - Docker configuration з PostgreSQL
@@ -468,7 +483,7 @@ class ProcessorConfig(BaseModel):
 - Core LLM abstraction з async support
 - OllamaProvider implementation
 - Basic classification pipeline
-- Async database operations з SQLAlchemy
+- Async database operations з SQLModel
 - Checkpoint system implementation
 
 **День 5-6 (4h):** Task Creation Processor + CLI Foundation
@@ -508,7 +523,7 @@ class ProcessorConfig(BaseModel):
 **День 12-13 (4h):** Production Readiness + Test Coverage
 - Cloud LLM providers (OpenAI adapter)
 - Production configuration management
-- Async SQLAlchemy performance optimization
+- SQLModel performance optimization
 - Error handling та recovery mechanisms
 - Test coverage analysis (target >80%)
 - Security testing та validation
@@ -544,129 +559,6 @@ class ProcessorConfig(BaseModel):
 - ✅ Quantifiable time savings (manual vs automated batch processing)
 - ✅ Clear cost advantages з local LLM
 - ✅ Scalability story для enterprise use
-
-### **Demo Requirements:**
-- ✅ Live CLI demo з interactive navigation
-- ✅ Scheduled job configuration через CLI
-- ✅ Real-time progress bars під час processing
-- ✅ LLM provider switching через меню
-- ✅ Beautiful terminal output з Rich formatting
-- ✅ Clear ROI value proposition
-- ✅ Production-ready CLI interface
-
----
-
-## ⚠️ **Ризики та Mitigation**
-
-### **Technical Risks:**
-- **Ollama setup складність** → Fallback до cloud LLM for demo
-- **Telegram API rate limits** → Implement proper throttling
-- **LLM response inconsistency** → Fallback classification rules + detailed Loguru logging
-- **Message recovery failures** → Manual recovery procedures з error tracking
-- **TaskIQ debugging** → Loguru structured logs для task monitoring
-
-### **Timeline Risks:**
-- **2 години/день недостатньо** → Simplify scope, focus на core demo
-- **Integration bugs** → Prepare fallback demo scenarios
-- **Deployment issues** → Local demo backup plan
-
-### **Competition Risks:**
-- **Similar solutions exist** → Emphasize unique LLM flexibility
-- **Technical demo fails** → Pre-recorded backup video
-- **Questions about scalability** → Prepare architecture diagrams
-
----
-
-## 💰 **Бюджет та ресурси**
-
-### **Development Costs:**
-- **LLM:** $0 (Ollama local) до $50 (cloud APIs)
-- **Hosting:** $10-20 для VPS
-- **Domain:** $10 (optional)
-- **Total:** $10-80
-
-### **Time Investment:**
-- **Development:** 28 годин over 14 днів
-- **Learning curve:** Ollama setup, Telegram Bot API
-- **Documentation:** README, deployment guide
-- **Demo prep:** Scenario testing, backup plans
-
-### **ROI Projection:**
-- **Time saved:** 2+ години/день × team size
-- **Cost saved:** $100-300/day у productive time
-- **LLM costs:** $0-150/month
-- **Net benefit:** $2000-6000/month для 5-person team
-
----
-
-## 🏆 **Конкурентні переваги**
-
-### **Unique Value Props:**
-1. **Universal Source Support** - Plugin architecture для будь-яких communication channels
-2. **Flexible Output System** - Не тільки tasks, але й notifications, reports, webhooks
-3. **Future-Proof Architecture** - Easy integration нових sources та processors
-4. **Plugin-Based Extensibility** - Runtime loading нових функціональностей
-5. **Production-Ready Stack** - Async SQLAlchemy, proper migrations, ACID transactions
-6. **Comprehensive Testing** - >80% coverage з pytest-asyncio для async workflows
-7. **Type-Safe Plugin System** - Abstract base classes з MyPy validation
-8. **Zero LLM Costs** - Local processing option з Ollama
-9. **100% Privacy Mode** - On-premise processing для sensitive data
-10. **Multi-Source Analytics** - Consolidated insights з різних channels
-11. **CLI-First Design** - Developer-friendly, scriptable, automation-ready
-12. **Async-Native** - High-performance concurrent processing
-
-### **Extensibility Benefits:**
-- **New Sources:** Easy addition Slack, Discord, Email adapters
-- **Custom Outputs:** Plugin system для custom business logic
-- **CLI Integration:** Command-line processors для automation workflows
-- **Business Rule Engine:** Configurable processing rules per source/output
-- **Multi-Tenant Ready:** Architecture supports scaling to multiple organizations
-- **Future Web API:** CLI foundation готова для HTTP layer коли потрібно
-
-### **Production Readiness:**
-- **Database Migrations:** Alembic для safe schema evolution
-- **Configuration Management:** Pydantic Settings з environment variables
-- **Error Handling:** Comprehensive error handling з Loguru
-- **Type Safety:** Full MyPy coverage для runtime safety
-- **Code Quality:** Ruff linting для consistent code style
-- **Unit Testing:** pytest з async support та database fixtures
-- **Test Coverage:** >80% coverage для core business logic
-- **Integration Testing:** End-to-end workflow testing
-- **Docker Support:** Production-ready containerization
-- **Monitoring:** Structured logging для observability
-
-### **Technical Advantages:**
-- **Plugin Architecture vs Monolithic:** Extensible design для нових sources/outputs
-- **Async SQLAlchemy vs Sync ORM:** High-performance concurrent operations
-- **pytest-asyncio vs Standard Testing:** Proper async workflow testing
-- **TaskIQ vs Celery:** Full async support, modern distributed processing
-- **Normalized Schema vs Document DB:** Proper relationships, ACID transactions
-- **Abstract Base Classes:** Type-safe plugin contracts з MyPy validation
-- **Pydantic Configuration:** Type-safe plugin config з validation
-- **Multi-Source Architecture:** Future-proof для Slack, Discord, Email integration
-- **Flexible Output System:** Adaptable для будь-які business requirements
-- **Source-Agnostic Processing:** Unified pipeline незалежно від джерела
-- **Dynamic Plugin Loading:** Runtime extensibility без restart
-- **Checkpoint System:** Reliable resume після failures з database persistence
-- **CLI-Native Performance:** Direct database access без HTTP overhead
-
-### **Market Differentiation:**
-- **vs UTasks/Corcava:** Universal multi-source platform vs single-app solutions
-- **vs Zapier/n8n:** AI-powered issue detection vs simple automation
-- **vs Corporate tools:** Plugin extensibility vs vendor lock-in
-- **vs Telegram-only bots:** Multi-channel platform vs single-source limitation
-- **vs Cloud-only solutions:** Privacy control + extensibility vs SaaS constraints
-- **vs Custom internal tools:** Production-ready architecture vs prototype quality
-- **vs Monitoring tools:** Proactive issue detection vs reactive alerting
-- **vs Traditional task trackers:** Automatic discovery vs manual creation
-
-### **Competitive Advantages:**
-- **First Universal Solution:** Multi-source issue detection platform
-- **Plugin Ecosystem Ready:** Extensible architecture для custom needs
-- **Enterprise Architecture:** Production-ready з proper testing та migrations
-- **Privacy Flexibility:** Local processing або cloud scaling
-- **Developer-First:** CLI-based, scriptable, automation-ready
-- **Future-Proof:** Ready для integration будь-яких communication channels
 
 ### **Demo Pitch Strategy:**
 > "Перше AI рішення що дає вибір між privacy (local LLM) та performance (cloud LLM). Почніть безкоштовно з локальною моделлю, scale до cloud при потребі. Ваші чати, ваші дані, ваш контроль."
