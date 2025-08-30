@@ -31,6 +31,9 @@ services:
     depends_on:
       - nats
     restart: unless-stopped
+    environment:
+      - TASKIQ_NATS_SERVERS=nats://nats:4222
+    working_dir: /app
 
 volumes:
   postgres_data:

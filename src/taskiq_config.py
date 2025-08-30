@@ -5,10 +5,14 @@
 from taskiq_nats import NatsBroker, NATSObjectStoreResultBackend
 from config import settings
 
-# Ініціалізація брокера NATS
+# Ініціалізація брокера NATS з додатковими параметрами
 nats_broker = NatsBroker(
     servers=settings.taskiq_nats_servers,
     queue=settings.taskiq_nats_queue,
+    # Додаткові параметри для покращення стабільності підключення
+    connect_timeout=10,
+    drain_timeout=30,
+    max_reconnect_attempts=-1,  # Нескінченна кількість спроб перепідключення
 )
 
 # Ініціалізація бекенду результатів

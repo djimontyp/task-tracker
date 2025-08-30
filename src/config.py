@@ -19,8 +19,20 @@ class Settings(BaseSettings):
     telegram_bot_token: str = ""
 
     # TaskIQ NATS
-    taskiq_nats_servers: str = "nats://nats:4222"
+    taskiq_nats_servers: str = "nats://localhost:4222"
     taskiq_nats_queue: str = "taskiq"
+
+    # Integration Tests
+    RUN_INTEGRATION_TESTS: bool = False
+
+    # Output Processor
+    output_processor_type: str = "jira"
+    jira_url: str = "https://your-company.atlassian.net"
+    jira_username: str = "your_email@example.com"
+    jira_api_token: str = "your_jira_api_token_here"
+
+    # Logging
+    log_level: str = "INFO"
 
     class Config:
         env_file = ".env"

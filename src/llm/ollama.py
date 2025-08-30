@@ -40,9 +40,10 @@ class OllamaProvider(AbstractLLMProvider):
 
         # Виконання класифікації
         result = await self.classification_agent.run(
-            message, system_prompt=system_prompt
+            system_prompt + "\n\nПовідомлення для аналізу: " + message
         )
 
+        # Повертаємо результат
         return result.data
 
     async def extract_entities(self, message: str) -> List[str]:
@@ -63,15 +64,15 @@ class OllamaProvider(AbstractLLMProvider):
 
         # Виконання видобування сутностей
         result = await self.entity_extraction_agent.run(
-            message, system_prompt=system_prompt
+            system_prompt + "\n\nПовідомлення для аналізу: " + message
         )
 
-        # Перетворення результату у список сутностей
+        # Повертаємо результат як список
         if isinstance(result.data, list):
             return result.data
         elif isinstance(result.data, str):
-            # Якщо отримали рядок, розбиваємо його на елементи
-            return [item.strip() for item in result.data.split(",") if item.strip()]
+            # Якщо отримали рядок, розділимо його на список
+            return [item.strip() for item in result.data.split(',') if item.strip()]
         else:
-            # Якщо отримали щось інше, повертаємо порожній список
+            # Якщо отримали щось інше, повернемо порожній список
             return []

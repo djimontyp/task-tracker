@@ -4,7 +4,6 @@ import typer
 from rich.console import Console
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
-from src.taskiq_config import nats_broker
 
 app = typer.Typer()
 console = Console()

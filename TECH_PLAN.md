@@ -65,6 +65,16 @@
 
 ### **Core Architecture:**
 ```
+tests/
+├── test_base_classes.py        # Тести для абстрактних базових класів
+├── test_message_processor.py   # Тести для основного обробника повідомлень
+├── test_ollama_provider.py     # Тести для Ollama провайдера
+├── test_pydantic_ai.py         # Тести для інтеграції з pydantic-ai
+├── test_task_creator.py        # Тести для обробника створення завдань
+├── test_taskiq_nats.py         # Тести для інтеграції TaskIQ з NATS
+├── test_telegram_adapter.py    # Тести для Telegram адаптера
+└── llm_comprehensive_test.py   # Комплексні тести для LLM
+
 src/
 ├── adapters/          # Source adapters (Telegram, Slack, etc.)
 ├── core/              # Core processing logic
@@ -126,6 +136,15 @@ async def test_docker_services():
     # Test Docker services startup
 ```
 
+### **Test Organization:**
+- Всі тести розташовані в окремій директорії `tests/`
+- Модульні тести для кожного компонента
+- Інтеграційні тести для перевірки взаємодії компонентів
+- Тести LLM для перевірки інтеграції з мовними моделями
+- Тести TaskIQ/NATS для перевірки асинхронної обробки
+- Всі тести використовують правильні моки та фікстури
+- Тести не використовують sys.path хаки
+
 ---
 
 ## ⚙️ **Конфігурація**
@@ -136,7 +155,7 @@ async def test_docker_services():
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 
 # Database
-DATABASE_URL=postgresql://user:password@localhost:5432/tasktracker
+DATABASE_URL=postgresql://user:password@localhost:5555/tasktracker
 
 # Ollama
 OLLAMA_BASE_URL=http://localhost:11434

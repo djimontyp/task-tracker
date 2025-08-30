@@ -49,17 +49,23 @@ worker:
 # Run tests
 test:
     @echo "Running tests..."
-    uv run pytest
+    uv run python -m pytest
 
 # Run tests with coverage
 test-cov:
     @echo "Running tests with coverage..."
-    uv run pytest --cov=src --cov-report=html --cov-report=term
+    uv run python -m pytest --cov=src --cov-report=html --cov-report=term
+
+# Run integration tests
+test-integration:
+    @echo "Running integration tests..."
+    @echo "Make sure services are running with 'just services' before running this command."
+    RUN_INTEGRATION_TESTS=true uv run python -m pytest -k "integration" -v
 
 # Lint the code
 lint:
     @echo "Linting code..."
-    uv run ruff check src
+    uv run ruff check src --fix
 
 # Format the code
 fmt:
