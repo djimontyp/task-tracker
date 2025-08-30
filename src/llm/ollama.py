@@ -72,7 +72,7 @@ class OllamaProvider(AbstractLLMProvider):
             return result.data
         elif isinstance(result.data, str):
             # Якщо отримали рядок, розділимо його на список
-            return [item.strip() for item in result.data.split(',') if item.strip()]
+            return [item.strip() for item in result.data.split(",") if item.strip()]
         else:
             # Якщо отримали щось інше, повернемо порожній список
             return []

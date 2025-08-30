@@ -1,5 +1,26 @@
 # Послідовний план реалізації: Universal Issue Detection & Processing System
 
+## Оновлення статусу (2025-08-30)
+
+### Виконано
+- [x] Базові абстракції та архітектура (`src/adapters`, `src/core`, `src/llm`, `src/processors`)
+- [x] Інтеграція LLM (Ollama) через `pydantic-ai`
+- [x] Конфігурація TaskIQ + NATS і воркер-скелет (`src/taskiq_config.py`, `src/worker.py`) — без зв’язки з конвеєром
+- [x] CLI на Typer + InquirerPy (`src/main.py`)
+- [x] Додано залежності `rich` та `asyncpg` у `pyproject.toml`
+- [x] Оновлено README: uv-only інсталяція, запуск сервісів і CLI
+
+### У процесі / Заплановано
+- [ ] Реальна інтеграція `TelegramAdapter` з `python-telegram-bot` (polling)
+- [ ] Зв’язати CLI `process_chats()` з конвеєром (`MessageProcessor.process_messages()`)
+- [ ] Async SQLModel engine/session, Alembic початкова міграція; персистенція `Message/Issue/Output`
+- [ ] Інтеграція конвеєра у TaskIQ: задачі `process_channel`/`process_pending`, запуск `start_worker`
+- [ ] Уніфікація конфігів: `.env.example` ↔ `src/config.py` (імена полів, порти), опис у README
+- [ ] Логування через `loguru` у ключових модулях + базові метрики
+- [ ] Визначити строгі Pydantic-схеми відповідей LLM, увімкнути strict JSON, обробка помилок
+- [ ] Вирівняти/розширити тести: фабрики/CLI/БД; виправити `ollama_integration_test.py`
+- [ ] Додаткові процесори: `Notifier`, `Reporter`, правила маршрутизації
+
 ## Тиждень 1: Backend Core (14 годин)
 
 ### День 1-2 (4 години): Core Architecture + Plugin System

@@ -1,5 +1,5 @@
 [project]
-name = "task-tracker"
+name = "task_tracker"
 version = "0.1.0"
 description = "Універсальна система автоматичного виявлення та класифікації проблем з різних комунікаційних каналів команд з гнучкими можливостями обробки та перенаправлення результатів."
 readme = "README.md"
@@ -12,11 +12,11 @@ dependencies = [
     "pydantic-settings>=2.10.1",
     "taskiq>=0.11.18",
     "python-telegram-bot>=22.3",
-    "typer>=0.16.1",
     "sqlmodel>=0.0.24",
     "pydantic-ai[logfire]>=0.8.1",
     "inquirerpy>=0.3.4",
     "taskiq-nats>=0.5.1",
+    "typer>=0.17.3",
 ]
 
 [project.scripts]
@@ -43,6 +43,3 @@ markers = [
     "asyncio: mark test as asyncio",
 ]
 pythonpath = ["src"]
-
-[build-system]
-requires = ["setuptools", "wheel"]
