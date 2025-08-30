@@ -4,9 +4,18 @@ import typer
 from rich.console import Console
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
+from src.taskiq_config import nats_broker
 
 app = typer.Typer()
 console = Console()
+
+
+@app.command()
+def start_worker():
+    """Запустити воркер TaskIQ"""
+    console.print("[green]Запуск воркера TaskIQ з використанням NATS...[/green]")
+    # Тут буде реалізація запуску воркера
+    console.print("[yellow]Функціонал ще не реалізовано[/yellow]")
 
 
 def process_chats():
@@ -52,52 +61,37 @@ def export_issues():
 
 
 @app.command()
-def main():
-    """Головне меню Task Tracker"""
+def run():
+    """Запустити головне меню"""
     while True:
-        console.clear()
-        console.print(
-            "[bold blue]AI Issue Tracker v0.1.0[/bold blue]", justify="center"
-        )
-        console.print()
-
-        # Використовуємо InquirerPy для створення інтерактивного меню
-        choice = inquirer.select(
-            message="Ваш вибір:",
+        action = inquirer.select(
+            message="Оберіть дію:",
             choices=[
-                Choice(value="1", name="1. Process chats now - Обробити чати зараз"),
-                Choice(value="2", name="2. Schedule jobs - Налаштувати заплановані завдання"),
-                Choice(value="3", name="3. View statistics - Переглянути статистику"),
-                Choice(value="4", name="4. Configure LLM provider - Налаштувати провайдера LLM"),
-                Choice(value="5", name="5. Database management - Управління базою даних"),
-                Choice(value="6", name="6. Export issues - Експорт проблем"),
-                Choice(value="7", name="7. Exit - Вихід з програми"),
+                Choice("process_chats", name="Обробити чати зараз"),
+                Choice("schedule_jobs", name="Налаштувати заплановані завдання"),
+                Choice("view_statistics", name="Переглянути статистику"),
+                Choice("configure_llm", name="Налаштувати провайдера LLM"),
+                Choice("database_management", name="Управління базою даних"),
+                Choice("export_issues", name="Експорт проблем"),
+                Choice("exit", name="Вихід"),
             ],
-            default="1",
-            pointer="❯",
-            show_cursor=False,
-            cycle=True,
         ).execute()
 
-        if choice == "1":
+        if action == "process_chats":
             process_chats()
-        elif choice == "2":
+        elif action == "schedule_jobs":
             schedule_jobs()
-        elif choice == "3":
+        elif action == "view_statistics":
             view_statistics()
-        elif choice == "4":
+        elif action == "configure_llm":
             configure_llm()
-        elif choice == "5":
+        elif action == "database_management":
             database_management()
-        elif choice == "6":
+        elif action == "export_issues":
             export_issues()
-        elif choice == "7":
+        elif action == "exit":
             console.print("[blue]До побачення![/blue]")
             break
-
-        # Пауза перед поверненням до меню
-        console.print()
-        input("Натисніть Enter, щоб повернутися до меню...")
 
 
 if __name__ == "__main__":

@@ -10,6 +10,30 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  nats:
+    image: nats:latest
+    container_name: task-tracker-nats
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    command: ["--jetstream"]
+    volumes:
+      - nats_data:/data
+    restart: unless-stopped
+
+  worker:
+    build: .
+    container_name: task-tracker-worker
+    command: ["uv", "run", "taskiq", "worker", "src.taskiq_config:nats_broker", "src.worker"]
+    volumes:
+      - .:/app
+    depends_on:
+      - nats
+    restart: unless-stopped
+
 volumes:
   postgres_data:
     name: task-tracker-postgres-data
+  nats_data:
+    name: task-tracker-nats-data

@@ -18,8 +18,9 @@ class Settings(BaseSettings):
     # Telegram
     telegram_bot_token: str = ""
 
-    # TaskIQ
-    taskiq_broker_url: str = "redis://localhost:6379"
+    # TaskIQ NATS
+    taskiq_nats_servers: str = "nats://nats:4222"
+    taskiq_nats_queue: str = "taskiq"
 
     class Config:
         env_file = ".env"
