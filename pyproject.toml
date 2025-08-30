@@ -1,13 +1,12 @@
 [project]
 name = "task-tracker"
 version = "0.1.0"
-description = "Add your description here"
+description = "Універсальна система автоматичного виявлення та класифікації проблем з різних комунікаційних каналів команд з гнучкими можливостями обробки та перенаправлення результатів."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "alembic-postgresql-enum>=1.8.0",
     "alembic>=1.16.5",
-    "fastapi[all]>=0.116.1",
     "loguru>=0.7.3",
     "sqlalchemy>=2.0.43",
     "pydantic-settings>=2.10.1",
@@ -15,7 +14,12 @@ dependencies = [
     "python-telegram-bot>=22.3",
     "typer>=0.16.1",
     "sqlmodel>=0.0.24",
+    "pydantic-ai[logfire]>=0.8.1",
+    "inquirerpy>=0.3.4",
 ]
+
+[project.scripts]
+task-tracker = "src.main:app"
 
 [dependency-groups]
 dev = [
@@ -23,5 +27,21 @@ dev = [
     "ruff>=0.12.11",
 ]
 test = [
+    "pytest>=8.4.1",
     "pytest-asyncio>=1.1.0",
 ]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short"
+markers = [
+    "asyncio: mark test as asyncio",
+]
+pythonpath = ["src"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
