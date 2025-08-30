@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 from llm.ollama import OllamaProvider
 
 
@@ -29,15 +29,18 @@ class TestPydanticAIIntegration:
     async def test_ollama_provider_classify_issue(self, ollama_provider):
         """Перевірка класифікації проблеми провайдером Ollama"""
         # Мокуємо агента для повернення тестових даних
+        mock_result = MagicMock()
+        mock_result.data = {
+            "is_issue": True,
+            "category": "feature",
+            "priority": "medium",
+            "confidence": 0.85,
+        }
+        
         with patch.object(
             ollama_provider.classification_agent, "run", new=AsyncMock()
         ) as mock_run:
-            mock_run.return_value.data = {
-                "is_issue": True,
-                "category": "feature",
-                "priority": "medium",
-                "confidence": 0.85,
-            }
+            mock_run.return_value = mock_result
 
             result = await ollama_provider.classify_issue(
                 "Implement new user authentication feature"
@@ -53,14 +56,17 @@ class TestPydanticAIIntegration:
     async def test_ollama_provider_extract_entities(self, ollama_provider):
         """Перевірка видобування сутностей провайдером Ollama"""
         # Мокуємо агента для повернення тестових даних
+        mock_result = MagicMock()
+        mock_result.data = [
+            "user authentication",
+            "security",
+            "login page",
+        ]
+        
         with patch.object(
             ollama_provider.entity_extraction_agent, "run", new=AsyncMock()
         ) as mock_run:
-            mock_run.return_value.data = [
-                "user authentication",
-                "security",
-                "login page",
-            ]
+            mock_run.return_value = mock_result
 
             result = await ollama_provider.extract_entities(
                 "Implement new user authentication feature with security measures on login page"
@@ -79,10 +85,13 @@ class TestPydanticAIIntegration:
     ):
         """Перевірка видобування сутностей з рядковою відповіддю"""
         # Мокуємо агента для повернення тестових даних у вигляді рядка
+        mock_result = MagicMock()
+        mock_result.data = "user authentication, security, login page"
+        
         with patch.object(
             ollama_provider.entity_extraction_agent, "run", new=AsyncMock()
         ) as mock_run:
-            mock_run.return_value.data = "user authentication, security, login page"
+            mock_run.return_value = mock_result
 
             result = await ollama_provider.extract_entities(
                 "Implement new user authentication feature with security measures on login page"

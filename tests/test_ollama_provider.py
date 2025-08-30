@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 
 
 class TestOllamaProvider:
@@ -27,13 +27,16 @@ class TestOllamaProvider:
         provider = OllamaProvider(config)
         
         # Мокуємо агента для повернення тестових даних
+        mock_result = MagicMock()
+        mock_result.data = {
+            "is_issue": True,
+            "category": "feature",
+            "priority": "medium",
+            "confidence": 0.85
+        }
+        
         with patch.object(provider.classification_agent, 'run', new=AsyncMock()) as mock_run:
-            mock_run.return_value.data = {
-                "is_issue": True,
-                "category": "feature",
-                "priority": "medium",
-                "confidence": 0.85
-            }
+            mock_run.return_value = mock_result
 
             classification = await provider.classify_issue("Test message")
 
@@ -52,8 +55,11 @@ class TestOllamaProvider:
         provider = OllamaProvider(config)
         
         # Мокуємо агента для повернення тестових даних
+        mock_result = MagicMock()
+        mock_result.data = ["entity1", "entity2"]
+        
         with patch.object(provider.entity_extraction_agent, 'run', new=AsyncMock()) as mock_run:
-            mock_run.return_value.data = ["entity1", "entity2"]
+            mock_run.return_value = mock_result
 
             entities = await provider.extract_entities("Test message")
 
