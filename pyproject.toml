@@ -17,6 +17,7 @@ dependencies = [
     "inquirerpy>=0.3.4",
     "taskiq-nats>=0.5.1",
     "typer>=0.17.3",
+    "asyncpg>=0.30.0",
 ]
 
 [project.scripts]
