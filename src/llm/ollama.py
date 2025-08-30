@@ -44,9 +44,9 @@ class OllamaProvider(AbstractLLMProvider):
         )
 
         # Повертаємо результат
-        return result.data
+        return result
 
-    async def extract_entities(self, message: str) -> List[str]:
+    async def extract_entities(self, message: str) -> Any:
         """Видобути сутності з повідомлення"""
         # Визначення системного запиту для видобування сутностей
         system_prompt = """
@@ -67,12 +67,5 @@ class OllamaProvider(AbstractLLMProvider):
             system_prompt + "\n\nПовідомлення для аналізу: " + message
         )
 
-        # Повертаємо результат як список
-        if isinstance(result.data, list):
-            return result.data
-        elif isinstance(result.data, str):
-            # Якщо отримали рядок, розділимо його на список
-            return [item.strip() for item in result.data.split(",") if item.strip()]
-        else:
-            # Якщо отримали щось інше, повернемо порожній список
-            return []
+        # Повертаємо сирий результат агента (AgentRunResult) без доступу до .data
+        return result

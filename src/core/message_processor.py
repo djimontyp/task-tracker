@@ -1,4 +1,5 @@
 from typing import List, Dict, Any
+import json
 from adapters.base import AbstractSourceAdapter
 from llm.base import AbstractLLMProvider
 from processors.base import AbstractOutputProcessor
@@ -31,9 +32,10 @@ class MessageProcessor:
             )
 
             # Класифікувати повідомлення за допомогою LLM
-            classification = await self.llm_provider.classify_issue(
+            classification_result = await self.llm_provider.classify_issue(
                 normalized_message["content"]
             )
+            classification = self._parse_classification(classification_result)
 
             # Створити об'єкт проблеми
             issue = {
@@ -54,3 +56,54 @@ class MessageProcessor:
                 processed_issues.append(issue)
 
         return processed_issues
+
+    def _parse_classification(self, result: Any) -> Dict[str, Any]:
+        """Уніфікувати результат класифікації від провайдера LLM.
+
+        Підтримує:
+        - словник із очікуваними ключами
+        - об'єкт із атрибутами `.output` або `.output_text` (AgentRunResult від pydantic-ai)
+        - рядок із JSON або просто текст
+        """
+        default = {
+            "classification": "task",
+            "category": "question",
+            "priority": "low",
+            "confidence": 0.0,
+        }
+
+        # Якщо приходить словник (зворотна сумісність із тестами)
+        if isinstance(result, dict):
+            return {
+                "classification": result.get("classification", default["classification"]),
+                "category": result.get("category", default["category"]),
+                "priority": result.get("priority", default["priority"]),
+                "confidence": result.get("confidence", default["confidence"]),
+            }
+
+        # AgentRunResult: спробувати дістати текст виводу
+        text = None
+        output = getattr(result, "output", None)
+        if isinstance(output, str):
+            text = output
+        if text is None:
+            output_text = getattr(result, "output_text", None)
+            if isinstance(output_text, str):
+                text = output_text
+
+        # Спробувати розпарсити JSON, якщо це текст
+        if isinstance(text, str):
+            try:
+                data = json.loads(text)
+                if isinstance(data, dict):
+                    return {
+                        "classification": data.get("classification", default["classification"]),
+                        "category": data.get("category", default["category"]),
+                        "priority": data.get("priority", default["priority"]),
+                        "confidence": data.get("confidence", default["confidence"]),
+                    }
+            except Exception:
+                pass
+
+        # Фолбек: повертаємо дефолтні значення
+        return default

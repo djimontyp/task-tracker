@@ -28,22 +28,13 @@ class TestOllamaProvider:
         
         # Мокуємо агента для повернення тестових даних
         mock_result = MagicMock()
-        mock_result.data = {
-            "is_issue": True,
-            "category": "feature",
-            "priority": "medium",
-            "confidence": 0.85
-        }
         
         with patch.object(provider.classification_agent, 'run', new=AsyncMock()) as mock_run:
             mock_run.return_value = mock_result
 
             classification = await provider.classify_issue("Test message")
-
-            assert classification["is_issue"] is True
-            assert classification["category"] == "feature"
-            assert classification["priority"] == "medium"
-            assert classification["confidence"] == 0.85
+            # Повертаємо сирий результат AgentRunResult
+            assert classification is mock_result
             mock_run.assert_called_once()
 
     @pytest.mark.asyncio
@@ -56,15 +47,11 @@ class TestOllamaProvider:
         
         # Мокуємо агента для повернення тестових даних
         mock_result = MagicMock()
-        mock_result.data = ["entity1", "entity2"]
         
         with patch.object(provider.entity_extraction_agent, 'run', new=AsyncMock()) as mock_run:
             mock_run.return_value = mock_result
 
             entities = await provider.extract_entities("Test message")
-
-            assert isinstance(entities, list)
-            assert len(entities) == 2
-            assert "entity1" in entities
-            assert "entity2" in entities
+            # Повертаємо сирий результат AgentRunResult
+            assert entities is mock_result
             mock_run.assert_called_once()

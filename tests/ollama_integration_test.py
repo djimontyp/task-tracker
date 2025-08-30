@@ -38,7 +38,12 @@ async def test_classification(provider, test_message):
     try:
         result = await provider.classify_issue(test_message)
         print(f"✓ Classification successful:")
-        print(f"  Output: {result.output}")
+        out = getattr(result, 'output', result)
+        print(f"  Output: {out}")
+        try:
+            print(f"  Usage: {result.usage()}")
+        except Exception:
+            pass
         return result
     except Exception as e:
         print(f"✗ Classification failed: {e}")
@@ -52,7 +57,12 @@ async def test_entity_extraction(provider, test_message):
     try:
         result = await provider.extract_entities(test_message)
         print(f"✓ Entity extraction successful:")
-        print(f"  Output: {result.output}")
+        out = getattr(result, 'output', result)
+        print(f"  Output: {out}")
+        try:
+            print(f"  Usage: {result.usage()}")
+        except Exception:
+            pass
         return result
     except Exception as e:
         print(f"✗ Entity extraction failed: {e}")

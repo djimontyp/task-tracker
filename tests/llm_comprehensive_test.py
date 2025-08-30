@@ -40,7 +40,11 @@ async def test_classification(provider, test_message, test_name):
     try:
         result = await provider.classify_issue(test_message)
         print(f"✓ Класифікація успішна:")
-        print(f"  Результат: {result.output}")
+        print(f"  Output: {getattr(result, 'output', result)}")
+        try:
+            print(f"  Usage: {result.usage()}")
+        except Exception:
+            pass
         return result
     except Exception as e:
         print(f"✗ Класифікація не вдалася: {e}")
@@ -55,7 +59,11 @@ async def test_entity_extraction(provider, test_message, test_name):
     try:
         result = await provider.extract_entities(test_message)
         print(f"✓ Видобування сутностей успішне:")
-        print(f"  Результат: {result.output}")
+        print(f"  Output: {getattr(result, 'output', result)}")
+        try:
+            print(f"  Usage: {result.usage()}")
+        except Exception:
+            pass
         return result
     except Exception as e:
         print(f"✗ Видобування сутностей не вдалося: {e}")
