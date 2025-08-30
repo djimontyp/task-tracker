@@ -49,6 +49,25 @@
    just worker
    ```
 
+## Міграції БД (Alembic)
+
+Початкова схема вже створена і застосована в репозиторії. Щоб застосувати міграції локально:
+
+```
+uv run alembic upgrade head
+```
+
+Якщо ви змінюєте моделі у `src/models/database.py`, згенеруйте нову міграцію та застосуйте її:
+
+```
+uv run alembic revision --autogenerate -m "update schema"
+uv run alembic upgrade head
+```
+
+Примітки:
+- Використовується async-драйвер: `DATABASE_URL=postgresql+asyncpg://...` (див. `.env.example`)
+- PostgreSQL у `compose.yml` доступний на порту `5555`
+
 ## Використання
 
 ### CLI команди

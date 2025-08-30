@@ -31,6 +31,7 @@
 - Додано команди для управління сервісами в justfile
 - Організовано тести в окрему директорію tests/
 - Додано інтеграційні тести для LLM провайдерів
+- Створено та застосовано початкову Alembic міграцію (таблиці: llmprovider, source, stream, message, processingjob, issue, output)
 
 ### Змінено
 - Оновлено justfile для запуску CLI
@@ -53,6 +54,10 @@
 - Оновлено README: перехід на uv-only інсталяцію, додано запуск сервісів і CLI, уточнено порт PostgreSQL (5555)
 - Синхронізовано залежності в pyproject.toml: додано `rich` і `asyncpg`
 - Усунуто конфлікти між pytest та standalone тестами
+- Виправлено `TimestampMixin` у `models/database.py` (перехід на `sa_type` + `sa_column_kwargs`), щоб уникнути повторного використання Column
+- Виправлено згенеровану міграцію: додано `import sqlmodel` для `AutoString`
+- Оновлено README: додано крок застосування міграцій та розділ з Alembic командами
+- Уніфіковано приклади `DATABASE_URL` з використанням драйвера `asyncpg` у `.env.example` та TECH_PLAN
 
 ### Видалено
 - Видалено оригінальні тести з кореневої директорії

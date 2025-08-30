@@ -155,7 +155,7 @@ async def test_docker_services():
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 
 # Database
-DATABASE_URL=postgresql://user:password@localhost:5555/tasktracker
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5555/tasktracker
 
 # Ollama
 OLLAMA_BASE_URL=http://localhost:11434
@@ -238,7 +238,7 @@ class ProcessorConfig(BaseModel):
 - Основний конвеєр: `core/message_processor.py` реалізує базову обробку (fetch → normalize → classify → process → mark)
 - Обробник виводу: `processors/task_creator.py` існує як заглушка (друк у консоль), реальні інтеграції відсутні
 - Асинхронна черга: конфіг TaskIQ+NATS та воркер — готово (`taskiq_config.py`, `worker.py`), є приклад задачі (`example_task.py`); конвеєр з чергою ще не зв’язано
-- База даних: моделі `sqlmodel` є (`models/database.py`), але немає async engine/session, Alembic міграцій і збереження артефактів у конвеєрі
+- База даних: моделі `sqlmodel` є (`models/database.py`), початкова Alembic міграція створена і застосована; async engine/session і збереження у конвеєрі ще не реалізовані
 - CLI: `main.py` з Typer+InquirerPy працює, але всі дії — заглушки, зв’язки з конвеєром/воркером немає
 - Конфігурація: `config.py` на BaseSettings; є невідповідності з `.env.example` (порти/назви полів)
 - Логування: `loguru` у залежностях, але майже не використовується

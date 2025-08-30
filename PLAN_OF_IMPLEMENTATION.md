@@ -9,11 +9,12 @@
 - [x] CLI на Typer + InquirerPy (`src/main.py`)
 - [x] Додано залежності `rich` та `asyncpg` у `pyproject.toml`
 - [x] Оновлено README: uv-only інсталяція, запуск сервісів і CLI
+- [x] Початкова Alembic міграція створена і застосована; схема БД розгорнута
 
 ### У процесі / Заплановано
 - [ ] Реальна інтеграція `TelegramAdapter` з `python-telegram-bot` (polling)
 - [ ] Зв’язати CLI `process_chats()` з конвеєром (`MessageProcessor.process_messages()`)
-- [ ] Async SQLModel engine/session, Alembic початкова міграція; персистенція `Message/Issue/Output`
+ - [ ] Async SQLModel engine/session; персистенція `Message/Issue/Output`
 - [ ] Інтеграція конвеєра у TaskIQ: задачі `process_channel`/`process_pending`, запуск `start_worker`
 - [ ] Уніфікація конфігів: `.env.example` ↔ `src/config.py` (імена полів, порти), опис у README
 - [ ] Логування через `loguru` у ключових модулях + базові метрики
