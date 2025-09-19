@@ -1,6 +1,5 @@
 from typing import List, Dict, Any
 import json
-from adapters.base import AbstractSourceAdapter
 from llm.base import AbstractLLMProvider
 from processors.base import AbstractOutputProcessor
 
@@ -10,7 +9,7 @@ class MessageProcessor:
 
     def __init__(
         self,
-        source_adapter: AbstractSourceAdapter,
+        source_adapter,
         llm_provider: AbstractLLMProvider,
         output_processor: AbstractOutputProcessor,
     ):

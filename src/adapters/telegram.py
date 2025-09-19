@@ -1,8 +1,7 @@
 from typing import List, Dict, Any
-from adapters.base import AbstractSourceAdapter
 
 
-class TelegramAdapter(AbstractSourceAdapter):
+class TelegramAdapter:
     """Адаптер для отримання повідомлень з Telegram"""
 
     def __init__(self, config: Dict[str, Any]):
