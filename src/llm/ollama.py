@@ -23,6 +23,7 @@ class OllamaProvider(AbstractLLMProvider):
         # Агенти для різних завдань
         self.classification_agent = Agent(self.model)
         self.entity_extraction_agent = Agent(self.model)
+        self.note_agent = Agent(self.model)
 
     async def classify_issue(self, message: str) -> Dict[str, Any]:
         """Класифікувати повідомлення та повернути результат класифікації"""
@@ -69,3 +70,21 @@ class OllamaProvider(AbstractLLMProvider):
 
         # Повертаємо сирий результат агента (AgentRunResult) без доступу до .data
         return result
+
+    async def get_note_on_message(self, message: str) -> str:
+        """Отримати примітку від LLM щодо повідомлення"""
+        # Визначення системного запиту для отримання примітки
+        system_prompt = """
+        Ви є експертом з аналізу повідомлень. Ваше завдання - надати коротку, інформативну 
+        примітку щодо повідомлення, яка може допомогти в подальшій обробці.
+        
+        Поверніть коротку примітку (1-2 речення) українською мовою.
+        """
+
+        # Виконання отримання примітки
+        result = await self.note_agent.run(
+            system_prompt + "\n\nПовідомлення для аналізу: " + message
+        )
+
+        # Повертаємо текстовий результат
+        return str(result)
