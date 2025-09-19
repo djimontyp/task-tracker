@@ -1,8 +1,8 @@
-from sqlmodel import Field, SQLModel, Relationship
 from datetime import datetime
-from sqlalchemy import BigInteger, DateTime, Text, UniqueConstraint, Index
+
+from sqlalchemy import BigInteger, DateTime, func, UniqueConstraint, Text, Index
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.sql import func
+from sqlmodel import SQLModel, Field, Relationship
 
 
 class IDMixin(SQLModel):

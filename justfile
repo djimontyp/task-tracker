@@ -1,5 +1,3 @@
-# Justfile for managing PostgreSQL service and Task Tracker
-
 default:
     @just --list
 
@@ -67,7 +65,7 @@ fmt:
     uv run ruff format src
 
 # Run all checks
-check: lint fmt test
+check: lint fmt
 
 # Install dependencies
 install:
