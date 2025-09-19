@@ -56,12 +56,6 @@ test-cov:
     @echo "Running tests with coverage..."
     uv run python -m pytest --cov=src --cov-report=html --cov-report=term
 
-# Run integration tests
-test-integration:
-    @echo "Running integration tests..."
-    @echo "Make sure services are running with 'just services' before running this command."
-    RUN_INTEGRATION_TESTS=true uv run python -m pytest -k "integration" -v
-
 # Lint the code
 lint:
     @echo "Linting code..."
