@@ -39,20 +39,10 @@ run:
     @echo "Running Task Tracker..."
     uv run python -m src.main run
 
-# Run TaskIQ worker
-worker:
-    @echo "Starting TaskIQ worker..."
-    uv run taskiq worker src.taskiq_config:nats_broker src.worker
-
 # Run tests
 test:
     @echo "Running tests..."
     uv run python -m pytest
-
-# Run tests with coverage
-test-cov:
-    @echo "Running tests with coverage..."
-    uv run python -m pytest --cov=src --cov-report=html --cov-report=term
 
 # Lint the code
 lint:
@@ -64,21 +54,15 @@ fmt:
     @echo "Formatting code..."
     uv run ruff format src
 
-# Run all checks
+# Run lint and format
 check: lint fmt
 
 # Install dependencies
-install:
+install-dev:
     @echo "Installing dependencies..."
-    uv sync
+    uv sync --all-groups
 
-# Update dependencies
-update:
+# Upgrade dependencies
+upgrade:
     @echo "Updating dependencies..."
     uv lock --upgrade --all-groups
-
-# Clean up
-clean:
-    @echo "Cleaning up..."
-    rm -rf .coverage htmlcov .pytest_cache __pycache__ */__pycache__
-    @echo "Cleaned up."
