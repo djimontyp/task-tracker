@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-"""Comprehensive test script to demonstrate LLM functionality with Ukrainian messages"""
-
-# Примітка: Для форматування коду можна використовувати Ruff - швидкий лінтер та форматувальник Python,
-# який об'єднує функції flake8, black, isort та інших інструментів. Можна використовувати в режимі watch
-# для автоматичного форматування коду на ходу.
-
 import asyncio
 
 from llm.ollama import OllamaProvider
@@ -27,7 +20,7 @@ def test_ollama_initialization():
     
     try:
         provider = OllamaProvider(config)
-        print(f"✓ Successfully initialized Ollama provider")
+        print("✓ Successfully initialized Ollama provider")
         print(f"  Model: {provider.model_name}")
         print(f"  Base URL: {provider.base_url}")
         return provider
@@ -43,7 +36,7 @@ async def test_classification(provider, test_message, test_name):
     
     try:
         result = await provider.classify_issue(test_message)
-        print(f"✓ Класифікація успішна:")
+        print("✓ Класифікація успішна:")
         print(f"  Output: {getattr(result, 'output', result)}")
         try:
             print(f"  Usage: {result.usage()}")
@@ -62,7 +55,7 @@ async def test_entity_extraction(provider, test_message, test_name):
     
     try:
         result = await provider.extract_entities(test_message)
-        print(f"✓ Видобування сутностей успішне:")
+        print("✓ Видобування сутностей успішне:")
         print(f"  Output: {getattr(result, 'output', result)}")
         try:
             print(f"  Usage: {result.usage()}")

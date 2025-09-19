@@ -1,18 +1,11 @@
 from typing import List, Dict, Any
 import json
-from llm.base import AbstractLLMProvider
-from processors.base import AbstractOutputProcessor
 
 
 class MessageProcessor:
     """Основний обробник повідомлень"""
 
-    def __init__(
-        self,
-        source_adapter,
-        llm_provider: AbstractLLMProvider,
-        output_processor: AbstractOutputProcessor,
-    ):
+    def __init__(self, source_adapter, llm_provider, output_processor):
         self.source_adapter = source_adapter
         self.llm_provider = llm_provider
         self.output_processor = output_processor

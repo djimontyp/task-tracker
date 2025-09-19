@@ -1,8 +1,7 @@
 from typing import Dict, Any
-from processors.base import AbstractOutputProcessor
 
 
-class TaskCreationProcessor(AbstractOutputProcessor):
+class TaskCreationProcessor:
     """Обробник виводу для створення завдань"""
 
     def __init__(self, config: Dict[str, Any]):

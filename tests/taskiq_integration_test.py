@@ -1,19 +1,10 @@
-"""
-Інтеграційні тести для TaskIQ з NATS
-"""
-
 import pytest
 from config import settings
-
-# Використовуємо налаштування замість змінних середовища
-RUN_INTEGRATION_TESTS = settings.RUN_INTEGRATION_TESTS
-
 
 class TestTaskIQIntegration:
     """Інтеграційні тести для TaskIQ з NATS"""
     
     @pytest.mark.asyncio
-    @pytest.mark.skipif(not RUN_INTEGRATION_TESTS, reason="Integration tests are disabled. Set RUN_INTEGRATION_TESTS=true to run.")
     async def test_process_message_task(self):
         """Тест завдання обробки повідомлень"""
         # Використовуємо налаштування замість встановлення змінної середовища
