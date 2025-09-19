@@ -1,0 +1,144 @@
+/* Стилі для Task Tracker CLI */
+
+Screen {
+    background: $background;
+}
+
+Header {
+    background: $primary;
+    color: $text-primary;
+    height: 3;
+    text-align: center;
+    border-bottom: heavy $secondary;
+    text-style: bold;
+}
+
+Footer {
+    background: $primary;
+    color: $text-primary;
+    height: 3;
+    border-top: heavy $secondary;
+}
+
+#welcome {
+    text-align: center;
+    padding: 2 0;
+    margin: 1 0;
+    width: 100%;
+    color: $text-secondary;
+    text-style: bold;
+}
+
+#menu_container {
+    layout: vertical;
+    align: center middle;
+    width: 100%;
+    height: 1fr;
+    padding: 1;
+}
+
+#menu_buttons {
+    layout: vertical;
+    align: center middle;
+    width: 100%;
+    height: auto;
+    margin: 1 0;
+}
+
+Button {
+    width: 80%;
+    margin: 0 0 1 0;
+    height: 3;
+    background: $surface;
+    color: $text;
+    border: round $primary;
+}
+
+Button:hover {
+    background: $accent;
+    color: $text-primary;
+}
+
+Button:focus {
+    background: $secondary;
+    color: $text-primary;
+    border: round $accent;
+}
+
+Button.-active {
+    background: $secondary;
+    color: $text-primary;
+}
+
+#screen_container {
+    layout: vertical;
+    align: center middle;
+    width: 100%;
+    height: 1fr;
+    padding: 1;
+}
+
+#title {
+    text-align: center;
+    padding: 1 0;
+    margin: 1 0;
+    width: 100%;
+    color: $primary;
+    text-style: bold;
+    border-bottom: solid $secondary;
+}
+
+#content {
+    text-align: center;
+    padding: 2 0;
+    margin: 1 0;
+    width: 100%;
+    color: $text;
+}
+
+.progress {
+    text-align: center;
+    padding: 1 0;
+    margin: 1 0;
+    width: 100%;
+    color: $success;
+    text-style: italic;
+}
+
+/* Стилі для екранів функцій */
+.feature-title {
+    text-align: center;
+    padding: 1 0;
+    margin: 1 0;
+    width: 100%;
+    color: $accent;
+    text-style: bold;
+}
+
+.feature-content {
+    text-align: center;
+    padding: 2 0;
+    margin: 1 0;
+    width: 100%;
+    color: $text;
+}
+
+.feature-button {
+    width: 60%;
+    margin: 1 0;
+    height: 3;
+    background: $surface;
+    color: $text;
+    border: round $primary;
+}
+
+.feature-button:hover {
+    background: $accent;
+    color: $text-primary;
+}
+
+.feature-button:focus {
+    background: $secondary;
+    color: $text-primary;
+    border: round $accent;
+}
