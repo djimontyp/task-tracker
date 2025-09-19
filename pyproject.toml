@@ -14,10 +14,9 @@ dependencies = [
     "python-telegram-bot>=22.3",
     "sqlmodel>=0.0.24",
     "pydantic-ai[logfire]>=0.8.1",
-    "inquirerpy>=0.3.4",
     "taskiq-nats>=0.5.1",
-    "typer>=0.17.3",
     "asyncpg>=0.30.0",
+    "textual[syntax]>=6.1.0",
 ]
 
 
