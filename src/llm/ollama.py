@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any
 from llm.base import AbstractLLMProvider
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIChatModel

@@ -75,7 +75,9 @@ class MessageProcessor:
         # Якщо приходить словник (зворотна сумісність із тестами)
         if isinstance(result, dict):
             return {
-                "classification": result.get("classification", default["classification"]),
+                "classification": result.get(
+                    "classification", default["classification"]
+                ),
                 "category": result.get("category", default["category"]),
                 "priority": result.get("priority", default["priority"]),
                 "confidence": result.get("confidence", default["confidence"]),
@@ -97,7 +99,9 @@ class MessageProcessor:
                 data = json.loads(text)
                 if isinstance(data, dict):
                     return {
-                        "classification": data.get("classification", default["classification"]),
+                        "classification": data.get(
+                            "classification", default["classification"]
+                        ),
                         "category": data.get("category", default["category"]),
                         "priority": data.get("priority", default["priority"]),
                         "confidence": data.get("confidence", default["confidence"]),

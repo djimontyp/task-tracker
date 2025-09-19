@@ -20,8 +20,6 @@ dependencies = [
     "asyncpg>=0.30.0",
 ]
 
-[project.scripts]
-task-tracker = "src.main:app"
 
 [dependency-groups]
 dev = [

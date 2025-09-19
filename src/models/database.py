@@ -1,6 +1,6 @@
 from sqlmodel import Field, SQLModel, Relationship
 from datetime import datetime
-from sqlalchemy import BigInteger, Column, DateTime, Text, UniqueConstraint, Index
+from sqlalchemy import BigInteger, DateTime, Text, UniqueConstraint, Index
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 

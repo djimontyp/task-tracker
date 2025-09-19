@@ -83,7 +83,7 @@ install:
 # Update dependencies
 update:
     @echo "Updating dependencies..."
-    uv lock --upgrade
+    uv lock --upgrade --all-groups
 
 # Clean up
 clean:
