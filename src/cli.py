@@ -7,35 +7,40 @@ from textual.theme import Theme
 # Кастомна кольорова схема в зелених тонах
 green_theme = Theme(
     name="green",
-    primary="#2E7D32",      # Темно-зелений (основний колір)
-    secondary="#4CAF50",    # Середньо-зелений (альтернативний колір)
-    accent="#8BC34A",       # Світло-зелений (акцентний колір)
-    foreground="#212121",   # Темно-сірий (текст)
-    background="#F5F5F5",   # Світло-сірий (фон)
-    surface="#FFFFFF",      # Білий (поверхня віджетів)
-    panel="#EEEEEE",        # Світло-сірий (панелі)
-    success="#388E3C",      # Зелений успіху
-    warning="#FF9800",      # Помаранчевий (попередження)
-    error="#D32F2F",        # Червоний (помилки)
+    primary="#2E7D32",  # Темно-зелений (основний колір)
+    secondary="#4CAF50",  # Середньо-зелений (альтернативний колір)
+    accent="#8BC34A",  # Світло-зелений (акцентний колір)
+    foreground="#212121",  # Темно-сірий (текст)
+    background="#F5F5F5",  # Світло-сірий (фон)
+    surface="#FFFFFF",  # Білий (поверхня віджетів)
+    panel="#EEEEEE",  # Світло-сірий (панелі)
+    success="#388E3C",  # Зелений успіху
+    warning="#FF9800",  # Помаранчевий (попередження)
+    error="#D32F2F",  # Червоний (помилки)
     dark=False,
 )
+
 
 # Екрани для кожної функції
 class ProcessChatsScreen(Screen):
     """Екран для обробки чатів"""
-    
+
     def compose(self) -> ComposeResult:
         # yield Header()
         yield Container(
             Static("Обробка чатів", id="title", classes="feature-title"),
-            Static("Натисніть кнопку нижче, щоб розпочати обробку чатів", id="content", classes="feature-content"),
+            Static(
+                "Натисніть кнопку нижче, щоб розпочати обробку чатів",
+                id="content",
+                classes="feature-content",
+            ),
             Button("Обробити чати", id="process", classes="feature-button"),
             Static("", id="progress", classes="progress"),
             Button("Назад", id="back", classes="feature-button"),
-            id="screen_container"
+            id="screen_container",
         )
         yield Footer()
-    
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "process":
             # Тут буде реалізація обробки чатів
@@ -43,21 +48,28 @@ class ProcessChatsScreen(Screen):
         elif event.button.id == "back":
             self.app.pop_screen()
 
+
 class ScheduleJobsScreen(Screen):
     """Екран для налаштування запланованих завдань"""
-    
+
     def compose(self) -> ComposeResult:
         yield Header()
         yield Container(
-            Static("Налаштування запланованих завдань", id="title", classes="feature-title"),
-            Static("Натисніть кнопку нижче, щоб налаштувати завдання", id="content", classes="feature-content"),
+            Static(
+                "Налаштування запланованих завдань", id="title", classes="feature-title"
+            ),
+            Static(
+                "Натисніть кнопку нижче, щоб налаштувати завдання",
+                id="content",
+                classes="feature-content",
+            ),
             Button("Налаштувати завдання", id="schedule", classes="feature-button"),
             Static("", id="progress", classes="progress"),
             Button("Назад", id="back", classes="feature-button"),
-            id="screen_container"
+            id="screen_container",
         )
         yield Footer()
-    
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "schedule":
             # Тут буде реалізація налаштування завдань
@@ -65,43 +77,55 @@ class ScheduleJobsScreen(Screen):
         elif event.button.id == "back":
             self.app.pop_screen()
 
+
 class ViewStatisticsScreen(Screen):
     """Екран для перегляду статистики"""
-    
+
     def compose(self) -> ComposeResult:
         yield Header()
         yield Container(
             Static("Перегляд статистики", id="title", classes="feature-title"),
-            Static("Натисніть кнопку нижче, щоб переглянути статистику", id="content", classes="feature-content"),
+            Static(
+                "Натисніть кнопку нижче, щоб переглянути статистику",
+                id="content",
+                classes="feature-content",
+            ),
             Button("Переглянути статистику", id="view", classes="feature-button"),
             Static("", id="progress", classes="progress"),
             Button("Назад", id="back", classes="feature-button"),
-            id="screen_container"
+            id="screen_container",
         )
         yield Footer()
-    
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "view":
             # Тут буде реалізація перегляду статистики
-            self.query_one("#progress").update("[green]Завантаження статистики...[/green]")
+            self.query_one("#progress").update(
+                "[green]Завантаження статистики...[/green]"
+            )
         elif event.button.id == "back":
             self.app.pop_screen()
 
+
 class ConfigureLLMScreen(Screen):
     """Екран для налаштування провайдера LLM"""
-    
+
     def compose(self) -> ComposeResult:
         yield Header()
         yield Container(
             Static("Налаштування провайдера LLM", id="title", classes="feature-title"),
-            Static("Натисніть кнопку нижче, щоб налаштувати LLM", id="content", classes="feature-content"),
+            Static(
+                "Натисніть кнопку нижче, щоб налаштувати LLM",
+                id="content",
+                classes="feature-content",
+            ),
             Button("Налаштувати LLM", id="configure", classes="feature-button"),
             Static("", id="progress", classes="progress"),
             Button("Назад", id="back", classes="feature-button"),
-            id="screen_container"
+            id="screen_container",
         )
         yield Footer()
-    
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "configure":
             # Тут буде реалізація налаштування LLM
@@ -109,43 +133,55 @@ class ConfigureLLMScreen(Screen):
         elif event.button.id == "back":
             self.app.pop_screen()
 
+
 class DatabaseManagementScreen(Screen):
     """Екран для управління базою даних"""
-    
+
     def compose(self) -> ComposeResult:
         yield Header()
         yield Container(
             Static("Управління базою даних", id="title", classes="feature-title"),
-            Static("Натисніть кнопку нижче, щоб керувати базою даних", id="content", classes="feature-content"),
+            Static(
+                "Натисніть кнопку нижче, щоб керувати базою даних",
+                id="content",
+                classes="feature-content",
+            ),
             Button("Керувати БД", id="manage", classes="feature-button"),
             Static("", id="progress", classes="progress"),
             Button("Назад", id="back", classes="feature-button"),
-            id="screen_container"
+            id="screen_container",
         )
         yield Footer()
-    
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "manage":
             # Тут буде реалізація управління БД
-            self.query_one("#progress").update("[green]Керування базою даних...[/green]")
+            self.query_one("#progress").update(
+                "[green]Керування базою даних...[/green]"
+            )
         elif event.button.id == "back":
             self.app.pop_screen()
 
+
 class ExportIssuesScreen(Screen):
     """Екран для експорту проблем"""
-    
+
     def compose(self) -> ComposeResult:
         yield Header()
         yield Container(
             Static("Експорт проблем", id="title", classes="feature-title"),
-            Static("Натисніть кнопку нижче, щоб експортувати проблеми", id="content", classes="feature-content"),
+            Static(
+                "Натисніть кнопку нижче, щоб експортувати проблеми",
+                id="content",
+                classes="feature-content",
+            ),
             Button("Експортувати", id="export", classes="feature-button"),
             Static("", id="progress", classes="progress"),
             Button("Назад", id="back", classes="feature-button"),
-            id="screen_container"
+            id="screen_container",
         )
         yield Footer()
-    
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "export":
             # Тут буде реалізація експорту
@@ -153,9 +189,10 @@ class ExportIssuesScreen(Screen):
         elif event.button.id == "back":
             self.app.pop_screen()
 
+
 class MainMenu(Screen):
     """Головне меню додатку Task Tracker."""
-    
+
     def compose(self) -> ComposeResult:
         """Створення віджетів для головного меню."""
         yield Container(
@@ -168,15 +205,15 @@ class MainMenu(Screen):
                 Button("Управління базою даних", id="database_management"),
                 Button("Експорт проблем", id="export_issues"),
                 Button("Вихід", id="exit"),
-                id="menu_buttons"
+                id="menu_buttons",
             ),
-            id="menu_container"
+            id="menu_container",
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Обробка натискання кнопок."""
         button_id = event.button.id
-        
+
         if button_id == "process_chats":
             self.app.push_screen("process_chats")
         elif button_id == "schedule_jobs":
@@ -192,9 +229,10 @@ class MainMenu(Screen):
         elif button_id == "exit":
             self.app.exit()
 
+
 class TaskTrackerCLI(App):
     """Головний додаток Task Tracker CLI."""
-    
+
     CSS_PATH = "cli.tcss"
     SCREENS = {
         "main": MainMenu,
@@ -203,9 +241,9 @@ class TaskTrackerCLI(App):
         "view_statistics": ViewStatisticsScreen,
         "configure_llm": ConfigureLLMScreen,
         "database_management": DatabaseManagementScreen,
-        "export_issues": ExportIssuesScreen
+        "export_issues": ExportIssuesScreen,
     }
-    
+
     def on_mount(self) -> None:
         """Встановлення початкового екрану при запуску додатку."""
         # Реєстрація кастомної теми
@@ -214,6 +252,7 @@ class TaskTrackerCLI(App):
         self.theme = "green"
         # Встановлення початкового екрану
         self.push_screen("main")
+
 
 if __name__ == "__main__":
     app = TaskTrackerCLI()

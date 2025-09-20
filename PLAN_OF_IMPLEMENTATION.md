@@ -1,109 +1,192 @@
 # Послідовний план реалізації: Universal Issue Detection & Processing System
 
-## Оновлення статусу (2025-08-30)
+## Оновлення статусу (2025-01-20)
 
 ### Виконано
 - [x] Базові абстракції та архітектура (`src/adapters`, `src/core`, `src/llm`, `src/processors`)
 - [x] Інтеграція LLM (Ollama) через `pydantic-ai`
-- [x] Конфігурація TaskIQ + NATS і воркер-скелет (`src/taskiq_config.py`, `src/worker.py`) — без зв’язки з конвеєром
-- [x] CLI на Typer + InquirerPy (`src/main.py`)
+- [x] Конфігурація TaskIQ + NATS і воркер-скелет (`src/taskiq_config.py`, `src/worker.py`)
+- [x] CLI на Rich (замість Typer + InquirerPy)
 - [x] Додано залежності `rich` та `asyncpg` у `pyproject.toml`
 - [x] Оновлено README: uv-only інсталяція, запуск сервісів і CLI
 - [x] Початкова Alembic міграція створена і застосована; схема БД розгорнута
+- [x] Спрощена модель БД (3 таблиці замість 7)
+- [x] Видалені абстрактні класи та зайві тести
+- [x] Конфіги підправлені
 
-### У процесі / Заплановано
+### У процесі / Заплановано для Sprint'у
 - [ ] Реальна інтеграція `TelegramAdapter` з `python-telegram-bot` (polling)
-- [ ] Зв’язати CLI `process_chats()` з конвеєром (`MessageProcessor.process_messages()`)
- - [ ] Async SQLModel engine/session; персистенція `Message/Issue/Output`
-- [ ] Інтеграція конвеєра у TaskIQ: задачі `process_channel`/`process_pending`, запуск `start_worker`
-- [ ] Уніфікація конфігів: `.env.example` ↔ `src/config.py` (імена полів, порти), опис у README
+- [ ] Зв'язати CLI команди з конвеєром обробки повідомлень
+- [ ] Async SQLModel engine/session; персистенція `Message/Issue/TaskExport`
+- [ ] Інтеграція конвеєра у TaskIQ: задачі `process_message`, запуск `start_worker`
+- [ ] Linear GraphQL API інтеграція для створення задач
+- [ ] Duplicate detection система через семантичну схожість
 - [ ] Логування через `loguru` у ключових модулях + базові метрики
-- [ ] Визначити строгі Pydantic-схеми відповідей LLM, увімкнути strict JSON, обробка помилок
-- [ ] Вирівняти/розширити тести: фабрики/CLI/БД; виправити `ollama_integration_test.py`
-- [ ] Додаткові процесори: `Notifier`, `Reporter`, правила маршрутизації
+- [ ] Demo-ready CLI dashboard з real-time статистикою
 
-## Тиждень 1: Backend Core (14 годин)
+## Sprint Plan: Feodal AI 2.0 (1-2 дні)
 
-### День 1-2 (4 години): Core Architecture + Plugin System
-- [x] Створити структуру репозиторію з plugin architecture
-- [x] Реалізувати абстрактні базові класи (SourceAdapter, OutputProcessor, LLMProvider)
-- [x] Розробити моделі SQLModel
-- [x] Налаштувати Alembic migrations для нормалізованої схеми
-- [x] Створити Pydantic моделі для конфігурацій плагінів
-- [x] Налаштувати Docker конфігурацію з PostgreSQL
-- [x] Налаштувати MyPy/Ruff для перевірки типів
+### День 1: Core Integration (8 годин)
 
-### День 3-4 (4 години): Telegram Source Adapter + LLM Integration
-- [x] Реалізувати TelegramSourceAdapter з використанням python-telegram-bot
-- [x] Створити рівень нормалізації повідомлень
-- [x] Розробити абстракцію ядра LLM з async підтримкою
-- [x] Реалізувати OllamaProvider
-- [x] Створити базовий конвеєр класифікації
-- [x] Реалізувати асинхронні операції з базою даних через SQLModel
-- [x] Інтегрувати pydantic-ai для роботи з LLM
+#### Ранок (3 години): Telegram Real Integration
+**Мета:** Замінити заглушку на реальний polling
 
-### День 5-6 (3 години): Task Creation Processor + CLI Foundation
-- [x] Реалізувати TaskCreationOutputProcessor
-- [x] Створити CLI інтерфейс з Typer
-- [x] Додати інтерактивне меню з навігацією стрілочками
-- [x] Інтегрувати CLI з основним обробником повідомлень
-- [x] Реалізувати базові команди CLI (run, test, lint, fmt)
+**Завдання:**
+- Реалізувати справжній `python-telegram-bot` polling у `TelegramAdapter`
+- Налаштувати обробку повідомлень з реальних чатів
+- Додати просту дедуплікацію (на основі message_id)
+- Тестування на тестовому боті з приватним чатом
 
-### День 7 (3 години): Core Integration + Testing Setup
-- [x] Інтегрувати всі компоненти разом
-- [x] Налаштувати pytest з async підтримкою
-- [x] Створити тести для всіх компонентів
-- [x] Налаштувати coverage.py для вимірювання покриття
-- [x] Виправити всі помилки конфігурації
-- [x] Оптимізувати імпорти у всіх файлах проекту
-- [x] Організувати тести в окрему директорію tests/
-- [x] Виправити всі помилки в тести через неправильне використання моків
+**Критерій готовності:** Система читає і обробляє реальні повідомлення з Telegram
 
-## Тиждень 2: Advanced Features + Comprehensive Testing (14 годин)
+#### День (3 години): Ollama Classification Pipeline  
+**Мета:** Зв'язати всі компоненти в робочий конвеєр
 
-### День 8-9 (4 години): Plugin System + CLI Enhancement
-- [x] Реалізувати систему плагінів для адаптерів
-- [x] Розширити CLI з додатковими командами
-- [x] Додати підтримку конфігураційних файлів для плагінів
-- [x] Реалізувати динамічне завантаження плагінів
-- [x] Інтегрувати TaskIQ з NATS для асинхронної обробки завдань
-- [x] Налаштувати Docker Compose для запуску всіх сервісів
+**Завдання:**
+- Інтеграція `TelegramAdapter` → `MessageProcessor` → `OllamaProvider`
+- Налаштування конвеєра обробки через TaskIQ
+- Збереження результатів у БД (Message, Issue таблиці)
+- CLI команди для запуску та моніторингу процесу
 
-### День 10-11 (4 години): Output Processors + Advanced Testing
-- [x] Створити додаткові обробники виводу (Notifier, Reporter)
-- [x] Реалізувати систему правил маршрутизації
-- [x] Розширити тести для нових компонентів
-- [x] Налаштувати інтеграційні тести
-- [x] Створити інтеграційні тести для TaskIQ з NATS
-- [x] Виправити конфлікти між pytest та standalone тестами
+**Критерій готовності:** End-to-end обробка: Telegram → AI аналіз → БД
 
-### День 12-13 (3 години): Production Readiness + Test Coverage
-- [x] Оптимізувати Docker образи для меншого розміру
-- [x] Налаштувати health checks для всіх сервісів
-- [x] Покращити обробку помилок та логування
-- [x] Збільшити покриття тестами до 80%+
-- [x] Усунути всі помилки в тести
-- [x] Перевірити, що всі тести проходять успішно
+#### Вечір (2 години): Task Creation Integration
+**Мета:** Автоматичне створення задач
 
-### День 14 (3 години): Final Integration + Demo Preparation
-- [x] Фінальна інтеграція всіх компонентів
-- [x] Підготовка демонстрації системи
-- [x] Оновлення документації
-- [x] Фінальне тестування
+**Завдання:**
+- Linear GraphQL API інтеграція АБО JSON файл fallback
+- Маппінг результатів класифікації на структуру задач
+- Збереження створених задач у `TaskExport` таблицю
+- Обробка помилок та retry логіка
 
-## Мінімальна робоча версія (Дні 1-2)
+**Критерій готовності:** Створені задачі видимі в Linear або JSON файлі
 
-### Core Architecture
-- [x] Plugin architecture
-- [x] Abstract base classes
-- [x] SQLModel схема
-- [x] Pydantic конфігурації
-- [x] Docker налаштування
-- [x] Type checking
+### День 2: Demo Polish (6 годин)
 
-### Бізнес метрики
-- [x] Універсальна архітектура для розширюваності
-- [x] Асинхронна обробка для високої продуктивності
-- [x] Модульна структура для легкого тестування
-- [x] Підтримка бази даних PostgreSQL
-- [x] Docker розгортання
+#### Ранок (2 години): CLI Dashboard
+**Мета:** Beautiful interface для демонстрації
+
+**Завдання:**
+- Rich CLI dashboard з real-time оновленнями
+- Статистика обробки (кількість повідомлень, issues, tasks)
+- Відображення нещодавніх класифікацій та результатів
+- Команди для статусу черги та воркерів
+
+**Критерій готовності:** Інтерактивний dashboard показує live активність
+
+#### День (2 години): Performance & Reliability
+**Мета:** Стабільність для демо
+
+**Завдання:**
+- Circuit breaker для зовнішніх API викликів
+- Retry логіка з exponential backoff
+- Proper error handling та логування
+- Тестування з реальним навантаженням
+
+**Критерій готовності:** Система працює стабільно під навантаженням
+
+#### Вечір (2 години): Demo Preparation
+**Мета:** Готовність до презентації
+
+**Завдання:**
+- Підготовка демо сценарію з тестовими повідомленнями
+- Документація основних команд та функцій
+- Screenshots/recordings ключових features
+- Presentation script (3-5 хвилин)
+
+**Критерій готовності:** Готова презентація з live demo
+
+## Post-Sprint Roadmap (опційно)
+
+### Тиждень 1: Advanced Features
+- Multi-channel support (додаткові Telegram чати)
+- Advanced duplicate detection з Sentence Transformers
+- Custom classification rules та templates
+- Batch processing для historical messages
+
+### Тиждень 2: Production Features  
+- Comprehensive monitoring з Langfuse
+- A/B testing framework для моделей
+- Advanced security (input validation, rate limiting)
+- Backup and disaster recovery procedures
+
+### Тиждень 3: Scaling Features
+- Horizontal scaling з Kubernetes
+- Multi-team support з isolated processing
+- Advanced analytics та reporting
+- API endpoints для external integrations
+
+## Технічні рішення на основі дослідження
+
+### LLM Strategy
+**Primary:** Ollama local models (приватність, no costs)
+**Fallback:** GPT-4o-mini для складних випадків (якщо потрібно)
+**Optimization:** Семантичне кешування для повторних queries
+
+### Duplicate Detection
+**Approach:** Multi-level detection (exact string → fuzzy → semantic)
+**Model:** all-MiniLM-L6-v2 для швидкості та точності
+**Threshold:** 0.85 cosine similarity для near-duplicates
+
+### Task Tracker Integration
+**Primary:** Linear GraphQL API (1,500 requests/hour)
+**Fallback:** JSON file export для offline demo
+**Strategy:** Bulk operations для high-volume scenarios
+
+### Reliability Patterns
+**Message Processing:** Exactly-once через NATS JetStream
+**Error Handling:** Circuit breakers + exponential backoff
+**Data Persistence:** Transactional outbox pattern
+
+## Success Metrics для Sprint'у
+
+### Functional Requirements
+- ✅ Читає повідомлення з реального Telegram чату
+- ✅ Класифікує повідомлення через локальну LLM
+- ✅ Створює задачі в Linear або зберігає в файл
+- ✅ Відображає статистику в CLI dashboard
+- ✅ Відновлюється після перезапуску (persistent queue)
+
+### Performance Targets
+- **Response Time:** <5 секунд для класифікації
+- **Throughput:** 100+ повідомлень на годину
+- **Accuracy:** >80% правильної класифікації (subjective)
+- **Uptime:** 99% під час демо періоду
+- **Recovery Time:** <30 секунд після падіння
+
+### Demo Requirements
+- **Live Processing:** Real-time обробка під час презентації
+- **Visual Appeal:** Beautiful CLI з кольорами та прогрес-барами
+- **Ease of Use:** Одна команда для запуску всієї системи
+- **Reliability:** Стабільна робота протягом 10+ хвилин demo
+- **Clear Value:** Obvious time savings та automation benefits
+
+## Risk Mitigation
+
+### High Priority Risks
+1. **Ollama Performance** → Fallback до більш швидких моделей
+2. **Telegram Rate Limits** → Batch processing та respect limits
+3. **Linear API Failures** → JSON fallback для demo continuity  
+4. **Demo Technical Issues** → Pre-recorded backup content
+
+### Contingency Plans
+- **LLM Unavailable:** Rule-based classification fallback
+- **Database Issues:** In-memory storage for demo period
+- **Network Issues:** Offline mode з pre-loaded messages
+- **Time Constraints:** Minimal viable demo з core features only
+
+## Definition of Success
+
+**Sprint MVP Ready:**
+- Processes 20+ real Telegram messages successfully
+- Creates corresponding tasks in Linear or file
+- Displays results in beautiful CLI dashboard
+- Demonstrates clear ROI potential for teams
+- Runs stable demo for 5+ minutes without issues
+
+**Business Value Demonstrated:**
+- Automatic issue detection saves manual triage time
+- Consistent task creation prevents lost issues
+- Real-time processing enables faster response
+- Scalable architecture supports team growth
+- Clear integration path for production deployment

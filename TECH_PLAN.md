@@ -2,278 +2,363 @@
 
 ## 🎯 **Мета проекту**
 
-Створити універсальну систему автоматичного виявлення та класифікації проблем з різних комунікаційних каналів команд з гнучкими можливостями обробки та перенаправлення результатів.
+Створити AI-powered систему автоматичного виявлення та класифікації проблем з Telegram чатів команд з автоматичним створенням задач у task tracker'ах (Linear/Redmine). Система повинна працювати в режимі реального часу, забезпечувати надійність обробки та легко масштабуватися.
+
+**Business Case:** Автоматизація процесу виявлення та тріажу проблем економить 2+ години щодня для команди розробників, гарантує що жодна критична проблема не залишиться без уваги.
 
 ---
 
 ## 📋 **Функціональні вимоги**
 
 ### **Core Features:**
-1. **Source Adapters System**
-   - Telegram integration (primary)
-   - Slack adapter (майбутнє)
-   - Discord adapter (майбутнє)
-   - Email integration (майбутнє)
-   - Generic API adapter для custom sources
-   - Plugin architecture для нових джерел
+1. **Real-time Message Processing**
+   - Читання повідомлень з Telegram чатів через polling
+   - Exactly-once processing guarantee через NATS JetStream
+   - Automatic recovery після перезапусків системи
+   - Batch processing для historical messages
 
-2. **Universal Message Processing**
-   - Batch обробка повідомлень по запиту або розкладу
-   - Періодичне стягування нових повідомлень (polling)
-   - Відновлення пропущених повідомлень після downtime
-   - Source-agnostic message normalization
+2. **AI-Powered Classification**
+   - Автоматична класифікація повідомлень (bug/feature/question/info)
+   - Priority assessment (low/medium/high/critical)
+   - Confidence scoring для кожної класифікації
+   - Entity extraction (проекти, технології, дедлайни)
 
-3. **AI Processing Engine**
-   - Flexible LLM abstraction layer
-   - Issue detection та classification
-   - Category classification (bug, feature, question, info)
-   - Priority assessment (high, medium, low)
-   - Entity extraction (проект, технології, дедлайни)
-   - Sentiment analysis
+3. **Duplicate Detection**
+   - Multi-level duplicate detection (exact/fuzzy/semantic)
+   - Similarity threshold configuration
+   - Time-windowed blocking (24-hour windows)
+   - Performance optimization через Redis caching
 
-4. **Output Processing System**
-   - Task creation processors (Jira, Linear, Asana)
-   - Notification processors (Email, Slack, Teams)
-   - Report generators (Analytics, Summaries)
-   - Webhook processors для custom integrations
-   - File export processors (JSON, CSV, Excel)
-   - Plugin architecture для custom outputs
+4. **Task Tracker Integration**
+   - Linear GraphQL API integration (primary)
+   - Redmine REST API support (fallback)
+   - Automatic project/team mapping
+   - Bulk operations для high-volume scenarios
 
-5. **Flexible LLM Support**
-   - Локальні LLM (Ollama) для розробки/privacy
-   - Cloud LLM (OpenAI, Anthropic) для production
-   - Runtime переключення між провайдерами
-   - Configurable accuracy vs cost trade-offs
+5. **Monitoring & Observability**
+   - Real-time CLI dashboard з статистикою
+   - Structured logging через Loguru
+   - Performance metrics tracking
+   - Error alerting та health checks
 
-6. **CLI Interface**
-   - Interactive CLI з arrow navigation
-   - Source management commands
-   - Output processor management
-   - Configuration commands
-   - Service management (start/stop/restart)
-
-7. **Task Queue System**
-   - Asynchronous task processing with TaskIQ
-   - NATS message broker for distributed processing
-   - Worker service for background task execution
-   - Result backend for storing task results
-   - Dockerized services for easy deployment
+6. **Reliability Features**
+   - Circuit breaker patterns для external APIs
+   - Exponential backoff з jitter
+   - Dead letter queue для failed messages
+   - Transactional outbox pattern
 
 ---
 
-## 🏗️ **Архітектура**
+## 🏗️ **Системна архітектура**
 
-### **Core Architecture:**
+### **High-Level Architecture**
 ```
-tests/
-├── test_base_classes.py        # Тести для абстрактних базових класів
-├── test_message_processor.py   # Тести для основного обробника повідомлень
-├── test_ollama_provider.py     # Тести для Ollama провайдера
-├── test_pydantic_ai.py         # Тести для інтеграції з pydantic-ai
-├── test_task_creator.py        # Тести для обробника створення завдань
-├── test_taskiq_nats.py         # Тести для інтеграції TaskIQ з NATS
-├── test_telegram_adapter.py    # Тести для Telegram адаптера
-└── llm_comprehensive_test.py   # Комплексні тести для LLM
-
-src/
-├── adapters/          # Source adapters (Telegram, Slack, etc.)
-├── core/              # Core processing logic
-├── llm/               # LLM abstraction layer
-├── models/            # Database models
-├── processors/        # Output processors
-├── config.py          # Configuration management
-├── main.py            # CLI entry point
-├── taskiq_config.py   # TaskIQ configuration with NATS
-├── worker.py          # TaskIQ worker
-└── example_task.py    # Example task usage
+┌─────────────────────────────────────────────────────────────┐
+│                    SYSTEM ARCHITECTURE                     │
+├─────────────────────────────────────────────────────────────┤
+│  [Telegram API] ──polling──> [Message Ingestion]           │
+│        │                           │                       │
+│        ▼                           ▼                       │
+│  [NATS JetStream] ──queue──> [TaskIQ Workers]             │
+│        │                           │                       │
+│        ▼                           ▼                       │
+│  [AI Classification] ──results──> [Issue Detection]        │
+│        │                           │                       │
+│        ▼                           ▼                       │
+│  [Duplicate Check] ──unique──> [Task Creation]            │
+│        │                           │                       │
+│        ▼                           ▼                       │
+│  [PostgreSQL] <──sync──> [Linear/Redmine APIs]            │
+│        │                           │                       │
+│        ▼                           ▼                       │
+│  [Rich CLI Dashboard] <──monitor──> [Metrics & Logs]       │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### **Task Queue Choice - TaskIQ with NATS:**
-- **Full async support:** Native async/await support
-- **Framework-agnostic:** Async-first підхід без прив'язки до веб-фреймворку (FastAPI видалено з проєкту)
-- **Modern architecture:** Modern approach to distributed task processing
-- **NATS broker:** High-performance message broker with JetStream
-- **Dockerized services:** Easy deployment with Docker Compose
-- **Simpler setup:** Less boilerplate code compared to Celery
+### **Technology Stack**
+
+#### **Core Infrastructure**
+- **Application Framework:** FastAPI з async/await
+- **Task Queue:** TaskIQ з NATS JetStream broker
+- **Database:** PostgreSQL 15 з async SQLAlchemy/SQLModel
+- **Caching:** Redis для embeddings та similarity results
+- **Containerization:** Docker з multi-stage builds
+
+#### **AI & Processing**
+- **Primary LLM:** Local Ollama models (qwen3:14b, mistral-nemo)
+- **Fallback LLM:** GPT-4o-mini для складних випадків  
+- **LLM Integration:** pydantic-ai для structured outputs
+- **Similarity Detection:** Sentence Transformers (all-MiniLM-L6-v2)
+- **Text Processing:** spaCy для entity extraction
+
+#### **External Integrations**
+- **Telegram:** python-telegram-bot з polling mode
+- **Linear:** GraphQL API з official schema
+- **Redmine:** REST API з custom fields support
+- **Monitoring:** Langfuse для LLM observability
+
+#### **Development & Operations**
+- **CLI Interface:** Rich для beautiful terminal output
+- **Configuration:** Pydantic Settings з .env support
+- **Logging:** Loguru з structured JSON output
+- **Testing:** pytest з async support
+- **Code Quality:** Ruff для linting та formatting
 
 ---
 
-## 🧪 **Тестування**
+## 📊 **Модель даних**
 
-### **Unit Testing:**
-```python
-@pytest.mark.asyncio
-async def test_telegram_adapter():
-    # Test Telegram adapter functionality
-    
-@pytest.mark.asyncio
-async def test_ollama_provider():
-    # Test Ollama LLM provider
-    
-@pytest.mark.asyncio
-async def test_task_creation_processor():
-    # Test task creation output processor
-    
-@pytest.mark.asyncio
-async def test_async_classification():
-    # Test async LLM calls з mocked responses
-    
-# Pipeline async testing
-```
+### **Simplified Schema (3 Tables)**
 
-### **Integration Testing:**
-```python
-@pytest.mark.asyncio
-async def test_full_pipeline():
-    # Test full message processing pipeline
-    
-@pytest.mark.asyncio
-async def test_taskiq_nats_integration():
-    # Test TaskIQ with NATS integration
-    
-@pytest.mark.asyncio
-async def test_docker_services():
-    # Test Docker services startup
-```
+#### **Messages Table**
+- Зберігає всі оброблені повідомлення з Telegram
+- JSONB поле для metadata та flexible schema
+- Підтримка різних джерел (не тільки Telegram)
+- Idempotency через unique external_id
 
-### **Test Organization:**
-- Всі тести розташовані в окремій директорії `tests/`
-- Модульні тести для кожного компонента
-- Інтеграційні тести для перевірки взаємодії компонентів
-- Тести LLM для перевірки інтеграції з мовними моделями
-- Тести TaskIQ/NATS для перевірки асинхронної обробки
-- Всі тести використовують правильні моки та фікстури
-- Тести не використовують sys.path хаки
+#### **Issues Table** 
+- Результати AI класифікації
+- Confidence scores та priority levels
+- Foreign key до Messages
+- Support для entity extraction results
+
+#### **TaskExports Table**
+- Tracking створених задач у external systems
+- Status tracking (pending/created/failed)
+- External task IDs та URLs
+- Retry metadata для failed exports
+
+### **Key Design Principles**
+- **JSONB для гнучкості:** Easy schema evolution без migrations
+- **Minimal normalization:** Faster queries, easier maintenance
+- **Audit trail:** Повна історія всіх операцій
+- **Multi-source ready:** Підготовлено для Slack, Discord expansion
 
 ---
 
-## ⚙️ **Конфігурація**
+## ⚡ **Performance Requirements**
 
-### **Environment Configuration:**
-```env
-# Telegram bot
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+### **Throughput Targets**
+- **Message Processing:** 2000+ повідомлень на день
+- **Classification Speed:** <5 секунд per message
+- **Task Creation:** <10 секунд end-to-end
+- **Concurrent Users:** 10+ team members simultaneously
 
-# Database
-DATABASE_URL=postgresql+asyncpg://user:password@localhost:5555/tasktracker
+### **Reliability Targets**
+- **System Uptime:** 99.5% availability
+- **Message Loss:** 0% (exactly-once processing)
+- **Error Recovery:** <1 minute automatic recovery
+- **Data Consistency:** ACID transactions для critical operations
 
-# Ollama
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.1
-
-# Output processor
-OUTPUT_PROCESSOR_TYPE=jira
-JIRA_URL=https://your-company.atlassian.net
-JIRA_USERNAME=your_email@example.com
-JIRA_API_TOKEN=your_jira_api_token_here
-
-# Logging
-LOG_LEVEL=INFO
-
-# TaskIQ NATS
-TASKIQ_NATS_SERVERS=nats://nats:4222
-TASKIQ_NATS_QUEUE=taskiq
-```
-
-### **Processor Configuration:**
-```python
-from pydantic import BaseModel
-from typing import Dict, Any, Literal
-
-class ProcessorConfig(BaseModel):
-    type: Literal["task_creator", "notifier", "reporter", "webhook"]
-    name: str
-    config: Dict[str, Any]
-    is_active: bool = True
-```
+### **Scalability Targets**
+- **Horizontal Scaling:** 5+ worker instances
+- **Team Growth:** 100+ team members support
+- **Message Volume:** 10x growth capacity
+- **Multi-region:** Ready для geographic distribution
 
 ---
 
-## 🚀 **Майбутні можливості**
+## 🔧 **Integration Specifications**
 
-1. **Advanced Output Processors:** Slack, Teams, Email notifications
-2. **Webhook Output Processor:** Custom integrations
-3. **Real-time Processing Mode:** Event-driven processing
-4. **Advanced Analytics:** Cross-source correlation analysis
-5. **Web API:** REST endpoints для external integrations
+### **Telegram Integration**
+- **Authentication:** Bot token з BotFather
+- **Message Types:** Text messages, replies, forwards
+- **Rate Limiting:** 30 messages/second compliance
+- **Error Handling:** Automatic retry з exponential backoff
+- **Data Privacy:** Message content anonymization options
 
----
+### **Linear Integration**
+- **API Type:** GraphQL з strongly typed schema
+- **Authentication:** API key або OAuth2
+- **Rate Limits:** 1,500 requests/hour для API keys
+- **Features:** Real-time webhooks, bulk operations
+- **Data Mapping:** Automatic project/team assignment
 
-## 📦 **Залежності**
-
-### **Core Dependencies:**
-- `python-telegram-bot` - Telegram integration
-- `sqlmodel` - Database ORM
-- `pydantic` - Data validation
-- `pydantic-settings` - Configuration management
-- `pydantic-ai` - LLM integration
-- `ollama` - Local LLM support
-- `taskiq` - Task queue framework
-- `taskiq-nats` - NATS broker for TaskIQ
-- `typer` - CLI framework
-- `loguru` - Logging
-- `alembic` - Database migrations
-- `rich` - Вивід у CLI (консольні стилі)
-- `asyncpg` - Async драйвер PostgreSQL для SQLAlchemy/SQLModel
-
-### **Development Dependencies:**
-- `pytest` - Testing framework
-- `pytest-asyncio` - Async testing support
-- `ruff` - Code linting
-- `mypy` - Type checking
-
-### **Deployment Dependencies:**
-- `docker` - Containerization
-- `docker-compose` - Service orchestration
-- `uv` - Python package manager
-- `just` - Command runner
+### **Redmine Integration**
+- **API Type:** REST API з JSON responses
+- **Authentication:** API key або username/password
+- **Custom Fields:** Support для arbitrary metadata
+- **Attachment Handling:** Two-step upload process
+- **Bulk Operations:** Multiple issue creation
 
 ---
 
-## 📆 **Стан реалізації (2025-08-30)**
+## 🛡️ **Security & Compliance**
 
-- Абстракції та архітектура: готово (`adapters/base.py`, `processors/base.py`, `llm/base.py`, структура `src/`)
-- Telegram адаптер: є каркас і нормалізація, але без реальної інтеграції з `python-telegram-bot` (polling/webhook не реалізовано) — `adapters/telegram.py`
-- LLM: Ollama через `pydantic-ai` реалізовано — `llm/ollama.py`; тести для інтеграції з pydantic-ai — `tests/test_pydantic_ai.py`
-- Основний конвеєр: `core/message_processor.py` реалізує базову обробку (fetch → normalize → classify → process → mark)
-- Обробник виводу: `processors/task_creator.py` існує як заглушка (друк у консоль), реальні інтеграції відсутні
-- Асинхронна черга: конфіг TaskIQ+NATS та воркер — готово (`taskiq_config.py`, `worker.py`), є приклад задачі (`example_task.py`); конвеєр з чергою ще не зв’язано
-- База даних: моделі `sqlmodel` є (`models/database.py`), початкова Alembic міграція створена і застосована; async engine/session і збереження у конвеєрі ще не реалізовані
-- CLI: `main.py` з Typer+InquirerPy працює, але всі дії — заглушки, зв’язки з конвеєром/воркером немає
-- Конфігурація: `config.py` на BaseSettings; є невідповідності з `.env.example` (порти/назви полів)
-- Логування: `loguru` у залежностях, але майже не використовується
-- Тести: наявні для LLM і TaskIQ/NATS, е2е/CLI/БД відсутні
+### **Data Protection**
+- **Input Sanitization:** HTML escaping, SQL injection prevention
+- **PII Detection:** Automatic email/phone/IP masking
+- **Audit Logging:** Complete access trail
+- **Data Retention:** Configurable message retention periods
 
----
+### **API Security**
+- **Rate Limiting:** Per-user та global limits
+- **Input Validation:** Pydantic models для all inputs
+- **Error Handling:** No sensitive data в error messages
+- **Secret Management:** Environment variables, no hardcoded keys
 
-## 🚨 **Ризики та прогалини**
-
-- Telegram інтеграція відсутня (лише заглушка) → немає реального надходження повідомлень
-- CLI не під’єднано до конвеєра/черги → немає one-click E2E запуску
-- БД: немає Alembic/engine/session → дані не зберігаються, відсутня ідемпотентність/відновлення
-- LLM: немає strict Pydantic-схем для відповідей, можливі неструктуровані виходи
-- Конфіг: розбіжності `.env.example` ↔ `config.py` (наприклад, `DATABASE_URL` і порт 5555), відсутні описи деяких полів
-- Залежності: у `pyproject.toml` відсутній `rich` (використовується в `main.py`), для async Postgres потрібен `asyncpg`
-- Логування/обсервабіліті: відсутні структуровані логи та базові метрики
-- Тести: недостатнє покриття е2е/CLI/БД; автономний `ollama_integration_test.py` використовує `result.output` замість узгодженого `result.data`
+### **Network Security**
+- **HTTPS Everywhere:** All external API calls
+- **Webhook Validation:** HMAC signature verification
+- **IP Whitelisting:** Optional restriction для admin access
+- **Container Security:** Non-root users, minimal attack surface
 
 ---
 
-## 📝 **Пріоритетні наступні кроки**
+## 📈 **Monitoring & Metrics**
 
-Високий пріоритет:
-- [ ] Провести CLI до реального конвеєра: у `process_chats()` створити фабрики (TelegramAdapter, OllamaProvider, TaskCreationProcessor) і викликати `MessageProcessor.process_messages()`
-- [ ] Реалізувати `TelegramAdapter` з `python-telegram-bot` (polling на старт) із `fetch/normalize/mark`
-- [ ] Підключити БД: async engine/session, Alembic initial міграція; збереження `Message/Issue/Output` під час обробки
-- [ ] Інтегрувати конвеєр у TaskIQ: задачі `process_channel`/`process_pending`; оновити CLI `start_worker`
-- [ ] Уніфікувати конфіги: вирівняти `.env.example` ↔ `config.py` (порти/назви), опис у README
+### **Business Metrics**
+- **Messages Processed:** Daily/weekly volumes
+- **Issues Detected:** Classification accuracy tracking
+- **Tasks Created:** Success rates і response times
+- **Time Savings:** Manual vs automated processing comparison
 
-Середній пріоритет:
-- [ ] Логування через `loguru` у ключових модулях; базові метрики
-- [ ] Стандартизувати LLM-відповіді: Pydantic-схеми (strict JSON), обробка помилок
-- [ ] Оновити README під `uv`, додати розділ “Known limitations” і перший запуск
-- [ ] Вирівняти/розширити тести: покрити фабрики/CLI/БД; виправити `ollama_integration_test.py`
+### **Technical Metrics**
+- **System Performance:** Response times, throughput, error rates
+- **Resource Usage:** CPU, memory, disk, network utilization
+- **Queue Health:** Depth, processing lag, worker status
+- **External APIs:** Success rates, rate limit usage
 
-Низький пріоритет:
-- [ ] Додаткові процесори (Notifier/Reporter) і правила маршрутизації
-- [ ] Підтримка OpenAI/Anthropic із runtime-перемикачем
+### **AI/ML Metrics**
+- **Classification Accuracy:** Precision, recall, F1 scores
+- **Model Performance:** Inference time, token usage
+- **Confidence Distribution:** Score histograms і trends
+- **Duplicate Detection:** False positive/negative rates
+
+---
+
+## 🚀 **Deployment Strategy**
+
+### **Development Environment**
+- **Local Setup:** Docker Compose з all services
+- **Database:** PostgreSQL container з volume persistence
+- **Message Broker:** NATS container з JetStream enabled
+- **AI Models:** Local Ollama instance
+
+### **Production Environment**
+- **Orchestration:** Kubernetes з HELM charts
+- **High Availability:** Multi-replica deployments
+- **Load Balancing:** NGINX ingress controller
+- **Monitoring:** Prometheus + Grafana stack
+- **Logging:** ELK stack або Loki
+
+### **CI/CD Pipeline**
+- **Testing:** Automated test suite з coverage reports
+- **Building:** Multi-stage Docker builds
+- **Deployment:** GitOps з ArgoCD або Flux
+- **Rollback:** Blue-green deployments
+
+---
+
+## 💰 **Cost Optimization**
+
+### **LLM Cost Management**
+- **Local Models First:** Ollama для majority of processing
+- **Smart Fallbacks:** Cloud LLMs тільки для complex cases
+- **Caching Strategy:** Semantic similarity для duplicate queries
+- **Batch Processing:** Group similar requests
+
+### **Infrastructure Costs**
+- **Resource Right-sizing:** CPU/memory optimization
+- **Auto-scaling:** Scale down during low usage
+- **Efficient Storage:** Compression та archival policies
+- **Network Optimization:** CDN for static assets
+
+---
+
+## 🎯 **Success Criteria**
+
+### **MVP Success (Sprint Goal)**
+- ✅ Processes 50+ real Telegram messages
+- ✅ Achieves 80%+ classification accuracy
+- ✅ Creates verified tasks у Linear або JSON
+- ✅ Runs stable demo for 10+ minutes
+- ✅ Demonstrates clear ROI potential
+
+### **Production Ready (Month 1)**
+- ✅ Handles 2000+ messages daily
+- ✅ Maintains 99.5% uptime
+- ✅ <2% duplicate task creation
+- ✅ Full monitoring та alerting
+- ✅ Documentation та runbooks complete
+
+### **Scale Ready (Month 3)**
+- ✅ Multi-team support
+- ✅ Advanced analytics dashboard
+- ✅ Custom classification rules
+- ✅ Enterprise security features
+- ✅ Multi-channel source support
+
+---
+
+## 🚨 **Risk Assessment**
+
+### **Technical Risks**
+- **LLM Performance:** Local models may be slower than cloud alternatives
+- **API Rate Limits:** External services may throttle requests
+- **Data Volume:** Message storage growth over time
+- **Model Accuracy:** AI classification may need fine-tuning
+
+### **Business Risks**
+- **User Adoption:** Teams may resist automation
+- **Privacy Concerns:** Message content sensitivity
+- **Integration Complexity:** Task tracker API changes
+- **Maintenance Overhead:** System complexity growth
+
+### **Mitigation Strategies**
+- **Performance:** Benchmarking та optimization plans
+- **Rate Limits:** Circuit breakers та backoff strategies
+- **Storage:** Data retention policies та archival
+- **Accuracy:** Human feedback loops та model retraining
+- **Adoption:** Training та gradual rollout
+- **Privacy:** Anonymization та consent mechanisms
+
+---
+
+## 📚 **Documentation Requirements**
+
+### **Technical Documentation**
+- **Architecture Overview:** High-level system design
+- **API Documentation:** All endpoints та schemas
+- **Deployment Guide:** Step-by-step setup instructions
+- **Configuration Reference:** All settings та environment variables
+
+### **User Documentation**
+- **Quick Start Guide:** 15-minute setup tutorial
+- **CLI Reference:** All commands та options
+- **Troubleshooting:** Common issues та solutions
+- **Best Practices:** Recommended usage patterns
+
+### **Operational Documentation**
+- **Runbooks:** Incident response procedures
+- **Monitoring Guide:** Alerts та dashboards setup
+- **Backup Procedures:** Data protection strategies
+- **Scaling Guide:** Capacity planning recommendations
+
+---
+
+## 🔄 **Future Roadmap**
+
+### **Phase 1: Core Platform (Months 1-2)**
+- Basic message processing pipeline
+- Single team support
+- Linear integration
+- CLI interface
+
+### **Phase 2: Intelligence (Months 3-4)**
+- Advanced duplicate detection
+- Custom classification rules
+- Multi-channel support
+- Web dashboard
+
+### **Phase 3: Enterprise (Months 5-6)**
+- Multi-team isolation
+- Advanced analytics
+- Enterprise security
+- API marketplace integration
+
+### **Phase 4: AI Evolution (Months 7-12)**
+- Custom model fine-tuning
+- Predictive analytics
+- Automated workflow creation
+- Integration marketplace
