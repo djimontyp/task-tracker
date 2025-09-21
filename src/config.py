@@ -9,12 +9,12 @@ class Settings(BaseSettings):
         default="postgresql+asyncpg://postgres:postgres@localhost:5555/tasktracker",
         validation_alias=AliasChoices("DATABASE_URL", "database_url"),
     )
-    llm_provider: str = Field(
-        default="ollama", validation_alias=AliasChoices("LLM_PROVIDER", "llm_provider")
-    )
     ollama_base_url: str = Field(
         default="http://localhost:11434",
         validation_alias=AliasChoices("OLLAMA_BASE_URL", "ollama_base_url"),
+    )
+    llm_provider: str = Field(
+        default="ollama", validation_alias=AliasChoices("LLM_PROVIDER", "llm_provider")
     )
     ollama_model: str = Field(
         default="mistral-nemo:12b-instruct-2407-q4_k_m",
