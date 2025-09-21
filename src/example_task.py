@@ -1,31 +1,31 @@
 """
-Приклад використання TaskIQ з NATS
+Example usage of TaskIQ with NATS
 """
 
 import asyncio
 
 
 async def main():
-    """Головна функція для відправки прикладного завдання"""
-    print("Надсилаємо завдання для обробки повідомлення...")
+    """Main function for sending example task"""
+    print("Sending task for message processing...")
 
-    # Додаємо невелику затримку для того, щоб NATS встиг запуститися
+    # Add small delay for NATS to start up
     await asyncio.sleep(2)
 
-    # Імпортуємо функцію
+    # Import function
     from src.worker import process_message
 
-    # Надсилаємо завдання
-    task = await process_message.kiq("Приклад повідомлення для обробки")
+    # Send task
+    task = await process_message.kiq("Example message for processing")
 
-    # Очікуємо результат
-    print("Очікуємо результат обробки...")
+    # Wait for result
+    print("Waiting for processing result...")
     result = await task.wait_result()
 
-    # Виводимо результат
-    print(f"Результат: {result.return_value}")
+    # Output result
+    print(f"Result: {result.return_value}")
 
 
 if __name__ == "__main__":
-    # Запускаємо асинхронну функцію
+    # Run async function
     asyncio.run(main())

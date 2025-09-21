@@ -4,19 +4,19 @@ from textual.containers import Container
 from textual.screen import Screen
 from textual.theme import Theme
 
-# Кастомна кольорова схема в зелених тонах
+# Custom green color scheme
 green_theme = Theme(
     name="green",
-    primary="#2E7D32",  # Темно-зелений (основний колір)
-    secondary="#4CAF50",  # Середньо-зелений (альтернативний колір)
-    accent="#8BC34A",  # Світло-зелений (акцентний колір)
-    foreground="#212121",  # Темно-сірий (текст)
-    background="#F5F5F5",  # Світло-сірий (фон)
-    surface="#FFFFFF",  # Білий (поверхня віджетів)
-    panel="#EEEEEE",  # Світло-сірий (панелі)
-    success="#388E3C",  # Зелений успіху
-    warning="#FF9800",  # Помаранчевий (попередження)
-    error="#D32F2F",  # Червоний (помилки)
+    primary="#2E7D32",  # Dark green (primary color)
+    secondary="#4CAF50",  # Medium green (secondary color)
+    accent="#8BC34A",  # Light green (accent color)
+    foreground="#212121",  # Dark gray (text)
+    background="#F5F5F5",  # Light gray (background)
+    surface="#FFFFFF",  # White (widget surface)
+    panel="#EEEEEE",  # Light gray (panels)
+    success="#388E3C",  # Success green
+    warning="#FF9800",  # Orange (warning)
+    error="#D32F2F",  # Red (error)
     dark=False,
 )
 
