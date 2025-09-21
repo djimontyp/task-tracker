@@ -37,7 +37,7 @@ services-clean-all:
 # Run the application
 run:
     @echo "Running Task Tracker..."
-    uv run python -m src.main run
+    uv run python -m src run
 
 # Run tests
 test:
