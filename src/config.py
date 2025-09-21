@@ -26,7 +26,9 @@ class Settings(BaseSettings):
     )
     telegram_group_chat_id: str = Field(
         default="",
-        validation_alias=AliasChoices("TELEGRAM_GROUP_CHAT_ID", "telegram_group_chat_id"),
+        validation_alias=AliasChoices(
+            "TELEGRAM_GROUP_CHAT_ID", "telegram_group_chat_id"
+        ),
     )
     taskiq_nats_servers: str = Field(
         default="nats://localhost:4222",
@@ -37,7 +39,8 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("TASKIQ_NATS_QUEUE", "taskiq_nats_queue"),
     )
     log_level: str = Field(
-        default="INFO", validation_alias=AliasChoices("LOG_LEVEL", "LOGURU_LEVEL", "log_level")
+        default="INFO",
+        validation_alias=AliasChoices("LOG_LEVEL", "LOGURU_LEVEL", "log_level"),
     )
 
 
