@@ -37,11 +37,11 @@ This is a universal task tracking system that processes messages from various co
 **Current Status**: Working on a functional MVP for **Feodal AI Sprint 2.0** (1 серпня - 1 вересня). This is a practical AI competition where participants create functional AI solutions that directly improve work processes. Focus on core functionality and stability - delivering a fully working case that can be easily integrated and scaled for teams or the entire company.
 
 ### Core Architecture Pattern
-The system follows an adapter-processor-output pattern:
-1. **Source Adapters** (src/telegram.py) - Fetch and normalize messages from different platforms
-2. **Message Processor** (src/main.py:MessageProcessor) - Central orchestrator that coordinates the pipeline
+The system follows a simple event-driven pattern:
+1. **Telegram Listener** (src/telegram.py) - Receives real-time messages from configured groups
+2. **Message Processing** (src/__main__.py) - Main entry point that coordinates the pipeline
 3. **LLM Classification** (src/agents.py) - AI agents that classify messages using pydantic-ai
-4. **Output Processors** - Handle the results (task creation, notifications, etc.)
+4. **Future: Output Processors** - Will handle the results (task creation, notifications, etc.)
 
 ### Key Components
 
