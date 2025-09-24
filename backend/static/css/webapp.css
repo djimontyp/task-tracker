@@ -1,0 +1,282 @@
+/* Telegram WebApp Styles */
+:root {
+    --tg-theme-bg-color: #ffffff;
+    --tg-theme-text-color: #000000;
+    --tg-theme-hint-color: #707579;
+    --tg-theme-link-color: #3390ec;
+    --tg-theme-button-color: #3390ec;
+    --tg-theme-button-text-color: #ffffff;
+    --tg-theme-secondary-bg-color: #f4f4f5;
+}
+
+[data-theme="dark"] {
+    --tg-theme-bg-color: #212121;
+    --tg-theme-text-color: #ffffff;
+    --tg-theme-hint-color: #aaaaaa;
+    --tg-theme-link-color: #8bb4f0;
+    --tg-theme-button-color: #8bb4f0;
+    --tg-theme-button-text-color: #ffffff;
+    --tg-theme-secondary-bg-color: #0f0f0f;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background-color: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+    line-height: 1.4;
+}
+
+.container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.webapp-container, .dashboard-container {
+    padding: 0;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.header p {
+    color: var(--tg-theme-hint-color);
+    font-size: 16px;
+}
+
+/* Forms */
+.task-form {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    background-color: var(--tg-theme-secondary-bg-color);
+    color: var(--tg-theme-text-color);
+    font-size: 16px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    box-shadow: 0 0 0 2px var(--tg-theme-link-color);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-group select {
+    cursor: pointer;
+}
+
+/* User info */
+.user-info {
+    background-color: var(--tg-theme-secondary-bg-color);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 20px;
+}
+
+.user-info p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--tg-theme-hint-color);
+}
+
+/* Dashboard styles */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background-color: var(--tg-theme-secondary-bg-color);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+}
+
+.stat-card h3 {
+    font-size: 14px;
+    color: var(--tg-theme-hint-color);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--tg-theme-text-color);
+}
+
+.stat-status {
+    font-size: 16px;
+    color: #4ade80;
+    font-weight: 500;
+}
+
+.content-grid {
+    display: grid;
+    gap: 30px;
+}
+
+.section h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.task-list, .message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.task-item, .message-item {
+    background-color: var(--tg-theme-secondary-bg-color);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.task-header, .message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.task-category, .task-priority {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.task-category.bug { background: #fee2e2; color: #dc2626; }
+.task-category.feature { background: #dbeafe; color: #2563eb; }
+.task-category.improvement { background: #fef3c7; color: #d97706; }
+.task-category.question { background: #e0e7ff; color: #4338ca; }
+.task-category.chore { background: #f3f4f6; color: #6b7280; }
+
+.task-priority.low { background: #d1fae5; color: #059669; }
+.task-priority.medium { background: #fef3c7; color: #d97706; }
+.task-priority.high { background: #fed7aa; color: #ea580c; }
+.task-priority.critical { background: #fee2e2; color: #dc2626; }
+
+.task-item h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.task-item p, .message-content {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--tg-theme-hint-color);
+    margin-bottom: 8px;
+}
+
+.task-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--tg-theme-hint-color);
+}
+
+.message-author {
+    font-weight: 500;
+    color: var(--tg-theme-link-color);
+}
+
+.message-time {
+    font-size: 12px;
+    color: var(--tg-theme-hint-color);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--tg-theme-hint-color);
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    text-align: center;
+    transition: opacity 0.2s ease;
+    cursor: pointer;
+}
+
+.btn:hover {
+    opacity: 0.8;
+}
+
+.btn-primary {
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+}
+
+.btn-secondary {
+    background-color: var(--tg-theme-secondary-bg-color);
+    color: var(--tg-theme-text-color);
+}
+
+/* Dark theme adaptations */
+[data-theme="dark"] .task-category.bug { background: #5c1a1a; color: #fca5a5; }
+[data-theme="dark"] .task-category.feature { background: #1e3a8a; color: #93c5fd; }
+[data-theme="dark"] .task-category.improvement { background: #78350f; color: #fbbf24; }
+[data-theme="dark"] .task-category.question { background: #312e81; color: #a5b4fc; }
+[data-theme="dark"] .task-category.chore { background: #374151; color: #d1d5db; }
+
+[data-theme="dark"] .task-priority.low { background: #064e3b; color: #6ee7b7; }
+[data-theme="dark"] .task-priority.medium { background: #78350f; color: #fbbf24; }
+[data-theme="dark"] .task-priority.high { background: #9a3412; color: #fb923c; }
+[data-theme="dark"] .task-priority.critical { background: #5c1a1a; color: #fca5a5; }

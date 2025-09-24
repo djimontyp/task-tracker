@@ -42,6 +42,14 @@ class Settings(BaseSettings):
         default="INFO",
         validation_alias=AliasChoices("LOG_LEVEL", "LOGURU_LEVEL", "log_level"),
     )
+    webapp_url: str = Field(
+        default="http://localhost:8000/webapp",
+        validation_alias=AliasChoices("WEBAPP_URL", "webapp_url"),
+    )
+    api_base_url: str = Field(
+        default="http://localhost:8000",
+        validation_alias=AliasChoices("API_BASE_URL", "api_base_url"),
+    )
 
 
 settings = Settings()

@@ -8,18 +8,43 @@ alias sc := services-clean
 alias sca := services-clean-all
 
 # Список сервісів
-SERVICES := "postgres nats worker"
+SERVICES := "postgres nats worker api dashboard nginx"
 
-# Start services
+# Start services (production mode)
 services:
-    @echo "Starting services ($(SERVICES))..."
-    docker compose up -d postgres nats worker
+    @echo "Starting services (postgres nats worker api dashboard nginx)..."
+    docker compose up -d postgres nats worker api dashboard nginx
     @echo "Services started."
+    @echo "🌐 Available at: http://localhost"
+    @echo "📱 Telegram WebApp: http://localhost/webapp"
+    @echo "📊 Dashboard: http://localhost/dashboard"
+    @echo "🔗 Webhook URL: http://localhost/webhook/telegram"
+
+# Start services in development mode with watch
+services-dev:
+    @echo "Starting services in development mode with file watching..."
+    docker compose watch
+
+# Start specific service in development mode
+dev SERVICE:
+    @echo "Starting {{SERVICE}} in development mode..."
+    docker compose watch {{SERVICE}}
+
+# Rebuild specific service
+rebuild SERVICE:
+    @echo "Rebuilding {{SERVICE}}..."
+    docker compose build {{SERVICE}} --no-cache
+    docker compose up -d {{SERVICE}}
+
+# Run new Telegram bot with Aiogram 3
+bot:
+    @echo "Starting Telegram bot with WebApp support..."
+    uv run python backend/app/telegram_bot.py
 
 # Stop services
 services-stop:
     @echo "Stopping services..."
-    docker compose down postgres nats worker
+    docker compose down postgres nats worker api dashboard nginx
     @echo "Services stopped."
 
 # Full clean services without volumes
@@ -34,10 +59,7 @@ services-clean-all:
     docker compose down --rmi all
     @echo "Services containers and images removed."
 
-# Run the application
-run:
-    @echo "Running Task Tracker..."
-    uv run python -m src run
+# This command was removed - use 'just bot' or 'just services' instead
 
 # Run tests
 test:
@@ -47,12 +69,12 @@ test:
 # Lint the code
 lint:
     @echo "Linting code..."
-    uv run ruff check src --fix
+    uv run ruff check backend --fix
 
 # Format the code
 fmt:
     @echo "Formatting code..."
-    uv run ruff format src
+    uv run ruff format backend
 
 # Run lint and format
 check: lint fmt

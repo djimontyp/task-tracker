@@ -1,0 +1,123 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 20px;
+  color: white;
+  min-height: 100vh;
+}
+
+.App-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 2.5rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 40px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card {
+  background-color: #404040;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.5rem;
+}
+
+.card p {
+  margin: 0;
+  color: #ccc;
+}
+
+.connection-status {
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+.status {
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 15px;
+}
+
+.status.connected {
+  background-color: #2d5016;
+  color: #4caf50;
+}
+
+.status.connecting {
+  background-color: #4a3c00;
+  color: #ffeb3b;
+}
+
+.status.disconnected {
+  background-color: #4a1616;
+  color: #f44336;
+}
+
+.messages-card {
+  grid-column: span 2;
+}
+
+.messages-container {
+  max-height: 400px;
+  overflow-y: auto;
+  text-align: left;
+  border: 1px solid #555;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.no-messages {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+}
+
+.message {
+  background-color: #333;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-left: 3px solid #007acc;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.author {
+  font-weight: bold;
+  color: #007acc;
+}
+
+.timestamp {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.message-content {
+  color: #fff;
+  line-height: 1.4;
+}

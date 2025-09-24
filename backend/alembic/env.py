@@ -15,8 +15,8 @@ PROJECT_ROOT = THIS_DIR.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-import src.models  # noqa: F401, E402
-from src.config import settings  # type: ignore  # noqa: E402
+import backend.core.models  # noqa: F401, E402
+from backend.core.config import settings  # type: ignore  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

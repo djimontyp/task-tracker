@@ -25,7 +25,7 @@ services:
   worker:
     build: .
     container_name: task-tracker-worker
-    command: ["uv", "run", "taskiq", "worker", "src.taskiq_config:nats_broker", "src.worker"]
+    command: ["uv", "run", "taskiq", "worker", "backend.core.taskiq_config:nats_broker", "backend.core.worker"]
     volumes:
       - .:/app
     depends_on:
@@ -34,6 +34,74 @@ services:
     environment:
       - TASKIQ_NATS_SERVERS=nats://nats:4222
     working_dir: /app
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./backend/core
+          target: /app/backend/core
+          ignore:
+            - "**/__pycache__"
+            - "**/*.pyc"
+        - action: rebuild
+          path: ./pyproject.toml
+          target: /app/pyproject.toml
+
+  api:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    container_name: task-tracker-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/task_tracker
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./backend/app
+          target: /app/app
+        - action: sync+restart
+          path: ./backend/core
+          target: /app/core
+
+  dashboard:
+    build: ./frontend
+    container_name: task-tracker-dashboard
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    environment:
+      - REACT_APP_API_BASE_URL=${DASHBOARD_API_BASE_URL:-http://localhost:8000}
+      - REACT_APP_WS_URL=${DASHBOARD_WS_URL:-ws://localhost:8000/ws}
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend/src
+          target: /app/src
+        - action: rebuild
+          path: ./frontend/package.json
+          target: /app/package.json
+
+  nginx:
+    image: nginx:alpine
+    container_name: task-tracker-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+      - dashboard
+    restart: unless-stopped
 
 volumes:
   postgres_data:

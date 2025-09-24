@@ -2,7 +2,7 @@
 Worker for TaskIQ task processing using NATS
 """
 
-from src.taskiq_config import nats_broker
+from .taskiq_config import nats_broker
 
 
 @nats_broker.task
