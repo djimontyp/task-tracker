@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Essential Commands (via justfile)
 - `just run` - Start the CLI application with interactive menu
-- `just services` - Start all services (PostgreSQL, NATS, Worker) via Docker
+- `just services` - Start all services (PostgreSQL, NATS, Worker, API, Dashboard) via Docker
 - `just services-stop` - Stop all services
 - `just worker` - Run TaskIQ worker locally (alternative to dockerized worker)
 - `just test` - Run all tests
@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Application Launch Commands
 - `uv run python -m src` - Start Telegram listener (default mode)
-- `uv run python -m src telegram` - Start Telegram listener explicitly
+- `uv run python -m src tg` - Start Telegram listener explicitly
 - `uv run python -m src cli` - Start interactive CLI interface
 
 ### Package Management
@@ -35,6 +35,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a universal task tracking system that processes messages from various communication channels (Telegram, Slack, etc.) and automatically classifies them as issues/tasks using AI.
 
 **Current Status**: Working on a functional MVP for **Feodal AI Sprint 2.0** (1 серпня - 1 вересня). This is a practical AI competition where participants create functional AI solutions that directly improve work processes. Focus on core functionality and stability - delivering a fully working case that can be easily integrated and scaled for teams or the entire company.
+
+**New Services Added**:
+- **FastAPI Backend** (`api/`) - REST API with task management endpoints, accessible at http://localhost:8000
+- **React Dashboard** (`web/dashboard/`) - Web interface for viewing tasks and statistics, accessible at http://localhost:3000
 
 ### Core Architecture Pattern
 The system follows a simple event-driven pattern:
@@ -103,6 +107,13 @@ The system follows a simple event-driven pattern:
 4. **Run application**: `uv run python -m src` (starts Telegram listener)
 
 ## Code Implementation Guidelines
+
+### Python Dependencies Policy
+**CRITICAL**: NEVER modify Python dependencies in `pyproject.toml`. Only the user can add/remove/update dependencies. This includes:
+- Do NOT add new packages to `dependencies` array
+- Do NOT modify versions of existing packages
+- Do NOT suggest dependency changes in pyproject.toml
+- If you need a new package, ask the user to add it manually
 
 ### MCP Context7 Integration
 When implementing features or fixing bugs, **ALWAYS** use MCP context7 to retrieve up-to-date documentation and examples for libraries and frameworks used in this project:
