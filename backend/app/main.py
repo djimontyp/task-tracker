@@ -1,21 +1,12 @@
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Request
-from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Dict, Set
-from pydantic import BaseModel
-from datetime import datetime
 import json
-from pydantic_settings import BaseSettings
+from datetime import datetime
+from typing import Dict, List, Set
 
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
-# Settings
-class Settings(BaseSettings):
-    ngrok_url: str = "http://localhost"
-
-    class Config:
-        env_file = ".env"
-
-
-settings = Settings()
+from core.config import settings
 
 app = FastAPI(
     title="Task Tracker API",
@@ -116,10 +107,12 @@ async def health_check():
 @app.get("/api/config")
 async def get_client_config():
     """Get client-side configuration"""
-    # Remove protocol from ngrok_url for WebSocket
-    ws_host = settings.ngrok_url.replace("https://", "").replace("http://", "")
-
-    return {"wsUrl": f"ws://{ws_host}/ws", "apiBaseUrl": settings.ngrok_url}
+    # For local development, use localhost URLs through nginx proxy
+    # ngrok is only needed for Telegram webhook, not internal communication
+    return {
+        "wsUrl": "ws://localhost/ws",
+        "apiBaseUrl": "http://localhost"
+    }
 
 
 @app.websocket("/ws")

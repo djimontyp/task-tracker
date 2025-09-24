@@ -9,6 +9,9 @@ class Settings(BaseSettings):
         default="postgresql+asyncpg://postgres:postgres@localhost:5555/tasktracker",
         validation_alias=AliasChoices("DATABASE_URL", "database_url"),
     )
+    migration_database_url: str = (
+        "postgresql+asyncpg://postgres:postgres@localhost:5555/tasktracker"
+    )
     ollama_base_url: str = Field(
         default="http://localhost:11434",
         validation_alias=AliasChoices("OLLAMA_BASE_URL", "ollama_base_url"),

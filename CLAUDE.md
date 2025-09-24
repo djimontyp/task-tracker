@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `just check` - Run both lint and format
 
 ### Application Launch Commands
-- `just bot` - Start Telegram bot with aiogram and WebApp support
+- `just bot` - Start Telegram bot with aiogram
 - `just services` - Start all services in production mode
 - `just services-dev` - Start all services in development mode with file watching
 
@@ -48,7 +48,6 @@ This is a universal task tracking system that processes messages from various co
 **New Services Added**:
 - **FastAPI Backend** (`backend/`) - REST API with task management endpoints, accessible at http://localhost:8000
 - **React Dashboard** (`frontend/`) - Basic web interface with real-time WebSocket connection, accessible at http://localhost:3000
-- **Telegram WebApp** (`frontend/public/webapp/`) - Task creation interface, accessible at http://localhost/webapp
 
 **Development Features**:
 - **Docker Compose Watch** - Auto-reload services on file changes using `just services-dev`
@@ -57,7 +56,7 @@ This is a universal task tracking system that processes messages from various co
 
 ### Core Architecture Pattern
 The system follows a microservices event-driven pattern:
-1. **Telegram Bot** (backend/app/telegram_bot.py) - aiogram-based bot with WebApp support
+1. **Telegram Bot** (backend/app/telegram_bot.py) - aiogram-based bot
 2. **FastAPI Backend** (backend/app/main.py) - REST API for task management and message processing
 3. **React Dashboard** (frontend/) - Basic web interface with real-time message display via WebSocket
 4. **Worker Service** - TaskIQ worker for background processing
@@ -66,10 +65,9 @@ The system follows a microservices event-driven pattern:
 ### Key Components
 
 **Telegram Integration** (backend/app/telegram_bot.py):
-- Modern aiogram 3 bot with WebApp support
-- Command handlers (/start, /webapp, /dashboard, /help)
+- Modern aiogram 3 bot
+- Command handlers (/start, /help)
 - Automatic message processing and forwarding to FastAPI
-- WebApp integration for task creation
 - Real-time notifications and inline keyboards
 - Configurable via TELEGRAM_BOT_TOKEN environment variable
 
@@ -122,7 +120,7 @@ WS   /ws                  # WebSocket real-time updates
 
 ### Message Processing Flow
 1. **Telegram Bot** - aiogram bot receives messages and commands
-2. **WebApp Integration** - Users create structured tasks via Telegram WebApp
+2. **Message Processing** - Users send messages via Telegram bot
 3. **FastAPI Processing** - Messages forwarded to API for classification and storage
 4. **LLM Classification** - AI agents classify message content and extract entities (when implemented)
 5. **React Dashboard** - Users view tasks and statistics via web interface
@@ -196,18 +194,22 @@ docker ps       # ✅ 6 containers running (postgres, nats, api, dashboard, ngin
 **API Endpoints Verification:**
 - ✅ `http://localhost:8000/api/health` - Returns healthy status
 - ✅ `http://localhost:8000/` - API status working
-- ✅ `http://localhost:8000/api/config` - Returns WebSocket/API config (shows ngrok URLs)
+- ✅ `http://localhost:8000/api/config` - Now returns localhost URLs correctly
 
 **Frontend Accessibility:**
-- ✅ `http://localhost:3000` - React Dashboard loads properly
-- ❌ `http://localhost/dashboard` - 502 Bad Gateway (nginx proxy issue)
-- 🔄 `http://localhost/webapp` - Not tested yet
+- ✅ `http://localhost:3000` - **React Dashboard working perfectly!**
+  - Modern dark theme with responsive design
+  - WebSocket connection successful (🟢 Connected)
+  - Clean 3-column layout: Statistics, Real-time Messages, Settings
+  - Emoji-enhanced UI for better visual appeal
+- ⚠️ `http://localhost` - Nginx proxy has static file routing issues
+- ❌ WebApp references removed (not needed)
 
 **Key Findings:**
-1. **Configuration Issue**: API config endpoint returns ngrok URLs instead of localhost
-2. **Proxy Problem**: Nginx not properly routing to React service
-3. **WebSocket Failure**: Real-time features broken due to wrong endpoint URL
-4. **UI Incomplete**: Dashboard is view-only, lacks task management functionality
+1. **✅ WebSocket Fixed**: API config now returns correct localhost URLs
+2. **✅ Dashboard Working**: Full functionality at http://localhost:3000
+3. **⚠️ Nginx Proxy**: Static file routing needs debugging for port 80 access
+4. **🔄 UI Enhancement**: Dashboard has good foundation, needs task management features
 
 ### Quick Start
 1. **Setup environment**: Copy `.env.example` to `.env` and configure:
@@ -216,7 +218,6 @@ docker ps       # ✅ 6 containers running (postgres, nats, api, dashboard, ngin
 3. **Alternative - run bot locally**: `just bot` (for development)
 4. **Access interfaces**:
    - 🌐 Web Dashboard: http://localhost (via nginx)
-   - 📱 Telegram WebApp: http://localhost/webapp
    - 🔗 API: http://localhost/api
    - 📊 Direct services: API (8000), Dashboard (3000)
 
