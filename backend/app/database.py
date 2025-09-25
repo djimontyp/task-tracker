@@ -33,3 +33,16 @@ async def get_db_session() -> AsyncSession:
             raise
         finally:
             await session.close()
+
+
+async def get_db_session_context():
+    """Context manager for database session in background tasks"""
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()

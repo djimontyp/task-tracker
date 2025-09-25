@@ -17,6 +17,7 @@ from .api_schemas import (
     SimpleMessage,
     SimpleSource
 )
+from .tasks import save_telegram_message
 
 router = APIRouter()
 
@@ -42,26 +43,16 @@ async def get_client_config(settings: SettingsDep):
 
 
 @router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, db: DatabaseDep):
+async def websocket_endpoint(websocket: WebSocket):
+    """WebSocket endpoint for real-time updates only (no history)"""
     await manager.connect(websocket)
     try:
-        statement = select(SimpleMessage).order_by(SimpleMessage.created_at.desc()).limit(10)
-        result = await db.execute(statement)
-        recent_messages = result.scalars().all()
+        # Send connection confirmation
+        await websocket.send_text(
+            json.dumps({"type": "connection", "data": {"status": "connected", "message": "Ready for real-time updates"}})
+        )
 
-        for msg in recent_messages:
-            response = MessageResponse(
-                id=msg.id,
-                external_message_id=msg.external_message_id,
-                content=msg.content,
-                author=msg.author,
-                sent_at=msg.sent_at,
-                source_name="api"
-            )
-            await websocket.send_text(
-                json.dumps({"type": "message", "data": response.dict()})
-            )
-
+        # Keep connection alive for real-time messages only
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
@@ -102,7 +93,10 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
         source_name=source.name
     )
 
-    await manager.broadcast({"type": "message", "data": response.dict()})
+    # Fix datetime serialization for WebSocket
+    response_data = response.model_dump()
+    response_data["sent_at"] = response_data["sent_at"].isoformat()
+    await manager.broadcast({"type": "message", "data": response_data})
 
     return {"status": "message received", "id": db_message.id}
 
@@ -128,47 +122,33 @@ async def get_messages(db: DatabaseDep, limit: int = 50):
 
 
 @router.post("/webhook/telegram")
-async def telegram_webhook(request: Request, db: DatabaseDep):
-    """Handle Telegram webhook updates"""
+async def telegram_webhook(request: Request):
+    """Handle Telegram webhook updates with instant response"""
     try:
         update_data = await request.json()
 
         if "message" in update_data:
             message = update_data["message"]
 
-            source_statement = select(SimpleSource).where(SimpleSource.name == "telegram")
-            result = await db.execute(source_statement)
-            source = result.scalar_one_or_none()
-
-            if not source:
-                source = SimpleSource(name="telegram", created_at=datetime.now())
-                db.add(source)
-                await db.commit()
-                await db.refresh(source)
-
-            db_message = SimpleMessage(
+            # Create instant response for WebSocket (no DB required)
+            live_response = MessageResponse(
+                id=0,  # Temporary ID for live display
                 external_message_id=str(message["message_id"]),
                 content=message.get("text", message.get("caption", "[Media]")),
                 author=message.get("from", {}).get("first_name", "Unknown"),
                 sent_at=datetime.fromtimestamp(message["date"]),
-                source_id=source.id,
-                created_at=datetime.now()
+                source_name="telegram"
             )
 
-            db.add(db_message)
-            await db.commit()
-            await db.refresh(db_message)
+            # Instant WebSocket broadcast (no waiting for DB)
+            message_data = live_response.model_dump()
+            message_data["sent_at"] = message_data["sent_at"].isoformat()  # Convert datetime to string
+            await manager.broadcast({"type": "message", "data": message_data})
 
-            response = MessageResponse(
-                id=db_message.id,
-                external_message_id=db_message.external_message_id,
-                content=db_message.content,
-                author=db_message.author,
-                sent_at=db_message.sent_at,
-                source_name=source.name
-            )
+            # Schedule background database save
+            await save_telegram_message.kiq(update_data)
 
-            await manager.broadcast({"type": "message", "data": response.dict()})
+            print(f"⚡ Instant Telegram message broadcast: {message['message_id']}")
 
         return {"status": "ok"}
 
@@ -204,7 +184,10 @@ async def create_task(task: TaskCreateRequest, db: DatabaseDep):
 
     response = TaskResponse.from_orm(db_task)
 
-    await manager.broadcast({"type": "task_created", "data": response.dict()})
+    # Fix datetime serialization for WebSocket
+    response_data = response.model_dump()
+    response_data["created_at"] = response_data["created_at"].isoformat()
+    await manager.broadcast({"type": "task_created", "data": response_data})
 
     return response
 
