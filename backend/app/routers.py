@@ -99,7 +99,7 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
     source = result.scalar_one_or_none()
 
     if not source:
-        source = SimpleSource(name="api", created_at=datetime.now())
+        source = SimpleSource(name="api", created_at=datetime.utcnow())
         db.add(source)
         await db.commit()
         await db.refresh(source)
@@ -108,9 +108,9 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
         external_message_id=message.id,
         content=message.content,
         author=message.author,
-        sent_at=datetime.fromisoformat(message.timestamp.replace("Z", "+00:00")),
+        sent_at=datetime.fromisoformat(message.timestamp.replace("Z", "+00:00")).replace(tzinfo=None),
         source_id=source.id,
-        created_at=datetime.now(),
+        created_at=datetime.utcnow(),
     )
 
     db.add(db_message)
@@ -136,26 +136,30 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
 
 @api_router.get("/messages", response_model=List[MessageResponse])
 async def get_messages(db: DatabaseDep, limit: int = 50):
+    # Join with source table to get actual source name
     statement = (
-        select(SimpleMessage).order_by(SimpleMessage.created_at.desc()).limit(limit)
+        select(SimpleMessage, SimpleSource)
+        .join(SimpleSource, SimpleMessage.source_id == SimpleSource.id)
+        .order_by(SimpleMessage.created_at.desc())
+        .limit(limit)
     )
     result = await db.execute(statement)
-    messages = result.scalars().all()
+    messages_with_sources = result.all()
 
-    result = []
-    for msg in messages:
-        result.append(
+    response_list = []
+    for msg, source in messages_with_sources:
+        response_list.append(
             MessageResponse(
                 id=msg.id,
                 external_message_id=msg.external_message_id,
                 content=msg.content,
                 author=msg.author,
                 sent_at=msg.sent_at,
-                source_name="api",  # Default for now
+                source_name=source.name,  # Actual source name from database
             )
         )
 
-    return result
+    return response_list
 
 
 # ~~~~~~~~~~~~~~~~ Роути для вебхуків ~~~~~~~~~~~~~~~~
@@ -227,7 +231,7 @@ async def create_task(task: TaskCreateRequest, db: DatabaseDep):
         priority=task.priority,
         source=task.source,
         status="open",
-        created_at=datetime.now(),
+        created_at=datetime.utcnow(),
     )
 
     db.add(db_task)
