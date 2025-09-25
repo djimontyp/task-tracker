@@ -1,5 +1,7 @@
 /* Modern App Layout */
 .app {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -10,7 +12,8 @@
 .desktop-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
 }
 
 .mobile-layout {
@@ -88,7 +91,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px);
+  flex: 1;
 }
 
 .dashboard-header {
@@ -180,6 +183,23 @@
   font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
+}
+
+
+/* Tab layout adjustments to avoid nested scrollbars */
+.app .tab-navigation {
+  height: auto;
+}
+
+.app .tab-content-container,
+.app .mobile-tab-content-container {
+  overflow: visible;
+}
+
+.app .tab-content,
+.app .mobile-tab-content {
+  height: auto;
+  overflow: visible;
 }
 
 
@@ -512,7 +532,7 @@
   .mobile-layout {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;
   }
 
   .dashboard-content,
