@@ -1,9 +1,10 @@
 from datetime import datetime
 from typing import Dict, Any
 
+from loguru import logger
 from sqlmodel import select
 from core.taskiq_config import nats_broker
-from .database import get_db_session_context
+from .database import AsyncSessionLocal
 from .api_schemas import SimpleSource, SimpleMessage
 
 
@@ -11,7 +12,7 @@ from .api_schemas import SimpleSource, SimpleMessage
 async def process_message(message: str) -> str:
     """Example function for message processing"""
 
-    print(f"Processing message: {message}")
+    logger.info(f"Processing message: {message}")
     # Implementation of message processing will be here
     return f"Processed: {message}"
 
@@ -20,8 +21,11 @@ async def process_message(message: str) -> str:
 async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
     """Background task to save Telegram message to database"""
     try:
-        async with get_db_session_context() as db:
+        logger.info(f"Starting to save Telegram message: {telegram_data.get('message', {}).get('message_id', 'unknown')}")
+
+        async with AsyncSessionLocal() as db:
             message = telegram_data["message"]
+            logger.debug(f"Processing message data: {message}")
 
             # Get or create telegram source
             source_statement = select(SimpleSource).where(SimpleSource.name == "telegram")
@@ -29,10 +33,14 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
             source = result.scalar_one_or_none()
 
             if not source:
+                logger.info("Creating new Telegram source record")
                 source = SimpleSource(name="telegram", created_at=datetime.now())
                 db.add(source)
                 await db.flush()  # Flush to get the ID
                 await db.refresh(source)
+                logger.info(f"Created Telegram source with ID: {source.id}")
+            else:
+                logger.debug(f"Using existing Telegram source with ID: {source.id}")
 
             # Create message record
             db_message = SimpleMessage(
@@ -45,12 +53,17 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
             )
 
             db.add(db_message)
+            logger.debug(f"Added message to session: {db_message.external_message_id}")
 
-            print(f"✅ Saved Telegram message {message['message_id']} to database")
+            # CRITICAL: Commit the transaction!
+            await db.commit()
+            logger.info(f"✅ Successfully committed Telegram message {message['message_id']} to database")
+
             return f"Saved message {message['message_id']}"
 
     except Exception as e:
-        print(f"❌ Failed to save Telegram message: {e}")
+        logger.error(f"❌ Failed to save Telegram message: {e}")
+        logger.exception("Full traceback:")
         return f"Error: {str(e)}"
 
 
@@ -62,12 +75,12 @@ if __name__ == "__main__":
     async def main():
         """Main function for sending example task"""
 
-        print("Sending task for message processing...")
+        logger.info("Sending task for message processing...")
         task = await process_message.kiq("Example message for processing")
 
-        print("Waiting for processing result...")
+        logger.info("Waiting for processing result...")
         result = await task.wait_result()
 
-        print(f"Result: {result.return_value}")
+        logger.info(f"Result: {result.return_value}")
 
     asyncio.run(main())
