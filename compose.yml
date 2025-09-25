@@ -78,10 +78,13 @@ services:
             - "**/*.pyc"
 
   dashboard:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
     container_name: task-tracker-dashboard
     ports:
-      - "3000:80"
+      - "3000:3000"
     depends_on:
       - api
     restart: unless-stopped
@@ -93,9 +96,11 @@ services:
         - action: sync
           path: ./frontend/src
           target: /app/src
+        - action: sync
+          path: ./frontend/public
+          target: /app/public
         - action: rebuild
           path: ./frontend/package.json
-          target: /app/package.json
 
   nginx:
     image: nginx:alpine
