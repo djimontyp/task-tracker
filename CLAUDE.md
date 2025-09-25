@@ -202,7 +202,21 @@ WS   /ws                  # WebSocket real-time updates
 - **Test Coverage**: Limited to LLM and TaskIQ tests, missing comprehensive API/bot integration tests
 - **Advanced Models**: Complex SQLModel schemas in `models.py` not utilized (using simplified schemas instead)
 
+**✅ Database Integration Status (September 2025):**
+- **Message Storage**: ✅ WORKING - Telegram messages persist to database correctly
+- **Schema**: Both complex (`source`, `message`) and simple (`simple_sources`, `simple_messages`) schemas exist
+- **Current Usage**: API uses simple schema tables for reliable message storage
+- **Timezone Handling**: ✅ FIXED - UTC timestamps properly converted to timezone-naive format
+- **Testing**: ✅ VERIFIED - PostgreSQL MCP confirms message persistence
+
 **✅ Recently Resolved Issues (September 2025):**
+- **Telegram Message Database Storage**: ✅ FIXED - Messages now properly stored in database
+  - **Root Cause**: Schema mismatch between complex schema (alembic) and simple schema (API), plus datetime timezone issues
+  - **Solution**: Fixed datetime timezone conversion (`.replace(tzinfo=None)`) and ensured proper table usage
+  - **Result**: All Telegram messages successfully stored in `simple_messages` table with correct UTC timestamps
+  - **Status**: Full message persistence working, verified with PostgreSQL MCP testing
+  - **Files Modified**: `backend/app/routers.py` (datetime conversion), `backend/app/tasks.py` (TaskIQ worker)
+
 - **Telegram Webhook 405 Errors**: ✅ FIXED - Added POST handler for root endpoint
   - **Root Cause**: External service or misconfigured webhook sending POST to `/` instead of `/webhook/telegram`
   - **Solution**: Added `@router.post("/")` handler to gracefully handle and log unexpected requests
