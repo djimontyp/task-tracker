@@ -43,10 +43,6 @@ rebuild SERVICE:
     docker compose build {{SERVICE}} --no-cache
     docker compose up -d {{SERVICE}}
 
-# Run new Telegram bot with Aiogram 3
-bot:
-    @echo "Starting Telegram bot with WebApp support..."
-    uv run python backend/app/telegram_bot.py
 
 # Stop services
 services-stop:
@@ -65,8 +61,6 @@ services-clean-all:
     @echo "Stopping and removing services containers and images..."
     docker compose down --rmi all
     @echo "Services containers and images removed."
-
-# This command was removed - use 'just bot' or 'just services' instead
 
 # Run tests
 test:
