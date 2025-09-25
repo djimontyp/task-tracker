@@ -1,6 +1,4 @@
 import asyncio
-import sys
-from pathlib import Path
 from typing import Any, Dict
 
 import httpx
@@ -14,10 +12,8 @@ from aiogram.types import (
     WebAppInfo,
 )
 from aiogram.utils.markdown import hbold, hitalic
-
-sys.path.append(str(Path(__file__).parent.parent))
 from core.config import settings
-from core.logging import setup_logging, logger
+from core.logging import logger, setup_logging
 
 # Setup centralized logging
 setup_logging()
