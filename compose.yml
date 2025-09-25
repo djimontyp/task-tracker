@@ -31,8 +31,8 @@ services:
     depends_on:
       - nats
     restart: unless-stopped
-    environment:
-      - TASKIQ_NATS_SERVERS=nats://nats:4222
+    env_file:
+      - .env
     working_dir: /app
     develop:
       watch:
@@ -58,8 +58,6 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/task_tracker
     develop:
       watch:
         - action: sync+restart
