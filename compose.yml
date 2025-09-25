@@ -27,10 +27,7 @@ services:
       context: .
       dockerfile: ./backend/Dockerfile
     container_name: task-tracker-worker
-    command: ["uv", "run", "taskiq", "worker", "core.taskiq_config:nats_broker", "core.worker"]
-    volumes:
-      - ./pyproject.toml:/app/pyproject.toml
-      - ./uv.lock:/app/uv.lock
+    command: ["python", "-m", "taskiq", "worker", "core.taskiq_config:nats_broker", "core.worker"]
     depends_on:
       - nats
     restart: unless-stopped
@@ -40,19 +37,18 @@ services:
       watch:
         - action: sync+restart
           path: ./backend/app
-          target: /app/backend/app
+          target: /app/app
           ignore:
             - "**/__pycache__"
             - "**/*.pyc"
         - action: sync+restart
           path: ./backend/core
-          target: /app/backend/core
+          target: /app/core
           ignore:
             - "**/__pycache__"
             - "**/*.pyc"
         - action: rebuild
           path: ./pyproject.toml
-          target: /app/pyproject.toml
 
   api:
     build:
