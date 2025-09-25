@@ -1,4 +1,4 @@
-from core.taskiq_config import nats_broker
+from ..core.taskiq_config import nats_broker
 
 
 @nats_broker.task

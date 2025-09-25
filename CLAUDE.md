@@ -65,11 +65,12 @@ The system follows a microservices event-driven pattern:
 ### Key Components
 
 **Telegram Integration** (backend/app/telegram_bot.py):
-- Modern aiogram 3 bot
-- Command handlers (/start, /help)
-- Automatic message processing and forwarding to FastAPI
+- Modern aiogram 3 bot with proper relative imports
+- Command handlers (/start, /help) with WebApp integration
+- HTTP client for FastAPI communication via httpx
 - Real-time notifications and inline keyboards
 - Configurable via TELEGRAM_BOT_TOKEN environment variable
+- Clean import structure without sys.path manipulation
 
 **FastAPI Backend** (backend/app/main.py):
 - REST API with basic task/message management endpoints
@@ -101,10 +102,12 @@ WS   /ws                  # WebSocket real-time updates
 - Three main agents: classification, entity extraction, and analysis
 - Structured schemas defined in backend/core/schemas.py (TextClassification, EntityExtraction, EntityStructured)
 
-**Async Task Processing** (backend/core/worker.py, backend/core/taskiq_config.py):
+**Async Task Processing** (backend/app/tasks.py, backend/core/taskiq_config.py):
 - TaskIQ with NATS broker for distributed task processing
 - NATS runs on default ports: 4222 (client), 6222 (routing), 8222 (monitoring)
-- Worker can run either in Docker or locally via `just worker`
+- Basic task example for message processing (backend/app/tasks.py)
+- Worker can run either in Docker (default) or locally via `just worker`
+- **Current State**: Minimal TaskIQ integration, not connected to LLM processing workflow
 
 **Configuration** (backend/core/config.py):
 - Pydantic Settings with .env file support
@@ -114,8 +117,10 @@ WS   /ws                  # WebSocket real-time updates
 
 **Data Models**:
 - **Pydantic Schemas** (backend/core/schemas.py): AI classification results, priorities, categories
-- **SQLModel Database Models** (backend/core/models.py): Complex relational schema with Source, Stream, Message, Issue, Output, ProcessingJob tables
-- **Current Gap**: API uses simple in-memory storage instead of the sophisticated database models
+- **SQLModel Database Models** (backend/app/models.py): Complex relational schema with Source, Stream, Message, Issue, Output, ProcessingJob, LLMProvider tables
+- **API Pydantic Models** (backend/app/main.py): Simple TaskCreate, Task, Message, Stats models for in-memory storage
+- **Current Gap**: API uses in-memory storage instead of the sophisticated SQLModel database models
+- **Model Duplication**: Task and Message classes exist in both main.py (simple) and models.py (complex SQLModel)
 - Categories: bug, feature, improvement, question, chore | Priorities: low, medium, high, critical
 
 ### Message Processing Flow
@@ -142,48 +147,64 @@ WS   /ws                  # WebSocket real-time updates
 
 ### Current System Status
 
-**✅ Working Components (Verified):**
-- **All Docker Services** - 6 services running: PostgreSQL, NATS, API, Dashboard, Nginx, Worker
+**✅ Working Components (Verified as of September 2025):**
+- **All Docker Services** - 6 services running successfully: PostgreSQL, NATS, API, Dashboard, Nginx, Worker
 - **FastAPI Backend** - All API endpoints functional, health checks pass:
   - GET / (API status) ✅
   - GET /api/health ✅
-  - GET /api/config ✅
+  - GET /api/config ✅ (now returns correct localhost URLs)
   - All CRUD endpoints for tasks/messages working
-- **React Dashboard (Direct Access)** - Clean UI loads at http://localhost:3000
-  - Modern, responsive design with emoji-enhanced interface
-  - Proper responsive layout (mobile, tablet, desktop tested)
+- **React Dashboard** - TypeScript React app working at http://localhost:3000
+  - Modern responsive design with dark theme
+  - Clean build process via Docker
   - No JavaScript runtime errors
 - **Development Environment** - justfile commands working, proper service orchestration
+- **Telegram Bot** - Modern aiogram 3 implementation with correct relative imports
 
-**❌ Critical Issues Found (Testing Results):**
-- **WebSocket Connection Failure** - Dashboard tries connecting to ngrok URL instead of localhost:8000/ws
-  - Error: "Unexpected response code: 502"
-  - Impact: No real-time functionality works
-- **Nginx Routing Broken** - http://localhost/dashboard returns 502 Bad Gateway
-  - Impact: Primary dashboard access route unusable
-- **Dashboard Incomplete** - Only static display, no interactive task management UI
-  - Missing: task creation forms, status updates, navigation
-  - Current state: View-only with connection status indicator
+**✅ Recently Fixed (September 2025) - Complete Backend Architecture Overhaul:**
 
-**⚠️ Current Architectural Gaps:**
-- **Database Integration**: Complex SQLModel schemas exist but API uses in-memory storage
-- **AI Classification**: LLM agents defined but not connected to API workflow
-- **WebSocket Configuration**: Dashboard configured for external ngrok instead of local API
-- **Test Coverage**: Only LLM and TaskIQ tests, missing API/bot integration tests
+**Phase 1 - Code Organization:**
+- **✅ Code Organization**: Успішно розділено `main.py` на логічні компоненти:
+  - `app/main.py` - тільки FastAPI app setup та middleware
+  - `app/routers.py` - всі API endpoints
+  - `app/websocket.py` - ConnectionManager для WebSocket
+  - `app/database.py` - async database session management
+  - `app/dependencies.py` - FastAPI dependencies з modern Annotated patterns
+- **✅ Model Duplication Removed**: Видалено дубльовані моделі з `main.py`
+- **✅ Hardcode Elimination**: Замінено хардкод URLs на використання `core/config.py`
 
-**🔄 Immediate Fixes Needed (High Priority):**
-1. **Fix WebSocket URL** - Change React config from ngrok to ws://localhost:8000/ws
-2. **Fix Nginx Configuration** - Resolve 502 error for /dashboard proxy route
-3. **Complete Dashboard UI** - Add interactive task management components
+**Phase 2 - Database Integration (NEW):**
+- **✅ Database Integration Complete**: Замінено in-memory storage на повноцінну SQLModel database integration:
+  - `app/api_schemas.py` - спрощені SQLModel таблиці (SimpleTask, SimpleMessage, SimpleSource)
+  - Async database operations через SQLAlchemy/SQLModel
+  - Proper database sessions з dependency injection
+  - Auto-creation таблиць при старті через `create_db_and_tables()`
+- **✅ Full CRUD Operations**: Всі endpoints працюють з database:
+  - Tasks: create, read, update status, statistics
+  - Messages: create, read, WebSocket broadcasting
+  - Persistent data storage between requests
+- **✅ Modern FastAPI Patterns**: DatabaseDep, SettingsDep dependencies
 
-**🔄 Next Integration Steps (Medium Priority):**
-1. Connect SQLModel database models to FastAPI endpoints
-2. Implement AI message classification in API workflow
-3. Add comprehensive API and bot integration tests
+**⚠️ Current Architectural Gaps (Updated):**
+- **AI Classification**: LLM agents defined in `backend/core/agents.py` but not connected to API workflow
+- **TaskIQ Integration**: Basic TaskIQ setup exists but minimal integration with LLM processing
+- **Test Coverage**: Limited to LLM and TaskIQ tests, missing comprehensive API/bot integration tests
+- **Advanced Models**: Complex SQLModel schemas in `models.py` not utilized (using simplified schemas instead)
+
+**🔄 Next Integration Steps (High Priority):**
+1. **AI Classification**: Connect LLM agents to message processing pipeline in API endpoints
+2. **TaskIQ-LLM Integration**: Implement background AI processing tasks for message classification
+3. **Advanced Schema Migration**: Move from simplified to full SQLModel schemas with relationships
+
+**🔄 Code Quality Improvements (Medium Priority):**
+1. Add comprehensive integration tests for API-bot-database flow
+2. Implement proper database session management
+3. Add interactive task management UI components to React dashboard
+4. Configure CORS properly for production environment
 
 ### Testing Results Summary
 
-**Last Tested**: September 2025 with MCP Playwright and specialized agents
+**Last Tested**: September 2025 with comprehensive service analysis
 
 **Service Status Check:**
 ```bash
@@ -192,34 +213,57 @@ docker ps       # ✅ 6 containers running (postgres, nats, api, dashboard, ngin
 ```
 
 **API Endpoints Verification:**
-- ✅ `http://localhost:8000/api/health` - Returns healthy status
-- ✅ `http://localhost:8000/` - API status working
-- ✅ `http://localhost:8000/api/config` - Now returns localhost URLs correctly
+- ✅ `http://localhost:8000/api/health` - Returns healthy status with timestamp
+- ✅ `http://localhost:8000/` - API status working ("Task Tracker API", "status": "running")
+- ✅ `http://localhost:8000/api/config` - Returns correct localhost WebSocket and API URLs
 
-**Frontend Accessibility:**
-- ✅ `http://localhost:3000` - **React Dashboard working perfectly!**
-  - Modern dark theme with responsive design
-  - WebSocket connection successful (🟢 Connected)
-  - Clean 3-column layout: Statistics, Real-time Messages, Settings
-  - Emoji-enhanced UI for better visual appeal
-- ⚠️ `http://localhost` - Nginx proxy has static file routing issues
-- ❌ WebApp references removed (not needed)
+**Frontend Status:**
+- ✅ `http://localhost:3000` - **React Dashboard fully operational**
+  - TypeScript React 18.3.1 application
+  - Modern build pipeline with react-scripts 5.0.1
+  - Responsive design ready for task management features
+  - Successfully serves built static files via nginx in Docker
 
-**Key Findings:**
-1. **✅ WebSocket Fixed**: API config now returns correct localhost URLs
-2. **✅ Dashboard Working**: Full functionality at http://localhost:3000
-3. **⚠️ Nginx Proxy**: Static file routing needs debugging for port 80 access
-4. **🔄 UI Enhancement**: Dashboard has good foundation, needs task management features
+**Architecture Verification:**
+- ✅ **Docker Compose**: 6-service architecture with proper dependencies
+- ✅ **File Structure**: Complete backend architecture with database integration:
+  ```
+  backend/
+  ├── core/              # конфіги, LLM, логінг
+  │   ├── config.py      # settings з database URLs
+  │   ├── agents.py      # LLM classification agents
+  │   └── ...
+  └── app/               # повністю інтегрований API код
+      ├── main.py        # FastAPI app setup (45 рядків)
+      ├── routers.py     # API endpoints з database integration (275 рядків)
+      ├── websocket.py   # WebSocket ConnectionManager
+      ├── database.py    # async session management + create_db_and_tables
+      ├── dependencies.py # DatabaseDep, SettingsDep з Annotated patterns
+      ├── api_schemas.py # спрощені SQLModel таблиці для API (NEW)
+      ├── models.py      # комплексні SQLModel schemas (не використовуються)
+      └── ...
+  ```
+- ✅ **Development Workflow**: justfile automation for common development tasks
+- ✅ **Database Integration**: Повна заміна in-memory storage на SQLModel database operations
+- ✅ **Modern Patterns**: Async CRUD, dependency injection, type safety
+
+**Key Current State:**
+1. **✅ Infrastructure**: All services containerized and running reliably
+2. **✅ API Foundation**: FastAPI with WebSocket support and CORS configured
+3. **✅ Frontend Foundation**: React TypeScript app with proper build process
+4. **🔄 Integration Gap**: Need to connect SQLModel database schemas to FastAPI endpoints
+5. **🔄 AI Processing**: LLM agents exist but not integrated into message processing workflow
 
 ### Quick Start
 1. **Setup environment**: Copy `.env.example` to `.env` and configure:
    - `TELEGRAM_BOT_TOKEN` - Get from @BotFather on Telegram
-2. **Start all services**: `just services` (API, Dashboard, Database, etc.)
+2. **Start all services**: `just services` (PostgreSQL, NATS, API, Dashboard, Worker, Nginx)
 3. **Alternative - run bot locally**: `just bot` (for development)
 4. **Access interfaces**:
-   - 🌐 Web Dashboard: http://localhost (via nginx)
-   - 🔗 API: http://localhost/api
-   - 📊 Direct services: API (8000), Dashboard (3000)
+   - 🌐 React Dashboard: http://localhost:3000 (direct access)
+   - 🔗 API: http://localhost:8000 (direct access)
+   - 📱 Nginx Proxy: http://localhost (proxies to services)
+   - 📊 API Health: http://localhost:8000/api/health
 
 ## Code Implementation Guidelines
 
@@ -238,6 +282,42 @@ When implementing features or fixing bugs, **ALWAYS** use MCP context7 to retrie
 - **For troubleshooting**: Get specific documentation sections to resolve implementation issues correctly
 
 This ensures all implementations use current best practices and maintain consistency with the latest library versions.
+
+### Code Quality Standards
+
+#### **Comments Policy - CRITICAL**
+**NEVER write obvious comments that just repeat what the code does.** Коментарі мають пояснювати **ЧОМУ**, не **ЩО**.
+
+**❌ Погані приклади (НЕ робити):**
+```python
+# Include all routes
+app.include_router(router)
+
+# Create database session
+session = AsyncSession()
+
+# Return response
+return {"status": "ok"}
+
+# Set status to completed
+task.status = "completed"
+```
+
+**✅ Хороші приклади (коли коментарі доречні):**
+```python
+# Working around FastAPI issue #1234 with WebSocket dependency injection
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket, db: DatabaseDep):
+
+# Complex business logic requires explanation
+# Priority calculation: high=3, medium=2, low=1, then multiply by category weight
+priority_score = PRIORITY_VALUES[task.priority] * CATEGORY_WEIGHTS[task.category]
+
+# TODO: Replace with proper LLM classification once agents are integrated
+classification = "manual"
+```
+
+**Правило:** Якщо код говорить сам за себе і не є складним - коментар не потрібен. Код має бути self-documenting.
 
 ## System File Restrictions
 
