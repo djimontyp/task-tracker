@@ -7,6 +7,13 @@ alias st := services-stop
 alias sc := services-clean
 alias sca := services-clean-all
 
+
+# Reinstall UV venv and all deps localy
+rds:
+    rm -rf .venv
+    uv venv --python 3.13
+    uv sync --all-groups
+
 # Список сервісів
 SERVICES := "postgres nats worker api dashboard nginx"
 
