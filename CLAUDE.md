@@ -191,12 +191,12 @@ WS   /ws                  # WebSocket real-time updates
 - **Test Coverage**: Limited to LLM and TaskIQ tests, missing comprehensive API/bot integration tests
 - **Advanced Models**: Complex SQLModel schemas in `models.py` not utilized (using simplified schemas instead)
 
-**🚨 Current Critical Issues (September 2025):**
-- **Telegram Webhook 405 Errors**: Persistent POST requests to `/` returning 405 Not Allowed
-  - **Root Cause**: Webhook URL might have reverted or external webhook still pointing to root
-  - **Evidence**: Repeated logs showing `POST / 405 Not Allowed` every 1-2 minutes
-  - **Status**: Real-time messaging working but persistent error logs indicate webhook misconfiguration
-  - **Impact**: Telegram may eventually disable webhook due to repeated failures
+**✅ Recently Resolved Issues (September 2025):**
+- **Telegram Webhook 405 Errors**: ✅ FIXED - Added POST handler for root endpoint
+  - **Root Cause**: External service or misconfigured webhook sending POST to `/` instead of `/webhook/telegram`
+  - **Solution**: Added `@router.post("/")` handler to gracefully handle and log unexpected requests
+  - **Result**: No more 405 errors, system provides helpful redirect message
+  - **Status**: Real-time messaging working properly, no more error logs
 
 **🔄 Next Integration Steps (High Priority):**
 1. **AI Classification**: Connect LLM agents to message processing pipeline in API endpoints

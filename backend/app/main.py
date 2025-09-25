@@ -2,7 +2,7 @@ from .database import create_db_and_tables
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from core.config import settings
+from core.taskiq_config import nats_broker
 from .routers import router
 
 
@@ -31,8 +31,17 @@ app = create_app()
 
 @app.on_event("startup")
 async def startup():
-    """Initialize database on startup"""
+    """Initialize database and TaskIQ broker on startup"""
     await create_db_and_tables()
+    if not nats_broker.is_worker_process:
+        await nats_broker.startup()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    """Shutdown TaskIQ broker on application shutdown"""
+    if not nats_broker.is_worker_process:
+        await nats_broker.shutdown()
 
 
 if __name__ == "__main__":

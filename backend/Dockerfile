@@ -15,7 +15,9 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen
 
 # Copy source code
-COPY backend/ .
+COPY backend/app ./app
+COPY backend/core ./core
+COPY backend/alembic ./alembic
 
 # Expose port
 EXPOSE 8000

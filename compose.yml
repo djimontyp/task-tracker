@@ -23,22 +23,30 @@ services:
     restart: unless-stopped
 
   worker:
-    build: .
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
     container_name: task-tracker-worker
-    command: ["uv", "run", "taskiq", "worker", "backend.core.taskiq_config:nats_broker", "backend.core.worker"]
+    command: ["uv", "run", "taskiq", "worker", "core.taskiq_config:nats_broker", "core.worker"]
     volumes:
-      - .:/app
+      - ./pyproject.toml:/app/pyproject.toml
+      - ./uv.lock:/app/uv.lock
     depends_on:
       - nats
     restart: unless-stopped
     env_file:
       - .env
-    working_dir: /app
     develop:
       watch:
         - action: sync+restart
-          path: ./backend
-          target: /app/backend
+          path: ./backend/app
+          target: /app/backend/app
+          ignore:
+            - "**/__pycache__"
+            - "**/*.pyc"
+        - action: sync+restart
+          path: ./backend/core
+          target: /app/backend/core
           ignore:
             - "**/__pycache__"
             - "**/*.pyc"
@@ -63,9 +71,15 @@ services:
         - action: sync+restart
           path: ./backend/app
           target: /app/app
+          ignore:
+            - "**/__pycache__"
+            - "**/*.pyc"
         - action: sync+restart
           path: ./backend/core
           target: /app/core
+          ignore:
+            - "**/__pycache__"
+            - "**/*.pyc"
 
   dashboard:
     build: ./frontend

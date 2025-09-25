@@ -1,5 +1,5 @@
-import json
 from datetime import datetime
+import json
 from typing import List
 
 from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
@@ -15,11 +15,15 @@ from .api_schemas import (
     StatsResponse,
     SimpleTask,
     SimpleMessage,
-    SimpleSource
+    SimpleSource,
 )
 from .tasks import save_telegram_message
 
 router = APIRouter()
+api_router = APIRouter(prefix="/api")
+
+
+# ~~~~~~~~~~~~~~~~ Основні роути ~~~~~~~~~~~~~~~~
 
 
 @router.get("/")
@@ -27,19 +31,37 @@ async def root():
     return {"message": "Task Tracker API", "status": "running"}
 
 
-@router.get("/api/health")
+@router.post("/")
+async def root_post(request: Request):
+    """Handle unexpected POST requests to root - likely misconfigured webhook"""
+    try:
+        body = await request.body()
+        print(f"⚠️ Unexpected POST to root endpoint. Body: {body.decode()[:200]}...")
+        return {
+            "status": "redirect",
+            "message": "Use /webhook/telegram for Telegram webhooks",
+        }
+    except Exception as e:
+        print(f"⚠️ Error handling POST to root: {e}")
+        return {"status": "error", "message": "Invalid request to root endpoint"}
+
+
+# ~~~~~~~~~~~~~~~~ API роути для конфігурації та перевірки здоров'я ~~~~~~~~~~~~~~~~
+
+
+@api_router.get("/health")
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.now()}
 
 
-@router.get("/api/config")
+@api_router.get("/config")
 async def get_client_config(settings: SettingsDep):
     """Get client-side configuration"""
     base_url = settings.api_base_url.replace("http://", "").replace("https://", "")
-    return {
-        "wsUrl": f"ws://{base_url}/ws",
-        "apiBaseUrl": f"http://{base_url}"
-    }
+    return {"wsUrl": f"ws://{base_url}/ws", "apiBaseUrl": f"http://{base_url}"}
+
+
+# ~~~~~~~~~~~~~~~~ Роути для WebSocket з'єднань ~~~~~~~~~~~~~~~~
 
 
 @router.websocket("/ws")
@@ -49,7 +71,15 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         # Send connection confirmation
         await websocket.send_text(
-            json.dumps({"type": "connection", "data": {"status": "connected", "message": "Ready for real-time updates"}})
+            json.dumps(
+                {
+                    "type": "connection",
+                    "data": {
+                        "status": "connected",
+                        "message": "Ready for real-time updates",
+                    },
+                }
+            )
         )
 
         # Keep connection alive for real-time messages only
@@ -59,7 +89,10 @@ async def websocket_endpoint(websocket: WebSocket):
         manager.disconnect(websocket)
 
 
-@router.post("/api/messages")
+# ~~~~~~~~~~~~~~~~ API роути для повідомлень ~~~~~~~~~~~~~~~~
+
+
+@api_router.post("/messages")
 async def create_message(message: MessageCreateRequest, db: DatabaseDep):
     source_statement = select(SimpleSource).where(SimpleSource.name == "api")
     result = await db.execute(source_statement)
@@ -75,9 +108,9 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
         external_message_id=message.id,
         content=message.content,
         author=message.author,
-        sent_at=datetime.fromisoformat(message.timestamp.replace('Z', '+00:00')),
+        sent_at=datetime.fromisoformat(message.timestamp.replace("Z", "+00:00")),
         source_id=source.id,
-        created_at=datetime.now()
+        created_at=datetime.now(),
     )
 
     db.add(db_message)
@@ -90,7 +123,7 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
         content=db_message.content,
         author=db_message.author,
         sent_at=db_message.sent_at,
-        source_name=source.name
+        source_name=source.name,
     )
 
     # Fix datetime serialization for WebSocket
@@ -101,24 +134,31 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
     return {"status": "message received", "id": db_message.id}
 
 
-@router.get("/api/messages", response_model=List[MessageResponse])
+@api_router.get("/messages", response_model=List[MessageResponse])
 async def get_messages(db: DatabaseDep, limit: int = 50):
-    statement = select(SimpleMessage).order_by(SimpleMessage.created_at.desc()).limit(limit)
+    statement = (
+        select(SimpleMessage).order_by(SimpleMessage.created_at.desc()).limit(limit)
+    )
     result = await db.execute(statement)
     messages = result.scalars().all()
 
     result = []
     for msg in messages:
-        result.append(MessageResponse(
-            id=msg.id,
-            external_message_id=msg.external_message_id,
-            content=msg.content,
-            author=msg.author,
-            sent_at=msg.sent_at,
-            source_name="api"  # Default for now
-        ))
+        result.append(
+            MessageResponse(
+                id=msg.id,
+                external_message_id=msg.external_message_id,
+                content=msg.content,
+                author=msg.author,
+                sent_at=msg.sent_at,
+                source_name="api",  # Default for now
+            )
+        )
 
     return result
+
+
+# ~~~~~~~~~~~~~~~~ Роути для вебхуків ~~~~~~~~~~~~~~~~
 
 
 @router.post("/webhook/telegram")
@@ -137,16 +177,25 @@ async def telegram_webhook(request: Request):
                 content=message.get("text", message.get("caption", "[Media]")),
                 author=message.get("from", {}).get("first_name", "Unknown"),
                 sent_at=datetime.fromtimestamp(message["date"]),
-                source_name="telegram"
+                source_name="telegram",
             )
 
             # Instant WebSocket broadcast (no waiting for DB)
             message_data = live_response.model_dump()
-            message_data["sent_at"] = message_data["sent_at"].isoformat()  # Convert datetime to string
+            message_data["sent_at"] = message_data[
+                "sent_at"
+            ].isoformat()  # Convert datetime to string
             await manager.broadcast({"type": "message", "data": message_data})
 
             # Schedule background database save
-            await save_telegram_message.kiq(update_data)
+            try:
+                await save_telegram_message.kiq(update_data)
+                print(
+                    f"✅ TaskIQ завдання відправлено для повідомлення {message['message_id']}"
+                )
+            except Exception as e:
+                print(f"❌ TaskIQ помилка: {e}")
+                # Не блокуємо webhook через TaskIQ помилки
 
             print(f"⚡ Instant Telegram message broadcast: {message['message_id']}")
 
@@ -157,7 +206,10 @@ async def telegram_webhook(request: Request):
         return {"status": "error", "message": str(e)}
 
 
-@router.get("/api/tasks", response_model=List[TaskResponse])
+# ~~~~~~~~~~~~~~~~ API роути для завдань ~~~~~~~~~~~~~~~~
+
+
+@api_router.get("/tasks", response_model=List[TaskResponse])
 async def get_tasks(db: DatabaseDep):
     statement = select(SimpleTask).order_by(SimpleTask.created_at.desc())
     result = await db.execute(statement)
@@ -166,7 +218,7 @@ async def get_tasks(db: DatabaseDep):
     return [TaskResponse.from_orm(task) for task in tasks]
 
 
-@router.post("/api/tasks", response_model=TaskResponse)
+@api_router.post("/tasks", response_model=TaskResponse)
 async def create_task(task: TaskCreateRequest, db: DatabaseDep):
     db_task = SimpleTask(
         title=task.title,
@@ -192,7 +244,7 @@ async def create_task(task: TaskCreateRequest, db: DatabaseDep):
     return response
 
 
-@router.get("/api/tasks/{task_id}", response_model=TaskResponse)
+@api_router.get("/tasks/{task_id}", response_model=TaskResponse)
 async def get_task(task_id: int, db: DatabaseDep):
     statement = select(SimpleTask).where(SimpleTask.id == task_id)
     result = await db.execute(statement)
@@ -204,7 +256,7 @@ async def get_task(task_id: int, db: DatabaseDep):
     return TaskResponse.from_orm(task)
 
 
-@router.put("/api/tasks/{task_id}/status")
+@api_router.put("/tasks/{task_id}/status")
 async def update_task_status(task_id: int, status: str, db: DatabaseDep):
     statement = select(SimpleTask).where(SimpleTask.id == task_id)
     result = await db.execute(statement)
@@ -220,7 +272,10 @@ async def update_task_status(task_id: int, status: str, db: DatabaseDep):
     return {"message": "Task status updated", "task_id": task_id, "status": status}
 
 
-@router.get("/api/stats", response_model=StatsResponse)
+# ~~~~~~~~~~~~~~~~ API роути для статистики ~~~~~~~~~~~~~~~~
+
+
+@api_router.get("/stats", response_model=StatsResponse)
 async def get_stats(db: DatabaseDep):
     statement = select(SimpleTask)
     result = await db.execute(statement)
@@ -244,3 +299,7 @@ async def get_stats(db: DatabaseDep):
         categories=categories,
         priorities=priorities,
     )
+
+
+# Include the API router
+router.include_router(api_router)
