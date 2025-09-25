@@ -12,6 +12,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Development Mode (with file watching):**
 - `just services-dev` - Start all services with Docker Compose Watch (auto-reload on changes)
+  - **✅ Live CSS/JS Sync**: Frontend файли синхронізуються без rebuild
+  - **✅ Backend Hot Reload**: Python код оновлюється з sync+restart
+  - **✅ File Watching**: Автоматичне відстеження змін у `./frontend/src` та `./backend/`
 - `just dev SERVICE` - Start specific service in development mode (e.g., `just dev api`)
 - `just rebuild SERVICE` - Force rebuild specific service without cache
 
@@ -163,6 +166,29 @@ WS   /ws                  # WebSocket real-time updates
 
 **✅ Recently Fixed (September 2025) - Complete Backend Architecture Overhaul:**
 
+**Phase 4 - Frontend UI/UX Improvements (NEW - September 2025):**
+- **✅ Tab Navigation Enhancement**: Повністю перероблена система табів з професійним дизайном:
+  - **Центрування**: Табы ідеально центровані з `justify-content: center`
+  - **2K Monitor Support**: Адаптивні розміри для high-DPI displays:
+    - Базові: `1.5rem 3rem` padding, `1.25rem` font, `1.75rem` icons
+    - 2K: `2rem 4rem` padding, `1.5rem` font, `2.25rem` icons
+    - 4K: `2.5rem 5rem` padding, `1.75rem` font, `2.5rem` icons
+  - **Мінімалістичний дизайн**: Убрані закруглення та синя обводка для чіткого переходу в header
+  - **Hover анімації**: GPU-прискорені ефекти підйому, масштабування, тіней
+  - **Responsive**: Окремі стилі для мобільних з bottom navigation bar
+- **✅ Layout Optimization**: Оптимізована структура dashboard:
+  - **Hover Status Indicator**: Статус ConnectionStatus перенесено в елегантний tooltip (правий верхній кут)
+  - **Content Hierarchy**: Видалено дублювання назв, підняті статистики вгору
+  - **Flexible Layout**: Messages container розтягується на весь екран з `flex: 1`
+  - **Visual Balance**: Зменшені відступи для кращого використання простору
+- **✅ Docker Compose Watch Integration**: Налаштована повноцінна синхронізація файлів:
+  - **Fixed compose.yml**: Убрано `profiles: production` з dashboard service
+  - **Watch Configuration**: Додано `develop.watch` для frontend файлів
+  - **Live Reload**: `just services-dev` синхронізує зміни CSS/JS без rebuild
+  - **File Sync**: Автоматична синхронізація `./frontend/src` → `/app/src` в контейнер
+
+**✅ Recently Fixed (September 2025) - Complete Backend Architecture Overhaul:**
+
 **Phase 1 - Code Organization:**
 - **✅ Code Organization**: Успішно розділено `main.py` на логічні компоненти:
   - `app/main.py` - тільки FastAPI app setup та middleware
@@ -253,7 +279,9 @@ docker ps       # ✅ 6 containers running (postgres, nats, api, dashboard, ngin
 - ✅ `http://localhost:3000` - **React Dashboard fully operational**
   - TypeScript React 18.3.1 application
   - Modern build pipeline with react-scripts 5.0.1
-  - Responsive design ready for task management features
+  - **Enhanced Tab Navigation**: Центровані табы з адаптивними розмірами для 2K+ мониторів
+  - **Optimized Layout**: Hover status indicator, flexible messages container, improved content hierarchy
+  - **Docker Watch Integration**: Live CSS/JS sync без rebuild через `just services-dev`
   - Successfully serves built static files via nginx in Docker
 
 **Architecture Verification:**
