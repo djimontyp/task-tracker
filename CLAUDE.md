@@ -173,7 +173,7 @@ WS   /ws                  # WebSocket real-time updates
 - **✅ Model Duplication Removed**: Видалено дубльовані моделі з `main.py`
 - **✅ Hardcode Elimination**: Замінено хардкод URLs на використання `core/config.py`
 
-**Phase 2 - Database Integration (NEW):**
+**Phase 2 - Database Integration:**
 - **✅ Database Integration Complete**: Замінено in-memory storage на повноцінну SQLModel database integration:
   - `app/api_schemas.py` - спрощені SQLModel таблиці (SimpleTask, SimpleMessage, SimpleSource)
   - Async database operations через SQLAlchemy/SQLModel
@@ -184,6 +184,17 @@ WS   /ws                  # WebSocket real-time updates
   - Messages: create, read, WebSocket broadcasting
   - Persistent data storage between requests
 - **✅ Modern FastAPI Patterns**: DatabaseDep, SettingsDep dependencies
+
+**Phase 3 - Docker Optimization (NEW - September 2025):**
+- **✅ Multi-stage Dockerfile**: Оптимізовано backend/Dockerfile з 2-stage build:
+  - **Dependencies Stage**: встановлення залежностей з `uv sync --locked --no-dev`
+  - **Application Stage**: копіювання `.venv` та коду додатку
+- **✅ Proper uv Integration**: Правильне використання uv в Docker:
+  - ❌ НЕ ПРАЦЮЄ: `uv export` + `pip install` або `uv pip sync`
+  - ✅ ПРАЦЮЄ: `uv sync --locked --no-dev` + копіювання `.venv` між stages
+- **✅ Docker Layer Optimization**: Залежності кешуються окремо від коду для швидшого rebuild
+- **✅ Security**: Non-root user `appuser` у фінальному образі
+- **✅ Size Optimization**: Compile-time залежності (gcc) не потрапляють у фінальний образ
 
 **⚠️ Current Architectural Gaps (Updated):**
 - **AI Classification**: LLM agents defined in `backend/core/agents.py` but not connected to API workflow
@@ -290,6 +301,134 @@ When implementing features or fixing bugs, **ALWAYS** use MCP context7 to retrie
 
 This ensures all implementations use current best practices and maintain consistency with the latest library versions.
 
+## Task Delegation Guidelines
+
+### Strict Delegation Policy - CRITICAL
+
+**Claude Code MUST delegate tasks to specialized sub-agents whenever an appropriate agent exists. Only handle tasks directly when NO suitable agent is available.**
+
+#### **MANDATORY Delegation Rules:**
+
+1. **ALWAYS delegate first** - Before handling any non-trivial task, check if a specialized agent exists
+2. **NEVER bypass agents** - Do not handle tasks that fall within an agent's expertise
+3. **Multiple agents in parallel** - Use multiple agents concurrently when task requires different specializations
+4. **Complete delegation** - Let agents handle their full scope, don't split their work
+
+### Agent Decision Matrix
+
+**Backend Development Tasks → fastapi-backend-expert:**
+- Python/FastAPI development, async programming
+- Database operations, SQLAlchemy/SQLModel integration
+- TaskIQ/NATS background processing
+- API endpoint creation/modification
+- Backend architecture review
+- LLM integration (pydantic-ai)
+
+**Frontend Development Tasks → react-spa-architect:**
+- React component development
+- TypeScript/JavaScript frontend code
+- WebSocket integration, real-time features
+- UI/UX implementation
+- Frontend-backend integration
+- Modern React patterns (hooks, context, etc.)
+
+**Infrastructure/DevOps Tasks → devops-expert:**
+- Docker configuration, multi-stage builds
+- CI/CD pipeline setup (GitHub Actions)
+- Development environment configuration
+- Service orchestration (docker-compose)
+- Deployment automation
+- Container optimization
+
+**Architecture Review Tasks → architecture-guardian:**
+- Code structure review
+- Architectural compliance checking
+- Design pattern adherence
+- Code organization validation
+- Refactoring guidance
+- System design evaluation
+
+**Complex Research/Multi-step Tasks → general-purpose:**
+- Codebase exploration and analysis
+- Complex debugging across multiple files
+- Multi-step implementation planning
+- Integration between multiple systems
+- Performance optimization analysis
+
+### Direct Action Criteria (VERY LIMITED)
+
+**Claude Code should ONLY handle tasks directly in these specific scenarios:**
+
+1. **Simple File Operations:**
+   - Reading single files for information
+   - Basic edits to existing files (1-2 line changes)
+   - Configuration file updates
+
+2. **Basic Commands:**
+   - Simple bash commands (`ls`, `git status`, health checks)
+   - Running existing justfile commands
+   - Basic test execution
+
+3. **Immediate Responses:**
+   - Factual questions about the codebase
+   - Explaining existing code functionality
+   - Quick configuration lookups
+
+4. **Documentation Updates:**
+   - CLAUDE.md modifications (like this section)
+   - Simple documentation fixes
+
+### Delegation Examples
+
+#### ✅ CORRECT Delegation:
+
+```
+User: "Add a new API endpoint for task filtering"
+Assistant: I'll use the fastapi-backend-expert agent to implement this API endpoint with proper FastAPI patterns and database integration.
+```
+
+```
+User: "Create a task management component for the React dashboard"
+Assistant: I'll use the react-spa-architect agent to create a modern React component with proper TypeScript integration and state management.
+```
+
+```
+User: "Optimize the Docker build process"
+Assistant: I'll use the devops-expert agent to optimize the Docker configuration with multi-stage builds and proper caching.
+```
+
+#### ❌ INCORRECT Direct Handling:
+
+```
+User: "Add a new API endpoint for task filtering"
+Assistant: I'll create the endpoint directly...
+❌ WRONG - Should delegate to fastapi-backend-expert
+```
+
+```
+User: "Review the current architecture for issues"
+Assistant: Looking at the code structure...
+❌ WRONG - Should delegate to architecture-guardian
+```
+
+### Enforcement and Validation
+
+**Before Taking Any Action:**
+
+1. **Task Analysis:** Identify the primary skill/expertise required
+2. **Agent Matching:** Check if any agent specializes in this area
+3. **Delegation Decision:** If match found → MUST delegate, else handle directly
+4. **Parallel Delegation:** For multi-domain tasks, launch multiple agents
+
+**Validation Questions:**
+- "Does this involve backend development?" → fastapi-backend-expert
+- "Does this involve frontend/React work?" → react-spa-architect
+- "Does this involve Docker/infrastructure?" → devops-expert
+- "Does this involve architectural review?" → architecture-guardian
+- "Is this a complex multi-step research task?" → general-purpose
+
+**CRITICAL:** When in doubt about which agent to use, **ALWAYS choose delegation over direct action**. It's better to over-delegate than to miss using specialized expertise.
+
 ### Code Quality Standards
 
 #### **Comments Policy - CRITICAL**
@@ -350,3 +489,106 @@ __pycache__/        # Python compiled bytecode
 - **Relevance**: Only contain generated/system files, never application code
 
 This restriction applies globally to all projects and has absolute priority over any other instructions.
+
+## Docker Best Practices (uv Multi-stage Build)
+
+### ✅ Optimized Multi-stage Dockerfile Pattern
+
+**Правильна структура для uv в Docker:**
+
+```dockerfile
+# ============================================================================
+# Dependencies Stage: Install dependencies in isolation
+# ============================================================================
+FROM python:3.12-slim AS dependencies
+
+WORKDIR /app
+
+# Install system dependencies required for package compilation
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv package manager
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies globally using environment variable
+ENV UV_SYSTEM_PYTHON=1
+RUN uv sync --locked --no-dev
+
+# ============================================================================
+# Application Stage: Copy application code and run
+# ============================================================================
+FROM python:3.12-slim AS application
+
+WORKDIR /app
+
+# Install only runtime dependencies (no gcc needed)
+RUN apt-get update && apt-get install -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set UV_SYSTEM_PYTHON in final stage too (for consistency)
+ENV UV_SYSTEM_PYTHON=1
+
+# Copy virtual environment from dependencies stage
+COPY --from=dependencies /app/.venv /app/.venv
+
+# Add virtual environment to PATH
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Copy application source code
+COPY backend/app ./app
+COPY backend/core ./core
+COPY backend/alembic ./alembic
+
+# Create non-root user for security
+RUN groupadd --gid 1001 --system appgroup && \
+    useradd --uid 1001 --system --gid appgroup --create-home appuser && \
+    chown -R appuser:appgroup /app
+
+USER appuser
+
+# Expose port
+EXPOSE 8000
+
+# Use Python directly since packages are installed globally
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+```
+
+### 🚫 Що НЕ працює з uv:
+
+```dockerfile
+# ❌ НЕПРАВИЛЬНО - uv export + pip install
+RUN uv export --frozen --no-dev --format requirements-txt > requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt
+
+# ❌ НЕПРАВИЛЬНО - uv pip sync (не підтримує --frozen)
+RUN uv pip sync --frozen --system uv.lock
+
+# ❌ НЕПРАВИЛЬНО - uv.lock не requirements формат
+RUN uv pip sync --system uv.lock
+```
+
+### ✅ Переваги Multi-stage підходу:
+
+1. **Кешування**: Залежності кешуються окремо від коду
+2. **Швидкий rebuild**: Зміна коду не перестворює stage з залежностями
+3. **Менший розмір**: gcc та інші compile-time залежності не потрапляють у final image
+4. **Безпека**: Non-root user у production image
+5. **Оптимізація**: Використання правильних uv команд
+
+### 📋 Команди для роботи:
+
+```bash
+# Rebuild конкретного сервісу
+just rebuild api
+
+# Перевірити API після rebuild
+curl -s http://localhost:8000/api/health
+
+# Запустити всі сервіси
+just services
+```
