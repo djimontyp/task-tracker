@@ -40,20 +40,21 @@ function AppContent() {
     const fetchConfig = async () => {
       try {
         const protocol = window.location.protocol;
-        const host = window.location.host;
-        const configUrl = `${protocol}//${host}/api/config`;
+        const apiHost = window.location.hostname + ':8000';
+        const configUrl = `${protocol}//${apiHost}/api/config`;
 
         const response = await fetch(configUrl);
         const clientConfig = await response.json();
         setConfig(clientConfig);
       } catch (error) {
         console.error('Failed to fetch config, using defaults:', error);
-        // Fallback to auto-detection
+        // Fallback to auto-detection - API is always on port 8000
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const apiProtocol = window.location.protocol;
+        const apiHost = window.location.hostname + ':8000';
         setConfig({
-          wsUrl: `${protocol}//${window.location.host}/ws`,
-          apiBaseUrl: `${apiProtocol}//${window.location.host}`
+          wsUrl: `${protocol}//${apiHost}/ws`,
+          apiBaseUrl: `${apiProtocol}//${apiHost}`
         });
       }
     };
@@ -130,18 +131,6 @@ function AppContent() {
   // Dashboard Tab Content
   const DashboardContent = () => (
     <div className="dashboard-content animate-fade-in">
-      <div className="dashboard-header">
-        <h1 className="dashboard-title">🎯 Task Tracker Dashboard</h1>
-        <p className="dashboard-subtitle text-secondary">AI-powered task management system</p>
-
-        <div className="connection-status">
-          <span className="status-label text-secondary">Status:</span>
-          <span className={`status ${connectionStatus}`}>
-            {connectionStatus === 'connected' ? '🟢 Connected' :
-             connectionStatus === 'connecting' ? '🟡 Connecting...' : '🔴 Disconnected'}
-          </span>
-        </div>
-      </div>
 
       <div className="dashboard-grid">
         <div className="stat-card bg-card shadow-md rounded-lg">
@@ -368,6 +357,13 @@ function AppContent() {
               <span className="logo-text">Task Tracker</span>
             </div>
             <div className="header-actions">
+              <div className={`connection-status ${connectionStatus}`}>
+                <span className="status-dot"></span>
+                <span className="status-text">
+                  {connectionStatus === 'connected' ? 'WebSocket Connected' :
+                   connectionStatus === 'connecting' ? 'Connecting to API...' : 'API Disconnected'}
+                </span>
+              </div>
               <ThemeToggle />
             </div>
           </div>
@@ -388,7 +384,12 @@ function AppContent() {
               <span className="logo-icon">🎯</span>
               <span className="logo-text">Task Tracker</span>
             </div>
-            <ThemeToggle />
+            <div className="header-actions">
+              <div className={`connection-status ${connectionStatus}`}>
+                <span className="status-dot"></span>
+              </div>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
         <MobileTabNavigation
