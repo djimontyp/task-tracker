@@ -1,5 +1,5 @@
 from taskiq_nats import NatsBroker, NATSObjectStoreResultBackend
-from config import settings
+from .config import settings
 
 nats_broker = NatsBroker(
     servers=settings.taskiq_nats_servers,
