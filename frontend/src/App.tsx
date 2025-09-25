@@ -7,11 +7,12 @@ import './components/TabNavigation.css';
 import './App.css';
 
 interface Message {
-  id: string;
+  id: number;
+  external_message_id: string;
   content: string;
   author: string;
-  timestamp: string;
-  chat_id: string;
+  sent_at: string;
+  source_name: string;
 }
 
 interface Task {
@@ -31,6 +32,8 @@ function AppContent() {
   const [config, setConfig] = useState<{wsUrl: string, apiBaseUrl: string} | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const ws = useRef<WebSocket | null>(null);
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 5;
 
   useEffect(() => {
     // Fetch client configuration from API
@@ -71,26 +74,38 @@ function AppContent() {
       ws.current.onopen = () => {
         console.log('WebSocket connected');
         setConnectionStatus('connected');
+        reconnectAttempts.current = 0;
       };
 
       ws.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.type === 'message') {
+        console.log('WebSocket message received:', data);
+
+        if (data.type === 'connection') {
+          console.log('WebSocket connection confirmed:', data.data.message);
+        } else if (data.type === 'message') {
+          // Real-time messages only - no deduplication needed since no history
           setMessages(prev => {
-            // Prevent duplicates
-            if (prev.some(msg => msg.id === data.data.id)) {
-              return prev;
-            }
-            return [...prev, data.data].slice(-50); // Keep last 50 messages
+            // Keep only the last 10 real-time messages for live display
+            return [data.data, ...prev].slice(0, 10);
           });
+          console.log('💬 New real-time message:', data.data);
         }
       };
 
-      ws.current.onclose = () => {
-        console.log('WebSocket disconnected');
+      ws.current.onclose = (event) => {
+        console.log('WebSocket disconnected', event.code, event.reason);
         setConnectionStatus('disconnected');
-        // Reconnect after 3 seconds
-        setTimeout(connectWebSocket, 3000);
+
+        // Exponential backoff reconnection
+        if (reconnectAttempts.current < maxReconnectAttempts) {
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 10000);
+          console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current + 1})`);
+          reconnectAttempts.current++;
+          setTimeout(connectWebSocket, delay);
+        } else {
+          console.log('Max reconnection attempts reached');
+        }
       };
 
       ws.current.onerror = (error) => {
@@ -158,20 +173,21 @@ function AppContent() {
       </div>
 
       <div className="recent-activity bg-card shadow-md rounded-lg">
-        <h3 className="activity-title">💬 Recent Messages</h3>
+        <h3 className="activity-title">⚡ Live Messages Stream</h3>
         <div className="messages-container">
           {messages.length === 0 ? (
             <div className="tab-empty">
-              <div className="tab-empty-icon">💬</div>
-              <p className="tab-empty-title">No messages yet</p>
-              <p className="tab-empty-description">Messages will appear here when received via Telegram</p>
+              <div className="tab-empty-icon">⚡</div>
+              <p className="tab-empty-title">Waiting for real-time messages</p>
+              <p className="tab-empty-description">New messages will appear instantly when received via Telegram</p>
             </div>
           ) : (
-            messages.slice(-5).reverse().map((message) => (
+            messages.slice(0, 5).map((message) => (
               <div key={message.id} className="message bg-secondary rounded-md">
                 <div className="message-header">
                   <span className="author accent-primary">{message.author}</span>
-                  <span className="timestamp text-muted">{formatTimestamp(message.timestamp)}</span>
+                  <span className="timestamp text-muted">{formatTimestamp(message.sent_at)}</span>
+                  <span className="source text-muted">({message.source_name})</span>
                 </div>
                 <div className="message-content text-primary">{message.content}</div>
               </div>
