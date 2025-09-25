@@ -2,7 +2,7 @@
 name: architecture-guardian
 description: Use this agent when you need to review code changes for architectural compliance and structural integrity. Examples: <example>Context: The user has just added a new feature with database models and API endpoints. user: "I've added user authentication with new models and endpoints" assistant: "Let me use the architecture-guardian agent to review the structural organization and ensure everything follows the project's architectural patterns."</example> <example>Context: The user has modified configuration handling across multiple files. user: "I've updated how we handle environment variables in several places" assistant: "I'll use the architecture-guardian agent to check that configuration changes maintain proper separation and don't introduce hardcoded values."</example> <example>Context: The user has refactored some business logic. user: "I've moved some task processing logic around" assistant: "Let me have the architecture-guardian agent review this to ensure the logic is properly organized and there's no duplication."</example>
 tools: Bash, Glob, Grep, Read, Edit, MultiEdit, Write, NotebookEdit, WebFetch, TodoWrite, WebSearch, BashOutput, KillShell, SlashCommand, ListMcpResourcesTool, ReadMcpResourceTool, mcp__context7__resolve-library-id, mcp__context7__get-library-docs, mcp__ide__getDiagnostics, mcp__sequential-thinking__sequentialthinking
-model: haiku
+model: sonnet
 color: red
 ---
 
