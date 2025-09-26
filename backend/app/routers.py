@@ -108,7 +108,9 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
         external_message_id=message.id,
         content=message.content,
         author=message.author,
-        sent_at=datetime.fromisoformat(message.timestamp.replace("Z", "+00:00")).replace(tzinfo=None),
+        sent_at=datetime.fromisoformat(
+            message.timestamp.replace("Z", "+00:00")
+        ).replace(tzinfo=None),
         source_id=source.id,
         created_at=datetime.utcnow(),
     )
