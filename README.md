@@ -1,151 +1,64 @@
 # Task Tracker
 
-Універсальна система автоматичного виявлення та класифікації проблем з різних комунікаційних каналів команд з гнучкими можливостями обробки та перенаправлення результатів.
+A web-based task management system with real-time message processing and AI-powered task classification.
 
-## Основні компоненти
+## Quick Start
 
-- Система адаптерів джерел (Telegram, Slack, Discord, Email)
-- Універсальна обробка повідомлень
-- Двигун обробки на основі ШІ (LLM)
-- Система обробки виводу (створення завдань, сповіщення, звіти)
-- Підтримка різних LLM (локальні та хмарні)
-- CLI інтерфейс з інтерактивним меню та навігацією стрілочками
-- Асинхронна обробка завдань з використанням TaskIQ та NATS
-
-## Встановлення
-
-1. Клонуйте репозиторій:
-   ```
-   git clone <repository-url>
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-org/task-tracker.git
    cd task-tracker
    ```
 
-2. Встановіть залежності:
-   ```
-   uv sync
-   ```
-   Примітка: якщо у вас не встановлено uv, інсталюйте: `pip install uv`.
-
-3. Скопіюйте та налаштуйте конфігураційний файл:
-   ```
+2. **Copy configuration**:
+   ```bash
    cp .env.example .env
-   # Відредагуйте .env згідно з вашими налаштуваннями
+   # Edit .env with your Telegram bot token and other settings
    ```
 
-4. Запустіть сервіси (PostgreSQL, NATS, Worker):
-   ```
+3. **Start all services**:
+   ```bash
    just services
    ```
-   Примітка: PostgreSQL доступний на `localhost:5555` (див. `compose.yml`).
-   Зупинити сервіси: `just services-stop`.
 
-5. Запустіть CLI головного меню:
-   ```
-   just run
-   ```
+## Architecture Overview
 
-6. (Опційно) Запустіть локально воркер TaskIQ (замість dockerized worker):
-   ```
-   just worker
-   ```
+The Task Tracker is a modern microservices system with six Docker services:
+- **PostgreSQL**: Database for storing messages and tasks
+- **NATS**: Message broker for asynchronous processing
+- **FastAPI Backend**: REST API for task management
+- **React Dashboard**: Web interface for real-time task tracking
+- **Nginx**: Web server and reverse proxy
+- **TaskIQ Worker**: Background task processing
 
-## Міграції БД (Alembic)
+## Access Points
 
-Початкова схема вже створена і застосована в репозиторії. Щоб застосувати міграції локально:
+- **Web Dashboard**: http://localhost:3000
+- **API**: http://localhost:8000
+- **API Health Check**: http://localhost:8000/api/health
 
-```
-uv run alembic upgrade head
-```
+## Development Commands
 
-Якщо ви змінюєте моделі у `src/models/database.py`, згенеруйте нову міграцію та застосуйте її:
+- `just services-dev`: Start services with live reloading
+- `just test`: Run all tests
+- `just lint`: Check code quality
+- `just fmt`: Format code
 
-```
-uv run alembic revision --autogenerate -m "update schema"
-uv run alembic upgrade head
-```
+## Current API Endpoints
 
-Примітки:
-- Використовується async-драйвер: `DATABASE_URL=postgresql+asyncpg://...` (див. `.env.example`)
-- PostgreSQL у `compose.yml` доступний на порту `5555`
+- `GET /`: API status
+- `GET /api/health`: Health check
+- `GET /api/config`: Client configuration
+- `POST /api/messages`: Create message
+- `GET /api/messages`: Get messages list
+- `POST /api/tasks`: Create task
+- `GET /api/tasks`: Get tasks list
+- `GET /api/tasks/{id}`: Get specific task
+- `PUT /api/tasks/{id}/status`: Update task status
+- `GET /api/stats`: Task statistics
+- `POST /webhook/telegram`: Telegram webhook
+- `WS /ws`: WebSocket real-time updates
 
-## Використання
+## Licensing
 
-### CLI команди
-
-- `just run` - Запустити головне меню додатку
-- `just services` або `just ss` - Запустити всі сервіси (PostgreSQL, NATS, Worker)
-- `just services-stop` або `just st` - Зупинити всі сервіси
-- `just worker` - Запустити воркер TaskIQ в локальному середовищі
-- `just test` - Запустити тести
-- `just test-cov` - Запустити тести з покриттям
-- `just test-integration` - Запустити інтеграційні тести (потрібно запустити сервіси перед цим)
-- `just lint` - Перевірити код на помилки
-- `just fmt` - Форматувати код
-- `just check` - Виконати всі перевірки (lint, fmt, test)
-
-### Docker команди
-
-- `docker compose up -d` - Запустити всі сервіси в фоновому режимі
-- `docker compose down` - Зупинити всі сервіси
-- `docker compose logs <service>` - Переглянути логи сервісу
-
-### Сервіси
-
-- **PostgreSQL** - База даних додатку (порт 5555)
-- **NATS** - Брокер повідомлень для TaskIQ (порти 4222, 6222, 8222)
-- **Worker** - Воркер TaskIQ для асинхронної обробки завдань
-
-## Архітектура
-
-```
-tests/
-├── test_base_classes.py        # Тести для абстрактних базових класів
-├── test_message_processor.py   # Тести для основного обробника повідомлень
-├── test_ollama_provider.py     # Тести для Ollama провайдера
-├── test_pydantic_ai.py         # Тести для інтеграції з pydantic-ai
-├── test_task_creator.py        # Тести для обробника створення завдань
-├── test_taskiq_nats.py         # Тести для інтеграції TaskIQ з NATS
-├── test_telegram_adapter.py    # Тести для Telegram адаптера
-└── llm_comprehensive_test.py   # Комплексні тести для LLM
-
-src/
-├── adapters/          # Адаптери джерел (Telegram, Slack, etc.)
-├── core/              # Основна логіка обробки
-├── llm/               # Провайдери LLM (Ollama, OpenAI, etc.)
-├── models/            # Моделі бази даних
-├── processors/        # Обробники виводу (Task Creation, Notification, etc.)
-├── config.py          # Конфігурація додатку
-├── main.py            # Точка входу CLI
-├── taskiq_config.py   # Конфігурація TaskIQ з NATS
-├── worker.py          # Воркер TaskIQ
-└── example_task.py    # Приклад використання TaskIQ
-```
-
-## Розробка
-
-1. Форкніть репозиторій
-2. Створіть feature гілку: `git checkout -b feature/назва-фічі`
-3. Реалізуйте фічу
-4. Напишіть тести
-5. Перевірте код: `just check`
-6. Зробіть коміт: `git commit -am "Додати назву фічі"`
-7. Відправте зміни: `git push origin feature/назва-фічі`
-8. Створіть Pull Request
-
-## Тестування
-
-Проект має повну тестову покриття для всіх основних компонентів:
-
-- **Модульні тести** - для кожного компонента окремо
-- **Інтеграційні тести** - для перевірки взаємодії компонентів
-- **Тести LLM** - для перевірки інтеграції з мовними моделями
-- **Тести TaskIQ/NATS** - для перевірки асинхронної обробки
-
-Всі тести розташовані в директорії `tests/` і можуть бути запущені за допомогою команд:
-- `just test` - запуск всіх тестів
-- `just test-cov` - запуск тестів з аналізом покриття
-- `just test-integration` - запуск інтеграційних тестів
-
-## Ліцензія
-
-MIT
+MIT License
