@@ -7,6 +7,8 @@ from sqlmodel import select
 
 from .dependencies import SettingsDep, DatabaseDep
 from .websocket import manager
+from core.crypto import encrypt_sensitive_data, decrypt_sensitive_data
+from core.telegram import telegram_webhook_manager
 from .models import (
     TaskCreateRequest,
     TaskResponse,
@@ -16,6 +18,9 @@ from .models import (
     SimpleTask,
     SimpleMessage,
     SimpleSource,
+    Settings,
+    SettingsRequest,
+    SettingsResponse,
 )
 from .tasks import save_telegram_message
 
@@ -59,6 +64,147 @@ async def get_client_config(settings: SettingsDep):
     """Get client-side configuration"""
     base_url = settings.api_base_url.replace("http://", "").replace("https://", "")
     return {"wsUrl": f"ws://{base_url}/ws", "apiBaseUrl": f"http://{base_url}"}
+
+
+# ~~~~~~~~~~~~~~~~ API роути для налаштувань ~~~~~~~~~~~~~~~~
+
+
+@api_router.get("/settings", response_model=SettingsResponse)
+async def get_settings(db: DatabaseDep, settings: SettingsDep):
+    """
+    Get current application settings with decrypted sensitive data
+
+    Returns decrypted Telegram bot token and webhook configuration.
+    If no settings exist, returns defaults from environment.
+    """
+    # Try to get settings from database
+    statement = select(Settings).where(Settings.id == 1)
+    result = await db.execute(statement)
+    db_settings = result.scalar_one_or_none()
+
+    if db_settings:
+        # Decrypt sensitive data
+        try:
+            decrypted_token = ""
+            if db_settings.telegram_bot_token_encrypted:
+                decrypted_token = decrypt_sensitive_data(db_settings.telegram_bot_token_encrypted)
+                # Truncate token for security in response
+                if len(decrypted_token) > 10:
+                    decrypted_token = decrypted_token[:10] + "...[truncated]"
+        except Exception as e:
+            print(f"Warning: Could not decrypt bot token: {e}")
+            decrypted_token = "[encrypted - cannot decrypt]"
+
+        return SettingsResponse(
+            telegram={
+                "bot_token": decrypted_token,
+                "webhook_base_url": db_settings.telegram_webhook_base_url or settings.webhook_base_url
+            },
+            updated_at=db_settings.updated_at
+        )
+    else:
+        # Return defaults from environment
+        env_token = settings.telegram_bot_token
+        if env_token and len(env_token) > 10:
+            env_token = env_token[:10] + "...[truncated]"
+
+        return SettingsResponse(
+            telegram={
+                "bot_token": env_token,
+                "webhook_base_url": settings.webhook_base_url
+            },
+            updated_at=None
+        )
+
+
+@api_router.post("/settings", response_model=SettingsResponse)
+async def update_settings(request: SettingsRequest, db: DatabaseDep, settings: SettingsDep):
+    """
+    Update application settings and automatically configure Telegram webhook
+
+    This endpoint:
+    1. Validates the Telegram bot token
+    2. Encrypts and saves settings to database
+    3. Automatically sets up the Telegram webhook
+    4. Returns the updated settings
+    """
+    telegram_config = request.telegram
+    bot_token = telegram_config.get("bot_token", "").strip()
+    webhook_base_url = telegram_config.get("webhook_base_url", "").strip()
+
+    # Use fallback webhook URL if not provided
+    if not webhook_base_url:
+        webhook_base_url = settings.webhook_base_url
+
+    # Validate bot token if provided
+    if bot_token:
+        print(f"🔍 Validating Telegram bot token...")
+        validation_result = await telegram_webhook_manager.validate_bot_token(bot_token)
+
+        if not validation_result["valid"]:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid Telegram bot token: {validation_result['error']}"
+            )
+
+        print(f"✅ Bot token validated. Bot info: {validation_result['bot_info']}")
+
+    # Get or create settings record
+    statement = select(Settings).where(Settings.id == 1)
+    result = await db.execute(statement)
+    db_settings = result.scalar_one_or_none()
+
+    if db_settings:
+        # Update existing settings
+        if bot_token:
+            db_settings.telegram_bot_token_encrypted = encrypt_sensitive_data(bot_token)
+        db_settings.telegram_webhook_base_url = webhook_base_url
+    else:
+        # Create new settings record
+        db_settings = Settings(
+            id=1,  # Singleton pattern
+            telegram_bot_token_encrypted=encrypt_sensitive_data(bot_token) if bot_token else None,
+            telegram_webhook_base_url=webhook_base_url
+        )
+        db.add(db_settings)
+
+    await db.commit()
+    await db.refresh(db_settings)
+
+    # Set up Telegram webhook if bot token is provided
+    webhook_result = None
+    if bot_token:
+        print(f"🔧 Setting up Telegram webhook...")
+        webhook_result = await telegram_webhook_manager.setup_webhook(bot_token, webhook_base_url)
+
+        if not webhook_result["success"]:
+            print(f"⚠️  Webhook setup failed: {webhook_result['error']}")
+            # We don't fail the entire request if webhook setup fails
+            # Settings are still saved, but we include the webhook error info
+        else:
+            print(f"✅ Webhook configured: {webhook_result['webhook_url']}")
+
+    # Prepare response (truncate token for security)
+    response_token = ""
+    if bot_token and len(bot_token) > 10:
+        response_token = bot_token[:10] + "...[truncated]"
+    elif bot_token:
+        response_token = bot_token
+
+    response = SettingsResponse(
+        telegram={
+            "bot_token": response_token,
+            "webhook_base_url": webhook_base_url
+        },
+        updated_at=db_settings.updated_at
+    )
+
+    # Add webhook setup result to response if attempted
+    if webhook_result:
+        webhook_status = "configured" if webhook_result["success"] else "failed"
+        print(f"📡 Webhook status: {webhook_status}")
+
+    return response
 
 
 # ~~~~~~~~~~~~~~~~ Роути для WebSocket з'єднань ~~~~~~~~~~~~~~~~

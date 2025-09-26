@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ThemeProvider, ThemeToggle } from './components/ThemeProvider';
 import { TabNavigation, MobileTabNavigation, Tab } from './components/TabNavigation';
+import { TelegramSettingsForm } from './components/TelegramSettings';
 import './theme.css';
 import './components/ThemeProvider.css';
 import './components/TabNavigation.css';
+import './components/TelegramSettings.css';
 import './App.css';
 
 interface Message {
@@ -285,6 +287,11 @@ function AppContent() {
       <h2 className="settings-title">⚙️ Settings</h2>
 
       <div className="settings-sections">
+        {/* Telegram Settings Section */}
+        <div className="settings-section bg-card shadow-sm rounded-lg">
+          <TelegramSettingsForm config={config} />
+        </div>
+
         <div className="settings-section bg-card shadow-sm rounded-lg">
           <h3 className="section-title">Appearance</h3>
           <div className="setting-item">

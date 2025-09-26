@@ -342,6 +342,81 @@ class StatsResponse(BaseModel):
     priorities: Dict[str, int]
 
 
+# ~~~~~~~~~~~~~~~~ Settings Models ~~~~~~~~~~~~~~~~
+
+
+class SettingsBase(SQLModel):
+    """Base model for Settings with common fields"""
+
+    # Telegram configuration (encrypted in database)
+    telegram_bot_token_encrypted: str | None = Field(
+        default=None,
+        sa_type=Text,
+        description="Encrypted Telegram bot token"
+    )
+    telegram_webhook_base_url: str | None = Field(
+        default=None,
+        max_length=500,
+        description="Base URL for webhook setup"
+    )
+
+    # Additional settings can be added here as the system grows
+    # email_smtp_config: dict | None = Field(default=None, sa_type=JSONB)
+    # slack_config: dict | None = Field(default=None, sa_type=JSONB)
+
+
+class Settings(IDMixin, TimestampMixin, SettingsBase, table=True):
+    """Settings table - stores encrypted application configuration"""
+
+    __tablename__ = "settings"
+
+    # Only one settings record should exist, enforced by application logic
+    # We use a singleton pattern with id=1
+
+
+class SettingsRequest(BaseModel):
+    """API request schema for settings updates"""
+
+    telegram: dict[str, str] = Field(
+        description="Telegram configuration"
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "telegram": {
+                    "bot_token": "1234567890:ABC-DEF1234ghIkl-zyx57W2v1u123ew11",
+                    "webhook_base_url": "https://your-domain.com"
+                }
+            }
+        }
+    }
+
+
+class SettingsResponse(BaseModel):
+    """API response schema for settings (with decrypted values)"""
+
+    telegram: dict[str, str] = Field(
+        description="Telegram configuration"
+    )
+    updated_at: datetime | None = Field(
+        description="When settings were last updated"
+    )
+
+    model_config = {
+        "from_attributes": True,
+        "json_schema_extra": {
+            "example": {
+                "telegram": {
+                    "bot_token": "1234567890:ABC-DEF...[truncated]",
+                    "webhook_base_url": "https://your-domain.com"
+                },
+                "updated_at": "2023-01-15T10:30:00"
+            }
+        }
+    }
+
+
 # ~~~~~~~~~~~~~~~~ Backward Compatibility Aliases ~~~~~~~~~~~~~~~~
 # Simplified models with existing table names for gradual migration
 

@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlmodel import SQLModel
 
 from core.config import settings
-from .models import SimpleSource, SimpleMessage, SimpleTask  # noqa
+from .models import SimpleSource, SimpleMessage, SimpleTask, Settings  # noqa
 
 engine = create_async_engine(
     settings.database_url,
