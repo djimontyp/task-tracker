@@ -1,15 +1,53 @@
 from datetime import datetime
+from typing import Dict, Any, Optional
+from enum import Enum
 
-from sqlalchemy import BigInteger, DateTime, func, UniqueConstraint, Text, Index
+from pydantic import BaseModel
+from sqlalchemy import BigInteger, DateTime, func, Text, Index
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import SQLModel, Field, Relationship
 
 
+# ~~~~~~~~~~~~~~~~ Enums for Type Safety ~~~~~~~~~~~~~~~~
+
+class TaskStatus(str, Enum):
+    open = "open"
+    in_progress = "in_progress"
+    completed = "completed"
+    closed = "closed"
+
+
+class TaskCategory(str, Enum):
+    bug = "bug"
+    feature = "feature"
+    improvement = "improvement"
+    question = "question"
+    chore = "chore"
+
+
+class TaskPriority(str, Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+    critical = "critical"
+
+
+class SourceType(str, Enum):
+    telegram = "telegram"
+    slack = "slack"
+    email = "email"
+    api = "api"
+
+
+# ~~~~~~~~~~~~~~~~ Mixins for Common Patterns ~~~~~~~~~~~~~~~~
+
 class IDMixin(SQLModel):
+    """Primary key mixin with BigInteger for scalability"""
     id: int | None = Field(default=None, primary_key=True, sa_type=BigInteger)
 
 
 class TimestampMixin(SQLModel):
+    """Timestamp mixin with automatic creation and update tracking"""
     created_at: datetime | None = Field(
         default=None,
         sa_type=DateTime(timezone=True),
@@ -22,158 +60,281 @@ class TimestampMixin(SQLModel):
     )
 
 
-class Source(IDMixin, TimestampMixin, SQLModel, table=True):
-    type: str = Field(max_length=50)
-    name: str = Field(max_length=100)
-    config: dict | None = Field(default=None, sa_type=JSONB)
-    is_active: bool = Field(default=True)
+# ~~~~~~~~~~~~~~~~ Source Models ~~~~~~~~~~~~~~~~
 
-    # Relationships
-    streams: list["Stream"] = Relationship(
-        back_populates="source",
-        sa_relationship_kwargs={
-            "cascade": "all, delete-orphan",
-            "passive_deletes": True,
-        },
-    )
-    messages: list["Message"] = Relationship(
-        back_populates="source",
-        sa_relationship_kwargs={
-            "cascade": "all, delete-orphan",
-            "passive_deletes": True,
-        },
-    )
+class SourceBase(SQLModel):
+    """Base model for Source with common fields"""
+    name: str = Field(max_length=100, description="Display name for the source")
+    type: SourceType = Field(description="Type of communication source")
+    config: dict | None = Field(default=None, sa_type=JSONB, description="Source-specific configuration")
+    is_active: bool = Field(default=True, description="Whether source is actively monitored")
 
 
-class Stream(IDMixin, TimestampMixin, SQLModel, table=True):
-    source_id: int = Field(
-        foreign_key="source.id",
-        sa_type=BigInteger,
-        ondelete="CASCADE",
-    )
-    type: str = Field(max_length=50)  # chat, channel, dm, mailbox, api_endpoint, etc.
-    external_id: str = Field(max_length=100)
-    name: str = Field(max_length=100)
-    config: dict | None = Field(default=None, sa_type=JSONB)
+class Source(IDMixin, TimestampMixin, SourceBase, table=True):
+    """Source table - represents communication channels (Telegram, Slack, etc.)"""
+    __tablename__ = "sources"
 
-    # Relationships
-    source: "Source" = Relationship(back_populates="streams")
-    messages: list["Message"] = Relationship(
-        back_populates="stream",
-        sa_relationship_kwargs={
-            "cascade": "all, delete-orphan",
-            "passive_deletes": True,
-        },
-    )
-    jobs: list["ProcessingJob"] = Relationship(
-        back_populates="stream",
-        sa_relationship_kwargs={
-            "cascade": "all, delete-orphan",
-            "passive_deletes": True,
-        },
-    )
-
-    __table_args__ = (
-        UniqueConstraint("source_id", "external_id", name="uq_stream_source_external"),
-    )
+    # Relationships will be added in future phases
+    # messages: list["Message"] = Relationship(back_populates="source")
+    # tasks: list["Task"] = Relationship(back_populates="source")
 
 
-class Message(IDMixin, TimestampMixin, SQLModel, table=True):
-    source_id: int = Field(
-        foreign_key="source.id",
-        sa_type=BigInteger,
-        ondelete="CASCADE",
-    )
-    stream_id: int | None = Field(
+class SourceCreate(SourceBase):
+    """Schema for creating new sources"""
+    pass
+
+
+class SourcePublic(SourceBase):
+    """Public schema for source responses"""
+    id: int
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
+class SourceUpdate(SQLModel):
+    """Schema for updating sources - all fields optional"""
+    name: str | None = None
+    type: SourceType | None = None
+    config: dict | None = None
+    is_active: bool | None = None
+
+
+# ~~~~~~~~~~~~~~~~ Message Models ~~~~~~~~~~~~~~~~
+
+class MessageBase(SQLModel):
+    """Base model for Message with common fields"""
+    external_message_id: str = Field(max_length=100, description="Original message ID from source")
+    content: str = Field(sa_type=Text, description="Message content/text")
+    author: str = Field(max_length=100, description="Message author/sender")
+    sent_at: datetime = Field(description="When message was originally sent")
+
+    # AI-ready fields for future enhancement
+    payload: dict | None = Field(
         default=None,
-        foreign_key="stream.id",
+        sa_type=JSONB,
+        description="Raw message data from source (Telegram update, Slack event, etc.)"
+    )
+    classification: str | None = Field(
+        default=None,
+        max_length=50,
+        description="AI classification result (task, question, notification, etc.)"
+    )
+    confidence: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="AI confidence score (0.0-1.0)"
+    )
+    processed: bool = Field(default=False, description="Whether message has been processed by AI")
+
+
+class Message(IDMixin, TimestampMixin, MessageBase, table=True):
+    """Message table - stores incoming messages from various sources"""
+    __tablename__ = "messages"
+
+    # Foreign key to Source
+    source_id: int | None = Field(default=None, foreign_key="sources.id", sa_type=BigInteger)
+
+    # Future relationships
+    # source: Source | None = Relationship(back_populates="messages")
+    # generated_tasks: list["Task"] = Relationship(back_populates="source_message")
+
+    # Indexes will be added in future migration phases
+    # __table_args__ = (
+    #     Index("ix_message_external_id_source", "external_message_id", "source_id"),
+    #     Index("ix_message_sent_at", "sent_at"),
+    #     Index("ix_message_processed", "processed"),
+    # )
+
+
+class MessageCreate(MessageBase):
+    """Schema for creating new messages"""
+    source_id: int | None = None
+
+
+class MessagePublic(MessageBase):
+    """Public schema for message responses"""
+    id: int
+    source_id: int | None
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
+class MessageUpdate(SQLModel):
+    """Schema for updating messages - all fields optional"""
+    classification: str | None = None
+    confidence: float | None = None
+    processed: bool | None = None
+
+
+# ~~~~~~~~~~~~~~~~ Task Models ~~~~~~~~~~~~~~~~
+
+class TaskBase(SQLModel):
+    """Base model for Task with common fields"""
+    title: str = Field(max_length=200, description="Task title/summary")
+    description: str = Field(sa_type=Text, description="Detailed task description")
+    category: TaskCategory = Field(description="Task category")
+    priority: TaskPriority = Field(description="Task priority level")
+    status: TaskStatus = Field(default=TaskStatus.open, description="Current task status")
+
+    # AI-ready fields for future enhancement
+    classification_data: dict | None = Field(
+        default=None,
+        sa_type=JSONB,
+        description="Detailed AI classification results and metadata"
+    )
+    ai_generated: bool = Field(default=False, description="Whether task was created by AI")
+    confidence_score: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="AI confidence score for task classification"
+    )
+
+
+class Task(IDMixin, TimestampMixin, TaskBase, table=True):
+    """Task table - represents issues/tasks extracted from messages"""
+    __tablename__ = "tasks"
+
+    # Foreign keys
+    source_id: int | None = Field(default=None, foreign_key="sources.id", sa_type=BigInteger)
+    source_message_id: int | None = Field(
+        default=None,
+        foreign_key="messages.id",
         sa_type=BigInteger,
-        ondelete="SET NULL",
-        nullable=True,
+        description="Original message that generated this task"
     )
-    external_message_id: str = Field(max_length=100)
-    subject: str | None = None
-    content: str = Field(sa_type=Text)
-    content_html: str | None = Field(default=None, sa_type=Text)
-    payload: dict | None = Field(default=None, sa_type=JSONB)
-    author: str = Field(max_length=100)
-    thread_key: str | None = None
+
+    # Future relationships
+    # source: Source | None = Relationship(back_populates="tasks")
+    # source_message: Message | None = Relationship(back_populates="generated_tasks")
+
+    # Indexes will be added in future migration phases
+    # __table_args__ = (
+    #     Index("ix_task_status", "status"),
+    #     Index("ix_task_priority", "priority"),
+    #     Index("ix_task_category", "category"),
+    #     Index("ix_task_ai_generated", "ai_generated"),
+    # )
+
+
+class TaskCreate(TaskBase):
+    """Schema for creating new tasks"""
+    source_id: int | None = None
+    source_message_id: int | None = None
+
+
+class TaskPublic(TaskBase):
+    """Public schema for task responses"""
+    id: int
+    source_id: int | None
+    source_message_id: int | None
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
+class TaskUpdate(SQLModel):
+    """Schema for updating tasks - all fields optional"""
+    title: str | None = None
+    description: str | None = None
+    category: TaskCategory | None = None
+    priority: TaskPriority | None = None
+    status: TaskStatus | None = None
+    classification_data: dict | None = None
+    confidence_score: float | None = None
+
+
+# ~~~~~~~~~~~~~~~~ API Request/Response Schemas (Legacy Compatibility) ~~~~~~~~~~~~~~~~
+
+class TaskCreateRequest(BaseModel):
+    """Legacy API schema for task creation requests"""
+    title: str
+    description: str
+    category: str
+    priority: str
+    source: str
+
+
+class MessageCreateRequest(BaseModel):
+    """Legacy API schema for message creation requests"""
+    id: str
+    content: str
+    author: str
+    timestamp: str
+    chat_id: str
+
+
+class TaskResponse(BaseModel):
+    """Legacy API schema for task responses"""
+    id: int
+    title: str
+    description: str
+    category: str
+    priority: str
+    source: str
+    created_at: datetime
+    status: str = "open"
+
+    class Config:
+        from_attributes = True
+
+
+class MessageResponse(BaseModel):
+    """Legacy API schema for message responses"""
+    id: int
+    external_message_id: str
+    content: str
+    author: str
     sent_at: datetime
+    source_name: str
 
-    # Relationships
-    source: "Source" = Relationship(back_populates="messages")
-    stream: "Stream | None" = Relationship(back_populates="messages")
-    issues: list["Issue"] = Relationship(
-        back_populates="message",
-        sa_relationship_kwargs={
-            "cascade": "all, delete-orphan",
-            "passive_deletes": True,
-        },
-    )
-
-    __table_args__ = (
-        UniqueConstraint(
-            "source_id",
-            "stream_id",
-            "external_message_id",
-            name="uq_msg_src_stream_extid",
-        ),
-        Index("ix_message_sent_at", "sent_at"),
-        Index("ix_message_thread_key", "thread_key"),
-    )
+    class Config:
+        from_attributes = True
 
 
-class Issue(IDMixin, TimestampMixin, SQLModel, table=True):
-    message_id: int = Field(
-        foreign_key="message.id", sa_type=BigInteger, ondelete="CASCADE"
-    )
-    classification: str = Field(max_length=50)
+class StatsResponse(BaseModel):
+    """API schema for statistics responses"""
+    total_tasks: int
+    open_tasks: int
+    completed_tasks: int
+    categories: Dict[str, int]
+    priorities: Dict[str, int]
+
+
+# ~~~~~~~~~~~~~~~~ Backward Compatibility Aliases ~~~~~~~~~~~~~~~~
+# Simplified models with existing table names for gradual migration
+
+class SimpleSource(SQLModel, table=True):
+    """Backward compatibility model for existing simple_sources table"""
+    __tablename__ = "simple_sources"
+
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(max_length=100)
+    created_at: datetime | None = Field(default=None)
+
+
+class SimpleMessage(SQLModel, table=True):
+    """Backward compatibility model for existing simple_messages table"""
+    __tablename__ = "simple_messages"
+
+    id: int | None = Field(default=None, primary_key=True)
+    external_message_id: str = Field(max_length=100)
+    content: str = Field(sa_type=Text)
+    author: str = Field(max_length=100)
+    sent_at: datetime
+    source_id: int | None = Field(default=None, foreign_key="simple_sources.id")
+    created_at: datetime | None = Field(default=None)
+
+
+class SimpleTask(SQLModel, table=True):
+    """Backward compatibility model for existing simple_tasks table"""
+    __tablename__ = "simple_tasks"
+
+    id: int | None = Field(default=None, primary_key=True)
+    title: str = Field(max_length=200)
+    description: str = Field(sa_type=Text)
     category: str = Field(max_length=50)
     priority: str = Field(max_length=20)
-    confidence: float
-
-    # Relationships
-    message: "Message" = Relationship(back_populates="issues")
-    outputs: list["Output"] = Relationship(
-        back_populates="issue",
-        sa_relationship_kwargs={
-            "cascade": "all, delete-orphan",
-            "passive_deletes": True,
-        },
-    )
-
-
-class ProcessingJob(IDMixin, SQLModel, table=True):
-    stream_id: int = Field(
-        foreign_key="stream.id",
-        sa_type=BigInteger,
-        ondelete="CASCADE",
-    )
-    processor_type: str = Field(max_length=50)
-    status: str = Field(max_length=20)
-    config: dict | None = Field(default=None, sa_type=JSONB)
-    started_at: datetime | None = None
-    completed_at: datetime | None = None
-
-    # Relationships
-    stream: "Stream" = Relationship(back_populates="jobs")
-
-
-class Output(IDMixin, TimestampMixin, SQLModel, table=True):
-    issue_id: int = Field(
-        foreign_key="issue.id", sa_type=BigInteger, ondelete="CASCADE"
-    )
-    processor_type: str = Field(max_length=50)
-    external_id: str = Field(max_length=100)
-    status: str = Field(max_length=20)
-
-    # Relationships
-    issue: "Issue" = Relationship(back_populates="outputs")
-
-
-class LLMProvider(IDMixin, SQLModel, table=True):
-    name: str = Field(max_length=100)
-    type: str = Field(max_length=50)
-    config: dict | None = Field(default=None, sa_type=JSONB)
-    is_active: bool = Field(default=True)
-    usage_stats: dict | None = Field(default=None, sa_type=JSONB)
+    source: str = Field(max_length=50)
+    status: str = Field(default="open", max_length=20)
+    created_at: datetime | None = Field(default=None)
