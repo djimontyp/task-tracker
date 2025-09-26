@@ -353,7 +353,6 @@ function AppContent() {
         <div className="app-header bg-secondary border-b border-primary">
           <div className="header-content">
             <div className="logo">
-              <span className="logo-icon">🎯</span>
               <span className="logo-text">Task Tracker</span>
             </div>
             <div className="header-actions">
@@ -381,7 +380,6 @@ function AppContent() {
         <div className="mobile-header bg-secondary border-b border-primary">
           <div className="header-content">
             <div className="logo">
-              <span className="logo-icon">🎯</span>
               <span className="logo-text">Task Tracker</span>
             </div>
             <div className="header-actions">

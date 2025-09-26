@@ -51,14 +51,27 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: 700;
-  font-size: 1.25rem;
   color: var(--text-primary);
 }
 
-.logo-icon {
+.logo-text {
+  font-family: var(--font-family-primary);
+  font-weight: 800;
   font-size: 1.5rem;
+  letter-spacing: -0.025em;
+  background: linear-gradient(135deg, var(--text-primary), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all var(--transition-fast);
+}
+
+.logo-text:hover {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transform: translateX(1px);
 }
 
 .header-actions {
@@ -589,11 +602,7 @@
     padding: 0.75rem 1rem;
   }
 
-  .logo {
-    font-size: 1rem;
-  }
-
-  .logo-icon {
+  .logo-text {
     font-size: 1.25rem;
   }
 
