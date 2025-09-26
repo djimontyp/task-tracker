@@ -7,7 +7,7 @@ from sqlmodel import select
 
 from .dependencies import SettingsDep, DatabaseDep
 from .websocket import manager
-from .api_schemas import (
+from .models import (
     TaskCreateRequest,
     TaskResponse,
     MessageCreateRequest,

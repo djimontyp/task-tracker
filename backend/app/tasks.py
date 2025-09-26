@@ -5,7 +5,7 @@ from loguru import logger
 from sqlmodel import select
 from core.taskiq_config import nats_broker
 from .database import AsyncSessionLocal
-from .api_schemas import SimpleSource, SimpleMessage
+from .models import SimpleSource, SimpleMessage
 
 
 @nats_broker.task
