@@ -1,14 +1,15 @@
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Optional
 from enum import Enum
 
 from pydantic import BaseModel
-from sqlalchemy import BigInteger, DateTime, func, Text, Index
+from sqlalchemy import BigInteger, DateTime, func, Text
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field
 
 
 # ~~~~~~~~~~~~~~~~ Enums for Type Safety ~~~~~~~~~~~~~~~~
+
 
 class TaskStatus(str, Enum):
     open = "open"
@@ -41,13 +42,16 @@ class SourceType(str, Enum):
 
 # ~~~~~~~~~~~~~~~~ Mixins for Common Patterns ~~~~~~~~~~~~~~~~
 
+
 class IDMixin(SQLModel):
     """Primary key mixin with BigInteger for scalability"""
+
     id: int | None = Field(default=None, primary_key=True, sa_type=BigInteger)
 
 
 class TimestampMixin(SQLModel):
     """Timestamp mixin with automatic creation and update tracking"""
+
     created_at: datetime | None = Field(
         default=None,
         sa_type=DateTime(timezone=True),
@@ -62,16 +66,23 @@ class TimestampMixin(SQLModel):
 
 # ~~~~~~~~~~~~~~~~ Source Models ~~~~~~~~~~~~~~~~
 
+
 class SourceBase(SQLModel):
     """Base model for Source with common fields"""
+
     name: str = Field(max_length=100, description="Display name for the source")
     type: SourceType = Field(description="Type of communication source")
-    config: dict | None = Field(default=None, sa_type=JSONB, description="Source-specific configuration")
-    is_active: bool = Field(default=True, description="Whether source is actively monitored")
+    config: dict | None = Field(
+        default=None, sa_type=JSONB, description="Source-specific configuration"
+    )
+    is_active: bool = Field(
+        default=True, description="Whether source is actively monitored"
+    )
 
 
 class Source(IDMixin, TimestampMixin, SourceBase, table=True):
     """Source table - represents communication channels (Telegram, Slack, etc.)"""
+
     __tablename__ = "sources"
 
     # Relationships will be added in future phases
@@ -81,11 +92,13 @@ class Source(IDMixin, TimestampMixin, SourceBase, table=True):
 
 class SourceCreate(SourceBase):
     """Schema for creating new sources"""
+
     pass
 
 
 class SourcePublic(SourceBase):
     """Public schema for source responses"""
+
     id: int
     created_at: datetime
     updated_at: datetime | None = None
@@ -93,6 +106,7 @@ class SourcePublic(SourceBase):
 
 class SourceUpdate(SQLModel):
     """Schema for updating sources - all fields optional"""
+
     name: str | None = None
     type: SourceType | None = None
     config: dict | None = None
@@ -101,9 +115,13 @@ class SourceUpdate(SQLModel):
 
 # ~~~~~~~~~~~~~~~~ Message Models ~~~~~~~~~~~~~~~~
 
+
 class MessageBase(SQLModel):
     """Base model for Message with common fields"""
-    external_message_id: str = Field(max_length=100, description="Original message ID from source")
+
+    external_message_id: str = Field(
+        max_length=100, description="Original message ID from source"
+    )
     content: str = Field(sa_type=Text, description="Message content/text")
     author: str = Field(max_length=100, description="Message author/sender")
     sent_at: datetime = Field(description="When message was originally sent")
@@ -112,28 +130,30 @@ class MessageBase(SQLModel):
     payload: dict | None = Field(
         default=None,
         sa_type=JSONB,
-        description="Raw message data from source (Telegram update, Slack event, etc.)"
+        description="Raw message data from source (Telegram update, Slack event, etc.)",
     )
     classification: str | None = Field(
         default=None,
         max_length=50,
-        description="AI classification result (task, question, notification, etc.)"
+        description="AI classification result (task, question, notification, etc.)",
     )
     confidence: float | None = Field(
-        default=None,
-        ge=0.0,
-        le=1.0,
-        description="AI confidence score (0.0-1.0)"
+        default=None, ge=0.0, le=1.0, description="AI confidence score (0.0-1.0)"
     )
-    processed: bool = Field(default=False, description="Whether message has been processed by AI")
+    processed: bool = Field(
+        default=False, description="Whether message has been processed by AI"
+    )
 
 
 class Message(IDMixin, TimestampMixin, MessageBase, table=True):
     """Message table - stores incoming messages from various sources"""
+
     __tablename__ = "messages"
 
     # Foreign key to Source
-    source_id: int | None = Field(default=None, foreign_key="sources.id", sa_type=BigInteger)
+    source_id: int | None = Field(
+        default=None, foreign_key="sources.id", sa_type=BigInteger
+    )
 
     # Future relationships
     # source: Source | None = Relationship(back_populates="messages")
@@ -149,11 +169,13 @@ class Message(IDMixin, TimestampMixin, MessageBase, table=True):
 
 class MessageCreate(MessageBase):
     """Schema for creating new messages"""
+
     source_id: int | None = None
 
 
 class MessagePublic(MessageBase):
     """Public schema for message responses"""
+
     id: int
     source_id: int | None
     created_at: datetime
@@ -162,6 +184,7 @@ class MessagePublic(MessageBase):
 
 class MessageUpdate(SQLModel):
     """Schema for updating messages - all fields optional"""
+
     classification: str | None = None
     confidence: float | None = None
     processed: bool | None = None
@@ -169,40 +192,49 @@ class MessageUpdate(SQLModel):
 
 # ~~~~~~~~~~~~~~~~ Task Models ~~~~~~~~~~~~~~~~
 
+
 class TaskBase(SQLModel):
     """Base model for Task with common fields"""
+
     title: str = Field(max_length=200, description="Task title/summary")
     description: str = Field(sa_type=Text, description="Detailed task description")
     category: TaskCategory = Field(description="Task category")
     priority: TaskPriority = Field(description="Task priority level")
-    status: TaskStatus = Field(default=TaskStatus.open, description="Current task status")
+    status: TaskStatus = Field(
+        default=TaskStatus.open, description="Current task status"
+    )
 
     # AI-ready fields for future enhancement
     classification_data: dict | None = Field(
         default=None,
         sa_type=JSONB,
-        description="Detailed AI classification results and metadata"
+        description="Detailed AI classification results and metadata",
     )
-    ai_generated: bool = Field(default=False, description="Whether task was created by AI")
+    ai_generated: bool = Field(
+        default=False, description="Whether task was created by AI"
+    )
     confidence_score: float | None = Field(
         default=None,
         ge=0.0,
         le=1.0,
-        description="AI confidence score for task classification"
+        description="AI confidence score for task classification",
     )
 
 
 class Task(IDMixin, TimestampMixin, TaskBase, table=True):
     """Task table - represents issues/tasks extracted from messages"""
+
     __tablename__ = "tasks"
 
     # Foreign keys
-    source_id: int | None = Field(default=None, foreign_key="sources.id", sa_type=BigInteger)
+    source_id: int | None = Field(
+        default=None, foreign_key="sources.id", sa_type=BigInteger
+    )
     source_message_id: int | None = Field(
         default=None,
         foreign_key="messages.id",
         sa_type=BigInteger,
-        description="Original message that generated this task"
+        description="Original message that generated this task",
     )
 
     # Future relationships
@@ -220,12 +252,14 @@ class Task(IDMixin, TimestampMixin, TaskBase, table=True):
 
 class TaskCreate(TaskBase):
     """Schema for creating new tasks"""
+
     source_id: int | None = None
     source_message_id: int | None = None
 
 
 class TaskPublic(TaskBase):
     """Public schema for task responses"""
+
     id: int
     source_id: int | None
     source_message_id: int | None
@@ -235,6 +269,7 @@ class TaskPublic(TaskBase):
 
 class TaskUpdate(SQLModel):
     """Schema for updating tasks - all fields optional"""
+
     title: str | None = None
     description: str | None = None
     category: TaskCategory | None = None
@@ -246,8 +281,10 @@ class TaskUpdate(SQLModel):
 
 # ~~~~~~~~~~~~~~~~ API Request/Response Schemas (Legacy Compatibility) ~~~~~~~~~~~~~~~~
 
+
 class TaskCreateRequest(BaseModel):
     """Legacy API schema for task creation requests"""
+
     title: str
     description: str
     category: str
@@ -257,6 +294,7 @@ class TaskCreateRequest(BaseModel):
 
 class MessageCreateRequest(BaseModel):
     """Legacy API schema for message creation requests"""
+
     id: str
     content: str
     author: str
@@ -266,6 +304,7 @@ class MessageCreateRequest(BaseModel):
 
 class TaskResponse(BaseModel):
     """Legacy API schema for task responses"""
+
     id: int
     title: str
     description: str
@@ -281,12 +320,14 @@ class TaskResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     """Legacy API schema for message responses"""
+
     id: int
     external_message_id: str
     content: str
     author: str
     sent_at: datetime
     source_name: str
+    analyzed: bool = False
 
     class Config:
         from_attributes = True
@@ -294,6 +335,7 @@ class MessageResponse(BaseModel):
 
 class StatsResponse(BaseModel):
     """API schema for statistics responses"""
+
     total_tasks: int
     open_tasks: int
     completed_tasks: int
@@ -301,27 +343,47 @@ class StatsResponse(BaseModel):
     priorities: Dict[str, int]
 
 
+class MessageFiltersResponse(BaseModel):
+    """API schema for message filter metadata"""
+
+    authors: list[str]
+    sources: list[str]
+    total_messages: int
+    date_range: dict[
+        str, Optional[str]
+    ]  # {"earliest": "2024-01-01", "latest": "2024-12-31"}
+
+
 # ~~~~~~~~~~~~~~~~ Webhook Settings Models ~~~~~~~~~~~~~~~~
+
 
 class WebhookSettingsBase(SQLModel):
     """Base model for WebhookSettings with common fields"""
+
     name: str = Field(max_length=100, description="Settings configuration name")
-    config: dict = Field(sa_type=JSONB, description="Webhook configuration stored as JSON")
-    is_active: bool = Field(default=True, description="Whether webhook settings are active")
+    config: dict = Field(
+        sa_type=JSONB, description="Webhook configuration stored as JSON"
+    )
+    is_active: bool = Field(
+        default=True, description="Whether webhook settings are active"
+    )
 
 
 class WebhookSettings(IDMixin, TimestampMixin, WebhookSettingsBase, table=True):
     """WebhookSettings table - stores webhook configurations for different platforms"""
+
     __tablename__ = "webhook_settings"
 
 
 class WebhookSettingsCreate(WebhookSettingsBase):
     """Schema for creating new webhook settings"""
+
     pass
 
 
 class WebhookSettingsPublic(WebhookSettingsBase):
     """Public schema for webhook settings responses"""
+
     id: int
     created_at: datetime
     updated_at: datetime | None = None
@@ -329,6 +391,7 @@ class WebhookSettingsPublic(WebhookSettingsBase):
 
 class WebhookSettingsUpdate(SQLModel):
     """Schema for updating webhook settings - all fields optional"""
+
     name: str | None = None
     config: dict | None = None
     is_active: bool | None = None
@@ -337,8 +400,10 @@ class WebhookSettingsUpdate(SQLModel):
 # ~~~~~~~~~~~~~~~~ Backward Compatibility Aliases ~~~~~~~~~~~~~~~~
 # Simplified models with existing table names for gradual migration
 
+
 class SimpleSource(SQLModel, table=True):
     """Backward compatibility model for existing simple_sources table"""
+
     __tablename__ = "simple_sources"
 
     id: int | None = Field(default=None, primary_key=True)
@@ -348,6 +413,7 @@ class SimpleSource(SQLModel, table=True):
 
 class SimpleMessage(SQLModel, table=True):
     """Backward compatibility model for existing simple_messages table"""
+
     __tablename__ = "simple_messages"
 
     id: int | None = Field(default=None, primary_key=True)
@@ -357,10 +423,12 @@ class SimpleMessage(SQLModel, table=True):
     sent_at: datetime
     source_id: int | None = Field(default=None, foreign_key="simple_sources.id")
     created_at: datetime | None = Field(default=None)
+    analyzed: bool = Field(default=False)
 
 
 class SimpleTask(SQLModel, table=True):
     """Backward compatibility model for existing simple_tasks table"""
+
     __tablename__ = "simple_tasks"
 
     id: int | None = Field(default=None, primary_key=True)

@@ -21,14 +21,18 @@ async def process_message(message: str) -> str:
 async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
     """Background task to save Telegram message to database"""
     try:
-        logger.info(f"Starting to save Telegram message: {telegram_data.get('message', {}).get('message_id', 'unknown')}")
+        logger.info(
+            f"Starting to save Telegram message: {telegram_data.get('message', {}).get('message_id', 'unknown')}"
+        )
 
         async with AsyncSessionLocal() as db:
             message = telegram_data["message"]
             logger.debug(f"Processing message data: {message}")
 
             # Get or create telegram source
-            source_statement = select(SimpleSource).where(SimpleSource.name == "telegram")
+            source_statement = select(SimpleSource).where(
+                SimpleSource.name == "telegram"
+            )
             result = await db.execute(source_statement)
             source = result.scalar_one_or_none()
 
@@ -49,7 +53,7 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
                 author=message.get("from", {}).get("first_name", "Unknown"),
                 sent_at=datetime.fromtimestamp(message["date"]),
                 source_id=source.id,
-                created_at=datetime.now()
+                created_at=datetime.now(),
             )
 
             db.add(db_message)
@@ -57,7 +61,9 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
 
             # CRITICAL: Commit the transaction!
             await db.commit()
-            logger.info(f"✅ Successfully committed Telegram message {message['message_id']} to database")
+            logger.info(
+                f"✅ Successfully committed Telegram message {message['message_id']} to database"
+            )
 
             return f"Saved message {message['message_id']}"
 

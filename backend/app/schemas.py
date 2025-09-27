@@ -28,15 +28,25 @@ class EntityStructured(BaseModel):
 
 class TelegramWebhookConfig(BaseModel):
     """Schema for Telegram webhook configuration"""
-    protocol: Literal["http", "https"] = Field(default="https", description="Protocol for webhook URL")
-    host: str = Field(..., description="Host for webhook URL (e.g., 'example.ngrok.io')")
-    webhook_url: str | None = Field(default=None, description="Complete webhook URL (computed)")
+
+    protocol: Literal["http", "https"] = Field(
+        default="https", description="Protocol for webhook URL"
+    )
+    host: str = Field(
+        ..., description="Host for webhook URL (e.g., 'example.ngrok.io')"
+    )
+    webhook_url: str | None = Field(
+        default=None, description="Complete webhook URL (computed)"
+    )
     is_active: bool = Field(default=False, description="Whether webhook is active")
-    last_set_at: datetime | None = Field(default=None, description="When webhook was last set")
+    last_set_at: datetime | None = Field(
+        default=None, description="When webhook was last set"
+    )
 
 
 class WebhookConfigResponse(BaseModel):
     """Response schema for webhook configuration"""
+
     telegram: TelegramWebhookConfig | None = None
     default_protocol: str = Field(description="Default protocol from backend config")
     default_host: str = Field(description="Default host from backend config")
@@ -44,12 +54,16 @@ class WebhookConfigResponse(BaseModel):
 
 class SetWebhookRequest(BaseModel):
     """Request schema for setting webhook"""
-    protocol: Literal["http", "https"] = Field(..., description="Protocol for webhook URL")
+
+    protocol: Literal["http", "https"] = Field(
+        ..., description="Protocol for webhook URL"
+    )
     host: str = Field(..., description="Host for webhook URL")
 
 
 class SetWebhookResponse(BaseModel):
     """Response schema for webhook setting operation"""
+
     success: bool = Field(description="Whether operation was successful")
     webhook_url: str | None = Field(default=None, description="Set webhook URL")
     message: str = Field(description="Operation result message")

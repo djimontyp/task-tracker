@@ -1,9 +1,16 @@
-from datetime import datetime
+from datetime import datetime, date
 import json
-from typing import List
+from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
-from sqlmodel import select
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+    Query,
+)
+from sqlmodel import select, and_, func
 
 from .dependencies import SettingsDep, DatabaseDep
 from .websocket import manager
@@ -13,6 +20,7 @@ from .models import (
     MessageCreateRequest,
     MessageResponse,
     StatsResponse,
+    MessageFiltersResponse,
     SimpleTask,
     SimpleMessage,
     SimpleSource,
@@ -115,7 +123,9 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
         external_message_id=message.id,
         content=message.content,
         author=message.author,
-        sent_at=datetime.fromisoformat(message.timestamp.replace("Z", "+00:00")).replace(tzinfo=None),
+        sent_at=datetime.fromisoformat(
+            message.timestamp.replace("Z", "+00:00")
+        ).replace(tzinfo=None),
         source_id=source.id,
         created_at=datetime.utcnow(),
     )
@@ -142,14 +152,51 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
 
 
 @api_router.get("/messages", response_model=List[MessageResponse])
-async def get_messages(db: DatabaseDep, limit: int = 50):
-    # Join with source table to get actual source name
-    statement = (
-        select(SimpleMessage, SimpleSource)
-        .join(SimpleSource, SimpleMessage.source_id == SimpleSource.id)
-        .order_by(SimpleMessage.created_at.desc())
-        .limit(limit)
+async def get_messages(
+    db: DatabaseDep,
+    limit: int = 50,
+    author: Optional[str] = Query(None, description="Filter by message author"),
+    source: Optional[str] = Query(None, description="Filter by message source"),
+    date_from: Optional[date] = Query(
+        None, description="Filter messages from this date"
+    ),
+    date_to: Optional[date] = Query(
+        None, description="Filter messages until this date"
+    ),
+):
+    # Start with base query joining message and source tables
+    statement = select(SimpleMessage, SimpleSource).join(
+        SimpleSource, SimpleMessage.source_id == SimpleSource.id
     )
+
+    # Build filter conditions
+    filters = []
+
+    if author:
+        filters.append(SimpleMessage.author.ilike(f"%{author}%"))
+
+    if source:
+        filters.append(SimpleSource.name.ilike(f"%{source}%"))
+
+    if date_from:
+        # Convert date to datetime for comparison (start of day)
+        filters.append(
+            SimpleMessage.sent_at >= datetime.combine(date_from, datetime.min.time())
+        )
+
+    if date_to:
+        # Convert date to datetime for comparison (end of day)
+        filters.append(
+            SimpleMessage.sent_at <= datetime.combine(date_to, datetime.max.time())
+        )
+
+    # Apply filters if any exist
+    if filters:
+        statement = statement.where(and_(*filters))
+
+    # Add ordering and limit
+    statement = statement.order_by(SimpleMessage.created_at.desc()).limit(limit)
+
     result = await db.execute(statement)
     messages_with_sources = result.all()
 
@@ -163,10 +210,52 @@ async def get_messages(db: DatabaseDep, limit: int = 50):
                 author=msg.author,
                 sent_at=msg.sent_at,
                 source_name=source.name,  # Actual source name from database
+                analyzed=msg.analyzed,
             )
         )
 
     return response_list
+
+
+@api_router.get("/messages/filters", response_model=MessageFiltersResponse)
+async def get_message_filters(db: DatabaseDep):
+    """Get metadata for message filtering (authors, sources, date range)"""
+
+    # Get unique authors
+    authors_statement = (
+        select(SimpleMessage.author).distinct().where(SimpleMessage.author.isnot(None))
+    )
+    authors_result = await db.execute(authors_statement)
+    authors = [author for author in authors_result.scalars().all() if author]
+
+    # Get unique sources
+    sources_statement = select(SimpleSource.name).distinct()
+    sources_result = await db.execute(sources_statement)
+    sources = [source for source in sources_result.scalars().all() if source]
+
+    # Get total message count
+    count_statement = select(func.count(SimpleMessage.id))
+    count_result = await db.execute(count_statement)
+    total_messages = count_result.scalar() or 0
+
+    # Get date range (earliest and latest message dates)
+    date_range_statement = select(
+        func.min(SimpleMessage.sent_at), func.max(SimpleMessage.sent_at)
+    )
+    date_range_result = await db.execute(date_range_statement)
+    min_date, max_date = date_range_result.one()
+
+    date_range = {
+        "earliest": min_date.date().isoformat() if min_date else None,
+        "latest": max_date.date().isoformat() if max_date else None,
+    }
+
+    return MessageFiltersResponse(
+        authors=sorted(authors),  # Sort alphabetically for better UX
+        sources=sorted(sources),
+        total_messages=total_messages,
+        date_range=date_range,
+    )
 
 
 # ~~~~~~~~~~~~~~~~ Роути для вебхуків ~~~~~~~~~~~~~~~~
@@ -312,6 +401,93 @@ async def get_stats(db: DatabaseDep):
     )
 
 
+@api_router.post("/analyze-day")
+async def analyze_day(db: DatabaseDep, target_date: str = None):
+    """Analyze messages for a specific day and create tasks"""
+    try:
+        # Use today if no date provided
+        if target_date:
+            analysis_date = datetime.strptime(target_date, "%Y-%m-%d").date()
+        else:
+            analysis_date = date.today()
+
+        # Get unanalyzed messages for the day
+        start_datetime = datetime.combine(analysis_date, datetime.min.time())
+        end_datetime = datetime.combine(analysis_date, datetime.max.time())
+
+        statement = select(SimpleMessage).where(
+            and_(
+                SimpleMessage.sent_at >= start_datetime,
+                SimpleMessage.sent_at <= end_datetime,
+                ~SimpleMessage.analyzed,
+            )
+        )
+        result = await db.execute(statement)
+        unanalyzed_messages = result.scalars().all()
+
+        if not unanalyzed_messages:
+            return {
+                "success": True,
+                "message": f"No unanalyzed messages found for {analysis_date}",
+                "messages_processed": 0,
+                "tasks_created": 0,
+            }
+
+        # For now, create a summary task based on message count
+        # TODO: Replace with actual AI analysis
+        summary_content = f"Daily Analysis for {analysis_date}\n\n"
+        summary_content += f"Processed {len(unanalyzed_messages)} messages:\n"
+        for msg in unanalyzed_messages[:5]:  # Show first 5 messages
+            summary_content += f"- {msg.author}: {msg.content[:50]}...\n"
+
+        if len(unanalyzed_messages) > 5:
+            summary_content += f"... and {len(unanalyzed_messages) - 5} more messages"
+
+        # Create a summary task
+        summary_task = SimpleTask(
+            title=f"Daily Summary - {analysis_date}",
+            description=summary_content,
+            status="open",
+            priority="medium",
+            category="summary",
+            source="analysis",
+            created_at=datetime.utcnow(),
+        )
+        db.add(summary_task)
+
+        # Mark messages as analyzed
+        for message in unanalyzed_messages:
+            message.analyzed = True
+            db.add(message)
+
+        await db.commit()
+        await db.refresh(summary_task)
+
+        # Broadcast the new task via WebSocket
+        task_data = {
+            "id": summary_task.id,
+            "title": summary_task.title,
+            "description": summary_task.description,
+            "status": summary_task.status,
+            "priority": summary_task.priority,
+            "category": summary_task.category,
+            "created_at": summary_task.created_at.isoformat(),
+        }
+        await manager.broadcast({"type": "task_created", "data": task_data})
+
+        return {
+            "success": True,
+            "message": f"Successfully analyzed {len(unanalyzed_messages)} messages",
+            "messages_processed": len(unanalyzed_messages),
+            "tasks_created": 1,
+            "date": str(analysis_date),
+            "summary_task_id": summary_task.id,
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+
 # ~~~~~~~~~~~~~~~~ API роути для webhook management ~~~~~~~~~~~~~~~~
 
 
@@ -324,38 +500,36 @@ async def get_webhook_settings(db: DatabaseDep, settings: SettingsDep):
     # Extract default values from settings
     api_base_url = settings.api_base_url
     default_protocol = "https" if api_base_url.startswith("https") else "http"
-    default_host = api_base_url.replace("http://", "").replace("https://", "").split(":")[0]
+    default_host = (
+        api_base_url.replace("http://", "").replace("https://", "").split(":")[0]
+    )
 
     return WebhookConfigResponse(
         telegram=telegram_config,
         default_protocol=default_protocol,
-        default_host=default_host
+        default_host=default_host,
     )
 
 
 @api_router.post("/webhook-settings", response_model=TelegramWebhookConfig)
-async def save_webhook_settings(
-    request: SetWebhookRequest,
-    db: DatabaseDep
-):
+async def save_webhook_settings(request: SetWebhookRequest, db: DatabaseDep):
     """Save webhook configuration (without setting it in Telegram)"""
     try:
         config = await webhook_settings_service.save_telegram_config(
             db=db,
             protocol=request.protocol,
             host=request.host,
-            is_active=False  # Not active until webhook is actually set
+            is_active=False,  # Not active until webhook is actually set
         )
         return config
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save webhook settings: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to save webhook settings: {str(e)}"
+        )
 
 
 @api_router.post("/webhook-settings/telegram/set", response_model=SetWebhookResponse)
-async def set_telegram_webhook(
-    request: SetWebhookRequest,
-    db: DatabaseDep
-):
+async def set_telegram_webhook(request: SetWebhookRequest, db: DatabaseDep):
     """Set Telegram webhook URL via Bot API"""
     webhook_url = f"{request.protocol}://{request.host}/webhook/telegram"
 
@@ -366,30 +540,24 @@ async def set_telegram_webhook(
         if result["success"]:
             # Save configuration with active status
             await webhook_settings_service.save_telegram_config(
-                db=db,
-                protocol=request.protocol,
-                host=request.host,
-                is_active=True
+                db=db, protocol=request.protocol, host=request.host, is_active=True
             )
 
             return SetWebhookResponse(
                 success=True,
                 webhook_url=webhook_url,
-                message="Webhook set successfully"
+                message="Webhook set successfully",
             )
         else:
             return SetWebhookResponse(
                 success=False,
                 webhook_url=webhook_url,
                 message="Failed to set webhook",
-                error=result.get("error", "Unknown error")
+                error=result.get("error", "Unknown error"),
             )
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to set webhook: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to set webhook: {str(e)}")
 
 
 @api_router.delete("/webhook-settings/telegram", response_model=SetWebhookResponse)
@@ -404,20 +572,18 @@ async def delete_telegram_webhook(db: DatabaseDep):
             await webhook_settings_service.set_telegram_webhook_active(db, False)
 
             return SetWebhookResponse(
-                success=True,
-                message="Webhook deleted successfully"
+                success=True, message="Webhook deleted successfully"
             )
         else:
             return SetWebhookResponse(
                 success=False,
                 message="Failed to delete webhook",
-                error=result.get("error", "Unknown error")
+                error=result.get("error", "Unknown error"),
             )
 
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to delete webhook: {str(e)}"
+            status_code=500, detail=f"Failed to delete webhook: {str(e)}"
         )
 
 
@@ -430,15 +596,11 @@ async def get_telegram_webhook_info():
         if result["success"]:
             return {"success": True, "webhook_info": result["data"]}
         else:
-            return {
-                "success": False,
-                "error": result.get("error", "Unknown error")
-            }
+            return {"success": False, "error": result.get("error", "Unknown error")}
 
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get webhook info: {str(e)}"
+            status_code=500, detail=f"Failed to get webhook info: {str(e)}"
         )
 
 

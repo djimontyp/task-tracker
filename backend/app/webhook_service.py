@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from datetime import datetime
 from typing import Dict, Any
@@ -9,7 +8,7 @@ from sqlmodel import select
 
 from core.config import settings
 from .models import WebhookSettings
-from .schemas import TelegramWebhookConfig, SetWebhookResponse
+from .schemas import TelegramWebhookConfig
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +27,7 @@ class TelegramWebhookService:
         """Set Telegram webhook URL via Bot API"""
         url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/setWebhook"
 
-        payload = {
-            "url": webhook_url,
-            "allowed_updates": ["message", "callback_query"]
-        }
+        payload = {"url": webhook_url, "allowed_updates": ["message", "callback_query"]}
 
         try:
             async with httpx.AsyncClient() as client:
@@ -44,7 +40,10 @@ class TelegramWebhookService:
                     return {"success": True, "data": result}
                 else:
                     logger.error(f"Telegram API error: {result}")
-                    return {"success": False, "error": result.get("description", "Unknown error")}
+                    return {
+                        "success": False,
+                        "error": result.get("description", "Unknown error"),
+                    }
 
         except httpx.RequestError as e:
             logger.error(f"Request error setting webhook: {e}")
@@ -68,7 +67,10 @@ class TelegramWebhookService:
                     return {"success": True, "data": result}
                 else:
                     logger.error(f"Telegram API error: {result}")
-                    return {"success": False, "error": result.get("description", "Unknown error")}
+                    return {
+                        "success": False,
+                        "error": result.get("description", "Unknown error"),
+                    }
 
         except httpx.RequestError as e:
             logger.error(f"Request error deleting webhook: {e}")
@@ -91,7 +93,10 @@ class TelegramWebhookService:
                     return {"success": True, "data": result["result"]}
                 else:
                     logger.error(f"Telegram API error: {result}")
-                    return {"success": False, "error": result.get("description", "Unknown error")}
+                    return {
+                        "success": False,
+                        "error": result.get("description", "Unknown error"),
+                    }
 
         except httpx.RequestError as e:
             logger.error(f"Request error getting webhook info: {e}")
@@ -106,7 +111,9 @@ class WebhookSettingsService:
 
     TELEGRAM_SETTINGS_NAME = "telegram_webhook"
 
-    async def get_telegram_config(self, db: AsyncSession) -> TelegramWebhookConfig | None:
+    async def get_telegram_config(
+        self, db: AsyncSession
+    ) -> TelegramWebhookConfig | None:
         """Get Telegram webhook configuration from database"""
         try:
             statement = select(WebhookSettings).where(
@@ -126,11 +133,7 @@ class WebhookSettingsService:
             return None
 
     async def save_telegram_config(
-        self,
-        db: AsyncSession,
-        protocol: str,
-        host: str,
-        is_active: bool = False
+        self, db: AsyncSession, protocol: str, host: str, is_active: bool = False
     ) -> TelegramWebhookConfig:
         """Save Telegram webhook configuration to database"""
         webhook_url = f"{protocol}://{host}/webhook/telegram"
@@ -141,7 +144,7 @@ class WebhookSettingsService:
                 "host": host,
                 "webhook_url": webhook_url,
                 "is_active": is_active,
-                "last_set_at": datetime.utcnow().isoformat() if is_active else None
+                "last_set_at": datetime.utcnow().isoformat() if is_active else None,
             }
         }
 
@@ -163,7 +166,7 @@ class WebhookSettingsService:
                 new_settings = WebhookSettings(
                     name=self.TELEGRAM_SETTINGS_NAME,
                     config=config_data,
-                    is_active=is_active
+                    is_active=is_active,
                 )
                 db.add(new_settings)
 
@@ -177,7 +180,9 @@ class WebhookSettingsService:
             logger.error(f"Error saving telegram config: {e}")
             raise
 
-    async def set_telegram_webhook_active(self, db: AsyncSession, is_active: bool) -> bool:
+    async def set_telegram_webhook_active(
+        self, db: AsyncSession, is_active: bool
+    ) -> bool:
         """Update the active status of Telegram webhook"""
         try:
             statement = select(WebhookSettings).where(
@@ -192,7 +197,9 @@ class WebhookSettingsService:
                 if "telegram" in config:
                     config["telegram"]["is_active"] = is_active
                     if is_active:
-                        config["telegram"]["last_set_at"] = datetime.utcnow().isoformat()
+                        config["telegram"]["last_set_at"] = (
+                            datetime.utcnow().isoformat()
+                        )
 
                     settings_record.config = config
                     settings_record.is_active = is_active
