@@ -301,6 +301,39 @@ class StatsResponse(BaseModel):
     priorities: Dict[str, int]
 
 
+# ~~~~~~~~~~~~~~~~ Webhook Settings Models ~~~~~~~~~~~~~~~~
+
+class WebhookSettingsBase(SQLModel):
+    """Base model for WebhookSettings with common fields"""
+    name: str = Field(max_length=100, description="Settings configuration name")
+    config: dict = Field(sa_type=JSONB, description="Webhook configuration stored as JSON")
+    is_active: bool = Field(default=True, description="Whether webhook settings are active")
+
+
+class WebhookSettings(IDMixin, TimestampMixin, WebhookSettingsBase, table=True):
+    """WebhookSettings table - stores webhook configurations for different platforms"""
+    __tablename__ = "webhook_settings"
+
+
+class WebhookSettingsCreate(WebhookSettingsBase):
+    """Schema for creating new webhook settings"""
+    pass
+
+
+class WebhookSettingsPublic(WebhookSettingsBase):
+    """Public schema for webhook settings responses"""
+    id: int
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
+class WebhookSettingsUpdate(SQLModel):
+    """Schema for updating webhook settings - all fields optional"""
+    name: str | None = None
+    config: dict | None = None
+    is_active: bool | None = None
+
+
 # ~~~~~~~~~~~~~~~~ Backward Compatibility Aliases ~~~~~~~~~~~~~~~~
 # Simplified models with existing table names for gradual migration
 
