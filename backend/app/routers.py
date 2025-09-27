@@ -22,7 +22,14 @@ from .models import (
     SettingsRequest,
     SettingsResponse,
 )
+from .schemas import (
+    WebhookConfigResponse,
+    TelegramWebhookConfig,
+    SetWebhookRequest,
+    SetWebhookResponse,
+)
 from .tasks import save_telegram_message
+from .webhook_service import telegram_webhook_service, webhook_settings_service
 
 router = APIRouter()
 api_router = APIRouter(prefix="/api")
@@ -451,6 +458,136 @@ async def get_stats(db: DatabaseDep):
         categories=categories,
         priorities=priorities,
     )
+
+
+# ~~~~~~~~~~~~~~~~ API роути для webhook management ~~~~~~~~~~~~~~~~
+
+
+@api_router.get("/webhook-settings", response_model=WebhookConfigResponse)
+async def get_webhook_settings(db: DatabaseDep, settings: SettingsDep):
+    """Get current webhook configuration"""
+    # Get Telegram config from database
+    telegram_config = await webhook_settings_service.get_telegram_config(db)
+
+    # Extract default values from settings
+    api_base_url = settings.api_base_url
+    default_protocol = "https" if api_base_url.startswith("https") else "http"
+    default_host = api_base_url.replace("http://", "").replace("https://", "").split(":")[0]
+
+    return WebhookConfigResponse(
+        telegram=telegram_config,
+        default_protocol=default_protocol,
+        default_host=default_host
+    )
+
+
+@api_router.post("/webhook-settings", response_model=TelegramWebhookConfig)
+async def save_webhook_settings(
+    request: SetWebhookRequest,
+    db: DatabaseDep
+):
+    """Save webhook configuration (without setting it in Telegram)"""
+    try:
+        config = await webhook_settings_service.save_telegram_config(
+            db=db,
+            protocol=request.protocol,
+            host=request.host,
+            is_active=False  # Not active until webhook is actually set
+        )
+        return config
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save webhook settings: {str(e)}")
+
+
+@api_router.post("/webhook-settings/telegram/set", response_model=SetWebhookResponse)
+async def set_telegram_webhook(
+    request: SetWebhookRequest,
+    db: DatabaseDep
+):
+    """Set Telegram webhook URL via Bot API"""
+    webhook_url = f"{request.protocol}://{request.host}/webhook/telegram"
+
+    try:
+        # Call Telegram API to set webhook
+        result = await telegram_webhook_service.set_webhook(webhook_url)
+
+        if result["success"]:
+            # Save configuration with active status
+            await webhook_settings_service.save_telegram_config(
+                db=db,
+                protocol=request.protocol,
+                host=request.host,
+                is_active=True
+            )
+
+            return SetWebhookResponse(
+                success=True,
+                webhook_url=webhook_url,
+                message="Webhook set successfully"
+            )
+        else:
+            return SetWebhookResponse(
+                success=False,
+                webhook_url=webhook_url,
+                message="Failed to set webhook",
+                error=result.get("error", "Unknown error")
+            )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to set webhook: {str(e)}"
+        )
+
+
+@api_router.delete("/webhook-settings/telegram", response_model=SetWebhookResponse)
+async def delete_telegram_webhook(db: DatabaseDep):
+    """Remove Telegram webhook"""
+    try:
+        # Call Telegram API to delete webhook
+        result = await telegram_webhook_service.delete_webhook()
+
+        if result["success"]:
+            # Update database to mark as inactive
+            await webhook_settings_service.set_telegram_webhook_active(db, False)
+
+            return SetWebhookResponse(
+                success=True,
+                message="Webhook deleted successfully"
+            )
+        else:
+            return SetWebhookResponse(
+                success=False,
+                message="Failed to delete webhook",
+                error=result.get("error", "Unknown error")
+            )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete webhook: {str(e)}"
+        )
+
+
+@api_router.get("/webhook-settings/telegram/info")
+async def get_telegram_webhook_info():
+    """Get current webhook information from Telegram"""
+    try:
+        result = await telegram_webhook_service.get_webhook_info()
+
+        if result["success"]:
+            return {"success": True, "webhook_info": result["data"]}
+        else:
+            return {
+                "success": False,
+                "error": result.get("error", "Unknown error")
+            }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get webhook info: {str(e)}"
+        )
 
 
 # Include the API router

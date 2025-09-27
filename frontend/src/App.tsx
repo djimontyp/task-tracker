@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ThemeProvider, ThemeToggle } from './components/ThemeProvider';
 import { TabNavigation, MobileTabNavigation, Tab } from './components/TabNavigation';
-import { TelegramSettingsForm } from './components/TelegramSettings';
 import './theme.css';
 import './components/ThemeProvider.css';
 import './components/TabNavigation.css';
-import './components/TelegramSettings.css';
 import './App.css';
 
 interface Message {
@@ -25,6 +23,18 @@ interface Task {
   priority: 'low' | 'medium' | 'high' | 'critical';
   status: 'open' | 'in_progress' | 'completed';
   created_at: string;
+}
+
+interface WebhookSettings {
+  protocol: 'http' | 'https';
+  host: string;
+  webhookUrl: string;
+  isActive: boolean;
+}
+
+interface WebhookOperationResult {
+  success: boolean;
+  message: string;
 }
 
 function AppContent() {
@@ -282,48 +292,250 @@ function AppContent() {
   );
 
   // Settings Tab Content
-  const SettingsContent = () => (
-    <div className="settings-content animate-fade-in">
-      <h2 className="settings-title">⚙️ Settings</h2>
+  const SettingsContent = () => {
+    const [webhookSettings, setWebhookSettings] = useState<WebhookSettings>({
+      protocol: 'https',
+      host: '',
+      webhookUrl: '',
+      isActive: false
+    });
+    const [isLoading, setIsLoading] = useState(false);
+    const [operationStatus, setOperationStatus] = useState<{type: 'success' | 'error' | null; message: string}>({type: null, message: ''});
 
-      <div className="settings-sections">
-        {/* Telegram Settings Section */}
-        <div className="settings-section bg-card shadow-sm rounded-lg">
-          <TelegramSettingsForm config={config} />
-        </div>
+    // Load webhook settings on component mount
+    useEffect(() => {
+      const loadWebhookSettings = async () => {
+        if (!config?.apiBaseUrl) return;
 
-        <div className="settings-section bg-card shadow-sm rounded-lg">
-          <h3 className="section-title">Appearance</h3>
-          <div className="setting-item">
-            <label className="setting-label">Theme</label>
-            <ThemeToggle />
+        try {
+          const response = await fetch(`${config.apiBaseUrl}/api/webhook-settings`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.telegram) {
+              setWebhookSettings({
+                protocol: result.telegram.protocol || 'https',
+                host: result.telegram.host || '',
+                webhookUrl: result.telegram.webhook_url || '',
+                isActive: result.telegram.is_active || false
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to load webhook settings:', error);
+        }
+      };
+
+      loadWebhookSettings();
+    }, [config]);
+
+    // Update webhook URL when protocol or host changes
+    useEffect(() => {
+      if (webhookSettings.host) {
+        const url = `${webhookSettings.protocol}://${webhookSettings.host}/webhook/telegram`;
+        setWebhookSettings(prev => ({ ...prev, webhookUrl: url }));
+      } else {
+        setWebhookSettings(prev => ({ ...prev, webhookUrl: '' }));
+      }
+    }, [webhookSettings.protocol, webhookSettings.host]);
+
+    const handleSaveSettings = async () => {
+      if (!config?.apiBaseUrl || !webhookSettings.host?.trim()) {
+        setOperationStatus({type: 'error', message: 'Host is required'});
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${config.apiBaseUrl}/api/webhook-settings`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            protocol: webhookSettings.protocol,
+            host: webhookSettings.host
+          })
+        });
+
+        const result = await response.json();
+        setOperationStatus({
+          type: result.success ? 'success' : 'error',
+          message: result.message
+        });
+      } catch (error) {
+        setOperationStatus({type: 'error', message: 'Failed to save settings'});
+      }
+      setIsLoading(false);
+      setTimeout(() => setOperationStatus({type: null, message: ''}), 3000);
+    };
+
+    const handleSetWebhook = async () => {
+      if (!config?.apiBaseUrl || !webhookSettings.webhookUrl) {
+        setOperationStatus({type: 'error', message: 'Please configure webhook URL first'});
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${config.apiBaseUrl}/api/webhook-settings/telegram/set`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            protocol: webhookSettings.protocol,
+            host: webhookSettings.host
+          })
+        });
+
+        const result = await response.json();
+        setWebhookSettings(prev => ({ ...prev, isActive: result.success }));
+        setOperationStatus({
+          type: result.success ? 'success' : 'error',
+          message: result.message
+        });
+      } catch (error) {
+        setOperationStatus({type: 'error', message: 'Failed to set webhook'});
+      }
+      setIsLoading(false);
+      setTimeout(() => setOperationStatus({type: null, message: ''}), 3000);
+    };
+
+    const handleDeleteWebhook = async () => {
+      if (!config?.apiBaseUrl) return;
+
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${config.apiBaseUrl}/api/webhook-settings/telegram`, {
+          method: 'DELETE'
+        });
+
+        const result = await response.json();
+        setWebhookSettings(prev => ({ ...prev, isActive: false }));
+        setOperationStatus({
+          type: result.success ? 'success' : 'error',
+          message: result.message
+        });
+      } catch (error) {
+        setOperationStatus({type: 'error', message: 'Failed to delete webhook'});
+      }
+      setIsLoading(false);
+      setTimeout(() => setOperationStatus({type: null, message: ''}), 3000);
+    };
+
+    return (
+      <div className="settings-content animate-fade-in">
+        <h2 className="settings-title">⚙️ Settings</h2>
+
+        <div className="settings-sections">
+          <div className="settings-section bg-card shadow-sm rounded-lg">
+            <h3 className="section-title">Appearance</h3>
+            <div className="setting-item">
+              <label className="setting-label">Theme</label>
+              <ThemeToggle />
+            </div>
           </div>
-        </div>
 
-        <div className="settings-section bg-card shadow-sm rounded-lg">
-          <h3 className="section-title">Notifications</h3>
-          <div className="setting-item">
-            <label className="setting-label">Real-time Updates</label>
-            <div className={`toggle ${connectionStatus === 'connected' ? 'enabled' : 'disabled'}`}>
-              {connectionStatus === 'connected' ? '✅' : '❌'}
+          <div className="settings-section bg-card shadow-sm rounded-lg">
+            <h3 className="section-title">Telegram Webhook Configuration</h3>
+
+            <div className="webhook-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Protocol</label>
+                  <select
+                    className="form-select"
+                    value={webhookSettings.protocol}
+                    onChange={(e) => setWebhookSettings(prev => ({ ...prev, protocol: e.target.value as 'http' | 'https' }))}
+                    disabled={isLoading}
+                  >
+                    <option value="https">HTTPS</option>
+                    <option value="http">HTTP</option>
+                  </select>
+                </div>
+
+                <div className="form-group flex-1">
+                  <label className="form-label">Host</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="your-domain.ngrok-free.app"
+                    value={webhookSettings.host}
+                    onChange={(e) => setWebhookSettings(prev => ({ ...prev, host: e.target.value }))}
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Generated Webhook URL</label>
+                <div className="webhook-url-display">
+                  {webhookSettings.webhookUrl || 'Enter host to generate URL'}
+                </div>
+              </div>
+
+              <div className="webhook-status">
+                <span className="setting-label">Webhook Status</span>
+                <div className={`webhook-status-indicator ${webhookSettings.isActive ? 'active' : 'inactive'}`}>
+                  {webhookSettings.isActive ? '✅ Active' : '❌ Inactive'}
+                </div>
+              </div>
+
+              <div className="webhook-actions">
+                <button
+                  className="btn-secondary"
+                  onClick={handleSaveSettings}
+                  disabled={isLoading || !webhookSettings.host.trim()}
+                >
+                  {isLoading ? '⏳ Saving...' : '💾 Save Settings'}
+                </button>
+
+                <button
+                  className="btn-primary"
+                  onClick={handleSetWebhook}
+                  disabled={isLoading || !webhookSettings.webhookUrl}
+                >
+                  {isLoading ? '⏳ Setting...' : '🔗 Set Webhook'}
+                </button>
+
+                <button
+                  className="btn-danger"
+                  onClick={handleDeleteWebhook}
+                  disabled={isLoading || !webhookSettings.isActive}
+                >
+                  {isLoading ? '⏳ Deleting...' : '🗑️ Delete Webhook'}
+                </button>
+              </div>
+
+              {operationStatus.type && (
+                <div className={`operation-status ${operationStatus.type}`}>
+                  {operationStatus.message}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="settings-section bg-card shadow-sm rounded-lg">
+            <h3 className="section-title">Notifications</h3>
+            <div className="setting-item">
+              <label className="setting-label">Real-time Updates</label>
+              <div className={`toggle ${connectionStatus === 'connected' ? 'enabled' : 'disabled'}`}>
+                {connectionStatus === 'connected' ? '✅' : '❌'}
+              </div>
+            </div>
+          </div>
+
+          <div className="settings-section bg-card shadow-sm rounded-lg">
+            <h3 className="section-title">System Info</h3>
+            <div className="setting-item">
+              <span className="setting-label">API Status</span>
+              <span className="setting-value text-secondary">Connected</span>
+            </div>
+            <div className="setting-item">
+              <span className="setting-label">WebSocket</span>
+              <span className="setting-value text-secondary">{config?.wsUrl || 'Loading...'}</span>
             </div>
           </div>
         </div>
-
-        <div className="settings-section bg-card shadow-sm rounded-lg">
-          <h3 className="section-title">System Info</h3>
-          <div className="setting-item">
-            <span className="setting-label">API Status</span>
-            <span className="setting-value text-secondary">Connected</span>
-          </div>
-          <div className="setting-item">
-            <span className="setting-label">WebSocket</span>
-            <span className="setting-value text-secondary">{config?.wsUrl || 'Loading...'}</span>
-          </div>
-        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const tabs: Tab[] = [
     {
