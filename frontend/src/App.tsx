@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ThemeProvider, ThemeToggle } from './components/ThemeProvider';
-import { TabNavigation, MobileTabNavigation, Tab } from './components/TabNavigation';
+import { SidebarLayout } from './components/SidebarLayout';
+import { MenuItem } from './components/Sidebar';
 import './theme.css';
 import './components/ThemeProvider.css';
-import './components/TabNavigation.css';
 import './App.css';
 
 interface Message {
@@ -537,85 +537,75 @@ function AppContent() {
     );
   };
 
-  const tabs: Tab[] = [
+  const menuItems: MenuItem[] = [
     {
       id: 'dashboard',
       label: 'Dashboard',
-      icon: '🏠',
-      content: <DashboardContent />
+      icon: 'dashboard'
     },
     {
       id: 'tasks',
       label: 'Tasks',
-      icon: '📋',
-      content: <TasksContent />,
+      icon: 'tasks',
       badge: tasks.length
     },
     {
       id: 'analytics',
       label: 'Analytics',
-      icon: '📈',
-      content: <AnalyticsContent />
+      icon: 'messages'
     },
     {
       id: 'settings',
       label: 'Settings',
-      icon: '⚙️',
-      content: <SettingsContent />
+      icon: 'settings'
     }
   ];
 
-  return (
-    <div className="app">
-      {/* Desktop Layout */}
-      <div className="desktop-layout">
-        <div className="app-header bg-secondary border-b border-primary">
-          <div className="header-content">
-            <div className="logo">
-              <span className="logo-text">Task Tracker</span>
-            </div>
-            <div className="header-actions">
-              <div className={`connection-status ${connectionStatus}`}>
-                <span className="status-dot"></span>
-                <span className="status-text">
-                  {connectionStatus === 'connected' ? 'WebSocket Connected' :
-                   connectionStatus === 'connecting' ? 'Connecting to API...' : 'API Disconnected'}
-                </span>
-              </div>
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-        <TabNavigation
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          className="main-tabs"
-        />
-      </div>
+  const renderActiveContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <DashboardContent />;
+      case 'tasks':
+        return <TasksContent />;
+      case 'analytics':
+        return <AnalyticsContent />;
+      case 'settings':
+        return <SettingsContent />;
+      default:
+        return <DashboardContent />;
+    }
+  };
 
-      {/* Mobile Layout */}
-      <div className="mobile-layout">
-        <div className="mobile-header bg-secondary border-b border-primary">
-          <div className="header-content">
-            <div className="logo">
-              <span className="logo-text">Task Tracker</span>
-            </div>
-            <div className="header-actions">
-              <div className={`connection-status ${connectionStatus}`}>
-                <span className="status-dot"></span>
-              </div>
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-        <MobileTabNavigation
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          className="main-mobile-tabs"
-        />
+  const headerContent = (
+    <div className="sidebar-header-content">
+      <div className="sidebar-header-left">
+        <span className="page-title">
+          {menuItems.find(item => item.id === activeTab)?.label || 'Dashboard'}
+        </span>
       </div>
+      <div className="sidebar-header-right">
+        <div className={`connection-status ${connectionStatus}`}>
+          <span className="status-dot"></span>
+          <span className="status-text">
+            {connectionStatus === 'connected' ? 'WebSocket Connected' :
+             connectionStatus === 'connecting' ? 'Connecting to API...' : 'API Disconnected'}
+          </span>
+        </div>
+        <ThemeToggle />
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="app sidebar-layout">
+      <SidebarLayout
+        menuItems={menuItems}
+        activeItem={activeTab}
+        onItemClick={setActiveTab}
+        header={headerContent}
+      >
+        {renderActiveContent()}
+      </SidebarLayout>
     </div>
   );
 }
