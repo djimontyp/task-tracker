@@ -1,11 +1,20 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { ListTodo, Clock, Loader2, CheckCircle2 } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent, Badge, Skeleton } from '@shared/ui'
-import { apiClient } from '@shared/lib/api/client'
-import { Task, Message, TaskStats } from '@shared/types'
+import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
+import { Badge, Skeleton } from '@/shared/ui'
+import { apiClient } from '@/shared/lib/api/client'
+import { Task, Message, TaskStats } from '@/shared/types'
+import MetricCard from '@/shared/components/MetricCard'
+import TrendChart from '@/shared/components/TrendChart'
+import { ChartConfig } from '@/shared/ui/chart'
+import { useTasksStore } from '@/features/tasks/store/tasksStore'
 
 const DashboardPage = () => {
+  const navigate = useNavigate()
+  const { setFilterStatus } = useTasksStore()
+
   const { data: stats, isLoading: statsLoading } = useQuery<TaskStats>({
     queryKey: ['stats'],
     queryFn: async () => {
@@ -13,6 +22,11 @@ const DashboardPage = () => {
       return response.data
     },
   })
+
+  const handleMetricClick = (filter: 'all' | 'pending' | 'in_progress' | 'completed') => {
+    setFilterStatus(filter)
+    navigate('/tasks')
+  }
 
   const { data: messages, isLoading: messagesLoading } = useQuery<Message[]>({
     queryKey: ['messages'],
@@ -30,68 +44,155 @@ const DashboardPage = () => {
     },
   })
 
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
+  // Calculate metrics with trends
+  const metrics = useMemo(() => {
+    const total = stats?.total || 0
+    const pending = stats?.pending || 0
+    const inProgress = stats?.in_progress || 0
+    const completed = stats?.completed || 0
+    const successRate = total > 0 ? Math.round((completed / total) * 100) : 0
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    return {
+      total: {
+        value: total,
+        trend: { value: 12, direction: 'up' as const },
+        subtitle: 'vs last month',
+      },
+      pending: {
+        value: pending,
+        trend: { value: 8, direction: 'down' as const },
+        subtitle: 'awaiting action',
+      },
+      inProgress: {
+        value: inProgress,
+        trend: { value: 5, direction: 'up' as const },
+        subtitle: 'actively working',
+      },
+      successRate: {
+        value: `${successRate}%`,
+        trend: { value: 3, direction: 'up' as const },
+        subtitle: 'completion rate',
+      },
+    }
+  }, [stats])
+
+  // Generate chart data based on tasks
+  const chartData = useMemo(() => {
+    if (!tasks || tasks.length === 0) {
+      // Mock data for empty state
+      return [
+        { date: '2025-09-24', tasks: 2 },
+        { date: '2025-09-25', tasks: 5 },
+        { date: '2025-09-26', tasks: 3 },
+        { date: '2025-09-27', tasks: 8 },
+        { date: '2025-09-28', tasks: 6 },
+        { date: '2025-09-29', tasks: 10 },
+        { date: '2025-09-30', tasks: 7 },
+      ]
+    }
+
+    // Group tasks by date
+    const tasksByDate = tasks.reduce((acc, task) => {
+      const date = new Date(task.created_at || task.createdAt).toLocaleDateString('en-CA')
+      acc[date] = (acc[date] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    // Convert to array and sort by date
+    return Object.entries(tasksByDate)
+      .map(([date, count]) => ({ date, tasks: count }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(-7) // Last 7 days
+  }, [tasks])
+
+  const chartConfig: ChartConfig = {
+    tasks: {
+      label: 'Tasks',
+      color: 'hsl(var(--primary))',
+    },
+  }
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in-down">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
+        <div className="text-sm text-muted-foreground">
+          Last updated: {new Date().toLocaleString('uk-UA')}
+        </div>
+      </div>
+
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up">
         {statsLoading ? (
           <>
             {[...Array(4)].map((_, i) => (
               <Card key={i}>
                 <CardContent className="pt-6">
                   <Skeleton className="h-4 w-20 mb-2" />
-                  <Skeleton className="h-8 w-12" />
+                  <Skeleton className="h-8 w-12 mb-2" />
+                  <Skeleton className="h-3 w-24" />
                 </CardContent>
               </Card>
             ))}
           </>
         ) : (
           <>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm text-muted-foreground">Total Tasks</div>
-                  <ListTodo className="w-5 h-5 text-primary" />
-                </div>
-                <div className="text-3xl font-bold text-foreground">{stats?.total || 0}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm text-muted-foreground">Pending</div>
-                  <Clock className="w-5 h-5 text-br-peach" />
-                </div>
-                <div className="text-3xl font-bold text-br-peach">{stats?.pending || 0}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm text-muted-foreground">In Progress</div>
-                  <Loader2 className="w-5 h-5 text-br-blue" />
-                </div>
-                <div className="text-3xl font-bold text-br-blue">{stats?.in_progress || 0}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm text-muted-foreground">Completed</div>
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
-                </div>
-                <div className="text-3xl font-bold text-green-600">{stats?.completed || 0}</div>
-              </CardContent>
-            </Card>
+            <MetricCard
+              title="Total Tasks"
+              value={metrics.total.value}
+              subtitle={metrics.total.subtitle}
+              trend={metrics.total.trend}
+              icon={ListTodo}
+              iconColor="text-primary"
+              onClick={() => handleMetricClick('all')}
+            />
+            <MetricCard
+              title="Pending Tasks"
+              value={metrics.pending.value}
+              subtitle={metrics.pending.subtitle}
+              trend={metrics.pending.trend}
+              icon={Clock}
+              iconColor="text-br-peach"
+              onClick={() => handleMetricClick('pending')}
+            />
+            <MetricCard
+              title="In Progress"
+              value={metrics.inProgress.value}
+              subtitle={metrics.inProgress.subtitle}
+              trend={metrics.inProgress.trend}
+              icon={Loader2}
+              iconColor="text-br-blue"
+              onClick={() => handleMetricClick('in_progress')}
+            />
+            <MetricCard
+              title="Success Rate"
+              value={metrics.successRate.value}
+              subtitle={metrics.successRate.subtitle}
+              trend={metrics.successRate.trend}
+              icon={CheckCircle2}
+              iconColor="text-green-600"
+              onClick={() => handleMetricClick('completed')}
+            />
           </>
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Trend Chart */}
+      <div className="animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
+        <TrendChart
+          title="Task Creation Trend"
+          data={chartData}
+          dataKey="tasks"
+          xAxisKey="date"
+          config={chartConfig}
+          height={350}
+          className="w-full"
+        />
+      </div>
+
+      {/* Recent Activities */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+        {/* Recent Messages */}
         <Card>
           <CardHeader>
             <CardTitle>Recent Messages</CardTitle>
@@ -107,14 +208,14 @@ const DashboardPage = () => {
                     </div>
                   ))}
                 </>
-              ) : (
-                messages?.slice(0, 5).map((message) => (
-                  <div key={message.id} className="border-b pb-3 last:border-b-0">
+              ) : messages && messages.length > 0 ? (
+                messages.slice(0, 5).map((message) => (
+                  <div key={message.id} className="border-b pb-3 last:border-b-0 cursor-pointer hover:bg-accent/50 transition-colors -mx-6 px-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <p className="text-sm">{message.text}</p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {message.sender} • {new Date(message.timestamp).toLocaleString()}
+                          {message.sender} • {new Date(message.timestamp).toLocaleString('uk-UA')}
                         </p>
                       </div>
                       {message.is_task && (
@@ -125,11 +226,16 @@ const DashboardPage = () => {
                     </div>
                   </div>
                 ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No messages yet</p>
+                </div>
               )}
             </div>
           </CardContent>
         </Card>
 
+        {/* Recent Tasks */}
         <Card>
           <CardHeader>
             <CardTitle>Recent Tasks</CardTitle>
@@ -145,14 +251,14 @@ const DashboardPage = () => {
                     </div>
                   ))}
                 </>
-              ) : (
-                tasks?.slice(0, 5).map((task) => (
-                  <div key={task.id} className="border-b pb-3 last:border-b-0">
+              ) : tasks && tasks.length > 0 ? (
+                tasks.slice(0, 5).map((task) => (
+                  <div key={task.id} className="border-b pb-3 last:border-b-0 cursor-pointer hover:bg-accent/50 transition-colors -mx-6 px-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <p className="text-sm font-medium">{task.title}</p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(task.created_at || task.createdAt).toLocaleString()}
+                          {new Date(task.created_at || task.createdAt).toLocaleString('uk-UA')}
                         </p>
                       </div>
                       <Badge
@@ -170,6 +276,10 @@ const DashboardPage = () => {
                     </div>
                   </div>
                 ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No tasks yet</p>
+                </div>
               )}
             </div>
           </CardContent>

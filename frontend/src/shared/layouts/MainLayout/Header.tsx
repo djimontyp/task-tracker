@@ -1,19 +1,22 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Sun, Moon } from 'lucide-react'
 import { useWebSocket } from '@features/websocket/hooks/useWebSocket'
-import { useUiStore } from '@shared/store/uiStore'
+import { useTheme } from '../../../components/ThemeProvider'
 
 const Header = () => {
   const { isConnected } = useWebSocket()
-  const { theme, toggleTheme } = useUiStore()
+  const { effectiveTheme, setTheme, theme } = useTheme()
 
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark')
+  const handleToggleTheme = () => {
+    // Cycle: light -> dark -> system
+    if (theme === 'light') {
+      setTheme('dark')
+    } else if (theme === 'dark') {
+      setTheme('system')
     } else {
-      document.documentElement.classList.remove('dark')
+      setTheme('light')
     }
-  }, [theme])
+  }
 
   return (
     <header className="bg-card shadow-sm border-b border-border px-4 md:px-6 py-4">
@@ -22,11 +25,12 @@ const Header = () => {
 
         <div className="flex items-center gap-4">
           <button
-            onClick={toggleTheme}
+            onClick={handleToggleTheme}
             className="p-2 rounded-lg hover:bg-accent/10 transition-colors"
             aria-label="Toggle theme"
+            title={`Current: ${theme} (${effectiveTheme})`}
           >
-            {theme === 'light' ? (
+            {effectiveTheme === 'light' ? (
               <Moon className="w-5 h-5 text-foreground" />
             ) : (
               <Sun className="w-5 h-5 text-foreground" />

@@ -69,11 +69,11 @@ const TasksPage = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in-down">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Tasks</h1>
 
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap animate-slide-in-right">
           {(['all', 'pending', 'in_progress', 'completed', 'cancelled'] as const).map((status) => (
             <Button
               key={status}
@@ -87,7 +87,7 @@ const TasksPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-4 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
         {filteredTasks.length === 0 ? (
           <Card>
             <CardContent className="py-8">
@@ -95,8 +95,8 @@ const TasksPage = () => {
             </CardContent>
           </Card>
         ) : (
-          filteredTasks.map((task) => (
-            <Card key={task.id} className="hover:shadow-lg transition-shadow">
+          filteredTasks.map((task, index) => (
+            <Card key={task.id} className="hover:shadow-lg transition-shadow animate-scale-in" style={{ animationDelay: `${0.05 * index}s`, animationFillMode: 'backwards' }}>
               <CardContent className="pt-6">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                   <div className="flex-1">

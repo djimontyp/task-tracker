@@ -21,13 +21,19 @@ const Sidebar = () => {
         }`}
       >
         <div className="flex items-center justify-between p-4 border-b border-border">
-          {sidebarOpen && <h1 className="text-xl font-bold text-primary">Task Tracker</h1>}
+          <h1
+            className={`text-xl font-bold text-primary transition-all duration-300 overflow-hidden whitespace-nowrap ${
+              sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'
+            }`}
+          >
+            Task Tracker
+          </h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-accent/10 transition-colors"
+            className="p-2 rounded-lg hover:bg-accent/10 transition-all duration-200 cursor-pointer"
             aria-label="Toggle sidebar"
           >
-            {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+            <ChevronLeft className={`flex-shrink-0 max-w-[24px] w-full h-auto transition-transform duration-300 ${!sidebarOpen ? 'rotate-180' : ''}`} />
           </button>
         </div>
 
@@ -39,15 +45,21 @@ const Sidebar = () => {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer ${
                     isActive
                       ? 'bg-primary text-primary-foreground font-medium'
-                      : 'text-foreground hover:bg-accent/10'
+                      : 'text-foreground hover:bg-accent/10 hover:scale-[1.02]'
                   }`
                 }
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                {sidebarOpen && <span>{item.label}</span>}
+                <Icon className="flex-shrink-0 max-w-[24px] w-full h-auto" />
+                <span
+                  className={`transition-all duration-300 overflow-hidden whitespace-nowrap ${
+                    sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'
+                  }`}
+                >
+                  {item.label}
+                </span>
               </NavLink>
             )
           })}

@@ -26,11 +26,11 @@ const AnalyticsPage = () => {
     : '0.0'
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl md:text-3xl font-bold text-foreground">Analytics</h1>
+    <div className="space-y-6 animate-fade-in">
+      <h1 className="text-2xl md:text-3xl font-bold text-foreground animate-fade-in-down">Analytics</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
+        <Card className="animate-slide-in-left" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
           <h2 className="text-xl font-semibold mb-4 text-foreground">Task Statistics</h2>
           <div className="space-y-4">
             <div>
@@ -67,7 +67,7 @@ const AnalyticsPage = () => {
           </div>
         </Card>
 
-        <Card>
+        <Card className="animate-slide-in-right" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>
           <h2 className="text-xl font-semibold mb-4 text-foreground">Status Distribution</h2>
           <div className="space-y-3">
             <div>
