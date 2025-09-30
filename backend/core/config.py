@@ -53,6 +53,10 @@ class Settings(BaseSettings):
         default="http://localhost:8000",
         validation_alias=AliasChoices("API_BASE_URL", "api_base_url"),
     )
+    webhook_base_url: str = Field(
+        default="http://localhost",
+        validation_alias=AliasChoices("WEBHOOK_BASE_URL", "webhook_base_url"),
+    )
 
 
 settings = Settings()

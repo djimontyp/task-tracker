@@ -31,6 +31,8 @@ services:
 services-dev:
     @echo "Starting services in development mode with file watching..."
     docker compose watch
+    @echo "Restarting nginx to refresh connections..."
+    docker restart task-tracker-nginx || true
 
 # Start specific service in development mode
 dev SERVICE:

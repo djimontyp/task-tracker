@@ -1,23 +1,40 @@
 /* Modern App Layout */
 .app {
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-family-primary);
 }
 
-/* Desktop Layout */
-.desktop-layout {
+/* Legacy Layout Styles - Hidden when using sidebar */
+.app.legacy-layout {
+  display: flex;
+  flex-direction: column;
+}
+
+.app.legacy-layout .desktop-layout {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
 }
 
-.mobile-layout {
+.app.legacy-layout .mobile-layout {
   display: none;
+}
+
+/* Sidebar Layout Styles */
+.app.sidebar-layout {
+  /* Layout handled by SidebarLayout component */
+}
+
+/* Desktop Layout - Legacy */
+.desktop-layout {
+  display: none; /* Hidden by default when using sidebar */
+}
+
+.mobile-layout {
+  display: none; /* Hidden by default when using sidebar */
 }
 
 /* App Header */
@@ -971,16 +988,59 @@
   font-size: 0.875rem;
 }
 
+/* Sidebar Layout Content Adjustments */
+.app.sidebar-layout .dashboard-content,
+.app.sidebar-layout .tasks-content,
+.app.sidebar-layout .analytics-content,
+.app.sidebar-layout .settings-content {
+  padding: 2rem;
+  max-width: none;
+  margin: 0;
+  width: 100%;
+  flex: 1;
+}
+
+/* Header content for sidebar layout */
+.sidebar-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.sidebar-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sidebar-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
 /* Print Styles */
 @media print {
   .app-header,
   .tab-headers,
   .mobile-tab-bar,
-  .theme-toggle {
+  .theme-toggle,
+  .sidebar,
+  .sidebar-toggle {
     display: none !important;
   }
 
-  .tab-content {
+  .tab-content,
+  .main-content {
     padding: 0 !important;
+    margin: 0 !important;
   }
 }

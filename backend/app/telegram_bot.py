@@ -15,14 +15,10 @@ from aiogram.utils.markdown import hbold, hitalic
 from core.config import settings
 from core.logging import logger, setup_logging
 
-# Setup centralized logging
 setup_logging()
 
-# Initialize bot and dispatcher
 bot = Bot(settings.telegram_bot_token, parse_mode=ParseMode.HTML)
 dp = Dispatcher()
-
-# Bot configuration from settings
 
 
 @dp.message(CommandStart())
@@ -30,7 +26,6 @@ async def command_start_handler(message: Message) -> None:
     """Handle /start command"""
     user_name = html.bold(message.from_user.full_name)
 
-    # Create WebApp button
     webapp_button = InlineKeyboardMarkup(
         inline_keyboard=[
             [
