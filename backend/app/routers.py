@@ -18,9 +18,9 @@ from .models import (
     SimpleTask,
     SimpleMessage,
     SimpleSource,
-    Settings,
-    SettingsRequest,
-    SettingsResponse,
+    # Settings,
+    # SettingsRequest,
+    # SettingsResponse,
 )
 from .schemas import (
     WebhookConfigResponse,
@@ -76,142 +76,148 @@ async def get_client_config(settings: SettingsDep):
 # ~~~~~~~~~~~~~~~~ API роути для налаштувань ~~~~~~~~~~~~~~~~
 
 
-@api_router.get("/settings", response_model=SettingsResponse)
-async def get_settings(db: DatabaseDep, settings: SettingsDep):
-    """
-    Get current application settings with decrypted sensitive data
+# @api_router.get("/settings", response_model=SettingsResponse)
+# async def get_settings(db: DatabaseDep, settings: SettingsDep):
+#     """
+#     Get current application settings with decrypted sensitive data
+#
+#     Returns decrypted Telegram bot token and webhook configuration.
+#     If no settings exist, returns defaults from environment.
+#     """
+#     # Try to get settings from database
+#     statement = select(Settings).where(Settings.id == 1)
+#     result = await db.execute(statement)
+#     db_settings = result.scalar_one_or_none()
+#
+#     if db_settings:
+#         # Decrypt sensitive data
+#         try:
+#             decrypted_token = ""
+#             if db_settings.telegram_bot_token_encrypted:
+#                 decrypted_token = decrypt_sensitive_data(
+#                     db_settings.telegram_bot_token_encrypted
+#                 )
+#                 # Truncate token for security in response
+#                 if len(decrypted_token) > 10:
+#                     decrypted_token = decrypted_token[:10] + "...[truncated]"
+#         except Exception as e:
+#             print(f"Warning: Could not decrypt bot token: {e}")
+#             decrypted_token = "[encrypted - cannot decrypt]"
+#
+#         return SettingsResponse(
+#             telegram={
+#                 "bot_token": decrypted_token,
+#                 "webhook_base_url": db_settings.telegram_webhook_base_url
+#                 or settings.webhook_base_url,
+#             },
+#             updated_at=db_settings.updated_at,
+#         )
+#     else:
+#         # Return defaults from environment
+#         env_token = settings.telegram_bot_token
+#         if env_token and len(env_token) > 10:
+#             env_token = env_token[:10] + "...[truncated]"
+#
+#         return SettingsResponse(
+#             telegram={
+#                 "bot_token": env_token,
+#                 "webhook_base_url": settings.webhook_base_url,
+#             },
+#             updated_at=None,
+#         )
 
-    Returns decrypted Telegram bot token and webhook configuration.
-    If no settings exist, returns defaults from environment.
-    """
-    # Try to get settings from database
-    statement = select(Settings).where(Settings.id == 1)
-    result = await db.execute(statement)
-    db_settings = result.scalar_one_or_none()
 
-    if db_settings:
-        # Decrypt sensitive data
-        try:
-            decrypted_token = ""
-            if db_settings.telegram_bot_token_encrypted:
-                decrypted_token = decrypt_sensitive_data(db_settings.telegram_bot_token_encrypted)
-                # Truncate token for security in response
-                if len(decrypted_token) > 10:
-                    decrypted_token = decrypted_token[:10] + "...[truncated]"
-        except Exception as e:
-            print(f"Warning: Could not decrypt bot token: {e}")
-            decrypted_token = "[encrypted - cannot decrypt]"
-
-        return SettingsResponse(
-            telegram={
-                "bot_token": decrypted_token,
-                "webhook_base_url": db_settings.telegram_webhook_base_url or settings.webhook_base_url
-            },
-            updated_at=db_settings.updated_at
-        )
-    else:
-        # Return defaults from environment
-        env_token = settings.telegram_bot_token
-        if env_token and len(env_token) > 10:
-            env_token = env_token[:10] + "...[truncated]"
-
-        return SettingsResponse(
-            telegram={
-                "bot_token": env_token,
-                "webhook_base_url": settings.webhook_base_url
-            },
-            updated_at=None
-        )
-
-
-@api_router.post("/settings", response_model=SettingsResponse)
-async def update_settings(request: SettingsRequest, db: DatabaseDep, settings: SettingsDep):
-    """
-    Update application settings and automatically configure Telegram webhook
-
-    This endpoint:
-    1. Validates the Telegram bot token
-    2. Encrypts and saves settings to database
-    3. Automatically sets up the Telegram webhook
-    4. Returns the updated settings
-    """
-    telegram_config = request.telegram
-    bot_token = telegram_config.get("bot_token", "").strip()
-    webhook_base_url = telegram_config.get("webhook_base_url", "").strip()
-
-    # Use fallback webhook URL if not provided
-    if not webhook_base_url:
-        webhook_base_url = settings.webhook_base_url
-
-    # Validate bot token if provided
-    if bot_token:
-        print(f"🔍 Validating Telegram bot token...")
-        validation_result = await telegram_webhook_manager.validate_bot_token(bot_token)
-
-        if not validation_result["valid"]:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid Telegram bot token: {validation_result['error']}"
-            )
-
-        print(f"✅ Bot token validated. Bot info: {validation_result['bot_info']}")
-
-    # Get or create settings record
-    statement = select(Settings).where(Settings.id == 1)
-    result = await db.execute(statement)
-    db_settings = result.scalar_one_or_none()
-
-    if db_settings:
-        # Update existing settings
-        if bot_token:
-            db_settings.telegram_bot_token_encrypted = encrypt_sensitive_data(bot_token)
-        db_settings.telegram_webhook_base_url = webhook_base_url
-    else:
-        # Create new settings record
-        db_settings = Settings(
-            id=1,  # Singleton pattern
-            telegram_bot_token_encrypted=encrypt_sensitive_data(bot_token) if bot_token else None,
-            telegram_webhook_base_url=webhook_base_url
-        )
-        db.add(db_settings)
-
-    await db.commit()
-    await db.refresh(db_settings)
-
-    # Set up Telegram webhook if bot token is provided
-    webhook_result = None
-    if bot_token:
-        print(f"🔧 Setting up Telegram webhook...")
-        webhook_result = await telegram_webhook_manager.setup_webhook(bot_token, webhook_base_url)
-
-        if not webhook_result["success"]:
-            print(f"⚠️  Webhook setup failed: {webhook_result['error']}")
-            # We don't fail the entire request if webhook setup fails
-            # Settings are still saved, but we include the webhook error info
-        else:
-            print(f"✅ Webhook configured: {webhook_result['webhook_url']}")
-
-    # Prepare response (truncate token for security)
-    response_token = ""
-    if bot_token and len(bot_token) > 10:
-        response_token = bot_token[:10] + "...[truncated]"
-    elif bot_token:
-        response_token = bot_token
-
-    response = SettingsResponse(
-        telegram={
-            "bot_token": response_token,
-            "webhook_base_url": webhook_base_url
-        },
-        updated_at=db_settings.updated_at
-    )
-
-    # Add webhook setup result to response if attempted
-    if webhook_result:
-        webhook_status = "configured" if webhook_result["success"] else "failed"
-        print(f"📡 Webhook status: {webhook_status}")
-
-    return response
+# @api_router.post("/settings", response_model=SettingsResponse)
+# async def update_settings(
+#     request: SettingsRequest, db: DatabaseDep, settings: SettingsDep
+# ):
+#     """
+#     Update application settings and automatically configure Telegram webhook
+#
+#     This endpoint:
+#     1. Validates the Telegram bot token
+#     2. Encrypts and saves settings to database
+#     3. Automatically sets up the Telegram webhook
+#     4. Returns the updated settings
+#     """
+#     telegram_config = request.telegram
+#     bot_token = telegram_config.get("bot_token", "").strip()
+#     webhook_base_url = telegram_config.get("webhook_base_url", "").strip()
+#
+#     # Use fallback webhook URL if not provided
+#     if not webhook_base_url:
+#         webhook_base_url = settings.webhook_base_url
+#
+#     # Validate bot token if provided
+#     if bot_token:
+#         print("🔍 Validating Telegram bot token...")
+#         validation_result = await telegram_webhook_manager.validate_bot_token(bot_token)
+#
+#         if not validation_result["valid"]:
+#             raise HTTPException(
+#                 status_code=400,
+#                 detail=f"Invalid Telegram bot token: {validation_result['error']}",
+#             )
+#
+#         print(f"✅ Bot token validated. Bot info: {validation_result['bot_info']}")
+#
+#     # Get or create settings record
+#     statement = select(Settings).where(Settings.id == 1)
+#     result = await db.execute(statement)
+#     db_settings = result.scalar_one_or_none()
+#
+#     if db_settings:
+#         # Update existing settings
+#         if bot_token:
+#             db_settings.telegram_bot_token_encrypted = encrypt_sensitive_data(bot_token)
+#         db_settings.telegram_webhook_base_url = webhook_base_url
+#     else:
+#         # Create new settings record
+#         db_settings = Settings(
+#             id=1,  # Singleton pattern
+#             telegram_bot_token_encrypted=encrypt_sensitive_data(bot_token)
+#             if bot_token
+#             else None,
+#             telegram_webhook_base_url=webhook_base_url,
+#         )
+#         db.add(db_settings)
+#
+#     await db.commit()
+#     await db.refresh(db_settings)
+#
+#     # Set up Telegram webhook if bot token is provided
+#     webhook_result = None
+#     if bot_token:
+#         print("🔧 Setting up Telegram webhook...")
+#         webhook_result = await telegram_webhook_manager.setup_webhook(
+#             bot_token, webhook_base_url
+#         )
+#
+#         if not webhook_result["success"]:
+#             print(f"⚠️  Webhook setup failed: {webhook_result['error']}")
+#             # We don't fail the entire request if webhook setup fails
+#             # Settings are still saved, but we include the webhook error info
+#         else:
+#             print(f"✅ Webhook configured: {webhook_result['webhook_url']}")
+#
+#     # Prepare response (truncate token for security)
+#     response_token = ""
+#     if bot_token and len(bot_token) > 10:
+#         response_token = bot_token[:10] + "...[truncated]"
+#     elif bot_token:
+#         response_token = bot_token
+#
+#     response = SettingsResponse(
+#         telegram={"bot_token": response_token, "webhook_base_url": webhook_base_url},
+#         updated_at=db_settings.updated_at,
+#     )
+#
+#     # Add webhook setup result to response if attempted
+#     if webhook_result:
+#         webhook_status = "configured" if webhook_result["success"] else "failed"
+#         print(f"📡 Webhook status: {webhook_status}")
+#
+#     return response
 
 
 # ~~~~~~~~~~~~~~~~ Роути для WebSocket з'єднань ~~~~~~~~~~~~~~~~
@@ -472,38 +478,36 @@ async def get_webhook_settings(db: DatabaseDep, settings: SettingsDep):
     # Extract default values from settings
     api_base_url = settings.api_base_url
     default_protocol = "https" if api_base_url.startswith("https") else "http"
-    default_host = api_base_url.replace("http://", "").replace("https://", "").split(":")[0]
+    default_host = (
+        api_base_url.replace("http://", "").replace("https://", "").split(":")[0]
+    )
 
     return WebhookConfigResponse(
         telegram=telegram_config,
         default_protocol=default_protocol,
-        default_host=default_host
+        default_host=default_host,
     )
 
 
 @api_router.post("/webhook-settings", response_model=TelegramWebhookConfig)
-async def save_webhook_settings(
-    request: SetWebhookRequest,
-    db: DatabaseDep
-):
+async def save_webhook_settings(request: SetWebhookRequest, db: DatabaseDep):
     """Save webhook configuration (without setting it in Telegram)"""
     try:
         config = await webhook_settings_service.save_telegram_config(
             db=db,
             protocol=request.protocol,
             host=request.host,
-            is_active=False  # Not active until webhook is actually set
+            is_active=False,  # Not active until webhook is actually set
         )
         return config
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save webhook settings: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to save webhook settings: {str(e)}"
+        )
 
 
 @api_router.post("/webhook-settings/telegram/set", response_model=SetWebhookResponse)
-async def set_telegram_webhook(
-    request: SetWebhookRequest,
-    db: DatabaseDep
-):
+async def set_telegram_webhook(request: SetWebhookRequest, db: DatabaseDep):
     """Set Telegram webhook URL via Bot API"""
     webhook_url = f"{request.protocol}://{request.host}/webhook/telegram"
 
@@ -514,30 +518,24 @@ async def set_telegram_webhook(
         if result["success"]:
             # Save configuration with active status
             await webhook_settings_service.save_telegram_config(
-                db=db,
-                protocol=request.protocol,
-                host=request.host,
-                is_active=True
+                db=db, protocol=request.protocol, host=request.host, is_active=True
             )
 
             return SetWebhookResponse(
                 success=True,
                 webhook_url=webhook_url,
-                message="Webhook set successfully"
+                message="Webhook set successfully",
             )
         else:
             return SetWebhookResponse(
                 success=False,
                 webhook_url=webhook_url,
                 message="Failed to set webhook",
-                error=result.get("error", "Unknown error")
+                error=result.get("error", "Unknown error"),
             )
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to set webhook: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to set webhook: {str(e)}")
 
 
 @api_router.delete("/webhook-settings/telegram", response_model=SetWebhookResponse)
@@ -552,20 +550,18 @@ async def delete_telegram_webhook(db: DatabaseDep):
             await webhook_settings_service.set_telegram_webhook_active(db, False)
 
             return SetWebhookResponse(
-                success=True,
-                message="Webhook deleted successfully"
+                success=True, message="Webhook deleted successfully"
             )
         else:
             return SetWebhookResponse(
                 success=False,
                 message="Failed to delete webhook",
-                error=result.get("error", "Unknown error")
+                error=result.get("error", "Unknown error"),
             )
 
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to delete webhook: {str(e)}"
+            status_code=500, detail=f"Failed to delete webhook: {str(e)}"
         )
 
 
@@ -578,15 +574,11 @@ async def get_telegram_webhook_info():
         if result["success"]:
             return {"success": True, "webhook_info": result["data"]}
         else:
-            return {
-                "success": False,
-                "error": result.get("error", "Unknown error")
-            }
+            return {"success": False, "error": result.get("error", "Unknown error")}
 
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get webhook info: {str(e)}"
+            status_code=500, detail=f"Failed to get webhook info: {str(e)}"
         )
 
 

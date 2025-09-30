@@ -1,77 +1,91 @@
 import React from 'react'
-import { Card, Button } from '@shared/ui'
+import { Card, CardHeader, CardTitle, CardContent, Button, Label } from '@shared/ui'
 import { useUiStore } from '@shared/store/uiStore'
 
 const SettingsPage = () => {
   const { theme, setTheme } = useUiStore()
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Settings</h1>
+    <div className="space-y-8">
+      <h1 className="text-2xl md:text-3xl font-bold text-foreground">Settings</h1>
 
       <Card>
-        <h2 className="text-xl font-semibold mb-4">Appearance</h2>
-        <div className="space-y-4">
+        <CardHeader>
+          <CardTitle className="text-foreground">Appearance</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+            <Label className="text-base font-medium text-foreground mb-3 block">Theme Preference</Label>
+            <p className="text-sm text-muted-foreground mb-4">Choose your preferred color theme</p>
             <div className="flex gap-3">
               <Button
-                variant={theme === 'light' ? 'primary' : 'ghost'}
+                variant={theme === 'light' ? 'default' : 'outline'}
                 onClick={() => setTheme('light')}
+                className="flex-1 sm:flex-none"
               >
                 Light
               </Button>
               <Button
-                variant={theme === 'dark' ? 'primary' : 'ghost'}
+                variant={theme === 'dark' ? 'default' : 'outline'}
                 onClick={() => setTheme('dark')}
+                className="flex-1 sm:flex-none"
               >
                 Dark
               </Button>
             </div>
           </div>
-        </div>
+        </CardContent>
       </Card>
 
       <Card>
-        <h2 className="text-xl font-semibold mb-4">Notifications</h2>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-900">Email Notifications</p>
-              <p className="text-sm text-gray-500">Receive email updates about tasks</p>
+        <CardHeader>
+          <CardTitle className="text-foreground">Notifications</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <Label className="text-base font-medium text-foreground">Email Notifications</Label>
+              <p className="text-sm text-muted-foreground mt-1">Receive email updates about tasks and assignments</p>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
+            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
               <input type="checkbox" className="sr-only peer" defaultChecked />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-900">Desktop Notifications</p>
-              <p className="text-sm text-gray-500">Show notifications on desktop</p>
+          <div className="flex items-start justify-between gap-4 pt-4 border-t border-border">
+            <div className="flex-1">
+              <Label className="text-base font-medium text-foreground">Desktop Notifications</Label>
+              <p className="text-sm text-muted-foreground mt-1">Show browser notifications for task updates</p>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
+            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
               <input type="checkbox" className="sr-only peer" />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
-        </div>
+        </CardContent>
       </Card>
 
       <Card>
-        <h2 className="text-xl font-semibold mb-4">About</h2>
-        <div className="space-y-2 text-sm text-gray-600">
-          <p>
-            <span className="font-medium">Version:</span> 1.0.0
-          </p>
-          <p>
-            <span className="font-medium">API URL:</span> {process.env.REACT_APP_API_URL || 'http://localhost:8000'}
-          </p>
-          <p>
-            <span className="font-medium">WebSocket URL:</span> {process.env.REACT_APP_WS_URL || 'http://localhost:8000'}
-          </p>
-        </div>
+        <CardHeader>
+          <CardTitle className="text-foreground">About</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-foreground w-32">Version:</span>
+              <span className="text-muted-foreground">1.0.0</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-foreground w-32">API URL:</span>
+              <span className="text-muted-foreground break-all">{process.env.REACT_APP_API_URL || 'http://localhost:8000'}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-foreground w-32">WebSocket URL:</span>
+              <span className="text-muted-foreground break-all">{process.env.REACT_APP_WS_URL || 'http://localhost:8000'}</span>
+            </div>
+          </div>
+        </CardContent>
       </Card>
     </div>
   )

@@ -18,10 +18,16 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        roboto: ['Roboto', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        roboto: ['Roboto', 'sans-serif'],
       },
       colors: {
+        'br-orange': '#FF6B35',
+        'br-peach': '#FF9B71',
+        'br-navy': '#1A2332',
+        'br-blue': '#4A90E2',
+        'br-light': '#E8EDF2',
+        'br-dark': '#0A0E11',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -73,6 +79,15 @@ module.exports = {
         sm: "calc(var(--radius) - 4px)",
       },
       spacing: {
+        '0': '0px',
+        '1': '8px',
+        '2': '16px',
+        '3': '24px',
+        '4': '32px',
+        '5': '40px',
+        '6': '48px',
+        '7': '56px',
+        '8': '64px',
         '18': '4.5rem',
         '88': '22rem',
         '112': '28rem',
