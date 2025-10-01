@@ -33,10 +33,10 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="px-3 pt-3 pb-2 border-b border-border">
+      <SidebarHeader className="px-3 py-2 border-b border-border">
         <div
           className={cn(
-            'flex items-center gap-2 rounded-lg bg-sidebar-accent/40 px-2 py-1.5',
+            'flex items-center gap-2 rounded-lg bg-sidebar-accent/40 px-2 py-1',
             'group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:py-2 group-data-[collapsible=icon]:bg-transparent'
           )}
         >
