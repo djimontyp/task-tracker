@@ -134,7 +134,7 @@ const SidebarProvider = React.forwardRef<
 
     return (
       <SidebarContext.Provider value={contextValue}>
-        <TooltipProvider delayDuration={0}>
+        <TooltipProvider delayDuration={1500}>
           <div
             style={
               {
@@ -296,15 +296,25 @@ const SidebarRail = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">
 >(({ className, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, state } = useSidebar()
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault()
+      toggleSidebar()
+    }
+  }
 
   return (
     <button
       ref={ref}
       data-sidebar="rail"
       aria-label="Toggle Sidebar"
-      tabIndex={-1}
+      role="button"
+      tabIndex={0}
+      aria-expanded={state === "expanded"}
       onClick={toggleSidebar}
+      onKeyDown={handleKeyDown}
       title="Toggle Sidebar"
       className={cn(
         "absolute inset-y-0 z-20 hidden w-6 -translate-x-1/2 rounded-full bg-sidebar border border-sidebar-border/60 shadow-sm transition-all ease-linear group-data-[side=left]:-right-3 group-data-[side=right]:left-3 sm:flex",

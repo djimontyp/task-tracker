@@ -69,7 +69,11 @@ const Header = () => {
     <header className="bg-card shadow-sm border-b border-border px-4 py-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <SidebarTrigger />
+          <SidebarTrigger
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 border-0 bg-transparent text-muted-foreground hover:bg-accent/20 hover:text-foreground"
+          />
           <Breadcrumb>
             <BreadcrumbList>
               {crumbs.map((segment, index) => {
