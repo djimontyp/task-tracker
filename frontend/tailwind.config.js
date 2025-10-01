@@ -6,26 +6,42 @@ module.exports = {
     "./public/index.html",
   ],
   theme: {
+  	container: {
+  		center: true,
+  		padding: {
+  			DEFAULT: '1rem',
+  			sm: '1rem',
+  			lg: '2rem',
+  			xl: '2rem',
+  			'2xl': '2rem'
+  		},
+  		screens: {
+  			sm: '100%',
+  			md: '100%',
+  			lg: '1280px',
+  			xl: '1536px',
+  			'2xl': '1920px'
+  		}
+  	},
   	screens: {
   		sm: '640px',
-  		md: '768px',
-  		lg: '1024px',
-  		xl: '1280px',
-  		'macbook-14': '1512px',
-  		fullhd: '1920px',
-  		'macbook-16': '2056px',
-  		'2k': '2560px',
-  		'4k': '3840px'
+  		md: '1024px',
+  		lg: '1280px',
+  		xl: '1536px',
+  		'2xl': '1920px',
+  		'3xl': '2560px'
   	},
   	extend: {
+  		fontSize: {
+  			base: ['clamp(14px, 1.2vw, 16px)', '1.5'],
+  			lg: ['clamp(16px, 1.5vw, 20px)', '1.6'],
+  			xl: ['clamp(18px, 2vw, 24px)', '1.6'],
+  			'2xl': ['clamp(20px, 2.5vw, 28px)', '1.6']
+  		},
   		fontFamily: {
   			sans: [
   				'Inter',
   				'system-ui',
-  				'sans-serif'
-  			],
-  			roboto: [
-  				'Roboto',
   				'sans-serif'
   			]
   		},
@@ -33,7 +49,6 @@ module.exports = {
   			'br-orange': '#FF6B35',
   			'br-peach': '#FF9B71',
   			'br-navy': '#1A2332',
-  			'br-blue': '#4A90E2',
   			'br-light': '#E8EDF2',
   			'br-dark': '#0A0E11',
   			border: 'hsl(var(--border))',
@@ -42,17 +57,17 @@ module.exports = {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			primary: {
-  				'50': '#f0f9ff',
-  				'100': '#e0f2fe',
-  				'200': '#bae6fd',
-  				'300': '#7dd3fc',
-  				'400': '#38bdf8',
-  				'500': '#0ea5e9',
-  				'600': '#0284c7',
-  				'700': '#0369a1',
-  				'800': '#075985',
-  				'900': '#0c4a6e',
-  				'950': '#082f49',
+  				'50': '#fff5f2',
+  				'100': '#ffe8e0',
+  				'200': '#ffd0c2',
+  				'300': '#ffad94',
+  				'400': '#ff9b71',
+  				'500': '#ff6b35',
+  				'600': '#f04e1a',
+  				'700': '#c83d10',
+  				'800': '#a03310',
+  				'900': '#842f14',
+  				'950': '#481506',
   				DEFAULT: 'hsl(var(--primary))',
   				foreground: 'hsl(var(--primary-foreground))'
   			},
@@ -97,19 +112,14 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		spacing: {
-  			'0': '0px',
-  			'1': '8px',
-  			'2': '16px',
-  			'3': '24px',
-  			'4': '32px',
-  			'5': '40px',
-  			'6': '48px',
-  			'7': '56px',
-  			'8': '64px',
   			'18': '4.5rem',
+  			'22': '5.5rem',
   			'88': '22rem',
   			'112': '28rem',
   			'128': '32rem'
+  		},
+  		maxWidth: {
+  			'screen-3xl': '1920px'
   		},
   		keyframes: {
   			'fade-in': {
@@ -181,5 +191,9 @@ module.exports = {
   		}
   	}
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/aspect-ratio'),
+  ],
 };

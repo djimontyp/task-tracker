@@ -98,7 +98,7 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
               <p className="text-sm font-medium text-muted-foreground">{title}</p>
             </div>
 
-            <p className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl 2k:text-5xl font-bold text-foreground">{value}</p>
+            <p className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl 3xl:text-5xl font-bold text-foreground">{value}</p>
 
             {trend && (
               <div

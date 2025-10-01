@@ -82,17 +82,17 @@ export function Sidebar({
       <div className={`fixed top-0 left-0 h-full bg-white shadow-xl z-50 transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       } ${className}`}>
-        <div className="relative flex flex-col bg-clip-border rounded-none bg-white text-gray-700 h-full w-80 shadow-xl shadow-blue-gray-900/5 border-r">
+        <div className="relative flex flex-col bg-clip-border rounded-none bg-white text-gray-700 h-full w-80 shadow-xl shadow-slate-900/5 border-r">
           {/* Header */}
           <div className="mb-2 flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-md">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-orange-700 text-white shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
                   <path fillRule="evenodd" d="M2.25 2.25a.75.75 0 000 1.5H3v10.5a3 3 0 003 3h1.21l-1.172 3.513a.75.75 0 001.424.474l.329-.987h8.418l.33.987a.75.75 0 001.422-.474l-1.17-3.513H18a3 3 0 003-3V3.75h.75a.75.75 0 000-1.5H2.25zm6.04 16.5l.5-1.5h6.42l.5 1.5H8.29zm7.46-12a.75.75 0 00-1.5 0v6a.75.75 0 001.5 0v-6zm-3 2.25a.75.75 0 00-1.5 0v3.75a.75.75 0 001.5 0V9zm-3 2.25a.75.75 0 00-1.5 0v1.5a.75.75 0 001.5 0v-1.5z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="flex flex-col">
-                <h5 className="block font-sans text-xl antialiased font-semibold leading-snug tracking-normal text-blue-gray-900">
+                <h5 className="block font-sans text-xl antialiased font-semibold leading-snug tracking-normal text-slate-900">
                   Task Tracker
                 </h5>
                 <p className="block font-sans text-sm antialiased font-normal leading-normal text-gray-700">
@@ -102,7 +102,7 @@ export function Sidebar({
             </div>
             <button
               onClick={onToggle}
-              className="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg text-blue-gray-500 hover:bg-blue-gray-50 transition-colors"
+              className="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg text-slate-500 hover:bg-slate-50 transition-colors"
               aria-label="Close navigation drawer"
             >
               <XMarkIcon className="h-5 w-5" />
@@ -118,8 +118,8 @@ export function Sidebar({
                 onClick={() => !item.disabled && onItemClick(item.id)}
                 className={`flex items-center w-full p-3 leading-tight transition-all rounded-lg outline-none text-start cursor-pointer ${
                   activeItem === item.id
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'hover:bg-blue-gray-50 hover:bg-opacity-80 hover:text-blue-gray-900 focus:bg-blue-gray-50 focus:bg-opacity-80 focus:text-blue-gray-900 active:bg-blue-gray-50 active:bg-opacity-80 active:text-blue-gray-900'
+                    ? 'bg-orange-500 text-white shadow-md'
+                    : 'hover:bg-slate-50 hover:bg-opacity-80 hover:text-slate-900 focus:bg-slate-50 focus:bg-opacity-80 focus:text-slate-900 active:bg-slate-50 active:bg-opacity-80 active:text-slate-900'
                 } ${
                   item.disabled ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
@@ -179,7 +179,7 @@ export function SidebarToggle({
   return (
     <button
       onClick={onToggle}
-      className={`flex items-center justify-center w-10 h-10 rounded-lg text-blue-gray-500 hover:bg-blue-gray-50 transition-colors ${className}`}
+      className={`flex items-center justify-center w-10 h-10 rounded-lg text-slate-500 hover:bg-slate-50 transition-colors ${className}`}
       aria-label={isOpen ? 'Close navigation drawer' : 'Open navigation drawer'}
       aria-expanded={isOpen}
     >

@@ -17,13 +17,13 @@
     --secondary-foreground: 0 0% 100%;
     --muted: 210 20% 90%;
     --muted-foreground: 217 20% 40%;
-    --accent: 210 100% 60%; /* BR Blue #4A90E2 */
+    --accent: 14 100% 60%; /* BR Orange #FF6B35 */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: 214 20% 88%;
     --input: 214 20% 88%;
-    --ring: 217 91% 45%; /* Unified focus ring - darker blue for WCAG contrast */
+    --ring: 14 100% 60%; /* Unified focus ring - orange for consistency */
     --radius: 8px;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -32,7 +32,7 @@
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217 91% 45%; /* Unified focus ring - same as --ring */
+    --sidebar-ring: 14 100% 60%; /* Unified focus ring - same as --ring */
   }
 
   .dark {
@@ -49,21 +49,21 @@
     --secondary-foreground: 210 20% 93%;
     --muted: 215 20% 18%;
     --muted-foreground: 210 15% 60%;
-    --accent: 210 82% 58%; /* BR Blue #4A90E2 */
+    --accent: 20 100% 72%; /* BR Peach #FF9B71 */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
     --border: 215 20% 18%;
     --input: 215 20% 18%;
-    --ring: 217 91% 65%; /* Unified focus ring - lighter blue for WCAG contrast on dark */
+    --ring: 20 100% 72%; /* Unified focus ring - peach for dark theme */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 14 100% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217 91% 65%; /* Unified focus ring - same as --ring */
+    --sidebar-ring: 20 100% 72%; /* Unified focus ring - same as --ring */
   }
 }
 

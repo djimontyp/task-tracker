@@ -1,15 +1,37 @@
 import React, { useMemo } from 'react'
-import { Sun, Moon, ChevronRight } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { Sun, Moon } from 'lucide-react'
+import { useLocation, Link } from 'react-router-dom'
 import { useWebSocket } from '@features/websocket/hooks/useWebSocket'
 import { useTheme } from '../../../components/ThemeProvider'
 import { SidebarTrigger } from '@/shared/ui/sidebar'
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/shared/ui/breadcrumb'
 
-const breadcrumbMap: Record<string, string[]> = {
-  '/': ['Workspace', 'Overview'],
-  '/tasks': ['Workspace', 'Tasks'],
-  '/analytics': ['Workspace', 'Analytics'],
-  '/settings': ['Settings'],
+interface BreadcrumbSegment {
+  label: string
+  href?: string
+}
+
+const breadcrumbMap: Record<string, BreadcrumbSegment[]> = {
+  '/': [
+    { label: 'Home', href: '/' },
+    { label: 'Dashboard' },
+  ],
+  '/tasks': [
+    { label: 'Home', href: '/' },
+    { label: 'Tasks' },
+  ],
+  '/analytics': [
+    { label: 'Home', href: '/' },
+    { label: 'Analytics' },
+  ],
+  '/settings': [{ label: 'Settings' }],
 }
 
 const Header = () => {
@@ -17,15 +39,16 @@ const Header = () => {
   const { effectiveTheme, setTheme, theme } = useTheme()
   const location = useLocation()
 
-  const crumbs = useMemo(() => {
+  const crumbs = useMemo((): BreadcrumbSegment[] => {
     const segments = breadcrumbMap[location.pathname]
 
     if (!segments) {
       return location.pathname
         .split('/')
         .filter(Boolean)
-        .map((segment) => segment.replace(/-/g, ' '))
-        .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+        .map((segment) => ({
+          label: segment.charAt(0).toUpperCase() + segment.replace(/-/g, ' ').slice(1),
+        }))
     }
 
     return segments
@@ -43,27 +66,37 @@ const Header = () => {
   }
 
   return (
-    <header className="bg-card shadow-sm border-b border-border px-4 md:px-6 py-3">
+    <header className="bg-card shadow-sm border-b border-border px-4 py-2">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <SidebarTrigger />
-          <nav className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex" aria-label="Breadcrumb">
-            {crumbs.map((label, index) => {
-              const isLast = index === crumbs.length - 1
-              return (
-                <React.Fragment key={`${label}-${index}`}>
-                  <span className={isLast ? 'text-foreground font-medium' : undefined}>{label}</span>
-                  {!isLast ? <ChevronRight className="h-3 w-3" /> : null}
-                </React.Fragment>
-              )
-            })}
-          </nav>
+          <Breadcrumb>
+            <BreadcrumbList>
+              {crumbs.map((segment, index) => {
+                const isLast = index === crumbs.length - 1
+                return (
+                  <React.Fragment key={`${segment.label}-${index}`}>
+                    <BreadcrumbItem>
+                      {segment.href && !isLast ? (
+                        <BreadcrumbLink asChild>
+                          <Link to={segment.href}>{segment.label}</Link>
+                        </BreadcrumbLink>
+                      ) : (
+                        <BreadcrumbPage>{segment.label}</BreadcrumbPage>
+                      )}
+                    </BreadcrumbItem>
+                    {!isLast && <BreadcrumbSeparator />}
+                  </React.Fragment>
+                )
+              })}
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <button
             onClick={handleToggleTheme}
-            className="p-2.5 sm:p-2 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center rounded-lg hover:bg-accent/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="p-1.5 flex items-center justify-center rounded-lg hover:bg-accent/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Toggle theme"
             title={`Current: ${theme} (${effectiveTheme})`}
           >
@@ -81,11 +114,11 @@ const Header = () => {
               }`}
               aria-hidden="true"
             />
-            <span className="text-sm text-muted-foreground hidden md:inline">
-              {isConnected ? 'Connected' : 'Disconnected'}
+            <span className="text-sm text-muted-foreground hidden sm:inline">
+              {isConnected ? 'API Connected' : 'API Disconnected'}
             </span>
             <span className="sr-only">
-              WebSocket connection status: {isConnected ? 'Connected' : 'Disconnected'}
+              API connection status: {isConnected ? 'Connected' : 'Disconnected'}
             </span>
           </div>
         </div>

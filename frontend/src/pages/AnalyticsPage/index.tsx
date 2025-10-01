@@ -26,12 +26,12 @@ const AnalyticsPage = () => {
     : '0.0'
 
   return (
-    <div className="space-y-4 sm:space-y-5 md:space-y-6 2k:space-y-8 animate-fade-in">
-      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl 2k:text-5xl font-bold text-foreground animate-fade-in-down">Analytics</h1>
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 3xl:space-y-8 animate-fade-in">
+      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl 3xl:text-5xl font-bold text-foreground animate-fade-in-down">Analytics</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 2k:gap-8 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 3xl:gap-8 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
         <Card className="animate-slide-in-left" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
-          <h2 className="text-xl 2k:text-2xl font-semibold mb-4 text-foreground">Task Statistics</h2>
+          <h2 className="text-xl 3xl:text-2xl font-semibold mb-4 text-foreground">Task Statistics</h2>
           <div className="space-y-4">
             <div>
               <div className="flex justify-between mb-1">
@@ -55,8 +55,8 @@ const AnalyticsPage = () => {
                 <div className="text-2xl font-bold text-br-peach">{stats?.pending || 0}</div>
                 <div className="text-sm text-muted-foreground mt-1">Pending</div>
               </div>
-              <div className="text-center p-4 bg-br-blue/10 rounded-lg border border-br-blue/20">
-                <div className="text-2xl font-bold text-br-blue">{stats?.in_progress || 0}</div>
+              <div className="text-center p-4 bg-slate-500/10 rounded-lg border border-slate-500/20">
+                <div className="text-2xl font-bold text-slate-700">{stats?.in_progress || 0}</div>
                 <div className="text-sm text-muted-foreground mt-1">In Progress</div>
               </div>
               <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
@@ -68,7 +68,7 @@ const AnalyticsPage = () => {
         </Card>
 
         <Card className="animate-slide-in-right" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>
-          <h2 className="text-xl 2k:text-2xl font-semibold mb-4 text-foreground">Status Distribution</h2>
+          <h2 className="text-xl 3xl:text-2xl font-semibold mb-4 text-foreground">Status Distribution</h2>
           <div className="space-y-3">
             <div>
               <div className="flex justify-between mb-1">
@@ -108,7 +108,7 @@ const AnalyticsPage = () => {
                 aria-label={`In progress tasks: ${stats?.in_progress || 0} out of ${stats?.total || 0}`}
               >
                 <div
-                  className="bg-br-blue h-2 rounded-full transition-all duration-300"
+                  className="bg-slate-600 h-2 rounded-full transition-all duration-300"
                   style={{
                     width: stats && stats.total > 0
                       ? `${(stats.in_progress / stats.total) * 100}%`

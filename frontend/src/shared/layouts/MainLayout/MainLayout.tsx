@@ -13,8 +13,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8 2k:p-10">
-          <div className="max-w-[1920px] mx-auto">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8 2xl:p-10 3xl:p-12">
+          <div className="container">
             {children}
           </div>
         </main>

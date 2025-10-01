@@ -115,15 +115,15 @@ const DashboardPage = () => {
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 sm:gap-3 md:gap-4 animate-fade-in-down">
-        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl 2k:text-5xl font-bold text-foreground">Dashboard</h1>
-        <div className="text-sm 2k:text-base text-muted-foreground">
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl 3xl:text-5xl font-bold text-foreground">Dashboard</h1>
+        <div className="text-sm 3xl:text-base text-muted-foreground">
           Last updated: {new Date().toLocaleString('uk-UA')}
         </div>
       </div>
 
       {/* Metric Cards */}
       <div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 2k:gap-6 animate-fade-in-up"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 3xl:gap-6 animate-fade-in-up"
         role="region"
         aria-label="Task statistics"
         aria-live="polite"
@@ -167,7 +167,7 @@ const DashboardPage = () => {
               subtitle={metrics.inProgress.subtitle}
               trend={metrics.inProgress.trend}
               icon={Loader2}
-              iconColor="text-br-blue"
+              iconColor="text-slate-700"
               onClick={() => handleMetricClick('in_progress')}
             />
             <MetricCard
@@ -197,7 +197,7 @@ const DashboardPage = () => {
       </div>
 
       {/* Recent Activities */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 2k:gap-8 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 3xl:gap-8 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
         {/* Recent Messages */}
         <Card>
           <CardHeader>

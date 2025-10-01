@@ -46,25 +46,23 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton asChild tooltip={item.label}>
-                    <NavLink
-                      to={item.path}
-                      className={({ isActive }) =>
-                        cn(
-                          'relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground/75 transition-all duration-200 ease-out',
-                          'hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
-                          'before:absolute before:-left-5 before:top-1/2 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-transparent',
-                          'group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0',
-                          isActive
-                            ? 'bg-sidebar-accent text-sidebar-foreground shadow-sm before:bg-primary'
-                            : 'before:bg-transparent'
-                        )
-                      }
-                    >
-                      <item.icon className="size-4 shrink-0" />
-                      <span className="flex-1 truncate group-data-[collapsible=icon]:hidden">{item.label}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) =>
+                      cn(
+                        'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ease-out',
+                        'relative',
+                        'before:absolute before:left-0 before:top-1/2 before:h-5 before:w-1 before:-translate-x-3 before:-translate-y-1/2 before:rounded-full before:transition-all before:duration-200',
+                        'group-data-[collapsible=icon]:justify-center',
+                        isActive
+                          ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-300 font-semibold shadow-sm border border-orange-200 dark:border-orange-800 before:bg-orange-600'
+                          : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground before:bg-transparent'
+                      )
+                    }
+                  >
+                    <item.icon className="size-4 shrink-0" />
+                    <span className="flex-1 truncate group-data-[collapsible=icon]:hidden">{item.label}</span>
+                  </NavLink>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
