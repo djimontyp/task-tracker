@@ -72,9 +72,9 @@ export function AppSidebar() {
                           className={cn(
                             'px-3 py-2 text-sm font-medium transition-colors duration-200 ease-out',
                             'text-sidebar-foreground/70 hover:text-sidebar-foreground',
-                            'data-[active=true]:bg-orange-100 data-[active=true]:text-orange-800 dark:data-[active=true]:bg-orange-900/40 dark:data-[active=true]:text-orange-200 data-[active=true]:border data-[active=true]:border-orange-200 dark:data-[active=true]:border-orange-800',
+                            'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:border data-[active=true]:border-primary/20',
                             'group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0 group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:border group-data-[collapsible=icon]:border-transparent group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:shadow-none',
-                            'data-[active=true]:group-data-[collapsible=icon]:border-orange-500 data-[active=true]:group-data-[collapsible=icon]:bg-orange-500 data-[active=true]:group-data-[collapsible=icon]:text-white'
+                            'data-[active=true]:group-data-[collapsible=icon]:border-primary/20 data-[active=true]:group-data-[collapsible=icon]:bg-primary/10 data-[active=true]:group-data-[collapsible=icon]:text-primary'
                           )}
                         >
                           <Link
