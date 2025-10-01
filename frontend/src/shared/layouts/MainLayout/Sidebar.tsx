@@ -26,7 +26,7 @@ const Sidebar = () => {
               sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'
             }`}
           >
-            Task Tracker
+            Topics Radar
           </h1>
           <button
             onClick={toggleSidebar}

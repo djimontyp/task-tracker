@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react'
 import { Sun, Moon } from 'lucide-react'
 import { useLocation, Link } from 'react-router-dom'
-import { useWebSocket } from '@features/websocket/hooks/useWebSocket'
 import { useTheme } from '../../../components/ThemeProvider'
 import { SidebarTrigger } from '@/shared/ui/sidebar'
 import {
@@ -35,7 +34,6 @@ const breadcrumbMap: Record<string, BreadcrumbSegment[]> = {
 }
 
 const Header = () => {
-  const { isConnected } = useWebSocket()
   const { effectiveTheme, setTheme, theme } = useTheme()
   const location = useLocation()
 
@@ -66,13 +64,13 @@ const Header = () => {
   }
 
   return (
-    <header className="bg-card shadow-sm border-b border-border px-4 py-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+    <header className="sticky top-0 z-40 bg-card border-b border-border/80 pl-0 pr-4">
+      <div className="flex min-h-[56px] items-center justify-between gap-2">
+        <div className="flex items-center gap-2 border-l border-border/80 pl-4">
           <SidebarTrigger
             variant="ghost"
             size="icon"
-            className="h-9 w-9 border-0 bg-transparent text-muted-foreground hover:bg-accent/20 hover:text-foreground"
+            className="h-8 w-8 border-0 bg-transparent text-muted-foreground hover:bg-accent/20 hover:text-foreground"
           />
           <Breadcrumb>
             <BreadcrumbList>
@@ -110,21 +108,6 @@ const Header = () => {
               <Sun className="w-5 h-5 text-foreground" />
             )}
           </button>
-
-          <div className="flex items-center gap-2" role="status" aria-live="polite">
-            <span
-              className={`w-2 h-2 rounded-full ${
-                isConnected ? 'bg-green-500' : 'bg-red-500'
-              }`}
-              aria-hidden="true"
-            />
-            <span className="text-sm text-muted-foreground hidden sm:inline">
-              {isConnected ? 'API Connected' : 'API Disconnected'}
-            </span>
-            <span className="sr-only">
-              API connection status: {isConnected ? 'Connected' : 'Disconnected'}
-            </span>
-          </div>
         </div>
       </div>
     </header>

@@ -7,7 +7,7 @@ const SettingsPage = () => {
 
   return (
     <div className="space-y-6 sm:space-y-7 md:space-y-8">
-      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">Settings</h1>
+      <p className="text-sm sm:text-base text-muted-foreground">Personalize how Topics Radar looks and notifies you about new signals.</p>
 
       <Card>
         <CardHeader>

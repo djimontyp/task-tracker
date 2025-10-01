@@ -114,12 +114,6 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 sm:gap-3 md:gap-4 animate-fade-in-down">
-        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl 3xl:text-5xl font-bold text-foreground">Dashboard</h1>
-        <div className="text-sm 3xl:text-base text-muted-foreground">
-          Last updated: {new Date().toLocaleString('uk-UA')}
-        </div>
-      </div>
 
       {/* Metric Cards */}
       <div

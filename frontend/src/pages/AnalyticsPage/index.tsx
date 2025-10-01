@@ -27,7 +27,7 @@ const AnalyticsPage = () => {
 
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6 3xl:space-y-8 animate-fade-in">
-      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl 3xl:text-5xl font-bold text-foreground animate-fade-in-down">Analytics</h1>
+      <p className="text-sm sm:text-base text-muted-foreground animate-fade-in-down">Explore signal health, completion ratios, and channel performance trends collected by Topics Radar.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 3xl:gap-8 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
         <Card className="animate-slide-in-left" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
