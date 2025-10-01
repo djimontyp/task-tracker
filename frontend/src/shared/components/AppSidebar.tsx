@@ -37,15 +37,13 @@ export function AppSidebar() {
         <div
           className={cn(
             'flex items-center gap-2 rounded-lg bg-sidebar-accent/40 px-2 py-1',
-            'group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:py-2 group-data-[collapsible=icon]:bg-transparent'
+            'group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:py-1 group-data-[collapsible=icon]:bg-transparent'
           )}
         >
           <div
             className={cn(
               'flex size-8 shrink-0 items-center justify-center rounded-md transition-all duration-200',
-              state === 'collapsed'
-                ? 'bg-sidebar-foreground text-sidebar'
-                : 'bg-orange-500 text-white dark:bg-orange-400 dark:text-slate-950'
+              'bg-primary/10 text-primary border border-primary/20'
             )}
           >
             <ListChecks className="size-4" />
