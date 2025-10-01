@@ -26,19 +26,19 @@ const AnalyticsPage = () => {
     : '0.0'
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <h1 className="text-2xl md:text-3xl font-bold text-foreground animate-fade-in-down">Analytics</h1>
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 2k:space-y-8 animate-fade-in">
+      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl 2k:text-5xl font-bold text-foreground animate-fade-in-down">Analytics</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 2k:gap-8 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
         <Card className="animate-slide-in-left" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
-          <h2 className="text-xl font-semibold mb-4 text-foreground">Task Statistics</h2>
+          <h2 className="text-xl 2k:text-2xl font-semibold mb-4 text-foreground">Task Statistics</h2>
           <div className="space-y-4">
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium text-muted-foreground">Completion Rate</span>
                 <span className="text-sm font-medium text-foreground">{completionRate}%</span>
               </div>
-              <div className="w-full bg-muted rounded-full h-2">
+              <div className="w-full bg-muted rounded-full h-2" role="progressbar" aria-valuenow={parseFloat(completionRate)} aria-valuemin={0} aria-valuemax={100} aria-label="Task completion rate">
                 <div
                   className="bg-green-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${completionRate}%` }}
@@ -68,14 +68,21 @@ const AnalyticsPage = () => {
         </Card>
 
         <Card className="animate-slide-in-right" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>
-          <h2 className="text-xl font-semibold mb-4 text-foreground">Status Distribution</h2>
+          <h2 className="text-xl 2k:text-2xl font-semibold mb-4 text-foreground">Status Distribution</h2>
           <div className="space-y-3">
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm text-muted-foreground">Pending</span>
                 <span className="text-sm font-medium text-foreground">{stats?.pending || 0}</span>
               </div>
-              <div className="w-full bg-muted rounded-full h-2">
+              <div
+                className="w-full bg-muted rounded-full h-2"
+                role="progressbar"
+                aria-valuenow={stats && stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`Pending tasks: ${stats?.pending || 0} out of ${stats?.total || 0}`}
+              >
                 <div
                   className="bg-br-peach h-2 rounded-full transition-all duration-300"
                   style={{
@@ -92,7 +99,14 @@ const AnalyticsPage = () => {
                 <span className="text-sm text-muted-foreground">In Progress</span>
                 <span className="text-sm font-medium text-foreground">{stats?.in_progress || 0}</span>
               </div>
-              <div className="w-full bg-muted rounded-full h-2">
+              <div
+                className="w-full bg-muted rounded-full h-2"
+                role="progressbar"
+                aria-valuenow={stats && stats.total > 0 ? Math.round((stats.in_progress / stats.total) * 100) : 0}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`In progress tasks: ${stats?.in_progress || 0} out of ${stats?.total || 0}`}
+              >
                 <div
                   className="bg-br-blue h-2 rounded-full transition-all duration-300"
                   style={{
@@ -109,7 +123,14 @@ const AnalyticsPage = () => {
                 <span className="text-sm text-muted-foreground">Completed</span>
                 <span className="text-sm font-medium text-foreground">{stats?.completed || 0}</span>
               </div>
-              <div className="w-full bg-muted rounded-full h-2">
+              <div
+                className="w-full bg-muted rounded-full h-2"
+                role="progressbar"
+                aria-valuenow={stats && stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`Completed tasks: ${stats?.completed || 0} out of ${stats?.total || 0}`}
+              >
                 <div
                   className="bg-green-500 h-2 rounded-full transition-all duration-300"
                   style={{
@@ -126,7 +147,14 @@ const AnalyticsPage = () => {
                 <span className="text-sm text-muted-foreground">Cancelled</span>
                 <span className="text-sm font-medium text-foreground">{stats?.cancelled || 0}</span>
               </div>
-              <div className="w-full bg-muted rounded-full h-2">
+              <div
+                className="w-full bg-muted rounded-full h-2"
+                role="progressbar"
+                aria-valuenow={stats && stats.total > 0 ? Math.round((stats.cancelled / stats.total) * 100) : 0}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`Cancelled tasks: ${stats?.cancelled || 0} out of ${stats?.total || 0}`}
+              >
                 <div
                   className="bg-br-orange h-2 rounded-full transition-all duration-300"
                   style={{

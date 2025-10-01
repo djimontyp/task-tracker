@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
-import { useUiStore } from '@shared/store/uiStore'
-import Sidebar from './Sidebar'
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/shared/ui/sidebar'
+import { AppSidebar } from '@/shared/components/AppSidebar'
 import Header from './Header'
 
 interface MainLayoutProps {
@@ -8,18 +8,18 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children }: MainLayoutProps) => {
-  const { sidebarOpen } = useUiStore()
-
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
         <Header />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          {children}
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8 2k:p-10">
+          <div className="max-w-[1920px] mx-auto">
+            {children}
+          </div>
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }
 

@@ -69,17 +69,19 @@ const TasksPage = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in-down">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Tasks</h1>
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 2k:space-y-8 animate-fade-in">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 md:gap-5 animate-fade-in-down">
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl 2k:text-5xl font-bold text-foreground">Tasks</h1>
 
-        <div className="flex gap-2 flex-wrap animate-slide-in-right">
+        <div className="flex gap-2 flex-wrap animate-slide-in-right" role="group" aria-label="Filter tasks by status">
           {(['all', 'pending', 'in_progress', 'completed', 'cancelled'] as const).map((status) => (
             <Button
               key={status}
               variant={filterStatus === status ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setFilterStatus(status)}
+              aria-pressed={filterStatus === status}
+              aria-label={`Filter by ${status.replace('_', ' ')}`}
             >
               {status.replace('_', ' ')}
             </Button>
@@ -87,7 +89,13 @@ const TasksPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
+      <div
+        className="grid grid-cols-1 gap-3 sm:gap-4 animate-fade-in-up"
+        style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}
+        role="region"
+        aria-label="Tasks list"
+        aria-live="polite"
+      >
         {filteredTasks.length === 0 ? (
           <Card>
             <CardContent className="py-8">

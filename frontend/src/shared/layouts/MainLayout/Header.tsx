@@ -1,11 +1,35 @@
-import React from 'react'
-import { Sun, Moon } from 'lucide-react'
+import React, { useMemo } from 'react'
+import { Sun, Moon, ChevronRight } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 import { useWebSocket } from '@features/websocket/hooks/useWebSocket'
 import { useTheme } from '../../../components/ThemeProvider'
+import { SidebarTrigger } from '@/shared/ui/sidebar'
+
+const breadcrumbMap: Record<string, string[]> = {
+  '/': ['Workspace', 'Overview'],
+  '/tasks': ['Workspace', 'Tasks'],
+  '/analytics': ['Workspace', 'Analytics'],
+  '/settings': ['Settings'],
+}
 
 const Header = () => {
   const { isConnected } = useWebSocket()
   const { effectiveTheme, setTheme, theme } = useTheme()
+  const location = useLocation()
+
+  const crumbs = useMemo(() => {
+    const segments = breadcrumbMap[location.pathname]
+
+    if (!segments) {
+      return location.pathname
+        .split('/')
+        .filter(Boolean)
+        .map((segment) => segment.replace(/-/g, ' '))
+        .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    }
+
+    return segments
+  }, [location.pathname])
 
   const handleToggleTheme = () => {
     // Cycle: light -> dark -> system
@@ -19,14 +43,27 @@ const Header = () => {
   }
 
   return (
-    <header className="bg-card shadow-sm border-b border-border px-4 md:px-6 py-4">
+    <header className="bg-card shadow-sm border-b border-border px-4 md:px-6 py-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg md:text-xl font-semibold text-foreground">Welcome back!</h2>
+        <div className="flex items-center gap-3">
+          <SidebarTrigger />
+          <nav className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex" aria-label="Breadcrumb">
+            {crumbs.map((label, index) => {
+              const isLast = index === crumbs.length - 1
+              return (
+                <React.Fragment key={`${label}-${index}`}>
+                  <span className={isLast ? 'text-foreground font-medium' : undefined}>{label}</span>
+                  {!isLast ? <ChevronRight className="h-3 w-3" /> : null}
+                </React.Fragment>
+              )
+            })}
+          </nav>
+        </div>
 
         <div className="flex items-center gap-4">
           <button
             onClick={handleToggleTheme}
-            className="p-2 rounded-lg hover:bg-accent/10 transition-colors"
+            className="p-2.5 sm:p-2 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 flex items-center justify-center rounded-lg hover:bg-accent/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             aria-label="Toggle theme"
             title={`Current: ${theme} (${effectiveTheme})`}
           >
@@ -37,15 +74,18 @@ const Header = () => {
             )}
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" role="status" aria-live="polite">
             <span
               className={`w-2 h-2 rounded-full ${
                 isConnected ? 'bg-green-500' : 'bg-red-500'
               }`}
-              aria-label={isConnected ? 'Connected' : 'Disconnected'}
+              aria-hidden="true"
             />
             <span className="text-sm text-muted-foreground hidden md:inline">
               {isConnected ? 'Connected' : 'Disconnected'}
+            </span>
+            <span className="sr-only">
+              WebSocket connection status: {isConnected ? 'Connected' : 'Disconnected'}
             </span>
           </div>
         </div>

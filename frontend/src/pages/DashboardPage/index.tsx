@@ -113,16 +113,22 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in-down">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
-        <div className="text-sm text-muted-foreground">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 sm:gap-3 md:gap-4 animate-fade-in-down">
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl 2k:text-5xl font-bold text-foreground">Dashboard</h1>
+        <div className="text-sm 2k:text-base text-muted-foreground">
           Last updated: {new Date().toLocaleString('uk-UA')}
         </div>
       </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up">
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 2k:gap-6 animate-fade-in-up"
+        role="region"
+        aria-label="Task statistics"
+        aria-live="polite"
+        aria-atomic="false"
+      >
         {statsLoading ? (
           <>
             {[...Array(4)].map((_, i) => (
@@ -191,14 +197,14 @@ const DashboardPage = () => {
       </div>
 
       {/* Recent Activities */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 2k:gap-8 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
         {/* Recent Messages */}
         <Card>
           <CardHeader>
             <CardTitle>Recent Messages</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="space-y-3" role="feed" aria-label="Recent messages feed" aria-busy={messagesLoading}>
               {messagesLoading ? (
                 <>
                   {[...Array(3)].map((_, i) => (
@@ -210,7 +216,19 @@ const DashboardPage = () => {
                 </>
               ) : messages && messages.length > 0 ? (
                 messages.slice(0, 5).map((message) => (
-                  <div key={message.id} className="border-b pb-3 last:border-b-0 cursor-pointer hover:bg-accent/50 transition-colors -mx-6 px-6">
+                  <div
+                    key={message.id}
+                    className="border-b pb-3 last:border-b-0 cursor-pointer hover:bg-accent/50 active:scale-[0.99] transition-all duration-150 -mx-6 px-6 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Message from ${message.sender}: ${message.text}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        // Handle message click if needed
+                      }
+                    }}
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <p className="text-sm">{message.text}</p>
@@ -241,7 +259,7 @@ const DashboardPage = () => {
             <CardTitle>Recent Tasks</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="space-y-3" role="feed" aria-label="Recent tasks feed" aria-busy={tasksLoading}>
               {tasksLoading ? (
                 <>
                   {[...Array(3)].map((_, i) => (
@@ -253,7 +271,19 @@ const DashboardPage = () => {
                 </>
               ) : tasks && tasks.length > 0 ? (
                 tasks.slice(0, 5).map((task) => (
-                  <div key={task.id} className="border-b pb-3 last:border-b-0 cursor-pointer hover:bg-accent/50 transition-colors -mx-6 px-6">
+                  <div
+                    key={task.id}
+                    className="border-b pb-3 last:border-b-0 cursor-pointer hover:bg-accent/50 active:scale-[0.99] transition-all duration-150 -mx-6 px-6 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Task: ${task.title}, Status: ${task.status}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        // Handle task click if needed - could navigate to task details
+                      }
+                    }}
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <p className="text-sm font-medium">{task.title}</p>

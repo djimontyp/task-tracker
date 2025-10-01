@@ -6,8 +6,8 @@ const SettingsPage = () => {
   const { theme, setTheme } = useUiStore()
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl md:text-3xl font-bold text-foreground">Settings</h1>
+    <div className="space-y-6 sm:space-y-7 md:space-y-8">
+      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">Settings</h1>
 
       <Card>
         <CardHeader>
@@ -48,7 +48,14 @@ const SettingsPage = () => {
               <p className="text-sm text-muted-foreground mt-1">Receive email updates about tasks and assignments</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-              <input type="checkbox" className="sr-only peer" defaultChecked />
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                defaultChecked
+                role="switch"
+                aria-label="Enable email notifications"
+                aria-checked="true"
+              />
               <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
@@ -59,7 +66,13 @@ const SettingsPage = () => {
               <p className="text-sm text-muted-foreground mt-1">Show browser notifications for task updates</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-              <input type="checkbox" className="sr-only peer" />
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                role="switch"
+                aria-label="Enable desktop notifications"
+                aria-checked="false"
+              />
               <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
