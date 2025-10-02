@@ -181,73 +181,6 @@
   font-style: italic;
 }
 
-.input-control-button {
-  position: absolute;
-  right: 0.75rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.375rem;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.input-control-button:hover:not(:disabled) {
-  color: var(--text-secondary);
-  background-color: var(--bg-tertiary);
-  transform: scale(1.1);
-}
-
-/* Specific styling for copy button */
-.copy-button:hover:not(:disabled) {
-  color: var(--accent-primary);
-  background-color: rgba(59, 130, 246, 0.1);
-  transform: scale(1.15);
-}
-
-.copy-button:active:not(:disabled) {
-  transform: scale(1.05);
-  background-color: rgba(59, 130, 246, 0.2);
-}
-
-/* Specific styling for clear button */
-.clear-button:hover:not(:disabled) {
-  color: var(--accent-error);
-  background-color: rgba(239, 68, 68, 0.1);
-}
-
-.input-control-button:active:not(:disabled) {
-  transform: scale(0.95);
-}
-
-.input-control-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* Specific button positioning when multiple buttons are present */
-.input-control-button.copy-button {
-  right: 2.5rem;
-}
-
-.input-control-button.clear-button {
-  right: 0.75rem;
-}
-
-/* When only copy button is present */
-.input-with-controls:has(.copy-button):not(:has(.clear-button)) .copy-button {
-  right: 0.75rem;
-}
-
-/* Fallback for browsers that don't support :has() */
-.input-control-button + .input-control-button {
-  right: 2.5rem;
-}
 
 /* Field Help */
 .field-help {
@@ -306,56 +239,6 @@
   justify-content: flex-end;
   padding-top: 1rem;
   border-top: 1px solid var(--border-primary);
-}
-
-.save-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  color: white;
-  border: none;
-  padding: 0.875rem 1.5rem;
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-  position: relative;
-  overflow: hidden;
-}
-
-.save-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  filter: brightness(110%);
-}
-
-.save-button:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: var(--shadow-sm);
-}
-
-.save-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  filter: none;
-}
-
-.save-button.saving {
-  background: var(--text-muted);
-  cursor: wait;
-}
-
-.save-spinner {
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
 }
 
 /* Responsive Design */

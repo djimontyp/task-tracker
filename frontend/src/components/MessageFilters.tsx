@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Button } from '@shared/ui';
 
 interface MessageFiltersState {
   author: string;
@@ -155,13 +156,13 @@ export function MessageFilters({ onFiltersChange, apiBaseUrl, className = '' }: 
         </div>
 
         <div className="filter-actions">
-          <button
-            className="btn-secondary"
+          <Button
+            variant="outline"
             onClick={handleClearFilters}
             disabled={!hasActiveFilters || isLoading}
           >
             🗑️ Clear All
-          </button>
+          </Button>
 
           {hasActiveFilters && (
             <div className="active-filters-indicator">

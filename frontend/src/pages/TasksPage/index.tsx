@@ -75,7 +75,8 @@ const TasksPage = () => {
           {(['all', 'pending', 'in_progress', 'completed', 'cancelled'] as const).map((status) => (
             <Button
               key={status}
-              variant={filterStatus === status ? 'default' : 'ghost'}
+              variant="ghost"
+              size="sm"
               onClick={() => setFilterStatus(status)}
               aria-pressed={filterStatus === status}
               aria-label={`Filter by ${status.replace('_', ' ')}`}

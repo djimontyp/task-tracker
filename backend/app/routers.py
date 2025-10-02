@@ -734,14 +734,22 @@ async def get_webhook_settings(db: DatabaseDep, settings: SettingsDep):
 @api_router.post("/webhook-settings", response_model=TelegramWebhookConfig)
 async def save_webhook_settings(request: SetWebhookRequest, db: DatabaseDep):
     """Save webhook configuration (without setting it in Telegram)"""
+    host = request.host.strip()
+    if not host:
+        raise HTTPException(status_code=400, detail="Host must not be empty")
+    if "://" in host:
+        raise HTTPException(
+            status_code=400,
+            detail="Host should not include protocol. Provide only host name or host:port.",
+        )
+
     try:
-        config = await webhook_settings_service.save_telegram_config(
+        return await webhook_settings_service.save_telegram_config(
             db=db,
             protocol=request.protocol,
-            host=request.host,
+            host=host,
             is_active=False,  # Not active until webhook is actually set
         )
-        return config
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to save webhook settings: {str(e)}"
@@ -751,7 +759,16 @@ async def save_webhook_settings(request: SetWebhookRequest, db: DatabaseDep):
 @api_router.post("/webhook-settings/telegram/set", response_model=SetWebhookResponse)
 async def set_telegram_webhook(request: SetWebhookRequest, db: DatabaseDep):
     """Set Telegram webhook URL via Bot API"""
-    webhook_url = f"{request.protocol}://{request.host}/webhook/telegram"
+    host = request.host.strip()
+    if not host:
+        raise HTTPException(status_code=400, detail="Host must not be empty")
+    if "://" in host:
+        raise HTTPException(
+            status_code=400,
+            detail="Host should not include protocol. Provide only host name or host:port.",
+        )
+
+    webhook_url = f"{request.protocol}://{host}/webhook/telegram"
 
     try:
         # Call Telegram API to set webhook
@@ -760,7 +777,7 @@ async def set_telegram_webhook(request: SetWebhookRequest, db: DatabaseDep):
         if result["success"]:
             # Save configuration with active status
             await webhook_settings_service.save_telegram_config(
-                db=db, protocol=request.protocol, host=request.host, is_active=True
+                db=db, protocol=request.protocol, host=host, is_active=True
             )
 
             return SetWebhookResponse(
@@ -789,21 +806,27 @@ async def delete_telegram_webhook(db: DatabaseDep):
 
         if result["success"]:
             # Update database to mark as inactive
-            await webhook_settings_service.set_telegram_webhook_active(db, False)
+            config = await webhook_settings_service.set_telegram_webhook_active(
+                db, False
+            )
 
             return SetWebhookResponse(
-                success=True, message="Webhook deleted successfully"
+                success=True,
+                webhook_url=config.webhook_url if config else None,
+                message="Webhook deleted successfully",
             )
         else:
             return SetWebhookResponse(
                 success=False,
+                webhook_url=None,
                 message="Failed to delete webhook",
                 error=result.get("error", "Unknown error"),
             )
 
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to delete webhook: {str(e)}"
+            status_code=500,
+            detail=f"Failed to delete webhook: {str(e)}",
         )
 
 

@@ -136,12 +136,13 @@ class WebhookSettingsService:
         self, db: AsyncSession, protocol: str, host: str, is_active: bool = False
     ) -> TelegramWebhookConfig:
         """Save Telegram webhook configuration to database"""
-        webhook_url = f"{protocol}://{host}/webhook/telegram"
+        normalized_host = host.strip().rstrip("/")
+        webhook_url = f"{protocol}://{normalized_host}/webhook/telegram"
 
         config_data = {
             "telegram": {
                 "protocol": protocol,
-                "host": host,
+                "host": normalized_host,
                 "webhook_url": webhook_url,
                 "is_active": is_active,
                 "last_set_at": datetime.utcnow().isoformat() if is_active else None,
@@ -182,7 +183,7 @@ class WebhookSettingsService:
 
     async def set_telegram_webhook_active(
         self, db: AsyncSession, is_active: bool
-    ) -> bool:
+    ) -> TelegramWebhookConfig | None:
         """Update the active status of Telegram webhook"""
         try:
             statement = select(WebhookSettings).where(
@@ -200,19 +201,22 @@ class WebhookSettingsService:
                         config["telegram"]["last_set_at"] = (
                             datetime.utcnow().isoformat()
                         )
+                    else:
+                        config["telegram"]["last_set_at"] = None
 
                     settings_record.config = config
                     settings_record.is_active = is_active
                     db.add(settings_record)
                     await db.commit()
-                    return True
+                    await db.refresh(settings_record)
+                    return TelegramWebhookConfig(**config["telegram"])
 
-            return False
+            return None
 
         except Exception as e:
             await db.rollback()
             logger.error(f"Error updating webhook active status: {e}")
-            return False
+            return None
 
 
 # Service instances

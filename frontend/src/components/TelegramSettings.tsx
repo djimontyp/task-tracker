@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Button } from '@/shared/ui';
 
 interface TelegramSettings {
   bot_token: string;
@@ -247,7 +248,7 @@ export function TelegramSettingsForm({ config }: TelegramSettingsFormProps) {
             <input
               id="bot-token"
               type="password"
-              className="field-input"
+              className="field-input pr-16"
               placeholder="Enter your Telegram bot token"
               value={botToken}
               onChange={(e) => {
@@ -259,21 +260,25 @@ export function TelegramSettingsForm({ config }: TelegramSettingsFormProps) {
               disabled={isSaving}
             />
             {botToken && (
-              <button
+              <Button
                 type="button"
-                className="input-control-button copy-button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-12 top-1/2 -translate-y-1/2 h-9 w-9 p-0"
                 onClick={handleCopyToken}
                 disabled={isSaving}
                 aria-label="Copy token to clipboard"
                 title="Copy token to clipboard"
               >
                 📋
-              </button>
+              </Button>
             )}
             {botToken && (
-              <button
+              <Button
                 type="button"
-                className="input-control-button clear-button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 p-0"
                 onClick={() => {
                   setBotToken('');
                   setFullBotToken('');
@@ -283,7 +288,7 @@ export function TelegramSettingsForm({ config }: TelegramSettingsFormProps) {
                 title="Clear token"
               >
                 ✕
-              </button>
+              </Button>
             )}
           </div>
           <p className="field-help">
@@ -299,7 +304,7 @@ export function TelegramSettingsForm({ config }: TelegramSettingsFormProps) {
             <input
               id="webhook-url"
               type="text"
-              className="field-input"
+              className="field-input pr-12"
               placeholder={defaultWebhookUrl || 'Enter your webhook base URL'}
               value={webhookBaseUrl}
               onChange={(e) => setWebhookBaseUrl(e.target.value)}
@@ -307,16 +312,18 @@ export function TelegramSettingsForm({ config }: TelegramSettingsFormProps) {
               disabled={isSaving}
             />
             {webhookBaseUrl && (
-              <button
+              <Button
                 type="button"
-                className="input-control-button clear-button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 p-0"
                 onClick={() => setWebhookBaseUrl('')}
                 disabled={isSaving}
                 aria-label="Clear webhook URL"
                 title="Clear webhook URL"
               >
                 ✕
-              </button>
+              </Button>
             )}
           </div>
           <div className="webhook-url-display">
@@ -327,23 +334,15 @@ export function TelegramSettingsForm({ config }: TelegramSettingsFormProps) {
       </div>
 
       <div className="settings-actions">
-        <button
+        <Button
           type="button"
-          className={`save-button ${isSaving ? 'saving' : ''}`}
           onClick={handleSave}
           disabled={isSaving || !botToken.trim()}
+          loading={isSaving}
+          className="w-full sm:w-auto"
         >
-          {isSaving ? (
-            <>
-              <span className="save-spinner"></span>
-              Saving Settings...
-            </>
-          ) : (
-            <>
-              💾 Save Settings
-            </>
-          )}
-        </button>
+          Save Settings
+        </Button>
       </div>
     </div>
   );
