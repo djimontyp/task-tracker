@@ -7,8 +7,7 @@ import { Badge, Skeleton } from '@/shared/ui'
 import { apiClient } from '@/shared/lib/api/client'
 import { Task, Message, TaskStats } from '@/shared/types'
 import MetricCard from '@/shared/components/MetricCard'
-import TrendChart from '@/shared/components/TrendChart'
-import { ChartConfig } from '@/shared/ui/chart'
+import ActivityHeatmap from '@/shared/components/ActivityHeatmap'
 import { useTasksStore } from '@/features/tasks/store/tasksStore'
 
 const DashboardPage = () => {
@@ -75,42 +74,6 @@ const DashboardPage = () => {
       },
     }
   }, [stats])
-
-  // Generate chart data based on tasks
-  const chartData = useMemo(() => {
-    if (!tasks || tasks.length === 0) {
-      // Mock data for empty state
-      return [
-        { date: '2025-09-24', tasks: 2 },
-        { date: '2025-09-25', tasks: 5 },
-        { date: '2025-09-26', tasks: 3 },
-        { date: '2025-09-27', tasks: 8 },
-        { date: '2025-09-28', tasks: 6 },
-        { date: '2025-09-29', tasks: 10 },
-        { date: '2025-09-30', tasks: 7 },
-      ]
-    }
-
-    // Group tasks by date
-    const tasksByDate = tasks.reduce((acc, task) => {
-      const date = new Date(task.created_at || task.createdAt).toLocaleDateString('en-CA')
-      acc[date] = (acc[date] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
-
-    // Convert to array and sort by date
-    return Object.entries(tasksByDate)
-      .map(([date, count]) => ({ date, tasks: count }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(-7) // Last 7 days
-  }, [tasks])
-
-  const chartConfig: ChartConfig = {
-    tasks: {
-      label: 'Tasks',
-      color: 'hsl(var(--primary))',
-    },
-  }
 
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
@@ -297,15 +260,12 @@ const DashboardPage = () => {
         </Card>
       </div>
 
-      {/* Trend Chart */}
-      <div className="animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>
-        <TrendChart
-          title="Task Creation Trend"
-          data={chartData}
-          dataKey="tasks"
-          xAxisKey="date"
-          config={chartConfig}
-          height={350}
+      {/* Activity Heatmap */}
+      <div className="animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}>
+        <ActivityHeatmap
+          title="Message Activity Heatmap"
+          period="week"
+          enabledSources={['telegram']}
           className="w-full"
         />
       </div>

@@ -31,6 +31,19 @@ export {
 export { Label } from './label'
 export { Skeleton } from './skeleton'
 export { Toaster } from './sonner'
+export { Checkbox } from './checkbox'
+export {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider
+} from './tooltip'
+export {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent
+} from './tabs'
 
 // Keep custom Spinner
 export { default as Spinner } from './Spinner'

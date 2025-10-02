@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import json
 from typing import List, Optional
 
@@ -525,6 +525,74 @@ async def update_task_status(task_id: int, status: str, db: DatabaseDep):
 
 
 # ~~~~~~~~~~~~~~~~ API роути для статистики ~~~~~~~~~~~~~~~~
+
+
+@api_router.get("/activity")
+async def get_activity_data(
+    db: DatabaseDep,
+    period: str = Query("week", description="Period type: 'week' or 'month'"),
+    month: Optional[int] = Query(None, description="Month (0-11, for month period)"),
+    year: Optional[int] = Query(None, description="Year (for month period)"),
+):
+    """
+    Get message activity data grouped by hour and day for heatmap visualization
+
+    Returns activity data points with timestamp, source, and count
+    """
+    # Calculate date range based on period
+    if period == "month":
+        # Use provided month/year or current
+        target_month = month if month is not None else datetime.utcnow().month - 1
+        target_year = year if year is not None else datetime.utcnow().year
+
+        # First day of month
+        start_date = datetime(target_year, target_month + 1, 1)
+        # Last day of month
+        if target_month == 11:
+            end_date = datetime(target_year + 1, 1, 1) - timedelta(seconds=1)
+        else:
+            end_date = datetime(target_year, target_month + 2, 1) - timedelta(seconds=1)
+    else:
+        # Week period (default)
+        end_date = datetime.utcnow()
+        start_date = end_date - timedelta(days=7)
+
+    # Query messages within date range
+    statement = (
+        select(SimpleMessage, SimpleSource)
+        .join(SimpleSource, SimpleMessage.source_id == SimpleSource.id)
+        .where(
+            and_(
+                SimpleMessage.sent_at >= start_date,
+                SimpleMessage.sent_at <= end_date
+            )
+        )
+        .order_by(SimpleMessage.sent_at)
+    )
+
+    result = await db.execute(statement)
+    messages_with_sources = result.all()
+
+    # Group by hour and source
+    activity_data = []
+    for message, source in messages_with_sources:
+        activity_data.append({
+            "timestamp": message.sent_at.isoformat(),
+            "source": source.name,
+            "count": 1  # Each message counts as 1
+        })
+
+    return {
+        "data": activity_data,
+        "period": {
+            "type": period,
+            "start": start_date.isoformat(),
+            "end": end_date.isoformat(),
+            "month": target_month if period == "month" else None,
+            "year": target_year if period == "month" else None,
+        },
+        "total_messages": len(activity_data)
+    }
 
 
 @api_router.get("/stats", response_model=StatsResponse)
