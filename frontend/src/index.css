@@ -4,66 +4,66 @@
 
 @layer base {
   :root {
-    /* Light Theme - Blade Runner Inspired */
-    --background: 210 20% 98%;
-    --foreground: 217 32% 13%;
+    /* Light Theme - Elegant Techno-Neon */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 217 32% 13%;
+    --card-foreground: 0 0% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 217 32% 13%;
-    --primary: 14 100% 60%; /* BR Orange #FF6B35 */
+    --popover-foreground: 0 0% 12%;
+    --primary: 14 82% 53%; /* Warm copper gradient start #E4572E */
     --primary-foreground: 0 0% 100%;
-    --secondary: 217 25% 20%; /* BR Navy #1A2332 */
-    --secondary-foreground: 0 0% 100%;
-    --muted: 210 20% 90%;
-    --muted-foreground: 217 20% 40%;
-    --accent: 14 100% 60%; /* BR Orange #FF6B35 */
+    --secondary: 0 0% 16%; /* Dark charcoal #2A2A2A */
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 17 90% 65%; /* Copper accent #F58549 */
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --destructive: 353 84% 46%; /* Deep ruby #D72638 */
     --destructive-foreground: 0 0% 100%;
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
-    --ring: 14 100% 60%; /* Unified focus ring - orange for consistency */
-    --radius: 8px;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 14 82% 53%;
+    --radius: 6px;
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-foreground: 0 0% 12%;
+    --sidebar-primary: 0 0% 12%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 14 100% 60%; /* Unified focus ring - same as --ring */
+    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent-foreground: 0 0% 12%;
+    --sidebar-border: 0 0% 91%;
+    --sidebar-ring: 14 82% 53%;
   }
 
   .dark {
-    /* Dark Theme - Blade Runner Cyberpunk */
-    --background: 210 30% 6%; /* Very dark #0A0E11 */
-    --foreground: 210 20% 93%;
-    --card: 215 25% 11%; /* Card #1A1F24 */
-    --card-foreground: 210 20% 93%;
-    --popover: 215 25% 11%;
-    --popover-foreground: 210 20% 93%;
-    --primary: 20 100% 72%; /* BR Peach #FF9B71 */
-    --primary-foreground: 210 30% 6%;
-    --secondary: 217 25% 20%; /* BR Navy */
-    --secondary-foreground: 210 20% 93%;
-    --muted: 215 20% 18%;
-    --muted-foreground: 210 15% 60%;
-    --accent: 20 100% 72%; /* BR Peach #FF9B71 */
+    /* Dark Theme - Elegant Techno-Neon */
+    --background: 0 0% 12%; /* Deep charcoal #1E1E1E */
+    --foreground: 0 0% 92%;
+    --card: 0 0% 16%; /* Dark grey #2A2A2A */
+    --card-foreground: 0 0% 92%;
+    --popover: 0 0% 16%;
+    --popover-foreground: 0 0% 92%;
+    --primary: 14 82% 53%; /* Warm copper #E4572E */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 16%; /* Dark charcoal #2A2A2A */
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 17 90% 65%; /* Copper accent #F58549 */
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 62% 50%;
+    --destructive: 353 84% 46%; /* Deep ruby #D72638 */
     --destructive-foreground: 0 0% 100%;
-    --border: 215 20% 18%;
-    --input: 215 20% 18%;
-    --ring: 20 100% 72%; /* Unified focus ring - peach for dark theme */
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 14 100% 60%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 14 82% 53%;
+    --sidebar-background: 0 0% 12%;
+    --sidebar-foreground: 0 0% 92%;
+    --sidebar-primary: 14 82% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 20 100% 72%; /* Unified focus ring - same as --ring */
+    --sidebar-accent: 0 0% 18%;
+    --sidebar-accent-foreground: 0 0% 92%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 14 82% 53%;
   }
 }
 
