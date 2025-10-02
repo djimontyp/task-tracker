@@ -43,6 +43,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   // Apply theme to document
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', effectiveTheme);
+    document.documentElement.classList.toggle('dark', effectiveTheme === 'dark');
     localStorage.setItem('theme', theme);
   }, [theme, effectiveTheme]);
 

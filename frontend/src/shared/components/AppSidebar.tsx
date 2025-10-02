@@ -19,7 +19,7 @@ import { cn } from '@/shared/lib/utils'
 import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
 
 const navItems = [
-  { path: '/', label: 'Overview', icon: LayoutDashboard },
+  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/tasks', label: 'Tasks', icon: CheckSquare },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/settings', label: 'Settings', icon: Settings },
