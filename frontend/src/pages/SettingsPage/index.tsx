@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AxiosError } from 'axios'
 import toast from 'react-hot-toast'
+import { Copy, Check, Info, MessageSquare } from 'lucide-react'
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Skeleton } from '@shared/ui'
 import { useTheme } from '../../components/ThemeProvider'
 import { apiClient } from '@/shared/lib/api/client'
@@ -116,6 +117,7 @@ const SettingsPage = () => {
   const [isAddingGroup, setIsAddingGroup] = useState(false)
   const [isRefreshingNames, setIsRefreshingNames] = useState(false)
   const [removingGroupIds, setRemovingGroupIds] = useState<Set<number>>(new Set())
+  const [copiedWebhookUrl, setCopiedWebhookUrl] = useState(false)
 
   const { protocol, host } = useMemo(() => parseBaseUrl(webhookBaseUrl), [webhookBaseUrl])
   const computedWebhookUrl = useMemo(
@@ -307,8 +309,23 @@ const SettingsPage = () => {
     }
   }
 
-  const activeBadgeVariant = isActive ? 'default' : 'outline'
+  const handleCopyWebhookUrl = async () => {
+    const urlToCopy = serverWebhookUrl || computedWebhookUrl
+    if (!urlToCopy) return
+
+    try {
+      await navigator.clipboard.writeText(urlToCopy)
+      setCopiedWebhookUrl(true)
+      toast.success('Webhook URL copied to clipboard')
+      setTimeout(() => setCopiedWebhookUrl(false), 2000)
+    } catch (error) {
+      toast.error('Failed to copy URL')
+    }
+  }
+
+  const activeBadgeVariant = isActive ? 'default' : 'secondary'
   const activeBadgeText = isActive ? 'Active' : 'Inactive'
+  const statusDotColor = isActive ? 'bg-green-500' : 'bg-gray-400'
   const lastSetFormatted = useMemo(() => {
     if (!lastSetAt) return null
     try {
@@ -375,141 +392,215 @@ const SettingsPage = () => {
                   value={webhookBaseUrl}
                   onChange={(event) => setWebhookBaseUrl(event.target.value)}
                   autoComplete="off"
+                  aria-label="Webhook base URL"
+                  aria-describedby="webhook-url-help"
                 />
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Provide the publicly accessible base URL, for example `https://ecf34ba1bf9a.ngrok-free.app`.
-                  The system will append `{WEBHOOK_PATH}` automatically.
-                </p>
+                <div id="webhook-url-help" className="mt-2 flex items-start gap-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-md">
+                  <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                  <p className="text-xs text-foreground/70">
+                    Provide the publicly accessible base URL, for example <code className="text-xs bg-muted px-1 py-0.5 rounded">https://ecf34ba1bf9a.ngrok-free.app</code>.
+                    The system will append <code className="text-xs bg-muted px-1 py-0.5 rounded">{WEBHOOK_PATH}</code> automatically.
+                  </p>
+                </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label className="text-sm font-medium text-foreground">Final webhook URL</Label>
-                  <Input className="mt-2" value={serverWebhookUrl || computedWebhookUrl || ''} readOnly />
+                  <div className="mt-2 flex items-center gap-2 p-3 bg-muted/50 rounded-md border border-border">
+                    <code className="flex-1 text-sm font-mono text-foreground truncate">
+                      {serverWebhookUrl || computedWebhookUrl || 'Not configured'}
+                    </code>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCopyWebhookUrl}
+                      disabled={!serverWebhookUrl && !computedWebhookUrl}
+                      className="shrink-0"
+                      aria-label={copiedWebhookUrl ? "Webhook URL copied" : "Copy webhook URL to clipboard"}
+                      title={copiedWebhookUrl ? "Copied!" : "Copy to clipboard"}
+                    >
+                      {copiedWebhookUrl ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-foreground">Status</Label>
                   <div className="mt-1 flex items-center gap-2">
-                    <Badge variant={activeBadgeVariant}>{activeBadgeText}</Badge>
+                    <div className="flex items-center gap-2">
+                      <div className={`h-2 w-2 rounded-full ${statusDotColor}`} />
+                      <Badge variant={activeBadgeVariant}>{activeBadgeText}</Badge>
+                    </div>
                     {lastSetFormatted && (
-                      <span className="text-xs text-muted-foreground">Last set: {lastSetFormatted}</span>
+                      <span className="text-xs text-foreground/60">Last set: {lastSetFormatted}</span>
                     )}
                   </div>
                 </div>
               </div>
 
+              <div className="flex items-start gap-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded-md">
+                <Info className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                <p className="text-xs text-foreground/70">
+                  <strong>Workflow:</strong> Save your changes first, then activate the webhook with Telegram
+                </p>
+              </div>
+
               <div className="flex flex-wrap gap-3">
-                <Button type="button" variant="ghost" onClick={handleSave} disabled={isSaving || !isValidBaseUrl}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleSave}
+                  disabled={isSaving || !isValidBaseUrl}
+                  aria-label="Save webhook configuration settings"
+                  title="Save your webhook base URL configuration"
+                >
                   {isSaving ? 'Saving…' : 'Save settings'}
                 </Button>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="default"
                   onClick={handleSetWebhook}
                   disabled={isSettingWebhook || !isValidBaseUrl}
+                  aria-label="Activate webhook with Telegram"
+                  title="Register this webhook URL with Telegram Bot API"
                 >
                   {isSettingWebhook ? 'Activating…' : 'Set & Activate'}
                 </Button>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="destructive"
                   onClick={handleDeleteWebhook}
                   disabled={isDeletingWebhook || !isActive}
+                  aria-label="Delete webhook from Telegram"
+                  title="Remove webhook configuration from Telegram Bot API"
                 >
                   {isDeletingWebhook ? 'Deleting…' : 'Delete webhook'}
                 </Button>
-                <Button type="button" variant="ghost" onClick={loadConfig} disabled={isLoadingConfig}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={loadConfig}
+                  disabled={isLoadingConfig}
+                  aria-label="Refresh webhook configuration"
+                  title="Reload configuration from server"
+                >
                   Refresh
                 </Button>
               </div>
 
-              <div className="border-t pt-6 mt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <Label className="text-sm font-medium text-foreground">Telegram Groups</Label>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleRefreshNames}
-                    disabled={isRefreshingNames || groups.length === 0}
-                  >
-                    {isRefreshingNames ? 'Refreshing…' : 'Refresh Names'}
-                  </Button>
-                </div>
-
-                <div className="space-y-2 mb-4">
-                  <div className="flex gap-2">
-                    <Input
-                      id="new-group-id"
-                      placeholder="-2988379206 (from URL) or -1002988379206"
-                      value={newGroupId}
-                      onChange={(event) => setNewGroupId(event.target.value)}
-                      autoComplete="off"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleAddGroup()
-                        }
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={handleAddGroup}
-                      disabled={isAddingGroup || !newGroupId.trim()}
-                    >
-                      {isAddingGroup ? 'Adding…' : 'Add Group'}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    💡 Copy group ID from Telegram Web URL (e.g., https://web.telegram.org/k/#-2988379206)
-                  </p>
-                </div>
-
-                {groups.length > 0 ? (
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      {groups.map(group => (
-                        <Card key={group.id} className="p-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm font-medium text-foreground">
-                                  {group.name || `Group ${group.id}`}
-                                </p>
-                                {!group.name && (
-                                  <Badge variant="outline" className="text-xs">No Name</Badge>
-                                )}
-                              </div>
-                              <p className="text-xs text-muted-foreground">ID: {group.id}</p>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRemoveGroup(group.id)}
-                              disabled={removingGroupIds.has(group.id)}
-                            >
-                              {removingGroupIds.has(group.id) ? 'Removing…' : 'Remove'}
-                            </Button>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                    {groups.some(g => !g.name) && (
-                      <div className="bg-muted/50 p-3 rounded-md text-xs text-muted-foreground">
-                        <p className="font-medium mb-1">💡 To fetch group names:</p>
-                        <ol className="list-decimal list-inside space-y-1">
-                          <li>Add the bot to your Telegram group as admin</li>
-                          <li>Click "Refresh Names" button above</li>
-                        </ol>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No groups configured. Add a group ID above to start monitoring.</p>
-                )}
-              </div>
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-foreground">Telegram Groups</CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshNames}
+              disabled={isRefreshingNames || groups.length === 0}
+              aria-label="Refresh Telegram group names"
+              title="Fetch the latest group names from Telegram"
+            >
+              {isRefreshingNames ? 'Refreshing…' : 'Refresh Names'}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <Input
+                id="new-group-id"
+                placeholder="-2988379206 (from URL) or -1002988379206"
+                value={newGroupId}
+                onChange={(event) => setNewGroupId(event.target.value)}
+                autoComplete="off"
+                aria-label="Enter Telegram group ID"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleAddGroup()
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleAddGroup}
+                disabled={isAddingGroup || !newGroupId.trim()}
+                aria-label="Add Telegram group to monitoring list"
+                title="Add this group ID to your monitored groups"
+              >
+                {isAddingGroup ? 'Adding…' : 'Add Group'}
+              </Button>
+            </div>
+            <div className="flex items-start gap-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-md">
+              <MessageSquare className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-foreground/70">
+                Copy group ID from Telegram Web URL (e.g., <code className="text-xs bg-muted px-1 py-0.5 rounded">https://web.telegram.org/k/#-2988379206</code>)
+              </p>
+            </div>
+          </div>
+
+          {groups.length > 0 ? (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                {groups.map(group => (
+                  <Card key={group.id} className="p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center h-10 w-10 rounded-full bg-blue-500/10 shrink-0">
+                        <MessageSquare className="h-5 w-5 text-blue-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-foreground truncate">
+                            {group.name || `Group ${group.id}`}
+                          </p>
+                          {!group.name && (
+                            <Badge variant="outline" className="text-xs shrink-0">Name Pending</Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">ID: {group.id}</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveGroup(group.id)}
+                        disabled={removingGroupIds.has(group.id)}
+                        className="shrink-0"
+                        aria-label={`Remove ${group.name || 'group'} from monitoring list`}
+                        title={`Remove group ${group.id} from your monitored groups`}
+                      >
+                        {removingGroupIds.has(group.id) ? 'Removing…' : 'Remove'}
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+              {groups.some(g => !g.name) && (
+                <div className="flex items-start gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-md">
+                  <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                  <div className="text-xs text-foreground/70">
+                    <p className="font-medium mb-2">To fetch group names:</p>
+                    <ol className="list-decimal list-inside space-y-1">
+                      <li>Add the bot to your Telegram group as admin</li>
+                      <li>Click "Refresh Names" button above</li>
+                    </ol>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No groups configured. Add a group ID above to start monitoring.</p>
           )}
         </CardContent>
       </Card>

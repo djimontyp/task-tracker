@@ -22,23 +22,52 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema - drop complex unused tables in correct dependency order."""
     # Drop tables in dependency order (child tables first, then parents)
+    # Use try-except to handle tables that may not exist
 
-    # Drop dependent tables first
-    op.drop_table("output")  # depends on issue
-    op.drop_table("issue")  # depends on message
-    op.drop_table("processingjob")  # depends on stream
+    try:
+        op.drop_table("output")  # depends on issue
+    except Exception:
+        pass
 
-    # Drop message table and its indexes
-    op.drop_index(op.f("ix_message_sent_at"), table_name="message")
-    op.drop_index(op.f("ix_message_thread_key"), table_name="message")
-    op.drop_table("message")  # depends on source and stream
+    try:
+        op.drop_table("issue")  # depends on message
+    except Exception:
+        pass
 
-    # Drop stream table (depends on source)
-    op.drop_table("stream")
+    try:
+        op.drop_table("processingjob")  # depends on stream
+    except Exception:
+        pass
 
-    # Drop parent tables
-    op.drop_table("source")
-    op.drop_table("llmprovider")  # independent table
+    try:
+        op.drop_index(op.f("ix_message_sent_at"), table_name="message")
+    except Exception:
+        pass
+
+    try:
+        op.drop_index(op.f("ix_message_thread_key"), table_name="message")
+    except Exception:
+        pass
+
+    try:
+        op.drop_table("message")  # depends on source and stream
+    except Exception:
+        pass
+
+    try:
+        op.drop_table("stream")
+    except Exception:
+        pass
+
+    try:
+        op.drop_table("source")
+    except Exception:
+        pass
+
+    try:
+        op.drop_table("llmprovider")  # independent table
+    except Exception:
+        pass
 
     # Update working table column types to match consolidated models
     op.alter_column(

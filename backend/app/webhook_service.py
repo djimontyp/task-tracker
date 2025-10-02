@@ -23,6 +23,9 @@ class TelegramWebhookService:
         if not self.bot_token:
             raise ValueError("Telegram bot token is required")
 
+        # Simple in-memory cache for user avatar URLs to reduce Telegram API calls
+        self._avatar_cache: dict[int, str] = {}
+
     async def set_webhook(self, webhook_url: str) -> Dict[str, Any]:
         """Set Telegram webhook URL via Bot API"""
         url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/setWebhook"
@@ -44,18 +47,83 @@ class TelegramWebhookService:
                         "success": False,
                         "error": result.get("description", "Unknown error"),
                     }
-
         except httpx.RequestError as e:
             logger.error(f"Request error setting webhook: {e}")
             return {"success": False, "error": f"Request failed: {str(e)}"}
         except Exception as e:
             logger.error(f"Unexpected error setting webhook: {e}")
-            return {"success": False, "error": f"Unexpected error: {str(e)}"}
+            return {"success": False, "error": f"Unexpected error getting chat info: {str(e)}"}
+
+    async def get_user_avatar_url(self, user_id: int) -> str | None:
+        """Fetch Telegram user avatar URL using Bot API."""
+
+        if not user_id:
+            return None
+
+        if user_id in self._avatar_cache:
+            return self._avatar_cache[user_id]
+
+        profile_photos_url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/getUserProfilePhotos"
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    profile_photos_url,
+                    json={"user_id": user_id, "limit": 1},
+                    timeout=30.0,
+                )
+                response.raise_for_status()
+                result = response.json()
+
+            if not result.get("ok"):
+                logger.warning(
+                    "Telegram API error fetching profile photos for %s: %s",
+                    user_id,
+                    result.get("description", "unknown error"),
+                )
+                return None
+
+            photos = result.get("result", {}).get("photos", [])
+            if not photos:
+                return None
+
+            # Latest photo is first in array. Take biggest size (last item)
+            file_id = photos[0][-1]["file_id"]
+
+            get_file_url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/getFile"
+            async with httpx.AsyncClient() as client:
+                file_response = await client.post(
+                    get_file_url, json={"file_id": file_id}, timeout=30.0
+                )
+                file_response.raise_for_status()
+                file_result = file_response.json()
+
+            if not file_result.get("ok"):
+                logger.warning(
+                    "Telegram API error fetching file for %s: %s",
+                    user_id,
+                    file_result.get("description", "unknown error"),
+                )
+                return None
+
+            file_path = file_result.get("result", {}).get("file_path")
+            if not file_path:
+                return None
+
+            avatar_url = f"https://api.telegram.org/file/bot{self.bot_token}/{file_path}"
+            self._avatar_cache[user_id] = avatar_url
+            return avatar_url
+
+        except httpx.RequestError as exc:
+            logger.error("Failed to fetch avatar for user %s: %s", user_id, exc)
+            return None
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.error("Unexpected error fetching avatar for user %s: %s", user_id, exc)
+            return None
 
     async def delete_webhook(self) -> Dict[str, Any]:
         """Remove Telegram webhook"""
         url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/deleteWebhook"
-
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(url, timeout=30.0)

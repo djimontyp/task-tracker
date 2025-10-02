@@ -277,6 +277,16 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
         await db.commit()
         await db.refresh(source)
 
+    avatar_url = message.avatar_url
+
+    if not avatar_url and message.user_id:
+        try:
+            avatar_url = await telegram_webhook_service.get_user_avatar_url(
+                message.user_id
+            )
+        except Exception as exc:  # pragma: no cover - defensive logging
+            logger.warning("Failed to resolve avatar for %s: %s", message.user_id, exc)
+
     db_message = SimpleMessage(
         external_message_id=message.id,
         content=message.content,
@@ -286,6 +296,7 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
         ).replace(tzinfo=None),
         source_id=source.id,
         created_at=datetime.utcnow(),
+        avatar_url=avatar_url,
     )
 
     db.add(db_message)
@@ -299,12 +310,15 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
         author=db_message.author,
         sent_at=db_message.sent_at,
         source_name=source.name,
+        analyzed=db_message.analyzed,
+        avatar_url=avatar_url,
+        persisted=True,
     )
 
     # Fix datetime serialization for WebSocket
     response_data = response.model_dump()
     response_data["sent_at"] = response_data["sent_at"].isoformat()
-    await manager.broadcast({"type": "message", "data": response_data})
+    await manager.broadcast({"type": "message.new", "data": response_data})
 
     return {"status": "message received", "id": db_message.id}
 
@@ -369,6 +383,8 @@ async def get_messages(
                 sent_at=msg.sent_at,
                 source_name=source.name,  # Actual source name from database
                 analyzed=msg.analyzed,
+                avatar_url=msg.avatar_url,
+                persisted=True,
             )
         )
 
@@ -429,13 +445,22 @@ async def telegram_webhook(request: Request):
             message = update_data["message"]
 
             # Create instant response for WebSocket (no DB required)
+            from_user = message.get("from", {})
+            user_id = from_user.get("id")
+            avatar_url = None
+
+            if user_id:
+                avatar_url = await telegram_webhook_service.get_user_avatar_url(user_id)
+
             live_response = MessageResponse(
                 id=0,  # Temporary ID for live display
                 external_message_id=str(message["message_id"]),
                 content=message.get("text", message.get("caption", "[Media]")),
-                author=message.get("from", {}).get("first_name", "Unknown"),
+                author=from_user.get("first_name", "Unknown"),
                 sent_at=datetime.fromtimestamp(message["date"]),
                 source_name="telegram",
+                avatar_url=avatar_url,
+                persisted=False,
             )
 
             # Instant WebSocket broadcast (no waiting for DB)
@@ -443,7 +468,7 @@ async def telegram_webhook(request: Request):
             message_data["sent_at"] = message_data[
                 "sent_at"
             ].isoformat()  # Convert datetime to string
-            await manager.broadcast({"type": "message", "data": message_data})
+            await manager.broadcast({"type": "message.new", "data": message_data})
 
             # Schedule background database save
             try:

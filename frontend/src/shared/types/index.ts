@@ -18,13 +18,21 @@ export interface Task {
 }
 
 export interface Message {
-  id: string
+  id: number | string
+  external_message_id: string
   content: string
+  author: string
+  sent_at: string
+  source_name: string
+  analyzed?: boolean
+  avatar_url?: string | null
+  persisted?: boolean
+  // Legacy compatibility fields
   text?: string
   sender?: string
-  source: string
-  timestamp: string
-  isTask: boolean
+  timestamp?: string
+  source?: string
+  isTask?: boolean
   is_task?: boolean
   taskId?: string
   task_id?: string

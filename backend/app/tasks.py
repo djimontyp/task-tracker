@@ -3,9 +3,12 @@ from typing import Dict, Any
 
 from loguru import logger
 from sqlmodel import select
+
 from core.taskiq_config import nats_broker
 from .database import AsyncSessionLocal
 from .models import SimpleSource, SimpleMessage
+from .webhook_service import telegram_webhook_service
+from .websocket import manager
 
 
 @nats_broker.task
@@ -46,6 +49,21 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
             else:
                 logger.debug(f"Using existing Telegram source with ID: {source.id}")
 
+            avatar_url = None
+
+            from_user = message.get("from", {})
+            user_id = from_user.get("id") or message.get("user_id")
+
+            if user_id:
+                try:
+                    avatar_url = await telegram_webhook_service.get_user_avatar_url(
+                        int(user_id)
+                    )
+                except Exception as exc:  # pragma: no cover - defensive logging
+                    logger.warning(
+                        "Failed to fetch avatar for Telegram user %s: %s", user_id, exc
+                    )
+
             # Create message record
             db_message = SimpleMessage(
                 external_message_id=str(message["message_id"]),
@@ -54,6 +72,7 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
                 sent_at=datetime.fromtimestamp(message["date"]),
                 source_id=source.id,
                 created_at=datetime.now(),
+                avatar_url=avatar_url,
             )
 
             db.add(db_message)
@@ -64,6 +83,25 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
             logger.info(
                 f"✅ Successfully committed Telegram message {message['message_id']} to database"
             )
+
+            try:
+                await manager.broadcast(
+                    {
+                        "type": "message.updated",
+                        "data": {
+                            "id": db_message.id,
+                            "external_message_id": db_message.external_message_id,
+                            "persisted": True,
+                            "avatar_url": avatar_url,
+                        },
+                    }
+                )
+            except Exception as exc:  # pragma: no cover - defensive logging
+                logger.warning(
+                    "Failed to broadcast persisted update for message %s: %s",
+                    message["message_id"],
+                    exc,
+                )
 
             return f"Saved message {message['message_id']}"
 

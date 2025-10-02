@@ -122,6 +122,17 @@ Just send me any message and I'll help classify it as a task, or use the WebApp 
 async def process_message(message: Message) -> None:
     """Process regular messages and send to API for classification"""
     try:
+        avatar_url = None
+
+        try:
+            photos = await bot.get_user_profile_photos(message.from_user.id, limit=1)
+            if photos.total_count > 0:
+                largest_photo = photos.photos[0][-1]
+                file = await bot.get_file(largest_photo.file_id)
+                avatar_url = f"https://api.telegram.org/file/bot{settings.telegram_bot_token}/{file.file_path}"
+        except Exception as exc:  # pragma: no cover - defensive logging
+            logger.warning("Failed to fetch avatar for user %s: %s", message.from_user.id, exc)
+
         # Prepare message data
         message_data = {
             "id": str(message.message_id),
@@ -130,6 +141,7 @@ async def process_message(message: Message) -> None:
             "timestamp": message.date.isoformat(),
             "chat_id": str(message.chat.id),
             "user_id": message.from_user.id,
+            "avatar_url": avatar_url,
         }
 
         # Send to FastAPI backend

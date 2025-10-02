@@ -69,6 +69,11 @@ test:
     @echo "Running tests..."
     uv run python -m pytest
 
+# Run Alembic migrations
+alembic-up:
+    @echo "Applying database migrations..."
+    uv run alembic upgrade head
+
 # Lint the code
 lint:
     @echo "Linting code..."

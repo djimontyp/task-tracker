@@ -16,11 +16,14 @@ class ConnectionManager:
         self.active_connections.discard(websocket)
 
     async def broadcast(self, message: dict):
+        print(f"📢 Broadcasting to {len(self.active_connections)} connections: {message.get('type')}")
         disconnected = set()
         for connection in self.active_connections.copy():
             try:
                 await connection.send_text(json.dumps(message))
-            except Exception:
+                print(f"  ✅ Sent to connection")
+            except Exception as e:
+                print(f"  ❌ Failed to send: {e}")
                 disconnected.add(connection)
 
         # Remove disconnected connections

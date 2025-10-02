@@ -300,6 +300,8 @@ class MessageCreateRequest(BaseModel):
     author: str
     timestamp: str
     chat_id: str
+    user_id: int | None = None
+    avatar_url: str | None = None
 
 
 class TaskResponse(BaseModel):
@@ -328,6 +330,8 @@ class MessageResponse(BaseModel):
     sent_at: datetime
     source_name: str
     analyzed: bool = False
+    avatar_url: str | None = None
+    persisted: bool = True
 
     class Config:
         from_attributes = True
@@ -424,6 +428,7 @@ class SimpleMessage(SQLModel, table=True):
     source_id: int | None = Field(default=None, foreign_key="simple_sources.id")
     created_at: datetime | None = Field(default=None)
     analyzed: bool = Field(default=False)
+    avatar_url: str | None = Field(default=None, max_length=500)
 
 
 class SimpleTask(SQLModel, table=True):
