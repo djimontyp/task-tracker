@@ -120,10 +120,10 @@ const TasksPage = () => {
                     <Badge
                       className={
                         task.priority === 'urgent' || task.priority === 'high'
-                          ? 'bg-br-orange text-white hover:bg-br-orange/90'
+                          ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                           : task.priority === 'medium'
-                          ? 'bg-br-peach text-white hover:bg-br-peach/90'
-                          : 'bg-slate-500 text-white hover:bg-slate-600'
+                          ? 'bg-accent text-accent-foreground hover:bg-accent/80'
+                          : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                       }
                     >
                       {task.priority}

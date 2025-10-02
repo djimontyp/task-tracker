@@ -51,16 +51,16 @@ const AnalyticsPage = () => {
                 <div className="text-2xl font-bold text-primary">{stats?.total || 0}</div>
                 <div className="text-sm text-muted-foreground mt-1">Total Tasks</div>
               </div>
-              <div className="text-center p-4 bg-br-peach/10 rounded-lg border border-br-peach/20">
-                <div className="text-2xl font-bold text-br-peach">{stats?.pending || 0}</div>
+              <div className="text-center p-4 bg-primary/10 rounded-lg border border-primary/20">
+                <div className="text-2xl font-bold text-primary-400">{stats?.pending || 0}</div>
                 <div className="text-sm text-muted-foreground mt-1">Pending</div>
               </div>
-              <div className="text-center p-4 bg-slate-500/10 rounded-lg border border-slate-500/20">
-                <div className="text-2xl font-bold text-slate-700">{stats?.in_progress || 0}</div>
+              <div className="text-center p-4 bg-secondary/10 rounded-lg border border-secondary/30">
+                <div className="text-2xl font-bold text-secondary-foreground">{stats?.in_progress || 0}</div>
                 <div className="text-sm text-muted-foreground mt-1">In Progress</div>
               </div>
-              <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                <div className="text-2xl font-bold text-green-600 dark:text-green-500">{stats?.completed || 0}</div>
+              <div className="text-center p-4 bg-accent/10 rounded-lg border border-accent/30">
+                <div className="text-2xl font-bold text-accent">{stats?.completed || 0}</div>
                 <div className="text-sm text-muted-foreground mt-1">Completed</div>
               </div>
             </div>
@@ -78,13 +78,12 @@ const AnalyticsPage = () => {
               <div
                 className="w-full bg-muted rounded-full h-2"
                 role="progressbar"
-                aria-valuenow={stats && stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-label={`Pending tasks: ${stats?.pending || 0} out of ${stats?.total || 0}`}
               >
                 <div
-                  className="bg-br-peach h-2 rounded-full transition-all duration-300"
+                  className="bg-primary h-2 rounded-full transition-all duration-300"
                   style={{
                     width: stats && stats.total > 0
                       ? `${(stats.pending / stats.total) * 100}%`
@@ -102,13 +101,12 @@ const AnalyticsPage = () => {
               <div
                 className="w-full bg-muted rounded-full h-2"
                 role="progressbar"
-                aria-valuenow={stats && stats.total > 0 ? Math.round((stats.in_progress / stats.total) * 100) : 0}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-label={`In progress tasks: ${stats?.in_progress || 0} out of ${stats?.total || 0}`}
               >
                 <div
-                  className="bg-slate-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-secondary h-2 rounded-full transition-all duration-300"
                   style={{
                     width: stats && stats.total > 0
                       ? `${(stats.in_progress / stats.total) * 100}%`
@@ -126,13 +124,12 @@ const AnalyticsPage = () => {
               <div
                 className="w-full bg-muted rounded-full h-2"
                 role="progressbar"
-                aria-valuenow={stats && stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-label={`Completed tasks: ${stats?.completed || 0} out of ${stats?.total || 0}`}
               >
                 <div
-                  className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                  className="bg-accent h-2 rounded-full transition-all duration-300"
                   style={{
                     width: stats && stats.total > 0
                       ? `${(stats.completed / stats.total) * 100}%`
@@ -150,13 +147,11 @@ const AnalyticsPage = () => {
               <div
                 className="w-full bg-muted rounded-full h-2"
                 role="progressbar"
-                aria-valuenow={stats && stats.total > 0 ? Math.round((stats.cancelled / stats.total) * 100) : 0}
                 aria-valuemin={0}
-                aria-valuemax={100}
                 aria-label={`Cancelled tasks: ${stats?.cancelled || 0} out of ${stats?.total || 0}`}
               >
                 <div
-                  className="bg-br-orange h-2 rounded-full transition-all duration-300"
+                  className="bg-destructive h-2 rounded-full transition-all duration-300"
                   style={{
                     width: stats && stats.total > 0
                       ? `${(stats.cancelled / stats.total) * 100}%`

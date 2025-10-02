@@ -152,7 +152,7 @@ const DashboardPage = () => {
               subtitle={metrics.pending.subtitle}
               trend={metrics.pending.trend}
               icon={Clock}
-              iconColor="text-br-peach"
+              iconColor="text-primary-400"
               onClick={() => handleMetricClick('pending')}
             />
             <MetricCard
@@ -161,7 +161,7 @@ const DashboardPage = () => {
               subtitle={metrics.inProgress.subtitle}
               trend={metrics.inProgress.trend}
               icon={Loader2}
-              iconColor="text-slate-700"
+              iconColor="text-secondary-foreground"
               onClick={() => handleMetricClick('in_progress')}
             />
             <MetricCard
