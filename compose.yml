@@ -90,7 +90,7 @@ services:
     restart: unless-stopped
     environment:
       - REACT_APP_API_BASE_URL=${DASHBOARD_API_BASE_URL:-http://localhost:8000}
-      - REACT_APP_WS_URL=${DASHBOARD_WS_URL:-ws://localhost:8000/ws}
+      - REACT_APP_WS_URL=${DASHBOARD_WS_URL:-ws://localhost/ws}
     develop:
       watch:
         - action: sync

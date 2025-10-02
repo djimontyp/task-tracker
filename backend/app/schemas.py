@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -26,6 +26,13 @@ class EntityStructured(BaseModel):
     )
 
 
+class TelegramGroupInfo(BaseModel):
+    """Schema for Telegram group/chat information"""
+
+    id: int = Field(description="Telegram chat/group ID")
+    name: Optional[str] = Field(default=None, description="Chat/group name")
+
+
 class TelegramWebhookConfig(BaseModel):
     """Schema for Telegram webhook configuration"""
 
@@ -41,6 +48,9 @@ class TelegramWebhookConfig(BaseModel):
     is_active: bool = Field(default=False, description="Whether webhook is active")
     last_set_at: datetime | None = Field(
         default=None, description="When webhook was last set"
+    )
+    groups: list[TelegramGroupInfo] = Field(
+        default_factory=list, description="Telegram groups/chats to monitor"
     )
 
 
@@ -68,3 +78,23 @@ class SetWebhookResponse(BaseModel):
     webhook_url: str | None = Field(default=None, description="Set webhook URL")
     message: str = Field(description="Operation result message")
     error: str | None = Field(default=None, description="Error message if failed")
+
+
+class UpdateTelegramGroupIdsRequest(BaseModel):
+    """Request schema for updating Telegram group IDs"""
+
+    group_ids: list[int] = Field(
+        description="List of Telegram group/chat IDs to monitor"
+    )
+
+
+class AddTelegramGroupRequest(BaseModel):
+    """Request schema for adding a Telegram group"""
+
+    group_id: int = Field(description="Telegram chat/group ID to add")
+
+
+class RemoveTelegramGroupRequest(BaseModel):
+    """Request schema for removing a Telegram group"""
+
+    group_id: int = Field(description="Telegram chat/group ID to remove")

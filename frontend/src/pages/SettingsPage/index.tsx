@@ -1,33 +1,22 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AxiosError } from 'axios'
 import toast from 'react-hot-toast'
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Skeleton
-} from '@shared/ui'
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Skeleton } from '@shared/ui'
 import { useTheme } from '../../components/ThemeProvider'
-import { cn } from '@/shared/lib/utils'
 import { apiClient } from '@/shared/lib/api/client'
 
 const themeOptions: { value: 'light' | 'dark' | 'system'; label: string }[] = [
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
-  { value: 'system', label: 'System' }
+  { value: 'system', label: 'System' },
 ]
 
 type ProtocolOption = 'http' | 'https'
+
+interface TelegramGroupInfo {
+  id: number
+  name?: string | null
+}
 
 interface TelegramWebhookConfigDto {
   protocol: ProtocolOption
@@ -35,6 +24,7 @@ interface TelegramWebhookConfigDto {
   webhook_url?: string | null
   is_active: boolean
   last_set_at?: string | null
+  groups?: TelegramGroupInfo[]
 }
 
 interface WebhookConfigResponseDto {
@@ -50,35 +40,51 @@ interface SetWebhookResponseDto {
   error?: string
 }
 
-const LOCAL_STORAGE_KEYS = {
-  protocol: 'WEBHOOK_PROTOCOL',
-  host: 'WEBHOOK_HOST'
-} as const
+const WEBHOOK_PATH = '/webhook/telegram'
 
-const PROTOCOL_OPTIONS: ProtocolOption[] = ['https', 'http']
+const LOCAL_STORAGE_KEY = 'WEBHOOK_BASE_URL'
 
-const sanitizeHost = (value: string) =>
-  value.replace(/^https?:\/\//i, '').replace(/\/+$/, '').trim()
+const normalizeInputUrl = (value: string) => value.trim()
 
-const readLocalConfig = () => {
-  if (typeof window === 'undefined') {
-    return { protocol: null as ProtocolOption | null, host: null as string | null }
+const ensureProtocol = (value: string) =>
+  /^https?:\/\//i.test(value) ? value : `https://${value}`
+
+const parseBaseUrl = (value: string): { protocol: ProtocolOption; host: string } => {
+  const cleaned = normalizeInputUrl(value)
+  if (!cleaned) {
+    return { protocol: 'https', host: '' }
   }
 
-  const protocol = localStorage.getItem(LOCAL_STORAGE_KEYS.protocol) as ProtocolOption | null
-  const host = localStorage.getItem(LOCAL_STORAGE_KEYS.host)
-
-  return {
-    protocol: protocol && PROTOCOL_OPTIONS.includes(protocol) ? protocol : null,
-    host: host ? sanitizeHost(host) : null
+  try {
+    const url = new URL(ensureProtocol(cleaned))
+    const protocol = url.protocol.replace(':', '')
+    if (protocol !== 'http' && protocol !== 'https') {
+      return { protocol: 'https', host: '' }
+    }
+    return { protocol, host: url.host }
+  } catch {
+    return { protocol: 'https', host: '' }
   }
 }
 
-const writeLocalConfig = (protocol: ProtocolOption, host: string) => {
+const buildBaseUrl = (protocol: ProtocolOption, host: string) =>
+  host ? `${protocol}://${host}` : ''
+
+const buildWebhookUrl = (protocol: ProtocolOption, host: string) =>
+  host ? `${protocol}://${host}${WEBHOOK_PATH}` : ''
+
+const readLocalConfig = () => {
+  if (typeof window === 'undefined') {
+    return ''
+  }
+
+  return localStorage.getItem(LOCAL_STORAGE_KEY) || ''
+}
+
+const writeLocalConfig = (baseUrl: string) => {
   if (typeof window === 'undefined') return
 
-  localStorage.setItem(LOCAL_STORAGE_KEYS.protocol, protocol)
-  localStorage.setItem(LOCAL_STORAGE_KEYS.host, sanitizeHost(host))
+  localStorage.setItem(LOCAL_STORAGE_KEY, normalizeInputUrl(baseUrl))
 }
 
 const extractErrorMessage = (error: unknown) => {
@@ -93,25 +99,30 @@ const extractErrorMessage = (error: unknown) => {
 }
 
 const SettingsPage = () => {
-  const { theme, setTheme, effectiveTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
 
   const [isLoadingConfig, setIsLoadingConfig] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isSettingWebhook, setIsSettingWebhook] = useState(false)
   const [isDeletingWebhook, setIsDeletingWebhook] = useState(false)
 
-  const [protocol, setProtocol] = useState<ProtocolOption>('https')
-  const [host, setHost] = useState('')
+  const [webhookBaseUrl, setWebhookBaseUrl] = useState('')
   const [serverWebhookUrl, setServerWebhookUrl] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(false)
   const [lastSetAt, setLastSetAt] = useState<string | null>(null)
-  const [defaultHost, setDefaultHost] = useState('')
-  const [defaultProtocol, setDefaultProtocol] = useState<ProtocolOption>('https')
+  const [defaultBaseUrl, setDefaultBaseUrl] = useState('')
+  const [groups, setGroups] = useState<TelegramGroupInfo[]>([])
+  const [newGroupId, setNewGroupId] = useState('')
+  const [isAddingGroup, setIsAddingGroup] = useState(false)
+  const [isRefreshingNames, setIsRefreshingNames] = useState(false)
+  const [removingGroupIds, setRemovingGroupIds] = useState<Set<number>>(new Set())
 
-  const computedWebhookUrl = useMemo(() => {
-    const normalizedHost = sanitizeHost(host)
-    return normalizedHost ? `${protocol}://${normalizedHost}/webhook/telegram` : ''
-  }, [host, protocol])
+  const { protocol, host } = useMemo(() => parseBaseUrl(webhookBaseUrl), [webhookBaseUrl])
+  const computedWebhookUrl = useMemo(
+    () => buildWebhookUrl(protocol, host),
+    [host, protocol]
+  )
+  const isValidBaseUrl = Boolean(host)
 
   const loadConfig = useCallback(async () => {
     setIsLoadingConfig(true)
@@ -119,24 +130,25 @@ const SettingsPage = () => {
       const response = await apiClient.get<WebhookConfigResponseDto>('/api/webhook-settings')
       const data = response.data
 
-      setDefaultHost(data.default_host)
-      setDefaultProtocol(data.default_protocol)
-
-      const localConfig = readLocalConfig()
-
-      const resolvedProtocol = data.telegram?.protocol || localConfig.protocol || data.default_protocol
-      const resolvedHost = sanitizeHost(
-        data.telegram?.host || localConfig.host || data.default_host || ''
+      const backendBaseUrl = buildBaseUrl(
+        data.telegram?.protocol || data.default_protocol,
+        data.telegram?.host || data.default_host || ''
       )
 
-      setProtocol(resolvedProtocol)
-      setHost(resolvedHost)
+      const localConfig = readLocalConfig()
+      const resolvedBaseUrl = localConfig || backendBaseUrl
+
+      setDefaultBaseUrl(buildBaseUrl(data.default_protocol, data.default_host))
+      setWebhookBaseUrl(resolvedBaseUrl)
       setServerWebhookUrl(data.telegram?.webhook_url || null)
       setIsActive(Boolean(data.telegram?.is_active))
       setLastSetAt(data.telegram?.last_set_at || null)
 
-      if (data.telegram) {
-        writeLocalConfig(resolvedProtocol, resolvedHost)
+      const loadedGroups = data.telegram?.groups || []
+      setGroups(loadedGroups)
+
+      if (resolvedBaseUrl) {
+        writeLocalConfig(resolvedBaseUrl)
       }
     } catch (error) {
       toast.error(`Failed to load webhook settings: ${extractErrorMessage(error)}`)
@@ -150,10 +162,8 @@ const SettingsPage = () => {
   }, [loadConfig])
 
   const handleSave = async () => {
-    const normalizedHost = sanitizeHost(host)
-
-    if (!normalizedHost) {
-      toast.error('Host must not be empty')
+    if (!isValidBaseUrl) {
+      toast.error('Webhook URL must not be empty')
       return
     }
 
@@ -161,15 +171,15 @@ const SettingsPage = () => {
     try {
       const { data } = await apiClient.post<TelegramWebhookConfigDto>('/api/webhook-settings', {
         protocol,
-        host: normalizedHost
+        host
       })
 
-      setProtocol(data.protocol)
-      setHost(data.host)
+      const updatedBaseUrl = buildBaseUrl(data.protocol, data.host)
+      setWebhookBaseUrl(updatedBaseUrl)
       setServerWebhookUrl(data.webhook_url || null)
       setIsActive(Boolean(data.is_active))
       setLastSetAt(data.last_set_at || null)
-      writeLocalConfig(data.protocol, data.host)
+      writeLocalConfig(updatedBaseUrl)
 
       toast.success('Webhook settings saved')
     } catch (error) {
@@ -180,10 +190,8 @@ const SettingsPage = () => {
   }
 
   const handleSetWebhook = async () => {
-    const normalizedHost = sanitizeHost(host)
-
-    if (!normalizedHost) {
-      toast.error('Host must not be empty')
+    if (!isValidBaseUrl) {
+      toast.error('Webhook URL must not be empty')
       return
     }
 
@@ -193,13 +201,13 @@ const SettingsPage = () => {
         '/api/webhook-settings/telegram/set',
         {
           protocol,
-          host: normalizedHost
+          host
         }
       )
 
       if (data.success) {
         toast.success(data.message || 'Webhook activated')
-        writeLocalConfig(protocol, normalizedHost)
+        writeLocalConfig(buildBaseUrl(protocol, host))
         await loadConfig()
       } else {
         toast.error(data.error || data.message || 'Failed to activate webhook')
@@ -228,6 +236,74 @@ const SettingsPage = () => {
       toast.error(`Failed to delete webhook: ${extractErrorMessage(error)}`)
     } finally {
       setIsDeletingWebhook(false)
+    }
+  }
+
+  const handleAddGroup = async () => {
+    let groupId = parseInt(newGroupId.trim(), 10)
+    if (isNaN(groupId)) {
+      toast.error('Please enter a valid group ID')
+      return
+    }
+
+    // Convert URL format to API format for supergroups
+    // URL: -2988379206 → API: -1002988379206
+    if (groupId < 0 && !newGroupId.trim().startsWith('-100')) {
+      const converted = parseInt(`-100${Math.abs(groupId)}`, 10)
+      console.log(`Converting group ID from ${groupId} to ${converted}`)
+      groupId = converted
+    }
+
+    setIsAddingGroup(true)
+    try {
+      const { data } = await apiClient.post<TelegramWebhookConfigDto>(
+        '/api/webhook-settings/telegram/groups',
+        { group_id: groupId }
+      )
+
+      setGroups(data.groups || [])
+      setNewGroupId('')
+      toast.success('Group added successfully')
+    } catch (error) {
+      toast.error(`Failed to add group: ${extractErrorMessage(error)}`)
+    } finally {
+      setIsAddingGroup(false)
+    }
+  }
+
+  const handleRemoveGroup = async (groupId: number) => {
+    setRemovingGroupIds(prev => new Set(prev).add(groupId))
+    try {
+      const { data } = await apiClient.delete<TelegramWebhookConfigDto>(
+        `/api/webhook-settings/telegram/groups/${groupId}`
+      )
+
+      setGroups(data.groups || [])
+      toast.success('Group removed successfully')
+    } catch (error) {
+      toast.error(`Failed to remove group: ${extractErrorMessage(error)}`)
+    } finally {
+      setRemovingGroupIds(prev => {
+        const next = new Set(prev)
+        next.delete(groupId)
+        return next
+      })
+    }
+  }
+
+  const handleRefreshNames = async () => {
+    setIsRefreshingNames(true)
+    try {
+      const { data } = await apiClient.post<TelegramWebhookConfigDto>(
+        '/api/webhook-settings/telegram/groups/refresh-names'
+      )
+
+      setGroups(data.groups || [])
+      toast.success('Group names refreshed successfully')
+    } catch (error) {
+      toast.error(`Failed to refresh names: ${extractErrorMessage(error)}`)
+    } finally {
+      setIsRefreshingNames(false)
     }
   }
 
@@ -288,51 +364,28 @@ const SettingsPage = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="webhook-protocol" className="text-sm font-medium text-foreground">
-                    Protocol
-                  </Label>
-                  <Select value={protocol} onValueChange={(value) => setProtocol(value as ProtocolOption)}>
-                    <SelectTrigger id="webhook-protocol" className="mt-2">
-                      <SelectValue placeholder="Select protocol" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PROTOCOL_OPTIONS.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option.toUpperCase()}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="webhook-host" className="text-sm font-medium text-foreground">
-                    Host
-                  </Label>
-                  <Input
-                    id="webhook-host"
-                    className="mt-2"
-                    placeholder={defaultHost || 'example.ngrok.app'}
-                    value={host}
-                    onChange={(event) => setHost(event.target.value)}
-                    onBlur={() => setHost((current) => sanitizeHost(current))}
-                    autoComplete="off"
-                  />
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Provide host or host:port only. Protocol is selected above. Default host: {defaultHost || 'n/a'}
-                  </p>
-                </div>
+              <div>
+                <Label htmlFor="webhook-base-url" className="text-sm font-medium text-foreground">
+                  Webhook Base URL
+                </Label>
+                <Input
+                  id="webhook-base-url"
+                  className="mt-2"
+                  placeholder={defaultBaseUrl || 'https://ecf34ba1bf9a.ngrok-free.app'}
+                  value={webhookBaseUrl}
+                  onChange={(event) => setWebhookBaseUrl(event.target.value)}
+                  autoComplete="off"
+                />
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Provide the publicly accessible base URL, for example `https://ecf34ba1bf9a.ngrok-free.app`.
+                  The system will append `{WEBHOOK_PATH}` automatically.
+                </p>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <Label className="text-sm font-medium text-foreground">Webhook URL</Label>
-                  <Input
-                    className="mt-2"
-                    value={serverWebhookUrl || computedWebhookUrl || ''}
-                    readOnly
-                  />
+                  <Label className="text-sm font-medium text-foreground">Final webhook URL</Label>
+                  <Input className="mt-2" value={serverWebhookUrl || computedWebhookUrl || ''} readOnly />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-foreground">Status</Label>
@@ -346,14 +399,14 @@ const SettingsPage = () => {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Button type="button" variant="ghost" onClick={handleSave} disabled={isSaving || isLoadingConfig}>
+                <Button type="button" variant="ghost" onClick={handleSave} disabled={isSaving || !isValidBaseUrl}>
                   {isSaving ? 'Saving…' : 'Save settings'}
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={handleSetWebhook}
-                  disabled={isSettingWebhook || !host || isLoadingConfig}
+                  disabled={isSettingWebhook || !isValidBaseUrl}
                 >
                   {isSettingWebhook ? 'Activating…' : 'Set & Activate'}
                 </Button>
@@ -361,7 +414,7 @@ const SettingsPage = () => {
                   type="button"
                   variant="ghost"
                   onClick={handleDeleteWebhook}
-                  disabled={isDeletingWebhook || isLoadingConfig || !isActive}
+                  disabled={isDeletingWebhook || !isActive}
                 >
                   {isDeletingWebhook ? 'Deleting…' : 'Delete webhook'}
                 </Button>
@@ -369,30 +422,95 @@ const SettingsPage = () => {
                   Refresh
                 </Button>
               </div>
+
+              <div className="border-t pt-6 mt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <Label className="text-sm font-medium text-foreground">Telegram Groups</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRefreshNames}
+                    disabled={isRefreshingNames || groups.length === 0}
+                  >
+                    {isRefreshingNames ? 'Refreshing…' : 'Refresh Names'}
+                  </Button>
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex gap-2">
+                    <Input
+                      id="new-group-id"
+                      placeholder="-2988379206 (from URL) or -1002988379206"
+                      value={newGroupId}
+                      onChange={(event) => setNewGroupId(event.target.value)}
+                      autoComplete="off"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleAddGroup()
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={handleAddGroup}
+                      disabled={isAddingGroup || !newGroupId.trim()}
+                    >
+                      {isAddingGroup ? 'Adding…' : 'Add Group'}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    💡 Copy group ID from Telegram Web URL (e.g., https://web.telegram.org/k/#-2988379206)
+                  </p>
+                </div>
+
+                {groups.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      {groups.map(group => (
+                        <Card key={group.id} className="p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-medium text-foreground">
+                                  {group.name || `Group ${group.id}`}
+                                </p>
+                                {!group.name && (
+                                  <Badge variant="outline" className="text-xs">No Name</Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground">ID: {group.id}</p>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveGroup(group.id)}
+                              disabled={removingGroupIds.has(group.id)}
+                            >
+                              {removingGroupIds.has(group.id) ? 'Removing…' : 'Remove'}
+                            </Button>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                    {groups.some(g => !g.name) && (
+                      <div className="bg-muted/50 p-3 rounded-md text-xs text-muted-foreground">
+                        <p className="font-medium mb-1">💡 To fetch group names:</p>
+                        <ol className="list-decimal list-inside space-y-1">
+                          <li>Add the bot to your Telegram group as admin</li>
+                          <li>Click "Refresh Names" button above</li>
+                        </ol>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No groups configured. Add a group ID above to start monitoring.</p>
+                )}
+              </div>
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-foreground">About</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-foreground w-32">Version:</span>
-              <span className="text-muted-foreground">1.0.0</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-foreground w-32">API URL:</span>
-              <span className="text-muted-foreground break-all">{process.env.REACT_APP_API_URL || 'http://localhost:8000'}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-foreground w-32">WebSocket URL:</span>
-              <span className="text-muted-foreground break-all">{process.env.REACT_APP_WS_URL || 'http://localhost:8000'}</span>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>

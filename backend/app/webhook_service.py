@@ -8,7 +8,7 @@ from sqlmodel import select
 
 from core.config import settings
 from .models import WebhookSettings
-from .schemas import TelegramWebhookConfig
+from .schemas import TelegramWebhookConfig, TelegramGroupInfo
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +105,44 @@ class TelegramWebhookService:
             logger.error(f"Unexpected error getting webhook info: {e}")
             return {"success": False, "error": f"Unexpected error: {str(e)}"}
 
+    async def get_chat_info(self, chat_id: int) -> Dict[str, Any]:
+        """Get chat information from Telegram"""
+        url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/getChat"
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    url, json={"chat_id": chat_id}, timeout=30.0
+                )
+                response.raise_for_status()
+                result = response.json()
+
+                if result.get("ok"):
+                    chat_data = result["result"]
+                    return {
+                        "success": True,
+                        "data": {
+                            "id": chat_data["id"],
+                            "name": chat_data.get("title")
+                            or chat_data.get("first_name")
+                            or f"Chat {chat_id}",
+                            "type": chat_data.get("type"),
+                        },
+                    }
+                else:
+                    logger.error(f"Telegram API error for chat {chat_id}: {result}")
+                    return {
+                        "success": False,
+                        "error": result.get("description", "Unknown error"),
+                    }
+
+        except httpx.RequestError as e:
+            logger.error(f"Request error getting chat info for {chat_id}: {e}")
+            return {"success": False, "error": f"Request failed: {str(e)}"}
+        except Exception as e:
+            logger.error(f"Unexpected error getting chat info for {chat_id}: {e}")
+            return {"success": False, "error": f"Unexpected error: {str(e)}"}
+
 
 class WebhookSettingsService:
     """Service for managing webhook settings in database"""
@@ -133,7 +171,12 @@ class WebhookSettingsService:
             return None
 
     async def save_telegram_config(
-        self, db: AsyncSession, protocol: str, host: str, is_active: bool = False
+        self,
+        db: AsyncSession,
+        protocol: str,
+        host: str,
+        is_active: bool = False,
+        groups: list[dict] | None = None,
     ) -> TelegramWebhookConfig:
         """Save Telegram webhook configuration to database"""
         normalized_host = host.strip().rstrip("/")
@@ -146,6 +189,7 @@ class WebhookSettingsService:
                 "webhook_url": webhook_url,
                 "is_active": is_active,
                 "last_set_at": datetime.utcnow().isoformat() if is_active else None,
+                "groups": groups or [],
             }
         }
 
@@ -159,8 +203,10 @@ class WebhookSettingsService:
 
             if existing:
                 # Update existing
+                from sqlalchemy.orm.attributes import flag_modified
                 existing.config = config_data
                 existing.is_active = is_active
+                flag_modified(existing, "config")
                 db.add(existing)
             else:
                 # Create new
@@ -193,8 +239,11 @@ class WebhookSettingsService:
             settings_record = result.scalars().first()
 
             if settings_record:
-                # Update telegram config within the JSON
-                config = settings_record.config.copy()
+                # Create a deep copy and update
+                import copy
+                from sqlalchemy.orm.attributes import flag_modified
+
+                config = copy.deepcopy(settings_record.config)
                 if "telegram" in config:
                     config["telegram"]["is_active"] = is_active
                     if is_active:
@@ -204,8 +253,13 @@ class WebhookSettingsService:
                     else:
                         config["telegram"]["last_set_at"] = None
 
+                    # Preserve groups if they exist
+                    if "groups" not in config["telegram"]:
+                        config["telegram"]["groups"] = []
+
                     settings_record.config = config
                     settings_record.is_active = is_active
+                    flag_modified(settings_record, "config")
                     db.add(settings_record)
                     await db.commit()
                     await db.refresh(settings_record)
@@ -216,6 +270,146 @@ class WebhookSettingsService:
         except Exception as e:
             await db.rollback()
             logger.error(f"Error updating webhook active status: {e}")
+            return None
+
+    async def add_telegram_group(
+        self, db: AsyncSession, group_info: dict
+    ) -> TelegramWebhookConfig | None:
+        """Add a Telegram group to configuration"""
+        try:
+            statement = select(WebhookSettings).where(
+                WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME
+            )
+            result = await db.execute(statement)
+            settings_record = result.scalars().first()
+
+            if settings_record:
+                import copy
+                from sqlalchemy.orm.attributes import flag_modified
+
+                config = copy.deepcopy(settings_record.config)
+                if "telegram" in config:
+                    groups = config["telegram"].get("groups", [])
+                    # Check if group already exists
+                    if not any(g["id"] == group_info["id"] for g in groups):
+                        groups.append(group_info)
+                        config["telegram"]["groups"] = groups
+                        settings_record.config = config
+                        flag_modified(settings_record, "config")
+                        db.add(settings_record)
+                        await db.commit()
+                        await db.refresh(settings_record)
+                    return TelegramWebhookConfig(**config["telegram"])
+            else:
+                # Create new settings if not exists
+                config_data = {
+                    "telegram": {
+                        "protocol": "https",
+                        "host": "",
+                        "webhook_url": None,
+                        "is_active": False,
+                        "last_set_at": None,
+                        "groups": [group_info],
+                    }
+                }
+                new_settings = WebhookSettings(
+                    name=self.TELEGRAM_SETTINGS_NAME,
+                    config=config_data,
+                    is_active=False,
+                )
+                db.add(new_settings)
+                await db.commit()
+                await db.refresh(new_settings)
+                return TelegramWebhookConfig(**config_data["telegram"])
+
+            return None
+
+        except Exception as e:
+            await db.rollback()
+            logger.error(f"Error adding telegram group: {e}")
+            return None
+
+    async def remove_telegram_group(
+        self, db: AsyncSession, group_id: int
+    ) -> TelegramWebhookConfig | None:
+        """Remove a Telegram group from configuration"""
+        try:
+            statement = select(WebhookSettings).where(
+                WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME
+            )
+            result = await db.execute(statement)
+            settings_record = result.scalars().first()
+
+            if settings_record:
+                import copy
+                from sqlalchemy.orm.attributes import flag_modified
+
+                config = copy.deepcopy(settings_record.config)
+                if "telegram" in config:
+                    groups = config["telegram"].get("groups", [])
+                    # Remove group with matching ID
+                    updated_groups = [g for g in groups if g["id"] != group_id]
+                    config["telegram"]["groups"] = updated_groups
+                    settings_record.config = config
+                    flag_modified(settings_record, "config")
+                    db.add(settings_record)
+                    await db.commit()
+                    await db.refresh(settings_record)
+                    return TelegramWebhookConfig(**config["telegram"])
+
+            return None
+
+        except Exception as e:
+            await db.rollback()
+            logger.error(f"Error removing telegram group: {e}")
+            return None
+
+    async def update_group_names(
+        self, db: AsyncSession, telegram_service: "TelegramWebhookService"
+    ) -> TelegramWebhookConfig | None:
+        """Update all group names by fetching from Telegram"""
+        try:
+            statement = select(WebhookSettings).where(
+                WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME
+            )
+            result = await db.execute(statement)
+            settings_record = result.scalars().first()
+
+            if settings_record:
+                import copy
+                from sqlalchemy.orm.attributes import flag_modified
+
+                config = copy.deepcopy(settings_record.config)
+                if "telegram" in config:
+                    groups = config["telegram"].get("groups", [])
+                    updated_groups = []
+
+                    for group in groups:
+                        chat_info = await telegram_service.get_chat_info(group["id"])
+                        if chat_info["success"]:
+                            updated_groups.append(
+                                {
+                                    "id": group["id"],
+                                    "name": chat_info["data"]["name"],
+                                }
+                            )
+                        else:
+                            # Keep old data if fetch fails
+                            updated_groups.append(group)
+
+                    config["telegram"]["groups"] = updated_groups
+                    settings_record.config = config
+                    flag_modified(settings_record, "config")
+                    db.add(settings_record)
+                    await db.commit()
+                    await db.refresh(settings_record)
+                    return TelegramWebhookConfig(**config["telegram"])
+
+            return None
+
+        except Exception as e:
+            await db.rollback()
+            logger.error(f"Error updating group names: {e}")
             return None
 
 

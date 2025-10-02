@@ -16,7 +16,7 @@ import {
 } from '@/shared/ui/sidebar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/tooltip'
 import { cn } from '@/shared/lib/utils'
-import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
+import { useServiceStatus } from '@/features/websocket/hooks/useServiceStatus'
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -29,7 +29,41 @@ export function AppSidebar() {
   const items = useMemo(() => navItems, [])
   const location = useLocation()
   const { state } = useSidebar()
-  const { isConnected } = useWebSocket()
+  const { indicator, connectionState, healthState, lastHealthError } = useServiceStatus()
+
+  const indicatorClasses =
+    indicator === 'healthy'
+      ? 'bg-emerald-400 shadow-[0_0_0_3px_rgba(16,185,129,0.25)]'
+      : indicator === 'warning'
+        ? 'bg-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.25)]'
+        : 'bg-rose-500 shadow-[0_0_0_3px_rgba(244,63,94,0.25)]'
+
+  const statusTitle =
+    indicator === 'healthy'
+      ? 'Service healthy'
+      : indicator === 'warning'
+        ? 'Service unstable'
+        : 'Service offline'
+
+  const statusSubtitle = (() => {
+    if (indicator === 'healthy') {
+      return 'Real-time updates active'
+    }
+
+    if (indicator === 'warning') {
+      if (connectionState === 'connecting' || connectionState === 'reconnecting') {
+        return 'Reconnecting to realtime channel'
+      }
+
+      if (healthState === 'retrying' || healthState === 'checking') {
+        return 'Retrying health check'
+      }
+
+      return 'Monitoring service status'
+    }
+
+    return lastHealthError || 'Realtime service unavailable'
+  })()
 
   return (
     <Sidebar collapsible="icon">
@@ -122,27 +156,21 @@ export function AppSidebar() {
               <span
                 className={cn(
                   'size-2.5 rounded-full shadow-[0_0_0_3px_rgba(16,185,129,0.12)] transition-colors duration-300',
-                  isConnected
-                    ? 'bg-emerald-400 shadow-[0_0_0_3px_rgba(16,185,129,0.25)]'
-                    : 'bg-rose-500 shadow-[0_0_0_3px_rgba(244,63,94,0.25)]'
+                  indicatorClasses
                 )}
                 aria-hidden="true"
               />
               <div className="flex-1 space-y-0.5 group-data-[collapsible=icon]:hidden">
-                <p className="text-[11px] font-semibold text-sidebar-foreground/80">
-                  {isConnected ? 'API Connected' : 'API Disconnected'}
-                </p>
-                <p className="text-[10px] text-sidebar-foreground/60">
-                  {isConnected ? 'Real-time updates active' : 'Attempting reconnection'}
-                </p>
+                <p className="text-[11px] font-semibold text-sidebar-foreground/80">{statusTitle}</p>
+                <p className="text-[10px] text-sidebar-foreground/60">{statusSubtitle}</p>
               </div>
               <span className="sr-only">
-                API connection status: {isConnected ? 'Connected' : 'Disconnected'}
+                Service status: {statusTitle}
               </span>
             </div>
           </TooltipTrigger>
           <TooltipContent side="right" sideOffset={8} className="px-3 py-2 text-xs">
-            {isConnected ? 'API Connected' : 'API Disconnected'}
+            {statusTitle}
           </TooltipContent>
         </Tooltip>
       </SidebarFooter>

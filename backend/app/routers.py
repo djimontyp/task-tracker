@@ -1,5 +1,6 @@
 from datetime import datetime, date, timedelta
 import json
+import logging
 from typing import List, Optional
 
 from fastapi import (
@@ -11,6 +12,8 @@ from fastapi import (
     Query,
 )
 from sqlmodel import select, and_, func
+
+logger = logging.getLogger(__name__)
 
 from .dependencies import SettingsDep, DatabaseDep
 from .websocket import manager
@@ -35,6 +38,9 @@ from .schemas import (
     TelegramWebhookConfig,
     SetWebhookRequest,
     SetWebhookResponse,
+    UpdateTelegramGroupIdsRequest,
+    AddTelegramGroupRequest,
+    RemoveTelegramGroupRequest,
 )
 from .tasks import save_telegram_message
 from .webhook_service import telegram_webhook_service, webhook_settings_service
@@ -844,6 +850,120 @@ async def get_telegram_webhook_info():
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to get webhook info: {str(e)}"
+        )
+
+
+@api_router.put("/webhook-settings/telegram/group-ids", response_model=TelegramWebhookConfig)
+async def update_telegram_group_ids(
+    request: UpdateTelegramGroupIdsRequest, db: DatabaseDep
+):
+    """Update Telegram group IDs to monitor (legacy endpoint)"""
+    try:
+        # Convert old format to new format with groups
+        groups = [{"id": gid, "name": None} for gid in request.group_ids]
+
+        # Get current config and update groups
+        config = await webhook_settings_service.get_telegram_config(db)
+        if config:
+            # Clear and add all groups
+            for gid in request.group_ids:
+                group_info = {"id": gid, "name": None}
+                await webhook_settings_service.add_telegram_group(db, group_info)
+
+            updated_config = await webhook_settings_service.get_telegram_config(db)
+            if updated_config:
+                return updated_config
+
+        raise HTTPException(status_code=404, detail="Webhook settings not found")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to update group IDs: {str(e)}"
+        )
+
+
+@api_router.post("/webhook-settings/telegram/groups", response_model=TelegramWebhookConfig)
+async def add_telegram_group(request: AddTelegramGroupRequest, db: DatabaseDep):
+    """Add a Telegram group to monitor"""
+    try:
+        # Try to fetch group info from Telegram
+        chat_info = await telegram_webhook_service.get_chat_info(request.group_id)
+
+        if chat_info["success"]:
+            group_info = {
+                "id": chat_info["data"]["id"],
+                "name": chat_info["data"]["name"],
+            }
+        else:
+            # If fetch fails, add group without name
+            logger.warning(
+                f"Failed to fetch chat info for {request.group_id}: {chat_info.get('error')}"
+            )
+            group_info = {
+                "id": request.group_id,
+                "name": None,
+            }
+
+        config = await webhook_settings_service.add_telegram_group(db, group_info)
+
+        if config:
+            return config
+        else:
+            raise HTTPException(
+                status_code=500, detail="Failed to add group"
+            )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to add group: {str(e)}"
+        )
+
+
+@api_router.delete("/webhook-settings/telegram/groups/{group_id}", response_model=TelegramWebhookConfig)
+async def remove_telegram_group(group_id: int, db: DatabaseDep):
+    """Remove a Telegram group from monitoring"""
+    try:
+        config = await webhook_settings_service.remove_telegram_group(db, group_id)
+
+        if config:
+            return config
+        else:
+            raise HTTPException(
+                status_code=404, detail="Webhook settings not found"
+            )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to remove group: {str(e)}"
+        )
+
+
+@api_router.post("/webhook-settings/telegram/groups/refresh-names", response_model=TelegramWebhookConfig)
+async def refresh_telegram_group_names(db: DatabaseDep):
+    """Refresh all Telegram group names"""
+    try:
+        config = await webhook_settings_service.update_group_names(
+            db, telegram_webhook_service
+        )
+
+        if config:
+            return config
+        else:
+            raise HTTPException(
+                status_code=404, detail="Webhook settings not found"
+            )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to refresh group names: {str(e)}"
         )
 
 
