@@ -112,7 +112,6 @@
     </BrowserRouter>
 
     8. Forms Best Practices
-
     - React Hook Form для performance
     - Zod schemas для валідації
     - Controlled inputs з debounce
@@ -120,15 +119,11 @@
 
     9. Performance Optimizations
 
-    - React.lazy() для code splitting
-    - React.memo для expensive renders
     - useCallback/useMemo де необхідно
     - Virtualization для великих списків
     - Image lazy loading
 
     10. Developer Experience
-
-    // tsconfig.json path aliases
     {
       "@/*": ["./src/*"],
       "@app/*": ["./src/app/*"],

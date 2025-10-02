@@ -1,13 +1,19 @@
 import React from 'react'
 import { Card, CardHeader, CardTitle, CardContent, Button, Label } from '@shared/ui'
-import { useUiStore } from '@shared/store/uiStore'
+import { useTheme } from '../../components/ThemeProvider'
+import { cn } from '@/shared/lib/utils'
+
+const themeOptions: { value: 'light' | 'dark' | 'system'; label: string }[] = [
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: 'System' }
+]
 
 const SettingsPage = () => {
-  const { theme, setTheme } = useUiStore()
+  const { theme, setTheme, effectiveTheme } = useTheme()
 
   return (
     <div className="space-y-6 sm:space-y-7 md:space-y-8">
-      <p className="text-sm sm:text-base text-muted-foreground">Personalize how Topics Radar looks and notifies you about new signals.</p>
 
       <Card>
         <CardHeader>
@@ -15,66 +21,28 @@ const SettingsPage = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <Label className="text-base font-medium text-foreground mb-3 block">Theme Preference</Label>
-            <p className="text-sm text-muted-foreground mb-4">Choose your preferred color theme</p>
-            <div className="flex gap-3">
-              <Button
-                variant={theme === 'light' ? 'default' : 'outline'}
-                onClick={() => setTheme('light')}
-                className="flex-1 sm:flex-none"
-              >
-                Light
-              </Button>
-              <Button
-                variant={theme === 'dark' ? 'default' : 'outline'}
-                onClick={() => setTheme('dark')}
-                className="flex-1 sm:flex-none"
-              >
-                Dark
-              </Button>
+            <Label className="text-base font-medium text-foreground mb-4 block">Theme Preference</Label>
+            <div className="flex flex-wrap gap-2">
+              {themeOptions.map(({ value, label }) => {
+                const isActive = theme === value
+                return (
+                  <Button
+                    key={value}
+                    type="button"
+                    variant="outline"
+                    onClick={() => setTheme(value)}
+                    className={cn(
+                      'flex-1 min-w-[96px] sm:flex-none rounded-full px-4 py-2 text-sm font-semibold transition-colors ease-out',
+                      isActive
+                        ? 'border-primary bg-primary/90 text-primary-foreground shadow-sm hover:bg-primary'
+                        : 'border-muted-foreground/60 text-muted-foreground hover:border-muted-foreground hover:bg-muted/40 hover:text-foreground'
+                    )}
+                  >
+                    {label}
+                  </Button>
+                )
+              })}
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-foreground">Notifications</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <Label className="text-base font-medium text-foreground">Email Notifications</Label>
-              <p className="text-sm text-muted-foreground mt-1">Receive email updates about tasks and assignments</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                defaultChecked
-                role="switch"
-                aria-label="Enable email notifications"
-                aria-checked="true"
-              />
-              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-            </label>
-          </div>
-
-          <div className="flex items-start justify-between gap-4 pt-4 border-t border-border">
-            <div className="flex-1">
-              <Label className="text-base font-medium text-foreground">Desktop Notifications</Label>
-              <p className="text-sm text-muted-foreground mt-1">Show browser notifications for task updates</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                role="switch"
-                aria-label="Enable desktop notifications"
-                aria-checked="false"
-              />
-              <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-            </label>
           </div>
         </CardContent>
       </Card>

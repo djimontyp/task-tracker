@@ -512,16 +512,6 @@ function AppContent() {
           </div>
 
           <div className="settings-section bg-card shadow-sm rounded-lg">
-            <h3 className="section-title">Notifications</h3>
-            <div className="setting-item">
-              <label className="setting-label">Real-time Updates</label>
-              <div className={`toggle ${connectionStatus === 'connected' ? 'enabled' : 'disabled'}`}>
-                {connectionStatus === 'connected' ? '✅' : '❌'}
-              </div>
-            </div>
-          </div>
-
-          <div className="settings-section bg-card shadow-sm rounded-lg">
             <h3 className="section-title">System Info</h3>
             <div className="setting-item">
               <span className="setting-label">API Status</span>

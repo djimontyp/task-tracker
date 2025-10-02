@@ -71,14 +71,11 @@ const TasksPage = () => {
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6 3xl:space-y-8 animate-fade-in">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 md:gap-5 animate-fade-in-down">
-        <p className="max-w-lg text-sm text-muted-foreground">Filter and act on captured conversations turned into follow-up tasks.</p>
-
         <div className="flex gap-2 flex-wrap animate-slide-in-right" role="group" aria-label="Filter tasks by status">
           {(['all', 'pending', 'in_progress', 'completed', 'cancelled'] as const).map((status) => (
             <Button
               key={status}
               variant={filterStatus === status ? 'default' : 'ghost'}
-              size="sm"
               onClick={() => setFilterStatus(status)}
               aria-pressed={filterStatus === status}
               aria-label={`Filter by ${status.replace('_', ' ')}`}
