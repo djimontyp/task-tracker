@@ -49,6 +49,8 @@ const enhanceMessage = (message: Message): MessageList => {
     sent_at: sentAtIso,
     displayTimestamp,
     displaySource,
+    // Explicitly preserve avatar_url
+    avatar_url: message.avatar_url,
   }
 }
 
@@ -129,7 +131,13 @@ export const useMessagesStore = create<MessagesStoreState>((set, get) => ({
         persisted: true,
       }
 
-      return enhanceMessage(next)
+      const enhanced = enhanceMessage(next)
+      // Preserve avatar_url from patch if provided
+      if (patch?.avatar_url !== undefined) {
+        enhanced.avatar_url = patch.avatar_url
+      }
+
+      return enhanced
     })
 
     set({

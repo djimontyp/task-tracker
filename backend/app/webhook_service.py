@@ -58,11 +58,14 @@ class TelegramWebhookService:
         """Fetch Telegram user avatar URL using Bot API."""
 
         if not user_id:
+            print(f"❌ get_user_avatar_url: user_id is None or 0")
             return None
 
         if user_id in self._avatar_cache:
+            print(f"💾 get_user_avatar_url: returning cached avatar for user {user_id}")
             return self._avatar_cache[user_id]
 
+        print(f"🔄 get_user_avatar_url: fetching avatar for user {user_id}")
         profile_photos_url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/getUserProfilePhotos"
 
         try:
@@ -84,7 +87,11 @@ class TelegramWebhookService:
                 return None
 
             photos = result.get("result", {}).get("photos", [])
+            total_count = result.get("result", {}).get("total_count", 0)
+            print(f"📸 get_user_avatar_url: user {user_id} has {total_count} photos, got {len(photos)} in response")
+            
             if not photos:
+                print(f"⚠️  get_user_avatar_url: user {user_id} has no profile photos")
                 return None
 
             # Latest photo is first in array. Take biggest size (last item)
@@ -108,10 +115,12 @@ class TelegramWebhookService:
 
             file_path = file_result.get("result", {}).get("file_path")
             if not file_path:
+                print(f"❌ get_user_avatar_url: no file_path in response for user {user_id}")
                 return None
 
             avatar_url = f"https://api.telegram.org/file/bot{self.bot_token}/{file_path}"
             self._avatar_cache[user_id] = avatar_url
+            print(f"✅ get_user_avatar_url: successfully got avatar for user {user_id}: {avatar_url[:50]}...")
             return avatar_url
 
         except httpx.RequestError as exc:

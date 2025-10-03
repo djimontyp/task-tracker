@@ -449,8 +449,21 @@ async def telegram_webhook(request: Request):
             user_id = from_user.get("id")
             avatar_url = None
 
-            if user_id:
-                avatar_url = await telegram_webhook_service.get_user_avatar_url(user_id)
+            print(f"🔍 Webhook received: user_id={user_id}, author={from_user.get('first_name')}")
+            
+            # DEBUG: Always generate avatar from initials
+            # if user_id:
+            #     avatar_url = await telegram_webhook_service.get_user_avatar_url(user_id)
+            
+            # Fallback: generate avatar from initials using ui-avatars.com
+            if True:
+                first_name = from_user.get('first_name', '')
+                last_name = from_user.get('last_name', '')
+                name = f"{first_name} {last_name}".strip() or "User"
+                # Generate avatar URL with initials
+                from urllib.parse import quote
+                avatar_url = f"https://ui-avatars.com/api/?name={quote(name)}&background=0D8ABC&color=fff&size=128"
+                print(f"🎨 Generated avatar URL from name: {name}")
 
             live_response = MessageResponse(
                 id=0,  # Temporary ID for live display

@@ -54,15 +54,25 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
             from_user = message.get("from", {})
             user_id = from_user.get("id") or message.get("user_id")
 
-            if user_id:
-                try:
-                    avatar_url = await telegram_webhook_service.get_user_avatar_url(
-                        int(user_id)
-                    )
-                except Exception as exc:  # pragma: no cover - defensive logging
-                    logger.warning(
-                        "Failed to fetch avatar for Telegram user %s: %s", user_id, exc
-                    )
+            # DEBUG: Always generate avatar from initials
+            # if user_id:
+            #     try:
+            #         avatar_url = await telegram_webhook_service.get_user_avatar_url(
+            #             int(user_id)
+            #         )
+            #     except Exception as exc:  # pragma: no cover - defensive logging
+            #         logger.warning(
+            #             "Failed to fetch avatar for Telegram user %s: %s", user_id, exc
+            #         )
+            
+            # Fallback: generate avatar from initials
+            if True:
+                from urllib.parse import quote
+                first_name = from_user.get('first_name', '')
+                last_name = from_user.get('last_name', '')
+                name = f"{first_name} {last_name}".strip() or "User"
+                avatar_url = f"https://ui-avatars.com/api/?name={quote(name)}&background=0D8ABC&color=fff&size=128"
+                logger.info(f"Generated avatar URL from name: {name}")
 
             # Create message record
             db_message = SimpleMessage(
