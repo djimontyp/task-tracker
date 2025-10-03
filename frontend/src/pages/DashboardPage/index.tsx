@@ -5,6 +5,7 @@ import { ListTodo, Clock, Loader2, CheckCircle2, Wifi, WifiOff } from 'lucide-re
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Badge, Skeleton } from '@/shared/ui'
 import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar'
+import { AvatarGroup } from '@/shared/components/AvatarGroup'
 import { TelegramIcon } from '@/shared/components/TelegramIcon'
 import { apiClient } from '@/shared/lib/api/client'
 import { Task, TaskStats } from '@/shared/types'
@@ -44,7 +45,11 @@ const DashboardPage = () => {
   const getTaskAvatars = (taskId: string | number) => {
     const numId = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId
     const count = (numId % 3) + 1
-    return mockAvatars.slice(0, count)
+    return mockAvatars.slice(0, count).map((url, idx) => ({
+      id: `task-${taskId}-avatar-${idx}`,
+      name: `User ${idx + 1}`,
+      avatarUrl: url
+    }))
   }
 
   const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
@@ -266,9 +271,14 @@ const DashboardPage = () => {
               {tasksLoading ? (
                 <>
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="py-3 border-b last:border-b-0">
-                      <Skeleton className="h-4 w-3/4 mb-2" />
-                      <Skeleton className="h-3 w-1/3" />
+                    <div key={i} className="flex items-start gap-3 py-2 border-b last:border-b-0">
+                      <div className="flex-1 space-y-1.5">
+                        <div className="flex flex-col">
+                          <Skeleton className="h-4 w-2/3" />
+                        </div>
+                      </div>
+                      <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+                      <Skeleton className="h-3 w-12" />
                     </div>
                   ))}
                 </>
@@ -276,7 +286,7 @@ const DashboardPage = () => {
                 tasks.slice(0, 5).map((task) => (
                   <div
                     key={task.id}
-                    className="group py-3 border-b last:border-b-0 rounded-md cursor-pointer transition-all duration-200 hover:bg-accent/50 -mx-2 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="group flex items-start gap-3 py-2 border-b last:border-b-0 rounded-md cursor-pointer transition-all duration-200 hover:bg-accent/50 -mx-2 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     tabIndex={0}
                     role="button"
                     aria-label={`Task: ${task.title}, Status: ${task.status}`}
@@ -287,52 +297,24 @@ const DashboardPage = () => {
                       }
                     }}
                   >
-                    {/* Avatar Group - left side */}
-                    <div className="flex -space-x-2 overflow-hidden shrink-0">
-                      {getTaskAvatars(task.id).map((avatarUrl, idx) => (
-                        <img
-                          key={idx}
-                          alt=""
-                          src={avatarUrl}
-                          className="inline-block h-10 w-10 rounded-full outline outline-1 -outline-offset-1 outline-border/50 ring-2 ring-background"
-                        />
-                      ))}
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-foreground truncate">
+                          {task.title}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Right-aligned Avatar Group */}
+                    <div className="relative shrink-0">
+                      <AvatarGroup avatars={getTaskAvatars(task.id)} size="lg" max={3} />
                     </div>
 
-                    <div className="flex items-start justify-between gap-3 flex-1 min-w-0">
-                      <div className="flex-1 min-w-0 space-y-1">
-                        <div className="flex items-baseline justify-between gap-2">
-                          <span className="text-sm font-semibold text-foreground truncate">
-                            {task.title}
-                          </span>
-                          <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                            {new Date(task.created_at || task.createdAt).toLocaleString('uk-UA', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </span>
-                        </div>
-
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(task.created_at || task.createdAt).toLocaleString('uk-UA', {
-                            day: '2-digit',
-                            month: '2-digit',
-                          })}
-                        </p>
-                      </div>
-                      
-                      <Badge
-                        variant={
-                          task.status === 'completed'
-                            ? 'default'
-                            : task.status === 'in_progress'
-                            ? 'secondary'
-                            : 'outline'
-                        }
-                        className="text-[10px] h-5 uppercase tracking-wide flex-shrink-0"
-                      >
-                        {task.status}
-                      </Badge>
+                    <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
+                      {new Date(task.created_at || task.createdAt).toLocaleString('uk-UA', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
                     </div>
                   </div>
                 ))

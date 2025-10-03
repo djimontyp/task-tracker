@@ -38,8 +38,7 @@ export const AvatarGroup: React.FC<AvatarGroupProps> = ({
           key={avatar.id}
           className={cn(
             config.size,
-            'border border-border/50',
-            'ring-2 ring-background',
+            'border border-border/80 shadow-sm ring-1 ring-black/5',
             'transition-transform hover:scale-110 hover:z-10'
           )}
           style={{ zIndex: displayAvatars.length - index }}
@@ -57,8 +56,7 @@ export const AvatarGroup: React.FC<AvatarGroupProps> = ({
         <Avatar
           className={cn(
             config.size,
-            'border border-border/50',
-            'ring-2 ring-background'
+            'border border-border/80 shadow-sm ring-1 ring-black/5'
           )}
           style={{ zIndex: 0 }}
         >
