@@ -1,12 +1,11 @@
 from datetime import datetime
-from typing import Dict, Optional
 from enum import Enum
+from typing import Dict, Optional
 
 from pydantic import BaseModel
-from sqlalchemy import BigInteger, DateTime, func, Text
+from sqlalchemy import BigInteger, DateTime, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlmodel import SQLModel, Field
-
+from sqlmodel import Field, SQLModel
 
 # ~~~~~~~~~~~~~~~~ Enums for Type Safety ~~~~~~~~~~~~~~~~
 
@@ -283,18 +282,25 @@ class TaskUpdate(SQLModel):
 
 
 class TaskCreateRequest(BaseModel):
-    """Legacy API schema for task creation requests"""
-
     title: str
     description: str
     category: str
     priority: str
     source: str
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "title": "Implement dark mode",
+                "description": "Add dark theme support to the dashboard",
+                "category": "feature",
+                "priority": "medium",
+                "source": "api",
+            }
+        }
+
 
 class MessageCreateRequest(BaseModel):
-    """Legacy API schema for message creation requests"""
-
     id: str
     content: str
     author: str
@@ -302,6 +308,19 @@ class MessageCreateRequest(BaseModel):
     chat_id: str
     user_id: int | None = None
     avatar_url: str | None = None
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "id": "msg_456",
+                "content": "Please review the pull request",
+                "author": "Jane Smith",
+                "timestamp": "2025-10-04T14:30:00Z",
+                "chat_id": "chat_789",
+                "user_id": 67890,
+                "avatar_url": "https://ui-avatars.com/api/?name=Jane+Smith",
+            }
+        }
 
 
 class TaskResponse(BaseModel):
