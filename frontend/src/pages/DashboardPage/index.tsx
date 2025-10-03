@@ -6,7 +6,6 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Badge, Skeleton } from '@/shared/ui'
 import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar'
 import { TelegramIcon } from '@/shared/components/TelegramIcon'
-import { AvatarGroup } from '@/shared/components/AvatarGroup'
 import { apiClient } from '@/shared/lib/api/client'
 import { Task, TaskStats } from '@/shared/types'
 import MetricCard from '@/shared/components/MetricCard'
@@ -34,18 +33,18 @@ const DashboardPage = () => {
   // Use the new messages feed with WebSocket support
   const { messages, isLoading: messagesLoading, isConnected } = useMessagesFeed({ limit: 50 })
 
-  // Mock avatars for tasks - will be replaced with real data later
-  const getMockAvatars = (taskId: string | number) => {
-    const mockUsers = [
-      { id: '1', name: 'Alice Johnson', avatarUrl: undefined },
-      { id: '2', name: 'Bob Smith', avatarUrl: undefined },
-      { id: '3', name: 'Charlie Brown', avatarUrl: undefined },
-      { id: '4', name: 'Diana Prince', avatarUrl: undefined },
-    ]
-    // Return 1-3 random users based on task id
+  // Mock avatar URLs from Unsplash (like Tailwind UI example)
+  const mockAvatars = [
+    'https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    'https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80',
+    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+  ]
+  
+  const getTaskAvatars = (taskId: string | number) => {
     const numId = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId
     const count = (numId % 3) + 1
-    return mockUsers.slice(0, count)
+    return mockAvatars.slice(0, count)
   }
 
   const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
@@ -174,9 +173,9 @@ const DashboardPage = () => {
               {messagesLoading ? (
                 <>
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="flex items-start gap-3 py-3 border-b last:border-b-0">
+                    <div key={i} className="flex items-start gap-3 py-2 border-b last:border-b-0">
                       <Skeleton className="h-10 w-10 rounded-full shrink-0" />
-                      <div className="flex-1 space-y-2">
+                      <div className="flex-1 space-y-1.5">
                         <Skeleton className="h-4 w-2/3" />
                         <Skeleton className="h-3 w-1/3" />
                       </div>
@@ -187,7 +186,7 @@ const DashboardPage = () => {
                 messages.slice(0, 5).map((message) => (
                   <div
                     key={message.id}
-                    className="group flex items-start gap-3 py-3 border-b last:border-b-0 rounded-md cursor-pointer transition-all duration-200 hover:bg-accent/50 -mx-2 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="group flex items-start gap-3 py-2 border-b last:border-b-0 rounded-md cursor-pointer transition-all duration-200 hover:bg-accent/50 -mx-2 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     tabIndex={0}
                     role="button"
                     aria-label={`Message from ${message.author}: ${message.content}`}
@@ -214,7 +213,7 @@ const DashboardPage = () => {
                       </div>
                     </div>
 
-                    <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="text-sm font-semibold text-foreground truncate">
                           {message.author || message.sender}
@@ -234,7 +233,7 @@ const DashboardPage = () => {
                         </span>
                       </div>
 
-                      <p className="text-sm text-muted-foreground leading-relaxed break-words line-clamp-2">
+                      <p className="text-sm text-muted-foreground leading-snug break-words line-clamp-2">
                         {message.content || message.text}
                       </p>
 
@@ -288,21 +287,40 @@ const DashboardPage = () => {
                       }
                     }}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0 space-y-1.5">
-                        <p className="text-sm font-semibold text-foreground line-clamp-2">{task.title}</p>
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-xs text-muted-foreground">
+                    {/* Avatar Group - left side */}
+                    <div className="flex -space-x-2 overflow-hidden shrink-0">
+                      {getTaskAvatars(task.id).map((avatarUrl, idx) => (
+                        <img
+                          key={idx}
+                          alt=""
+                          src={avatarUrl}
+                          className="inline-block h-10 w-10 rounded-full outline outline-1 -outline-offset-1 outline-border/50 ring-2 ring-background"
+                        />
+                      ))}
+                    </div>
+
+                    <div className="flex items-start justify-between gap-3 flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <span className="text-sm font-semibold text-foreground truncate">
+                            {task.title}
+                          </span>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                             {new Date(task.created_at || task.createdAt).toLocaleString('uk-UA', {
-                              day: '2-digit',
-                              month: '2-digit',
                               hour: '2-digit',
                               minute: '2-digit',
                             })}
-                          </p>
-                          <AvatarGroup avatars={getMockAvatars(task.id)} max={3} size="sm" />
+                          </span>
                         </div>
+
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(task.created_at || task.createdAt).toLocaleString('uk-UA', {
+                            day: '2-digit',
+                            month: '2-digit',
+                          })}
+                        </p>
                       </div>
+                      
                       <Badge
                         variant={
                           task.status === 'completed'

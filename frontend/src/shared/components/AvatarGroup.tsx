@@ -15,10 +15,10 @@ interface AvatarGroupProps {
   className?: string
 }
 
-const sizeClasses = {
-  sm: 'h-6 w-6 text-[10px]',
-  md: 'h-8 w-8 text-xs',
-  lg: 'h-10 w-10 text-sm',
+const sizeConfig = {
+  sm: { size: 'h-6 w-6', text: 'text-[10px]', space: '-space-x-1' },
+  md: { size: 'h-8 w-8', text: 'text-xs', space: '-space-x-2' },
+  lg: { size: 'h-10 w-10', text: 'text-sm', space: '-space-x-2' },
 }
 
 export const AvatarGroup: React.FC<AvatarGroupProps> = ({
@@ -29,15 +29,17 @@ export const AvatarGroup: React.FC<AvatarGroupProps> = ({
 }) => {
   const displayAvatars = avatars.slice(0, max)
   const remainingCount = Math.max(0, avatars.length - max)
+  const config = sizeConfig[size]
 
   return (
-    <div className={cn('flex -space-x-2', className)}>
+    <div className={cn('flex', config.space, className)}>
       {displayAvatars.map((avatar, index) => (
         <Avatar
           key={avatar.id}
           className={cn(
-            sizeClasses[size],
-            'border-2 border-background shadow-sm ring-1 ring-black/5',
+            config.size,
+            'border border-border/50',
+            'ring-2 ring-background',
             'transition-transform hover:scale-110 hover:z-10'
           )}
           style={{ zIndex: displayAvatars.length - index }}
@@ -45,7 +47,7 @@ export const AvatarGroup: React.FC<AvatarGroupProps> = ({
           {avatar.avatarUrl ? (
             <AvatarImage src={avatar.avatarUrl} alt={avatar.name} />
           ) : null}
-          <AvatarFallback className="bg-primary/10 text-primary font-medium">
+          <AvatarFallback className={cn('bg-primary/10 text-primary font-medium', config.text)}>
             {avatar.name.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
@@ -54,13 +56,13 @@ export const AvatarGroup: React.FC<AvatarGroupProps> = ({
       {remainingCount > 0 && (
         <Avatar
           className={cn(
-            sizeClasses[size],
-            'border-2 border-background shadow-sm bg-muted',
-            'flex items-center justify-center'
+            config.size,
+            'border border-border/50',
+            'ring-2 ring-background'
           )}
           style={{ zIndex: 0 }}
         >
-          <AvatarFallback className="bg-muted text-muted-foreground font-medium">
+          <AvatarFallback className={cn('bg-muted text-muted-foreground font-medium', config.text)}>
             +{remainingCount}
           </AvatarFallback>
         </Avatar>
