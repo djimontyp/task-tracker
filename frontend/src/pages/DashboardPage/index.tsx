@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import { ListTodo, Clock, Loader2, CheckCircle2, Wifi, WifiOff } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Badge, Skeleton } from '@/shared/ui'
+import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar'
+import { TelegramIcon } from '@/shared/components/TelegramIcon'
+import { AvatarGroup } from '@/shared/components/AvatarGroup'
 import { apiClient } from '@/shared/lib/api/client'
 import { Task, TaskStats } from '@/shared/types'
 import MetricCard from '@/shared/components/MetricCard'
@@ -30,6 +33,20 @@ const DashboardPage = () => {
 
   // Use the new messages feed with WebSocket support
   const { messages, isLoading: messagesLoading, isConnected } = useMessagesFeed({ limit: 50 })
+
+  // Mock avatars for tasks - will be replaced with real data later
+  const getMockAvatars = (taskId: string | number) => {
+    const mockUsers = [
+      { id: '1', name: 'Alice Johnson', avatarUrl: undefined },
+      { id: '2', name: 'Bob Smith', avatarUrl: undefined },
+      { id: '3', name: 'Charlie Brown', avatarUrl: undefined },
+      { id: '4', name: 'Diana Prince', avatarUrl: undefined },
+    ]
+    // Return 1-3 random users based on task id
+    const numId = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId
+    const count = (numId % 3) + 1
+    return mockUsers.slice(0, count)
+  }
 
   const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['tasks'],
@@ -157,11 +174,11 @@ const DashboardPage = () => {
               {messagesLoading ? (
                 <>
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="flex gap-3 border-b pb-3 last:border-b-0">
+                    <div key={i} className="flex items-start gap-3 py-3 border-b last:border-b-0">
                       <Skeleton className="h-10 w-10 rounded-full shrink-0" />
                       <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-3 w-32" />
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-3 w-1/3" />
                       </div>
                     </div>
                   ))}
@@ -170,7 +187,7 @@ const DashboardPage = () => {
                 messages.slice(0, 5).map((message) => (
                   <div
                     key={message.id}
-                    className="flex gap-3 border-b pb-3 last:border-b-0 cursor-pointer hover:bg-accent/50 active:scale-[0.99] transition-all duration-150 -mx-6 px-6 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="group flex items-start gap-3 py-3 border-b last:border-b-0 rounded-md cursor-pointer transition-all duration-200 hover:bg-accent/50 -mx-2 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     tabIndex={0}
                     role="button"
                     aria-label={`Message from ${message.author}: ${message.content}`}
@@ -181,52 +198,53 @@ const DashboardPage = () => {
                       }
                     }}
                   >
-                    {/* Avatar */}
-                    <div className="shrink-0">
-                      {message.avatar_url ? (
-                        <img
-                          src={message.avatar_url}
-                          alt={message.author}
-                          className="h-10 w-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-sm font-medium text-primary">
-                            {message.author?.charAt(0).toUpperCase() || '?'}
-                          </span>
-                        </div>
-                      )}
+                    {/* Avatar with Telegram Badge */}
+                    <div className="relative shrink-0">
+                      <Avatar className="h-10 w-10 border border-border/80 shadow-sm ring-1 ring-black/5">
+                        {message.avatar_url ? (
+                          <AvatarImage src={message.avatar_url} alt={message.author} />
+                        ) : null}
+                        <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                          {message.author?.charAt(0).toUpperCase() || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      {/* Telegram Badge - positioned bottom-right */}
+                      <div className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-[#0088cc] flex items-center justify-center shadow-md ring-2 ring-background">
+                        <TelegramIcon size={14} className="text-white drop-shadow-sm" />
+                      </div>
                     </div>
 
-                    {/* Message content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-foreground/90 break-words">
-                            {message.content || message.text}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                            <span className="font-medium">{message.author || message.sender}</span>
-                            <span>•</span>
-                            <span>{message.sent_at ? new Date(message.sent_at).toLocaleString('uk-UA') : message.timestamp ? new Date(message.timestamp).toLocaleString('uk-UA') : 'No date'}</span>
-                            {!isConnected && (
-                              <>
-                                <span>•</span>
-                                <span className="text-amber-500">Offline</span>
-                              </>
-                            )}
-                          </p>
-                        </div>
-
-                        {/* Badges */}
-                        <div className="flex items-center gap-2 shrink-0">
-                          {(message.is_task || message.isTask) && (
-                            <Badge variant="default" className="text-xs">
-                              Task
-                            </Badge>
-                          )}
-                        </div>
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-sm font-semibold text-foreground truncate">
+                          {message.author || message.sender}
+                        </span>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
+                          {message.sent_at
+                            ? new Date(message.sent_at).toLocaleString('uk-UA', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })
+                            : message.timestamp
+                            ? new Date(message.timestamp).toLocaleString('uk-UA', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })
+                            : 'No date'}
+                        </span>
                       </div>
+
+                      <p className="text-sm text-muted-foreground leading-relaxed break-words line-clamp-2">
+                        {message.content || message.text}
+                      </p>
+
+                      {(message.is_task || message.isTask) && (
+                        <div className="pt-0.5">
+                          <Badge variant="outline" className="text-[10px] h-5 uppercase tracking-wide">
+                            Task
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
@@ -249,9 +267,9 @@ const DashboardPage = () => {
               {tasksLoading ? (
                 <>
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="border-b pb-3 last:border-b-0">
-                      <Skeleton className="h-4 w-full mb-2" />
-                      <Skeleton className="h-3 w-32" />
+                    <div key={i} className="py-3 border-b last:border-b-0">
+                      <Skeleton className="h-4 w-3/4 mb-2" />
+                      <Skeleton className="h-3 w-1/3" />
                     </div>
                   ))}
                 </>
@@ -259,7 +277,7 @@ const DashboardPage = () => {
                 tasks.slice(0, 5).map((task) => (
                   <div
                     key={task.id}
-                    className="border-b pb-3 last:border-b-0 cursor-pointer hover:bg-accent/50 active:scale-[0.99] transition-all duration-150 -mx-6 px-6 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="group py-3 border-b last:border-b-0 rounded-md cursor-pointer transition-all duration-200 hover:bg-accent/50 -mx-2 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     tabIndex={0}
                     role="button"
                     aria-label={`Task: ${task.title}, Status: ${task.status}`}
@@ -270,12 +288,20 @@ const DashboardPage = () => {
                       }
                     }}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{task.title}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(task.created_at || task.createdAt).toLocaleString('uk-UA')}
-                        </p>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0 space-y-1.5">
+                        <p className="text-sm font-semibold text-foreground line-clamp-2">{task.title}</p>
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(task.created_at || task.createdAt).toLocaleString('uk-UA', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                          <AvatarGroup avatars={getMockAvatars(task.id)} max={3} size="sm" />
+                        </div>
                       </div>
                       <Badge
                         variant={
@@ -285,7 +311,7 @@ const DashboardPage = () => {
                             ? 'secondary'
                             : 'outline'
                         }
-                        className="ml-2"
+                        className="text-[10px] h-5 uppercase tracking-wide flex-shrink-0"
                       >
                         {task.status}
                       </Badge>
@@ -307,12 +333,11 @@ const DashboardPage = () => {
         <ActivityHeatmap
           title="Message Activity Heatmap"
           period="week"
-          enabledSources={['telegram']}
+          enabledSources={['telegram'] as ('telegram' | 'slack' | 'email')[]}
           className="w-full"
         />
       </div>
     </div>
   )
 }
-
 export default DashboardPage
