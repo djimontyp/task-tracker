@@ -1,7 +1,14 @@
 // Shared TypeScript types and interfaces
 
-export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled'
-export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
+export type TaskStatus =
+  | 'open'
+  | 'in_progress'
+  | 'completed'
+  | 'closed'
+  // legacy/client-only fallbacks
+  | 'pending'
+  | 'cancelled'
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent' | 'critical'
 
 export interface Task {
   id: string
@@ -9,6 +16,9 @@ export interface Task {
   description?: string
   status: TaskStatus
   priority: TaskPriority
+  // backend (legacy) fields
+  category?: string
+  source?: string
   createdAt: string
   created_at?: string
   updatedAt: string

@@ -45,5 +45,52 @@ export {
   TabsContent
 } from './tabs'
 
+// Table primitives
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from './table'
+
+// Dropdown menu primitives
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuCheckboxItem,
+} from './dropdown-menu'
+
+// Pagination primitives
+export {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from './pagination'
+
+// Popover primitives
+export { Popover, PopoverTrigger, PopoverContent } from './popover'
+
+// Command primitives
+export {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from './command'
+
 // Keep custom Spinner
 export { default as Spinner } from './Spinner'

@@ -1,25 +1,51 @@
 import React, { useEffect } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import {
   Spinner,
-  Card,
-  CardContent,
   Button,
-  Badge,
+  Input,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
   Select,
   SelectTrigger,
-  SelectValue,
   SelectContent,
-  SelectItem
+  SelectItem,
+  SelectValue,
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
 } from '@shared/ui'
 import { apiClient } from '@shared/lib/api/client'
-import { Task, TaskStatus } from '@shared/types'
+import { Task } from '@shared/types'
 import { useTasksStore } from '@features/tasks/store/tasksStore'
 import { toast } from 'sonner'
+import {
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table'
+import { columns as baseColumns, statusLabels, priorityLabels } from './columns'
+import { DataTableFacetedFilter } from './faceted-filter'
+import { ChevronDown } from 'lucide-react'
 
 const TasksPage = () => {
-  const queryClient = useQueryClient()
-  const { filterStatus, setFilterStatus, setTasks } = useTasksStore()
+  const { setTasks } = useTasksStore()
 
   const { data: tasks, isLoading } = useQuery<Task[]>({
     queryKey: ['tasks'],
@@ -28,21 +54,7 @@ const TasksPage = () => {
       return response.data
     },
   })
-
-  const updateTaskMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: TaskStatus }) => {
-      const response = await apiClient.put(`/api/tasks/${id}/status`, { status })
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
-      queryClient.invalidateQueries({ queryKey: ['stats'] })
-      toast.success('Task status updated')
-    },
-    onError: () => {
-      toast.error('Failed to update task')
-    },
-  })
+  
 
   useEffect(() => {
     if (tasks) {
@@ -50,15 +62,34 @@ const TasksPage = () => {
     }
   }, [tasks, setTasks])
 
-  const filteredTasks = React.useMemo(() => {
-    if (!tasks) return []
-    if (filterStatus === 'all') return tasks
-    return tasks.filter((task) => task.status === filterStatus)
-  }, [tasks, filterStatus])
+  // Data table state
+  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = React.useState({})
+  const [globalFilter, setGlobalFilter] = React.useState('')
 
-  const handleStatusChange = (taskId: string, status: TaskStatus) => {
-    updateTaskMutation.mutate({ id: taskId, status })
-  }
+  const table = useReactTable({
+    data: tasks ?? [],
+    columns: baseColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    state: { sorting, columnFilters, columnVisibility, rowSelection, globalFilter },
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const q = String(filterValue).toLowerCase()
+      return (
+        String(row.original.title).toLowerCase().includes(q) ||
+        String(row.original.description || '').toLowerCase().includes(q)
+      )
+    },
+  })
 
   if (isLoading) {
     return (
@@ -69,84 +100,147 @@ const TasksPage = () => {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-5 md:space-y-6 3xl:space-y-8 animate-fade-in">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 md:gap-5 animate-fade-in-down">
-        <div className="flex gap-2 flex-wrap animate-slide-in-right" role="group" aria-label="Filter tasks by status">
-          {(['all', 'pending', 'in_progress', 'completed', 'cancelled'] as const).map((status) => (
-            <Button
-              key={status}
-              variant="ghost"
-              size="sm"
-              onClick={() => setFilterStatus(status)}
-              aria-pressed={filterStatus === status}
-              aria-label={`Filter by ${status.replace('_', ' ')}`}
+    <div className="space-y-4 animate-fade-in">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex w-full items-center gap-2 flex-wrap">
+          <Input
+            placeholder="Filter tasks..."
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            className="max-w-sm"
+            aria-label="Filter tasks"
+          />
+          <DataTableFacetedFilter
+            columnKey="status"
+            table={table}
+            title="Status"
+            options={Object.entries(statusLabels).map(([value, meta]) => ({ value, label: meta.label, icon: meta.icon }))}
+          />
+          <DataTableFacetedFilter
+            columnKey="priority"
+            table={table}
+            title="Priority"
+            options={Object.entries(priorityLabels).map(([value, meta]) => ({ value, label: meta.label }))}
+          />
+          {/* Active filter chips */}
+          {((table.getColumn('status')?.getFilterValue() as string[] | undefined) ?? []).map((v) => (
+            <Button key={`status-${v}`} variant="secondary" size="sm" className="h-8 rounded-full"
+              onClick={() => {
+                const col = table.getColumn('status')
+                const current = (col?.getFilterValue() as string[] | undefined) ?? []
+                col?.setFilterValue(current.filter((x) => x !== v))
+              }}
             >
-              {status.replace('_', ' ')}
+              {statusLabels[v]?.label ?? v} ×
             </Button>
           ))}
+          {((table.getColumn('priority')?.getFilterValue() as string[] | undefined) ?? []).map((v) => (
+            <Button key={`priority-${v}`} variant="secondary" size="sm" className="h-8 rounded-full"
+              onClick={() => {
+                const col = table.getColumn('priority')
+                const current = (col?.getFilterValue() as string[] | undefined) ?? []
+                col?.setFilterValue(current.filter((x) => x !== v))
+              }}
+            >
+              {priorityLabels[v]?.label ?? v} ×
+            </Button>
+          ))}
+
+          <Button variant="ghost" size="sm" onClick={() => table.resetColumnFilters()} className="ml-1">
+            Reset
+          </Button>
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              View <ChevronDown className="ml-1 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            {table
+              .getAllColumns()
+              .filter((c) => c.getCanHide())
+              .map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  className="capitalize"
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                >
+                  {column.id}
+                </DropdownMenuCheckboxItem>
+              ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      <div
-        className="grid grid-cols-1 gap-3 sm:gap-4 animate-fade-in-up"
-        style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}
-        role="region"
-        aria-label="Tasks list"
-        aria-live="polite"
-      >
-        {filteredTasks.length === 0 ? (
-          <Card>
-            <CardContent className="py-8">
-              <p className="text-center text-muted-foreground">No tasks found</p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredTasks.map((task, index) => (
-            <Card key={task.id} className="hover:shadow-lg transition-shadow animate-scale-in" style={{ animationDelay: `${0.05 * index}s`, animationFillMode: 'backwards' }}>
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-2">{task.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">{task.description}</p>
-                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                      <span>Created: {new Date(task.created_at || task.createdAt).toLocaleDateString()}</span>
-                      {(task.due_date || task.dueDate) && <span>• Due: {new Date(task.due_date || task.dueDate || '').toLocaleDateString()}</span>}
-                    </div>
-                  </div>
+      <div className="overflow-hidden rounded-md border">
+        <Table role="grid" aria-label="Tasks table">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={baseColumns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-                  <div className="flex flex-col gap-2">
-                    <Badge
-                      className={
-                        task.priority === 'urgent' || task.priority === 'high'
-                          ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                          : task.priority === 'medium'
-                          ? 'bg-accent text-accent-foreground hover:bg-accent/80'
-                          : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                      }
-                    >
-                      {task.priority}
-                    </Badge>
-
-                    <Select
-                      value={task.status}
-                      onValueChange={(value) => handleStatusChange(task.id, value as TaskStatus)}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="in_progress">In Progress</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
+      <div className="flex items-center justify-end gap-2 py-2">
+        <div className="text-muted-foreground flex-1 text-sm">
+          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Rows per page</span>
+          <Select value={String(table.getState().pagination.pageSize)} onValueChange={(v) => table.setPageSize(Number(v))}>
+            <SelectTrigger className="h-8 w-[80px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 25, 50].map((n) => (
+                <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="text-sm text-muted-foreground">
+          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount() || 1}
+        </div>
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious onClick={() => table.previousPage()} aria-disabled={!table.getCanPreviousPage()} />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext onClick={() => table.nextPage()} aria-disabled={!table.getCanNextPage()} />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   )
