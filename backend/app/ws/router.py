@@ -28,11 +28,21 @@ async def websocket_endpoint(websocket: WebSocket, topics: str = None):
     if topics:
         topic_list = [t.strip() for t in topics.split(",")]
 
-    # Connect with legacy manager for backward compatibility
-    await legacy_manager.connect(websocket)
+    # Accept WebSocket connection once
+    await websocket.accept()
 
-    # Connect with new topic-based manager
-    await websocket_manager.connect(websocket, topic_list)
+    # Register with legacy manager (without accepting again)
+    legacy_manager.active_connections.add(websocket)
+
+    # Register with new topic-based manager (without accepting again)
+    if topic_list is None:
+        topic_list = ["agents", "tasks", "providers"]
+    
+    async with websocket_manager._lock:
+        for topic in topic_list:
+            if topic not in websocket_manager._connections:
+                websocket_manager._connections[topic] = set()
+            websocket_manager._connections[topic].add(websocket)
 
     try:
         # Send connection confirmation

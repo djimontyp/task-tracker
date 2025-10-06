@@ -92,5 +92,8 @@ export {
   CommandShortcut,
 } from './command'
 
+// Separator
+export { Separator } from './separator'
+
 // Keep custom Spinner
 export { default as Spinner } from './Spinner'

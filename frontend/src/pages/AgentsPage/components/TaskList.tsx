@@ -19,14 +19,14 @@ const TaskList = () => {
   const [editingTask, setEditingTask] = useState<TaskConfig | null>(null)
 
   const { data: tasks, isLoading } = useQuery<TaskConfig[]>({
-    queryKey: ['tasks'],
+    queryKey: ['task-configs'],
     queryFn: () => taskService.listTasks(),
   })
 
   const createMutation = useMutation({
     mutationFn: (data: TaskConfigCreate) => taskService.createTask(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['task-configs'] })
       toast.success('Task created successfully')
       setFormOpen(false)
     },
@@ -39,7 +39,7 @@ const TaskList = () => {
     mutationFn: ({ id, data }: { id: string; data: TaskConfigUpdate }) =>
       taskService.updateTask(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['task-configs'] })
       toast.success('Task updated successfully')
       setFormOpen(false)
       setEditingTask(null)
@@ -52,7 +52,7 @@ const TaskList = () => {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => taskService.deleteTask(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['task-configs'] })
       toast.success('Task deleted successfully')
     },
     onError: (error: Error) => {

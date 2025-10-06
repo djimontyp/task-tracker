@@ -4,10 +4,10 @@ from typing import Literal, Optional
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import and_, select
 
-from ...models import SimpleMessage, SimpleSource, SimpleTask, StatsResponse
+from ...models import SimpleMessage, SimpleSource, SimpleTask
 from ...websocket import manager
 from ..deps import DatabaseDep
-from .response_models import ActivityDataResponse, AnalyzeDayResponse
+from .response_models import ActivityDataResponse, AnalyzeDayResponse, StatsResponse
 
 router = APIRouter(tags=["statistics"])
 

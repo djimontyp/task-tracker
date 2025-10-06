@@ -6,6 +6,9 @@ alias ss := services
 alias st := services-stop
 alias sc := services-clean
 alias sca := services-clean-all
+alias dbc := db-clear
+alias dbs := db-seed
+alias dbr := db-reset
 
 
 # Reinstall UV venv and all deps localy
@@ -42,7 +45,7 @@ dev SERVICE:
 # Rebuild specific service
 rebuild SERVICE:
     @echo "Rebuilding {{SERVICE}}..."
-    docker compose build {{SERVICE}} --no-cache
+    COMPOSE_BAKE=true docker compose build {{SERVICE}} --no-cache
     docker compose up -d {{SERVICE}}
 
 
@@ -101,3 +104,18 @@ install-dev:
 upgrade:
     @echo "Updating dependencies..."
     uv lock --upgrade --all-groups
+
+# Clear all test data from database
+db-clear:
+    @echo "Clearing database..."
+    uv run python scripts/seed_db.py --clear
+
+# Seed test data into database
+db-seed COUNT="50":
+    @echo "Seeding {{COUNT}} tasks..."
+    uv run python scripts/seed_db.py --seed --count {{COUNT}}
+
+# Clear and seed database (fresh start)
+db-reset COUNT="50":
+    @echo "Resetting database with {{COUNT}} tasks..."
+    uv run python scripts/seed_db.py --clear --seed --count {{COUNT}}

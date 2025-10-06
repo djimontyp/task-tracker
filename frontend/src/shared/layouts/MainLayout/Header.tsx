@@ -64,9 +64,9 @@ const Header = () => {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-card border-b border-border/80 pl-0 pr-4">
-      <div className="flex min-h-[56px] items-center justify-between gap-2">
-        <div className="flex items-center gap-2 pl-4">
+    <header className="sticky top-0 z-40 bg-card border-b border-border/80">
+      <div className="flex min-h-[56px] items-center justify-between gap-2 px-4 sm:px-5 md:px-6 lg:px-8">
+        <div className="flex items-center gap-2">
           <SidebarTrigger
             variant="ghost"
             size="icon"

@@ -97,3 +97,83 @@ class WebhookInfoResponse(BaseModel):
     success: bool
     webhook_info: Optional[WebhookInfo] = None
     error: Optional[str] = None
+
+# ---------------------
+# Messages API Schemas
+# ---------------------
+
+class MessageCreateRequest(BaseModel):
+    id: str
+    content: str
+    author: str
+    timestamp: str  # ISO 8601 string
+    chat_id: Optional[str] = None
+    user_id: Optional[int] = None
+    avatar_url: Optional[str] = None
+
+
+class MessageResponse(BaseModel):
+    id: int
+    external_message_id: str
+    content: str
+    author: str
+    sent_at: datetime
+    source_name: str
+    analyzed: Optional[bool] = None
+    avatar_url: Optional[str] = None
+    persisted: bool = True
+
+
+class DateRange(BaseModel):
+    earliest: Optional[str] = None
+    latest: Optional[str] = None
+
+
+class MessageFiltersResponse(BaseModel):
+    authors: List[str]
+    sources: List[str]
+    total_messages: int
+    date_range: DateRange
+
+
+# ------------------
+# Tasks API Schemas
+# ------------------
+
+class TaskCreateRequest(BaseModel):
+    title: str
+    description: Optional[str] = None
+    category: str
+    priority: str
+    source: Optional[str] = None
+
+
+class TaskResponse(BaseModel):
+    id: int
+    title: str
+    description: Optional[str] = None
+    status: str
+    priority: str
+    category: str
+    source: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        # Pydantic v2: allow attribute-based validation for ORM objects
+        from_attributes = True
+
+    @classmethod
+    def from_orm(cls, obj):  # Backward-compat shim (v1-style API)
+        return cls.model_validate(obj, from_attributes=True)
+
+
+# ----------------------
+# Statistics API Schemas
+# ----------------------
+
+class StatsResponse(BaseModel):
+    total_tasks: int
+    open_tasks: int
+    completed_tasks: int
+    categories: dict
+    priorities: dict

@@ -3,7 +3,7 @@ from urllib.parse import quote
 
 from fastapi import APIRouter, Request
 
-from ..models import MessageResponse
+from ..api.v1.response_models import MessageResponse
 from ..tasks import save_telegram_message
 from ..websocket import manager
 

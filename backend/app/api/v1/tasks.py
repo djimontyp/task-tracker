@@ -4,7 +4,8 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
-from ...models import SimpleTask, TaskCreateRequest, TaskResponse
+from ...models import SimpleTask
+from .response_models import TaskCreateRequest, TaskResponse
 from ...websocket import manager
 from ..deps import DatabaseDep
 from .response_models import TaskStatusUpdateResponse

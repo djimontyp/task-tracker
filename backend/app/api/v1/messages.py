@@ -6,11 +6,13 @@ from fastapi import APIRouter, Query
 from sqlmodel import and_, func, select
 
 from app.models import (
+    SimpleMessage,
+    SimpleSource,
+)
+from .response_models import (
     MessageCreateRequest,
     MessageFiltersResponse,
     MessageResponse,
-    SimpleMessage,
-    SimpleSource,
 )
 from ...webhook_service import telegram_webhook_service
 from ...websocket import manager

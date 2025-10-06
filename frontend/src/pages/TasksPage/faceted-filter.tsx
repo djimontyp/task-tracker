@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { Check, PlusCircle, ChevronDown } from 'lucide-react'
+import { Check, PlusCircle } from 'lucide-react'
 
-import { Button, Popover, PopoverTrigger, PopoverContent, Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, Badge, Checkbox } from '@/shared/ui'
+import { Button, Popover, PopoverTrigger, PopoverContent, Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandSeparator, Badge, Separator } from '@/shared/ui'
 import { cn } from '@/shared/lib'
 import type { Table } from '@tanstack/react-table'
 
@@ -20,27 +20,42 @@ interface DataTableFacetedFilterProps<TData> {
 
 export function DataTableFacetedFilter<TData>({ columnKey, table, title, options }: DataTableFacetedFilterProps<TData>) {
   const column = table.getColumn(columnKey)
-  const isFiltered = (column?.getFilterValue() as string[] | undefined)?.length
+  const selectedValues = new Set((column?.getFilterValue() as string[] | undefined) ?? [])
 
-  // Precompute counts per option from prefiltered rows
-  const counts = React.useMemo(() => {
-    const rows = table.getPreFilteredRowModel().flatRows
-    const map = new Map<string, number>()
-    for (const row of rows) {
-      const v = String(row.getValue(columnKey) ?? '')
-      map.set(v, (map.get(v) ?? 0) + 1)
-    }
-    return map
-  }, [table, columnKey])
+  // Precompute counts per option from faceted values
+  const facets = column?.getFacetedUniqueValues()
 
   if (!column) return null
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className={cn('h-8', isFiltered ? 'border-primary text-primary' : '')}>
-          <PlusCircle className="mr-2 h-4 w-4" /> {title}
-          <ChevronDown className="ml-1 h-4 w-4" />
+        <Button variant="outline" size="sm" className="h-8 border-dashed border-border">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          {title}
+          {selectedValues.size > 0 && (
+            <>
+              <Separator orientation="vertical" className="mx-2 h-4" />
+              <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
+                {selectedValues.size}
+              </Badge>
+              <div className="hidden space-x-1 lg:flex">
+                {selectedValues.size > 2 ? (
+                  <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                    {selectedValues.size} selected
+                  </Badge>
+                ) : (
+                  options
+                    .filter((option) => selectedValues.has(option.value))
+                    .map((option) => (
+                      <Badge key={option.value} variant="secondary" className="rounded-sm px-1 font-normal">
+                        {option.label}
+                      </Badge>
+                    ))
+                )}
+              </div>
+            </>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[220px] p-0" align="start">
@@ -49,41 +64,54 @@ export function DataTableFacetedFilter<TData>({ columnKey, table, title, options
           <CommandList>
             <CommandEmpty>No results.</CommandEmpty>
             <CommandGroup>
-              {options.map((opt) => {
-                const selected = (column.getFilterValue() as string[] | undefined)?.includes(opt.value)
-                const Icon = opt.icon
-                const count = counts.get(opt.value) ?? 0
+              {options.map((option) => {
+                const isSelected = selectedValues.has(option.value)
                 return (
                   <CommandItem
-                    key={opt.value}
+                    key={option.value}
                     onSelect={() => {
-                      const current = (column.getFilterValue() as string[] | undefined) ?? []
-                      const next = selected ? current.filter((v) => v !== opt.value) : [...current, opt.value]
-                      column.setFilterValue(next.length ? next : undefined)
+                      if (isSelected) {
+                        selectedValues.delete(option.value)
+                      } else {
+                        selectedValues.add(option.value)
+                      }
+                      const filterValues = Array.from(selectedValues)
+                      column.setFilterValue(filterValues.length ? filterValues : undefined)
                     }}
-                    className="flex items-center gap-2"
                   >
-                    <Checkbox checked={!!selected} onCheckedChange={() => {}} aria-hidden className="pointer-events-none" />
-                    {Icon ? <Icon className="h-4 w-4 text-muted-foreground" /> : null}
-                    <span className="flex-1 text-sm">{opt.label}</span>
-                    <Badge variant="secondary" className="ml-2 rounded-sm px-1.5 py-0 text-[10px]">{count}</Badge>
+                    <div
+                      className={cn(
+                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                        isSelected ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
+                      )}
+                    >
+                      <Check />
+                    </div>
+                    {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
+                    <span>{option.label}</span>
+                    {facets?.get(option.value) && (
+                      <span className="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs">
+                        {facets.get(option.value)}
+                      </span>
+                    )}
                   </CommandItem>
                 )
               })}
             </CommandGroup>
+            {selectedValues.size > 0 && (
+              <>
+                <CommandSeparator />
+                <CommandGroup>
+                  <CommandItem
+                    onSelect={() => column.setFilterValue(undefined)}
+                    className="justify-center text-center"
+                  >
+                    Clear filters
+                  </CommandItem>
+                </CommandGroup>
+              </>
+            )}
           </CommandList>
-          {isFiltered ? (
-            <div className="border-t p-2">
-              <Button
-                onClick={() => column.setFilterValue(undefined)}
-                variant="ghost"
-                size="sm"
-                className="h-8 w-full justify-start text-muted-foreground"
-              >
-                <Check className="mr-2 h-4 w-4" /> Clear filters
-              </Button>
-            </div>
-          ) : null}
         </Command>
       </PopoverContent>
     </Popover>
