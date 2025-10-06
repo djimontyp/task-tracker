@@ -57,6 +57,10 @@ class Settings(BaseSettings):
         default="http://localhost",
         validation_alias=AliasChoices("WEBHOOK_BASE_URL", "webhook_base_url"),
     )
+    encryption_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("ENCRYPTION_KEY", "encryption_key"),
+    )
 
 
 settings = Settings()

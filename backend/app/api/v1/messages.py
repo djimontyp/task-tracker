@@ -5,7 +5,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Query
 from sqlmodel import and_, func, select
 
-from ...models import (
+from app.models import (
     MessageCreateRequest,
     MessageFiltersResponse,
     MessageResponse,

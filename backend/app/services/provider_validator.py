@@ -1,0 +1,170 @@
+"""Asynchronous LLM provider validation service.
+
+Validates connectivity and model availability for configured LLM providers
+without blocking API responses.
+"""
+
+import asyncio
+from datetime import datetime
+
+import httpx
+from sqlmodel import select
+
+from app.models import LLMProvider, ProviderType, ValidationStatus
+from app.database import get_session
+from app.services.websocket_manager import websocket_manager
+
+
+class ProviderValidator:
+    """Service for asynchronous provider connectivity validation.
+
+    Validates provider configurations in background to avoid blocking
+    API responses during provider creation/update.
+    """
+
+    def __init__(self, timeout: int = 10):
+        """Initialize validator.
+
+        Args:
+            timeout: HTTP request timeout in seconds (default: 10)
+        """
+        self.timeout = timeout
+
+    async def validate_provider_async(
+        self,
+        provider_id: str,
+    ) -> None:
+        """Validate provider connectivity asynchronously.
+
+        Args:
+            provider_id: UUID of provider to validate
+
+        Updates provider validation_status, validation_error, and validated_at
+        in database based on validation result.
+        """
+        async for session in get_session():
+            try:
+                # Load provider from database
+                result = await session.execute(
+                    select(LLMProvider).where(LLMProvider.id == provider_id)
+                )
+                provider = result.scalar_one_or_none()
+
+                if not provider:
+                    return
+
+                # Update status to validating
+                provider.validation_status = ValidationStatus.validating
+                await session.commit()
+
+                # Perform actual validation
+                try:
+                    if provider.type == ProviderType.ollama:
+                        await self._validate_ollama(provider)
+                    elif provider.type == ProviderType.openai:
+                        await self._validate_openai(provider)
+                    else:
+                        raise ValueError(f"Unknown provider type: {provider.type}")
+
+                    # Validation succeeded
+                    provider.validation_status = ValidationStatus.connected
+                    provider.validation_error = None
+
+                except Exception as e:
+                    # Validation failed
+                    provider.validation_status = ValidationStatus.error
+                    provider.validation_error = str(e)
+
+                # Update validated timestamp
+                provider.validated_at = datetime.utcnow()
+                await session.commit()
+
+                # Broadcast provider validation status update
+                try:
+                    await websocket_manager.broadcast(
+                        "providers",
+                        {
+                            "event": "validation_update",
+                            "provider_id": str(provider.id),
+                            "validation_status": provider.validation_status.value,
+                            "validation_error": provider.validation_error,
+                            "validated_at": provider.validated_at.isoformat()
+                            if provider.validated_at
+                            else None,
+                        },
+                    )
+                except Exception:
+                    # Avoid breaking validation flow on WS errors
+                    pass
+
+            except Exception:
+                # Database error, skip validation
+                await session.rollback()
+            finally:
+                await session.close()
+                break
+
+    async def _validate_ollama(self, provider: LLMProvider) -> None:
+        """Validate Ollama provider connectivity.
+
+        Args:
+            provider: Ollama provider configuration
+
+        Raises:
+            ValueError: If base_url is not configured
+            httpx.HTTPError: If connection fails
+        """
+        if not provider.base_url:
+            raise ValueError("Ollama provider requires base_url")
+
+        # Test connectivity by fetching tags endpoint
+        url = f"{provider.base_url.rstrip('/')}/api/tags"
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            response = await client.get(url)
+        response.raise_for_status()
+
+        # Verify response has expected structure
+        data = response.json()
+        if "models" not in data:
+            raise ValueError("Invalid response from Ollama API")
+
+    async def _validate_openai(self, provider: LLMProvider) -> None:
+        """Validate OpenAI provider connectivity.
+
+        Args:
+            provider: OpenAI provider configuration
+
+        Raises:
+            ValueError: If API key is not configured
+            httpx.HTTPError: If authentication fails
+        """
+        # Note: API key is encrypted in database
+        # Actual decryption will be implemented in T032 (CredentialEncryption service)
+        if not provider.api_key_encrypted:
+            raise ValueError("OpenAI provider requires api_key")
+
+        # TODO: Decrypt API key using CredentialEncryption service (T032)
+        # For now, raise error indicating encryption service needed
+        raise NotImplementedError(
+            "OpenAI validation requires CredentialEncryption service (T032)"
+        )
+
+    async def close(self) -> None:
+        """Close resources (no-op: clients are context-managed)."""
+        return
+
+    def schedule_validation(self, provider_id: str) -> asyncio.Task:
+        """Schedule provider validation as background task.
+
+        Args:
+            provider_id: UUID of provider to validate
+
+        Returns:
+            Asyncio task handle for the validation
+
+        Example:
+            validator = ProviderValidator()
+            task = validator.schedule_validation(provider.id)
+            # Task runs in background, no await needed
+        """
+        return asyncio.create_task(self.validate_provider_async(provider_id))

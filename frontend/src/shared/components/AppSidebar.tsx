@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { LayoutDashboard, CheckSquare, BarChart3, Settings, Radar } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, BarChart3, Settings, Radar, Bot } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   Sidebar,
@@ -21,6 +21,7 @@ import { useServiceStatus } from '@/features/websocket/hooks/useServiceStatus'
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/tasks', label: 'Tasks', icon: CheckSquare },
+  { path: '/agents', label: 'Agents', icon: Bot },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/settings', label: 'Settings', icon: Settings },
 ]

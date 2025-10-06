@@ -2,6 +2,7 @@
 """
 Test script for the settings system functionality.
 """
+
 import asyncio
 import sys
 from pathlib import Path
@@ -9,10 +10,9 @@ from pathlib import Path
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent / "backend"))
 
-from backend.app.database import create_db_and_tables, get_db_session_context
-from backend.core.config import settings
-from backend.core.crypto import settings_crypto
-from backend.core.telegram import telegram_webhook_manager
+from app.database import create_db_and_tables, get_db_session_context
+from core.crypto import settings_crypto
+from core.telegram import telegram_webhook_manager
 
 
 async def test_database_connection():
@@ -66,7 +66,9 @@ async def test_telegram_validation():
 
         # We expect this to fail with fake token
         if not result["valid"]:
-            print(f"✅ Token validation correctly rejected fake token: {result['error']}")
+            print(
+                f"✅ Token validation correctly rejected fake token: {result['error']}"
+            )
             return True
         else:
             print("⚠️ Fake token was unexpectedly accepted")
@@ -82,8 +84,8 @@ async def test_settings_database():
     print("\n💾 Testing settings database operations...")
 
     try:
-        from backend.app.models import Settings
-        from backend.core.crypto import encrypt_sensitive_data, decrypt_sensitive_data
+        from app.models import Settings
+        from core.crypto import encrypt_sensitive_data, decrypt_sensitive_data
         from sqlmodel import select
 
         test_token = "1234567890:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
@@ -94,7 +96,7 @@ async def test_settings_database():
             db_settings = Settings(
                 id=1,
                 telegram_bot_token_encrypted=encrypt_sensitive_data(test_token),
-                telegram_webhook_base_url=test_webhook_url
+                telegram_webhook_base_url=test_webhook_url,
             )
             session.add(db_settings)
             await session.commit()
@@ -108,9 +110,14 @@ async def test_settings_database():
             retrieved_settings = result.scalar_one_or_none()
 
             if retrieved_settings:
-                decrypted_token = decrypt_sensitive_data(retrieved_settings.telegram_bot_token_encrypted)
+                decrypted_token = decrypt_sensitive_data(
+                    retrieved_settings.telegram_bot_token_encrypted
+                )
 
-                if decrypted_token == test_token and retrieved_settings.telegram_webhook_base_url == test_webhook_url:
+                if (
+                    decrypted_token == test_token
+                    and retrieved_settings.telegram_webhook_base_url == test_webhook_url
+                ):
                     print("✅ Settings retrieval and decryption successful")
 
                     # Clean up
