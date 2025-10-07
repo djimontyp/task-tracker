@@ -51,7 +51,11 @@ export const columns: ColumnDef<Task>[] = [
   {
     accessorKey: 'title',
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        className="hover:bg-accent/10 hover:text-accent-foreground data-[state=open]:bg-accent/10"
+      >
         Title
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
