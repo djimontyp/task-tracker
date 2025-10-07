@@ -1,9 +1,10 @@
 import * as React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal, ArrowUpDown, Circle, CheckCircle2, Timer, XCircle, Tag } from 'lucide-react'
+import { MoreHorizontal, Circle, CheckCircle2, Timer, XCircle, Tag } from 'lucide-react'
 
 import type { Task } from '@/shared/types'
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'
+import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
 
 export const statusLabels: Record<string, { label: string; icon: React.ComponentType<any> }> = {
   open: { label: 'Backlog', icon: Timer },
@@ -51,14 +52,7 @@ export const columns: ColumnDef<Task>[] = [
   {
     accessorKey: 'title',
     header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        className="hover:bg-accent/10 hover:text-accent-foreground data-[state=open]:bg-accent/10"
-      >
-        Title
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
+      <DataTableColumnHeader column={column} title="Title" />
     ),
     cell: ({ row }) => {
       const title = row.getValue<string>('title')
@@ -73,7 +67,9 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: 'status',
-    header: 'Status',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
     cell: ({ row }) => {
       const value = row.getValue<string>('status')
       const meta = statusLabels[value] ?? { label: value, icon: Circle }
@@ -93,7 +89,9 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: 'priority',
-    header: 'Priority',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Priority" />
+    ),
     cell: ({ row }) => {
       const value = row.getValue<string>('priority')
       const meta = priorityLabels[value] ?? { label: value }
@@ -113,7 +111,9 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: 'created_at',
-    header: 'Created',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Created" />
+    ),
     cell: ({ row }) => {
       const d = row.getValue<string>('created_at') || (row.original as Task).createdAt
       return <div className="text-muted-foreground text-xs">{d ? new Date(d).toLocaleDateString() : '-'}</div>

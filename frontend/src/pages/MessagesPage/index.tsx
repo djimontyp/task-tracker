@@ -18,7 +18,7 @@ import {
   getFacetedUniqueValues,
   useReactTable,
 } from '@tanstack/react-table'
-import { columns as baseColumns, sourceLabels, statusLabels, Message } from './columns'
+import { createColumns, sourceLabels, statusLabels, Message } from './columns'
 import { DataTable } from '@shared/components/DataTable'
 import { DataTableToolbar } from '@shared/components/DataTableToolbar'
 import { DataTablePagination } from '@shared/components/DataTablePagination'
@@ -37,22 +37,31 @@ interface PaginatedResponse {
 const MessagesPage = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize] = useState(50)
+  const [pageSize, setPageSize] = useState(25)
 
   // Data table state
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: 'sent_at', desc: true } // Default sort by sent_at descending
+  ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [globalFilter, setGlobalFilter] = React.useState('')
 
   const { data: paginatedData, isLoading, refetch } = useQuery<PaginatedResponse>({
-    queryKey: ['messages', currentPage, pageSize],
+    queryKey: ['messages', currentPage, pageSize, sorting],
     queryFn: async () => {
       try {
         const params: any = {
           page: currentPage,
           page_size: pageSize
+        }
+
+        // Add sorting parameters
+        if (sorting.length > 0) {
+          const sort = sorting[0]
+          params.sort_by = sort.id
+          params.sort_order = sort.desc ? 'desc' : 'asc'
         }
 
         const response = await apiClient.get('/api/messages', { params })
@@ -65,9 +74,30 @@ const MessagesPage = () => {
   })
 
 
+  const hasActiveFilters = React.useMemo(() => {
+    // Check if there are column filters
+    if (columnFilters.length > 0) return true
+
+    // Check if sorting is different from default (sent_at desc)
+    if (sorting.length === 0) return false
+    if (sorting.length > 1) return true
+    const sort = sorting[0]
+    return sort.id !== 'sent_at' || sort.desc !== true
+  }, [columnFilters, sorting])
+
+  const handleReset = React.useCallback(() => {
+    setColumnFilters([])
+    setSorting([{ id: 'sent_at', desc: true }])
+  }, [])
+
+  const columns = React.useMemo(
+    () => createColumns({ onReset: handleReset, hasActiveFilters }),
+    [hasActiveFilters, handleReset]
+  )
+
   const table = useReactTable({
     data: paginatedData?.items ?? [],
-    columns: baseColumns,
+    columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -75,6 +105,7 @@ const MessagesPage = () => {
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     manualPagination: true, // Server-side pagination
+    manualSorting: true, // Server-side sorting
     pageCount: paginatedData?.total_pages || 1,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -85,7 +116,14 @@ const MessagesPage = () => {
       const newPagination = typeof updater === 'function'
         ? updater({ pageIndex: currentPage - 1, pageSize })
         : updater
-      setCurrentPage(newPagination.pageIndex + 1)
+
+      // If pageSize changed, reset to first page
+      if (newPagination.pageSize !== pageSize) {
+        setCurrentPage(1)
+        setPageSize(newPagination.pageSize)
+      } else {
+        setCurrentPage(newPagination.pageIndex + 1)
+      }
     },
     state: {
       sorting,
@@ -203,15 +241,9 @@ const MessagesPage = () => {
             label: meta.label
           }))}
         />
-        {(table.getColumn('source_name')?.getFilterValue() as string[] | undefined)?.length ||
-         (table.getColumn('analyzed')?.getFilterValue() as string[] | undefined)?.length ? (
-          <Button variant="ghost" size="sm" onClick={() => table.resetColumnFilters()}>
-            Reset
-          </Button>
-        ) : null}
       </DataTableToolbar>
 
-      <DataTable table={table} columns={baseColumns} emptyMessage="No messages found." />
+      <DataTable table={table} columns={columns} emptyMessage="No messages found." />
 
       <DataTablePagination table={table} />
 

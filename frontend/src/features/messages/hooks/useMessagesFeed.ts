@@ -114,8 +114,8 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
           ...resolveDateRange(currentPeriod),
         }
 
-        const response = await apiClient.get<Message[]>('/api/messages', { params })
-        hydrate(response.data)
+        const response = await apiClient.get<{ items: Message[] }>('/api/messages', { params })
+        hydrate(response.data.items)
         setError(null)
       } catch (err) {
         console.error('Failed to fetch messages:', err)

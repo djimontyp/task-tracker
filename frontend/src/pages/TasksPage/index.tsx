@@ -128,8 +128,12 @@ const TasksPage = () => {
           options={Object.entries(priorityLabels).map(([value, meta]) => ({ value, label: meta.label }))}
         />
         {(table.getColumn('status')?.getFilterValue() as string[] | undefined)?.length ||
-         (table.getColumn('priority')?.getFilterValue() as string[] | undefined)?.length ? (
-          <Button variant="ghost" size="sm" onClick={() => table.resetColumnFilters()}>
+         (table.getColumn('priority')?.getFilterValue() as string[] | undefined)?.length ||
+         sorting.length > 0 ? (
+          <Button variant="ghost" size="sm" onClick={() => {
+            table.resetColumnFilters()
+            setSorting([])
+          }}>
             Reset
           </Button>
         ) : null}

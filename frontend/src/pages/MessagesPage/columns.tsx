@@ -1,8 +1,14 @@
 import * as React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal, ArrowUpDown, Mail, User } from 'lucide-react'
+import { MoreHorizontal, Mail, User, X } from 'lucide-react'
 
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'
+import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
+
+export interface ColumnsCallbacks {
+  onReset?: () => void
+  hasActiveFilters?: boolean
+}
 
 export interface Message {
   id: number
@@ -26,7 +32,7 @@ export const statusLabels: Record<string, { label: string }> = {
   pending: { label: 'Pending' },
 }
 
-export const columns: ColumnDef<Message>[] = [
+export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[] => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -56,14 +62,7 @@ export const columns: ColumnDef<Message>[] = [
   {
     accessorKey: 'author',
     header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        className="hover:bg-accent/10 hover:text-accent-foreground data-[state=open]:bg-accent/10"
-      >
-        Author
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
+      <DataTableColumnHeader column={column} title="Author" />
     ),
     cell: ({ row }) => {
       const author = row.getValue<string>('author')
@@ -96,7 +95,9 @@ export const columns: ColumnDef<Message>[] = [
   },
   {
     accessorKey: 'source_name',
-    header: 'Source',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Source" />
+    ),
     cell: ({ row }) => {
       const value = row.getValue<string>('source_name')
       const meta = sourceLabels[value] ?? { label: value, icon: Mail }
@@ -116,7 +117,9 @@ export const columns: ColumnDef<Message>[] = [
   },
   {
     accessorKey: 'analyzed',
-    header: 'Status',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
     cell: ({ row }) => {
       const analyzed = row.getValue<boolean>('analyzed')
       return (
@@ -134,7 +137,9 @@ export const columns: ColumnDef<Message>[] = [
   },
   {
     accessorKey: 'sent_at',
-    header: 'Sent At',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Sent At" />
+    ),
     cell: ({ row }) => {
       const d = row.getValue<string>('sent_at')
       return <div className="text-muted-foreground text-xs">{d ? new Date(d).toLocaleString() : '-'}</div>
@@ -142,6 +147,22 @@ export const columns: ColumnDef<Message>[] = [
   },
   {
     id: 'actions',
+    header: () => {
+      if (callbacks?.hasActiveFilters) {
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={callbacks.onReset}
+            className="h-8 w-8 p-0 hover:bg-destructive/10"
+          >
+            <X className="h-4 w-4 text-destructive/70 hover:text-destructive" />
+            <span className="sr-only">Reset filters</span>
+          </Button>
+        )
+      }
+      return null
+    },
     enableHiding: false,
     cell: ({ row }) => {
       const message = row.original
@@ -167,3 +188,6 @@ export const columns: ColumnDef<Message>[] = [
     },
   },
 ]
+
+// Legacy export for backward compatibility
+export const columns = createColumns()

@@ -114,6 +114,8 @@ async def get_messages(
     date_to: Optional[date] = Query(
         None, description="Filter messages until this date"
     ),
+    sort_by: Optional[str] = Query(None, description="Column to sort by (author, source_name, analyzed, sent_at)"),
+    sort_order: Optional[str] = Query("desc", description="Sort order (asc or desc)"),
 ) -> PaginatedMessagesResponse:
     """
     Retrieve messages with pagination and optional filtering.
@@ -163,8 +165,26 @@ async def get_messages(
     total_pages = (total + page_size - 1) // page_size if total > 0 else 1
     offset = (page - 1) * page_size
 
+    # Apply sorting
+    sort_column = SimpleMessage.created_at  # default
+    if sort_by:
+        if sort_by == "author":
+            sort_column = SimpleMessage.author
+        elif sort_by == "source_name":
+            sort_column = SimpleSource.name
+        elif sort_by == "analyzed":
+            sort_column = SimpleMessage.analyzed
+        elif sort_by == "sent_at":
+            sort_column = SimpleMessage.sent_at
+
+    # Apply sort order
+    if sort_order == "asc":
+        statement = statement.order_by(sort_column.asc())
+    else:
+        statement = statement.order_by(sort_column.desc())
+
     # Fetch paginated data
-    statement = statement.order_by(SimpleMessage.created_at.desc()).offset(offset).limit(page_size)
+    statement = statement.offset(offset).limit(page_size)
 
     result = await db.execute(statement)
     messages_with_sources = result.all()
