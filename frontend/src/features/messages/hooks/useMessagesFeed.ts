@@ -92,7 +92,7 @@ const toUpdatedPayload = (value: unknown): MessageUpdatedPayload | null => {
 }
 
 export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => {
-  const [period, setPeriod] = useState<MessagesPeriod>('24h')
+  const [period, setPeriod] = useState<MessagesPeriod>('all')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

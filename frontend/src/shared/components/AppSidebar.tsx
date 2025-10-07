@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { LayoutDashboard, CheckSquare, BarChart3, Settings, Radar, Bot } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, BarChart3, Settings, Radar, Bot, Mail } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   Sidebar,
@@ -21,6 +21,7 @@ import { useServiceStatus } from '@/features/websocket/hooks/useServiceStatus'
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/tasks', label: 'Tasks', icon: CheckSquare },
+  { path: '/messages', label: 'Messages', icon: Mail },
   { path: '/agents', label: 'Agents', icon: Bot },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/settings', label: 'Settings', icon: Settings },
@@ -68,11 +69,11 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="px-2 py-2 border-b border-border">
+      <SidebarHeader className="px-2 py-2 border-b border-border group-data-[collapsible=icon]:px-0">
         <div
           className={cn(
             'flex w-full items-center gap-3 rounded-lg bg-sidebar-accent/40 px-3 py-2',
-            'group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0'
+            'group-data-[collapsible=icon]:h-11 group-data-[collapsible=icon]:w-11 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:border group-data-[collapsible=icon]:border-transparent'
           )}
         >
           <div
@@ -89,7 +90,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup className="group-data-[collapsible=icon]:px-0">
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
@@ -142,7 +143,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarSeparator className="mx-3" />
+      <SidebarSeparator />
       <SidebarFooter className="px-3 py-4">
         <Tooltip disableHoverableContent>
           <TooltipTrigger asChild>

@@ -116,12 +116,18 @@ class MessageResponse(BaseModel):
     id: int
     external_message_id: str
     content: str
-    author: str
+    author: str  # Display name (first_name + last_name)
     sent_at: datetime
     source_name: str
     analyzed: Optional[bool] = None
     avatar_url: Optional[str] = None
     persisted: bool = True
+
+    # Telegram user identification
+    telegram_user_id: Optional[int] = None
+    telegram_username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
 
 
 class DateRange(BaseModel):
@@ -134,6 +140,14 @@ class MessageFiltersResponse(BaseModel):
     sources: List[str]
     total_messages: int
     date_range: DateRange
+
+
+class PaginatedMessagesResponse(BaseModel):
+    items: List['MessageResponse']
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
 
 
 # ------------------

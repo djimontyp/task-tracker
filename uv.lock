@@ -1507,6 +1507,12 @@ wheels = [
 ]
 
 [[package]]
+name = "pyaes"
+version = "1.6.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/44/66/2c17bae31c906613795711fc78045c285048168919ace2220daa372c7d72/pyaes-1.6.1.tar.gz", hash = "sha256:02c1b1405c38d3c370b085fb952dd8bea3fadcee6411ad99f312cc129c536d8f", size = 28536 }
+
+[[package]]
 name = "pyasn1"
 version = "0.6.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2139,6 +2145,7 @@ dependencies = [
     { name = "sqlmodel" },
     { name = "taskiq" },
     { name = "taskiq-nats" },
+    { name = "telethon" },
     { name = "uvicorn" },
 ]
 
@@ -2170,6 +2177,7 @@ requires-dist = [
     { name = "sqlmodel", specifier = ">=0.0.24" },
     { name = "taskiq", specifier = ">=0.11.18" },
     { name = "taskiq-nats", specifier = ">=0.5.1" },
+    { name = "telethon", specifier = ">=1.38.1" },
     { name = "uvicorn", specifier = ">=0.35.0" },
 ]
 
@@ -2224,6 +2232,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/0f/1c/e46adc5031c92d2ce13ea13e426f664b258fd6e296c8fc6f1bb1009b698a/taskiq_nats-0.5.1.tar.gz", hash = "sha256:fe305fef7c959613bda893a0ffe92e0696194de9df1181c9b6e3a573bf5ac339", size = 7705 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c8/a7/7ce378ba7653cd5382d5a8611e4fdb13e9b991d7a2f54bd55c081123290f/taskiq_nats-0.5.1-py3-none-any.whl", hash = "sha256:87edcc082efe98435f59b344439b03436d4ef52eef52a6e34fd3e5bfe113e168", size = 7580 },
+]
+
+[[package]]
+name = "telethon"
+version = "1.41.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyaes" },
+    { name = "rsa" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/86/6a/3fc30b39eac0a8c770418c0f393d3ff040b9205938a1492d60f08934e97a/telethon-1.41.2.tar.gz", hash = "sha256:300a3441df62668378626b46cafda346573e9ac296367182510756334d2bdc5e", size = 669173 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/78/e0/2fb26c432ee4259a6d4ab427196b84a2b0c81db232337b02cf2a09df1896/telethon-1.41.2-py3-none-any.whl", hash = "sha256:28b6b1023a0753a32039e6d1fda4b63cac138ce894cd5cbcac1d5ddd2f8426d8", size = 744889 },
 ]
 
 [[package]]

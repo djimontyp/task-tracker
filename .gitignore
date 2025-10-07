@@ -164,3 +164,7 @@ cython_debug/
 
 .idea
 node_modules
+
+# Telethon session files (contain auth tokens)
+*.session
+*.session-journal

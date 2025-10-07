@@ -229,12 +229,18 @@ class SimpleMessage(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     external_message_id: str = Field(max_length=100)
     content: str = Field(sa_type=Text)
-    author: str = Field(max_length=100)
+    author: str = Field(max_length=100)  # Display name (first_name + last_name)
     sent_at: datetime
     source_id: int | None = Field(default=None, foreign_key="simple_sources.id")
     created_at: datetime | None = Field(default=None)
     analyzed: bool = Field(default=False)
     avatar_url: str | None = Field(default=None, max_length=500)
+
+    # Telegram user identification fields
+    telegram_user_id: int | None = Field(default=None, index=True)
+    telegram_username: str | None = Field(default=None, max_length=100)
+    first_name: str | None = Field(default=None, max_length=100)
+    last_name: str | None = Field(default=None, max_length=100)
 
 
 class SimpleTask(SQLModel, table=True):

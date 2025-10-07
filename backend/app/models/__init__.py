@@ -1,6 +1,4 @@
-"""Models package - new agent management + legacy models."""
-
-# New agent management models
+"""SQLModel models for the application."""
 from .agent_config import (
     AgentConfig,
     AgentConfigCreate,
@@ -12,6 +10,28 @@ from .agent_task_assignment import (
     AgentTaskAssignmentCreate,
     AgentTaskAssignmentPublic,
 )
+from .base import IDMixin, TimestampMixin
+from .enums import TaskCategory, TaskPriority, TaskStatus, SourceType
+from .legacy import (
+    Message,
+    MessageCreate,
+    MessagePublic,
+    MessageUpdate,
+    SimpleMessage,
+    SimpleSource,
+    SimpleTask,
+    Source,
+    SourceCreate,
+    SourcePublic,
+    SourceUpdate,
+    Task,
+    TaskCreate,
+    TaskPublic,
+    WebhookSettings,
+    WebhookSettingsCreate,
+    WebhookSettingsPublic,
+    WebhookSettingsUpdate,
+)
 from .llm_provider import (
     LLMProvider,
     LLMProviderCreate,
@@ -21,53 +41,14 @@ from .llm_provider import (
     ValidationStatus,
 )
 from .task_config import TaskConfig, TaskConfigCreate, TaskConfigPublic, TaskConfigUpdate
-
-# Base classes and enums
-from .base import IDMixin, TimestampMixin
-from .enums import TaskStatus, TaskCategory, TaskPriority, SourceType
-
-# Legacy models (old task tracker models)
-from .legacy import (
-    Source,
-    SourceCreate,
-    SourcePublic,
-    SourceUpdate,
-    Message,
-    MessageCreate,
-    MessagePublic,
-    MessageUpdate,
-    Task,
-    TaskCreate,
-    TaskPublic,
-    TaskUpdate,
-    WebhookSettings,
-    WebhookSettingsCreate,
-    WebhookSettingsPublic,
-    WebhookSettingsUpdate,
-    SimpleSource,
-    SimpleMessage,
-    SimpleTask,
+from .message_ingestion import (
+    MessageIngestionJob,
+    MessageIngestionJobCreate,
+    MessageIngestionJobPublic,
+    IngestionStatus,
 )
 
 __all__ = [
-    # New models
-    "AgentConfig",
-    "AgentConfigCreate",
-    "AgentConfigPublic",
-    "AgentConfigUpdate",
-    "LLMProvider",
-    "LLMProviderCreate",
-    "LLMProviderPublic",
-    "LLMProviderUpdate",
-    "ProviderType",
-    "ValidationStatus",
-    "TaskConfig",
-    "TaskConfigCreate",
-    "TaskConfigPublic",
-    "TaskConfigUpdate",
-    "AgentTaskAssignment",
-    "AgentTaskAssignmentCreate",
-    "AgentTaskAssignmentPublic",
     # Base
     "IDMixin",
     "TimestampMixin",
@@ -96,4 +77,29 @@ __all__ = [
     "SimpleSource",
     "SimpleMessage",
     "SimpleTask",
+    # LLM Provider
+    "LLMProvider",
+    "LLMProviderCreate",
+    "LLMProviderPublic",
+    "LLMProviderUpdate",
+    "ProviderType",
+    "ValidationStatus",
+    # Task Config
+    "TaskConfig",
+    "TaskConfigCreate",
+    "TaskConfigPublic",
+    # Message Ingestion
+    "MessageIngestionJob",
+    "MessageIngestionJobCreate",
+    "MessageIngestionJobPublic",
+    "IngestionStatus",
+    # Agent Config
+    "AgentConfig",
+    "AgentConfigCreate",
+    "AgentConfigPublic",
+    "AgentConfigUpdate",
+    # Agent Task Assignment
+    "AgentTaskAssignment",
+    "AgentTaskAssignmentCreate",
+    "AgentTaskAssignmentPublic",
 ]

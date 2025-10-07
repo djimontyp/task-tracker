@@ -31,12 +31,17 @@ export interface Message {
   id: number | string
   external_message_id: string
   content: string
-  author: string
+  author: string  // Display name (first_name + last_name)
   sent_at: string
   source_name: string
   analyzed?: boolean
   avatar_url?: string | null
   persisted?: boolean
+  // Telegram user identification
+  telegram_user_id?: number | null
+  telegram_username?: string | null
+  first_name?: string | null
+  last_name?: string | null
   // Legacy compatibility fields
   text?: string
   sender?: string

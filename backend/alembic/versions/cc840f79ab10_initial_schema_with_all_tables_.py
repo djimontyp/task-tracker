@@ -1,8 +1,8 @@
-"""initial schema with all tables
+"""Initial schema with all tables including message_ingestion_jobs
 
-Revision ID: ba32bb3cb82d
+Revision ID: cc840f79ab10
 Revises: 
-Create Date: 2025-10-04 02:17:53.570095
+Create Date: 2025-10-07 03:10:44.862705
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'ba32bb3cb82d'
+revision: str = 'cc840f79ab10'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -37,6 +37,26 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_llm_providers_name'), 'llm_providers', ['name'], unique=True)
+    op.create_table('message_ingestion_jobs',
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('id', sa.BigInteger(), nullable=False),
+    sa.Column('source_type', sqlmodel.sql.sqltypes.AutoString(length=50), nullable=False),
+    sa.Column('source_identifiers', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.Column('time_window_start', sa.DateTime(), nullable=True),
+    sa.Column('time_window_end', sa.DateTime(), nullable=True),
+    sa.Column('status', sa.Enum('pending', 'running', 'completed', 'failed', 'cancelled', name='ingestionstatus'), nullable=False),
+    sa.Column('messages_fetched', sa.Integer(), nullable=False),
+    sa.Column('messages_stored', sa.Integer(), nullable=False),
+    sa.Column('messages_skipped', sa.Integer(), nullable=False),
+    sa.Column('errors_count', sa.Integer(), nullable=False),
+    sa.Column('current_batch', sa.Integer(), nullable=False),
+    sa.Column('total_batches', sa.Integer(), nullable=True),
+    sa.Column('error_log', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('started_at', sa.DateTime(), nullable=True),
+    sa.Column('completed_at', sa.DateTime(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('simple_sources',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
@@ -176,6 +196,7 @@ def downgrade() -> None:
     op.drop_table('sources')
     op.drop_table('simple_tasks')
     op.drop_table('simple_sources')
+    op.drop_table('message_ingestion_jobs')
     op.drop_index(op.f('ix_llm_providers_name'), table_name='llm_providers')
     op.drop_table('llm_providers')
     # ### end Alembic commands ###
