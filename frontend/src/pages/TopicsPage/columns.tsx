@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal, Circle, CheckCircle2, Timer, XCircle, Tag } from 'lucide-react'
+import { MoreHorizontal, Circle, CheckCircle2, Timer, XCircle } from 'lucide-react'
 
 import type { Task } from '@/shared/types'
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'

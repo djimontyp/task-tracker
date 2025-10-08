@@ -1,5 +1,5 @@
-import { Badge } from '@shared/ui'
-import { ValidationStatus as Status } from '@/types/provider'
+import { Badge } from '@/shared/ui'
+import { ValidationStatus as Status } from '@/features/providers/types'
 
 interface ValidationStatusProps {
   status: Status

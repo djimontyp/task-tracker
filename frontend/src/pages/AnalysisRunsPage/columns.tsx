@@ -3,6 +3,7 @@ import { ColumnDef } from '@tanstack/react-table'
 import { ArrowUpDown, Clock, PlayCircle, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 
 import { Button, Badge } from '@/shared/ui'
+import { formatFullDate } from '@/shared/utils/date'
 
 export interface AnalysisRun {
   id: string
@@ -38,15 +39,7 @@ export const statusConfig: Record<string, { label: string; icon: React.Component
   cancelled: { label: 'Cancelled', icon: XCircle, className: 'bg-slate-400 text-white' },
 }
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString('uk-UA', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+// Use shared formatFullDate utility
 
 const formatCost = (cost: number) => {
   return `$${cost.toFixed(2)}`
@@ -105,9 +98,9 @@ export const columns: ColumnDef<AnalysisRun>[] = [
 
       return (
         <div className="text-sm">
-          <div>{formatDate(start)}</div>
+          <div>{formatFullDate(start)}</div>
           <div className="text-xs text-muted-foreground">to</div>
-          <div>{formatDate(end)}</div>
+          <div>{formatFullDate(end)}</div>
         </div>
       )
     },

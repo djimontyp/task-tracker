@@ -9,8 +9,8 @@ import {
   Input,
   Label,
   Checkbox,
-} from '@shared/ui'
-import { TaskConfigCreate, TaskConfigUpdate } from '@/types/task'
+} from '@/shared/ui'
+import { TaskConfigCreate, TaskConfigUpdate } from '@/features/agents/types'
 import SchemaEditor from './SchemaEditor'
 
 interface TaskFormProps {

@@ -6,7 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@shared/ui'
+} from '@/shared/ui'
 import {
   ColumnDef,
   flexRender,

@@ -16,9 +16,9 @@ import {
   SelectItem,
   Checkbox,
   Spinner,
-} from '@shared/ui'
-import { AgentConfigCreate, AgentConfigUpdate } from '@/types/agent'
-import { providerService } from '@/services/providerService'
+} from '@/shared/ui'
+import { AgentConfigCreate, AgentConfigUpdate } from '@/features/agents/types'
+import { providerService } from '@/features/providers/api'
 
 interface AgentFormProps {
   open: boolean

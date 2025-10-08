@@ -6,13 +6,14 @@ import {
   Button,
   Badge,
   Spinner,
-} from '@shared/ui'
-import { providerService } from '@/services/providerService'
-import { LLMProvider, LLMProviderCreate, LLMProviderUpdate } from '@/types/provider'
+} from '@/shared/ui'
+import { providerService } from '@/features/providers/api'
+import { LLMProvider, LLMProviderCreate, LLMProviderUpdate } from '@/features/providers/types'
 import { toast } from 'sonner'
 import { Pencil, Trash2, Plus } from 'lucide-react'
-import ProviderForm from '@/pages/AgentsPage/components/ProviderForm'
-import ValidationStatus from '@/pages/AgentsPage/components/ValidationStatus'
+import { ProviderForm } from '@/features/agents/components'
+import { ValidationStatus } from '@/features/providers/components'
+import { formatFullDate } from '@/shared/utils/date'
 
 const ProvidersPage = () => {
   const queryClient = useQueryClient()
@@ -168,7 +169,7 @@ const ProvidersPage = () => {
 
                     {provider.validated_at && (
                       <div className="text-xs text-muted-foreground">
-                        Validated: {new Date(provider.validated_at).toLocaleString()}
+                        Validated: {formatFullDate(provider.validated_at)}
                       </div>
                     )}
 

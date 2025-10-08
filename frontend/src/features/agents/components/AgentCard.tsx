@@ -1,5 +1,5 @@
-import { Card, CardContent, Button, Badge } from '@shared/ui'
-import { AgentConfig } from '@/types/agent'
+import { Card, CardContent, Button, Badge } from '@/shared/ui'
+import { AgentConfig } from '@/features/agents/types'
 import { Pencil, Trash2, Settings } from 'lucide-react'
 
 interface AgentCardProps {
