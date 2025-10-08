@@ -2,9 +2,9 @@ from datetime import datetime
 
 from fastapi import APIRouter, Request
 
-from ..api.v1.response_models import MessageResponse
+from ..schemas.messages import MessageResponse
 from ..tasks import save_telegram_message
-from ..websocket import manager
+from ..services.websocket_manager import websocket_manager
 from ..webhook_service import telegram_webhook_service
 
 router = APIRouter(prefix="/webhook", tags=["webhooks"])
@@ -44,20 +44,20 @@ async def telegram_webhook(request: Request):
             # Display name: "FirstName LastName" or fallback to username
             author = f"{first_name} {last_name}".strip() or telegram_username or "Unknown"
 
-            live_response = MessageResponse(
-                id=0,
-                external_message_id=str(message["message_id"]),
-                content=message.get("text", message.get("caption", "[Media]")),
-                author=author,
-                sent_at=datetime.fromtimestamp(message["date"]),
-                source_name="telegram",
-                avatar_url=avatar_url,
-                persisted=False,
-            )
+            # Instant broadcast for UI (simplified without DB IDs)
+            live_message_data = {
+                "id": 0,  # Temporary ID
+                "external_message_id": str(message["message_id"]),
+                "content": message.get("text", message.get("caption", "[Media]")),
+                "author": author,  # Legacy field
+                "author_name": author,
+                "sent_at": datetime.fromtimestamp(message["date"]).isoformat(),
+                "source_name": "telegram",
+                "avatar_url": avatar_url,
+                "persisted": False,
+            }
 
-            message_data = live_response.model_dump()
-            message_data["sent_at"] = message_data["sent_at"].isoformat()
-            await manager.broadcast({"type": "message.new", "data": message_data})
+            await websocket_manager.broadcast("messages", {"type": "message.new", "data": live_message_data})
 
             try:
                 await save_telegram_message.kiq(update_data)

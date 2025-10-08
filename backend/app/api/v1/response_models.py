@@ -102,53 +102,7 @@ class WebhookInfoResponse(BaseModel):
 # Messages API Schemas
 # ---------------------
 
-class MessageCreateRequest(BaseModel):
-    id: str
-    content: str
-    author: str
-    timestamp: str  # ISO 8601 string
-    chat_id: Optional[str] = None
-    user_id: Optional[int] = None
-    avatar_url: Optional[str] = None
-
-
-class MessageResponse(BaseModel):
-    id: int
-    external_message_id: str
-    content: str
-    sent_at: datetime
-
-    # Source
-    source_id: int
-    source_name: str
-
-    # Author (User) - normalized fields
-    author_id: int
-    author_name: str | None = None  # User.full_name
-    avatar_url: str | None = None
-
-    # Platform-specific
-    telegram_profile_id: int | None = None
-
-    # AI fields
-    classification: str | None = None
-    confidence: float | None = None
-    analyzed: bool = False
-
-    # Legacy compatibility (deprecated)
-    author: str | None = None  # @deprecated Use author_name
-    persisted: bool = True
-
-    # Telegram user identification (legacy)
-    telegram_user_id: int | None = None
-    telegram_username: str | None = None
-    first_name: str | None = None
-    last_name: str | None = None
-
-    # Timestamps
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
-
+from app.schemas.messages import MessageResponse
 
 class DateRange(BaseModel):
     earliest: Optional[str] = None
@@ -163,7 +117,7 @@ class MessageFiltersResponse(BaseModel):
 
 
 class PaginatedMessagesResponse(BaseModel):
-    items: List['MessageResponse']
+    items: List[MessageResponse]
     total: int
     page: int
     page_size: int

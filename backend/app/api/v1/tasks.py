@@ -6,7 +6,7 @@ from sqlmodel import select
 
 from ...models import Task
 from app.schemas.tasks import TaskCreateRequest, TaskResponse
-from ...websocket import manager
+from ...services.websocket_manager import websocket_manager
 from ..deps import DatabaseDep
 from .response_models import TaskStatusUpdateResponse
 
@@ -62,7 +62,7 @@ async def create_task(task: TaskCreateRequest, db: DatabaseDep) -> TaskResponse:
 
     response_data = response.model_dump()
     response_data["created_at"] = response_data["created_at"].isoformat()
-    await manager.broadcast({"type": "task_created", "data": response_data})
+    await websocket_manager.broadcast("tasks", {"type": "task_created", "data": response_data})
 
     return response
 

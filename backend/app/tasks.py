@@ -9,7 +9,7 @@ from .database import AsyncSessionLocal
 from .models import Source, Message, MessageIngestionJob, IngestionStatus, User, TelegramProfile
 from .services.user_service import identify_or_create_user, get_or_create_source
 from .webhook_service import telegram_webhook_service
-from .websocket import manager
+from .services.websocket_manager import websocket_manager
 from .services.telegram_ingestion_service import telegram_ingestion_service
 
 
@@ -97,8 +97,10 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
                 f"✅ Successfully committed Telegram message {message['message_id']} from {user.full_name}"
             )
 
+            # Broadcast full message data after persisting to DB
             try:
-                await manager.broadcast(
+                await websocket_manager.broadcast(
+                    "messages",
                     {
                         "type": "message.updated",
                         "data": {
@@ -106,6 +108,8 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
                             "external_message_id": db_message.external_message_id,
                             "author_id": user.id,
                             "author_name": user.full_name,
+                            "source_id": source.id,
+                            "source_name": source.name,
                             "persisted": True,
                             "avatar_url": avatar_url,
                         },
@@ -154,7 +158,7 @@ async def ingest_telegram_messages_task(
             await db.commit()
 
             # Broadcast start event
-            await manager.broadcast({
+            await websocket_manager.broadcast("messages", {
                 "type": "ingestion.started",
                 "data": {
                     "job_id": job_id,
@@ -228,7 +232,7 @@ async def ingest_telegram_messages_task(
                     )
 
                     # Broadcast progress
-                    await manager.broadcast({
+                    await websocket_manager.broadcast("messages", {
                         "type": "ingestion.progress",
                         "data": {
                             "job_id": job_id,
@@ -260,7 +264,7 @@ async def ingest_telegram_messages_task(
             await db.commit()
 
             # Broadcast completion
-            await manager.broadcast({
+            await websocket_manager.broadcast("messages", {
                 "type": "ingestion.completed",
                 "data": {
                     "job_id": job_id,
@@ -294,7 +298,7 @@ async def ingest_telegram_messages_task(
                     await db.commit()
 
                     # Broadcast failure
-                    await manager.broadcast({
+                    await websocket_manager.broadcast("messages", {
                         "type": "ingestion.failed",
                         "data": {
                             "job_id": job_id,
