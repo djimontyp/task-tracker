@@ -27,12 +27,6 @@ class Settings(BaseSettings):
         default="",
         validation_alias=AliasChoices("TELEGRAM_BOT_TOKEN", "telegram_bot_token"),
     )
-    telegram_group_chat_id: str = Field(
-        default="",
-        validation_alias=AliasChoices(
-            "TELEGRAM_GROUP_CHAT_ID", "telegram_group_chat_id"
-        ),
-    )
     # Telegram Client API credentials (for historical message fetching)
     telegram_api_id: int | None = Field(
         default=None,
@@ -44,7 +38,9 @@ class Settings(BaseSettings):
     )
     telegram_session_string: str | None = Field(
         default=None,
-        validation_alias=AliasChoices("TELEGRAM_SESSION_STRING", "telegram_session_string"),
+        validation_alias=AliasChoices(
+            "TELEGRAM_SESSION_STRING", "telegram_session_string"
+        ),
     )
     taskiq_nats_servers: str = Field(
         default="nats://localhost:4222",

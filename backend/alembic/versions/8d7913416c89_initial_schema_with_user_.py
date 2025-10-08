@@ -1,8 +1,8 @@
-"""Initial schema with all tables including message_ingestion_jobs
+"""Initial schema with User, TelegramProfile, Message, Task, Source
 
-Revision ID: cc840f79ab10
-Revises: 
-Create Date: 2025-10-07 03:10:44.862705
+Revision ID: 8d7913416c89
+Revises:
+Create Date: 2025-10-08 05:53:09.480961
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'cc840f79ab10'
+revision: str = '8d7913416c89'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -57,23 +57,6 @@ def upgrade() -> None:
     sa.Column('completed_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('simple_sources',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('simple_tasks',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sqlmodel.sql.sqltypes.AutoString(length=200), nullable=False),
-    sa.Column('description', sa.Text(), nullable=False),
-    sa.Column('category', sqlmodel.sql.sqltypes.AutoString(length=50), nullable=False),
-    sa.Column('priority', sqlmodel.sql.sqltypes.AutoString(length=20), nullable=False),
-    sa.Column('source', sqlmodel.sql.sqltypes.AutoString(length=50), nullable=False),
-    sa.Column('status', sqlmodel.sql.sqltypes.AutoString(length=20), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('sources',
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
     sa.Column('type', sa.Enum('telegram', 'slack', 'email', 'api', name='sourcetype'), nullable=False),
@@ -95,6 +78,21 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_task_configs_name'), 'task_configs', ['name'], unique=True)
+    op.create_table('users',
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('id', sa.BigInteger(), nullable=False),
+    sa.Column('first_name', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
+    sa.Column('last_name', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=True),
+    sa.Column('email', sa.String(), nullable=True),
+    sa.Column('phone', sqlmodel.sql.sqltypes.AutoString(length=20), nullable=True),
+    sa.Column('avatar_url', sqlmodel.sql.sqltypes.AutoString(length=500), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('is_bot', sa.Boolean(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+    op.create_index(op.f('ix_users_phone'), 'users', ['phone'], unique=True)
     op.create_table('webhook_settings',
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
     sa.Column('config', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
@@ -120,35 +118,24 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_agent_configs_name'), 'agent_configs', ['name'], unique=True)
-    op.create_table('messages',
-    sa.Column('external_message_id', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
-    sa.Column('content', sa.Text(), nullable=False),
-    sa.Column('author', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
-    sa.Column('sent_at', sa.DateTime(), nullable=False),
-    sa.Column('payload', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('classification', sqlmodel.sql.sqltypes.AutoString(length=50), nullable=True),
-    sa.Column('confidence', sa.Float(), nullable=True),
-    sa.Column('processed', sa.Boolean(), nullable=False),
+    op.create_table('telegram_profiles',
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('id', sa.BigInteger(), nullable=False),
-    sa.Column('source_id', sa.Integer(), nullable=True),
+    sa.Column('telegram_user_id', sa.BigInteger(), nullable=False),
+    sa.Column('first_name', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
+    sa.Column('last_name', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=True),
+    sa.Column('language_code', sqlmodel.sql.sqltypes.AutoString(length=10), nullable=True),
+    sa.Column('is_bot', sa.Boolean(), nullable=False),
+    sa.Column('is_premium', sa.Boolean(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('source_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['source_id'], ['sources.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id')
     )
-    op.create_table('simple_messages',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('external_message_id', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
-    sa.Column('content', sa.Text(), nullable=False),
-    sa.Column('author', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
-    sa.Column('sent_at', sa.DateTime(), nullable=False),
-    sa.Column('source_id', sa.Integer(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('analyzed', sa.Boolean(), nullable=False),
-    sa.Column('avatar_url', sqlmodel.sql.sqltypes.AutoString(length=500), nullable=True),
-    sa.ForeignKeyConstraint(['source_id'], ['simple_sources.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
+    op.create_index(op.f('ix_telegram_profiles_telegram_user_id'), 'telegram_profiles', ['telegram_user_id'], unique=True)
     op.create_table('agent_task_assignments',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('agent_id', sa.Uuid(), nullable=False),
@@ -160,6 +147,26 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('agent_id', 'task_id', name='uq_agent_task')
     )
+    op.create_table('messages',
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('id', sa.BigInteger(), nullable=False),
+    sa.Column('external_message_id', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
+    sa.Column('content', sa.Text(), nullable=False),
+    sa.Column('sent_at', sa.DateTime(), nullable=False),
+    sa.Column('source_id', sa.Integer(), nullable=False),
+    sa.Column('author_id', sa.Integer(), nullable=False),
+    sa.Column('telegram_profile_id', sa.Integer(), nullable=True),
+    sa.Column('avatar_url', sqlmodel.sql.sqltypes.AutoString(length=500), nullable=True),
+    sa.Column('classification', sqlmodel.sql.sqltypes.AutoString(length=50), nullable=True),
+    sa.Column('confidence', sa.Float(), nullable=True),
+    sa.Column('analyzed', sa.Boolean(), nullable=False),
+    sa.ForeignKeyConstraint(['author_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['source_id'], ['sources.id'], ),
+    sa.ForeignKeyConstraint(['telegram_profile_id'], ['telegram_profiles.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_messages_external_message_id'), 'messages', ['external_message_id'], unique=False)
     op.create_table('tasks',
     sa.Column('title', sqlmodel.sql.sqltypes.AutoString(length=200), nullable=False),
     sa.Column('description', sa.Text(), nullable=False),
@@ -172,8 +179,12 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('id', sa.BigInteger(), nullable=False),
-    sa.Column('source_id', sa.Integer(), nullable=True),
+    sa.Column('source_id', sa.Integer(), nullable=False),
     sa.Column('source_message_id', sa.Integer(), nullable=True),
+    sa.Column('assigned_to', sa.Integer(), nullable=True),
+    sa.Column('created_by', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['assigned_to'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['created_by'], ['users.id'], ),
     sa.ForeignKeyConstraint(['source_id'], ['sources.id'], ),
     sa.ForeignKeyConstraint(['source_message_id'], ['messages.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -185,17 +196,20 @@ def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('tasks')
-    op.drop_table('agent_task_assignments')
-    op.drop_table('simple_messages')
+    op.drop_index(op.f('ix_messages_external_message_id'), table_name='messages')
     op.drop_table('messages')
+    op.drop_table('agent_task_assignments')
+    op.drop_index(op.f('ix_telegram_profiles_telegram_user_id'), table_name='telegram_profiles')
+    op.drop_table('telegram_profiles')
     op.drop_index(op.f('ix_agent_configs_name'), table_name='agent_configs')
     op.drop_table('agent_configs')
     op.drop_table('webhook_settings')
+    op.drop_index(op.f('ix_users_phone'), table_name='users')
+    op.drop_index(op.f('ix_users_email'), table_name='users')
+    op.drop_table('users')
     op.drop_index(op.f('ix_task_configs_name'), table_name='task_configs')
     op.drop_table('task_configs')
     op.drop_table('sources')
-    op.drop_table('simple_tasks')
-    op.drop_table('simple_sources')
     op.drop_table('message_ingestion_jobs')
     op.drop_index(op.f('ix_llm_providers_name'), table_name='llm_providers')
     op.drop_table('llm_providers')

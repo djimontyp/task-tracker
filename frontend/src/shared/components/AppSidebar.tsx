@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { LayoutDashboard, CheckSquare, BarChart3, Settings, Radar, Bot, Mail } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, BarChart3, Settings, Radar, Bot, Brain, Mail } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   Sidebar,
@@ -23,6 +23,7 @@ const navItems = [
   { path: '/tasks', label: 'Tasks', icon: CheckSquare },
   { path: '/messages', label: 'Messages', icon: Mail },
   { path: '/agents', label: 'Agents', icon: Bot },
+  { path: '/analysis', label: 'Analysis', icon: Brain },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/settings', label: 'Settings', icon: Settings },
 ]

@@ -6,7 +6,8 @@ from sqlmodel import select
 
 from core.taskiq_config import nats_broker
 from .database import AsyncSessionLocal
-from .models import SimpleSource, SimpleMessage, MessageIngestionJob, IngestionStatus
+from .models import Source, Message, MessageIngestionJob, IngestionStatus, User, TelegramProfile
+from .services.user_service import identify_or_create_user, get_or_create_source
 from .webhook_service import telegram_webhook_service
 from .websocket import manager
 from .services.telegram_ingestion_service import telegram_ingestion_service
@@ -34,61 +35,57 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
             logger.debug(f"Processing message data: {message}")
 
             # Get or create telegram source
-            source_statement = select(SimpleSource).where(
-                SimpleSource.name == "telegram"
-            )
-            result = await db.execute(source_statement)
-            source = result.scalar_one_or_none()
-
-            if not source:
-                logger.info("Creating new Telegram source record")
-                source = SimpleSource(name="telegram", created_at=datetime.now())
-                db.add(source)
-                await db.flush()  # Flush to get the ID
-                await db.refresh(source)
-                logger.info(f"Created Telegram source with ID: {source.id}")
-            else:
-                logger.debug(f"Using existing Telegram source with ID: {source.id}")
-
-            avatar_url = None
+            source = await get_or_create_source(db, name="telegram")
 
             from_user = message.get("from", {})
-            user_id = from_user.get("id") or message.get("user_id")
+            telegram_user_id = from_user.get("id") or message.get("user_id")
 
-            # Fetch real Telegram avatar if user_id available
-            if user_id:
-                try:
-                    avatar_url = await telegram_webhook_service.get_user_avatar_url(
-                        int(user_id)
-                    )
-                    if avatar_url:
-                        logger.info(f"Fetched avatar URL for user {user_id}")
-                except Exception as exc:
-                    logger.warning(
-                        "Failed to fetch avatar for Telegram user %s: %s", user_id, exc
-                    )
-                    avatar_url = None
+            if not telegram_user_id:
+                logger.warning(f"Message {message['message_id']} has no sender, skipping")
+                return f"❌ Skipped message {message['message_id']}: no sender"
 
             # Extract user data
-            first_name = from_user.get("first_name", "")
-            last_name = from_user.get("last_name", "")
-            telegram_username = from_user.get("username")
+            first_name = from_user.get("first_name", "Unknown")
+            last_name = from_user.get("last_name")
+            language_code = from_user.get("language_code")
+            is_bot = from_user.get("is_bot", False)
 
-            # Display name: "FirstName LastName" or fallback to username
-            author = f"{first_name} {last_name}".strip() or telegram_username or "Unknown"
-
-            db_message = SimpleMessage(
-                external_message_id=str(message["message_id"]),
-                content=message.get("text", message.get("caption", "[Media]")),
-                author=author,
-                telegram_user_id=user_id,
-                telegram_username=telegram_username,
+            # Identify or create User + TelegramProfile
+            user, tg_profile = await identify_or_create_user(
+                db=db,
+                telegram_user_id=telegram_user_id,
                 first_name=first_name,
                 last_name=last_name,
+                language_code=language_code,
+                is_bot=is_bot,
+            )
+
+            # Fetch avatar if not set
+            avatar_url = user.avatar_url
+            if not avatar_url:
+                try:
+                    avatar_url = await telegram_webhook_service.get_user_avatar_url(
+                        int(telegram_user_id)
+                    )
+                    if avatar_url:
+                        user.avatar_url = avatar_url
+                        await db.flush()
+                        logger.info(f"Fetched and updated avatar for user {user.id}")
+                except Exception as exc:
+                    logger.warning(
+                        f"Failed to fetch avatar for Telegram user {telegram_user_id}: {exc}"
+                    )
+
+            # Create message
+            db_message = Message(
+                external_message_id=str(message["message_id"]),
+                content=message.get("text", message.get("caption", "[Media]")),
                 sent_at=datetime.fromtimestamp(message["date"]),
                 source_id=source.id,
-                created_at=datetime.now(),
+                author_id=user.id,
+                telegram_profile_id=tg_profile.id,
                 avatar_url=avatar_url,
+                analyzed=False,
             )
 
             db.add(db_message)
@@ -97,7 +94,7 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
             # CRITICAL: Commit the transaction!
             await db.commit()
             logger.info(
-                f"✅ Successfully committed Telegram message {message['message_id']} to database"
+                f"✅ Successfully committed Telegram message {message['message_id']} from {user.full_name}"
             )
 
             try:
@@ -107,6 +104,8 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
                         "data": {
                             "id": db_message.id,
                             "external_message_id": db_message.external_message_id,
+                            "author_id": user.id,
+                            "author_name": user.full_name,
                             "persisted": True,
                             "avatar_url": avatar_url,
                         },
@@ -165,7 +164,7 @@ async def ingest_telegram_messages_task(
             })
 
             # Get or create source
-            source = await telegram_ingestion_service.get_or_create_source(db)
+            source = await get_or_create_source(db, name="telegram")
 
             total_fetched = 0
             total_stored = 0

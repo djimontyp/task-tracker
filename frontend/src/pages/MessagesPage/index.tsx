@@ -18,7 +18,8 @@ import {
   getFacetedUniqueValues,
   useReactTable,
 } from '@tanstack/react-table'
-import { createColumns, sourceLabels, statusLabels, Message } from './columns'
+import { createColumns, sourceLabels, statusLabels } from './columns'
+import { Message } from '@/shared/types'
 import { DataTable } from '@shared/components/DataTable'
 import { DataTableToolbar } from '@shared/components/DataTableToolbar'
 import { DataTablePagination } from '@shared/components/DataTablePagination'
@@ -139,7 +140,7 @@ const MessagesPage = () => {
     globalFilterFn: (row, _columnId, filterValue) => {
       const q = String(filterValue).toLowerCase()
       return (
-        String(row.original.author || '').toLowerCase().includes(q) ||
+        String(row.original.author_name || row.original.author || '').toLowerCase().includes(q) ||
         String(row.original.content || '').toLowerCase().includes(q)
       )
     },

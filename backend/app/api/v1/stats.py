@@ -4,7 +4,8 @@ from typing import Literal, Optional
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import and_, select
 
-from ...models import SimpleMessage, SimpleSource, SimpleTask
+from ...models import Message, Source, Task, User
+from app.schemas.stats import StatsResponse
 from ...websocket import manager
 from ..deps import DatabaseDep
 from .response_models import ActivityDataResponse, AnalyzeDayResponse, StatsResponse
@@ -46,14 +47,14 @@ async def get_activity_data(
         start_date = end_date - timedelta(days=7)
 
     statement = (
-        select(SimpleMessage, SimpleSource)
-        .join(SimpleSource, SimpleMessage.source_id == SimpleSource.id)
+        select(Message, Source)
+        .join(Source, Message.source_id == Source.id)
         .where(
             and_(
-                SimpleMessage.sent_at >= start_date, SimpleMessage.sent_at <= end_date
+                Message.sent_at >= start_date, Message.sent_at <= end_date
             )
         )
-        .order_by(SimpleMessage.sent_at)
+        .order_by(Message.sent_at)
     )
 
     result = await db.execute(statement)
@@ -104,7 +105,7 @@ async def get_stats(db: DatabaseDep) -> StatsResponse:
     Returns total, open, and completed task counts,
     plus breakdowns by category and priority.
     """
-    statement = select(SimpleTask)
+    statement = select(Task)
     result = await db.execute(statement)
     tasks = result.scalars().all()
 
@@ -152,11 +153,11 @@ async def analyze_day(
         start_datetime = datetime.combine(analysis_date, datetime.min.time())
         end_datetime = datetime.combine(analysis_date, datetime.max.time())
 
-        statement = select(SimpleMessage).where(
+        statement = select(Message).where(
             and_(
-                SimpleMessage.sent_at >= start_datetime,
-                SimpleMessage.sent_at <= end_datetime,
-                ~SimpleMessage.analyzed,
+                Message.sent_at >= start_datetime,
+                Message.sent_at <= end_datetime,
+                ~Message.analyzed,
             )
         )
         result = await db.execute(statement)
@@ -180,7 +181,7 @@ async def analyze_day(
                 f"... and {len(unanalyzed_messages) - 5} more messages"
             )
 
-        summary_task = SimpleTask(
+        summary_task = Task(
             title=f"Daily Summary - {analysis_date}",
             description=summary_content,
             status="open",

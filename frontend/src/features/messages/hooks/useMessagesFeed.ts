@@ -22,6 +22,8 @@ interface MessageUpdatedPayload {
   external_message_id?: string
   persisted?: boolean
   avatar_url?: string | null
+  author_id?: number
+  author_name?: string
 }
 
 const PERIOD_OPTIONS: { key: MessagesPeriod; label: string }[] = [
@@ -88,6 +90,8 @@ const toUpdatedPayload = (value: unknown): MessageUpdatedPayload | null => {
       typeof candidate.avatar_url === 'string' || candidate.avatar_url === null
         ? (candidate.avatar_url as string | null)
         : undefined,
+    author_id: typeof candidate.author_id === 'number' ? candidate.author_id : undefined,
+    author_name: typeof candidate.author_name === 'string' ? candidate.author_name : undefined,
   }
 }
 
@@ -157,6 +161,7 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
         if (updated?.external_message_id) {
           markPersisted(updated.external_message_id, {
             avatar_url: updated.avatar_url ?? undefined,
+            author_name: updated.author_name ?? undefined,
             persisted: updated.persisted ?? true,
           })
         }

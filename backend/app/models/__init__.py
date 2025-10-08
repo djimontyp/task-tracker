@@ -13,13 +13,9 @@ from .agent_task_assignment import (
 from .base import IDMixin, TimestampMixin
 from .enums import TaskCategory, TaskPriority, TaskStatus, SourceType
 from .legacy import (
-    Message,
     MessageCreate,
     MessagePublic,
     MessageUpdate,
-    SimpleMessage,
-    SimpleSource,
-    SimpleTask,
     Source,
     SourceCreate,
     SourcePublic,
@@ -32,6 +28,9 @@ from .legacy import (
     WebhookSettingsPublic,
     WebhookSettingsUpdate,
 )
+from .message import Message
+from .telegram_profile import TelegramProfile
+from .user import User
 from .llm_provider import (
     LLMProvider,
     LLMProviderCreate,
@@ -74,9 +73,9 @@ __all__ = [
     "WebhookSettingsCreate",
     "WebhookSettingsPublic",
     "WebhookSettingsUpdate",
-    "SimpleSource",
-    "SimpleMessage",
-    "SimpleTask",
+    # User & Profiles
+    "User",
+    "TelegramProfile",
     # LLM Provider
     "LLMProvider",
     "LLMProviderCreate",

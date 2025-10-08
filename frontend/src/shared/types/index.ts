@@ -31,22 +31,35 @@ export interface Message {
   id: number | string
   external_message_id: string
   content: string
-  author: string  // Display name (first_name + last_name)
+
+  // New normalized fields (from backend User model)
+  author_id: number
+  author_name: string  // User.full_name (first_name + last_name)
+
   sent_at: string
+  source_id?: number
   source_name: string
   analyzed?: boolean
   avatar_url?: string | null
   persisted?: boolean
-  // Telegram user identification
+
+  // Platform-specific profiles
+  telegram_profile_id?: number | null
+
+  // Legacy compatibility fields (deprecated - use new fields above)
+  author?: string  // @deprecated Use author_name instead
+  sender?: string  // @deprecated Use author_name instead
+  text?: string    // @deprecated Use content instead
+  timestamp?: string  // @deprecated Use sent_at instead
+  source?: string  // @deprecated Use source_name instead
+
+  // Telegram user identification (legacy)
   telegram_user_id?: number | null
   telegram_username?: string | null
   first_name?: string | null
   last_name?: string | null
-  // Legacy compatibility fields
-  text?: string
-  sender?: string
-  timestamp?: string
-  source?: string
+
+  // Task-related fields
   isTask?: boolean
   is_task?: boolean
   taskId?: string

@@ -4,8 +4,8 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
-from ...models import SimpleTask
-from .response_models import TaskCreateRequest, TaskResponse
+from ...models import Task
+from app.schemas.tasks import TaskCreateRequest, TaskResponse
 from ...websocket import manager
 from ..deps import DatabaseDep
 from .response_models import TaskStatusUpdateResponse
@@ -25,7 +25,7 @@ async def get_tasks(db: DatabaseDep) -> List[TaskResponse]:
 
     Returns complete task information including status, priority, and metadata.
     """
-    statement = select(SimpleTask).order_by(SimpleTask.created_at.desc())
+    statement = select(Task).order_by(Task.created_at.desc())
     result = await db.execute(statement)
     tasks = result.scalars().all()
 
@@ -45,14 +45,13 @@ async def create_task(task: TaskCreateRequest, db: DatabaseDep) -> TaskResponse:
 
     Automatically sets status to 'open' and broadcasts to WebSocket clients.
     """
-    db_task = SimpleTask(
+    db_task = Task(
         title=task.title,
         description=task.description,
         category=task.category,
         priority=task.priority,
-        source=task.source,
-        status="open",
-        created_at=datetime.utcnow(),
+        source_id=task.source_id,
+        status=task.status,
     )
 
     db.add(db_task)
@@ -81,7 +80,7 @@ async def get_task(task_id: int, db: DatabaseDep) -> TaskResponse:
 
     Raises 404 error if task with given ID doesn't exist.
     """
-    statement = select(SimpleTask).where(SimpleTask.id == task_id)
+    statement = select(Task).where(Task.id == task_id)
     result = await db.execute(statement)
     task = result.scalar_one_or_none()
 
@@ -107,7 +106,7 @@ async def update_task_status(
     Allows changing task status (e.g., from 'open' to 'completed').
     Raises 404 error if task doesn't exist.
     """
-    statement = select(SimpleTask).where(SimpleTask.id == task_id)
+    statement = select(Task).where(Task.id == task_id)
     result = await db.execute(statement)
     task = result.scalar_one_or_none()
 

@@ -25,17 +25,19 @@ class WebSocketManager:
         # Lock for thread-safe connection management
         self._lock = asyncio.Lock()
 
-    async def connect(self, websocket: WebSocket, topics: List[str] = None) -> None:
+    async def connect(self, websocket: WebSocket, topics: List[str] = None, accept: bool = True) -> None:
         """Accept WebSocket connection and subscribe to topics.
 
         Args:
             websocket: WebSocket connection
             topics: List of topics to subscribe to (default: all topics)
+            accept: Whether to accept the WebSocket connection (default: True)
 
         Example:
             await manager.connect(websocket, ["agents", "providers"])
         """
-        await websocket.accept()
+        if accept:
+            await websocket.accept()
 
         # Default to all topics if none specified
         if topics is None:

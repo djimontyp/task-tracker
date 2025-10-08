@@ -56,51 +56,33 @@ class SourceUpdate(SQLModel):
     is_active: bool | None = None
 
 
-# ~~~~~~~~~~~~~~~~ Message Models ~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~ Message Schemas (table defined in message.py) ~~~~~~~~~~~~~~~~
 
 
-class MessageBase(SQLModel):
-    """Base model for Message with common fields."""
-
-    external_message_id: str = Field(
-        max_length=100, description="ID from external system"
-    )
-    content: str = Field(sa_type=Text, description="Message content")
-    author: str = Field(max_length=100, description="Message author")
-    sent_at: datetime = Field(description="When message was sent")
-    payload: dict | None = Field(
-        default=None, sa_type=JSONB, description="Full message payload"
-    )
-    classification: str | None = Field(
-        default=None, max_length=50, description="AI classification result"
-    )
-    confidence: float | None = Field(
-        default=None, description="Classification confidence score"
-    )
-    processed: bool = Field(default=False, description="Whether message was processed")
-
-
-class Message(IDMixin, TimestampMixin, MessageBase, table=True):
-    """Message table - stores incoming messages from various sources."""
-
-    __tablename__ = "messages"
-
-    source_id: int | None = Field(default=None, foreign_key="sources.id")
-
-
-class MessageCreate(MessageBase):
+class MessageCreate(SQLModel):
     """Schema for creating new messages."""
 
+    external_message_id: str
+    content: str
+    sent_at: datetime
     source_id: int
+    author_id: int
 
 
-class MessagePublic(MessageBase):
+class MessagePublic(SQLModel):
     """Public schema for message responses."""
 
     id: int
+    external_message_id: str
+    content: str
+    sent_at: datetime
     source_id: int
+    author_id: int
+    classification: str | None
+    confidence: float | None
+    analyzed: bool
     created_at: datetime
-    updated_at: datetime | None = None
+    updated_at: datetime | None
 
 
 class MessageUpdate(SQLModel):
@@ -108,7 +90,7 @@ class MessageUpdate(SQLModel):
 
     classification: str | None = None
     confidence: float | None = None
-    processed: bool | None = None
+    analyzed: bool | None = None
 
 
 # ~~~~~~~~~~~~~~~~ Task Models ~~~~~~~~~~~~~~~~
@@ -138,8 +120,18 @@ class Task(IDMixin, TimestampMixin, TaskBase, table=True):
 
     __tablename__ = "tasks"
 
-    source_id: int | None = Field(default=None, foreign_key="sources.id")
-    source_message_id: int | None = Field(default=None, foreign_key="messages.id")
+    source_id: int = Field(foreign_key="sources.id", description="Source of the task")
+    source_message_id: int | None = Field(
+        default=None, foreign_key="messages.id", description="Original message if task was extracted from one"
+    )
+
+    # User assignments
+    assigned_to: int | None = Field(
+        default=None, foreign_key="users.id", description="User assigned to this task"
+    )
+    created_by: int | None = Field(
+        default=None, foreign_key="users.id", description="User who created this task"
+    )
 
 
 class TaskCreate(TaskBase):
@@ -206,53 +198,3 @@ class WebhookSettingsUpdate(SQLModel):
     name: str | None = None
     config: dict | None = None
     is_active: bool | None = None
-
-
-# ~~~~~~~~~~~~~~~~ Backward Compatibility Aliases ~~~~~~~~~~~~~~~~
-
-
-class SimpleSource(SQLModel, table=True):
-    """Backward compatibility model for existing simple_sources table."""
-
-    __tablename__ = "simple_sources"
-
-    id: int | None = Field(default=None, primary_key=True)
-    name: str = Field(max_length=100)
-    created_at: datetime | None = Field(default=None)
-
-
-class SimpleMessage(SQLModel, table=True):
-    """Backward compatibility model for existing simple_messages table."""
-
-    __tablename__ = "simple_messages"
-
-    id: int | None = Field(default=None, primary_key=True)
-    external_message_id: str = Field(max_length=100)
-    content: str = Field(sa_type=Text)
-    author: str = Field(max_length=100)  # Display name (first_name + last_name)
-    sent_at: datetime
-    source_id: int | None = Field(default=None, foreign_key="simple_sources.id")
-    created_at: datetime | None = Field(default=None)
-    analyzed: bool = Field(default=False)
-    avatar_url: str | None = Field(default=None, max_length=500)
-
-    # Telegram user identification fields
-    telegram_user_id: int | None = Field(default=None, index=True)
-    telegram_username: str | None = Field(default=None, max_length=100)
-    first_name: str | None = Field(default=None, max_length=100)
-    last_name: str | None = Field(default=None, max_length=100)
-
-
-class SimpleTask(SQLModel, table=True):
-    """Backward compatibility model for existing simple_tasks table."""
-
-    __tablename__ = "simple_tasks"
-
-    id: int | None = Field(default=None, primary_key=True)
-    title: str = Field(max_length=200)
-    description: str = Field(sa_type=Text)
-    category: str = Field(max_length=50)
-    priority: str = Field(max_length=20)
-    source: str = Field(max_length=50)
-    status: str = Field(default="open", max_length=20)
-    created_at: datetime | None = Field(default=None)

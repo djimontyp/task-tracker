@@ -116,18 +116,38 @@ class MessageResponse(BaseModel):
     id: int
     external_message_id: str
     content: str
-    author: str  # Display name (first_name + last_name)
     sent_at: datetime
+
+    # Source
+    source_id: int
     source_name: str
-    analyzed: Optional[bool] = None
-    avatar_url: Optional[str] = None
+
+    # Author (User) - normalized fields
+    author_id: int
+    author_name: str | None = None  # User.full_name
+    avatar_url: str | None = None
+
+    # Platform-specific
+    telegram_profile_id: int | None = None
+
+    # AI fields
+    classification: str | None = None
+    confidence: float | None = None
+    analyzed: bool = False
+
+    # Legacy compatibility (deprecated)
+    author: str | None = None  # @deprecated Use author_name
     persisted: bool = True
 
-    # Telegram user identification
-    telegram_user_id: Optional[int] = None
-    telegram_username: Optional[str] = None
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    # Telegram user identification (legacy)
+    telegram_user_id: int | None = None
+    telegram_username: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+
+    # Timestamps
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class DateRange(BaseModel):

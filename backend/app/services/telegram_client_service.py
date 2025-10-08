@@ -129,7 +129,7 @@ class TelegramClientService:
             message: Telethon message object
             
         Returns:
-            Dict with message data compatible with our SimpleMessage model
+            Dict with message data compatible with our Message model
         """
         # Get sender info
         sender_name = "Unknown"

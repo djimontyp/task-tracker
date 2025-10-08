@@ -8,13 +8,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.models import (
-    SimpleMessage,
-    SimpleSource,
+    Message,
+    Source,
     MessageIngestionJob,
     IngestionStatus,
 )
 from app.webhook_service import TelegramWebhookService
 from app.services.telegram_client_service import get_telegram_client_service
+from app.services.user_service import identify_or_create_user, get_or_create_source
 from core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -95,11 +96,13 @@ class TelegramIngestionService:
         self,
         db: AsyncSession,
         message_data: Dict[str, Any],
-        source: SimpleSource,
+        source: Source,
     ) -> tuple[bool, str]:
         """
         Store a single message in the database.
-        
+
+        Uses identify_or_create_user() to auto-create User and TelegramProfile.
+
         Returns:
             (success: bool, reason: str) - reason is 'stored', 'duplicate', or 'error'
         """
@@ -109,8 +112,8 @@ class TelegramIngestionService:
                 return False, "error"
 
             # Check for duplicate by external_message_id
-            existing_stmt = select(SimpleMessage).where(
-                SimpleMessage.external_message_id == message_id
+            existing_stmt = select(Message).where(
+                Message.external_message_id == message_id
             )
             result = await db.execute(existing_stmt)
             existing = result.scalar_one_or_none()
@@ -122,16 +125,18 @@ class TelegramIngestionService:
             # Extract message data
             text = message_data.get("text", "")
             from_user = message_data.get("from", {})
-            user_id = from_user.get("id")
+            telegram_user_id = from_user.get("id")
+
+            if not telegram_user_id:
+                logger.warning(f"Message {message_id} has no sender, skipping")
+                return False, "error"
 
             # Extract user data
             first_name = from_user.get("first_name", "")
-            last_name = from_user.get("last_name", "")
-            telegram_username = from_user.get("username")
+            last_name = from_user.get("last_name")
+            language_code = from_user.get("language_code")
+            is_bot = from_user.get("is_bot", False)
 
-            # Display name: "FirstName LastName" or fallback to username
-            author = f"{first_name} {last_name}".strip() or telegram_username or "Unknown"
-            
             # Get timestamp
             timestamp = message_data.get("date")
             if timestamp:
@@ -139,56 +144,49 @@ class TelegramIngestionService:
             else:
                 sent_at = datetime.utcnow()
 
-            # Fetch avatar if user_id available
-            avatar_url = None
-            if user_id:
-                try:
-                    avatar_url = await self.telegram_service.get_user_avatar_url(user_id)
-                except Exception as e:
-                    logger.warning(f"Failed to fetch avatar for user {user_id}: {e}")
-
-            # Create message
-            db_message = SimpleMessage(
-                external_message_id=message_id,
-                content=text or "[No text content]",
-                author=author,
-                telegram_user_id=user_id,
-                telegram_username=telegram_username,
+            # Identify or create User + TelegramProfile
+            user, tg_profile = await identify_or_create_user(
+                db=db,
+                telegram_user_id=telegram_user_id,
                 first_name=first_name,
                 last_name=last_name,
+                language_code=language_code,
+                is_bot=is_bot,
+            )
+
+            # Fetch avatar if not set
+            avatar_url = user.avatar_url
+            if not avatar_url:
+                try:
+                    avatar_url = await self.telegram_service.get_user_avatar_url(telegram_user_id)
+                    if avatar_url:
+                        # Update user avatar
+                        user.avatar_url = avatar_url
+                        await db.flush()
+                except Exception as e:
+                    logger.warning(f"Failed to fetch avatar for user {telegram_user_id}: {e}")
+
+            # Create message
+            db_message = Message(
+                external_message_id=message_id,
+                content=text or "[No text content]",
                 sent_at=sent_at,
                 source_id=source.id,
-                created_at=datetime.utcnow(),
+                author_id=user.id,
+                telegram_profile_id=tg_profile.id,
                 avatar_url=avatar_url,
                 analyzed=False,
             )
 
             db.add(db_message)
             await db.flush()
-            
-            logger.info(f"Stored message {message_id} from {author}")
+
+            logger.info(f"Stored message {message_id} from {user.full_name}")
             return True, "stored"
 
         except Exception as e:
             logger.error(f"Error storing message: {e}")
             return False, "error"
-
-    async def get_or_create_source(
-        self, db: AsyncSession, source_name: str = "telegram"
-    ) -> SimpleSource:
-        """Get or create Telegram source."""
-        stmt = select(SimpleSource).where(SimpleSource.name == source_name)
-        result = await db.execute(stmt)
-        source = result.scalar_one_or_none()
-
-        if not source:
-            source = SimpleSource(name=source_name, created_at=datetime.utcnow())
-            db.add(source)
-            await db.flush()
-            await db.refresh(source)
-            logger.info(f"Created new source: {source_name}")
-
-        return source
 
     async def update_job_progress(
         self,

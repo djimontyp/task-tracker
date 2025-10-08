@@ -4,21 +4,11 @@ import { MoreHorizontal, Mail, User, X } from 'lucide-react'
 
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
+import { Message } from '@/shared/types'
 
 export interface ColumnsCallbacks {
   onReset?: () => void
   hasActiveFilters?: boolean
-}
-
-export interface Message {
-  id: number
-  external_message_id: string
-  content: string
-  author: string
-  sent_at: string
-  source_name: string
-  analyzed: boolean
-  avatar_url?: string | null
 }
 
 export const sourceLabels: Record<string, { label: string; icon: React.ComponentType<any> }> = {
@@ -60,23 +50,23 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     enableHiding: false,
   },
   {
-    accessorKey: 'author',
+    accessorKey: 'author_name',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Author" />
     ),
     cell: ({ row }) => {
-      const author = row.getValue<string>('author')
+      const authorName = row.getValue<string>('author_name') || row.original.author
       const avatarUrl = row.original.avatar_url
       return (
         <div className="flex items-center space-x-2">
           {avatarUrl ? (
-            <img src={avatarUrl} alt={author} className="h-6 w-6 rounded-full" />
+            <img src={avatarUrl} alt={authorName} className="h-6 w-6 rounded-full" />
           ) : (
             <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
               <User className="h-4 w-4 text-muted-foreground" />
             </div>
           )}
-          <span className="font-medium">{author}</span>
+          <span className="font-medium">{authorName}</span>
         </div>
       )
     },

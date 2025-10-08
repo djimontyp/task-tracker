@@ -28,16 +28,15 @@ async def websocket_endpoint(websocket: WebSocket, topics: str = None):
     if topics:
         topic_list = [t.strip() for t in topics.split(",")]
 
-    # Accept WebSocket connection once
-    await websocket.accept()
+    # Connect with legacy manager for backward compatibility (this calls accept())
+    await legacy_manager.connect(websocket)
 
-    # Register with legacy manager (without accepting again)
-    legacy_manager.active_connections.add(websocket)
-
+    # Connect with new topic-based manager (don't accept again)
+    await websocket_manager.connect(websocket, topic_list, accept=False)
     # Register with new topic-based manager (without accepting again)
     if topic_list is None:
         topic_list = ["agents", "tasks", "providers"]
-    
+
     async with websocket_manager._lock:
         for topic in topic_list:
             if topic not in websocket_manager._connections:

@@ -5,6 +5,7 @@ import TasksPage from '@pages/TasksPage'
 import MessagesPage from '@pages/MessagesPage'
 import AgentsPage from '@pages/AgentsPage'
 import AnalyticsPage from '@pages/AnalyticsPage'
+import AnalysisRunsPage from '@pages/AnalysisRunsPage'
 import SettingsPage from '@pages/SettingsPage'
 
 const AppRoutes = () => {
@@ -15,6 +16,7 @@ const AppRoutes = () => {
       <Route element={<MainLayout><MessagesPage /></MainLayout>} path="/messages" />
       <Route element={<MainLayout><AgentsPage /></MainLayout>} path="/agents" />
       <Route element={<MainLayout><AnalyticsPage /></MainLayout>} path="/analytics" />
+      <Route element={<MainLayout><AnalysisRunsPage /></MainLayout>} path="/analysis" />
       <Route element={<MainLayout><SettingsPage /></MainLayout>} path="/settings" />
     </Routes>
   )
