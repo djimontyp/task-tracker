@@ -1,0 +1,154 @@
+openapi: 3.1.0
+info:
+  title: LLM Provider API
+  version: 1.0.0
+
+paths:
+  /api/providers:
+    get:
+      summary: List LLM providers
+      operationId: listProviders
+      responses:
+        '200':
+          description: List of providers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  providers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LLMProvider'
+
+    post:
+      summary: Create LLM provider
+      operationId: createProvider
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LLMProviderCreate'
+      responses:
+        '201':
+          description: Provider created (async validation started)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProvider'
+
+  /api/providers/{provider_id}:
+    get:
+      summary: Get provider by ID
+      operationId: getProvider
+      parameters:
+        - name: provider_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Provider details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProvider'
+
+    put:
+      summary: Update provider
+      operationId: updateProvider
+      parameters:
+        - name: provider_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LLMProviderUpdate'
+      responses:
+        '200':
+          description: Provider updated (async re-validation triggered)
+
+    delete:
+      summary: Delete provider
+      operationId: deleteProvider
+      parameters:
+        - name: provider_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Provider deleted
+
+components:
+  schemas:
+    LLMProvider:
+      type: object
+      required: [id, name, type, validation_status, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [ollama, openai]
+        base_url:
+          type: string
+          nullable: true
+        is_active:
+          type: boolean
+        validation_status:
+          type: string
+          enum: [pending, validating, connected, error]
+        validation_error:
+          type: string
+          nullable: true
+        validated_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    LLMProviderCreate:
+      type: object
+      required: [name, type]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [ollama, openai]
+        base_url:
+          type: string
+        api_key:
+          type: string
+          format: password
+
+    LLMProviderUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        base_url:
+          type: string
+        api_key:
+          type: string
+          format: password

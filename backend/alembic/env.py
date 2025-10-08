@@ -15,9 +15,14 @@ PROJECT_ROOT = THIS_DIR.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-# Import consolidated models - includes both main models and simple compatibility models
-import backend.app.models  # noqa: F401, E402
-from backend.core.config import settings  # type: ignore  # noqa: E402
+# Import all models (new agent management + legacy task tracker)
+try:
+    import backend.app.models  # noqa: F401, E402
+    from backend.core.config import settings  # type: ignore  # noqa: E402
+except ModuleNotFoundError:
+    # Running in Docker container where structure is flat
+    import app.models  # noqa: F401, E402
+    from core.config import settings  # type: ignore  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

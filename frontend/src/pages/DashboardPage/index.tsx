@@ -221,7 +221,7 @@ const DashboardPage = () => {
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="text-sm font-semibold text-foreground truncate">
-                          {message.author || message.sender}
+                          {message.author_name || message.author || message.sender}
                         </span>
                         <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                           {message.sent_at

@@ -100,5 +100,47 @@ A modern, responsive React TypeScript dashboard for real-time task tracking and 
 - Check WebSocket connection
 - Verify environment variables
 
+## Navigation Structure
+
+### Sidebar Sections
+```
+WORKSPACE
+├── Dashboard (/)
+├── Messages (/messages)
+├── Topics (/topics) - research topics
+└── Tasks (/tasks) - TaskEntity results
+
+AI ANALYSIS
+├── Analysis Runs (/analysis)
+└── Task Proposals (/proposals) - AI-generated proposals
+
+AI CONFIGURATION
+├── Agents (/agents)
+├── Agent Tasks (/agent-tasks) - Pydantic schemas
+├── Providers (/providers) - OpenAI, Ollama
+└── Projects (/projects) - classification config
+
+INSIGHTS
+└── Analytics (/analytics)
+
+FOOTER
+├── Settings (/settings)
+└── User (Account, Logout)
+```
+
+### Page Structure
+- `/pages/DashboardPage` - main dashboard
+- `/pages/MessagesPage` - messages list
+- `/pages/TopicsPage` - research topics (renamed from TasksPage)
+- `/pages/TasksPage` - TaskEntity results from analysis
+- `/pages/AnalysisRunsPage` - analysis runs
+- `/pages/ProposalsPage` - TaskProposal review
+- `/pages/AgentsPage` - AI agents (no tabs)
+- `/pages/AgentTasksPage` - Task Configs with schemas
+- `/pages/ProvidersPage` - LLM providers
+- `/pages/ProjectsPage` - classification projects
+- `/pages/AnalyticsPage` - analytics
+- `/pages/SettingsPage` - settings
+
 ## Last Updated
-September 2025
+October 2025

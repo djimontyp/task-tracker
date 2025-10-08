@@ -1,11 +1,11 @@
 from datetime import datetime
-from urllib.parse import quote
 
 from fastapi import APIRouter, Request
 
-from ..models import MessageResponse
+from ..api.v1.response_models import MessageResponse
 from ..tasks import save_telegram_message
 from ..websocket import manager
+from ..webhook_service import telegram_webhook_service
 
 router = APIRouter(prefix="/webhook", tags=["webhooks"])
 
@@ -26,18 +26,29 @@ async def telegram_webhook(request: Request):
                 f"🔍 Webhook received: user_id={user_id}, author={from_user.get('first_name')}"
             )
 
-            if True:
-                first_name = from_user.get("first_name", "")
-                last_name = from_user.get("last_name", "")
-                name = f"{first_name} {last_name}".strip() or "User"
-                avatar_url = f"https://ui-avatars.com/api/?name={quote(name)}&background=0D8ABC&color=fff&size=128"
-                print(f"🎨 Generated avatar URL from name: {name}")
+            # Fetch real Telegram avatar if user_id available
+            if user_id:
+                try:
+                    avatar_url = await telegram_webhook_service.get_user_avatar_url(int(user_id))
+                    if avatar_url:
+                        print(f"✅ Fetched avatar URL for user {user_id}")
+                except Exception as exc:
+                    print(f"⚠️ Failed to fetch avatar for user {user_id}: {exc}")
+                    avatar_url = None
+
+            # Extract user data for display
+            first_name = from_user.get("first_name", "")
+            last_name = from_user.get("last_name", "")
+            telegram_username = from_user.get("username")
+
+            # Display name: "FirstName LastName" or fallback to username
+            author = f"{first_name} {last_name}".strip() or telegram_username or "Unknown"
 
             live_response = MessageResponse(
                 id=0,
                 external_message_id=str(message["message_id"]),
                 content=message.get("text", message.get("caption", "[Media]")),
-                author=from_user.get("first_name", "Unknown"),
+                author=author,
                 sent_at=datetime.fromtimestamp(message["date"]),
                 source_name="telegram",
                 avatar_url=avatar_url,

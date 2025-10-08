@@ -1,0 +1,431 @@
+openapi: 3.1.0
+info:
+  title: Agent Management API
+  version: 1.0.0
+  description: API endpoints for managing LLM agent configurations
+
+paths:
+  /api/agents:
+    get:
+      summary: List all agent configurations
+      operationId: listAgents
+      tags: [Agents]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            maximum: 1000
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AgentConfig'
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+
+    post:
+      summary: Create new agent configuration
+      operationId: createAgent
+      tags: [Agents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentConfigCreate'
+      responses:
+        '201':
+          description: Agent created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentConfig'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Agent name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/agents/{agent_id}:
+    get:
+      summary: Get agent configuration by ID
+      operationId: getAgent
+      tags: [Agents]
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentConfigDetail'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update agent configuration
+      operationId: updateAgent
+      tags: [Agents]
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentConfigUpdate'
+      responses:
+        '200':
+          description: Agent updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentConfig'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Agent name conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete agent configuration
+      operationId: deleteAgent
+      tags: [Agents]
+      description: Deletes agent configuration. Running agent instances will complete their tasks.
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Agent deleted successfully
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/agents/{agent_id}/tasks:
+    get:
+      summary: Get tasks assigned to agent
+      operationId: getAgentTasks
+      tags: [Agents]
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of assigned tasks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaskConfig'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Assign task to agent
+      operationId: assignTaskToAgent
+      tags: [Agents]
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [task_id]
+              properties:
+                task_id:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Task assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentTaskAssignment'
+        '404':
+          description: Agent or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Task already assigned to agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/agents/{agent_id}/tasks/{task_id}:
+    delete:
+      summary: Unassign task from agent
+      operationId: unassignTaskFromAgent
+      tags: [Agents]
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Task unassigned successfully
+        '404':
+          description: Assignment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    AgentConfig:
+      type: object
+      required: [id, name, provider_id, system_prompt, model_name, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        provider_id:
+          type: string
+          format: uuid
+        system_prompt:
+          type: string
+          minLength: 1
+        user_prompt:
+          type: string
+          nullable: true
+        model_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        tools_config:
+          type: object
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AgentConfigDetail:
+      allOf:
+        - $ref: '#/components/schemas/AgentConfig'
+        - type: object
+          properties:
+            provider:
+              $ref: '#/components/schemas/LLMProviderBasic'
+            assigned_tasks:
+              type: array
+              items:
+                $ref: '#/components/schemas/TaskConfig'
+
+    AgentConfigCreate:
+      type: object
+      required: [name, provider_id, system_prompt, model_name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+        provider_id:
+          type: string
+          format: uuid
+        system_prompt:
+          type: string
+          minLength: 1
+        user_prompt:
+          type: string
+        model_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        tools_config:
+          type: object
+
+    AgentConfigUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        provider_id:
+          type: string
+          format: uuid
+        system_prompt:
+          type: string
+          minLength: 1
+        user_prompt:
+          type: string
+          nullable: true
+        model_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        tools_config:
+          type: object
+          nullable: true
+
+    LLMProviderBasic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [ollama, openai]
+
+    TaskConfig:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        request_schema:
+          type: object
+          nullable: true
+        response_schema:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AgentTaskAssignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        agent_id:
+          type: string
+          format: uuid
+        task_id:
+          type: string
+          format: uuid
+        is_active:
+          type: boolean
+        assigned_at:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object

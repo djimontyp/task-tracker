@@ -97,3 +97,117 @@ class WebhookInfoResponse(BaseModel):
     success: bool
     webhook_info: Optional[WebhookInfo] = None
     error: Optional[str] = None
+
+# ---------------------
+# Messages API Schemas
+# ---------------------
+
+class MessageCreateRequest(BaseModel):
+    id: str
+    content: str
+    author: str
+    timestamp: str  # ISO 8601 string
+    chat_id: Optional[str] = None
+    user_id: Optional[int] = None
+    avatar_url: Optional[str] = None
+
+
+class MessageResponse(BaseModel):
+    id: int
+    external_message_id: str
+    content: str
+    sent_at: datetime
+
+    # Source
+    source_id: int
+    source_name: str
+
+    # Author (User) - normalized fields
+    author_id: int
+    author_name: str | None = None  # User.full_name
+    avatar_url: str | None = None
+
+    # Platform-specific
+    telegram_profile_id: int | None = None
+
+    # AI fields
+    classification: str | None = None
+    confidence: float | None = None
+    analyzed: bool = False
+
+    # Legacy compatibility (deprecated)
+    author: str | None = None  # @deprecated Use author_name
+    persisted: bool = True
+
+    # Telegram user identification (legacy)
+    telegram_user_id: int | None = None
+    telegram_username: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+
+    # Timestamps
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class DateRange(BaseModel):
+    earliest: Optional[str] = None
+    latest: Optional[str] = None
+
+
+class MessageFiltersResponse(BaseModel):
+    authors: List[str]
+    sources: List[str]
+    total_messages: int
+    date_range: DateRange
+
+
+class PaginatedMessagesResponse(BaseModel):
+    items: List['MessageResponse']
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+
+# ------------------
+# Tasks API Schemas
+# ------------------
+
+class TaskCreateRequest(BaseModel):
+    title: str
+    description: Optional[str] = None
+    category: str
+    priority: str
+    source: Optional[str] = None
+
+
+class TaskResponse(BaseModel):
+    id: int
+    title: str
+    description: Optional[str] = None
+    status: str
+    priority: str
+    category: str
+    source: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        # Pydantic v2: allow attribute-based validation for ORM objects
+        from_attributes = True
+
+    @classmethod
+    def from_orm(cls, obj):  # Backward-compat shim (v1-style API)
+        return cls.model_validate(obj, from_attributes=True)
+
+
+# ----------------------
+# Statistics API Schemas
+# ----------------------
+
+class StatsResponse(BaseModel):
+    total_tasks: int
+    open_tasks: int
+    completed_tasks: int
+    categories: dict
+    priorities: dict

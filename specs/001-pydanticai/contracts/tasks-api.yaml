@@ -1,0 +1,163 @@
+openapi: 3.1.0
+info:
+  title: Task Configuration API
+  version: 1.0.0
+
+paths:
+  /api/tasks:
+    get:
+      summary: List task configurations
+      operationId: listTasks
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaskConfig'
+
+    post:
+      summary: Create task configuration
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskConfigCreate'
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskConfig'
+        '400':
+          description: Invalid schema or validation error
+        '409':
+          description: Task name already exists
+
+  /api/tasks/{task_id}:
+    get:
+      summary: Get task by ID
+      operationId: getTask
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskConfigDetail'
+
+    put:
+      summary: Update task configuration
+      operationId: updateTask
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskConfigUpdate'
+      responses:
+        '200':
+          description: Task updated
+
+    delete:
+      summary: Delete task configuration
+      operationId: deleteTask
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Task deleted
+
+components:
+  schemas:
+    TaskConfig:
+      type: object
+      required: [id, name, response_schema, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        request_schema:
+          type: object
+          nullable: true
+        response_schema:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    TaskConfigDetail:
+      allOf:
+        - $ref: '#/components/schemas/TaskConfig'
+        - type: object
+          properties:
+            assigned_agents:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+
+    TaskConfigCreate:
+      type: object
+      required: [name, response_schema]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        request_schema:
+          type: object
+        response_schema:
+          type: object
+
+    TaskConfigUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        request_schema:
+          type: object
+        response_schema:
+          type: object
