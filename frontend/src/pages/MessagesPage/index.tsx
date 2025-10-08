@@ -147,7 +147,7 @@ const MessagesPage = () => {
     globalFilterFn: (row, _columnId, filterValue) => {
       const q = String(filterValue).toLowerCase()
       return (
-        String(row.original.author_name || row.original.author || '').toLowerCase().includes(q) ||
+        String(row.original.author_name || '').toLowerCase().includes(q) ||
         String(row.original.content || '').toLowerCase().includes(q)
       )
     },

@@ -195,7 +195,7 @@ const DashboardPage = () => {
                     className="group flex items-start gap-3 py-2 border-b last:border-b-0 rounded-md cursor-pointer transition-all duration-200 hover:bg-accent/50 -mx-2 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     tabIndex={0}
                     role="button"
-                    aria-label={`Message from ${message.author}: ${message.content}`}
+                    aria-label={`Message from ${message.author_name || 'Unknown'}: ${message.content || ''}`}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
@@ -207,10 +207,10 @@ const DashboardPage = () => {
                     <div className="relative shrink-0">
                       <Avatar className="h-10 w-10 border border-border/80 shadow-sm ring-1 ring-black/5">
                         {message.avatar_url ? (
-                          <AvatarImage src={message.avatar_url} alt={message.author} />
+                          <AvatarImage src={message.avatar_url} alt={message.author_name || 'User'} />
                         ) : null}
                         <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                          {message.author?.charAt(0).toUpperCase() || '?'}
+                          {message.author_name?.charAt(0).toUpperCase() || '?'}
                         </AvatarFallback>
                       </Avatar>
                       {/* Telegram Badge - positioned bottom-right */}
@@ -222,15 +222,15 @@ const DashboardPage = () => {
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="text-sm font-semibold text-foreground truncate">
-                          {message.author_name || message.author || message.sender}
+                          {message.author_name || 'Unknown'}
                         </span>
                         <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                          {formatMessageDate(message.sent_at, message.timestamp)}
+                          {formatMessageDate(message.sent_at || message.timestamp)}
                         </span>
                       </div>
 
                       <p className="text-sm text-muted-foreground leading-snug break-words line-clamp-2">
-                        {message.content || message.text}
+                        {message.content || ''}
                       </p>
 
                       {(message.is_task || message.isTask) && (

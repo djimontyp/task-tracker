@@ -107,11 +107,13 @@ export function ThemeToggle() {
   return (
     <button
       onClick={handleToggle}
-      className="theme-toggle focus-ring"
+      className="flex items-center justify-center w-10 h-10 bg-secondary border border-border rounded-md cursor-pointer transition-all duration-150 relative overflow-hidden hover:bg-tertiary hover:border-secondary hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
       title={getLabel()}
       aria-label={getLabel()}
     >
-      <span className="theme-icon">{getIcon()}</span>
+      <span className="text-xl leading-none transition-transform duration-150 hover:rotate-15">
+        {getIcon()}
+      </span>
     </button>
   );
 }
