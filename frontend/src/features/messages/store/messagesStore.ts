@@ -40,9 +40,10 @@ const toTimestamp = (value?: string): number => {
 }
 
 const enhanceMessage = (message: Message): MessageList => {
+  // Use new fields, fallback to deprecated fields for backwards compatibility
   const sentAtIso = normalizeSentAt(message.sent_at || message.timestamp)
   const displayTimestamp = new Date(sentAtIso).toLocaleString('uk-UA')
-  const displaySource = message.source_name || message.source || 'unknown'
+  const displaySource = message.source_name || 'unknown'
 
   return {
     ...message,
@@ -51,8 +52,10 @@ const enhanceMessage = (message: Message): MessageList => {
     displaySource,
     // Explicitly preserve avatar_url
     avatar_url: message.avatar_url,
-    // Ensure author_name is set (backwards compatibility)
+    // Use author_name (fallback to deprecated fields for legacy data)
     author_name: message.author_name || message.author || message.sender || 'Unknown',
+    // Ensure content is set (fallback to deprecated text field)
+    content: message.content || message.text || '',
   }
 }
 
