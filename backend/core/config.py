@@ -27,10 +27,19 @@ class Settings(BaseSettings):
         default="",
         validation_alias=AliasChoices("TELEGRAM_BOT_TOKEN", "telegram_bot_token"),
     )
-    telegram_group_chat_id: str = Field(
-        default="",
+    # Telegram Client API credentials (for historical message fetching)
+    telegram_api_id: int | None = Field(
+        default=None,
+        validation_alias=AliasChoices("TELEGRAM_API_ID", "telegram_api_id"),
+    )
+    telegram_api_hash: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("TELEGRAM_API_HASH", "telegram_api_hash"),
+    )
+    telegram_session_string: str | None = Field(
+        default=None,
         validation_alias=AliasChoices(
-            "TELEGRAM_GROUP_CHAT_ID", "telegram_group_chat_id"
+            "TELEGRAM_SESSION_STRING", "telegram_session_string"
         ),
     )
     taskiq_nats_servers: str = Field(
@@ -56,6 +65,10 @@ class Settings(BaseSettings):
     webhook_base_url: str = Field(
         default="http://localhost",
         validation_alias=AliasChoices("WEBHOOK_BASE_URL", "webhook_base_url"),
+    )
+    encryption_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("ENCRYPTION_KEY", "encryption_key"),
     )
 
 

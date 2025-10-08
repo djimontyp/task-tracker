@@ -51,6 +51,8 @@ const enhanceMessage = (message: Message): MessageList => {
     displaySource,
     // Explicitly preserve avatar_url
     avatar_url: message.avatar_url,
+    // Ensure author_name is set (backwards compatibility)
+    author_name: message.author_name || message.author || message.sender || 'Unknown',
   }
 }
 

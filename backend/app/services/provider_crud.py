@@ -1,0 +1,279 @@
+"""CRUD operations for LLM Provider management.
+
+Provides create, read, update, delete operations for LLM providers
+with encryption support and validation scheduling.
+"""
+
+from typing import List, Optional
+from uuid import UUID
+
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from app.models import (
+    AgentConfig,
+    LLMProvider,
+    LLMProviderCreate,
+    LLMProviderPublic,
+    LLMProviderUpdate,
+    ValidationStatus,
+)
+from app.services.credential_encryption import CredentialEncryption
+from app.services.provider_validator import ProviderValidator
+
+
+class ProviderCRUD:
+    """CRUD service for LLM Provider operations."""
+
+    def __init__(
+        self,
+        session: AsyncSession,
+        encryptor: Optional[CredentialEncryption] = None,
+        validator: Optional[ProviderValidator] = None,
+    ):
+        """Initialize CRUD service.
+
+        Args:
+            session: Async database session
+            encryptor: Credential encryption service (created if not provided)
+            validator: Provider validation service (created if not provided)
+        """
+        self.session = session
+        self.encryptor = encryptor or CredentialEncryption()
+        self.validator = validator or ProviderValidator()
+
+    async def create(
+        self,
+        provider_data: LLMProviderCreate,
+        schedule_validation: bool = True,
+    ) -> LLMProviderPublic:
+        """Create new LLM provider with encrypted credentials.
+
+        Args:
+            provider_data: Provider creation data
+            schedule_validation: Whether to schedule async validation
+
+        Returns:
+            Created provider with public fields
+
+        Raises:
+            ValueError: If provider name already exists
+        """
+        # Check name uniqueness
+        existing = await self.get_by_name(provider_data.name)
+        if existing:
+            raise ValueError(
+                f"Provider with name '{provider_data.name}' already exists"
+            )
+
+        # Encrypt API key if provided
+        api_key_encrypted = None
+        if provider_data.api_key:
+            api_key_encrypted = self.encryptor.encrypt(provider_data.api_key)
+
+        # Create provider record
+        provider = LLMProvider(
+            name=provider_data.name,
+            type=provider_data.type,
+            base_url=provider_data.base_url,
+            api_key_encrypted=api_key_encrypted,
+            is_active=provider_data.is_active,
+            # If validation is scheduled, immediately mark as 'validating' for API response
+            # and persisted state. Otherwise keep as 'pending'.
+            validation_status=(
+                ValidationStatus.validating if schedule_validation else ValidationStatus.pending
+            ),
+        )
+
+        self.session.add(provider)
+        await self.session.commit()
+        await self.session.refresh(provider)
+
+        # Schedule background validation
+        if schedule_validation:
+            self.validator.schedule_validation(str(provider.id))
+
+        return LLMProviderPublic.model_validate(provider)
+
+    async def get(self, provider_id: UUID) -> Optional[LLMProviderPublic]:
+        """Get provider by ID.
+
+        Args:
+            provider_id: Provider UUID
+
+        Returns:
+            Provider if found, None otherwise
+        """
+        result = await self.session.execute(
+            select(LLMProvider).where(LLMProvider.id == provider_id)
+        )
+        provider = result.scalar_one_or_none()
+
+        if provider:
+            return LLMProviderPublic.model_validate(provider)
+        return None
+
+    async def get_by_name(self, name: str) -> Optional[LLMProviderPublic]:
+        """Get provider by name.
+
+        Args:
+            name: Provider name
+
+        Returns:
+            Provider if found, None otherwise
+        """
+        result = await self.session.execute(
+            select(LLMProvider).where(LLMProvider.name == name)
+        )
+        provider = result.scalar_one_or_none()
+
+        if provider:
+            return LLMProviderPublic.model_validate(provider)
+        return None
+
+    async def list(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        active_only: bool = False,
+    ) -> List[LLMProviderPublic]:
+        """List providers with pagination.
+
+        Args:
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            active_only: Filter for active providers only
+
+        Returns:
+            List of providers
+        """
+        query = select(LLMProvider)
+
+        if active_only:
+            query = query.where(LLMProvider.is_active == True)  # noqa: E712
+
+        query = query.offset(skip).limit(limit)
+        result = await self.session.execute(query)
+        providers = result.scalars().all()
+
+        return [LLMProviderPublic.model_validate(p) for p in providers]
+
+    async def update(
+        self,
+        provider_id: UUID,
+        update_data: LLMProviderUpdate,
+        schedule_validation: bool = True,
+    ) -> Optional[LLMProviderPublic]:
+        """Update provider configuration.
+
+        Args:
+            provider_id: Provider UUID
+            update_data: Fields to update
+            schedule_validation: Whether to schedule async validation
+
+        Returns:
+            Updated provider if found, None otherwise
+        """
+        result = await self.session.execute(
+            select(LLMProvider).where(LLMProvider.id == provider_id)
+        )
+        provider = result.scalar_one_or_none()
+
+        if not provider:
+            return None
+
+        # Update fields if provided
+        update_dict = update_data.model_dump(exclude_unset=True)
+
+        # Handle API key encryption
+        if "api_key" in update_dict:
+            api_key = update_dict.pop("api_key")
+            if api_key:
+                update_dict["api_key_encrypted"] = self.encryptor.encrypt(api_key)
+            else:
+                update_dict["api_key_encrypted"] = None
+
+        # Apply updates
+        for field, value in update_dict.items():
+            setattr(provider, field, value)
+
+        # Reset validation status if connection details changed
+        connection_changed = any(k in update_dict for k in ["base_url", "api_key_encrypted"])
+        if connection_changed:
+            provider.validation_status = (
+                ValidationStatus.validating if schedule_validation else ValidationStatus.pending
+            )
+            provider.validation_error = None
+            provider.validated_at = None
+
+        await self.session.commit()
+        await self.session.refresh(provider)
+
+        # Schedule validation if connection details changed
+        if schedule_validation and connection_changed:
+            self.validator.schedule_validation(str(provider.id))
+
+        return LLMProviderPublic.model_validate(provider)
+
+    async def delete(self, provider_id: UUID) -> bool:
+        """Delete provider.
+
+        Args:
+            provider_id: Provider UUID
+
+        Returns:
+            True if deleted, False if not found
+
+        Behavior:
+            - If provider is referenced by any AgentConfig, perform soft delete by
+              setting is_active=False and return True.
+            - Otherwise, perform hard delete.
+        """
+        result = await self.session.execute(
+            select(LLMProvider).where(LLMProvider.id == provider_id)
+        )
+        provider = result.scalar_one_or_none()
+
+        if not provider:
+            return False
+
+        # Check for agent references
+        ref_result = await self.session.execute(
+            select(AgentConfig.id).where(AgentConfig.provider_id == provider_id).limit(1)
+        )
+        has_references = ref_result.first() is not None
+
+        if has_references:
+            # Soft delete: mark as inactive but keep record for FK integrity
+            provider.is_active = False
+            await self.session.commit()
+            return True
+
+        # No references: safe to hard delete
+        await self.session.delete(provider)
+        await self.session.commit()
+        return True
+
+    async def get_decrypted_api_key(self, provider_id: UUID) -> Optional[str]:
+        """Get decrypted API key for provider.
+
+        Args:
+            provider_id: Provider UUID
+
+        Returns:
+            Decrypted API key if found, None otherwise
+
+        Note:
+            This method should only be used by internal services
+            that need the actual API key (e.g., PydanticAI agent initialization).
+            Never expose decrypted keys via API endpoints.
+        """
+        result = await self.session.execute(
+            select(LLMProvider).where(LLMProvider.id == provider_id)
+        )
+        provider = result.scalar_one_or_none()
+
+        if not provider or not provider.api_key_encrypted:
+            return None
+
+        return self.encryptor.decrypt(provider.api_key_encrypted)

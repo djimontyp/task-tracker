@@ -5,6 +5,7 @@ from core.taskiq_config import nats_broker
 
 from .api.v1.router import api_router
 from .database import create_db_and_tables
+from .routers import agents_router, providers_router, tasks_router
 from .webhooks.router import webhook_router
 from .ws.router import router as ws_router
 
@@ -37,6 +38,14 @@ tags_metadata = [
         "name": "websocket",
         "description": "WebSocket connections for real-time updates and bidirectional communication with clients.",
     },
+    {
+        "name": "providers",
+        "description": "LLM Provider management for configuring Ollama and OpenAI providers with async validation.",
+    },
+    {
+        "name": "agents",
+        "description": "Agent Configuration management for creating and managing PydanticAI agents with task assignments.",
+    },
 ]
 
 
@@ -59,6 +68,10 @@ def create_app() -> FastAPI:
     app.include_router(api_router)
     app.include_router(webhook_router)
     app.include_router(ws_router)
+    # Agent management routers
+    app.include_router(providers_router)
+    app.include_router(agents_router)
+    app.include_router(tasks_router)
 
     @app.get("/")
     async def root():

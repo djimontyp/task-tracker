@@ -33,6 +33,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    volumes:
+      - ./telegram_sessions:/app/sessions
     develop:
       watch:
         - action: sync+restart
@@ -126,3 +128,5 @@ volumes:
     name: task-tracker-postgres-data
   nats_data:
     name: task-tracker-nats-data
+  telegram_sessions:
+    name: task-tracker-telegram-sessions

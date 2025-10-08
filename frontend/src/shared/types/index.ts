@@ -1,7 +1,14 @@
 // Shared TypeScript types and interfaces
 
-export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled'
-export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
+export type TaskStatus =
+  | 'open'
+  | 'in_progress'
+  | 'completed'
+  | 'closed'
+  // legacy/client-only fallbacks
+  | 'pending'
+  | 'cancelled'
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent' | 'critical'
 
 export interface Task {
   id: string
@@ -9,6 +16,9 @@ export interface Task {
   description?: string
   status: TaskStatus
   priority: TaskPriority
+  // backend (legacy) fields
+  category?: string
+  source?: string
   createdAt: string
   created_at?: string
   updatedAt: string
@@ -21,17 +31,35 @@ export interface Message {
   id: number | string
   external_message_id: string
   content: string
-  author: string
+
+  // New normalized fields (from backend User model)
+  author_id: number
+  author_name: string  // User.full_name (first_name + last_name)
+
   sent_at: string
+  source_id?: number
   source_name: string
   analyzed?: boolean
   avatar_url?: string | null
   persisted?: boolean
-  // Legacy compatibility fields
-  text?: string
-  sender?: string
-  timestamp?: string
-  source?: string
+
+  // Platform-specific profiles
+  telegram_profile_id?: number | null
+
+  // Legacy compatibility fields (deprecated - use new fields above)
+  author?: string  // @deprecated Use author_name instead
+  sender?: string  // @deprecated Use author_name instead
+  text?: string    // @deprecated Use content instead
+  timestamp?: string  // @deprecated Use sent_at instead
+  source?: string  // @deprecated Use source_name instead
+
+  // Telegram user identification (legacy)
+  telegram_user_id?: number | null
+  telegram_username?: string | null
+  first_name?: string | null
+  last_name?: string | null
+
+  // Task-related fields
   isTask?: boolean
   is_task?: boolean
   taskId?: string
