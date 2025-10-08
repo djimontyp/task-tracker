@@ -12,7 +12,7 @@ from app.schemas.messages import (
     MessageResponse,
 )
 from .response_models import PaginatedMessagesResponse
-from ...websocket import manager
+from ...services.websocket_manager import websocket_manager
 from ..deps import DatabaseDep
 
 logger = logging.getLogger(__name__)
@@ -81,7 +81,7 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
     response_data["sent_at"] = response_data["sent_at"].isoformat()
     if response_data.get("created_at"):
         response_data["created_at"] = response_data["created_at"].isoformat()
-    await manager.broadcast({"type": "message.new", "data": response_data})
+    await websocket_manager.broadcast("messages", {"type": "message.new", "data": response_data})
 
     return {"status": "message received", "id": db_message.id}
 
@@ -174,7 +174,8 @@ async def get_messages(
     elif sort_by == "sent_at":
         sort_column = Message.sent_at
     else:
-        sort_column = Message.created_at  # default
+        # Default: sort by sent_at (when message was actually sent)
+        sort_column = Message.sent_at
 
     # Apply sort order
     if sort_order == "asc":

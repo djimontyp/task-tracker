@@ -6,7 +6,7 @@ from sqlmodel import and_, select
 
 from ...models import Message, Source, Task, User
 from app.schemas.stats import StatsResponse
-from ...websocket import manager
+from ...services.websocket_manager import websocket_manager
 from ..deps import DatabaseDep
 from .response_models import ActivityDataResponse, AnalyzeDayResponse, StatsResponse
 
@@ -208,7 +208,7 @@ async def analyze_day(
             "category": summary_task.category,
             "created_at": summary_task.created_at.isoformat(),
         }
-        await manager.broadcast({"type": "task_created", "data": task_data})
+        await websocket_manager.broadcast("tasks", {"type": "task_created", "data": task_data})
 
         return AnalyzeDayResponse(
             success=True,

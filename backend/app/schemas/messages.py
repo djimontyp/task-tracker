@@ -41,6 +41,10 @@ class MessageResponse(BaseModel):
     confidence: float | None = None
     analyzed: bool = False
 
+    # Legacy compatibility (deprecated - for backward compatibility with frontend)
+    author: str | None = None  # @deprecated Use author_name
+    persisted: bool = True
+
     # Timestamps
     created_at: datetime | None = None
     updated_at: datetime | None = None

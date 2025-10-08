@@ -3,7 +3,6 @@ import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from ..services.websocket_manager import websocket_manager
-from ..websocket import manager as legacy_manager
 
 router = APIRouter(tags=["websocket"])
 
@@ -13,7 +12,8 @@ async def websocket_endpoint(websocket: WebSocket, topics: str = None):
     """WebSocket endpoint with topic-based subscriptions.
 
     Query params:
-        topics: Comma-separated list of topics to subscribe to (agents,tasks,providers)
+        topics: Comma-separated list of topics to subscribe to
+                (agents, tasks, providers, messages)
                 If not specified, subscribes to all topics
 
     Message format (client to server):
@@ -27,21 +27,12 @@ async def websocket_endpoint(websocket: WebSocket, topics: str = None):
     topic_list = None
     if topics:
         topic_list = [t.strip() for t in topics.split(",")]
+    else:
+        # Default to all topics
+        topic_list = ["agents", "tasks", "providers", "messages"]
 
-    # Connect with legacy manager for backward compatibility (this calls accept())
-    await legacy_manager.connect(websocket)
-
-    # Connect with new topic-based manager (don't accept again)
-    await websocket_manager.connect(websocket, topic_list, accept=False)
-    # Register with new topic-based manager (without accepting again)
-    if topic_list is None:
-        topic_list = ["agents", "tasks", "providers"]
-
-    async with websocket_manager._lock:
-        for topic in topic_list:
-            if topic not in websocket_manager._connections:
-                websocket_manager._connections[topic] = set()
-            websocket_manager._connections[topic].add(websocket)
+    # Connect with topic-based manager
+    await websocket_manager.connect(websocket, topic_list, accept=True)
 
     try:
         # Send connection confirmation
@@ -52,7 +43,7 @@ async def websocket_endpoint(websocket: WebSocket, topics: str = None):
                     "data": {
                         "status": "connected",
                         "message": "Ready for real-time updates",
-                        "topics": topic_list or ["agents", "tasks", "providers"],
+                        "topics": topic_list,
                     },
                 }
             )
@@ -92,5 +83,4 @@ async def websocket_endpoint(websocket: WebSocket, topics: str = None):
                 pass
 
     except WebSocketDisconnect:
-        legacy_manager.disconnect(websocket)
         await websocket_manager.disconnect(websocket)
