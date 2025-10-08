@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Task, TaskStatus, TaskPriority } from '@/shared/types'
+import type { Task, TaskStatus } from '@/shared/types'
 
 interface TasksStore {
   tasks: Task[]

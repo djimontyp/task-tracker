@@ -6,13 +6,13 @@ import {
   Button,
   Badge,
   Spinner,
-} from '@shared/ui'
-import { providerService } from '@/services/providerService'
-import { LLMProvider, LLMProviderCreate, LLMProviderUpdate } from '@/types/provider'
+} from '@/shared/ui'
+import { providerService } from '@/features/providers/api'
+import { LLMProvider, LLMProviderCreate, LLMProviderUpdate } from '@/features/providers/types'
 import { toast } from 'sonner'
 import { Pencil, Trash2, Plus } from 'lucide-react'
 import ProviderForm from './ProviderForm'
-import ValidationStatus from './ValidationStatus'
+import { ValidationStatus } from '@/features/providers/components'
 
 const ProviderList = () => {
   const queryClient = useQueryClient()

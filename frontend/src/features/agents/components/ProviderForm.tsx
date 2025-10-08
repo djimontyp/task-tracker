@@ -14,8 +14,8 @@ import {
   SelectContent,
   SelectItem,
   Checkbox,
-} from '@shared/ui'
-import { ProviderType, LLMProviderCreate, LLMProviderUpdate } from '@/types/provider'
+} from '@/shared/ui'
+import { ProviderType, LLMProviderCreate, LLMProviderUpdate } from '@/features/providers/types'
 
 interface ProviderFormProps {
   open: boolean

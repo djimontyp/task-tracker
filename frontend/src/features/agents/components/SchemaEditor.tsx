@@ -12,7 +12,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from '@shared/ui'
+} from '@/shared/ui'
 import { Plus, Trash2 } from 'lucide-react'
 
 interface SchemaField {

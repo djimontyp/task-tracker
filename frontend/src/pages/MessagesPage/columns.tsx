@@ -5,6 +5,7 @@ import { MoreHorizontal, Mail, User, X } from 'lucide-react'
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
 import { Message } from '@/shared/types'
+import { formatFullDate } from '@/shared/utils/date'
 
 export interface ColumnsCallbacks {
   onReset?: () => void
@@ -132,7 +133,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     ),
     cell: ({ row }) => {
       const d = row.getValue<string>('sent_at')
-      return <div className="text-muted-foreground text-xs">{d ? new Date(d).toLocaleString() : '-'}</div>
+      return <div className="text-muted-foreground text-xs">{d ? formatFullDate(d) : '-'}</div>
     },
   },
   {

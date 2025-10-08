@@ -2,9 +2,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AxiosError } from 'axios'
 import toast from 'react-hot-toast'
 import { Copy, Check, Info, MessageSquare } from 'lucide-react'
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Skeleton } from '@shared/ui'
-import { useTheme } from '../../components/ThemeProvider'
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Skeleton } from '@/shared/ui'
+import { useTheme } from '@/shared/components/ThemeProvider'
 import { apiClient } from '@/shared/lib/api/client'
+import { formatFullDate } from '@/shared/utils/date'
 
 const themeOptions: { value: 'light' | 'dark' | 'system'; label: string }[] = [
   { value: 'light', label: 'Light' },
@@ -329,7 +330,7 @@ const SettingsPage = () => {
   const lastSetFormatted = useMemo(() => {
     if (!lastSetAt) return null
     try {
-      return new Date(lastSetAt).toLocaleString('uk-UA')
+      return formatFullDate(lastSetAt)
     } catch (error) {
       return lastSetAt
     }

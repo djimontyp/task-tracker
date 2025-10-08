@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { Sun, Moon } from 'lucide-react'
 import { useLocation, Link } from 'react-router-dom'
-import { useTheme } from '../../../components/ThemeProvider'
+import { useTheme } from '@/shared/components/ThemeProvider'
 import { SidebarTrigger } from '@/shared/ui/sidebar'
 import {
   Breadcrumb,

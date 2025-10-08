@@ -1,8 +1,8 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Card, Spinner } from '@shared/ui'
-import { apiClient } from '@shared/lib/api/client'
-import { TaskStats } from '@shared/types'
+import { Card, Spinner } from '@/shared/ui'
+import { apiClient } from '@/shared/lib/api/client'
+import { TaskStats } from '@/shared/types'
 
 const AnalyticsPage = () => {
   const { data: stats, isLoading } = useQuery<TaskStats>({

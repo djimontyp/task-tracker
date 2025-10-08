@@ -13,6 +13,7 @@ import MetricCard from '@/shared/components/MetricCard'
 import ActivityHeatmap from '@/shared/components/ActivityHeatmap'
 import { useTasksStore } from '@/features/tasks/store/tasksStore'
 import { useMessagesFeed } from '@/features/messages/hooks/useMessagesFeed'
+import { formatMessageDate } from '@/shared/utils/date'
 
 const DashboardPage = () => {
   const navigate = useNavigate()
@@ -224,17 +225,7 @@ const DashboardPage = () => {
                           {message.author_name || message.author || message.sender}
                         </span>
                         <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                          {message.sent_at
-                            ? new Date(message.sent_at).toLocaleString('uk-UA', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : message.timestamp
-                            ? new Date(message.timestamp).toLocaleString('uk-UA', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : 'No date'}
+                          {formatMessageDate(message.sent_at, message.timestamp)}
                         </span>
                       </div>
 
@@ -311,10 +302,7 @@ const DashboardPage = () => {
                     </div>
 
                     <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                      {new Date(task.created_at || task.createdAt).toLocaleString('uk-UA', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {formatMessageDate(task.created_at || task.createdAt)}
                     </div>
                   </div>
                 ))

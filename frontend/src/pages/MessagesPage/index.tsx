@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import {
   Spinner,
   Button,
-} from '@shared/ui'
-import { apiClient } from '@shared/lib/api/client'
+} from '@/shared/ui'
+import { apiClient } from '@/shared/lib/api/client'
 import { toast } from 'sonner'
 import {
   SortingState,
@@ -20,12 +20,19 @@ import {
 } from '@tanstack/react-table'
 import { createColumns, sourceLabels, statusLabels } from './columns'
 import { Message } from '@/shared/types'
-import { DataTable } from '@shared/components/DataTable'
-import { DataTableToolbar } from '@shared/components/DataTableToolbar'
-import { DataTablePagination } from '@shared/components/DataTablePagination'
+import { DataTable } from '@/shared/components/DataTable'
+import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
+import { DataTablePagination } from '@/shared/components/DataTablePagination'
 import { DataTableFacetedFilter } from './faceted-filter'
 import { Download, RefreshCw, UserCheck } from 'lucide-react'
 import { IngestionModal } from './IngestionModal'
+
+interface MessageQueryParams {
+  page: number
+  page_size: number
+  sort_by?: string
+  sort_order?: 'asc' | 'desc'
+}
 
 interface PaginatedResponse {
   items: Message[]
@@ -53,7 +60,7 @@ const MessagesPage = () => {
     queryKey: ['messages', currentPage, pageSize, sorting],
     queryFn: async () => {
       try {
-        const params: any = {
+        const params: MessageQueryParams = {
           page: currentPage,
           page_size: pageSize
         }

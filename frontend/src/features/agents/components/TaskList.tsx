@@ -6,9 +6,9 @@ import {
   Button,
   Badge,
   Spinner,
-} from '@shared/ui'
-import { taskService } from '@/services/taskService'
-import { TaskConfig, TaskConfigCreate, TaskConfigUpdate } from '@/types/task'
+} from '@/shared/ui'
+import { taskService } from '@/features/agents/api'
+import { TaskConfig, TaskConfigCreate, TaskConfigUpdate } from '@/features/agents/types'
 import { toast } from 'sonner'
 import { Pencil, Trash2, Plus } from 'lucide-react'
 import TaskForm from './TaskForm'

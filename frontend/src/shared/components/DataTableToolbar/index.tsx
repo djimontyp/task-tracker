@@ -6,7 +6,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@shared/ui'
+} from '@/shared/ui'
 import { ChevronDown } from 'lucide-react'
 import { Table as TableType } from '@tanstack/react-table'
 

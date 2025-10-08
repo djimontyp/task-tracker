@@ -11,11 +11,11 @@ import {
   Badge,
   Checkbox,
   Label,
-} from '@shared/ui'
-import { AgentConfig } from '@/types/agent'
-import { AgentTaskAssignment } from '@/types/task'
-import { agentService } from '@/services/agentService'
-import { taskService } from '@/services/taskService'
+} from '@/shared/ui'
+import { AgentConfig } from '@/features/agents/types'
+import { AgentTaskAssignment } from '@/features/agents/types'
+import { agentService } from '@/features/agents/api'
+import { taskService } from '@/features/agents/api'
 import { toast } from 'sonner'
 
 interface TaskAssignmentProps {
