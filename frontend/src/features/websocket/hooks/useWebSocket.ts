@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
+import { logger } from '@/shared/utils/logger'
 
 const DEFAULT_WS_PATH = '/ws'
 
@@ -18,7 +19,7 @@ const resolveScheme = () => {
 }
 
 const resolveHost = () => {
-  const envHost = process.env.REACT_APP_WS_HOST?.trim()
+  const envHost = import.meta.env.VITE_WS_HOST?.trim()
   if (envHost) {
     return envHost
   }
@@ -33,7 +34,7 @@ const resolveHost = () => {
 const resolveWebSocketUrl = () => {
   const scheme = resolveScheme()
   const host = resolveHost()
-  const path = normalizePath(process.env.REACT_APP_WS_PATH)
+  const path = normalizePath(import.meta.env.VITE_WS_PATH)
 
   // Use window.location.port if available for correct port resolution
   const port = typeof window !== 'undefined' && window.location.port
@@ -72,7 +73,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   const connect = () => {
     // Guard: prevent multiple simultaneous connections
     if (isConnectingRef.current) {
-      console.log('⚠️  Connection already in progress, skipping...')
+      logger.debug('⚠️  Connection already in progress, skipping...')
       return
     }
 
@@ -80,7 +81,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     if (wsRef.current) {
       const currentState = wsRef.current.readyState
       if (currentState === WebSocket.CONNECTING || currentState === WebSocket.OPEN) {
-        console.log(`⚠️  WebSocket already ${currentState === WebSocket.CONNECTING ? 'connecting' : 'open'}, skipping...`)
+        logger.debug(`⚠️  WebSocket already ${currentState === WebSocket.CONNECTING ? 'connecting' : 'open'}, skipping...`)
         return
       }
     }
@@ -89,16 +90,16 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       isConnectingRef.current = true
       setConnectionState('connecting')
       // Resolve WebSocket URL at runtime, not at module load time
-      const wsUrl = process.env.REACT_APP_WS_URL || resolveWebSocketUrl()
-      console.log('🔌 Connecting to WebSocket:', wsUrl)
+      const wsUrl = import.meta.env.VITE_WS_URL || resolveWebSocketUrl()
+      logger.debug('🔌 Connecting to WebSocket:', wsUrl)
       const ws = new WebSocket(wsUrl)
 
       ws.onopen = () => {
-        console.log('✅ WebSocket opened successfully')
+        logger.debug('✅ WebSocket opened successfully')
         isConnectingRef.current = false
 
         if (!isMountedRef.current) {
-          console.log('⚠️  Component unmounted, closing connection')
+          logger.debug('⚠️  Component unmounted, closing connection')
           ws.close()
           return
         }
@@ -112,28 +113,28 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data)
-          console.log('📨 WebSocket message:', data)
+          logger.debug('📨 WebSocket message:', data)
           onMessage?.(data)
         } catch (error) {
-          console.error('WebSocket message parse error:', error)
+          logger.error('WebSocket message parse error:', error)
         }
       }
 
       ws.onerror = (error) => {
         const readyState = ws.readyState
         const stateText = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'][readyState]
-        console.error(`❌ WebSocket error in state ${readyState} (${stateText}):`, error)
+        logger.error(`❌ WebSocket error in state ${readyState} (${stateText}):`, error)
 
         isConnectingRef.current = false
 
         // Only show toast for initial connection errors, not during reconnect
         if (connectionState === 'connecting') {
-          console.log('⚠️  Error during initial connection, will retry...')
+          logger.debug('⚠️  Error during initial connection, will retry...')
         }
       }
 
       ws.onclose = (event) => {
-        console.log('🔌 WebSocket closed:', {
+        logger.debug('🔌 WebSocket closed:', {
           code: event.code,
           reason: event.reason,
           wasClean: event.wasClean
@@ -141,7 +142,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         isConnectingRef.current = false
 
         if (!isMountedRef.current) {
-          console.log('⚠️  Component unmounted, skipping reconnect')
+          logger.debug('⚠️  Component unmounted, skipping reconnect')
           return
         }
 
@@ -150,13 +151,13 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         onDisconnect?.()
 
         if (reconnect && isMountedRef.current) {
-          console.log(`⏳ Will reconnect in ${reconnectInterval}ms...`)
+          logger.debug(`⏳ Will reconnect in ${reconnectInterval}ms...`)
           reconnectTimeoutRef.current = setTimeout(() => {
             if (isMountedRef.current) {
-              console.log('🔄 Attempting to reconnect...')
+              logger.debug('🔄 Attempting to reconnect...')
               connect()
             } else {
-              console.log('⚠️  Component unmounted during reconnect delay, skipping')
+              logger.debug('⚠️  Component unmounted during reconnect delay, skipping')
             }
           }, reconnectInterval)
         }
@@ -164,7 +165,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
       wsRef.current = ws
     } catch (error) {
-      console.error('❌ Failed to create WebSocket:', error)
+      logger.error('❌ Failed to create WebSocket:', error)
       isConnectingRef.current = false
 
       // Only show toast for initial connection failures
@@ -174,7 +175,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
       // Try to reconnect if enabled and component is mounted
       if (reconnect && isMountedRef.current) {
-        console.log(`⏳ Will retry connection in ${reconnectInterval}ms...`)
+        logger.debug(`⏳ Will retry connection in ${reconnectInterval}ms...`)
         setConnectionState('reconnecting')
         reconnectTimeoutRef.current = setTimeout(() => {
           if (isMountedRef.current) {
@@ -186,7 +187,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   }
 
   const disconnect = () => {
-    console.log('🔌 Disconnecting WebSocket...')
+    logger.debug('🔌 Disconnecting WebSocket...')
 
     // Clear reconnect timeout
     if (reconnectTimeoutRef.current) {
@@ -199,7 +200,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       const ws = wsRef.current
       const currentState = ws.readyState
 
-      console.log(`📊 WebSocket state before close: ${currentState} (${
+      logger.debug(`📊 WebSocket state before close: ${currentState} (${
         ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'][currentState]
       })`)
 
@@ -207,9 +208,9 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       if (currentState === WebSocket.CONNECTING || currentState === WebSocket.OPEN) {
         try {
           ws.close(1000, 'Component unmounting')
-          console.log('✅ WebSocket close() called')
+          logger.debug('✅ WebSocket close() called')
         } catch (error) {
-          console.error('❌ Error closing WebSocket:', error)
+          logger.error('❌ Error closing WebSocket:', error)
         }
       }
 
@@ -231,18 +232,18 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(data))
     } else {
-      console.warn('WebSocket is not connected')
+      logger.warn('WebSocket is not connected')
     }
   }
 
   useEffect(() => {
-    console.log('🎯 useWebSocket mounted')
+    logger.debug('🎯 useWebSocket mounted')
     isMountedRef.current = true
 
     connect()
 
     return () => {
-      console.log('🎯 useWebSocket unmounting')
+      logger.debug('🎯 useWebSocket unmounting')
       isMountedRef.current = false
       disconnect()
     }

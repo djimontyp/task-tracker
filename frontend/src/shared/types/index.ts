@@ -46,12 +46,17 @@ export interface Message {
   // Platform-specific profiles
   telegram_profile_id?: number | null
 
-  // Legacy compatibility fields (deprecated - use new fields above)
-  author?: string  // @deprecated Use author_name instead
-  sender?: string  // @deprecated Use author_name instead
-  text?: string    // @deprecated Use content instead
-  timestamp?: string  // @deprecated Use sent_at instead
-  source?: string  // @deprecated Use source_name instead
+  // Legacy compatibility fields - DO NOT USE IN NEW CODE
+  /** @deprecated Use author_name instead */
+  author?: string
+  /** @deprecated Use author_name instead */
+  sender?: string
+  /** @deprecated Use content instead */
+  text?: string
+  /** @deprecated Use sent_at instead */
+  timestamp?: string
+  /** @deprecated Use source_name instead */
+  source?: string
 
   // Telegram user identification (legacy)
   telegram_user_id?: number | null

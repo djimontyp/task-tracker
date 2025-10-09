@@ -5,6 +5,7 @@ import apiClient from '@/shared/lib/api/client'
 import { useMessagesStore } from '../store/messagesStore'
 import type { Message } from '@/shared/types'
 import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
+import { logger } from '@/shared/utils/logger'
 
 export type MessagesPeriod = '24h' | '7d' | '30d' | 'all'
 
@@ -122,7 +123,7 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
         hydrate(response.data.items)
         setError(null)
       } catch (err) {
-        console.error('Failed to fetch messages:', err)
+        logger.error('Failed to fetch messages:', err)
         const message = err instanceof Error ? err.message : 'Не вдалося отримати повідомлення'
         setError(message)
         toast.error('Не вдалося завантажити повідомлення')
@@ -139,24 +140,24 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
 
   const handleMessageEvent = useCallback(
     (payload: unknown) => {
-      console.log('🔍 handleMessageEvent received:', payload)
+      logger.debug('handleMessageEvent received:', payload)
 
       if (!payload || typeof payload !== 'object') {
-        console.log('⚠️  Invalid payload')
+        logger.debug('Invalid payload')
         return
       }
 
       const { type, data } = payload as MessageEventPayload
-      console.log('📋 Message type:', type, 'data:', data)
+      logger.debug('Message type:', type, 'data:', data)
 
       if ((type === 'message.new' || type === 'message') && isMessageData(data)) {
-        console.log('✅ Adding new message to store')
+        logger.debug('Adding new message to store')
         upsertMessage({ ...data, persisted: data.persisted ?? false })
         return
       }
 
       if (type === 'message.updated') {
-        console.log('🔄 Updating message in store')
+        logger.debug('Updating message in store')
         const updated = toUpdatedPayload(data)
         if (updated?.external_message_id) {
           markPersisted(updated.external_message_id, {
@@ -167,7 +168,7 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
         }
       }
 
-      console.log('⚠️  Message type not handled:', type)
+      logger.debug('Message type not handled:', type)
     },
     [markPersisted, upsertMessage]
   )

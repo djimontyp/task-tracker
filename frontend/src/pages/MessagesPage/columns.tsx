@@ -1,17 +1,18 @@
 import * as React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal, Mail, User, X } from 'lucide-react'
+import { MoreHorizontal, Mail, User, X, LucideIcon } from 'lucide-react'
 
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
 import { Message } from '@/shared/types'
+import { formatFullDate } from '@/shared/utils/date'
 
 export interface ColumnsCallbacks {
   onReset?: () => void
   hasActiveFilters?: boolean
 }
 
-export const sourceLabels: Record<string, { label: string; icon: React.ComponentType<any> }> = {
+export const sourceLabels: Record<string, { label: string; icon: LucideIcon }> = {
   telegram: { label: 'Telegram', icon: Mail },
   api: { label: 'API', icon: Mail },
   slack: { label: 'Slack', icon: Mail },
@@ -43,7 +44,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     accessorKey: 'id',
     header: 'ID',
     cell: ({ row }) => {
-      const id = row.getValue<any>('id')
+      const id = row.getValue<number | string>('id')
       return <div className="w-[60px] text-xs font-medium text-muted-foreground">MSG-{String(id).padStart(4, '0')}</div>
     },
     enableSorting: false,
@@ -132,7 +133,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     ),
     cell: ({ row }) => {
       const d = row.getValue<string>('sent_at')
-      return <div className="text-muted-foreground text-xs">{d ? new Date(d).toLocaleString() : '-'}</div>
+      return <div className="text-muted-foreground text-xs">{d ? formatFullDate(d) : '-'}</div>
     },
   },
   {

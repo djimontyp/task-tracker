@@ -15,8 +15,8 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@shared/ui'
-import { apiClient } from '@shared/lib/api/client'
+} from '@/shared/ui'
+import { apiClient } from '@/shared/lib/api/client'
 import {
   ColumnFiltersState,
   SortingState,

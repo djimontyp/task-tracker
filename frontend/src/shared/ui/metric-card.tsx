@@ -1,6 +1,6 @@
 import { Card, CardContent } from './card'
 import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react'
-import { cn } from '@shared/lib/utils'
+import { cn } from '@/shared/lib/utils'
 
 interface MetricCardProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string

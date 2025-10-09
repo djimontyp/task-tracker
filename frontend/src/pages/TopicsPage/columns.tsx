@@ -1,12 +1,12 @@
 import * as React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal, Circle, CheckCircle2, Timer, XCircle, Tag } from 'lucide-react'
+import { MoreHorizontal, Circle, CheckCircle2, Timer, XCircle, LucideIcon } from 'lucide-react'
 
 import type { Task } from '@/shared/types'
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
 
-export const statusLabels: Record<string, { label: string; icon: React.ComponentType<any> }> = {
+export const statusLabels: Record<string, { label: string; icon: LucideIcon }> = {
   open: { label: 'Backlog', icon: Timer },
   in_progress: { label: 'In Progress', icon: Circle },
   completed: { label: 'Done', icon: CheckCircle2 },
@@ -14,7 +14,7 @@ export const statusLabels: Record<string, { label: string; icon: React.Component
   pending: { label: 'Pending', icon: Timer },
 }
 
-export const priorityLabels: Record<string, { label: string; icon?: React.ComponentType<any> }> = {
+export const priorityLabels: Record<string, { label: string; icon?: LucideIcon }> = {
   low: { label: 'Low' },
   medium: { label: 'Medium' },
   high: { label: 'High' },
@@ -43,7 +43,7 @@ export const columns: ColumnDef<Task>[] = [
     accessorKey: 'id',
     header: 'Task',
     cell: ({ row }) => {
-      const id = row.getValue<any>('id')
+      const id = row.getValue<number | string>('id')
       return <div className="w-[80px] text-xs font-medium text-muted-foreground">TASK-{String(id).padStart(4, '0')}</div>
     },
     enableSorting: false,

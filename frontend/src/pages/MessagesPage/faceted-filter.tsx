@@ -5,7 +5,7 @@ import { Table } from '@tanstack/react-table'
 import { cn } from '@/shared/lib/utils'
 import { Badge, Button, Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, Popover, PopoverContent, PopoverTrigger, Separator } from '@/shared/ui'
 
-interface DataTableFacetedFilterProps<TData, TValue> {
+interface DataTableFacetedFilterProps<TData> {
   columnKey: string
   table: Table<TData>
   title?: string
@@ -16,12 +16,12 @@ interface DataTableFacetedFilterProps<TData, TValue> {
   }[]
 }
 
-export function DataTableFacetedFilter<TData, TValue>({
+export function DataTableFacetedFilter<TData>({
   columnKey,
   table,
   title,
   options,
-}: DataTableFacetedFilterProps<TData, TValue>) {
+}: DataTableFacetedFilterProps<TData>) {
   const column = table.getColumn(columnKey)
   const facets = column?.getFacetedUniqueValues()
   const selectedValues = new Set(column?.getFilterValue() as string[])

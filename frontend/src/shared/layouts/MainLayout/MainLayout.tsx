@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react'
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/shared/ui/sidebar'
+import { SidebarProvider, SidebarInset } from '@/shared/ui/sidebar'
 import { AppSidebar } from '@/shared/components/AppSidebar'
 import Header from './Header'
 
