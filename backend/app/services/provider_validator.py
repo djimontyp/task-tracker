@@ -11,7 +11,7 @@ import httpx
 from sqlmodel import select
 
 from app.models import LLMProvider, ProviderType, ValidationStatus
-from app.database import get_session
+from app.database import AsyncSessionLocal
 from app.services.websocket_manager import websocket_manager
 
 
@@ -42,7 +42,7 @@ class ProviderValidator:
         Updates provider validation_status, validation_error, and validated_at
         in database based on validation result.
         """
-        async for session in get_session():
+        async with AsyncSessionLocal() as session:
             try:
                 # Load provider from database
                 result = await session.execute(
@@ -100,9 +100,7 @@ class ProviderValidator:
             except Exception:
                 # Database error, skip validation
                 await session.rollback()
-            finally:
-                await session.close()
-                break
+                raise
 
     async def _validate_ollama(self, provider: LLMProvider) -> None:
         """Validate Ollama provider connectivity.
@@ -117,16 +115,32 @@ class ProviderValidator:
         if not provider.base_url:
             raise ValueError("Ollama provider requires base_url")
 
-        # Test connectivity by fetching tags endpoint
-        url = f"{provider.base_url.rstrip('/')}/api/tags"
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await client.get(url)
-        response.raise_for_status()
+        base_url = provider.base_url.rstrip('/')
+        
+        # If base_url already contains /v1, use OpenAI-compatible endpoint
+        # Otherwise use native Ollama API
+        if base_url.endswith('/v1'):
+            # Test OpenAI-compatible endpoint (used by pydantic-ai)
+            url = f"{base_url}/models"
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.get(url)
+            response.raise_for_status()
+            
+            # Verify response has expected structure
+            data = response.json()
+            if "data" not in data:
+                raise ValueError("Invalid response from Ollama OpenAI API")
+        else:
+            # Test native Ollama API endpoint
+            url = f"{base_url}/api/tags"
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.get(url)
+            response.raise_for_status()
 
-        # Verify response has expected structure
-        data = response.json()
-        if "models" not in data:
-            raise ValueError("Invalid response from Ollama API")
+            # Verify response has expected structure
+            data = response.json()
+            if "models" not in data:
+                raise ValueError("Invalid response from Ollama API")
 
     async def _validate_openai(self, provider: LLMProvider) -> None:
         """Validate OpenAI provider connectivity.

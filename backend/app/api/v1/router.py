@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from . import analysis, health, messages, stats, tasks, users, webhooks, ingestion
+from . import agents, analysis, health, messages, providers, stats, tasks, users, webhooks, ingestion
 
 api_router = APIRouter(prefix="/api")
 
@@ -12,3 +12,5 @@ api_router.include_router(stats.router)
 api_router.include_router(webhooks.router)
 api_router.include_router(ingestion.router)
 api_router.include_router(analysis.router)
+api_router.include_router(providers.router)
+api_router.include_router(agents.router)

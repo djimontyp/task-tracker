@@ -189,6 +189,42 @@ class AgentService {
       throw new Error(`Failed to unassign task: ${response.statusText}`);
     }
   }
+
+  /**
+   * Test agent with custom prompt
+   */
+  async testAgent(
+    id: string,
+    prompt: string
+  ): Promise<{
+    response: string;
+    model: string;
+    provider: string;
+    execution_time_ms: number;
+  }> {
+    const response = await fetch(`${API_BASE_URL}/api/agents/${id}/test`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({
+        detail: response.statusText,
+      }));
+      if (response.status === 404) {
+        throw new Error("Agent not found");
+      }
+      if (response.status === 400) {
+        throw new Error(error.detail || "Invalid prompt");
+      }
+      throw new Error(error.detail || "Failed to test agent");
+    }
+
+    return response.json();
+  }
 }
 
 export const agentService = new AgentService();

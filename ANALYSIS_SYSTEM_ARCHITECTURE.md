@@ -1,60 +1,147 @@
 # 🏗️ **АРХІТЕКТУРА СИСТЕМИ АНАЛІЗУ ПОВІДОМЛЕНЬ**
 
+> **Статус**: В розробці | **Остання актуалізація**: 2025-10-09
+
 ---
 
-## 📐 **1. HIGH-LEVEL ARCHITECTURE**
+## 📋 **ПОТОЧНИЙ СТАН ПРОЄКТУ**
+
+### ✅ **Реалізовано (Foundation)**
+
+```
+DATABASE MODELS:
+├─ User, TelegramProfile         ✅ Користувачі та профілі
+├─ Source                         ✅ Джерела повідомлень (legacy)
+├─ Message                        ✅ Базова модель з AI classification
+├─ Task (legacy)                  ✅ Legacy таски (буде замінено на TaskEntity)
+├─ MessageIngestionJob            ✅ Прототип AnalysisRun (foundation)
+├─ LLMProvider                    ✅ Провайдери LLM (Ollama, OpenAI)
+├─ AgentConfig                    ✅ Конфігурація AI агентів
+├─ TaskConfig                     ✅ Конфігурація задач з Pydantic схемами
+└─ AgentTaskAssignment            ✅ Прив'язка агентів до задач
+
+FRONTEND STRUCTURE:
+├─ WORKSPACE
+│  ├─ DashboardPage              ✅ Головна панель
+│  ├─ MessagesPage               ✅ Список повідомлень
+│  ├─ TopicsPage                 ✅ Research topics
+│  └─ TasksPage                  ⏳ TaskEntity results (placeholder)
+│
+├─ AI ANALYSIS
+│  ├─ AnalysisRunsPage           ⏳ Analysis runs (placeholder)
+│  └─ ProposalsPage              ⏳ Task proposals (placeholder)
+│
+├─ AI CONFIGURATION
+│  ├─ AgentsPage                 ✅ AI agents management
+│  ├─ AgentTasksPage             ✅ Task configs з schemas
+│  ├─ ProvidersPage              ✅ LLM providers
+│  └─ ProjectsPage               ⏳ Project classification (placeholder)
+│
+└─ INSIGHTS
+   └─ AnalyticsPage              ⏳ Analytics (placeholder)
+
+BACKEND INFRASTRUCTURE:
+├─ FastAPI REST API              ✅ Endpoints для CRUD операцій
+├─ TaskIQ + NATS                 ✅ Background job processing
+├─ Async SQLAlchemy              ✅ Database integration
+├─ Pydantic-AI integration       ✅ Structured AI outputs
+└─ Docker services               ✅ PostgreSQL, NATS, Worker
+```
+
+### 🔄 **Наступні кроки (Roadmap)**
+
+```
+PHASE 1: Analysis Foundation (NEXT)
+├─ AnalysisRun model            ⏳ Координація аналізу
+├─ TaskProposal model           ⏳ AI-generated proposals
+├─ ProjectConfig model          ⏳ Classification projects
+└─ Analysis Run API endpoints   ⏳ CRUD for runs
+
+PHASE 2: Task Entity System
+├─ TaskEntity model             ⏳ Canonical task з self-reference
+├─ TaskVersion model            ⏳ Version history
+├─ AccuracyMetrics model        ⏳ Quality metrics
+└─ Tree validation logic        ⏳ Circular reference detection
+
+PHASE 3: LLM Analysis Pipeline
+├─ Pre-filtering stage          ⏳ Simple rules
+├─ Batch grouping               ⏳ Smart batching
+├─ Project classification       ⏳ LLM-based classification
+├─ Task extraction              ⏳ Task proposals generation
+└─ Duplicate detection          ⏳ Semantic similarity
+
+PHASE 4: PM Review Interface
+├─ Proposal review UI           ⏳ Review queue
+├─ Run lifecycle management     ⏳ Close/reopen runs
+├─ Metrics visualization        ⏳ Accuracy tracking
+└─ Batch approval actions       ⏳ Bulk operations
+```
+
+---
+
+## 📐 **1. HIGH-LEVEL ARCHITECTURE (Target State)**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         TELEGRAM SOURCE                              │
-│                    (messages stream incoming)                        │
+│                    TELEGRAM / OTHER SOURCES                          │
+│              (messages stream incoming via webhook)                  │
 └────────────────────────────────┬────────────────────────────────────┘
                                  │
                                  ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      MESSAGE STORAGE LAYER                           │
-│  - SimpleMessage (raw storage)                                       │
-│  - Metadata: timestamp, author, external_id                          │
-│  - Status: pending_analysis / analyzed / spam                        │
+│                   MESSAGE INGESTION LAYER ✅                         │
+│                                                                      │
+│  MessageIngestionJob (реалізовано)                                  │
+│  ├─ source_type, source_identifiers                                 │
+│  ├─ time_window (start/end)                                         │
+│  ├─ status: pending → running → completed → failed                  │
+│  └─ metrics: fetched, stored, skipped, errors                       │
+│                                                                      │
+│  ↓ Result: Messages stored in DB                                    │
+│                                                                      │
+│  Message (реалізовано)                                              │
+│  ├─ content, author_id, source_id, sent_at                          │
+│  ├─ classification, confidence (базова AI класифікація)             │
+│  └─ analyzed: bool                                                  │
 └────────────────────────────────┬────────────────────────────────────┘
                                  │
                     ┌────────────┴────────────┐
                     │   TRIGGER MECHANISM     │
+                    │  ⏳ Planned:             │
                     │  - Manual (PM button)   │
                     │  - Scheduled (nightly)  │
-                    │  - Custom window        │
+                    │  - Custom time window   │
                     └────────────┬────────────┘
                                  │
                                  ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                       ANALYSIS RUN ENGINE                            │
+│                    ANALYSIS RUN ENGINE ⏳                            │
 │                                                                      │
-│  Input: Time Window (start/end) + LLM Config                        │
+│  Input: Time Window + Agent/Task Assignment                         │
 │  Output: Task Proposals                                              │
 │                                                                      │
 │  ┌──────────────────────────────────────────────────────────┐      │
-│  │  STAGE 1: PRE-FILTERING (Simple Rules)                   │      │
+│  │  STAGE 1: PRE-FILTERING ⏳                                │      │
 │  │  - Keyword detection                                      │      │
 │  │  - @mention detection                                     │      │
-│  │  - Length filter (< 10 chars = likely noise)             │      │
+│  │  - Length filter (< 10 chars = noise)                    │      │
 │  │  Output: ~70% filtered out                                │      │
 │  └────────────────┬─────────────────────────────────────────┘      │
-│                   │                                                  │
 │                   ▼                                                  │
 │  ┌──────────────────────────────────────────────────────────┐      │
-│  │  STAGE 2: BATCH GROUPING (Smart Batching)                │      │
+│  │  STAGE 2: BATCH GROUPING ⏳                               │      │
 │  │  - Group by time proximity (5-10 min windows)            │      │
 │  │  - Max batch size: 50 messages                            │      │
-│  │  - Keep context: include surrounding messages             │      │
-│  │  Output: N batches ready for LLM                          │      │
+│  │  - Keep context: surrounding messages                     │      │
 │  └────────────────┬─────────────────────────────────────────┘      │
-│                   │                                                  │
 │                   ▼                                                  │
 │  ┌──────────────────────────────────────────────────────────┐      │
-│  │  STAGE 3: LLM ANALYSIS (Deep Processing)                 │      │
+│  │  STAGE 3: LLM ANALYSIS ⏳                                 │      │
+│  │                                                            │      │
+│  │  Uses: AgentConfig + TaskConfig + LLMProvider ✅          │      │
 │  │                                                            │      │
 │  │  Sub-stage 3.1: PROJECT CLASSIFICATION                    │      │
-│  │    Input: Batch + Project Descriptions                    │      │
+│  │    Input: Batch + ProjectConfig                           │      │
 │  │    Output: project_id or "unknown"                        │      │
 │  │                                                            │      │
 │  │  Sub-stage 3.2: TASK EXTRACTION                           │      │
@@ -64,93 +151,258 @@
 │  │  Sub-stage 3.3: ACTION ITEMS DETECTION                    │      │
 │  │    Input: Task description                                │      │
 │  │    Output: Sub-tasks list                                 │      │
-│  │                                                            │      │
 │  └────────────────┬─────────────────────────────────────────┘      │
-│                   │                                                  │
 │                   ▼                                                  │
 │  ┌──────────────────────────────────────────────────────────┐      │
-│  │  STAGE 4: DUPLICATE DETECTION (Entity Resolution)         │      │
-│  │  - Search existing approved tasks                         │      │
+│  │  STAGE 4: DUPLICATE DETECTION ⏳                          │      │
+│  │  - Search existing TaskEntity                             │      │
 │  │  - Semantic similarity (embeddings)                       │      │
-│  │  - Message overlap detection (exact match)                │      │
-│  │  Output: similar_task_id + diff                           │      │
+│  │  - Message overlap detection                              │      │
 │  └────────────────┬─────────────────────────────────────────┘      │
-│                   │                                                  │
 │                   ▼                                                  │
 │  ┌──────────────────────────────────────────────────────────┐      │
-│  │  STAGE 5: PROPOSAL CREATION                               │      │
+│  │  STAGE 5: PROPOSAL CREATION ⏳                            │      │
 │  │  - Create TaskProposal records                            │      │
 │  │  - Calculate confidence scores                            │      │
-│  │  - Generate recommendations                               │      │
 │  │  - Link to source messages                                │      │
 │  └────────────────┬─────────────────────────────────────────┘      │
 └───────────────────┼──────────────────────────────────────────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     PROPOSAL REVIEW QUEUE                            │
-│                                                                      │
-│  Auto-approve: confidence > 0.95 + no conflicts                     │
-│  Manual review: confidence < 0.95 OR has similar tasks              │
+│                  PROPOSAL REVIEW QUEUE ⏳                            │
 │                                                                      │
 │  PM Actions:                                                         │
-│  - Approve as new task                                               │
+│  - Approve as new TaskEntity                                        │
 │  - Merge with existing task (increment incident counter)            │
-│  - Update existing task (create new version)                        │
+│  - Update existing task (create new TaskVersion)                    │
 │  - Split into multiple tasks                                        │
-│  - Edit manually                                                     │
+│  - Edit manually before approval                                    │
 │  - Reject                                                            │
 └────────────────────────────────┬────────────────────────────────────┘
                                  │
                                  ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         TASK ENTITY LAYER                            │
+│                      TASK ENTITY LAYER ⏳                            │
 │                                                                      │
 │  TaskEntity (canonical task - дерево через self-reference)          │
 │  ├── parent_task_id (для ієрархії sub-tasks)                        │
-│  ├── current_version_id                                              │
-│  ├── incident_counter (for recurring issues)                         │
-│  ├── related_message_ids[]                                           │
-│  └── version_history[]                                               │
+│  ├── current_version_id → TaskVersion                               │
+│  ├── incident_counter (for recurring issues)                        │
+│  ├── related_message_ids[] (ALL messages)                           │
+│  └── version_history[] (all TaskVersion records)                    │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 💾 **2. DATA MODEL (Core Entities)**
+## 💾 **2. DATA MODEL (Current + Planned)**
 
-### **2.1 Message Storage**
+### **2.1 Message Storage ✅ (Реалізовано)**
 
 ```python
-class SimpleMessage:
-    """Raw message from Telegram - immutable"""
-    id: int
-    external_message_id: str  # Telegram message_id
-    content: str
-    author: str
-    sent_at: datetime
-    source_id: int  # FK to SimpleSource
-    avatar_url: str | None
+class Message(IDMixin, TimestampMixin, SQLModel, table=True):
+    """Message table - stores incoming messages from various sources.
 
-    # Analysis tracking
-    analysis_status: AnalysisStatus  # pending/analyzed/spam/noise
-    included_in_runs: List[UUID]  # які прогони обробили це повідомлення
+    ✅ РЕАЛІЗОВАНО: Базова модель з AI класифікацією
+    """
+    __tablename__ = "messages"
+
+    # Message identification
+    external_message_id: str = Field(index=True, max_length=100)
+    content: str = Field(sa_type=Text)
+    sent_at: datetime
+
+    # Core relationships
+    source_id: int = Field(foreign_key="sources.id")
+    author_id: int = Field(foreign_key="users.id")
+
+    # Platform-specific profiles
+    telegram_profile_id: int | None = Field(
+        default=None, foreign_key="telegram_profiles.id"
+    )
+
+    # Cached fields
+    avatar_url: str | None = None
+
+    # AI classification ✅ (базова класифікація реалізована)
+    classification: str | None = None
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    analyzed: bool = Field(default=False)
+
+    # ⏳ PLANNED: додати поля для analysis tracking
+    # analysis_status: AnalysisStatus  # pending/analyzed/spam/noise
+    # included_in_runs: List[UUID]  # які прогони обробили це повідомлення
+```
+
+**Відмінності від плану:**
+- ✅ Основна структура реалізована
+- ⏳ Потрібно додати `analysis_status` enum
+- ⏳ Потрібно додати `included_in_runs` для tracking
+
+---
+
+### **2.2 Message Ingestion ✅ (Реалізовано як прототип AnalysisRun)**
+
+```python
+class MessageIngestionJob(IDMixin, TimestampMixin, SQLModel, table=True):
+    """
+    Tracks message ingestion jobs from external sources.
+
+    ✅ РЕАЛІЗОВАНО: Foundation для майбутнього AnalysisRun
+    Схожий lifecycle pattern: pending → running → completed → failed
+    """
+    __tablename__ = "message_ingestion_jobs"
+
+    # Source configuration
+    source_type: str = Field(max_length=50)
+    source_identifiers: dict = Field(sa_type=JSONB)
+
+    # Time window
+    time_window_start: datetime | None
+    time_window_end: datetime | None
+
+    # Status tracking
+    status: IngestionStatus  # pending/running/completed/failed/cancelled
+    messages_fetched: int = 0
+    messages_stored: int = 0
+    messages_skipped: int = 0
+    errors_count: int = 0
+
+    # Progress tracking
+    current_batch: int = 0
+    total_batches: int | None = None
+
+    # Results and errors
+    error_log: dict | None = Field(sa_type=JSONB)
+
+    # Lifecycle timestamps
+    started_at: datetime | None
+    completed_at: datetime | None
+```
+
+**Використання як Foundation:**
+- ✅ Вже має lifecycle: pending → running → completed → failed
+- ✅ Вже має time window concept
+- ✅ Вже має progress tracking
+- ⏳ Можна розширити до AnalysisRun або використати як pattern
+
+---
+
+### **2.3 LLM Infrastructure ✅ (Реалізовано)**
+
+#### **LLMProvider Model ✅**
+
+```python
+class LLMProvider(SQLModel, table=True):
+    """LLM Provider configuration - supports Ollama, OpenAI, etc."""
+    __tablename__ = "llm_providers"
+
+    id: UUID
+    name: str = Field(unique=True, index=True)
+    type: ProviderType  # ollama / openai
+
+    # Connection
+    base_url: str | None  # e.g., http://localhost:11434
+    api_key_encrypted: bytes | None  # Fernet-encrypted
+
+    # Status
+    is_active: bool = True
+    validation_status: ValidationStatus  # pending/validating/connected/error
+    validation_error: str | None
+    validated_at: datetime | None
+
+    # Timestamps
     created_at: datetime
+    updated_at: datetime
+```
+
+#### **AgentConfig Model ✅**
+
+```python
+class AgentConfig(SQLModel, table=True):
+    """Agent Configuration - defines AI agent with prompt and model."""
+    __tablename__ = "agent_configs"
+
+    id: UUID
+    name: str = Field(unique=True, index=True)
+    description: str | None
+
+    # LLM Configuration
+    provider_id: UUID = Field(foreign_key="llm_providers.id")
+    model_name: str  # e.g., 'llama3', 'gpt-4'
+    system_prompt: str
+
+    # Agent Behavior
+    temperature: float = 0.7
+    max_tokens: int | None
+
+    is_active: bool = True
+    created_at: datetime
+    updated_at: datetime
+```
+
+#### **TaskConfig Model ✅**
+
+```python
+class TaskConfig(SQLModel, table=True):
+    """Task Configuration - defines task with Pydantic schema."""
+    __tablename__ = "task_configs"
+
+    id: UUID
+    name: str = Field(unique=True, index=True)
+    description: str | None
+
+    # Pydantic Schema (JSON Schema format)
+    response_schema: dict = Field(sa_type=JSONB)
+
+    is_active: bool = True
+    created_at: datetime
+    updated_at: datetime
+```
+
+#### **AgentTaskAssignment Model ✅**
+
+```python
+class AgentTaskAssignment(SQLModel, table=True):
+    """Links agent to task - creates independent agent instance."""
+    __tablename__ = "agent_task_assignments"
+
+    id: UUID
+    agent_id: UUID = Field(foreign_key="agent_configs.id")
+    task_id: UUID = Field(foreign_key="task_configs.id")
+
+    is_active: bool = True
+    assigned_at: datetime
+
+    # Constraint: unique (agent_id, task_id)
+```
+
+**Як це використовується:**
+```
+LLMProvider (Ollama Local)
+    ↓
+AgentConfig (Message Classifier)
+    ↓ (via AgentTaskAssignment)
+TaskConfig (Classify Message) → response_schema: {category, confidence}
+    ↓
+Result: Structured AI output matching schema
 ```
 
 ---
 
-### **2.2 Analysis Run (окрема meta-сутність для координації)**
+### **2.4 AnalysisRun ⏳ (Planned - наступний крок)**
 
 ```python
-class AnalysisRun:
+class AnalysisRun(SQLModel, table=True):
     """
-    Represents one analysis session - окрема координаційна сутність
-    Використовується для:
-    - Координації результатів роботи
-    - Відстеження метрик аналізу
-    - Послідовного процесу без накопичень
+    Analysis Run - координація AI-аналізу повідомлень
+
+    ⏳ PLANNED: Розширити MessageIngestionJob pattern
+    Lifecycle: pending → running → completed → reviewed → closed
     """
+    __tablename__ = "analysis_runs"
+
     id: UUID
 
     # Time window
@@ -158,225 +410,213 @@ class AnalysisRun:
     time_window_end: datetime
 
     # Configuration snapshot (versioning!)
-    llm_config: Dict  # model, prompt_version, temperature, provider
-    project_descriptions: Dict  # snapshot of project configs at run time
-    glossary_version: str  # version of terminology dict
+    agent_assignment_id: UUID = Field(
+        foreign_key="agent_task_assignments.id",
+        description="Which agent+task was used"
+    )
+    project_config_id: UUID | None = Field(
+        foreign_key="project_configs.id",
+        description="Project classification config"
+    )
+    config_snapshot: dict = Field(
+        sa_type=JSONB,
+        description="Full config at run time (for reproducibility)"
+    )
 
     # Execution & Lifecycle
-    trigger_type: TriggerType  # manual/scheduled/custom
-    triggered_by: str | None  # user_id if manual
-    status: RunStatus  # pending → running → completed → reviewed → closed
+    trigger_type: str  # manual/scheduled/custom
+    triggered_by_user_id: int | None = Field(foreign_key="users.id")
+    status: str  # pending/running/completed/reviewed/closed/failed/cancelled
 
     # Lifecycle timestamps
     created_at: datetime
     started_at: datetime | None
     completed_at: datetime | None
-    closed_at: datetime | None  # ✅ коли PM закрив (reviewed all proposals)
+    closed_at: datetime | None  # ✅ коли PM закрив
 
     # Proposals tracking
-    proposals_total: int  # скільки створено
-    proposals_approved: int  # скільки затверджено
-    proposals_rejected: int  # скільки відхилено
-    proposals_pending: int  # скільки ще на review
+    proposals_total: int = 0
+    proposals_approved: int = 0
+    proposals_rejected: int = 0
+    proposals_pending: int = 0
 
     # LLM usage statistics
-    total_messages_in_window: int
-    messages_after_prefilter: int
-    batches_created: int
-    llm_tokens_used: int
-    cost_estimate: float
+    total_messages_in_window: int = 0
+    messages_after_prefilter: int = 0
+    batches_created: int = 0
+    llm_tokens_used: int = 0
+    cost_estimate: float = 0.0
 
     # Results
-    proposals: List[UUID]  # FK to TaskProposal
-    tasks_created: List[UUID]  # FK to TaskEntity (створені з цього run)
+    error_log: dict | None = Field(sa_type=JSONB)
 
-    # 📊 METRICS - якість та точність (розраховується після closing)
-    accuracy_metrics: AccuracyMetrics | None
-
-    # Error handling
-    errors: List[Dict]  # log of errors during run
+    # 📊 METRICS - розраховується після closing
+    accuracy_metrics: dict | None = Field(
+        sa_type=JSONB,
+        description="AccuracyMetrics після closing"
+    )
 ```
 
 **⚠️ CRITICAL NOTES:**
 
-1. **Окрема сутність:** AnalysisRun є meta-інформацією про процес, не бізнес-даними
-2. **Lifecycle management:** Має власний життєвий цикл з обов'язковим закриттям
-3. **Metrics tracking:** Дозволяє відстежувати точність LLM та якість результатів
-4. **Sequential processing:** Запобігає накопиченням unclosed runs
+1. **Базується на MessageIngestionJob pattern** - lifecycle схожий
+2. **Snapshot config** - зберігає конфігурацію на момент запуску
+3. **Lifecycle management** - обов'язкове закриття перед новим run
+4. **Metrics after closing** - якість LLM оцінюється post-factum
 
 ---
 
-### **2.3 Accuracy Metrics**
+### **2.5 TaskProposal ⏳ (Planned)**
 
 ```python
-class AccuracyMetrics:
-    """Метрики для оцінки якості аналізу після closing run"""
+class TaskProposal(SQLModel, table=True):
+    """AI-generated task proposal - pending PM approval."""
+    __tablename__ = "task_proposals"
 
-    # Approval rate
-    total_proposals: int
-    approved_count: int
-    rejected_count: int
-    approval_rate: float  # approved / total
-
-    # Confidence distribution
-    avg_confidence: float
-    high_confidence_approved: int  # confidence > 0.9 AND approved
-    low_confidence_rejected: int   # confidence < 0.7 AND rejected
-    confidence_accuracy: float  # чи корелює confidence з approval?
-
-    # Duplicate detection accuracy
-    duplicates_found: int
-    duplicates_correct: int  # PM confirmed merge
-    duplicates_incorrect: int  # PM created separate task
-    duplicate_detection_accuracy: float
-
-    # Project classification accuracy
-    projects_classified: int
-    projects_correct: int  # PM didn't change project
-    projects_changed: int  # PM manually changed project
-    project_classification_accuracy: float
-
-    # Time efficiency
-    avg_time_per_proposal: float  # seconds
-    total_processing_time: float
-
-    # Cost efficiency
-    cost_per_approved_task: float  # $ per approved task
-
-    # PM workload
-    manual_edits_count: int  # скільки proposals PM редагував
-    quick_approvals: int  # approve without edits
-```
-
----
-
-### **2.4 Task Proposal**
-
-```python
-class TaskProposal:
-    """Proposal for task creation/update - pending PM approval"""
     id: UUID
-    analysis_run_id: UUID  # from which run
+    analysis_run_id: UUID = Field(foreign_key="analysis_runs.id")
 
     # Proposed task data
     proposed_title: str
-    proposed_description: str
-    proposed_priority: TaskPriority  # critical/high/medium/low
-    proposed_project_id: UUID | None
-    proposed_category: TaskCategory  # bug/feature/improvement/question
-    proposed_tags: List[str]
-    proposed_parent_id: UUID | None  # ✅ якщо це має бути sub-task
+    proposed_description: str = Field(sa_type=Text)
+    proposed_priority: TaskPriority
+    proposed_category: TaskCategory
+    proposed_project_id: UUID | None = Field(foreign_key="project_configs.id")
+    proposed_tags: list[str] = Field(sa_type=JSONB)
+    proposed_parent_id: UUID | None = Field(
+        foreign_key="task_entities.id",
+        description="Parent task if this should be sub-task"
+    )
 
     # Source tracking
-    source_message_ids: List[int]  # які повідомлення → ця пропозиція
+    source_message_ids: list[int] = Field(
+        sa_type=JSONB,
+        description="Message IDs that created this proposal"
+    )
     message_count: int
-    time_span: timedelta  # скільки часу між першим і останнім message
+    time_span_seconds: int  # seconds between first and last message
 
-    # Extracted sub-tasks (action items)
-    proposed_sub_tasks: List[Dict]  # [{"title": "...", "description": "..."}]
+    # Extracted sub-tasks
+    proposed_sub_tasks: list[dict] | None = Field(sa_type=JSONB)
 
     # Duplicate detection
-    similar_task_id: UUID | None  # якщо знайдено схожу існуючу таску
-    similarity_score: float | None  # 0.0-1.0
-    similarity_type: str | None  # "exact_messages" / "semantic" / "none"
-    diff_summary: Dict | None  # що змінилось
+    similar_task_id: UUID | None = Field(foreign_key="task_entities.id")
+    similarity_score: float | None = Field(ge=0.0, le=1.0)
+    similarity_type: str | None  # exact_messages/semantic/none
+    diff_summary: dict | None = Field(sa_type=JSONB)
 
     # LLM metadata
-    llm_recommendation: RecommendationType  # new_task/update_existing/merge/reject
-    confidence: float  # 0.0-1.0
-    reasoning: str  # пояснення LLM чому така рекомендація
+    llm_recommendation: str  # new_task/update_existing/merge/reject
+    confidence: float = Field(ge=0.0, le=1.0)
+    reasoning: str = Field(sa_type=Text)
 
     # Project classification
-    project_classification_confidence: float
-    project_keywords_matched: List[str]
+    project_classification_confidence: float | None
+    project_keywords_matched: list[str] | None = Field(sa_type=JSONB)
 
     # Review status
-    status: ProposalStatus  # pending/approved/rejected/merged
-    reviewed_by: str | None
+    status: str  # pending/approved/rejected/merged
+    reviewed_by_user_id: int | None = Field(foreign_key="users.id")
     reviewed_at: datetime | None
-    review_action: ReviewAction | None
-    review_notes: str | None
+    review_action: str | None
+    review_notes: str | None = Field(sa_type=Text)
 
     # Timestamps
     created_at: datetime
 ```
 
-**⚠️ CRITICAL NOTES:**
+**⚠️ KEY FEATURES:**
 
-1. **Message IDs tracking:** Ключовий механізм для виявлення повторних прогонів того самого вікна
-2. **similarity_type = "exact_messages":** Якщо нова пропозиція має ТІ САМІ message_ids що й існуюча таска → це точно дублікат
-3. **Reasoning field:** LLM має пояснювати свої рішення - важливо для PM review
-4. **proposed_parent_id:** Підтримка створення sub-tasks в ієрархії
+1. **Message IDs tracking** - source of truth для duplicate detection
+2. **similarity_type = "exact_messages"** - якщо ті самі message_ids → дублікат
+3. **reasoning field** - LLM пояснює свої рішення
+4. **proposed_parent_id** - підтримка створення sub-tasks
 
 ---
 
-### **2.5 Task Entity (з self-reference для дерева)**
+### **2.6 TaskEntity ⏳ (Planned - замість legacy Task)**
 
 ```python
-class TaskEntity:
+class TaskEntity(SQLModel, table=True):
     """
-    Canonical task - approved and active
-    ✅ ВАЖЛИВО: SubTask = TaskEntity з parent_task_id (не окрема модель!)
-    ✅ Дерево: тільки дерево, не граф (validation потрібен)
+    Canonical task - approved and active.
+
+    ✅ Self-referencing hierarchy для sub-tasks (дерево, не граф)
+    ⏳ PLANNED: Замінить legacy Task model
     """
+    __tablename__ = "task_entities"
+
     id: UUID
 
-    # ✅ Self-referencing hierarchy (для sub-tasks)
-    parent_task_id: UUID | None  # None = root task, else = sub-task
+    # ✅ Self-referencing hierarchy
+    parent_task_id: UUID | None = Field(
+        default=None,
+        foreign_key="task_entities.id",
+        description="None = root task, else = sub-task"
+    )
 
-    # Current state (from latest approved version)
+    # Current state (from latest TaskVersion)
     title: str
-    description: str
+    description: str = Field(sa_type=Text)
     priority: TaskPriority
     category: TaskCategory
-    project_id: UUID | None
-    tags: List[str]
+    project_id: UUID | None = Field(foreign_key="project_configs.id")
+    tags: list[str] = Field(sa_type=JSONB)
 
     # Status tracking
     status: TaskStatus  # open/in_progress/completed/cancelled
 
     # **KEY FEATURE: Incident Counter** (тільки для root tasks)
-    incident_counter: int  # скільки разів ця проблема повторювалась
-    incident_history: List[Dict]  # [{"timestamp": ..., "run_id": ..., "message_ids": [...]}]
+    incident_counter: int = Field(
+        default=0,
+        description="How many times this issue repeated"
+    )
+    incident_history: list[dict] = Field(
+        sa_type=JSONB,
+        default_factory=list,
+        description="[{timestamp, run_id, message_ids}]"
+    )
 
     # Source tracking
-    related_message_ids: List[int]  # ВСІ повідомлення пов'язані з цією таскою
-    original_message_ids: List[int]  # початкові повідомлення (з першої версії)
+    related_message_ids: list[int] = Field(
+        sa_type=JSONB,
+        default_factory=list,
+        description="ALL messages linked to this task"
+    )
+    original_message_ids: list[int] = Field(
+        sa_type=JSONB,
+        description="Initial messages from first version"
+    )
 
     # Versioning
-    current_version_id: UUID  # FK to TaskVersion
-    version_count: int
+    current_version_id: UUID = Field(foreign_key="task_versions.id")
+    version_count: int = 0
 
     # Creation tracking
-    created_from_proposal: UUID  # перша пропозиція що створила таску
-    created_from_run: UUID  # link to AnalysisRun
+    created_from_proposal_id: UUID = Field(foreign_key="task_proposals.id")
+    created_from_run_id: UUID = Field(foreign_key="analysis_runs.id")
+    created_by_user_id: int = Field(foreign_key="users.id")
     created_at: datetime
-    created_by: str
 
     # Update tracking
-    last_updated_from_proposal: UUID | None
-    last_updated_from_run: UUID | None
+    last_updated_from_proposal_id: UUID | None
+    last_updated_from_run_id: UUID | None
+    updated_by_user_id: int | None = Field(foreign_key="users.id")
     updated_at: datetime
-    updated_by: str
 
-    # Merge tracking (якщо це результат злиття)
-    merged_from_tasks: List[UUID]  # які таски були злиті в цю
-    is_merged: bool
+    # Merge tracking
+    merged_from_task_ids: list[UUID] | None = Field(sa_type=JSONB)
+    is_merged: bool = False
 
-    # Validation
-    @validates('parent_task_id')
-    def validate_no_circular_reference(self, key, parent_id):
-        """Перевірка що немає циклів в дереві"""
-        if parent_id:
-            validate_tree_structure(self.id, parent_id)
-        return parent_id
+    # ⚠️ Validation: tree structure only, no circular references
+    # Implemented via application logic (pre-save hook)
 ```
 
 **⚠️ CRITICAL FEATURES:**
 
-1. **Self-reference:** `parent_task_id` дозволяє будувати дерево без окремої моделі SubTask
-2. **Tree validation:** Обов'язкова перевірка на circular references
-3. **Incident Counter:** Працює тільки для root tasks (parent_task_id = None)
+1. **Self-reference** via `parent_task_id` - дерево без окремої моделі SubTask
+2. **Tree validation required** - circular references must be prevented
+3. **Incident Counter** - тільки для root tasks (parent_task_id = None)
 
 **Example Tree:**
 ```
@@ -389,71 +629,91 @@ Task #456: "Нестабільність фамішного сервісу" (par
 
 ---
 
-### **2.6 Task Version**
+### **2.7 TaskVersion ⏳ (Planned)**
 
 ```python
-class TaskVersion:
-    """Version history of task - immutable snapshots"""
+class TaskVersion(SQLModel, table=True):
+    """Version history of TaskEntity - immutable snapshots."""
+    __tablename__ = "task_versions"
+
     id: UUID
-    task_entity_id: UUID
+    task_entity_id: UUID = Field(foreign_key="task_entities.id")
     version_number: int
 
     # Version data (snapshot)
     title: str
-    description: str
+    description: str = Field(sa_type=Text)
     priority: TaskPriority
     category: TaskCategory
     project_id: UUID | None
-    tags: List[str]
+    tags: list[str] = Field(sa_type=JSONB)
     parent_task_id: UUID | None  # ✅ може змінитись в різних версіях
 
     # Source of this version
-    created_from_proposal: UUID
-    created_from_run: UUID
-    source_time_window: DateRange  # з якого часового вікна дані
+    created_from_proposal_id: UUID = Field(foreign_key="task_proposals.id")
+    created_from_run_id: UUID = Field(foreign_key="analysis_runs.id")
+    source_time_window_start: datetime
+    source_time_window_end: datetime
 
     # Versioning chain
-    previous_version_id: UUID | None
-    superseded_by_id: UUID | None
-    is_current: bool
+    previous_version_id: UUID | None = Field(foreign_key="task_versions.id")
+    superseded_by_id: UUID | None = Field(foreign_key="task_versions.id")
+    is_current: bool = True
 
     # Change tracking
-    changes_from_previous: Dict | None  # diff з попередньою версією
-    change_reason: str  # "initial" / "llm_update" / "pm_manual_edit"
+    changes_from_previous: dict | None = Field(
+        sa_type=JSONB,
+        description="Diff from previous version"
+    )
+    change_reason: str  # initial/llm_update/pm_manual_edit
 
     # Metadata
+    created_by_user_id: int = Field(foreign_key="users.id")
     created_at: datetime
-    created_by: str
 ```
 
 ---
 
-### **2.7 Project Configuration**
+### **2.8 ProjectConfig ⏳ (Planned)**
 
 ```python
-class ProjectConfig:
-    """Project definitions - pre-configured by PM"""
+class ProjectConfig(SQLModel, table=True):
+    """Project definitions for message classification."""
+    __tablename__ = "project_configs"
+
     id: UUID
-    name: str
-    description: str
+    name: str = Field(unique=True, index=True)
+    description: str = Field(sa_type=Text)
 
     # Classification keywords/phrases
-    keywords: List[str]  # ["фамі", "фамішна черга", "монітор"]
-    glossary: Dict[str, str]  # {"нігер нехай запише": "PM сказав AI нотувати"}
+    keywords: list[str] = Field(
+        sa_type=JSONB,
+        description="Keywords for project detection"
+    )
+    glossary: dict = Field(
+        sa_type=JSONB,
+        description="Domain-specific terminology"
+    )
 
     # Components/modules
-    components: List[Dict]  # [{"name": "family-queue", "keywords": [...]}]
+    components: list[dict] = Field(
+        sa_type=JSONB,
+        description="[{name, keywords}]"
+    )
 
     # Team
-    default_assignees: List[str]
-    pm_user_id: str
+    default_assignee_ids: list[int] = Field(sa_type=JSONB)
+    pm_user_id: int = Field(foreign_key="users.id")
 
     # Settings
-    is_active: bool
-    priority_rules: Dict  # правила визначення пріоритету
+    is_active: bool = True
+    priority_rules: dict = Field(
+        sa_type=JSONB,
+        description="Rules for priority assignment"
+    )
 
     # Versioning
-    version: str  # для tracking змін конфігурації
+    version: str  # semantic version (1.0.0)
     created_at: datetime
     updated_at: datetime
 ```
@@ -461,6 +721,8 @@ class ProjectConfig:
 ---
 
 ## 🔄 **3. ANALYSIS RUN LIFECYCLE**
+
+### **3.1 Status Flow**
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -509,21 +771,18 @@ class ProjectConfig:
    └─ No proposals created
 ```
 
-**⚠️ КРИТИЧНО:** Нові run-и можна запускати **тільки** коли всі попередні закриті (closed)!
+**⚠️ КРИТИЧНО:** Нові run-и можна запускати **тільки** коли всі попередні закриті!
 
 ---
 
-## 🚫 **4. SEQUENTIAL PROCESSING (запобігання накопиченням)**
-
-### **4.1 Validation Before Starting New Run**
+### **3.2 Validation Before Starting New Run**
 
 ```python
 async def can_start_new_run() -> tuple[bool, str | None]:
     """
-    Перевірка чи можна запускати новий run
-    Запобігає накопиченню unclosed runs
+    Перевірка чи можна запускати новий run.
+    Запобігає накопиченню unclosed runs.
     """
-
     # Check for unclosed runs
     unclosed = await db.execute(
         select(AnalysisRun).where(
@@ -535,11 +794,9 @@ async def can_start_new_run() -> tuple[bool, str | None]:
     if unclosed_count > 0:
         return False, f"Cannot start: {unclosed_count} runs not closed yet"
 
-    # Check for pending proposals across all runs
+    # Check for pending proposals
     pending_proposals = await db.execute(
-        select(TaskProposal).where(
-            TaskProposal.status == "pending_review"
-        )
+        select(TaskProposal).where(TaskProposal.status == "pending")
     )
     pending_count = len(pending_proposals.all())
 
@@ -549,13 +806,13 @@ async def can_start_new_run() -> tuple[bool, str | None]:
     return True, None
 ```
 
-### **4.2 Closing Run Process**
+---
+
+### **3.3 Closing Run Process**
 
 ```python
-async def close_analysis_run(run_id: UUID, pm_user_id: str):
-    """
-    Закриття аналізу після review всіх proposals
-    """
+async def close_analysis_run(run_id: UUID, pm_user_id: int):
+    """Закриття аналізу після review всіх proposals."""
     run = await db.get(AnalysisRun, run_id)
 
     # 1. Validate: всі proposals reviewed
@@ -570,7 +827,7 @@ async def close_analysis_run(run_id: UUID, pm_user_id: str):
     # 3. Update run
     run.status = "closed"
     run.closed_at = datetime.now()
-    run.accuracy_metrics = metrics
+    run.accuracy_metrics = metrics  # dict with AccuracyMetrics
 
     await db.commit()
 
@@ -578,28 +835,33 @@ async def close_analysis_run(run_id: UUID, pm_user_id: str):
     await send_notification(
         pm_user_id,
         f"Analysis Run #{run_id} closed. "
-        f"Accuracy: {metrics.approval_rate:.1%}"
+        f"Accuracy: {metrics['approval_rate']:.1%}"
     )
 ```
 
 ---
 
-## 🌳 **5. TREE VALIDATION (тільки дерево, не граф)**
+## 🌳 **4. TREE VALIDATION (тільки дерево, не граф)**
+
+### **4.1 Validation Logic**
 
 ```python
 class TaskTreeValidator:
-    """Валідація дерева задач"""
+    """Валідація дерева задач."""
 
     @staticmethod
-    async def validate_no_circular_reference(task_id: UUID, new_parent_id: UUID):
+    async def validate_no_circular_reference(
+        task_id: UUID,
+        new_parent_id: UUID,
+        db: AsyncSession
+    ):
         """
-        Перевіряємо що new_parent не є нащадком task_id
+        Перевіряємо що new_parent не є нащадком task_id.
 
         Приклад проблеми:
         Task 1 → parent = Task 2
         Task 2 → parent = Task 1  ❌ CIRCULAR!
         """
-        # Йдемо вгору по дереву від new_parent
         current_id = new_parent_id
         visited = set()
 
@@ -618,7 +880,7 @@ class TaskTreeValidator:
 
     @staticmethod
     async def get_tree_depth(task_id: UUID, db: AsyncSession) -> int:
-        """Отримати глибину задачі в дереві (0 = root)"""
+        """Отримати глибину задачі в дереві (0 = root)."""
         task = await db.get(TaskEntity, task_id)
         if not task:
             raise ValueError(f"Task {task_id} not found")
@@ -634,8 +896,8 @@ class TaskTreeValidator:
         return depth
 
     @staticmethod
-    async def get_subtree(root_id: UUID, db: AsyncSession) -> List[TaskEntity]:
-        """Отримати все піддерево (всі нащадки)"""
+    async def get_subtree(root_id: UUID, db: AsyncSession) -> list[TaskEntity]:
+        """Отримати все піддерево (всі нащадки)."""
         result = []
 
         # Get direct children
@@ -652,7 +914,9 @@ class TaskTreeValidator:
         return result
 ```
 
-**Приклади запитів для роботи з деревом:**
+---
+
+### **4.2 Query Examples**
 
 ```python
 # Отримати всі sub-tasks таски
@@ -679,15 +943,16 @@ SELECT * FROM task_tree;
 
 ---
 
-## 📊 **6. METRICS CALCULATION**
+## 📊 **5. METRICS CALCULATION**
 
 ```python
-async def calculate_accuracy_metrics(run_id: UUID) -> AccuracyMetrics:
-    """Розрахунок метрик після закриття run"""
+async def calculate_accuracy_metrics(run_id: UUID) -> dict:
+    """Розрахунок метрик після закриття run."""
 
     proposals = await db.execute(
         select(TaskProposal).where(TaskProposal.analysis_run_id == run_id)
     )
+    proposals = proposals.scalars().all()
 
     approved = [p for p in proposals if p.status == "approved"]
     rejected = [p for p in proposals if p.status == "rejected"]
@@ -727,40 +992,47 @@ async def calculate_accuracy_metrics(run_id: UUID) -> AccuracyMetrics:
         if p.review_notes and "edited" in p.review_notes
     ]
 
-    return AccuracyMetrics(
-        total_proposals=len(proposals),
-        approved_count=len(approved),
-        rejected_count=len(rejected),
-        approval_rate=approval_rate,
+    run = await db.get(AnalysisRun, run_id)
 
-        avg_confidence=sum(p.confidence for p in proposals) / len(proposals),
-        high_confidence_approved=len(high_conf_approved),
-        low_confidence_rejected=len(low_conf_rejected),
-        confidence_accuracy=confidence_accuracy,
+    return {
+        # Approval rate
+        "total_proposals": len(proposals),
+        "approved_count": len(approved),
+        "rejected_count": len(rejected),
+        "approval_rate": approval_rate,
 
-        duplicates_found=len(duplicates),
-        duplicates_correct=len(duplicates_correct),
-        duplicate_detection_accuracy=duplicate_accuracy,
+        # Confidence distribution
+        "avg_confidence": sum(p.confidence for p in proposals) / len(proposals),
+        "high_confidence_approved": len(high_conf_approved),
+        "low_confidence_rejected": len(low_conf_rejected),
+        "confidence_accuracy": confidence_accuracy,
 
-        projects_classified=len([p for p in proposals if p.proposed_project_id]),
-        projects_correct=len(approved) - len(projects_changed),
-        project_classification_accuracy=project_accuracy,
+        # Duplicate detection
+        "duplicates_found": len(duplicates),
+        "duplicates_correct": len(duplicates_correct),
+        "duplicate_detection_accuracy": duplicate_accuracy,
 
-        manual_edits_count=len(manual_edits),
-        quick_approvals=len(approved) - len(manual_edits),
+        # Project classification
+        "projects_classified": len([p for p in proposals if p.proposed_project_id]),
+        "projects_correct": len(approved) - len(projects_changed),
+        "project_classification_accuracy": project_accuracy,
+
+        # PM workload
+        "manual_edits_count": len(manual_edits),
+        "quick_approvals": len(approved) - len(manual_edits),
 
         # Cost
-        cost_per_approved_task=run.cost_estimate / len(approved) if approved else 0
-    )
+        "cost_per_approved_task": run.cost_estimate / len(approved) if approved else 0,
+    }
 ```
 
 ---
 
-## 📊 **7. UI FOR PM - RUN DASHBOARD**
+## 📊 **6. UI FOR PM - RUN DASHBOARD**
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│  Analysis Runs Dashboard                                    │
+│  Analysis Runs Dashboard                   /analysis       │
 │                                                             │
 │  Active Runs:                                               │
 │  ┌──────────────────────────────────────────────────────┐ │
@@ -812,43 +1084,47 @@ async def calculate_accuracy_metrics(run_id: UUID) -> AccuracyMetrics:
 
 ---
 
-## ⚠️ **8. CRITICAL IMPLEMENTATION RULES**
+## ⚠️ **7. CRITICAL IMPLEMENTATION RULES**
 
-### **8.1 Versioning & Immutability**
+### **7.1 Versioning & Immutability**
 
 ```
 RULE 1: Messages are immutable
-  - Never modify SimpleMessage records
-  - Only update analysis_status field
+  ✅ РЕАЛІЗОВАНО: Message model не має update endpoints
+  - Only update analysis_status, classification, confidence fields
 
 RULE 2: AnalysisRun config is snapshot
-  - Store complete LLM config at run time
-  - Store project descriptions version
-  - Store glossary version
-  → If PM changes prompts, old runs show what was used
+  ⏳ PLANNED: config_snapshot field in AnalysisRun
+  - Store complete agent+task+provider config at run time
+  - Store project config version
+  → If PM changes config, old runs show what was used
 
 RULE 3: TaskProposal → TaskEntity conversion
+  ⏳ PLANNED
   - TaskProposal is temporary (pending approval)
   - TaskEntity is permanent (canonical task)
   - Never delete TaskEntity, only mark as cancelled/merged
 
 RULE 4: TaskVersion is immutable snapshot
+  ⏳ PLANNED
   - Never modify TaskVersion records
   - Create new version for any change
   - Keep full version chain
 
 RULE 5: Incident history is append-only
+  ⏳ PLANNED
   - Never delete incidents
   - Only append new incidents
   - Each incident links to specific run + messages
 
 RULE 6: Tree structure validation
+  ⏳ PLANNED
   - ✅ Дерево: TaskEntity з parent_task_id (self-reference)
   - ❌ NO circular references (A → B → A)
-  - ❌ NO cross-references (A є parent для B, B є parent для A)
   - ✅ Validation перед кожною зміною parent_task_id
 
 RULE 7: AnalysisRun lifecycle must complete
+  ⏳ PLANNED
   - ✅ Runs must be closed (не залишати в "completed")
   - ❌ Cannot start new run while unclosed runs exist
   - ✅ Metrics calculated only after closing
@@ -856,7 +1132,7 @@ RULE 7: AnalysisRun lifecycle must complete
 
 ---
 
-### **8.2 Message ID Tracking**
+### **7.2 Message ID Tracking**
 
 ```
 WHY CRITICAL:
@@ -865,22 +1141,26 @@ WHY CRITICAL:
   - Recurring issues
   - Related discussions
 
-IMPLEMENTATION:
-  1. TaskProposal.source_message_ids: List[int]
+CURRENT STATE:
+  ✅ Message.id exists
+  ⏳ Need to add message_ids tracking in proposals/tasks
+
+PLANNED IMPLEMENTATION:
+  1. TaskProposal.source_message_ids: list[int]
      - Exact list of message IDs that created this proposal
 
-  2. TaskEntity.related_message_ids: List[int]
+  2. TaskEntity.related_message_ids: list[int]
      - ALL messages ever linked to this task
      - Grows over time as incidents added
 
-  3. TaskEntity.original_message_ids: List[int]
+  3. TaskEntity.original_message_ids: list[int]
      - First messages that created initial version
      - Never changes (historical record)
 
 QUERY PATTERN:
   # Find tasks containing specific messages
   SELECT * FROM task_entities
-  WHERE message_id = ANY(related_message_ids)
+  WHERE :message_id = ANY(related_message_ids)
 
   # Check if messages already in a task
   SELECT EXISTS(
@@ -891,7 +1171,7 @@ QUERY PATTERN:
 
 ---
 
-### **8.3 Confidence Thresholds**
+### **7.3 Confidence Thresholds**
 
 ```
 DEFINE CLEAR THRESHOLDS:
@@ -914,74 +1194,117 @@ Low Confidence (< 0.75):
 THRESHOLD TUNING:
   - Track approval/reject rates per confidence bucket
   - Adjust thresholds based on PM feedback
-  - Different thresholds per project (some need stricter review)
+  - Different thresholds per project
+
+CURRENT STATE:
+  ✅ Message.confidence field exists (basic classification)
+  ⏳ Need to implement in TaskProposal and analysis pipeline
 ```
 
 ---
 
-## 📝 **9. CRITICAL CHECKLIST FOR IMPLEMENTATION**
+## 📝 **8. IMPLEMENTATION ROADMAP**
+
+### **Phase 1: Analysis Foundation (NEXT STEPS)**
 
 ```
-BEFORE STARTING DEVELOPMENT:
+✅ Prerequisites (DONE):
+├─ Message model with basic classification
+├─ MessageIngestionJob (lifecycle pattern)
+├─ LLMProvider + AgentConfig + TaskConfig
+└─ Frontend pages structure
 
-☐ Define exact confidence thresholds with PM
-  - What confidence = auto-approve?
-  - What confidence = mandatory review?
+⏳ Phase 1 Tasks:
+├─ [ ] Create AnalysisRun model (extend MessageIngestionJob pattern)
+├─ [ ] Create TaskProposal model
+├─ [ ] Create ProjectConfig model
+├─ [ ] Add analysis_status enum to Message
+├─ [ ] Add included_in_runs field to Message
+├─ [ ] Implement AnalysisRun API endpoints
+├─ [ ] Implement ProjectConfig API endpoints
+├─ [ ] Update AnalysisRunsPage to display real runs
+└─ [ ] Update ProposalsPage to display real proposals
+```
 
-☐ Prepare project configurations
-  - Get list of all projects
-  - Get keywords per project
-  - Get glossary/terminology dict
+### **Phase 2: Task Entity System**
 
-☐ Design LLM prompts with PM feedback
-  - Show PM example outputs
-  - Iterate until prompts produce good results
+```
+⏳ Phase 2 Tasks:
+├─ [ ] Create TaskEntity model (self-referencing)
+├─ [ ] Create TaskVersion model
+├─ [ ] Implement tree validation logic
+├─ [ ] Add TaskTreeValidator utility
+├─ [ ] Migrate existing Task data to TaskEntity
+├─ [ ] Implement TaskEntity API endpoints
+├─ [ ] Update TasksPage to display TaskEntity
+└─ [ ] Add incident counter tracking
+```
 
-☐ Set up cost monitoring
-  - Track tokens per run
-  - Alert if cost exceeds budget
-  - Estimate monthly spend
+### **Phase 3: LLM Analysis Pipeline**
 
-☐ Prepare PM training
-  - How to review proposals
-  - How to handle conflicts
-  - How to tune thresholds
+```
+⏳ Phase 3 Tasks:
+├─ [ ] Implement Stage 1: Pre-filtering
+├─ [ ] Implement Stage 2: Batch grouping
+├─ [ ] Implement Stage 3.1: Project classification
+├─ [ ] Implement Stage 3.2: Task extraction
+├─ [ ] Implement Stage 3.3: Action items detection
+├─ [ ] Implement Stage 4: Duplicate detection
+├─ [ ] Implement Stage 5: Proposal creation
+├─ [ ] Add TaskIQ background jobs for analysis
+└─ [ ] Add progress tracking for runs
+```
 
-☐ Establish rollback procedure
-  - If LLM produces bad results
-  - How to revert to previous run
-  - How to re-run with fixed config
+### **Phase 4: PM Review Interface**
 
-☐ Define success metrics
-  - % of proposals approved without edits
-  - Time saved vs manual processing
-  - False positive/negative rates
-
-☐ Implement tree validation
-  - Circular reference detection
-  - Max depth limits (optional)
-  - Parent change validation
-
-☐ Implement run lifecycle management
-  - Closing procedure
-  - Sequential processing validation
-  - Metrics calculation
-
-☐ Design PM dashboard
-  - Run status overview
-  - Metrics visualization
-  - Pending proposals alert
+```
+⏳ Phase 4 Tasks:
+├─ [ ] Implement proposal review UI
+├─ [ ] Add batch approval actions
+├─ [ ] Implement run lifecycle management
+├─ [ ] Add metrics visualization
+├─ [ ] Implement close run workflow
+├─ [ ] Add accuracy metrics calculation
+├─ [ ] Add export reports functionality
+└─ [ ] Add notifications for PM
 ```
 
 ---
 
-## 🎯 **10. KEY ARCHITECTURAL DECISIONS SUMMARY**
+## 🎯 **9. KEY ARCHITECTURAL DECISIONS**
 
-1. ✅ **SubTask = TaskEntity** (self-reference через `parent_task_id`)
-2. ✅ **Tree structure only** (не граф, validation обов'язкова)
-3. ✅ **AnalysisRun = окрема meta-сутність** для координації та метрик
-4. ✅ **Lifecycle з обов'язковим closing** для запобігання накопиченням
-5. ✅ **Metrics після closing** для оцінки точності LLM
-6. ✅ **Sequential processing** - новий run тільки після closing попереднього
-7. ✅ **Message IDs = source of truth** для duplicate detection
-8. ✅ **Immutability** всюди крім status полів
+1. ✅ **LLM Infrastructure Ready** - AgentConfig + TaskConfig + LLMProvider реалізовано
+2. ✅ **Message Storage Ready** - Message model з базовою класифікацією
+3. ✅ **Lifecycle Pattern Established** - MessageIngestionJob як template для AnalysisRun
+4. ⏳ **SubTask = TaskEntity** - self-reference через `parent_task_id` (planned)
+5. ⏳ **Tree structure only** - не граф, validation обов'язкова (planned)
+6. ⏳ **AnalysisRun = окрема meta-сутність** - для координації та метрик (planned)
+7. ⏳ **Sequential processing** - новий run тільки після closing попереднього (planned)
+8. ⏳ **Message IDs = source of truth** - для duplicate detection (planned)
+9. ✅ **Immutability** - Messages вже immutable, розширити на інші моделі
+
+---
+
+## 📚 **10. REFERENCES**
+
+### **Database Models Location**
+- Current models: `backend/app/models/`
+- Legacy models: `backend/app/models/legacy.py`
+- Enums: `backend/app/models/enums.py`
+
+### **Frontend Pages**
+- Dashboard: `frontend/src/pages/DashboardPage/`
+- Messages: `frontend/src/pages/MessagesPage/`
+- Analysis Runs: `frontend/src/pages/AnalysisRunsPage/`
+- Proposals: `frontend/src/pages/ProposalsPage/`
+- Agents: `frontend/src/pages/AgentsPage/`
+- Providers: `frontend/src/pages/ProvidersPage/`
+
+### **API Documentation**
+- Backend: See `backend/CLAUDE.md`
+- Frontend: See `frontend/CLAUDE.md`
+
+---
+
+**Last Updated**: 2025-10-09
+**Status**: Foundation Complete, Analysis Pipeline In Planning

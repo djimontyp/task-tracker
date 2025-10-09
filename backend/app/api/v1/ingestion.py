@@ -12,7 +12,7 @@ from app.tasks import ingest_telegram_messages_task
 from ...api.deps import DatabaseDep
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/v1/ingestion", tags=["ingestion"])
+router = APIRouter(prefix="/ingestion", tags=["ingestion"])
 
 
 class TelegramIngestionRequest(BaseModel):
