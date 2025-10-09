@@ -4,8 +4,8 @@ import { logger } from '@/shared/utils/logger'
 // Prefer relative base URL to work behind Nginx at http://localhost
 // Fallbacks: explicit envs or localhost:8000 for standalone API dev
 const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL ||
-  process.env.REACT_APP_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
   ''
 
 export const apiClient = axios.create({

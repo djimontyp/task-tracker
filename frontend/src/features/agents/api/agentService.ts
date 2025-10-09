@@ -11,7 +11,7 @@ import {
 } from "../types";
 import { AgentTaskAssignment, AgentTaskAssignmentCreate } from "../types";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 class AgentService {
   /**

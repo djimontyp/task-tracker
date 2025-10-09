@@ -19,7 +19,7 @@ const resolveScheme = () => {
 }
 
 const resolveHost = () => {
-  const envHost = process.env.REACT_APP_WS_HOST?.trim()
+  const envHost = import.meta.env.VITE_WS_HOST?.trim()
   if (envHost) {
     return envHost
   }
@@ -34,7 +34,7 @@ const resolveHost = () => {
 const resolveWebSocketUrl = () => {
   const scheme = resolveScheme()
   const host = resolveHost()
-  const path = normalizePath(process.env.REACT_APP_WS_PATH)
+  const path = normalizePath(import.meta.env.VITE_WS_PATH)
 
   // Use window.location.port if available for correct port resolution
   const port = typeof window !== 'undefined' && window.location.port
@@ -90,7 +90,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       isConnectingRef.current = true
       setConnectionState('connecting')
       // Resolve WebSocket URL at runtime, not at module load time
-      const wsUrl = process.env.REACT_APP_WS_URL || resolveWebSocketUrl()
+      const wsUrl = import.meta.env.VITE_WS_URL || resolveWebSocketUrl()
       logger.debug('🔌 Connecting to WebSocket:', wsUrl)
       const ws = new WebSocket(wsUrl)
 
