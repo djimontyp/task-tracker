@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { logger } from '@/shared/utils/logger'
 
 // Prefer relative base URL to work behind Nginx at http://localhost
 // Fallbacks: explicit envs or localhost:8000 for standalone API dev
@@ -18,7 +19,7 @@ export const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error)
+    logger.error('API Error:', error)
     return Promise.reject(error)
   }
 )
