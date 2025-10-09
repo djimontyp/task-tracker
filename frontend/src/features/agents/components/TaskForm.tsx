@@ -10,7 +10,7 @@ import {
   Label,
   Checkbox,
 } from '@/shared/ui'
-import { TaskConfigCreate, TaskConfigUpdate } from '@/features/agents/types'
+import { TaskConfigCreate, TaskConfigUpdate, JsonSchema } from '@/features/agents/types'
 import SchemaEditor from './SchemaEditor'
 
 interface TaskFormProps {
@@ -20,6 +20,12 @@ interface TaskFormProps {
   initialData?: Partial<TaskConfigCreate>
   isEdit?: boolean
   loading?: boolean
+}
+
+const defaultSchema: JsonSchema = {
+  type: 'object',
+  properties: {},
+  required: [],
 }
 
 const TaskForm = ({
@@ -33,7 +39,7 @@ const TaskForm = ({
   const [formData, setFormData] = useState<Partial<TaskConfigCreate>>({
     name: initialData?.name || '',
     description: initialData?.description || '',
-    response_schema: initialData?.response_schema || { type: 'object', properties: {}, required: [] },
+    response_schema: initialData?.response_schema || defaultSchema,
     is_active: initialData?.is_active ?? true,
   })
 
@@ -42,7 +48,7 @@ const TaskForm = ({
       setFormData({
         name: initialData.name || '',
         description: initialData.description || '',
-        response_schema: initialData.response_schema || { type: 'object', properties: {}, required: [] },
+        response_schema: initialData.response_schema || defaultSchema,
         is_active: initialData.is_active ?? true,
       })
     }
@@ -53,7 +59,7 @@ const TaskForm = ({
     onSubmit(formData as TaskConfigCreate)
   }
 
-  const handleSchemaChange = (schema: Record<string, any>) => {
+  const handleSchemaChange = (schema: JsonSchema) => {
     setFormData({ ...formData, response_schema: schema })
   }
 
@@ -91,7 +97,7 @@ const TaskForm = ({
           <div className="space-y-2">
             <Label>Response Schema *</Label>
             <SchemaEditor
-              value={formData.response_schema || {}}
+              value={formData.response_schema || defaultSchema}
               onChange={handleSchemaChange}
             />
           </div>

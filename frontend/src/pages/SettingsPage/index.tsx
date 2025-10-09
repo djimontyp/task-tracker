@@ -6,6 +6,7 @@ import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Label, 
 import { useTheme } from '@/shared/components/ThemeProvider'
 import { apiClient } from '@/shared/lib/api/client'
 import { formatFullDate } from '@/shared/utils/date'
+import { logger } from '@/shared/utils/logger'
 
 const themeOptions: { value: 'light' | 'dark' | 'system'; label: string }[] = [
   { value: 'light', label: 'Light' },
@@ -253,7 +254,7 @@ const SettingsPage = () => {
     // URL: -2988379206 → API: -1002988379206
     if (groupId < 0 && !newGroupId.trim().startsWith('-100')) {
       const converted = parseInt(`-100${Math.abs(groupId)}`, 10)
-      console.log(`Converting group ID from ${groupId} to ${converted}`)
+      logger.debug(`Converting group ID from ${groupId} to ${converted}`)
       groupId = converted
     }
 

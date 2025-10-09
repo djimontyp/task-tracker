@@ -14,6 +14,7 @@ import {
   SelectItem,
 } from '@/shared/ui'
 import { Plus, Trash2 } from 'lucide-react'
+import { JsonSchema, SchemaPropertyConfig } from '@/features/agents/types'
 
 interface SchemaField {
   name: string
@@ -22,8 +23,8 @@ interface SchemaField {
 }
 
 interface SchemaEditorProps {
-  value: Record<string, any>
-  onChange: (schema: Record<string, any>) => void
+  value: JsonSchema
+  onChange: (schema: JsonSchema) => void
 }
 
 const FIELD_TYPES = [
@@ -41,7 +42,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
   const [fields, setFields] = useState<SchemaField[]>(() => {
     // Parse existing schema to fields
     if (value?.properties) {
-      return Object.entries(value.properties).map(([name, config]: [string, any]) => ({
+      return Object.entries(value.properties).map(([name, config]) => ({
         name,
         type: config.type || 'string',
         description: config.description || '',
@@ -72,7 +73,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
   }
 
   const updateSchema = (currentFields: SchemaField[]) => {
-    const properties: Record<string, any> = {}
+    const properties: Record<string, SchemaPropertyConfig> = {}
     const required: string[] = []
 
     currentFields.forEach((field) => {
@@ -92,8 +93,8 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
     })
   }
 
-  const getSchemaPreview = () => {
-    const properties: Record<string, any> = {}
+  const getSchemaPreview = (): JsonSchema => {
+    const properties: Record<string, SchemaPropertyConfig> = {}
     fields.forEach((field) => {
       if (field.name) {
         properties[field.name] = {

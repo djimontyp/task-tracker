@@ -6,6 +6,7 @@ import {
 } from '@/shared/ui'
 import { apiClient } from '@/shared/lib/api/client'
 import { toast } from 'sonner'
+import { logger } from '@/shared/utils/logger'
 import {
   SortingState,
   VisibilityState,
@@ -75,7 +76,7 @@ const MessagesPage = () => {
         const response = await apiClient.get('/api/messages', { params })
         return response.data
       } catch (error) {
-        console.warn('Messages endpoint not available yet, returning empty response')
+        logger.warn('Messages endpoint not available yet, returning empty response')
         return { items: [], total: 0, page: 1, page_size: pageSize, total_pages: 1 }
       }
     },
@@ -154,12 +155,12 @@ const MessagesPage = () => {
   })
 
   const handleIngestMessages = () => {
-    console.log('Opening ingestion modal')
+    logger.debug('Opening ingestion modal')
     setModalOpen(true)
   }
 
   const handleIngestionSuccess = (jobId: number) => {
-    console.log('Ingestion job started:', jobId)
+    logger.info('Ingestion job started:', jobId)
     // TODO: Show progress tracking or redirect to jobs page
   }
 
@@ -191,7 +192,7 @@ const MessagesPage = () => {
         toast.error(response.data.message || 'Failed to update authors', { id: 'update-authors' })
       }
     } catch (error) {
-      console.error('Update authors error:', error)
+      logger.error('Update authors error:', error)
       toast.error('Failed to update message authors', { id: 'update-authors' })
     }
   }

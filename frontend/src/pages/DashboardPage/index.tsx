@@ -14,6 +14,7 @@ import ActivityHeatmap from '@/shared/components/ActivityHeatmap'
 import { useTasksStore } from '@/features/tasks/store/tasksStore'
 import { useMessagesFeed } from '@/features/messages/hooks/useMessagesFeed'
 import { formatMessageDate } from '@/shared/utils/date'
+import { generateTaskAvatars } from '@/shared/utils/avatars'
 
 const DashboardPage = () => {
   const navigate = useNavigate()
@@ -34,24 +35,6 @@ const DashboardPage = () => {
 
   // Use the new messages feed with WebSocket support
   const { messages, isLoading: messagesLoading, isConnected } = useMessagesFeed({ limit: 50 })
-
-  // Mock avatar URLs from Unsplash (like Tailwind UI example)
-  const mockAvatars = [
-    'https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    'https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80',
-    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-  ]
-  
-  const getTaskAvatars = (taskId: string | number) => {
-    const numId = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId
-    const count = (numId % 3) + 1
-    return mockAvatars.slice(0, count).map((url, idx) => ({
-      id: `task-${taskId}-avatar-${idx}`,
-      name: `User ${idx + 1}`,
-      avatarUrl: url
-    }))
-  }
 
   const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['tasks'],
@@ -298,7 +281,7 @@ const DashboardPage = () => {
                     
                     {/* Right-aligned Avatar Group */}
                     <div className="relative shrink-0">
-                      <AvatarGroup avatars={getTaskAvatars(task.id)} size="lg" max={3} />
+                      <AvatarGroup avatars={generateTaskAvatars(task.id)} size="lg" max={3} />
                     </div>
 
                     <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">

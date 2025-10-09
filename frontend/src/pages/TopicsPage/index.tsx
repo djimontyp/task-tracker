@@ -70,8 +70,8 @@ const TopicsPage = () => {
   const normalizedTasks = React.useMemo(() => {
     return (tasks ?? []).map((t) => ({
       ...t,
-      status: normalizeStatus((t as any).status),
-      priority: normalizePriority((t as any).priority),
+      status: normalizeStatus(t.status),
+      priority: normalizePriority(t.priority),
     }))
   }, [tasks])
 

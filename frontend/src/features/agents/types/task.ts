@@ -4,11 +4,22 @@
  * TypeScript interfaces matching backend TaskConfig models
  */
 
+export interface SchemaPropertyConfig {
+  type: string
+  description?: string
+}
+
+export interface JsonSchema {
+  type: 'object'
+  properties: Record<string, SchemaPropertyConfig>
+  required: string[]
+}
+
 export interface TaskConfig {
   id: string;
   name: string;
   description?: string;
-  response_schema: Record<string, any>;
+  response_schema: JsonSchema;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -17,14 +28,14 @@ export interface TaskConfig {
 export interface TaskConfigCreate {
   name: string;
   description?: string;
-  response_schema: Record<string, any>;
+  response_schema: JsonSchema;
   is_active?: boolean;
 }
 
 export interface TaskConfigUpdate {
   name?: string;
   description?: string;
-  response_schema?: Record<string, any>;
+  response_schema?: JsonSchema;
   is_active?: boolean;
 }
 

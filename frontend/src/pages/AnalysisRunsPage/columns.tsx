@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
-import { ArrowUpDown, Clock, PlayCircle, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
+import { ArrowUpDown, Clock, PlayCircle, CheckCircle, XCircle, AlertCircle, LucideIcon } from 'lucide-react'
 
 import { Button, Badge } from '@/shared/ui'
 import { formatFullDate } from '@/shared/utils/date'
@@ -29,7 +29,7 @@ export interface AnalysisRun {
   triggered_by: string | null
 }
 
-export const statusConfig: Record<string, { label: string; icon: React.ComponentType<any>; className: string }> = {
+export const statusConfig: Record<string, { label: string; icon: LucideIcon; className: string }> = {
   pending: { label: 'Pending', icon: Clock, className: 'bg-slate-500 text-white' },
   running: { label: 'Running', icon: PlayCircle, className: 'bg-blue-500 text-white' },
   completed: { label: 'Waiting Review', icon: AlertCircle, className: 'bg-amber-500 text-white' },
