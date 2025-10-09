@@ -8,12 +8,14 @@ import { Plus } from 'lucide-react'
 import AgentForm from './AgentForm'
 import AgentCard from './AgentCard'
 import TaskAssignment from './TaskAssignment'
+import AgentTestDialog from './AgentTestDialog'
 
 const AgentList = () => {
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingAgent, setEditingAgent] = useState<AgentConfig | null>(null)
   const [managingAgent, setManagingAgent] = useState<AgentConfig | null>(null)
+  const [testingAgent, setTestingAgent] = useState<AgentConfig | null>(null)
 
   const { data: agents, isLoading } = useQuery<AgentConfig[]>({
     queryKey: ['agents'],
@@ -77,6 +79,10 @@ const AgentList = () => {
     setManagingAgent(agent)
   }
 
+  const handleTest = (agent: AgentConfig) => {
+    setTestingAgent(agent)
+  }
+
   const handleSubmit = (data: AgentConfigCreate | AgentConfigUpdate) => {
     if (editingAgent) {
       updateMutation.mutate({ id: editingAgent.id, data })
@@ -120,6 +126,7 @@ const AgentList = () => {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onManageTasks={handleManageTasks}
+              onTest={handleTest}
               isDeleting={deleteMutation.isPending}
             />
           ))
@@ -142,6 +149,12 @@ const AgentList = () => {
         agent={managingAgent}
         open={!!managingAgent}
         onClose={() => setManagingAgent(null)}
+      />
+
+      <AgentTestDialog
+        agent={testingAgent}
+        open={!!testingAgent}
+        onClose={() => setTestingAgent(null)}
       />
     </div>
   )

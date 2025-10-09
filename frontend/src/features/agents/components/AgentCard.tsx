@@ -1,12 +1,13 @@
 import { Card, CardContent, Button, Badge } from '@/shared/ui'
 import { AgentConfig } from '@/features/agents/types'
-import { Pencil, Trash2, Settings } from 'lucide-react'
+import { Pencil, Trash2, Settings, FlaskConical } from 'lucide-react'
 
 interface AgentCardProps {
   agent: AgentConfig
   onEdit: (agent: AgentConfig) => void
   onDelete: (id: string) => void
   onManageTasks: (agent: AgentConfig) => void
+  onTest: (agent: AgentConfig) => void
   isDeleting?: boolean
 }
 
@@ -15,6 +16,7 @@ const AgentCard = ({
   onEdit,
   onDelete,
   onManageTasks,
+  onTest,
   isDeleting = false,
 }: AgentCardProps) => {
   return (
@@ -44,6 +46,14 @@ const AgentCard = ({
                 aria-label="Manage tasks"
               >
                 <Settings className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => onTest(agent)}
+                aria-label="Test agent"
+              >
+                <FlaskConical className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"

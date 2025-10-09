@@ -1,6 +1,7 @@
 export { default as AgentCard } from './AgentCard'
 export { default as AgentForm } from './AgentForm'
 export { default as AgentList } from './AgentList'
+export { default as AgentTestDialog } from './AgentTestDialog'
 export { default as ProviderForm } from './ProviderForm'
 export { default as ProviderList } from './ProviderList'
 export { default as SchemaEditor } from './SchemaEditor'
