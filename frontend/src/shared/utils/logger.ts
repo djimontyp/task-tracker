@@ -3,7 +3,7 @@
  * Debug logs are only shown in development mode
  */
 
-const IS_DEV = process.env.NODE_ENV === 'development'
+const IS_DEV = import.meta.env.MODE === 'development'
 
 export const logger = {
   debug: (...args: unknown[]) => {

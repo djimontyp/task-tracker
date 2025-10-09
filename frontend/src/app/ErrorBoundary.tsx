@@ -80,7 +80,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             </div>
 
             {/* Error Details (Development Mode) */}
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.MODE === 'development' && this.state.error && (
               <details className="text-left bg-muted/50 rounded-lg p-4 border border-border">
                 <summary className="cursor-pointer font-semibold text-sm text-foreground hover:text-primary transition-colors">
                   Error Details (Development Only)
