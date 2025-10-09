@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectValue,
   Button,
-} from '@shared/ui'
+} from '@/shared/ui'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { Table as TableType } from '@tanstack/react-table'
 

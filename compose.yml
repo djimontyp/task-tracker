@@ -91,18 +91,49 @@ services:
       - api
     restart: unless-stopped
     environment:
-      - REACT_APP_API_BASE_URL=${DASHBOARD_API_BASE_URL:-http://localhost:8000}
-      - REACT_APP_WS_URL=${DASHBOARD_WS_URL:-ws://localhost/ws}
+      # Vite environment variables (renamed from REACT_APP_*)
+      - VITE_API_BASE_URL=${DASHBOARD_API_BASE_URL:-http://localhost:8000}
+      - VITE_API_URL=${DASHBOARD_API_BASE_URL:-http://localhost:8000}
+      - VITE_WS_URL=${DASHBOARD_WS_URL:-ws://localhost/ws}
+      - VITE_WS_HOST=${DASHBOARD_WS_HOST:-localhost:8000}
+      - VITE_WS_PATH=${DASHBOARD_WS_PATH:-/ws}
     develop:
       watch:
+        # Sync source files for hot reload
         - action: sync
           path: ./frontend/src
           target: /app/src
+          ignore:
+            - "**/__tests__"
+            - "**/*.test.ts"
+            - "**/*.test.tsx"
+            - "**/*.spec.ts"
+            - "**/*.spec.tsx"
+            - "**/__mocks__"
+            - "**/test-results"
+            - "**/coverage"
+        # Sync public assets
         - action: sync
           path: ./frontend/public
           target: /app/public
+          ignore:
+            - "**/.DS_Store"
+            - "**/Thumbs.db"
+        # Rebuild on package.json changes
         - action: rebuild
           path: ./frontend/package.json
+        # Rebuild on package-lock.json changes
+        - action: rebuild
+          path: ./frontend/package-lock.json
+        # Rebuild on vite.config.ts changes
+        - action: rebuild
+          path: ./frontend/vite.config.ts
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   nginx:
     image: nginx:alpine

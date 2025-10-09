@@ -1,4 +1,4 @@
-import AgentList from './components/AgentList'
+import { AgentList } from '@/features/agents/components'
 
 const AgentsPage = () => {
   return (

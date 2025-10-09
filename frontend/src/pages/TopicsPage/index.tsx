@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Spinner } from '@shared/ui'
-import { apiClient } from '@shared/lib/api/client'
-import { Task } from '@shared/types'
-import { useTasksStore } from '@features/tasks/store/tasksStore'
+import { Spinner } from '@/shared/ui'
+import { apiClient } from '@/shared/lib/api/client'
+import { Task } from '@/shared/types'
+import { useTasksStore } from '@/features/tasks/store/tasksStore'
 import {
   ColumnFiltersState,
   SortingState,
@@ -18,10 +18,10 @@ import {
 } from '@tanstack/react-table'
 import { columns as baseColumns, statusLabels, priorityLabels } from './columns'
 import { DataTableFacetedFilter } from './faceted-filter'
-import { DataTable } from '@shared/components/DataTable'
-import { DataTableToolbar } from '@shared/components/DataTableToolbar'
-import { DataTablePagination } from '@shared/components/DataTablePagination'
-import { Button } from '@shared/ui'
+import { DataTable } from '@/shared/components/DataTable'
+import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
+import { DataTablePagination } from '@/shared/components/DataTablePagination'
+import { Button } from '@/shared/ui'
 
 // Normalize backend/legacy status values to our canonical set
 const normalizeStatus = (s: string): Task['status'] => {
@@ -70,8 +70,8 @@ const TopicsPage = () => {
   const normalizedTasks = React.useMemo(() => {
     return (tasks ?? []).map((t) => ({
       ...t,
-      status: normalizeStatus((t as any).status),
-      priority: normalizePriority((t as any).priority),
+      status: normalizeStatus(t.status),
+      priority: normalizePriority(t.priority),
     }))
   }, [tasks])
 

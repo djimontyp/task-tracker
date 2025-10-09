@@ -13,6 +13,8 @@ import MetricCard from '@/shared/components/MetricCard'
 import ActivityHeatmap from '@/shared/components/ActivityHeatmap'
 import { useTasksStore } from '@/features/tasks/store/tasksStore'
 import { useMessagesFeed } from '@/features/messages/hooks/useMessagesFeed'
+import { formatMessageDate } from '@/shared/utils/date'
+import { generateTaskAvatars } from '@/shared/utils/avatars'
 
 const DashboardPage = () => {
   const navigate = useNavigate()
@@ -33,24 +35,6 @@ const DashboardPage = () => {
 
   // Use the new messages feed with WebSocket support
   const { messages, isLoading: messagesLoading, isConnected } = useMessagesFeed({ limit: 50 })
-
-  // Mock avatar URLs from Unsplash (like Tailwind UI example)
-  const mockAvatars = [
-    'https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    'https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80',
-    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-  ]
-  
-  const getTaskAvatars = (taskId: string | number) => {
-    const numId = typeof taskId === 'string' ? parseInt(taskId, 10) : taskId
-    const count = (numId % 3) + 1
-    return mockAvatars.slice(0, count).map((url, idx) => ({
-      id: `task-${taskId}-avatar-${idx}`,
-      name: `User ${idx + 1}`,
-      avatarUrl: url
-    }))
-  }
 
   const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['tasks'],
@@ -194,7 +178,7 @@ const DashboardPage = () => {
                     className="group flex items-start gap-3 py-2 border-b last:border-b-0 rounded-md cursor-pointer transition-all duration-200 hover:bg-accent/50 -mx-2 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     tabIndex={0}
                     role="button"
-                    aria-label={`Message from ${message.author}: ${message.content}`}
+                    aria-label={`Message from ${message.author_name || 'Unknown'}: ${message.content || ''}`}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
@@ -206,10 +190,10 @@ const DashboardPage = () => {
                     <div className="relative shrink-0">
                       <Avatar className="h-10 w-10 border border-border/80 shadow-sm ring-1 ring-black/5">
                         {message.avatar_url ? (
-                          <AvatarImage src={message.avatar_url} alt={message.author} />
+                          <AvatarImage src={message.avatar_url} alt={message.author_name || 'User'} />
                         ) : null}
                         <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                          {message.author?.charAt(0).toUpperCase() || '?'}
+                          {message.author_name?.charAt(0).toUpperCase() || '?'}
                         </AvatarFallback>
                       </Avatar>
                       {/* Telegram Badge - positioned bottom-right */}
@@ -221,25 +205,15 @@ const DashboardPage = () => {
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="text-sm font-semibold text-foreground truncate">
-                          {message.author_name || message.author || message.sender}
+                          {message.author_name || 'Unknown'}
                         </span>
                         <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                          {message.sent_at
-                            ? new Date(message.sent_at).toLocaleString('uk-UA', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : message.timestamp
-                            ? new Date(message.timestamp).toLocaleString('uk-UA', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : 'No date'}
+                          {formatMessageDate(message.sent_at || message.timestamp)}
                         </span>
                       </div>
 
                       <p className="text-sm text-muted-foreground leading-snug break-words line-clamp-2">
-                        {message.content || message.text}
+                        {message.content || ''}
                       </p>
 
                       {(message.is_task || message.isTask) && (
@@ -307,14 +281,11 @@ const DashboardPage = () => {
                     
                     {/* Right-aligned Avatar Group */}
                     <div className="relative shrink-0">
-                      <AvatarGroup avatars={getTaskAvatars(task.id)} size="lg" max={3} />
+                      <AvatarGroup avatars={generateTaskAvatars(task.id)} size="lg" max={3} />
                     </div>
 
                     <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                      {new Date(task.created_at || task.createdAt).toLocaleString('uk-UA', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {formatMessageDate(task.created_at || task.createdAt)}
                     </div>
                   </div>
                 ))

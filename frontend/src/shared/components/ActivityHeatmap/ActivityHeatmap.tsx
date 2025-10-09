@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
@@ -99,15 +99,18 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
       },
     })
 
-    const data = activityResponse?.data || []
-
-    // Get active sources
-    const activeSources = Object.entries(selectedSources)
-      .filter(([_, enabled]) => enabled)
-      .map(([source]) => source)
+    // Get active sources - memoize separately as it's used in rendering
+    const activeSources = useMemo(
+      () =>
+        Object.entries(selectedSources)
+          .filter(([_, enabled]) => enabled)
+          .map(([source]) => source),
+      [selectedSources]
+    )
 
     // Process data into heatmap format
     const processedData = useMemo(() => {
+      const data = activityResponse?.data || []
       const dataMap: ProcessedData = {}
 
       data.forEach((point) => {
@@ -143,7 +146,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
       })
 
       return dataMap
-    }, [data, activeSources, selectedPeriod, selectedMonth, selectedYear])
+    }, [activityResponse?.data, activeSources, selectedPeriod, selectedMonth, selectedYear])
 
     // Get number of days in selected month
     const daysInMonth = useMemo(() => {
@@ -151,7 +154,10 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
     }, [selectedMonth, selectedYear])
 
     // Generate cells for the grid
-    const cells = useMemo(() => {
+    // Note: cells variable is prepared for future use (e.g., exporting, filtering)
+    // Currently rendering is done inline, but keeping this for extensibility
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _cells = useMemo(() => {
       const result: HeatmapCell[] = []
       const daysToShow = selectedPeriod === 'week' ? 7 : daysInMonth
 

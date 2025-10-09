@@ -3,9 +3,10 @@ import { useQuery } from '@tanstack/react-query'
 import {
   Spinner,
   Button,
-} from '@shared/ui'
-import { apiClient } from '@shared/lib/api/client'
+} from '@/shared/ui'
+import { apiClient } from '@/shared/lib/api/client'
 import { toast } from 'sonner'
+import { logger } from '@/shared/utils/logger'
 import {
   SortingState,
   VisibilityState,
@@ -20,12 +21,19 @@ import {
 } from '@tanstack/react-table'
 import { createColumns, sourceLabels, statusLabels } from './columns'
 import { Message } from '@/shared/types'
-import { DataTable } from '@shared/components/DataTable'
-import { DataTableToolbar } from '@shared/components/DataTableToolbar'
-import { DataTablePagination } from '@shared/components/DataTablePagination'
+import { DataTable } from '@/shared/components/DataTable'
+import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
+import { DataTablePagination } from '@/shared/components/DataTablePagination'
 import { DataTableFacetedFilter } from './faceted-filter'
 import { Download, RefreshCw, UserCheck } from 'lucide-react'
 import { IngestionModal } from './IngestionModal'
+
+interface MessageQueryParams {
+  page: number
+  page_size: number
+  sort_by?: string
+  sort_order?: 'asc' | 'desc'
+}
 
 interface PaginatedResponse {
   items: Message[]
@@ -53,7 +61,7 @@ const MessagesPage = () => {
     queryKey: ['messages', currentPage, pageSize, sorting],
     queryFn: async () => {
       try {
-        const params: any = {
+        const params: MessageQueryParams = {
           page: currentPage,
           page_size: pageSize
         }
@@ -68,7 +76,7 @@ const MessagesPage = () => {
         const response = await apiClient.get('/api/messages', { params })
         return response.data
       } catch (error) {
-        console.warn('Messages endpoint not available yet, returning empty response')
+        logger.warn('Messages endpoint not available yet, returning empty response')
         return { items: [], total: 0, page: 1, page_size: pageSize, total_pages: 1 }
       }
     },
@@ -140,19 +148,19 @@ const MessagesPage = () => {
     globalFilterFn: (row, _columnId, filterValue) => {
       const q = String(filterValue).toLowerCase()
       return (
-        String(row.original.author_name || row.original.author || '').toLowerCase().includes(q) ||
+        String(row.original.author_name || '').toLowerCase().includes(q) ||
         String(row.original.content || '').toLowerCase().includes(q)
       )
     },
   })
 
   const handleIngestMessages = () => {
-    console.log('Opening ingestion modal')
+    logger.debug('Opening ingestion modal')
     setModalOpen(true)
   }
 
   const handleIngestionSuccess = (jobId: number) => {
-    console.log('Ingestion job started:', jobId)
+    logger.info('Ingestion job started:', jobId)
     // TODO: Show progress tracking or redirect to jobs page
   }
 
@@ -184,7 +192,7 @@ const MessagesPage = () => {
         toast.error(response.data.message || 'Failed to update authors', { id: 'update-authors' })
       }
     } catch (error) {
-      console.error('Update authors error:', error)
+      logger.error('Update authors error:', error)
       toast.error('Failed to update message authors', { id: 'update-authors' })
     }
   }

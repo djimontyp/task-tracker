@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from '../components/ThemeProvider'
+import { ThemeProvider } from '@/shared/components/ThemeProvider'
 
 const queryClient = new QueryClient({
   defaultOptions: {

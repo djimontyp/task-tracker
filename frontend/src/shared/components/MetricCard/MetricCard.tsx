@@ -72,7 +72,12 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
         if (onClick) {
-          onClick(e as any)
+          // Create a synthetic mouse event from keyboard event
+          const syntheticEvent = new MouseEvent('click', {
+            bubbles: e.bubbles,
+            cancelable: e.cancelable,
+          })
+          onClick(syntheticEvent as unknown as React.MouseEvent<HTMLDivElement>)
         }
       }
     }, [onClick])

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { LayoutDashboard, CheckSquare, BarChart3, Settings, Radar, Bot, Brain, Mail, MessageSquare, ListChecks, ClipboardList, Cog, Server, FolderKanban } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, BarChart3, Settings, Radar, Bot, Brain, Mail, MessageSquare, ListChecks, ClipboardList, Server, FolderKanban } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   Sidebar,
@@ -13,9 +13,7 @@ import {
   SidebarMenuItem,
   SidebarFooter,
   SidebarSeparator,
-  useSidebar,
 } from '@/shared/ui/sidebar'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/tooltip'
 import { cn } from '@/shared/lib/utils'
 import { useServiceStatus } from '@/features/websocket/hooks/useServiceStatus'
 import { NavUser } from './NavUser'
@@ -61,8 +59,7 @@ const footerItems = [
 export function AppSidebar() {
   const groups = useMemo(() => navGroups, [])
   const location = useLocation()
-  const { state } = useSidebar()
-  const { indicator, connectionState, healthState, lastHealthError } = useServiceStatus()
+  const { indicator } = useServiceStatus()
 
   const indicatorClasses =
     indicator === 'healthy'

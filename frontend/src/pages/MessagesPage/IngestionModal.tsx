@@ -10,13 +10,19 @@ import {
   Checkbox,
   Label,
   Input,
-} from '@shared/ui'
-import { apiClient } from '@shared/lib/api/client'
+} from '@/shared/ui'
+import { apiClient } from '@/shared/lib/api/client'
 import { toast } from 'sonner'
+import { logger } from '@/shared/utils/logger'
 
 interface TelegramGroup {
   chat_id: string
   title: string
+}
+
+interface TelegramGroupConfig {
+  id: string | number
+  name?: string
 }
 
 interface IngestionModalProps {
@@ -33,7 +39,7 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
   const [fetchingGroups, setFetchingGroups] = useState(false)
 
   useEffect(() => {
-    console.log('IngestionModal open state changed:', open)
+    logger.debug('IngestionModal open state changed:', open)
     if (open) {
       fetchGroups()
     }
@@ -45,21 +51,22 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
       // Fetch webhook settings to get configured groups
       const response = await apiClient.get('/api/webhook-settings')
       const settings = response.data
-      console.log('Webhook settings:', settings)
-      
+      logger.debug('Webhook settings:', settings)
+
       if (settings?.telegram?.groups && settings.telegram.groups.length > 0) {
-        const groupsList = settings.telegram.groups.map((g: any) => ({
+        const groupsList = settings.telegram.groups.map((g: TelegramGroupConfig) => ({
           chat_id: String(g.id),
           title: g.name || String(g.id),
         }))
-        console.log('Parsed groups:', groupsList)
+        logger.debug('Parsed groups:', groupsList)
         setGroups(groupsList)
       } else {
-        console.warn('No groups found in settings')
+        logger.warn('No groups found in settings')
         toast.warning('No Telegram groups configured. Please set up groups in Settings first.')
       }
-    } catch (error: any) {
-      console.error('Failed to fetch groups:', error)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('Failed to fetch groups:', message)
       toast.error('Failed to load Telegram groups')
     } finally {
       setFetchingGroups(false)
@@ -100,8 +107,15 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
       toast.success(`Ingestion started! Job ID: ${response.data.job_id}`)
       onSuccess(response.data.job_id)
       onClose()
-    } catch (error: any) {
-      toast.error(`Failed to start ingestion: ${error.response?.data?.detail || error.message}`)
+    } catch (error) {
+      let message = 'Unknown error'
+      if (error instanceof Error) {
+        message = error.message
+      } else if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { detail?: string } } }
+        message = axiosError.response?.data?.detail || 'Request failed'
+      }
+      toast.error(`Failed to start ingestion: ${message}`)
     } finally {
       setLoading(false)
     }
