@@ -10,6 +10,7 @@ import {
   AgentConfigUpdate,
 } from "../types";
 import { AgentTaskAssignment, AgentTaskAssignmentCreate } from "../types";
+import { API_ENDPOINTS } from "@/shared/config/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -30,7 +31,7 @@ class AgentService {
     if (params?.provider_id) queryParams.set("provider_id", params.provider_id);
 
     const response = await fetch(
-      `${API_BASE_URL}/api/agents?${queryParams.toString()}`
+      `${API_BASE_URL}${API_ENDPOINTS.agents}?${queryParams.toString()}`
     );
 
     if (!response.ok) {
@@ -44,7 +45,7 @@ class AgentService {
    * Get single agent by ID
    */
   async getAgent(id: string): Promise<AgentConfig> {
-    const response = await fetch(`${API_BASE_URL}/api/agents/${id}`);
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.agents}/${id}`);
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -60,7 +61,7 @@ class AgentService {
    * Create new agent
    */
   async createAgent(data: AgentConfigCreate): Promise<AgentConfig> {
-    const response = await fetch(`${API_BASE_URL}/api/agents`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.agents}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -86,7 +87,7 @@ class AgentService {
    * Update existing agent
    */
   async updateAgent(id: string, data: AgentConfigUpdate): Promise<AgentConfig> {
-    const response = await fetch(`${API_BASE_URL}/api/agents/${id}`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.agents}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -109,7 +110,7 @@ class AgentService {
    * Delete agent
    */
   async deleteAgent(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/agents/${id}`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.agents}/${id}`, {
       method: "DELETE",
     });
 
@@ -132,7 +133,7 @@ class AgentService {
     if (activeOnly) queryParams.set("active_only", "true");
 
     const response = await fetch(
-      `${API_BASE_URL}/api/agents/${agentId}/tasks?${queryParams.toString()}`
+      `${API_BASE_URL}${API_ENDPOINTS.agents}/${agentId}/tasks?${queryParams.toString()}`
     );
 
     if (!response.ok) {
@@ -149,7 +150,7 @@ class AgentService {
     agentId: string,
     data: Omit<AgentTaskAssignmentCreate, "agent_id">
   ): Promise<AgentTaskAssignment> {
-    const response = await fetch(`${API_BASE_URL}/api/agents/${agentId}/tasks`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.agents}/${agentId}/tasks`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -176,7 +177,7 @@ class AgentService {
    */
   async unassignTask(agentId: string, taskId: string): Promise<void> {
     const response = await fetch(
-      `${API_BASE_URL}/api/agents/${agentId}/tasks/${taskId}`,
+      `${API_BASE_URL}${API_ENDPOINTS.agents}/${agentId}/tasks/${taskId}`,
       {
         method: "DELETE",
       }
@@ -197,12 +198,16 @@ class AgentService {
     id: string,
     prompt: string
   ): Promise<{
+    agent_id: string;
+    agent_name: string;
+    prompt: string;
     response: string;
-    model: string;
-    provider: string;
-    execution_time_ms: number;
+    elapsed_time: number;
+    model_name: string;
+    provider_name: string;
+    provider_type: string;
   }> {
-    const response = await fetch(`${API_BASE_URL}/api/agents/${id}/test`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.agents}/${id}/test`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

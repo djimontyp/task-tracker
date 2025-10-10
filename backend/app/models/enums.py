@@ -37,3 +37,29 @@ class SourceType(str, Enum):
     slack = "slack"
     email = "email"
     api = "api"
+
+
+class ProviderType(str, Enum):
+    """Supported LLM provider types."""
+
+    ollama = "ollama"
+    openai = "openai"
+
+
+class ValidationStatus(str, Enum):
+    """Provider validation status."""
+
+    pending = "pending"
+    validating = "validating"
+    connected = "connected"
+    error = "error"
+
+
+class IngestionStatus(str, Enum):
+    """Status of message ingestion job."""
+
+    pending = "pending"
+    running = "running"
+    completed = "completed"
+    failed = "failed"
+    cancelled = "cancelled"

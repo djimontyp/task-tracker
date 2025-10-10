@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useWebSocket } from './useWebSocket'
 
-const HEALTH_ENDPOINT = '/api/health'
+import { API_ENDPOINTS } from '@/shared/config/api'
+const HEALTH_ENDPOINT = API_ENDPOINTS.health
 const HEALTH_CHECK_INTERVAL = 15000
 const HEALTH_RETRY_DELAY = 4000
 const HEALTH_MAX_RETRIES = 3

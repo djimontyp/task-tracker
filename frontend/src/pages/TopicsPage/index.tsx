@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Spinner } from '@/shared/ui'
 import { apiClient } from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
 import { Task } from '@/shared/types'
 import { useTasksStore } from '@/features/tasks/store/tasksStore'
 import {
@@ -48,7 +49,7 @@ const TopicsPage = () => {
   const { data: tasks, isLoading } = useQuery<Task[]>({
     queryKey: ['tasks'],
     queryFn: async () => {
-      const response = await apiClient.get('/api/tasks')
+      const response = await apiClient.get(API_ENDPOINTS.tasks)
       return response.data
     },
   })

@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger, Checkbox, Label } from '@/shared/ui'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
 import { cn } from '@/shared/lib'
 import { apiClient } from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
 
 // Types
 export interface ActivityDataPoint {

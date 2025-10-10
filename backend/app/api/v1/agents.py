@@ -1,250 +1,369 @@
-"""API endpoints for Agent Configuration management."""
+"""API endpoints for Agent Configuration management.
+
+Provides CRUD endpoints for managing agent configurations, task assignments,
+and agent testing functionality.
+"""
 
 import logging
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query
-from sqlmodel import select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.database import get_session
 from app.models import (
-    AgentConfig,
     AgentConfigCreate,
     AgentConfigPublic,
     AgentConfigUpdate,
-    LLMProvider,
+    AgentTaskAssignmentCreate,
+    AgentTaskAssignmentPublic,
 )
+from app.services import AgentCRUD, AssignmentCRUD
 from app.services.agent_service import (
     AgentTestService,
     TestAgentRequest,
     TestAgentResponse,
 )
-from ..deps import DatabaseDep
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/agents", tags=["agents"])
+
+
+# ============================================================================
+# CRUD Operations
+# ============================================================================
+
+
+@router.post(
+    "",
+    response_model=AgentConfigPublic,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create agent",
+    description="Create new agent configuration with prompts and model settings.",
+)
+async def create_agent(
+    agent_data: AgentConfigCreate,
+    session: AsyncSession = Depends(get_session),
+) -> AgentConfigPublic:
+    """Create new agent configuration.
+
+    Args:
+        agent_data: Agent configuration (name, provider_id, model, prompts)
+        session: Database session
+
+    Returns:
+        Created agent configuration
+
+    Raises:
+        HTTPException 409: Agent name already exists
+        HTTPException 404: Provider not found
+        HTTPException 400: Invalid configuration
+    """
+    try:
+        crud = AgentCRUD(session)
+        agent = await crud.create(agent_data)
+        logger.info(f"Created agent '{agent.name}' with ID {agent.id}")
+        return agent
+    except ValueError as e:
+        if "already exists" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=str(e),
+            )
+        if "not found" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(e),
+            )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
 
 
 @router.get(
     "",
     response_model=List[AgentConfigPublic],
     summary="List all agents",
-    response_description="List of agent configurations with optional filters",
+    description="Get list of all configured agents with pagination and filters.",
 )
 async def list_agents(
-    db: DatabaseDep,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(
         100, ge=1, le=1000, description="Maximum number of records to return"
     ),
     active_only: bool = Query(False, description="Filter for active agents only"),
     provider_id: Optional[UUID] = Query(None, description="Filter by provider ID"),
+    session: AsyncSession = Depends(get_session),
 ) -> List[AgentConfigPublic]:
+    """List all agent configurations.
+
+    Args:
+        skip: Number of records to skip (pagination)
+        limit: Maximum number of records to return
+        active_only: Filter for active agents only
+        provider_id: Filter by provider ID
+        session: Database session
+
+    Returns:
+        List of agent configurations
     """
-    Retrieve list of agent configurations with pagination and filters.
-
-    Supports filtering by active status and provider association.
-    Returns agents ordered by creation date (newest first).
-    """
-    query = select(AgentConfig).order_by(AgentConfig.created_at.desc())
-
-    if active_only:
-        query = query.where(AgentConfig.is_active == True)  # noqa: E712
-
-    if provider_id:
-        query = query.where(AgentConfig.provider_id == provider_id)
-
-    query = query.offset(skip).limit(limit)
-    result = await db.execute(query)
-    agents = result.scalars().all()
-
-    return [AgentConfigPublic.model_validate(agent) for agent in agents]
+    crud = AgentCRUD(session)
+    agents = await crud.list(
+        skip=skip,
+        limit=limit,
+        active_only=active_only,
+        provider_id=provider_id,
+    )
+    return agents
 
 
 @router.get(
     "/{agent_id}",
     response_model=AgentConfigPublic,
     summary="Get agent by ID",
-    response_description="Agent configuration details",
+    description="Get single agent configuration with provider details.",
 )
-async def get_agent(agent_id: UUID, db: DatabaseDep) -> AgentConfigPublic:
-    """
-    Retrieve a specific agent configuration by UUID.
+async def get_agent(
+    agent_id: UUID,
+    session: AsyncSession = Depends(get_session),
+) -> AgentConfigPublic:
+    """Get agent by ID.
 
-    Returns complete agent details including provider association,
-    model configuration, and system prompt.
+    Args:
+        agent_id: Agent UUID
+        session: Database session
+
+    Returns:
+        Agent configuration
+
+    Raises:
+        HTTPException 404: Agent not found
     """
-    agent = await db.get(AgentConfig, agent_id)
+    crud = AgentCRUD(session)
+    agent = await crud.get(agent_id)
 
     if not agent:
         raise HTTPException(
-            status_code=404, detail=f"Agent with ID '{agent_id}' not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Agent with ID '{agent_id}' not found",
         )
 
-    return AgentConfigPublic.model_validate(agent)
-
-
-@router.post(
-    "",
-    response_model=AgentConfigPublic,
-    summary="Create new agent",
-    response_description="Created agent configuration",
-    status_code=201,
-)
-async def create_agent(
-    agent_data: AgentConfigCreate,
-    db: DatabaseDep,
-) -> AgentConfigPublic:
-    """
-    Create a new agent configuration.
-
-    Validates that:
-    - Agent name is unique
-    - Associated provider exists
-    - Temperature is within valid range (0.0-1.0)
-
-    Returns the created agent with generated UUID.
-    """
-    # Check name uniqueness
-    existing_result = await db.execute(
-        select(AgentConfig).where(AgentConfig.name == agent_data.name)
-    )
-    existing = existing_result.scalar_one_or_none()
-
-    if existing:
-        raise HTTPException(
-            status_code=409,
-            detail=f"Agent with name '{agent_data.name}' already exists",
-        )
-
-    # Verify provider exists
-    provider = await db.get(LLMProvider, agent_data.provider_id)
-    if not provider:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Provider with ID '{agent_data.provider_id}' not found",
-        )
-
-    # Validate temperature range
-    if agent_data.temperature is not None:
-        if not (0.0 <= agent_data.temperature <= 1.0):
-            raise HTTPException(
-                status_code=400, detail="Temperature must be between 0.0 and 1.0"
-            )
-
-    # Create agent
-    agent = AgentConfig(
-        name=agent_data.name,
-        description=agent_data.description,
-        provider_id=agent_data.provider_id,
-        model_name=agent_data.model_name,
-        system_prompt=agent_data.system_prompt,
-        temperature=agent_data.temperature,
-        max_tokens=agent_data.max_tokens,
-        is_active=agent_data.is_active,
-    )
-
-    db.add(agent)
-    await db.commit()
-    await db.refresh(agent)
-
-    logger.info(f"Created agent '{agent.name}' with ID {agent.id}")
-    return AgentConfigPublic.model_validate(agent)
+    return agent
 
 
 @router.put(
     "/{agent_id}",
     response_model=AgentConfigPublic,
     summary="Update agent",
-    response_description="Updated agent configuration",
+    description="Update agent configuration. Doesn't affect running instances (per FR-011).",
 )
 async def update_agent(
     agent_id: UUID,
     update_data: AgentConfigUpdate,
-    db: DatabaseDep,
+    session: AsyncSession = Depends(get_session),
 ) -> AgentConfigPublic:
-    """
-    Update an existing agent configuration.
+    """Update agent configuration.
 
-    Supports partial updates - only provided fields will be modified.
-    Validates provider existence if provider_id is being updated.
-    """
-    agent = await db.get(AgentConfig, agent_id)
+    Args:
+        agent_id: Agent UUID
+        update_data: Fields to update
+        session: Database session
 
-    if not agent:
+    Returns:
+        Updated agent configuration
+
+    Raises:
+        HTTPException 404: Agent or provider not found
+        HTTPException 400: Invalid update data
+    """
+    try:
+        crud = AgentCRUD(session)
+        agent = await crud.update(agent_id, update_data)
+
+        if not agent:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Agent with ID '{agent_id}' not found",
+            )
+
+        logger.info(f"Updated agent '{agent.name}' (ID: {agent.id})")
+        return agent
+    except ValueError as e:
+        if "not found" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(e),
+            )
         raise HTTPException(
-            status_code=404, detail=f"Agent with ID '{agent_id}' not found"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
         )
-
-    # Get update dict excluding unset fields
-    update_dict = update_data.model_dump(exclude_unset=True)
-
-    # Validate name uniqueness if changing name
-    if "name" in update_dict and update_dict["name"] != agent.name:
-        existing_result = await db.execute(
-            select(AgentConfig).where(AgentConfig.name == update_dict["name"])
-        )
-        existing = existing_result.scalar_one_or_none()
-
-        if existing:
-            raise HTTPException(
-                status_code=409,
-                detail=f"Agent with name '{update_dict['name']}' already exists",
-            )
-
-    # Verify new provider exists if changing provider
-    if "provider_id" in update_dict:
-        provider = await db.get(LLMProvider, update_dict["provider_id"])
-        if not provider:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Provider with ID '{update_dict['provider_id']}' not found",
-            )
-
-    # Validate temperature range if updating
-    if "temperature" in update_dict and update_dict["temperature"] is not None:
-        if not (0.0 <= update_dict["temperature"] <= 1.0):
-            raise HTTPException(
-                status_code=400, detail="Temperature must be between 0.0 and 1.0"
-            )
-
-    # Apply updates
-    for field, value in update_dict.items():
-        setattr(agent, field, value)
-
-    await db.commit()
-    await db.refresh(agent)
-
-    logger.info(f"Updated agent '{agent.name}' (ID: {agent.id})")
-    return AgentConfigPublic.model_validate(agent)
 
 
 @router.delete(
     "/{agent_id}",
-    status_code=204,
+    status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete agent",
-    response_description="Agent deleted successfully",
+    description="Delete agent configuration. Running instances continue independently (per FR-033).",
 )
-async def delete_agent(agent_id: UUID, db: DatabaseDep) -> None:
-    """
-    Delete an agent configuration.
+async def delete_agent(
+    agent_id: UUID,
+    session: AsyncSession = Depends(get_session),
+) -> None:
+    """Delete agent configuration.
 
-    Note: Deletion is allowed even with active task assignments.
+    Per FR-033: Deletion allowed even with active task assignments.
     Running agent instances continue until task completion.
-    Cascades delete to agent_task_assignments due to FK constraint.
-    """
-    agent = await db.get(AgentConfig, agent_id)
 
-    if not agent:
+    Args:
+        agent_id: Agent UUID
+        session: Database session
+
+    Raises:
+        HTTPException 404: Agent not found
+    """
+    crud = AgentCRUD(session)
+    deleted = await crud.delete(agent_id)
+
+    if not deleted:
         raise HTTPException(
-            status_code=404, detail=f"Agent with ID '{agent_id}' not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Agent with ID '{agent_id}' not found",
         )
 
-    agent_name = agent.name
-    await db.delete(agent)
-    await db.commit()
+    logger.info(f"Deleted agent (ID: {agent_id})")
 
-    logger.info(f"Deleted agent '{agent_name}' (ID: {agent_id})")
+
+# ============================================================================
+# Task Assignment Operations
+# ============================================================================
+
+
+@router.post(
+    "/{agent_id}/tasks",
+    response_model=AgentTaskAssignmentPublic,
+    status_code=status.HTTP_201_CREATED,
+    summary="Assign task to agent",
+    description="Create agent-task assignment. System creates dedicated agent instance.",
+)
+async def assign_task(
+    agent_id: UUID,
+    assignment_data: AgentTaskAssignmentCreate,
+    session: AsyncSession = Depends(get_session),
+) -> AgentTaskAssignmentPublic:
+    """Assign task to agent.
+
+    Args:
+        agent_id: Agent UUID
+        assignment_data: Task assignment data (must include task_id)
+        session: Database session
+
+    Returns:
+        Created assignment
+
+    Raises:
+        HTTPException 409: Assignment already exists
+        HTTPException 404: Agent or task not found
+        HTTPException 400: Invalid assignment data
+    """
+    # Override agent_id from path
+    assignment_data.agent_id = agent_id
+
+    try:
+        crud = AssignmentCRUD(session)
+        assignment = await crud.create(assignment_data)
+        logger.info(
+            f"Assigned task '{assignment.task_id}' to agent '{agent_id}' "
+            f"(assignment ID: {assignment.id})"
+        )
+        return assignment
+    except ValueError as e:
+        if "already exists" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=str(e),
+            )
+        if "not found" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(e),
+            )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+
+
+@router.get(
+    "/{agent_id}/tasks",
+    response_model=List[AgentTaskAssignmentPublic],
+    summary="List agent's tasks",
+    description="Get all tasks assigned to this agent.",
+)
+async def get_agent_tasks(
+    agent_id: UUID,
+    active_only: bool = Query(False, description="Filter for active assignments only"),
+    session: AsyncSession = Depends(get_session),
+) -> List[AgentTaskAssignmentPublic]:
+    """List tasks assigned to agent.
+
+    Args:
+        agent_id: Agent UUID
+        active_only: Filter for active assignments only
+        session: Database session
+
+    Returns:
+        List of task assignments (empty array if none)
+    """
+    crud = AssignmentCRUD(session)
+    assignments = await crud.list_by_agent(agent_id, active_only=active_only)
+    return assignments
+
+
+@router.delete(
+    "/{agent_id}/tasks/{task_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Unassign task from agent",
+    description="Remove agent-task assignment.",
+)
+async def unassign_task(
+    agent_id: UUID,
+    task_id: UUID,
+    session: AsyncSession = Depends(get_session),
+) -> None:
+    """Remove task assignment from agent.
+
+    Args:
+        agent_id: Agent UUID
+        task_id: Task UUID
+        session: Database session
+
+    Raises:
+        HTTPException 404: Assignment not found
+    """
+    crud = AssignmentCRUD(session)
+
+    # Find assignment by agent_id and task_id
+    assignment = await crud.get_by_agent_and_task(agent_id, task_id)
+
+    if not assignment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Assignment between agent '{agent_id}' and task '{task_id}' not found",
+        )
+
+    await crud.delete(assignment.id)
+    logger.info(
+        f"Unassigned task '{task_id}' from agent '{agent_id}' "
+        f"(assignment ID: {assignment.id})"
+    )
+
+
+# ============================================================================
+# Agent Testing
+# ============================================================================
 
 
 @router.post(
@@ -256,21 +375,37 @@ async def delete_agent(agent_id: UUID, db: DatabaseDep) -> None:
 async def test_agent(
     agent_id: UUID,
     request: TestAgentRequest,
-    db: DatabaseDep,
+    session: AsyncSession = Depends(get_session),
 ) -> TestAgentResponse:
-    """
-    Test an agent configuration with a custom prompt.
+    """Test an agent configuration with a custom prompt.
 
     Sends the provided prompt to the LLM using the agent's configuration
     (system prompt, model, temperature, etc.) and returns the response.
 
     Useful for validating agent behavior before deploying to production tasks.
     Requires the associated provider to be validated and active.
+
+    Args:
+        agent_id: Agent UUID
+        request: Test request with prompt
+        session: Database session
+
+    Returns:
+        Test response with LLM output and execution metrics
+
+    Raises:
+        HTTPException 404: Agent not found
+        HTTPException 400: Invalid prompt or provider configuration
+        HTTPException 500: LLM execution failed
     """
-    service = AgentTestService(db)
+    service = AgentTestService(session)
 
     try:
         result = await service.test_agent(agent_id, request.prompt)
+        logger.info(
+            f"Successfully tested agent '{agent_id}' "
+            f"(execution time: {result.elapsed_time:.2f}s)"
+        )
         return result
     except ValueError as e:
         # Handle known validation errors
