@@ -2,9 +2,11 @@
 from datetime import datetime
 
 from sqlalchemy import Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
 from .base import IDMixin, TimestampMixin
+from .enums import AnalysisStatus
 
 
 class Message(IDMixin, TimestampMixin, SQLModel, table=True):
@@ -52,3 +54,15 @@ class Message(IDMixin, TimestampMixin, SQLModel, table=True):
         default=None, ge=0.0, le=1.0, description="Classification confidence score"
     )
     analyzed: bool = Field(default=False, description="Whether message was analyzed")
+
+    # Analysis tracking fields (Phase 1)
+    analysis_status: str | None = Field(
+        default=AnalysisStatus.pending.value,
+        max_length=50,
+        description="Analysis processing status: pending/analyzed/spam/noise",
+    )
+    included_in_runs: list[str] | None = Field(
+        default=None,
+        sa_type=JSONB,
+        description="UUIDs of AnalysisRuns that processed this message",
+    )

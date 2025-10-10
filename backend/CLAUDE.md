@@ -1,163 +1,42 @@
-# Backend Documentation
+# Backend: FastAPI + TaskIQ + Pydantic-AI
 
-## Architecture Overview
+## Core Components
+- **Main**: `backend/app/main.py` - FastAPI app, REST API, WebSocket
+- **Telegram Bot**: `backend/app/telegram_bot.py` - aiogram 3, webhook integration
+- **Background Jobs**: `backend/app/tasks.py` - TaskIQ + NATS broker
+- **DB**: PostgreSQL (port 5555), SQLAlchemy, Alembic migrations
 
-The backend is a sophisticated, event-driven microservice built with FastAPI, providing robust task management and message processing capabilities.
+## Critical API Routes
+### Phase 1: Analysis System (v1)
+**Analysis Runs** `/api/v1/analysis/runs`:
+- POST create (validates no unclosed runs, 409 if exists)
+- POST `{id}/start` - trigger background job
+- POST `{id}/close` - requires proposals_pending=0
 
-## Key Components
+**Proposals** `/api/v1/proposals`:
+- PUT `{id}/approve|reject|merge` - decrements run.proposals_pending
+- Filters: run_id, status, confidence (0.0-1.0)
 
-### Telegram Integration
-- **Location**: `backend/app/telegram_bot.py`
-- Modern aiogram 3 bot implementation
-- Command handlers for `/start`, `/help`
-- WebApp integration
-- HTTP client for FastAPI communication
+**Projects** `/api/v1/projects`:
+- Keywords REQUIRED (list[str]), auto-version on update
 
-### FastAPI Backend
-- **Location**: `backend/app/main.py`
-- REST API with comprehensive task/message management endpoints
-- WebSocket support for real-time updates
-- CORS middleware configuration
-
-### API Endpoints
-
+## Background Job Flow (`execute_analysis_run`)
 ```
-GET  /                     # API status
-GET  /api/health           # Health check
-GET  /api/config           # Client configuration
-POST /api/messages         # Create message
-GET  /api/messages         # Get messages list
-POST /api/tasks            # Create task
-GET  /api/tasks            # Get tasks list
-GET  /api/tasks/{id}       # Get specific task
-PUT  /api/tasks/{id}/status # Update task status
-GET  /api/stats            # Task statistics
-POST /webhook/telegram     # Telegram webhook
-WS   /ws                   # WebSocket real-time updates
-
-### Agent Management API
-GET    /api/agents           # List agents (pagination, filters)
-POST   /api/agents           # Create agent
-GET    /api/agents/{id}      # Get agent details
-PUT    /api/agents/{id}      # Update agent
-DELETE /api/agents/{id}      # Delete agent
-POST   /api/agents/{id}/test # Test agent with custom prompt
+1. fetch_messages(time_window) → prefilter(keywords/length/@mentions)
+2. create_batches(10min windows, max 50 msgs)
+3. FOR batch: LLMProposalService → save_proposals → broadcast WS
+4. complete_run() or fail_run(error_log)
 ```
 
-### Agent Management
-- **Location**: `backend/app/api/v1/agents.py`
-- Full CRUD operations for AI agent configurations
-- Integration with LLM providers (Ollama, OpenAI)
-- Agent testing endpoint for validation
+## Key Models
+- **AnalysisRun**: 7-state lifecycle (pending→running→completed→reviewed→closed→failed→cancelled)
+- **TaskProposal**: confidence (high>0.9, med 0.7-0.9, low<0.7), source_message_ids (JSONB)
+- **ProjectConfig**: keywords (required), semantic versioning
 
-#### Agent Management Features
-- Comprehensive CRUD API for agent configurations
-- Provider-agnostic agent management
-- Secure API key handling with encryption
-- Detailed agent testing capabilities
+## Validation Rules
+- No new AnalysisRun if unclosed exists (409)
+- Cannot close if proposals_pending > 0 (400)
+- Approve/reject decrements proposals_pending
 
-#### Agent Testing Service
-- **Location**: `backend/app/services/agent_service.py`
-- `AgentTestService` class for testing configured agents
-- Supports both Ollama and OpenAI providers
-- Automatic API key decryption
-- Pydantic-AI integration for type-safe LLM interactions
-- Execution time tracking
-- Provider validation (active status, connection status)
-
-#### Models
-- `AgentConfig`: Database model for agent configurations
-- `AgentConfigCreate`: Schema for creating agents
-- `AgentConfigUpdate`: Schema for updating agents (partial)
-- `AgentConfigPublic`: Response schema
-- `TestAgentRequest`: Request schema for testing
-- `TestAgentResponse`: Response schema for test results
-
-### LLM Integration
-- **Location**: `backend/core/agents.py`
-- Uses pydantic-ai for structured AI outputs
-- Supports multiple AI providers (e.g., Ollama)
-- Agents for:
-  - Message classification
-  - Entity extraction
-  - Advanced analysis
-
-### Async Task Processing
-- **Location**: `backend/app/tasks.py`
-- TaskIQ with NATS broker for distributed processing
-- Background job management
-- Worker can run in Docker or locally
-
-### Database Integration
-- SQLModel with async SQLAlchemy operations
-- Complex relational schemas
-- Supports both simple and advanced database models
-- Async database session management
-
-## Development Commands
-
-### Package Management
-- `uv sync`: Install dependencies
-- `uv sync --all-groups`: Install all dependency groups
-- `uv run python -m pytest`: Run tests
-
-### Database Migrations
-- `uv run alembic revision --autogenerate -m "description"`: Generate migration
-- `uv run alembic upgrade head`: Apply migrations
-
-## Configuration
-
-### Environment Variables
-- `DATABASE_URL`: PostgreSQL connection string
-- `OLLAMA_BASE_URL`: LLM provider URL
-- `TELEGRAM_BOT_TOKEN`: Telegram bot authentication
-- `LOG_LEVEL`: Logging configuration
-
-## Current Architectural Status
-
-### ✅ Working Components
-- Docker services
-- API endpoints
-- Database integration
-- Basic LLM agent definition
-
-### 🔄 Ongoing Development
-- Full LLM agent integration
-- Advanced TaskIQ processing
-- Comprehensive test coverage
-
-## Development Guidelines
-
-### Code Quality
-- Use async programming patterns
-- Implement type hints
-- Write comprehensive docstrings
-- Follow PEP 8 guidelines
-
-### Agent Development Guidelines
-- Agent testing requires validated LLM providers
-- Use CredentialEncryption for API key handling
-- Follow async patterns for LLM calls
-- Handle provider validation errors gracefully
-- Implement comprehensive error handling for agent testing
-- Ensure secure, efficient API key management
-
-### Testing
-- Async tests with pytest-asyncio
-- Integration tests for TaskIQ/NATS
-- Mock external services
-- Comprehensive testing of Agent Management features
-  - Provider validation
-  - Agent creation, update, deletion
-  - Agent testing scenarios
-  - Error handling for LLM interactions
-
-## Troubleshooting
-
-### Common Issues
-- Ensure PostgreSQL is running on port 5555
-- Check Telegram bot token configuration
-- Verify LLM provider connectivity
-
-## Last Updated
-September 2025
+## WebSocket Events
+Topic `analysis_runs`: run_started, progress_updated, proposals_created, run_completed, run_failed

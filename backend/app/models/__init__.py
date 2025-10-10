@@ -10,8 +10,25 @@ from .agent_task_assignment import (
     AgentTaskAssignmentCreate,
     AgentTaskAssignmentPublic,
 )
+from .analysis_run import (
+    AnalysisRun,
+    AnalysisRunCreate,
+    AnalysisRunListResponse,
+    AnalysisRunPublic,
+    AnalysisRunUpdate,
+)
 from .base import IDMixin, TimestampMixin
-from .enums import TaskCategory, TaskPriority, TaskStatus, SourceType
+from .enums import (
+    AnalysisRunStatus,
+    AnalysisStatus,
+    LLMRecommendation,
+    ProposalStatus,
+    SimilarityType,
+    SourceType,
+    TaskCategory,
+    TaskPriority,
+    TaskStatus,
+)
 from .legacy import (
     MessageCreate,
     MessagePublic,
@@ -46,6 +63,21 @@ from .message_ingestion import (
     MessageIngestionJobPublic,
     IngestionStatus,
 )
+from .project_config import (
+    ProjectConfig,
+    ProjectConfigCreate,
+    ProjectConfigPublic,
+    ProjectConfigUpdate,
+    ProjectConfigListResponse,
+)
+from .task_entity import TaskEntity, TaskEntityPublic
+from .task_proposal import (
+    TaskProposal,
+    TaskProposalCreate,
+    TaskProposalPublic,
+    TaskProposalUpdate,
+    TaskProposalListResponse,
+)
 
 __all__ = [
     # Base
@@ -56,6 +88,14 @@ __all__ = [
     "TaskCategory",
     "TaskPriority",
     "SourceType",
+    "AnalysisRunStatus",
+    "AnalysisStatus",
+    "ProposalStatus",
+    "LLMRecommendation",
+    "SimilarityType",
+    "ProviderType",
+    "ValidationStatus",
+    "IngestionStatus",
     # Legacy
     "Source",
     "SourceCreate",
@@ -101,4 +141,26 @@ __all__ = [
     "AgentTaskAssignment",
     "AgentTaskAssignmentCreate",
     "AgentTaskAssignmentPublic",
+    # Analysis Run
+    "AnalysisRun",
+    "AnalysisRunCreate",
+    "AnalysisRunListResponse",
+    "AnalysisRunPublic",
+    "AnalysisRunUpdate",
+    # Task Proposal
+    "TaskProposal",
+    "TaskProposalCreate",
+    "TaskProposalPublic",
+    "TaskProposalUpdate",
+    # Project Config
+    "ProjectConfig",
+    "ProjectConfigCreate",
+    "ProjectConfigPublic",
+    "ProjectConfigUpdate",
+    "ProjectConfigListResponse",
+    # Task Entity (Phase 2 placeholder)
+    "TaskEntity",
+    "TaskEntityPublic",
+    # List Responses
+    "TaskProposalListResponse",
 ]

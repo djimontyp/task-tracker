@@ -4,32 +4,9 @@ import { ArrowUpDown, Clock, PlayCircle, CheckCircle, XCircle, AlertCircle, Luci
 
 import { Button, Badge } from '@/shared/ui'
 import { formatFullDate } from '@/shared/utils/date'
+import type { AnalysisRun, AnalysisRunStatus } from '@/features/analysis/types'
 
-export interface AnalysisRun {
-  id: string
-  status: string
-  trigger_type: string
-  time_window_start: string
-  time_window_end: string
-  created_at: string
-  completed_at: string | null
-  closed_at: string | null
-  proposals_total: number
-  proposals_approved: number
-  proposals_rejected: number
-  proposals_pending: number
-  total_messages_in_window: number
-  cost_estimate: number
-  accuracy_metrics: {
-    approval_rate: number
-    avg_confidence: number
-    quick_approvals: number
-    total_proposals: number
-  } | null
-  triggered_by: string | null
-}
-
-export const statusConfig: Record<string, { label: string; icon: LucideIcon; className: string }> = {
+export const statusConfig: Record<AnalysisRunStatus, { label: string; icon: LucideIcon; className: string }> = {
   pending: { label: 'Pending', icon: Clock, className: 'bg-slate-500 text-white' },
   running: { label: 'Running', icon: PlayCircle, className: 'bg-blue-500 text-white' },
   completed: { label: 'Waiting Review', icon: AlertCircle, className: 'bg-amber-500 text-white' },
@@ -50,8 +27,8 @@ export const columns: ColumnDef<AnalysisRun>[] = [
     accessorKey: 'status',
     header: 'Status',
     cell: ({ row }) => {
-      const status = row.getValue<string>('status')
-      const config = statusConfig[status]
+      const status = row.getValue<AnalysisRunStatus>('status')
+      const config = statusConfig[status] ?? statusConfig.pending
       const Icon = config?.icon
 
       return (
@@ -71,13 +48,13 @@ export const columns: ColumnDef<AnalysisRun>[] = [
     header: 'Trigger',
     cell: ({ row }) => {
       const triggerType = row.getValue<string>('trigger_type')
-      const triggeredBy = row.original.triggered_by
+      const triggeredByUserId = row.original.triggered_by_user_id
 
       return (
         <div className="text-sm">
           <div className="font-medium capitalize">{triggerType}</div>
-          {triggeredBy && (
-            <div className="text-xs text-muted-foreground">by {triggeredBy}</div>
+          {triggeredByUserId !== null && (
+            <div className="text-xs text-muted-foreground">user #{triggeredByUserId}</div>
           )}
         </div>
       )
@@ -160,9 +137,13 @@ export const columns: ColumnDef<AnalysisRun>[] = [
 
       return (
         <div className="text-xs space-y-1">
-          <div>Approval: {(metrics.approval_rate * 100).toFixed(1)}%</div>
-          <div>Confidence: {(metrics.avg_confidence * 100).toFixed(0)}%</div>
-          <div>Quick: {metrics.quick_approvals}/{metrics.total_proposals}</div>
+          {metrics.approval_rate !== undefined && (
+            <div>Approval: {(metrics.approval_rate * 100).toFixed(1)}%</div>
+          )}
+          {metrics.rejection_rate !== undefined && (
+            <div>Rejection: {(metrics.rejection_rate * 100).toFixed(1)}%</div>
+          )}
+          <div>Total Proposals: {metrics.proposals_total ?? row.original.proposals_total}</div>
         </div>
       )
     },
