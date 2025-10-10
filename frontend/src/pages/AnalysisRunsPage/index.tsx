@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useState, useEffect } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Spinner,
   Button,
@@ -31,25 +31,99 @@ import {
 } from '@tanstack/react-table'
 import { columns, statusConfig, type AnalysisRun } from './columns'
 import { DataTableFacetedFilter } from './faceted-filter'
-import { ChevronDown } from 'lucide-react'
-
-interface AnalysisRunListResponse {
-  runs: AnalysisRun[]
-  total: number
-  page: number
-  page_size: number
-}
+import { ChevronDown, Plus } from 'lucide-react'
+import { CreateRunModal } from '@/features/analysis/components'
+import { analysisService } from '@/features/analysis/api/analysisService'
+import toast from 'react-hot-toast'
+import type { AnalysisRunListResponse } from '@/features/analysis/types'
 
 const AnalysisRunsPage = () => {
+  const queryClient = useQueryClient()
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+
   const { data, isLoading, error } = useQuery<AnalysisRunListResponse>({
     queryKey: ['analysis-runs'],
     queryFn: async () => {
       const response = await apiClient.get(API_ENDPOINTS.analysis.runs)
-      return response.data
+      return response.data as AnalysisRunListResponse
     },
   })
 
-  const runs = data?.runs ?? []
+  const runs = data?.items ?? []
+  const totalItems = data?.total ?? runs.length
+
+  // WebSocket integration for real-time updates
+  useEffect(() => {
+    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost/ws'
+    const ws = new WebSocket(`${wsUrl}?topics=analysis,proposals`)
+
+    ws.onopen = () => {
+      console.log('WebSocket connected for analysis updates')
+    }
+
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data)
+
+        if (message.topic === 'analysis') {
+          switch (message.event) {
+            case 'run_created':
+              queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
+              toast.success('New analysis run created')
+              break
+            case 'run_progress':
+              queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
+              break
+            case 'run_completed':
+              queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
+              toast.success('Analysis run completed')
+              break
+            case 'run_failed':
+              queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
+              toast.error('Analysis run failed')
+              break
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error)
+      }
+    }
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error)
+    }
+
+    ws.onclose = () => {
+      console.log('WebSocket disconnected')
+    }
+
+    return () => {
+      ws.close()
+    }
+  }, [queryClient])
+
+  // Mutations
+  const startRunMutation = useMutation({
+    mutationFn: (runId: string) => analysisService.startRun(runId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
+      toast.success('Analysis run started')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to start analysis run')
+    },
+  })
+
+  const closeRunMutation = useMutation({
+    mutationFn: (runId: string) => analysisService.closeRun(runId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
+      toast.success('Analysis run closed')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to close analysis run')
+    },
+  })
 
   // Data table state
   const [sorting, setSorting] = useState<SortingState>([])
@@ -110,6 +184,10 @@ const AnalysisRunsPage = () => {
             Manage and review AI-powered message analysis runs
           </p>
         </div>
+        <Button onClick={() => setCreateModalOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Create Run
+        </Button>
       </div>
 
       <div className="flex items-center gap-2">
@@ -200,7 +278,7 @@ const AnalysisRunsPage = () => {
 
         <div className="flex items-center justify-between px-4 py-4">
           <div className="text-sm text-muted-foreground">
-            {table.getFilteredRowModel().rows.length} run(s) total
+            {totalItems} run(s) total
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -222,6 +300,11 @@ const AnalysisRunsPage = () => {
           </div>
         </div>
       </Card>
+
+      <CreateRunModal
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+      />
     </div>
   )
 }

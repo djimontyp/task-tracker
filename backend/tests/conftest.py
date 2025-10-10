@@ -4,6 +4,9 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
+from sqlalchemy.dialects import postgresql
+from sqlalchemy import JSON, event
+from sqlalchemy.types import TypeDecorator
 
 from cryptography.fernet import Fernet
 from core.config import settings
@@ -19,12 +22,36 @@ if not settings.encryption_key:
 # Test database URL (in-memory SQLite)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
+# Monkey patch JSONB to use JSON for SQLite compatibility
+class SQLiteJSONB(TypeDecorator):
+    """Decorator to use JSON instead of JSONB for SQLite."""
+
+    impl = JSON
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == 'sqlite':
+            return dialect.type_descriptor(JSON())
+        else:
+            return dialect.type_descriptor(postgresql.JSONB())
+
+# Replace JSONB with JSON-compatible type
+postgresql.JSONB = SQLiteJSONB
+
 # Create test engine
 test_engine = create_async_engine(
     TEST_DATABASE_URL,
     connect_args={"check_same_thread": False},
     echo=False,
 )
+
+# Enable foreign keys for SQLite
+@event.listens_for(test_engine.sync_engine, "connect")
+def set_sqlite_pragma(dbapi_conn, connection_record):
+    """Configure SQLite for better testing."""
+    cursor = dbapi_conn.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 # Create test session factory
 TestSessionLocal = sessionmaker(
