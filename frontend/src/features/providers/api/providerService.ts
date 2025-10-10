@@ -11,6 +11,7 @@ import {
 } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { API_ENDPOINTS } from "@/shared/config/api";
 
 class ProviderService {
   /**
@@ -27,7 +28,7 @@ class ProviderService {
     if (params?.active_only) queryParams.set("active_only", "true");
 
     const response = await fetch(
-      `${API_BASE_URL}/api/providers?${queryParams.toString()}`
+      `${API_BASE_URL}${API_ENDPOINTS.providers}?${queryParams.toString()}`
     );
 
     if (!response.ok) {
@@ -41,7 +42,7 @@ class ProviderService {
    * Get single provider by ID
    */
   async getProvider(id: string): Promise<LLMProvider> {
-    const response = await fetch(`${API_BASE_URL}/api/providers/${id}`);
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.providers}/${id}`);
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -57,7 +58,7 @@ class ProviderService {
    * Create new provider
    */
   async createProvider(data: LLMProviderCreate): Promise<LLMProvider> {
-    const response = await fetch(`${API_BASE_URL}/api/providers`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.providers}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -83,7 +84,7 @@ class ProviderService {
     id: string,
     data: LLMProviderUpdate
   ): Promise<LLMProvider> {
-    const response = await fetch(`${API_BASE_URL}/api/providers/${id}`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.providers}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -106,7 +107,7 @@ class ProviderService {
    * Delete provider
    */
   async deleteProvider(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/providers/${id}`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.providers}/${id}`, {
       method: "DELETE",
     });
 

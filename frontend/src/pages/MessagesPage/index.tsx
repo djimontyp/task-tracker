@@ -5,6 +5,7 @@ import {
   Button,
 } from '@/shared/ui'
 import { apiClient } from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
 import { toast } from 'sonner'
 import { logger } from '@/shared/utils/logger'
 import {
@@ -73,7 +74,7 @@ const MessagesPage = () => {
           params.sort_order = sort.desc ? 'desc' : 'asc'
         }
 
-        const response = await apiClient.get('/api/messages', { params })
+        const response = await apiClient.get(API_ENDPOINTS.messages, { params })
         return response.data
       } catch (error) {
         logger.warn('Messages endpoint not available yet, returning empty response')

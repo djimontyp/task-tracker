@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 
 import apiClient from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
 import { useMessagesStore } from '../store/messagesStore'
 import type { Message } from '@/shared/types'
 import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
@@ -119,7 +120,7 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
           ...resolveDateRange(currentPeriod),
         }
 
-        const response = await apiClient.get<{ items: Message[] }>('/api/messages', { params })
+        const response = await apiClient.get<{ items: Message[] }>(API_ENDPOINTS.messages, { params })
         hydrate(response.data.items)
         setError(null)
       } catch (err) {

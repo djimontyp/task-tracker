@@ -14,6 +14,7 @@ import {
 import { apiClient } from '@/shared/lib/api/client'
 import { toast } from 'sonner'
 import { logger } from '@/shared/utils/logger'
+import { API_ENDPOINTS } from '@/shared/config/api'
 
 interface TelegramGroup {
   chat_id: string
@@ -49,7 +50,7 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
     setFetchingGroups(true)
     try {
       // Fetch webhook settings to get configured groups
-      const response = await apiClient.get('/api/webhook-settings')
+      const response = await apiClient.get(API_ENDPOINTS.webhookSettings)
       const settings = response.data
       logger.debug('Webhook settings:', settings)
 
@@ -99,7 +100,7 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
 
     setLoading(true)
     try {
-      const response = await apiClient.post('/api/v1/ingestion/telegram', {
+      const response = await apiClient.post(API_ENDPOINTS.ingestion.telegram, {
         chat_ids: Array.from(selectedGroups),
         limit,
       })

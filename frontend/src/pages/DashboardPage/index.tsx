@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar'
 import { AvatarGroup } from '@/shared/components/AvatarGroup'
 import { TelegramIcon } from '@/shared/components/TelegramIcon'
 import { apiClient } from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
 import { Task, TaskStats } from '@/shared/types'
 import MetricCard from '@/shared/components/MetricCard'
 import ActivityHeatmap from '@/shared/components/ActivityHeatmap'
@@ -23,7 +24,7 @@ const DashboardPage = () => {
   const { data: stats, isLoading: statsLoading } = useQuery<TaskStats>({
     queryKey: ['stats'],
     queryFn: async () => {
-      const response = await apiClient.get('/api/stats')
+      const response = await apiClient.get(API_ENDPOINTS.stats)
       return response.data
     },
   })
@@ -39,7 +40,7 @@ const DashboardPage = () => {
   const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['tasks'],
     queryFn: async () => {
-      const response = await apiClient.get('/api/tasks')
+      const response = await apiClient.get(API_ENDPOINTS.tasks)
       return response.data
     },
   })

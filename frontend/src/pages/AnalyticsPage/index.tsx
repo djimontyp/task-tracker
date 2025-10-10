@@ -2,13 +2,14 @@ import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Card, Spinner } from '@/shared/ui'
 import { apiClient } from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
 import { TaskStats } from '@/shared/types'
 
 const AnalyticsPage = () => {
   const { data: stats, isLoading } = useQuery<TaskStats>({
     queryKey: ['stats'],
     queryFn: async () => {
-      const response = await apiClient.get('/api/stats')
+      const response = await apiClient.get(API_ENDPOINTS.stats)
       return response.data
     },
   })

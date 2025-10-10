@@ -11,6 +11,7 @@ import {
 } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { API_ENDPOINTS } from "@/shared/config/api";
 
 class TaskService {
   /**
@@ -27,7 +28,7 @@ class TaskService {
     if (params?.active_only) queryParams.set("active_only", "true");
 
     const response = await fetch(
-      `${API_BASE_URL}/api/tasks?${queryParams.toString()}`
+      `${API_BASE_URL}${API_ENDPOINTS.taskConfigs}?${queryParams.toString()}`
     );
 
     if (!response.ok) {
@@ -41,7 +42,7 @@ class TaskService {
    * Get single task by ID
    */
   async getTask(id: string): Promise<TaskConfig> {
-    const response = await fetch(`${API_BASE_URL}/api/tasks/${id}`);
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.taskConfigs}/${id}`);
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -57,7 +58,7 @@ class TaskService {
    * Create new task
    */
   async createTask(data: TaskConfigCreate): Promise<TaskConfig> {
-    const response = await fetch(`${API_BASE_URL}/api/tasks`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.taskConfigs}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -83,7 +84,7 @@ class TaskService {
    * Update existing task
    */
   async updateTask(id: string, data: TaskConfigUpdate): Promise<TaskConfig> {
-    const response = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.taskConfigs}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -109,7 +110,7 @@ class TaskService {
    * Delete task
    */
   async deleteTask(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.taskConfigs}/${id}`, {
       method: "DELETE",
     });
 

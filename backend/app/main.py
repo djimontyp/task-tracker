@@ -5,7 +5,6 @@ from core.taskiq_config import nats_broker
 
 from .api.v1.router import api_router
 from .database import create_db_and_tables
-from .routers import agents_router, providers_router, tasks_router
 from .webhooks.router import webhook_router
 from .ws.router import router as ws_router
 
@@ -68,10 +67,6 @@ def create_app() -> FastAPI:
     app.include_router(api_router)
     app.include_router(webhook_router)
     app.include_router(ws_router)
-    # Agent management routers
-    app.include_router(providers_router)
-    app.include_router(agents_router)
-    app.include_router(tasks_router)
 
     @app.get("/")
     async def root():

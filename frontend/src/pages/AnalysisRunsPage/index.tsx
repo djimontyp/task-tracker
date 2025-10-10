@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui'
 import { apiClient } from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
 import {
   ColumnFiltersState,
   SortingState,
@@ -43,7 +44,7 @@ const AnalysisRunsPage = () => {
   const { data, isLoading, error } = useQuery<AnalysisRunListResponse>({
     queryKey: ['analysis-runs'],
     queryFn: async () => {
-      const response = await apiClient.get('/api/analysis/runs')
+      const response = await apiClient.get(API_ENDPOINTS.analysis.runs)
       return response.data
     },
   })

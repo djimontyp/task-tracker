@@ -92,6 +92,41 @@ A modern, responsive React TypeScript dashboard for real-time task tracking and 
 - Lazy loading of components
 - Minimal re-renders
 - Efficient state management
+- Optimized state updates for agent management
+
+## Agent Management Features
+
+### Agent Management UI
+- **Location**: `/pages/AgentsPage`
+- Full CRUD interface for AI agent configurations
+- Real-time agent testing with custom prompts
+
+#### Components
+- `/features/agents/components/AgentList.tsx` - Main list view with cards
+- `/features/agents/components/AgentForm.tsx` - Create/Edit dialog
+- `/features/agents/components/AgentCard.tsx` - Individual agent card
+- `/features/agents/components/AgentTestDialog.tsx` - Testing interface
+- `/features/agents/components/TaskAssignment.tsx` - Task assignment UI
+
+#### Agent Testing Interface
+- Custom prompt input (50-2000 characters)
+- Character count validation
+- Example prompts for quick testing
+- Real-time execution time display
+- Formatted response display
+- Error handling with toast notifications
+- Model and provider information display
+
+#### API Integration
+- **Service**: `/features/agents/api/agentService.ts`
+- Methods:
+  - `listAgents`
+  - `createAgent`
+  - `updateAgent`
+  - `deleteAgent`
+  - `testAgent`
+- TanStack Query for state management
+- Optimistic updates for better UX
 
 ## Troubleshooting
 
@@ -99,6 +134,10 @@ A modern, responsive React TypeScript dashboard for real-time task tracking and 
 - Ensure backend API is running
 - Check WebSocket connection
 - Verify environment variables
+- Agent testing error handling
+  - Verify provider status
+  - Check API key configuration
+  - Validate LLM provider connectivity
 
 ## Navigation Structure
 

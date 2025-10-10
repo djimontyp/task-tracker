@@ -7,6 +7,7 @@ import { useTheme } from '@/shared/components/ThemeProvider'
 import { apiClient } from '@/shared/lib/api/client'
 import { formatFullDate } from '@/shared/utils/date'
 import { logger } from '@/shared/utils/logger'
+import { API_ENDPOINTS } from '@/shared/config/api'
 
 const themeOptions: { value: 'light' | 'dark' | 'system'; label: string }[] = [
   { value: 'light', label: 'Light' },
@@ -131,7 +132,7 @@ const SettingsPage = () => {
   const loadConfig = useCallback(async () => {
     setIsLoadingConfig(true)
     try {
-      const response = await apiClient.get<WebhookConfigResponseDto>('/api/webhook-settings')
+      const response = await apiClient.get<WebhookConfigResponseDto>(API_ENDPOINTS.webhookSettings)
       const data = response.data
 
       const backendBaseUrl = buildBaseUrl(
@@ -173,7 +174,7 @@ const SettingsPage = () => {
 
     setIsSaving(true)
     try {
-      const { data } = await apiClient.post<TelegramWebhookConfigDto>('/api/webhook-settings', {
+      const { data } = await apiClient.post<TelegramWebhookConfigDto>(API_ENDPOINTS.webhookSettings, {
         protocol,
         host
       })
@@ -202,7 +203,7 @@ const SettingsPage = () => {
     setIsSettingWebhook(true)
     try {
       const { data } = await apiClient.post<SetWebhookResponseDto>(
-        '/api/webhook-settings/telegram/set',
+        API_ENDPOINTS.telegramWebhook.set,
         {
           protocol,
           host
@@ -227,7 +228,7 @@ const SettingsPage = () => {
     setIsDeletingWebhook(true)
     try {
       const { data } = await apiClient.delete<SetWebhookResponseDto>(
-        '/api/webhook-settings/telegram'
+        API_ENDPOINTS.telegramWebhook.delete
       )
 
       if (data.success) {
@@ -261,7 +262,7 @@ const SettingsPage = () => {
     setIsAddingGroup(true)
     try {
       const { data } = await apiClient.post<TelegramWebhookConfigDto>(
-        '/api/webhook-settings/telegram/groups',
+        API_ENDPOINTS.telegramWebhook.groups,
         { group_id: groupId }
       )
 
@@ -279,7 +280,7 @@ const SettingsPage = () => {
     setRemovingGroupIds(prev => new Set(prev).add(groupId))
     try {
       const { data } = await apiClient.delete<TelegramWebhookConfigDto>(
-        `/api/webhook-settings/telegram/groups/${groupId}`
+        API_ENDPOINTS.telegramWebhook.group(groupId)
       )
 
       setGroups(data.groups || [])
@@ -299,7 +300,7 @@ const SettingsPage = () => {
     setIsRefreshingNames(true)
     try {
       const { data } = await apiClient.post<TelegramWebhookConfigDto>(
-        '/api/webhook-settings/telegram/groups/refresh-names'
+        API_ENDPOINTS.telegramWebhook.refreshNames
       )
 
       setGroups(data.groups || [])
