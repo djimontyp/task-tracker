@@ -318,11 +318,11 @@ async def start_run(
             detail=f"Analysis run with ID '{run_id}' not found",
         )
 
-    # TODO: Phase 2 - Implement TaskIQ job trigger
-    # from app.tasks import execute_analysis_run
-    # await execute_analysis_run.kiq(str(run_id))
+    # Trigger TaskIQ background job
+    from app.tasks import execute_analysis_run
+    await execute_analysis_run.kiq(str(run_id))
 
-    logger.info(f"Triggered analysis run {run_id} (placeholder - TaskIQ integration pending)")
+    logger.info(f"Triggered analysis run {run_id} via TaskIQ background job")
 
     return {
         "status": "started",

@@ -453,10 +453,14 @@ class AnalysisExecutor:
             raise ValueError(f"Run with ID '{run_id}' not found")
 
         # Query messages in time window
+        # Convert aware datetime to naive for comparison (DB uses naive timestamps)
+        start_naive = run.time_window_start.replace(tzinfo=None) if run.time_window_start.tzinfo else run.time_window_start
+        end_naive = run.time_window_end.replace(tzinfo=None) if run.time_window_end.tzinfo else run.time_window_end
+
         messages_result = await self.session.execute(
             select(Message).where(
-                Message.sent_at >= run.time_window_start,
-                Message.sent_at <= run.time_window_end,
+                Message.sent_at >= start_naive,
+                Message.sent_at <= end_naive,
             )
         )
         messages = list(messages_result.scalars().all())
