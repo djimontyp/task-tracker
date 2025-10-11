@@ -86,38 +86,69 @@ def example():
 | Value    | Value    | Value    |
 
 ### Callouts/Admonitions
-Use these for important information:
+
+**Required extensions in mkdocs.yml:**
+```yaml
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+```
+
+**Basic syntax** - Use `!!!` for static admonitions:
 
 ```markdown
 !!! note
-    Additional information
+    Content must be indented (4 spaces or 1 tab).
+    Empty line before content is optional but recommended.
 
-!!! tip
-    Helpful suggestions
+!!! note "Custom Title"
+    You can add a custom title in quotes.
 
-!!! warning
-    Important warnings
-
-!!! danger
-    Critical alerts
-
-!!! info
-    General information
-
-!!! success
-    Positive outcomes
-
-!!! example
-    Usage examples
+!!! note ""
+    Empty quotes remove the title completely.
 ```
 
-### Collapsible Sections
+**Available types:**
+- `note` - Additional information
+- `abstract` - Summary or overview
+- `info` - General information
+- `tip` - Helpful suggestions
+- `success` - Positive outcomes
+- `question` - Questions or FAQs
+- `warning` - Important warnings
+- `failure` - Failed operations
+- `danger` - Critical alerts
+- `bug` - Bug information
+- `example` - Usage examples
+- `quote` - Quotations
+
+**Collapsible admonitions** - Use `???` instead of `!!!`:
+
 ```markdown
 ??? note "Click to expand"
-    Hidden content here
+    Starts collapsed. User must click to see content.
 
 ???+ tip "Expanded by default"
-    This section starts opened
+    Starts open. User can collapse it.
+```
+
+**IMPORTANT FORMATTING RULES:**
+1. Content MUST be indented (4 spaces or tab)
+2. Add empty lines between blocks inside admonitions
+3. For code blocks inside admonitions, use proper indentation:
+
+```markdown
+???+ example "Example with code"
+    This is text.
+
+    ```python
+    # Code block inside - note the empty line above
+    def example():
+        pass
+    ```
+
+    More text after code.
 ```
 
 ### Links

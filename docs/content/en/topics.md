@@ -1,37 +1,52 @@
 # Context Spaces (Topics)
 
+!!! tip "Quick Overview"
+    Context Spaces are smart containers that organize all your project information in one place. Think of them as living folders that understand their contents and grow with your project.
+
+---
+
 ## What are Context Spaces?
 
 **Context Spaces** (also referred to as Topics) are the central organizing concept in Task Tracker. They represent contextual domains that aggregate and structure all project-related information in one place.
 
-Unlike traditional task management systems where tasks are the primary entity, in Task Tracker, **Context Spaces serve as the central hub** for organizing knowledge, activities, and artifacts.
+!!! info "Key Difference"
+    Unlike traditional task management systems where tasks are the primary entity, in Task Tracker, **Context Spaces serve as the central hub** for organizing knowledge, activities, and artifacts.
+
+---
 
 ## Core Concept
 
 A Context Space is not just a category or label - it's a **living knowledge container** that:
 
-- Accumulates information from various sources
-- Maintains context and relationships
-- Evolves as new information arrives
-- Serves as the foundation for AI analysis and automation
+✓ **Accumulates information** from various sources
+✓ **Maintains context** and relationships
+✓ **Evolves automatically** as new information arrives
+✓ **Powers AI analysis** and automation
 
-Think of Context Spaces as smart folders that understand their contents and can be enriched automatically.
+!!! example "Think of it this way"
+    Context Spaces are like smart folders that understand their contents and can be enriched automatically by AI.
+
+---
 
 ## What Can Belong to a Context Space?
 
 A Context Space can contain heterogeneous entities:
 
-- **Tasks** - actionable items that need to be completed
-- **Messages** - chat messages, discussions, conversations
-- **Analysis Results** - structured data extracted by AI
-- **Reports** - generated summaries and insights
-- **External References** - links to Jira tickets, GitHub issues, Redmine tasks
-- **Documentation** - notes, specs, decision records
-- **Code References** - links to specific code locations
+| Entity Type | Description | Examples |
+|------------|-------------|----------|
+| **Tasks** | Actionable items that need completion | Bug fixes, features, improvements |
+| **Messages** | Conversations and discussions | Team chat, decisions, questions |
+| **Analysis Results** | Structured data extracted by AI | Classifications, insights, summaries |
+| **Reports** | Generated summaries and insights | Progress reports, analytics |
+| **External References** | Links to external systems | Jira tickets, GitHub issues, Redmine tasks |
+| **Documentation** | Project knowledge | Notes, specs, decision records |
+| **Code References** | Links to code locations | File paths, commits, PRs |
+
+---
 
 ## Hierarchical Structure
 
-Context Spaces can be organized hierarchically:
+Context Spaces can be organized hierarchically to match your project structure:
 
 ```
 Project: Mobile App Redesign
@@ -43,15 +58,32 @@ Project: Mobile App Redesign
       └─ Feature: Responsive Layout
 ```
 
-This allows for:
-- Granular organization
-- Inheritance of properties
-- Contextual scoping
-- Flexible navigation
+### Benefits of Hierarchy
+
+- **Granular organization** - Break down complex projects
+- **Property inheritance** - Settings flow down the tree
+- **Contextual scoping** - Keep related work together
+- **Flexible navigation** - Find information easily
+
+!!! warning "Don't Over-Nest"
+    Keep hierarchies simple. 2-3 levels is usually enough for most projects.
+
+---
 
 ## AI-Powered Knowledge Enrichment
 
-When new information enters the system (message, task, event), the AI pipeline:
+When new information enters the system (message, task, event), the AI pipeline automatically processes it:
+
+### The Enrichment Process
+
+```mermaid
+graph TD
+    A[New Information] --> B[Extract Structured Data]
+    B --> C[Identify Context Spaces]
+    C --> D[Update Context Space]
+    D --> E[Create Relationships]
+    E --> F[Trigger Actions]
+```
 
 1. **Extracts structured data** from raw content
 2. **Identifies relevant Context Space(s)** using semantic analysis
@@ -59,95 +91,175 @@ When new information enters the system (message, task, event), the AI pipeline:
 4. **Creates relationships** between related spaces
 5. **Triggers actions** based on context changes
 
-Example flow:
+### Real-World Example
 
-```
-User sends message: "We need to fix the login bug on iOS"
-    ↓
-AI Analysis extracts:
-  - Type: Bug
-  - Component: Authentication
-  - Platform: iOS
-  - Action: Fix required
-    ↓
-AI finds Context Space: "Mobile App → Authentication"
-    ↓
-Updates Context Space:
-  - Adds bug to issues list
-  - Links to related messages
-  - Updates status metrics
-  - Triggers notification to responsible team
-```
+???+ example "From Message to Action"
+    **User sends message:**
+
+    ```
+    "We need to fix the login bug on iOS"
+    ```
+
+    **AI Analysis extracts:**
+
+    - Type: Bug
+    - Component: Authentication
+    - Platform: iOS
+    - Action: Fix required
+
+    **AI finds Context Space:**
+
+    ```
+    Mobile App → Authentication
+    ```
+
+    **System updates:**
+
+    - ✓ Adds bug to issues list
+    - ✓ Links to related messages
+    - ✓ Updates status metrics
+    - ✓ Triggers notification to responsible team
+
+---
 
 ## Use Cases
 
-### 1. Project Management
-Track entire project lifecycle within its Context Space:
-- Planning documents
-- Tasks and milestones
-- Team discussions
-- Progress reports
+### 1. 📋 Project Management
 
-### 2. Knowledge Base
-Build living documentation:
+Track entire project lifecycle within its Context Space:
+
+- Planning documents and roadmaps
+- Tasks and milestones
+- Team discussions and decisions
+- Progress reports and metrics
+
+### 2. 📚 Knowledge Base
+
+Build living documentation that grows with your team:
+
 - Decisions made over time
-- Technical discussions
+- Technical discussions and debates
 - Solutions to problems
 - Best practices discovered
 
-### 3. Integration Hub
-Synchronize with external systems:
+### 3. 🔗 Integration Hub
+
+Synchronize with external systems seamlessly:
+
 - Create Jira issues from Context Space tasks
 - Import GitHub issues into relevant spaces
 - Export reports to project management tools
+- Link to external documentation
 
-### 4. Analytics Engine
+### 4. 📊 Analytics Engine
+
 Generate insights based on Context Space data:
+
 - Time spent per component
 - Bottlenecks identification
 - Team productivity metrics
-- Trend analysis
+- Trend analysis and predictions
+
+---
 
 ## Context Space Lifecycle
 
-### Active
+Context Spaces evolve through different states:
+
+### 🟢 Active
 Currently being worked on, accumulating information, AI actively processing new data.
 
-### Archived
+!!! success "Best for"
+    Current projects, ongoing work, active development
+
+### 📦 Archived
 Historical record, searchable but not actively updated.
 
-### Connected
+!!! info "Best for"
+    Completed projects, reference material, historical data
+
+### 🔗 Connected
 Linked to other spaces, information can flow between them.
+
+!!! tip "Best for"
+    Related projects, shared dependencies, cross-functional work
+
+---
 
 ## Benefits
 
-1. **Unified View** - All related information in one place
-2. **Smart Organization** - AI maintains structure automatically
-3. **Knowledge Retention** - History and context preserved
-4. **Flexible Integration** - Connect any external tools
-5. **Contextual Intelligence** - AI understands project context
+!!! success "Why Use Context Spaces?"
 
-## Technical Implementation
+    **1. Unified View**
+    All related information in one place - no more hunting across tools
 
-Context Spaces are implemented as:
-- Database entities with flexible schema
-- Graph of relationships between spaces
-- Event-driven updates via TaskIQ workers
-- WebSocket real-time notifications
-- AI analysis pipeline for enrichment
+    **2. Smart Organization**
+    AI maintains structure automatically - focus on work, not organization
+
+    **3. Knowledge Retention**
+    History and context preserved forever - never lose important decisions
+
+    **4. Flexible Integration**
+    Connect any external tools - Jira, GitHub, Slack, and more
+
+    **5. Contextual Intelligence**
+    AI understands your project context - get smarter suggestions
+
+---
 
 ## Best Practices
 
-1. **Start broad, refine as needed** - Create general spaces first, split into sub-spaces when they grow
-2. **Let AI help** - Allow the system to suggest space assignments
-3. **Review relationships** - Periodically check that spaces are properly connected
-4. **Archive completed work** - Keep active spaces focused on current work
-5. **Use hierarchies wisely** - Don't over-nest, 2-3 levels is usually enough
+### ✓ Do's
+
+!!! tip "Start Broad, Refine Later"
+    Create general spaces first. Split into sub-spaces when they grow too large.
+
+!!! tip "Let AI Help"
+    Allow the system to suggest space assignments. It learns from your patterns.
+
+!!! tip "Review Relationships"
+    Periodically check that spaces are properly connected for better insights.
+
+!!! tip "Archive Completed Work"
+    Keep active spaces focused on current work for better performance.
+
+### ✗ Don'ts
+
+!!! warning "Don't Over-Nest"
+    Avoid deep hierarchies. 2-3 levels is usually enough.
+
+!!! warning "Don't Create Too Many Spaces"
+    Start with fewer spaces and split as needed. Too many spaces dilute context.
+
+!!! warning "Don't Ignore Suggestions"
+    When AI suggests moving content, consider it. The system learns patterns.
+
+---
+
+## Technical Implementation
+
+??? note "For Developers: Technical Details"
+    Context Spaces are implemented as:
+
+    - **Database entities** with flexible JSONB schema for metadata
+    - **Graph of relationships** between spaces using PostgreSQL
+    - **Event-driven updates** via TaskIQ workers and NATS
+    - **WebSocket real-time notifications** for live updates
+    - **AI analysis pipeline** using Pydantic-AI for enrichment
+
+---
 
 ## Future Directions
 
-- Automatic space creation based on patterns
-- Cross-space search and analytics
-- Space templates for common project types
-- AI-generated space summaries
-- Collaborative space editing
+Upcoming features we're working on:
+
+- 🤖 **Automatic space creation** based on detected patterns
+- 🔍 **Cross-space search** and analytics
+- 📝 **Space templates** for common project types
+- 📄 **AI-generated summaries** of space contents
+- 👥 **Collaborative space editing** with real-time sync
+
+---
+
+!!! question "Need Help?"
+    If you have questions about Context Spaces, check the FAQ or reach out to the team.
