@@ -22,7 +22,12 @@ const formatCost = (cost: number) => {
   return `$${cost.toFixed(2)}`
 }
 
-export const columns: ColumnDef<AnalysisRun>[] = [
+interface ColumnsProps {
+  onStartRun?: (runId: string) => void
+  onCloseRun?: (runId: string) => void
+}
+
+export const createColumns = ({ onStartRun, onCloseRun }: ColumnsProps = {}): ColumnDef<AnalysisRun>[] => [
   {
     accessorKey: 'status',
     header: 'Status',
@@ -144,6 +149,32 @@ export const columns: ColumnDef<AnalysisRun>[] = [
             <div>Rejection: {(metrics.rejection_rate * 100).toFixed(1)}%</div>
           )}
           <div>Total Proposals: {metrics.proposals_total ?? row.original.proposals_total}</div>
+        </div>
+      )
+    },
+    size: 150,
+  },
+  {
+    id: 'actions',
+    header: 'Actions',
+    cell: ({ row }) => {
+      const status = row.original.status
+      const runId = row.original.id
+
+      return (
+        <div className="flex gap-2">
+          {status === 'pending' && onStartRun && (
+            <Button size="sm" onClick={() => onStartRun(runId)}>
+              <PlayCircle className="h-4 w-4 mr-1" />
+              Start
+            </Button>
+          )}
+          {(status === 'completed' || status === 'reviewed') && onCloseRun && (
+            <Button size="sm" variant="outline" onClick={() => onCloseRun(runId)}>
+              <CheckCircle className="h-4 w-4 mr-1" />
+              Close
+            </Button>
+          )}
         </div>
       )
     },

@@ -58,7 +58,7 @@ export const API_ENDPOINTS = {
   // Analysis
   analysis: {
     runs: buildApiPath('analysis/runs'),
-    run: (runId: number) => buildApiPath(`analysis/runs/${runId}`),
+    run: (runId: string) => buildApiPath(`analysis/runs/${runId}`),
   },
 
   // Proposals (under analysis prefix for Phase 1 API)
