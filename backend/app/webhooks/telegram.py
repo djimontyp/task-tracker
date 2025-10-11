@@ -57,7 +57,11 @@ async def telegram_webhook(request: Request):
                 "persisted": False,
             }
 
+            # Broadcast instant message notification
+            connection_count = websocket_manager.get_connection_count("messages")
+            print(f"📡 Broadcasting message.new to {connection_count} WebSocket clients")
             await websocket_manager.broadcast("messages", {"type": "message.new", "data": live_message_data})
+            print(f"⚡ Instant Telegram message broadcast sent: {message['message_id']}")
 
             try:
                 await save_telegram_message.kiq(update_data)
@@ -66,8 +70,6 @@ async def telegram_webhook(request: Request):
                 )
             except Exception as e:
                 print(f"❌ TaskIQ помилка: {e}")
-
-            print(f"⚡ Instant Telegram message broadcast: {message['message_id']}")
 
         return {"status": "ok"}
 

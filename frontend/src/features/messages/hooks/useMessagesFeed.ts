@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
+import { useQueryClient } from '@tanstack/react-query'
 
 import apiClient from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
@@ -101,6 +102,7 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
   const [period, setPeriod] = useState<MessagesPeriod>('all')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
   const {
     messages,
@@ -154,6 +156,10 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
       if ((type === 'message.new' || type === 'message') && isMessageData(data)) {
         logger.debug('Adding new message to store')
         upsertMessage({ ...data, persisted: data.persisted ?? false })
+
+        // Invalidate React Query cache to trigger refetch in components using useQuery
+        logger.debug('Invalidating React Query messages cache')
+        queryClient.invalidateQueries({ queryKey: ['messages'] })
         return
       }
 
@@ -166,12 +172,16 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
             author_name: updated.author_name ?? undefined,
             persisted: updated.persisted ?? true,
           })
+
+          // Invalidate React Query cache for the updated message
+          logger.debug('Invalidating React Query messages cache after update')
+          queryClient.invalidateQueries({ queryKey: ['messages'] })
         }
       }
 
       logger.debug('Message type not handled:', type)
     },
-    [markPersisted, upsertMessage]
+    [markPersisted, upsertMessage, queryClient]
   )
 
   const { connectionState, isConnected } = useWebSocket({

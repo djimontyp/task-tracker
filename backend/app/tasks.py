@@ -99,6 +99,10 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
 
             # Broadcast full message data after persisting to DB
             try:
+                from .services.websocket_manager import websocket_manager
+                connection_count = websocket_manager.get_connection_count("messages")
+                logger.info(f"📡 Broadcasting message.updated to {connection_count} WebSocket clients")
+
                 await websocket_manager.broadcast(
                     "messages",
                     {
@@ -115,6 +119,7 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
                         },
                     }
                 )
+                logger.info(f"✅ message.updated broadcast sent for message {message['message_id']}")
             except Exception as exc:  # pragma: no cover - defensive logging
                 logger.warning(
                     "Failed to broadcast persisted update for message %s: %s",
