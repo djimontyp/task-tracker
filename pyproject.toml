@@ -1,7 +1,7 @@
 [project]
-name = "task_tracker"
+name = "pulse_radar"
 version = "0.1.0"
-description = "Універсальна система автоматичного виявлення та класифікації проблем з різних комунікаційних каналів команд з гнучкими можливостями обробки та перенаправлення результатів."
+description = "AI-powered contextual workspace that organizes project information in smart, living knowledge containers with real-time pulse monitoring and intelligent automation."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

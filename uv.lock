@@ -1805,6 +1805,89 @@ wheels = [
 ]
 
 [[package]]
+name = "pulse-radar"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "aiogram" },
+    { name = "alembic" },
+    { name = "alembic-postgresql-enum" },
+    { name = "asyncpg" },
+    { name = "cryptography" },
+    { name = "email-validator" },
+    { name = "fastapi" },
+    { name = "greenlet" },
+    { name = "httpx" },
+    { name = "loguru" },
+    { name = "pydantic-ai" },
+    { name = "pydantic-settings" },
+    { name = "sqlalchemy" },
+    { name = "sqlmodel" },
+    { name = "taskiq" },
+    { name = "taskiq-nats" },
+    { name = "telethon" },
+    { name = "uvicorn" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "ruff" },
+]
+docs = [
+    { name = "lunr", extra = ["languages"] },
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+    { name = "mkdocs-static-i18n" },
+]
+test = [
+    { name = "aiosqlite" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aiogram", specifier = ">=3.22.0" },
+    { name = "alembic", specifier = ">=1.16.5" },
+    { name = "alembic-postgresql-enum", specifier = ">=1.8.0" },
+    { name = "asyncpg", specifier = ">=0.30.0" },
+    { name = "cryptography", specifier = ">=45.0.0" },
+    { name = "email-validator", specifier = ">=2.2.0" },
+    { name = "fastapi", specifier = ">=0.117.1" },
+    { name = "greenlet", specifier = ">=3.2.4" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "loguru", specifier = ">=0.7.3" },
+    { name = "pydantic-ai", specifier = ">=1.0.10" },
+    { name = "pydantic-settings", specifier = ">=2.10.1" },
+    { name = "sqlalchemy", specifier = ">=2.0.43" },
+    { name = "sqlmodel", specifier = ">=0.0.24" },
+    { name = "taskiq", specifier = ">=0.11.18" },
+    { name = "taskiq-nats", specifier = ">=0.5.1" },
+    { name = "telethon", specifier = ">=1.38.1" },
+    { name = "uvicorn", specifier = ">=0.35.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=1.17.1" },
+    { name = "ruff", specifier = ">=0.12.11" },
+]
+docs = [
+    { name = "lunr", extras = ["languages"], specifier = ">=0.6.0" },
+    { name = "mkdocs", specifier = ">=1.6.0" },
+    { name = "mkdocs-material", specifier = ">=9.5.0" },
+    { name = "mkdocs-static-i18n", specifier = ">=1.2.0" },
+]
+test = [
+    { name = "aiosqlite", specifier = ">=0.19.0" },
+    { name = "pytest", specifier = ">=8.4.1" },
+    { name = "pytest-asyncio", specifier = ">=1.1.0" },
+    { name = "pytest-cov", specifier = ">=7.0.0" },
+]
+
+[[package]]
 name = "pyaes"
 version = "1.6.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2538,89 +2621,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a7/a5/d6f429d43394057b67a6b5bbe6eae2f77a6bf7459d961fdb224bf206eee6/starlette-0.48.0.tar.gz", hash = "sha256:7e8cee469a8ab2352911528110ce9088fdc6a37d9876926e73da7ce4aa4c7a46", size = 2652949 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/be/72/2db2f49247d0a18b4f1bb9a5a39a0162869acf235f3a96418363947b3d46/starlette-0.48.0-py3-none-any.whl", hash = "sha256:0764ca97b097582558ecb498132ed0c7d942f233f365b86ba37770e026510659", size = 73736 },
-]
-
-[[package]]
-name = "task-tracker"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "aiogram" },
-    { name = "alembic" },
-    { name = "alembic-postgresql-enum" },
-    { name = "asyncpg" },
-    { name = "cryptography" },
-    { name = "email-validator" },
-    { name = "fastapi" },
-    { name = "greenlet" },
-    { name = "httpx" },
-    { name = "loguru" },
-    { name = "pydantic-ai" },
-    { name = "pydantic-settings" },
-    { name = "sqlalchemy" },
-    { name = "sqlmodel" },
-    { name = "taskiq" },
-    { name = "taskiq-nats" },
-    { name = "telethon" },
-    { name = "uvicorn" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "mypy" },
-    { name = "ruff" },
-]
-docs = [
-    { name = "lunr", extra = ["languages"] },
-    { name = "mkdocs" },
-    { name = "mkdocs-material" },
-    { name = "mkdocs-static-i18n" },
-]
-test = [
-    { name = "aiosqlite" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aiogram", specifier = ">=3.22.0" },
-    { name = "alembic", specifier = ">=1.16.5" },
-    { name = "alembic-postgresql-enum", specifier = ">=1.8.0" },
-    { name = "asyncpg", specifier = ">=0.30.0" },
-    { name = "cryptography", specifier = ">=45.0.0" },
-    { name = "email-validator", specifier = ">=2.2.0" },
-    { name = "fastapi", specifier = ">=0.117.1" },
-    { name = "greenlet", specifier = ">=3.2.4" },
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "loguru", specifier = ">=0.7.3" },
-    { name = "pydantic-ai", specifier = ">=1.0.10" },
-    { name = "pydantic-settings", specifier = ">=2.10.1" },
-    { name = "sqlalchemy", specifier = ">=2.0.43" },
-    { name = "sqlmodel", specifier = ">=0.0.24" },
-    { name = "taskiq", specifier = ">=0.11.18" },
-    { name = "taskiq-nats", specifier = ">=0.5.1" },
-    { name = "telethon", specifier = ">=1.38.1" },
-    { name = "uvicorn", specifier = ">=0.35.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = ">=1.17.1" },
-    { name = "ruff", specifier = ">=0.12.11" },
-]
-docs = [
-    { name = "lunr", extras = ["languages"], specifier = ">=0.6.0" },
-    { name = "mkdocs", specifier = ">=1.6.0" },
-    { name = "mkdocs-material", specifier = ">=9.5.0" },
-    { name = "mkdocs-static-i18n", specifier = ">=1.2.0" },
-]
-test = [
-    { name = "aiosqlite", specifier = ">=0.19.0" },
-    { name = "pytest", specifier = ">=8.4.1" },
-    { name = "pytest-asyncio", specifier = ">=1.1.0" },
-    { name = "pytest-cov", specifier = ">=7.0.0" },
 ]
 
 [[package]]
