@@ -165,3 +165,18 @@ class StatsResponse(BaseModel):
     completed_tasks: int
     categories: dict
     priorities: dict
+
+
+class SidebarCountsResponse(BaseModel):
+    """Response model for sidebar notification counts."""
+
+    unclosed_runs: int  # Analysis runs not closed (pending/running/completed/reviewed)
+    pending_proposals: int  # Task proposals awaiting review
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "unclosed_runs": 3,
+                "pending_proposals": 12,
+            }
+        }

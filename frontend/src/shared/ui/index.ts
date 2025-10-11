@@ -96,5 +96,6 @@ export {
 // Separator
 export { Separator } from './separator'
 
-// Keep custom Spinner
-export { default as Spinner } from './Spinner'
+// Custom components (not from shadcn)
+export { default as Spinner } from './Spinner/Spinner'
+export { NotificationBadge } from './notification-badge'

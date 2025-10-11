@@ -105,6 +105,11 @@ upgrade:
     @echo "Updating dependencies..."
     uv lock --upgrade --all-groups
 
+# Serve MkDocs documentation locally with live reload
+docs:
+    @echo "Serving documentation with live reload..."
+    uv run --group docs mkdocs serve --config-file docs/mkdocs.yml --dev-addr 127.0.0.1:8081 --livereload
+
 # Clear all test data from database
 db-clear:
     @echo "Clearing database..."

@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -45,6 +47,18 @@ tags_metadata = [
         "name": "agents",
         "description": "Agent Configuration management for creating and managing PydanticAI agents with task assignments.",
     },
+    {
+        "name": "analysis",
+        "description": "Analysis Run management for coordinating AI-driven task extraction runs with validation and metrics.",
+    },
+    {
+        "name": "proposals",
+        "description": "Task Proposal review endpoints for approving, rejecting, and merging AI-generated task proposals.",
+    },
+    {
+        "name": "projects",
+        "description": "Project Configuration management for defining classification keywords and team settings.",
+    },
 ]
 
 
@@ -56,12 +70,19 @@ def create_app() -> FastAPI:
         openapi_tags=tags_metadata,
     )
 
+    # CORS configuration - restrict origins for security
+    # Default allows localhost development, override with CORS_ORIGINS env var for production
+    cors_origins = os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:3000,http://localhost,http://localhost:80"
+    ).split(",")
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=cors_origins,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization", "X-Request-ID"],
     )
 
     app.include_router(api_router)
@@ -71,6 +92,12 @@ def create_app() -> FastAPI:
     @app.get("/")
     async def root():
         return {"message": "Task Tracker API", "status": "running"}
+
+    @app.get("/api/health")
+    async def legacy_health_check():
+        """Legacy health check endpoint for backward compatibility"""
+        from datetime import datetime
+        return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
     @app.post("/")
     async def root_post(request: Request):

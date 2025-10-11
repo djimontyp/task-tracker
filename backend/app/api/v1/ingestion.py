@@ -9,7 +9,7 @@ from sqlmodel import select
 
 from app.models import MessageIngestionJob, MessageIngestionJobPublic, IngestionStatus
 from app.tasks import ingest_telegram_messages_task
-from ...api.deps import DatabaseDep
+from app.dependencies import DatabaseDep
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ingestion", tags=["ingestion"])

@@ -63,3 +63,50 @@ class IngestionStatus(str, Enum):
     completed = "completed"
     failed = "failed"
     cancelled = "cancelled"
+
+
+class AnalysisRunStatus(str, Enum):
+    """Status of analysis run."""
+
+    pending = "pending"
+    running = "running"
+    completed = "completed"
+    reviewed = "reviewed"
+    closed = "closed"
+    failed = "failed"
+    cancelled = "cancelled"
+
+
+class ProposalStatus(str, Enum):
+    """Status of task proposal."""
+
+    pending = "pending"
+    approved = "approved"
+    rejected = "rejected"
+    merged = "merged"
+
+
+class LLMRecommendation(str, Enum):
+    """LLM recommendation for task proposal."""
+
+    new_task = "new_task"
+    update_existing = "update_existing"
+    merge = "merge"
+    reject = "reject"
+
+
+class SimilarityType(str, Enum):
+    """Type of similarity detection."""
+
+    exact_messages = "exact_messages"
+    semantic = "semantic"
+    none = "none"
+
+
+class AnalysisStatus(str, Enum):
+    """Analysis processing status for messages."""
+
+    pending = "pending"
+    analyzed = "analyzed"
+    spam = "spam"
+    noise = "noise"

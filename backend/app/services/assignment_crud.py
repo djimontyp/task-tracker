@@ -7,6 +7,7 @@ ensuring proper M2M relationship handling.
 from typing import List, Optional
 from uuid import UUID
 
+from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -16,8 +17,10 @@ from app.models import (
     AgentTaskAssignment,
     AgentTaskAssignmentCreate,
     AgentTaskAssignmentPublic,
+    LLMProvider,
     TaskConfig,
 )
+from app.models.agent_task_assignment import AgentTaskAssignmentWithDetails
 
 
 class AssignmentCRUD:
@@ -252,3 +255,73 @@ class AssignmentCRUD:
         await self.session.delete(assignment)
         await self.session.commit()
         return True
+
+    async def list_with_details(
+        self,
+        active_only: bool = False,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> List[AgentTaskAssignmentWithDetails]:
+        """List assignments with detailed information from joined tables.
+
+        Performs JOIN queries to fetch agent, task, and provider details
+        in a single database query for optimal performance.
+
+        Args:
+            active_only: Filter for active assignments only
+            skip: Number of records to skip (pagination)
+            limit: Maximum number of records to return
+
+        Returns:
+            List of assignments with detailed information including:
+            - agent_name: Name of the assigned agent
+            - task_name: Name of the assigned task
+            - provider_name: Name of the LLM provider
+            - provider_type: Type of the LLM provider (ollama/openai)
+        """
+        # Build query with JOINs
+        query = (
+            select(
+                AgentTaskAssignment.id,
+                AgentTaskAssignment.agent_id,
+                AgentTaskAssignment.task_id,
+                AgentTaskAssignment.is_active,
+                AgentTaskAssignment.assigned_at,
+                AgentConfig.name.label("agent_name"),
+                TaskConfig.name.label("task_name"),
+                LLMProvider.name.label("provider_name"),
+                LLMProvider.type.label("provider_type"),
+            )
+            .join(AgentConfig, AgentTaskAssignment.agent_id == AgentConfig.id)
+            .join(TaskConfig, AgentTaskAssignment.task_id == TaskConfig.id)
+            .join(LLMProvider, AgentConfig.provider_id == LLMProvider.id)
+        )
+
+        # Apply active filter if requested
+        if active_only:
+            query = query.where(AgentTaskAssignment.is_active == True)  # noqa: E712
+
+        # Apply pagination
+        query = query.offset(skip).limit(limit)
+
+        # Execute query
+        result = await self.session.execute(query)
+        rows = result.all()
+
+        # Convert rows to response models
+        assignments = [
+            AgentTaskAssignmentWithDetails(
+                id=row.id,
+                agent_id=row.agent_id,
+                task_id=row.task_id,
+                is_active=row.is_active,
+                assigned_at=row.assigned_at,
+                agent_name=row.agent_name,
+                task_name=row.task_name,
+                provider_name=row.provider_name,
+                provider_type=row.provider_type,
+            )
+            for row in rows
+        ]
+
+        return assignments

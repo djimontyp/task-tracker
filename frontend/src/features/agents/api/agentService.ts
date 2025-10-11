@@ -9,7 +9,11 @@ import {
   AgentConfigCreate,
   AgentConfigUpdate,
 } from "../types";
-import { AgentTaskAssignment, AgentTaskAssignmentCreate } from "../types";
+import {
+  AgentTaskAssignment,
+  AgentTaskAssignmentCreate,
+  AgentTaskAssignmentWithDetails,
+} from "../types";
 import { API_ENDPOINTS } from "@/shared/config/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -226,6 +230,32 @@ class AgentService {
         throw new Error(error.detail || "Invalid prompt");
       }
       throw new Error(error.detail || "Failed to test agent");
+    }
+
+    return response.json();
+  }
+
+  /**
+   * List all agent-task assignments with detailed information
+   */
+  async listAllAssignments(params?: {
+    active_only?: boolean;
+    skip?: number;
+    limit?: number;
+  }): Promise<AgentTaskAssignmentWithDetails[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.active_only) queryParams.set("active_only", "true");
+    if (params?.skip !== undefined)
+      queryParams.set("skip", params.skip.toString());
+    if (params?.limit !== undefined)
+      queryParams.set("limit", params.limit.toString());
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/assignments?${queryParams.toString()}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch assignments: ${response.statusText}`);
     }
 
     return response.json();

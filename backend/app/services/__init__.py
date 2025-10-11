@@ -2,8 +2,11 @@
 
 from .agent_crud import AgentCRUD
 from .agent_registry import AgentRegistry
+from .analysis_service import AnalysisRunCRUD, AnalysisRunValidator
 from .assignment_crud import AssignmentCRUD
 from .credential_encryption import CredentialEncryption
+from .project_service import ProjectConfigCRUD
+from .proposal_service import TaskProposalCRUD
 from .provider_crud import ProviderCRUD
 from .provider_validator import ProviderValidator
 from .schema_generator import SchemaGenerator
@@ -13,11 +16,15 @@ from .websocket_manager import websocket_manager
 __all__ = [
     "AgentCRUD",
     "AgentRegistry",
+    "AnalysisRunCRUD",
+    "AnalysisRunValidator",
     "AssignmentCRUD",
     "CredentialEncryption",
+    "ProjectConfigCRUD",
     "ProviderCRUD",
     "ProviderValidator",
     "SchemaGenerator",
     "TaskCRUD",
+    "TaskProposalCRUD",
     "websocket_manager",
 ]
