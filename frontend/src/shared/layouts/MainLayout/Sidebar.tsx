@@ -131,9 +131,9 @@ const Sidebar = () => {
           sidebarOpen ? 'w-64' : 'w-20'
         }`}
       >
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between px-3 py-3 border-b border-border">
           <h1
-            className={`text-xl font-bold text-primary transition-all duration-300 overflow-hidden whitespace-nowrap ${
+            className={`text-sm font-semibold text-primary transition-all duration-300 overflow-hidden whitespace-nowrap ${
               sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'
             }`}
           >
@@ -141,14 +141,14 @@ const Sidebar = () => {
           </h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-accent/10 transition-all duration-200 cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-accent/10 transition-all duration-200 cursor-pointer"
             aria-label="Toggle sidebar"
           >
-            <ChevronLeft className={`flex-shrink-0 max-w-[24px] w-full h-auto transition-transform duration-300 ${!sidebarOpen ? 'rotate-180' : ''}`} />
+            <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${!sidebarOpen ? 'rotate-180' : ''}`} />
           </button>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav className="px-3 py-2 space-y-1">
           {navItems.map((item) => {
             const Icon = item.Icon
             const showSectionLabel = item.section !== lastSection
@@ -159,7 +159,7 @@ const Sidebar = () => {
               <div key={item.path}>
                 {/* Section Label */}
                 {showSectionLabel && sidebarOpen && (
-                  <div className="px-4 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <div className="px-3 py-1 mt-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {sectionLabel}
                   </div>
                 )}
@@ -168,14 +168,14 @@ const Sidebar = () => {
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer ${
+                    `flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer ${
                       isActive
                         ? 'bg-primary text-primary-foreground font-medium'
                         : 'text-foreground hover:bg-accent/10 hover:scale-[1.02]'
                     }`
                   }
                 >
-                  <Icon className="flex-shrink-0 max-w-[24px] w-full h-auto" />
+                  <Icon className="flex-shrink-0 w-4 h-4" />
                   <span
                     className={`flex-1 transition-all duration-300 overflow-hidden whitespace-nowrap ${
                       sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'

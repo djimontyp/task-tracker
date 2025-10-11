@@ -135,13 +135,13 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="px-2 py-3 border-b border-border">
+      <SidebarHeader className="h-[56px] px-2 border-b border-border flex items-center">
         <div className="flex w-full items-center gap-3 px-2 group-data-[collapsible=icon]:justify-center">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-            <Radar className="size-5" />
+            <Radar className="size-4" />
           </div>
           <div className="flex flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
-            <span className="text-base font-semibold">{import.meta.env.VITE_APP_NAME || 'Pulse Radar'}</span>
+            <span className="text-sm font-semibold">{import.meta.env.VITE_APP_NAME || 'Pulse Radar'}</span>
             <div className="flex items-center gap-2">
               <span
                 className={cn(
@@ -191,7 +191,7 @@ export function AppSidebar() {
                           isActive={isActive}
                           tooltip={item.label}
                           className={cn(
-                            "h-11 text-base [&>svg]:!size-6 flex-1",
+                            "flex-1",
                             "data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold"
                           )}
                         >
@@ -231,7 +231,6 @@ export function AppSidebar() {
                   isActive={isActive}
                   tooltip={item.label}
                   className={cn(
-                    "h-11 text-base [&>svg]:!size-6",
                     "data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold"
                   )}
                 >

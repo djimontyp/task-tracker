@@ -113,7 +113,13 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data)
-          logger.debug('📨 WebSocket message:', data)
+          logger.debug('📨 WebSocket message received:', data)
+
+          // Log the message type for debugging
+          if (data.type) {
+            logger.debug(`📬 Message type: ${data.type}`)
+          }
+
           onMessage?.(data)
         } catch (error) {
           logger.error('WebSocket message parse error:', error)
