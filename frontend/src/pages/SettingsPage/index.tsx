@@ -400,7 +400,7 @@ const SettingsPage = () => {
                 />
                 <div id="webhook-url-help" className="mt-2 flex items-start gap-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-md">
                   <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
-                  <p className="text-xs text-foreground/70">
+                  <p className="text-xs text-muted-foreground">
                     Provide the publicly accessible base URL, for example <code className="text-xs bg-muted px-1 py-0.5 rounded">https://ecf34ba1bf9a.ngrok-free.app</code>.
                     The system will append <code className="text-xs bg-muted px-1 py-0.5 rounded">{WEBHOOK_PATH}</code> automatically.
                   </p>
@@ -440,7 +440,7 @@ const SettingsPage = () => {
                       <Badge variant={activeBadgeVariant}>{activeBadgeText}</Badge>
                     </div>
                     {lastSetFormatted && (
-                      <span className="text-xs text-foreground/60">Last set: {lastSetFormatted}</span>
+                      <span className="text-xs text-muted-foreground">Last set: {lastSetFormatted}</span>
                     )}
                   </div>
                 </div>
@@ -448,7 +448,7 @@ const SettingsPage = () => {
 
               <div className="flex items-start gap-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded-md">
                 <Info className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-                <p className="text-xs text-foreground/70">
+                <p className="text-xs text-muted-foreground">
                   <strong>Workflow:</strong> Save your changes first, then activate the webhook with Telegram
                 </p>
               </div>
@@ -547,7 +547,7 @@ const SettingsPage = () => {
             </div>
             <div className="flex items-start gap-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-md">
               <MessageSquare className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
-              <p className="text-xs text-foreground/70">
+              <p className="text-xs text-muted-foreground">
                 Copy group ID from Telegram Web URL (e.g., <code className="text-xs bg-muted px-1 py-0.5 rounded">https://web.telegram.org/k/#-2988379206</code>)
               </p>
             </div>
@@ -592,7 +592,7 @@ const SettingsPage = () => {
               {groups.some(g => !g.name) && (
                 <div className="flex items-start gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-md">
                   <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
-                  <div className="text-xs text-foreground/70">
+                  <div className="text-xs text-muted-foreground">
                     <p className="font-medium mb-2">To fetch group names:</p>
                     <ol className="list-decimal list-inside space-y-1">
                       <li>Add the bot to your Telegram group as admin</li>

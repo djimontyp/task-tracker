@@ -1,20 +1,8 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Spinner,
   Button,
-  Input,
-  Card,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
 } from '@/shared/ui'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
@@ -22,35 +10,39 @@ import {
   ColumnFiltersState,
   SortingState,
   VisibilityState,
-  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
   useReactTable,
 } from '@tanstack/react-table'
-import { createColumns, statusConfig, type AnalysisRun } from './columns'
+import { createColumns, statusConfig, triggerTypeLabels } from './columns'
 import { DataTableFacetedFilter } from './faceted-filter'
-import { ChevronDown, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { CreateRunModal } from '@/features/analysis/components'
 import { analysisService } from '@/features/analysis/api/analysisService'
 import toast from 'react-hot-toast'
-import type { AnalysisRunListResponse } from '@/features/analysis/types'
+import { DataTable } from '@/shared/components/DataTable'
+import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
+import { DataTablePagination } from '@/shared/components/DataTablePagination'
+import type { AnalysisRun } from '@/features/analysis/types'
 
 const AnalysisRunsPage = () => {
   const queryClient = useQueryClient()
   const [createModalOpen, setCreateModalOpen] = useState(false)
 
-  const { data, isLoading, error } = useQuery<AnalysisRunListResponse>({
+  const { data, isLoading, error } = useQuery<AnalysisRun[]>({
     queryKey: ['analysis-runs'],
     queryFn: async () => {
       const response = await apiClient.get(API_ENDPOINTS.analysis.runs)
-      return response.data as AnalysisRunListResponse
+      // Backend returns {items: [...]} not a plain array
+      return response.data.items as AnalysisRun[]
     },
   })
 
-  const runs = data?.items ?? []
-  const totalItems = data?.total ?? runs.length
+  const runs = data ?? []
 
   // WebSocket integration for real-time updates
   useEffect(() => {
@@ -126,16 +118,40 @@ const AnalysisRunsPage = () => {
   })
 
   // Data table state
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [globalFilter, setGlobalFilter] = useState('')
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: 'created_at', desc: true }
+  ])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = React.useState({})
+  const [globalFilter, setGlobalFilter] = React.useState('')
+
+  const hasActiveFilters = React.useMemo(() => {
+    // Check if there are column filters
+    if (columnFilters.length > 0) return true
+
+    // Check if sorting is different from default (created_at desc)
+    if (sorting.length === 0) return false
+    if (sorting.length > 1) return true
+    const sort = sorting[0]
+    return sort.id !== 'created_at' || sort.desc !== true
+  }, [columnFilters, sorting])
+
+  const handleReset = React.useCallback(() => {
+    setColumnFilters([])
+    setSorting([{ id: 'created_at', desc: true }])
+  }, [])
 
   // Create columns with action handlers
-  const columns = createColumns({
-    onStartRun: (runId) => startRunMutation.mutate(runId),
-    onCloseRun: (runId) => closeRunMutation.mutate(runId),
-  })
+  const columns = React.useMemo(
+    () => createColumns({
+      onStartRun: (runId) => startRunMutation.mutate(runId),
+      onCloseRun: (runId) => closeRunMutation.mutate(runId),
+      onReset: handleReset,
+      hasActiveFilters,
+    }),
+    [startRunMutation, closeRunMutation, hasActiveFilters, handleReset]
+  )
 
   const table = useReactTable({
     data: runs,
@@ -145,11 +161,21 @@ const AnalysisRunsPage = () => {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    manualPagination: false, // Client-side pagination
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
-    state: { sorting, columnFilters, columnVisibility, globalFilter },
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+      globalFilter,
+    },
     initialState: {
       pagination: { pageSize: 10 },
     },
@@ -165,9 +191,9 @@ const AnalysisRunsPage = () => {
 
   if (error) {
     return (
-      <div className="p-6 space-y-6">
-        <h1 className="text-3xl font-bold">Analysis Runs</h1>
-        <Card className="p-6 border-destructive">
+      <div className="space-y-4 animate-fade-in">
+        <h2 className="text-2xl font-bold tracking-tight">Analysis Runs</h2>
+        <div className="p-6 border border-destructive rounded-md">
           <div className="flex items-start gap-3">
             <div className="text-destructive text-lg">⚠️</div>
             <div>
@@ -177,136 +203,54 @@ const AnalysisRunsPage = () => {
               </p>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Analysis Runs</h1>
-          <p className="text-muted-foreground">
-            Manage and review AI-powered message analysis runs
-          </p>
+        <h2 className="text-2xl font-bold tracking-tight">Analysis Runs</h2>
+        <div className="flex gap-2">
+          <Button onClick={() => setCreateModalOpen(true)} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Run
+          </Button>
         </div>
-        <Button onClick={() => setCreateModalOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Run
-        </Button>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Input
-          placeholder="Search runs..."
-          value={globalFilter ?? ''}
-          onChange={(e) => setGlobalFilter(String(e.target.value))}
-          className="max-w-sm"
+      <DataTableToolbar
+        table={table}
+        globalFilter={globalFilter}
+        onGlobalFilterChange={setGlobalFilter}
+        searchPlaceholder="Search runs..."
+      >
+        <DataTableFacetedFilter
+          columnKey="status"
+          table={table}
+          title="Status"
+          options={Object.entries(statusConfig).map(([value, config]) => ({
+            value,
+            label: config.label,
+            icon: config.icon,
+          }))}
         />
+        <DataTableFacetedFilter
+          columnKey="trigger_type"
+          table={table}
+          title="Trigger Type"
+          options={Object.entries(triggerTypeLabels).map(([value, meta]) => ({
+            value,
+            label: meta.label,
+            icon: meta.icon,
+          }))}
+        />
+      </DataTableToolbar>
 
-        {table.getColumn('status') && (
-          <DataTableFacetedFilter
-            column={table.getColumn('status')}
-            title="Status"
-            options={Object.entries(statusConfig).map(([value, config]) => ({
-              label: config.label,
-              value,
-              icon: config.icon,
-            }))}
-          />
-        )}
+      <DataTable table={table} columns={columns} emptyMessage="No analysis runs found." />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                )
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      <Card>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id} style={{ width: header.getSize() }}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    )
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No analysis runs found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="text-sm text-muted-foreground">
-            {totalItems} run(s) total
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <DataTablePagination table={table} />
 
       <CreateRunModal
         open={createModalOpen}
