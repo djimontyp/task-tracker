@@ -62,7 +62,7 @@ class AnalysisService {
    * Get run details by ID
    */
   async getRunDetails(runId: string): Promise<AnalysisRun> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.analysis.run(Number(runId))}`)
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.analysis.run(runId)}`)
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -78,7 +78,7 @@ class AnalysisService {
    * Close analysis run
    */
   async closeRun(runId: string): Promise<AnalysisRun> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.analysis.run(Number(runId))}/close`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.analysis.run(runId)}/close`, {
       method: 'PUT',
     })
 
@@ -94,12 +94,12 @@ class AnalysisService {
    * Start analysis run
    */
   async startRun(runId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.analysis.run(Number(runId))}/start`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.analysis.run(runId)}/start`, {
       method: 'POST',
     })
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: response.statusText }))
+      const error = await response.json().catch(() => ({ detail: response.statusText}))
       throw new Error(error.detail || 'Failed to start analysis run')
     }
   }

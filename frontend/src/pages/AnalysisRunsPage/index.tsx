@@ -29,7 +29,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { columns, statusConfig, type AnalysisRun } from './columns'
+import { createColumns, statusConfig, type AnalysisRun } from './columns'
 import { DataTableFacetedFilter } from './faceted-filter'
 import { ChevronDown, Plus } from 'lucide-react'
 import { CreateRunModal } from '@/features/analysis/components'
@@ -131,9 +131,16 @@ const AnalysisRunsPage = () => {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = useState('')
 
+  // Create columns with action handlers
+  const columns = createColumns({
+    onStartRun: (runId) => startRunMutation.mutate(runId),
+    onCloseRun: (runId) => closeRunMutation.mutate(runId),
+  })
+
   const table = useReactTable({
     data: runs,
     columns,
+    getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
