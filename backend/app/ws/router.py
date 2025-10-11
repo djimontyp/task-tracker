@@ -13,7 +13,7 @@ async def websocket_endpoint(websocket: WebSocket, topics: str = None):
 
     Query params:
         topics: Comma-separated list of topics to subscribe to
-                (agents, tasks, providers, messages)
+                (agents, tasks, providers, messages, analysis, proposals)
                 If not specified, subscribes to all topics
 
     Message format (client to server):
@@ -29,7 +29,7 @@ async def websocket_endpoint(websocket: WebSocket, topics: str = None):
         topic_list = [t.strip() for t in topics.split(",")]
     else:
         # Default to all topics
-        topic_list = ["agents", "tasks", "providers", "messages"]
+        topic_list = ["agents", "tasks", "providers", "messages", "analysis", "proposals"]
 
     # Connect with topic-based manager
     await websocket_manager.connect(websocket, topic_list, accept=True)

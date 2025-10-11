@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import APIRouter
 
-from ..deps import SettingsDep
+from app.dependencies import SettingsDep
 from .response_models import ConfigResponse, HealthResponse
 
 router = APIRouter(tags=["health"])

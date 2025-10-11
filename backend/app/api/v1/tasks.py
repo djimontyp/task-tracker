@@ -4,10 +4,11 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
-from ...models import Task
+from app.dependencies import DatabaseDep
+from app.models import Task
 from app.schemas.tasks import TaskCreateRequest, TaskResponse
-from ...services.websocket_manager import websocket_manager
-from ..deps import DatabaseDep
+from app.services.websocket_manager import websocket_manager
+
 from .response_models import TaskStatusUpdateResponse
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])

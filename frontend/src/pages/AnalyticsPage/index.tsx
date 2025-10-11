@@ -1,4 +1,3 @@
-import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Card, Spinner } from '@/shared/ui'
 import { apiClient } from '@/shared/lib/api/client'

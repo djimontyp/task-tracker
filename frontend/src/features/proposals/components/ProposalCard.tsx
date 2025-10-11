@@ -119,6 +119,8 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
         <div className="border-t pt-2">
           <button
             onClick={() => setShowReasoning(!showReasoning)}
+            aria-expanded={showReasoning}
+            aria-label="Toggle LLM reasoning details"
             className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
           >
             {showReasoning ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -135,6 +137,8 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
         <div className="border-t pt-2">
           <button
             onClick={() => setShowSources(!showSources)}
+            aria-expanded={showSources}
+            aria-label={`Toggle source messages list (${proposal.source_message_ids.length} items)`}
             className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
           >
             {showSources ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
