@@ -4,7 +4,21 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
+from sqlalchemy import JSON, event
+from sqlalchemy.types import TypeDecorator
+from sqlalchemy.dialects import postgresql
 
+# Monkey patch JSONB BEFORE any imports from app
+# This ensures SQLite compatibility for testing
+class SQLiteJSON(TypeDecorator):
+    """Use JSON for SQLite instead of JSONB."""
+    impl = JSON
+    cache_ok = True
+
+# Replace JSONB with JSON for SQLite testing
+postgresql.JSONB = SQLiteJSON
+
+# Now safe to import app modules
 from cryptography.fernet import Fernet
 from core.config import settings
 
@@ -25,6 +39,14 @@ test_engine = create_async_engine(
     connect_args={"check_same_thread": False},
     echo=False,
 )
+
+# Enable foreign keys for SQLite
+@event.listens_for(test_engine.sync_engine, "connect")
+def set_sqlite_pragma(dbapi_conn, connection_record):
+    """Configure SQLite for better testing."""
+    cursor = dbapi_conn.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 # Create test session factory
 TestSessionLocal = sessionmaker(

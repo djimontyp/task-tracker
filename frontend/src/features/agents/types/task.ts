@@ -61,3 +61,15 @@ export interface AgentTaskAssignmentCreate {
   task_id: string;
   is_active?: boolean;
 }
+
+export interface AgentTaskAssignmentWithDetails {
+  id: string;
+  agent_id: string;
+  task_id: string;
+  is_active: boolean;
+  assigned_at: string;
+  agent_name: string;
+  task_name: string;
+  provider_name: string;
+  provider_type: string;
+}

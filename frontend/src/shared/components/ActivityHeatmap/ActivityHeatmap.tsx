@@ -95,7 +95,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
           params.append('month', selectedMonth.toString())
           params.append('year', selectedYear.toString())
         }
-        const response = await apiClient.get(`/api/activity?${params}`)
+        const response = await apiClient.get(`${API_ENDPOINTS.activity}?${params}`)
         return response.data
       },
     })

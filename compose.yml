@@ -9,18 +9,45 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tasktracker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
   nats:
     image: nats:latest
     container_name: task-tracker-nats
     ports:
       - "4222:4222"
-      - "6222:6222"
-      - "8222:8222"
-    command: ["--jetstream"]
+      - "8222:8222"  # Monitoring endpoint (remove in production)
+    command: ["--jetstream", "--http_port", "8222"]
     volumes:
       - nats_data:/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nats-server", "--version"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
 
   worker:
     build:
@@ -29,12 +56,29 @@ services:
     container_name: task-tracker-worker
     command: ["python", "-m", "taskiq", "worker", "core.taskiq_config:nats_broker", "core.worker"]
     depends_on:
-      - nats
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
     restart: unless-stopped
     env_file:
       - .env
     volumes:
       - ./telegram_sessions:/app/sessions
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'taskiq worker' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
     develop:
       watch:
         - action: sync+restart
@@ -60,10 +104,27 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
     restart: unless-stopped
     env_file:
       - .env
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
     develop:
       watch:
         - action: sync+restart
@@ -88,15 +149,27 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     restart: unless-stopped
     environment:
-      # Vite environment variables (renamed from REACT_APP_*)
+      # Vite environment variables
       - VITE_API_BASE_URL=${DASHBOARD_API_BASE_URL:-http://localhost:8000}
-      - VITE_API_URL=${DASHBOARD_API_BASE_URL:-http://localhost:8000}
+      # WebSocket configuration - all three variables used by frontend/src/features/websocket/hooks/useWebSocket.ts
+      # VITE_WS_URL: Direct WebSocket URL (primary method)
+      # VITE_WS_HOST: Host for dynamic URL construction (fallback method)
+      # VITE_WS_PATH: Path for dynamic URL construction (fallback method)
       - VITE_WS_URL=${DASHBOARD_WS_URL:-ws://localhost/ws}
       - VITE_WS_HOST=${DASHBOARD_WS_HOST:-localhost:8000}
       - VITE_WS_PATH=${DASHBOARD_WS_PATH:-/ws}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
     develop:
       watch:
         # Sync source files for hot reload
@@ -129,7 +202,7 @@ services:
         - action: rebuild
           path: ./frontend/vite.config.ts
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\" || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -145,19 +218,28 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
-      - api
-      - dashboard
+      api:
+        condition: service_healthy
+      dashboard:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/nginx-health"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost/nginx-health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
 
 volumes:
   postgres_data:
     name: task-tracker-postgres-data
   nats_data:
     name: task-tracker-nats-data
-  telegram_sessions:
-    name: task-tracker-telegram-sessions
