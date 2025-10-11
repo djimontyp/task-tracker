@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AxiosError } from 'axios'
 import toast from 'react-hot-toast'
 import { Copy, Check, Info, MessageSquare } from 'lucide-react'

@@ -1,4 +1,3 @@
-import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, CheckSquare, BarChart3, Settings, ChevronLeft } from 'lucide-react'
 import { useUiStore } from '@/shared/store/uiStore'

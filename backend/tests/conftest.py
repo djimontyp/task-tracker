@@ -4,10 +4,21 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
-from sqlalchemy.dialects import postgresql
 from sqlalchemy import JSON, event
 from sqlalchemy.types import TypeDecorator
+from sqlalchemy.dialects import postgresql
 
+# Monkey patch JSONB BEFORE any imports from app
+# This ensures SQLite compatibility for testing
+class SQLiteJSON(TypeDecorator):
+    """Use JSON for SQLite instead of JSONB."""
+    impl = JSON
+    cache_ok = True
+
+# Replace JSONB with JSON for SQLite testing
+postgresql.JSONB = SQLiteJSON
+
+# Now safe to import app modules
 from cryptography.fernet import Fernet
 from core.config import settings
 
@@ -21,22 +32,6 @@ if not settings.encryption_key:
 
 # Test database URL (in-memory SQLite)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
-
-# Monkey patch JSONB to use JSON for SQLite compatibility
-class SQLiteJSONB(TypeDecorator):
-    """Decorator to use JSON instead of JSONB for SQLite."""
-
-    impl = JSON
-    cache_ok = True
-
-    def load_dialect_impl(self, dialect):
-        if dialect.name == 'sqlite':
-            return dialect.type_descriptor(JSON())
-        else:
-            return dialect.type_descriptor(postgresql.JSONB())
-
-# Replace JSONB with JSON-compatible type
-postgresql.JSONB = SQLiteJSONB
 
 # Create test engine
 test_engine = create_async_engine(

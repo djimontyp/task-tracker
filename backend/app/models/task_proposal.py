@@ -1,5 +1,5 @@
 """TaskProposal model for AI-generated task proposals."""
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, Text, func
@@ -169,7 +169,7 @@ class TaskProposal(SQLModel, table=True):
 
     # Timestamps
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"server_default": func.now()},
     )

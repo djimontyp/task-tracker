@@ -39,6 +39,7 @@ export const CreateRunModal: React.FC<CreateRunModalProps> = ({ open, onOpenChan
   const [formData, setFormData] = useState<CreateAnalysisRun>({
     time_window_start: '',
     time_window_end: '',
+    agent_assignment_id: '',
     trigger_type: 'manual',
   })
 
@@ -62,6 +63,7 @@ export const CreateRunModal: React.FC<CreateRunModalProps> = ({ open, onOpenChan
       setFormData({
         time_window_start: '',
         time_window_end: '',
+        agent_assignment_id: '',
         trigger_type: 'manual',
       })
     },

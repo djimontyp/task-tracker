@@ -5,15 +5,16 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import and_, func, select
 
+from app.dependencies import DatabaseDep
 from app.models import Message, Source, User
 from app.schemas.messages import (
     MessageCreateRequest,
     MessageFiltersResponse,
     MessageResponse,
 )
+from app.services.websocket_manager import websocket_manager
+
 from .response_models import PaginatedMessagesResponse
-from ...services.websocket_manager import websocket_manager
-from ..deps import DatabaseDep
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/messages", tags=["messages"])

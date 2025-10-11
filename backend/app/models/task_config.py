@@ -1,5 +1,5 @@
 """Task Configuration model for defining agent task schemas."""
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Optional
 from uuid import UUID, uuid4
 
@@ -45,12 +45,12 @@ class TaskConfig(SQLModel, table=True):
 
     # Timestamps
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"server_default": func.now()},
     )
     updated_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"server_default": func.now(), "onupdate": func.now()},
     )
