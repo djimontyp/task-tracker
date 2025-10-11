@@ -98,3 +98,4 @@ export { Separator } from './separator'
 
 // Custom components (not from shadcn)
 export { default as Spinner } from './Spinner/Spinner'
+export { NotificationBadge } from './notification-badge'

@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { LayoutDashboard, CheckSquare, BarChart3, Settings, Radar, Bot, Brain, Mail, MessageSquare, ListChecks, ClipboardList, Server, FolderKanban } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +18,8 @@ import {
 import { cn } from '@/shared/lib/utils'
 import { useServiceStatus } from '@/features/websocket/hooks/useServiceStatus'
 import { NavUser } from './NavUser'
+import { statsService, type SidebarCounts } from '@/shared/api/statsService'
+import { NotificationBadge } from '@/shared/ui'
 
 const navGroups = [
   {
@@ -60,6 +63,60 @@ export function AppSidebar() {
   const groups = useMemo(() => navGroups, [])
   const location = useLocation()
   const { indicator } = useServiceStatus()
+  const queryClient = useQueryClient()
+
+  // Fetch sidebar counts
+  const { data: counts } = useQuery<SidebarCounts>({
+    queryKey: ['sidebar-counts'],
+    queryFn: () => statsService.getSidebarCounts(),
+    refetchInterval: 30000, // Refresh every 30 seconds
+  })
+
+  // WebSocket integration for real-time updates
+  useEffect(() => {
+    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost/ws'
+    const ws = new WebSocket(`${wsUrl}?topics=analysis,proposals`)
+
+    ws.onopen = () => {
+      console.log('[Sidebar] WebSocket connected for counts')
+    }
+
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data)
+        const { topic, event: eventType } = message
+
+        // Invalidate counts on relevant events
+        if (
+          topic === 'analysis' &&
+          ['run_created', 'run_closed', 'run_failed'].includes(eventType)
+        ) {
+          queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
+        }
+
+        if (
+          topic === 'proposals' &&
+          ['proposal_created', 'proposal_approved', 'proposal_rejected'].includes(eventType)
+        ) {
+          queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
+        }
+      } catch (error) {
+        console.error('[Sidebar] Error parsing WebSocket message:', error)
+      }
+    }
+
+    ws.onerror = (error) => {
+      console.error('[Sidebar] WebSocket error:', error)
+    }
+
+    ws.onclose = () => {
+      console.log('[Sidebar] WebSocket disconnected')
+    }
+
+    return () => {
+      ws.close()
+    }
+  }, [queryClient])
 
   const indicatorClasses =
     indicator === 'healthy'
@@ -110,22 +167,48 @@ export function AppSidebar() {
                     ? location.pathname === '/'
                     : location.pathname.startsWith(item.path)
 
+                  // Get badge count and tooltip for specific items
+                  let badgeCount: number | undefined
+                  let badgeTooltip: string | undefined
+
+                  if (item.path === '/analysis' && counts) {
+                    badgeCount = counts.unclosed_runs
+                    badgeTooltip = badgeCount === 1
+                      ? '1 unclosed analysis run'
+                      : `${badgeCount} unclosed analysis runs`
+                  } else if (item.path === '/proposals' && counts) {
+                    badgeCount = counts.pending_proposals
+                    badgeTooltip = badgeCount === 1
+                      ? '1 proposal awaiting review'
+                      : `${badgeCount} proposals awaiting review`
+                  }
+
                   return (
                     <SidebarMenuItem key={item.path}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        tooltip={item.label}
-                        className={cn(
-                          "h-11 text-base [&>svg]:!size-6",
-                          "data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold"
-                        )}
-                      >
-                        <Link to={item.path}>
-                          <item.icon />
-                          <span>{item.label}</span>
-                        </Link>
-                      </SidebarMenuButton>
+                      <div className="flex items-center gap-2 w-full relative">
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive}
+                          tooltip={item.label}
+                          className={cn(
+                            "h-11 text-base [&>svg]:!size-6 flex-1",
+                            "data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold"
+                          )}
+                        >
+                          <Link to={item.path}>
+                            <item.icon />
+                            <span>{item.label}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                        <NotificationBadge
+                          count={badgeCount || 0}
+                          tooltip={badgeTooltip}
+                          className={cn(
+                            "absolute right-2",
+                            isActive && "bg-primary text-white dark:bg-primary dark:text-white border-primary"
+                          )}
+                        />
+                      </div>
                     </SidebarMenuItem>
                   )
                 })}
