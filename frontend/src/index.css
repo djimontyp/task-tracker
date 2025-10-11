@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Light Theme - Elegant Techno-Neon */
+    /* Light Theme - Elegant Techno-Neon with Enhanced Contrast */
     --background: 0 0% 98%;
     --foreground: 0 0% 12%;
     --card: 0 0% 100%;
@@ -16,7 +16,7 @@
     --secondary: 0 0% 16%; /* Dark charcoal #2A2A2A */
     --secondary-foreground: 0 0% 92%;
     --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 40%;
+    --muted-foreground: 0 0% 20%; /* Much darker gray for excellent contrast on light background */
     --accent: 17 90% 65%; /* Copper accent #F58549 */
     --accent-foreground: 0 0% 100%;
     --destructive: 353 84% 46%; /* Deep ruby #D72638 */

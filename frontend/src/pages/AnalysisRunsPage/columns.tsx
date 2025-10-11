@@ -1,9 +1,10 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { ArrowUpDown, Clock, PlayCircle, CheckCircle, XCircle, AlertCircle, LucideIcon } from 'lucide-react'
+import { Clock, PlayCircle, CheckCircle, XCircle, AlertCircle, LucideIcon, X, Calendar, Webhook, UserCircle } from 'lucide-react'
 
-import { Button, Badge } from '@/shared/ui'
+import { Button, Badge, Checkbox } from '@/shared/ui'
 import { formatFullDate } from '@/shared/utils/date'
-import type { AnalysisRun, AnalysisRunStatus } from '@/features/analysis/types'
+import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
+import type { AnalysisRun, AnalysisRunStatus, AnalysisRunTriggerType } from '@/features/analysis/types'
 
 export const statusConfig: Record<AnalysisRunStatus, { label: string; icon: LucideIcon; className: string }> = {
   pending: { label: 'Pending', icon: Clock, className: 'bg-slate-500 text-white' },
@@ -15,21 +16,61 @@ export const statusConfig: Record<AnalysisRunStatus, { label: string; icon: Luci
   cancelled: { label: 'Cancelled', icon: XCircle, className: 'bg-slate-400 text-white' },
 }
 
-// Use shared formatFullDate utility
+export const triggerTypeLabels: Record<AnalysisRunTriggerType, { label: string; icon: LucideIcon }> = {
+  manual: { label: 'Manual', icon: UserCircle },
+  scheduled: { label: 'Scheduled', icon: Calendar },
+  custom: { label: 'Custom', icon: PlayCircle },
+  webhook: { label: 'Webhook', icon: Webhook },
+}
 
 const formatCost = (cost: number) => {
   return `$${cost.toFixed(2)}`
 }
 
-interface ColumnsProps {
+export interface ColumnsCallbacks {
   onStartRun?: (runId: string) => void
   onCloseRun?: (runId: string) => void
+  onReset?: () => void
+  hasActiveFilters?: boolean
 }
 
-export const createColumns = ({ onStartRun, onCloseRun }: ColumnsProps = {}): ColumnDef<AnalysisRun>[] => [
+export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<AnalysisRun>[] => [
+  {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+    size: 28,
+  },
+  {
+    accessorKey: 'id',
+    header: 'ID',
+    cell: ({ row }) => {
+      const id = row.getValue<string>('id')
+      // Format as RUN-XXXX using first 4 chars of UUID
+      return <div className="w-[80px] text-xs font-medium text-muted-foreground">RUN-{id.slice(0, 4).toUpperCase()}</div>
+    },
+    enableSorting: false,
+    size: 80,
+  },
   {
     accessorKey: 'status',
-    header: 'Status',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
     cell: ({ row }) => {
       const status = row.getValue<AnalysisRunStatus>('status')
       const config = statusConfig[status] ?? statusConfig.pending
@@ -49,29 +90,49 @@ export const createColumns = ({ onStartRun, onCloseRun }: ColumnsProps = {}): Co
   },
   {
     accessorKey: 'trigger_type',
-    header: 'Trigger',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trigger" />
+    ),
     cell: ({ row }) => {
-      const triggerType = row.getValue<string>('trigger_type')
+      const triggerType = row.getValue<AnalysisRunTriggerType>('trigger_type')
       const triggeredByUserId = row.original.triggered_by_user_id
+      const meta = triggerTypeLabels[triggerType] ?? { label: triggerType, icon: UserCircle }
+      const Icon = meta.icon
 
       return (
         <div className="text-sm">
-          <div className="font-medium capitalize">{triggerType}</div>
+          <div className="flex items-center gap-2 font-medium">
+            {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+            {meta.label}
+          </div>
           {triggeredByUserId !== null && (
             <div className="text-xs text-muted-foreground">user #{triggeredByUserId}</div>
           )}
         </div>
       )
     },
+    filterFn: (row, id, filterValues: string[]) => {
+      if (!filterValues || filterValues.length === 0) return true
+      const v = row.getValue<string>(id)
+      return filterValues.includes(v)
+    },
     size: 140,
+  },
+  {
+    accessorKey: 'created_at',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Created At" />
+    ),
+    cell: ({ row }) => {
+      const d = row.getValue<string>('created_at')
+      return <div className="text-muted-foreground text-xs">{d ? formatFullDate(d) : '-'}</div>
+    },
+    size: 150,
   },
   {
     accessorKey: 'time_window_start',
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-        Time Window
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
+      <DataTableColumnHeader column={column} title="Time Window" />
     ),
     cell: ({ row }) => {
       const start = row.getValue<string>('time_window_start')
@@ -89,7 +150,9 @@ export const createColumns = ({ onStartRun, onCloseRun }: ColumnsProps = {}): Co
   },
   {
     accessorKey: 'proposals_total',
-    header: 'Proposals',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Proposals" />
+    ),
     cell: ({ row }) => {
       const total = row.getValue<number>('proposals_total')
       const approved = row.original.proposals_approved
@@ -113,7 +176,9 @@ export const createColumns = ({ onStartRun, onCloseRun }: ColumnsProps = {}): Co
   },
   {
     accessorKey: 'total_messages_in_window',
-    header: 'Messages',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Messages" />
+    ),
     cell: ({ row }) => {
       const messages = row.getValue<number>('total_messages_in_window')
       return <div className="text-sm font-medium">{messages}</div>
@@ -122,7 +187,9 @@ export const createColumns = ({ onStartRun, onCloseRun }: ColumnsProps = {}): Co
   },
   {
     accessorKey: 'cost_estimate',
-    header: 'Cost',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Cost" />
+    ),
     cell: ({ row }) => {
       const cost = row.getValue<number>('cost_estimate')
       return <div className="text-sm font-medium">{formatCost(cost)}</div>
@@ -155,21 +222,37 @@ export const createColumns = ({ onStartRun, onCloseRun }: ColumnsProps = {}): Co
   },
   {
     id: 'actions',
-    header: 'Actions',
+    header: () => {
+      if (callbacks?.hasActiveFilters) {
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={callbacks.onReset}
+            className="h-8 w-8 p-0 hover:bg-destructive/10"
+          >
+            <X className="h-4 w-4 text-destructive/70 hover:text-destructive" />
+            <span className="sr-only">Reset filters</span>
+          </Button>
+        )
+      }
+      return null
+    },
+    enableHiding: false,
     cell: ({ row }) => {
       const status = row.original.status
       const runId = row.original.id
 
       return (
         <div className="flex gap-2">
-          {status === 'pending' && onStartRun && (
-            <Button size="sm" onClick={() => onStartRun(runId)}>
+          {status === 'pending' && callbacks?.onStartRun && (
+            <Button size="sm" onClick={() => callbacks.onStartRun!(runId)}>
               <PlayCircle className="h-4 w-4 mr-1" />
               Start
             </Button>
           )}
-          {(status === 'completed' || status === 'reviewed') && onCloseRun && (
-            <Button size="sm" variant="outline" onClick={() => onCloseRun(runId)}>
+          {(status === 'completed' || status === 'reviewed') && callbacks?.onCloseRun && (
+            <Button size="sm" variant="outline" onClick={() => callbacks.onCloseRun!(runId)}>
               <CheckCircle className="h-4 w-4 mr-1" />
               Close
             </Button>
@@ -180,3 +263,6 @@ export const createColumns = ({ onStartRun, onCloseRun }: ColumnsProps = {}): Co
     size: 150,
   },
 ]
+
+// Legacy export for backward compatibility
+export const columns = createColumns()
