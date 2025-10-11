@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
   // Statistics
   stats: buildApiPath('stats'),
   activity: buildApiPath('activity'),
+  sidebarCounts: buildApiPath('sidebar-counts'),
 
   // Webhook Settings
   webhookSettings: buildApiPath('webhook-settings'),

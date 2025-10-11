@@ -2,13 +2,19 @@ from datetime import date, datetime, timedelta
 from typing import Literal, Optional
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlmodel import and_, select
+from sqlmodel import and_, func, select
 
-from ...models import Message, Source, Task, User
+from ...models import AnalysisRun, Message, Source, Task, TaskProposal, User
+from ...models.enums import AnalysisRunStatus, ProposalStatus
 from app.schemas.stats import StatsResponse
 from ...services.websocket_manager import websocket_manager
 from ..deps import DatabaseDep
-from .response_models import ActivityDataResponse, AnalyzeDayResponse, StatsResponse
+from .response_models import (
+    ActivityDataResponse,
+    AnalyzeDayResponse,
+    SidebarCountsResponse,
+    StatsResponse,
+)
 
 router = APIRouter(tags=["statistics"])
 
@@ -221,3 +227,52 @@ async def analyze_day(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+
+@router.get(
+    "/sidebar-counts",
+    response_model=SidebarCountsResponse,
+    summary="Get sidebar notification counts",
+    response_description="Counts of unclosed runs and pending proposals for sidebar badges",
+)
+async def get_sidebar_counts(db: DatabaseDep) -> SidebarCountsResponse:
+    """
+    Get notification counts for sidebar badges.
+
+    Returns:
+    - unclosed_runs: Count of analysis runs with status != 'closed'
+      (pending, running, completed, reviewed)
+    - pending_proposals: Count of task proposals with status = 'pending'
+
+    These counts are used to display notification badges in the sidebar
+    navigation to alert the PM about items requiring attention.
+    """
+    # Count unclosed analysis runs (status != closed)
+    unclosed_statuses = [
+        AnalysisRunStatus.pending.value,
+        AnalysisRunStatus.running.value,
+        AnalysisRunStatus.completed.value,
+        AnalysisRunStatus.reviewed.value,
+    ]
+
+    unclosed_runs_statement = (
+        select(func.count())
+        .select_from(AnalysisRun)
+        .where(AnalysisRun.status.in_(unclosed_statuses))
+    )
+    unclosed_runs_result = await db.execute(unclosed_runs_statement)
+    unclosed_runs_count = unclosed_runs_result.scalar() or 0
+
+    # Count pending proposals
+    pending_proposals_statement = (
+        select(func.count())
+        .select_from(TaskProposal)
+        .where(TaskProposal.status == ProposalStatus.pending.value)
+    )
+    pending_proposals_result = await db.execute(pending_proposals_statement)
+    pending_proposals_count = pending_proposals_result.scalar() or 0
+
+    return SidebarCountsResponse(
+        unclosed_runs=unclosed_runs_count,
+        pending_proposals=pending_proposals_count,
+    )
