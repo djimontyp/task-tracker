@@ -3,7 +3,7 @@
  */
 
 import React, { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Dialog,
   DialogContent,
@@ -14,8 +14,17 @@ import {
   Button,
   Label,
   Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Badge,
+  Checkbox,
+  Spinner,
 } from '@/shared/ui'
 import { analysisService } from '../api/analysisService'
+import { agentService } from '@/features/agents/api/agentService'
 import type { CreateAnalysisRun } from '../types'
 import toast from 'react-hot-toast'
 
@@ -26,10 +35,22 @@ interface CreateRunModalProps {
 
 export const CreateRunModal: React.FC<CreateRunModalProps> = ({ open, onOpenChange }) => {
   const queryClient = useQueryClient()
+  const [showInactive, setShowInactive] = useState(false)
   const [formData, setFormData] = useState<CreateAnalysisRun>({
     time_window_start: '',
     time_window_end: '',
     trigger_type: 'manual',
+  })
+
+  // Fetch assignments with active filter
+  const {
+    data: assignments,
+    isLoading: assignmentsLoading,
+    error: assignmentsError,
+  } = useQuery({
+    queryKey: ['assignments', showInactive ? 'all' : 'active'],
+    queryFn: () => agentService.listAllAssignments({ active_only: !showInactive }),
+    enabled: open,
   })
 
   const createMutation = useMutation({
@@ -96,17 +117,61 @@ export const CreateRunModal: React.FC<CreateRunModalProps> = ({ open, onOpenChan
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="agent_assignment_id">Agent Assignment ID *</Label>
-            <Input
-              id="agent_assignment_id"
-              type="text"
-              placeholder="Enter agent assignment UUID"
-              value={formData.agent_assignment_id || ''}
-              onChange={(e) =>
-                setFormData({ ...formData, agent_assignment_id: e.target.value })
-              }
-              required
-            />
+            <Label htmlFor="agent_assignment_id">Agent Assignment *</Label>
+            {assignmentsLoading ? (
+              <div className="flex items-center justify-center p-4">
+                <Spinner className="h-6 w-6" />
+              </div>
+            ) : assignmentsError ? (
+              <div className="text-sm text-destructive">
+                Failed to load assignments. Please try again.
+              </div>
+            ) : (
+              <Select
+                value={formData.agent_assignment_id || ''}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, agent_assignment_id: value })
+                }
+              >
+                <SelectTrigger id="agent_assignment_id" aria-label="Select agent assignment">
+                  <SelectValue placeholder="Select agent assignment" />
+                </SelectTrigger>
+                <SelectContent>
+                  {assignments && assignments.length > 0 ? (
+                    assignments.map((assignment) => (
+                      <SelectItem key={assignment.id} value={assignment.id}>
+                        <div className="flex items-center gap-2">
+                          <span>
+                            Agent: {assignment.agent_name} | Task: {assignment.task_name} (
+                            {assignment.provider_type})
+                          </span>
+                          {!assignment.is_active && (
+                            <Badge variant="outline" className="ml-2 text-xs">
+                              Inactive
+                            </Badge>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="none" disabled>
+                      No assignments available
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            )}
+            <div className="flex items-center gap-2 mt-2">
+              <Checkbox
+                id="show_inactive"
+                checked={showInactive}
+                onCheckedChange={(checked) => setShowInactive(checked === true)}
+                aria-label="Show inactive assignments"
+              />
+              <Label htmlFor="show_inactive" className="text-sm font-normal cursor-pointer">
+                Show inactive assignments
+              </Label>
+            </div>
           </div>
 
           <div className="space-y-2">
