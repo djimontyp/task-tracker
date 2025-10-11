@@ -22,6 +22,7 @@ theme:
         name: Switch to light mode
 nav:
   - Home: index.md
+  - Context Spaces (Topics): topics.md
 plugins:
   - search
   - i18n:
