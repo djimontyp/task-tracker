@@ -71,3 +71,18 @@ class AgentTaskAssignmentPublic(SQLModel):
     task_id: UUID
     is_active: bool
     assigned_at: datetime
+
+
+class AgentTaskAssignmentWithDetails(SQLModel):
+    """Extended assignment schema with JOIN details from related entities."""
+
+    id: UUID
+    agent_id: UUID
+    task_id: UUID
+    is_active: bool
+    assigned_at: datetime
+    # Joined fields from related tables
+    agent_name: str
+    task_name: str
+    provider_name: str
+    provider_type: str

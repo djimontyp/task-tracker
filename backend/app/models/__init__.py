@@ -9,6 +9,7 @@ from .agent_task_assignment import (
     AgentTaskAssignment,
     AgentTaskAssignmentCreate,
     AgentTaskAssignmentPublic,
+    AgentTaskAssignmentWithDetails,
 )
 from .analysis_run import (
     AnalysisRun,
@@ -141,6 +142,7 @@ __all__ = [
     "AgentTaskAssignment",
     "AgentTaskAssignmentCreate",
     "AgentTaskAssignmentPublic",
+    "AgentTaskAssignmentWithDetails",
     # Analysis Run
     "AnalysisRun",
     "AnalysisRunCreate",

@@ -34,9 +34,9 @@ interface TestResult {
 }
 
 const EXAMPLE_PROMPTS = [
-  'Explain quantum computing in simple terms',
-  'Write a haiku about programming',
-  'Summarize the benefits of async programming',
+  'Треба зробити редизайн головної сторінки до п\'ятниці',
+  'Баг в оплаті - користувачі скаржаться що списується двічі',
+  'Домовились з клієнтом проDemo на наступний тиждень',
 ]
 
 const MIN_PROMPT_LENGTH = 1
