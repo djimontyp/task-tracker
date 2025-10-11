@@ -153,6 +153,8 @@ services:
         condition: service_healthy
     restart: unless-stopped
     environment:
+      # Application name
+      - VITE_APP_NAME=${APP_NAME:-Pulse Radar}
       # Vite environment variables
       - VITE_API_BASE_URL=${DASHBOARD_API_BASE_URL:-http://localhost:8000}
       # WebSocket configuration - all three variables used by frontend/src/features/websocket/hooks/useWebSocket.ts

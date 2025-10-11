@@ -141,7 +141,7 @@ export function AppSidebar() {
             <Radar className="size-5" />
           </div>
           <div className="flex flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
-            <span className="text-base font-semibold">Topics Radar</span>
+            <span className="text-base font-semibold">{import.meta.env.VITE_APP_NAME || 'Pulse Radar'}</span>
             <div className="flex items-center gap-2">
               <span
                 className={cn(

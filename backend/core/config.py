@@ -5,6 +5,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    # Application metadata
+    app_name: str = Field(
+        default="Pulse Radar",
+        validation_alias=AliasChoices("APP_NAME", "app_name"),
+    )
+    app_description: str = Field(
+        default="AI-powered contextual workspace that organizes project information in smart, living knowledge containers with real-time pulse monitoring and intelligent automation.",
+        validation_alias=AliasChoices("APP_DESCRIPTION", "app_description"),
+    )
+
     database_url: str = Field(
         default="postgresql+asyncpg://postgres:postgres@localhost:5555/tasktracker",
         validation_alias=AliasChoices("DATABASE_URL", "database_url"),

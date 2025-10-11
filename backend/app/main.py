@@ -3,6 +3,7 @@ import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from core.config import settings
 from core.taskiq_config import nats_broker
 
 from .api.v1.router import api_router
@@ -64,8 +65,8 @@ tags_metadata = [
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="Task Tracker API",
-        description="Universal task tracking system that processes messages from various communication channels (Telegram, Slack, etc.) and automatically classifies them as issues/tasks using AI.",
+        title=f"{settings.app_name} API",
+        description=settings.app_description,
         version="1.0.0",
         openapi_tags=tags_metadata,
     )
@@ -91,7 +92,7 @@ def create_app() -> FastAPI:
 
     @app.get("/")
     async def root():
-        return {"message": "Task Tracker API", "status": "running"}
+        return {"message": f"{settings.app_name} API", "status": "running"}
 
     @app.get("/api/health")
     async def legacy_health_check():
