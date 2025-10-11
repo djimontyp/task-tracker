@@ -111,7 +111,7 @@ class LLMProposalService:
         agent = PydanticAgent(
             model=model,
             system_prompt=self.agent_config.system_prompt,
-            result_type=BatchProposalsOutput,
+            output_type=BatchProposalsOutput,
         )
 
         # Build model settings
