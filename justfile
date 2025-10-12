@@ -9,6 +9,8 @@ alias sca := services-clean-all
 alias dbc := db-clear
 alias dbs := db-seed
 alias dbr := db-reset
+alias f := fmt
+alias fc := fmt-check
 
 
 # Reinstall UV venv and all deps localy
@@ -82,18 +84,21 @@ alembic-auto *ARGS:
     @echo "Creating database migration..."
     uv run alembic revision --autogenerate {{ARGS}}
 
-# Lint the code
-lint:
-    @echo "Linting code..."
-    uv run ruff check backend --fix
+# Format code: organize imports + format style
+[group: 'Quality']
+fmt PATH='backend':
+    @echo "🎨 Formatting {{PATH}}..."
+    @uv run ruff check {{PATH}} --select I,F401,UP --fix --unsafe-fixes --show-fixes
+    @uv run ruff format {{PATH}}
+    @echo "✨ Format complete!"
 
-# Format the code
-fmt:
-    @echo "Formatting code..."
-    uv run ruff format backend
-
-# Run lint and format
-check: lint fmt
+# Check formatting without changes (CI)
+[group: 'Quality']
+fmt-check PATH='backend':
+    @echo "🔍 Checking format on {{PATH}}..."
+    @uv run ruff check {{PATH}} --select I,F401,UP
+    @uv run ruff format {{PATH}} --check
+    @echo "✅ Format check passed!"
 
 # Install dependencies
 install-dev:
