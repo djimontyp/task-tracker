@@ -17,3 +17,9 @@ Event-driven microservices: **Telegram Bot** → **FastAPI Backend** (REST + Web
 - **Delegation**: Use specialized agents (fastapi-backend-expert, react-frontend-architect)
 - **Patterns**: Async/await, dependency injection, type safety
 - **Forbidden**: Modify dependencies without approval, commit secrets
+
+## Code Quality Standards
+- **Comments**: Write self-documenting code. Comments should only explain complex logic/algorithms, not describe obvious code structure
+  - ❌ BAD: `{/* Navigation Item */}`, `# Step 2: Update via API`, `// Create user object`
+  - ✅ GOOD: Explain WHY, not WHAT (e.g., complex business rules, non-obvious optimizations, workarounds)
+  - Rule: If code is self-explanatory, don't comment it. 80-90% of structural comments are noise
