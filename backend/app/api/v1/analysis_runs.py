@@ -6,7 +6,6 @@ with validation rules and WebSocket event broadcasting.
 
 import logging
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -33,17 +32,11 @@ def get_ws_manager():
 )
 async def list_runs(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(
-        100, ge=1, le=1000, description="Maximum number of records to return"
-    ),
-    status: Optional[str] = Query(None, description="Filter by status"),
-    trigger_type: Optional[str] = Query(None, description="Filter by trigger type"),
-    start_date: Optional[datetime] = Query(
-        None, description="Filter by created_at >= start_date (ISO 8601)"
-    ),
-    end_date: Optional[datetime] = Query(
-        None, description="Filter by created_at <= end_date (ISO 8601)"
-    ),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    status: str | None = Query(None, description="Filter by status"),
+    trigger_type: str | None = Query(None, description="Filter by trigger type"),
+    start_date: datetime | None = Query(None, description="Filter by created_at >= start_date (ISO 8601)"),
+    end_date: datetime | None = Query(None, description="Filter by created_at <= end_date (ISO 8601)"),
     session: AsyncSession = Depends(get_session),
 ) -> AnalysisRunListResponse:
     """List all analysis runs with pagination and filters.
@@ -131,7 +124,9 @@ async def create_run(
     try:
         crud = AnalysisRunCRUD(session)
         run = await crud.create(run_data)
-        logger.info(f"Created analysis run {run.id} for time window {run_data.time_window_start} to {run_data.time_window_end}")
+        logger.info(
+            f"Created analysis run {run.id} for time window {run_data.time_window_start} to {run_data.time_window_end}"
+        )
 
         # Broadcast WebSocket event
         await ws_manager.broadcast(
@@ -320,6 +315,7 @@ async def start_run(
 
     # Trigger TaskIQ background job
     from app.tasks import execute_analysis_run
+
     await execute_analysis_run.kiq(str(run_id))
 
     logger.info(f"Triggered analysis run {run_id} via TaskIQ background job")

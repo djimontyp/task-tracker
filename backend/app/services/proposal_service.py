@@ -4,7 +4,6 @@ Provides database operations for task proposals with run coordination.
 """
 
 from datetime import datetime
-from typing import List, Optional
 from uuid import UUID
 
 from sqlalchemy import func
@@ -49,9 +48,7 @@ class TaskProposalCRUD:
         )
         run = run_result.scalar_one_or_none()
         if not run:
-            raise ValueError(
-                f"Analysis run with ID '{proposal_data.analysis_run_id}' not found"
-            )
+            raise ValueError(f"Analysis run with ID '{proposal_data.analysis_run_id}' not found")
 
         # Create proposal
         proposal = TaskProposal(**proposal_data.model_dump())
@@ -62,7 +59,7 @@ class TaskProposalCRUD:
 
         return TaskProposalPublic.model_validate(proposal)
 
-    async def get(self, proposal_id: UUID) -> Optional[TaskProposalPublic]:
+    async def get(self, proposal_id: UUID) -> TaskProposalPublic | None:
         """Get task proposal by ID.
 
         Args:
@@ -71,9 +68,7 @@ class TaskProposalCRUD:
         Returns:
             Task proposal if found, None otherwise
         """
-        result = await self.session.execute(
-            select(TaskProposal).where(TaskProposal.id == proposal_id)
-        )
+        result = await self.session.execute(select(TaskProposal).where(TaskProposal.id == proposal_id))
         proposal = result.scalar_one_or_none()
 
         if proposal:
@@ -84,10 +79,10 @@ class TaskProposalCRUD:
         self,
         skip: int = 0,
         limit: int = 100,
-        run_id: Optional[UUID] = None,
-        status: Optional[str] = None,
-        confidence_min: Optional[float] = None,
-        confidence_max: Optional[float] = None,
+        run_id: UUID | None = None,
+        status: str | None = None,
+        confidence_min: float | None = None,
+        confidence_max: float | None = None,
     ) -> tuple[list[TaskProposalPublic], int]:
         """List task proposals with pagination and filters.
 
@@ -135,7 +130,7 @@ class TaskProposalCRUD:
         self,
         proposal_id: UUID,
         update_data: TaskProposalUpdate,
-    ) -> Optional[TaskProposalPublic]:
+    ) -> TaskProposalPublic | None:
         """Update task proposal.
 
         Args:
@@ -145,9 +140,7 @@ class TaskProposalCRUD:
         Returns:
             Updated task proposal if found, None otherwise
         """
-        result = await self.session.execute(
-            select(TaskProposal).where(TaskProposal.id == proposal_id)
-        )
+        result = await self.session.execute(select(TaskProposal).where(TaskProposal.id == proposal_id))
         proposal = result.scalar_one_or_none()
 
         if not proposal:
@@ -168,8 +161,8 @@ class TaskProposalCRUD:
     async def approve(
         self,
         proposal_id: UUID,
-        user_id: Optional[int] = None,
-    ) -> Optional[TaskProposalPublic]:
+        user_id: int | None = None,
+    ) -> TaskProposalPublic | None:
         """Approve task proposal and decrement run.proposals_pending.
 
         Args:
@@ -179,9 +172,7 @@ class TaskProposalCRUD:
         Returns:
             Updated task proposal if found, None otherwise
         """
-        result = await self.session.execute(
-            select(TaskProposal).where(TaskProposal.id == proposal_id)
-        )
+        result = await self.session.execute(select(TaskProposal).where(TaskProposal.id == proposal_id))
         proposal = result.scalar_one_or_none()
 
         if not proposal:
@@ -194,9 +185,7 @@ class TaskProposalCRUD:
         proposal.reviewed_at = datetime.utcnow()
 
         # Decrement run.proposals_pending and increment run.proposals_approved
-        run_result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == proposal.analysis_run_id)
-        )
+        run_result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == proposal.analysis_run_id))
         run = run_result.scalar_one_or_none()
         if run:
             run.proposals_pending = max(0, run.proposals_pending - 1)
@@ -211,8 +200,8 @@ class TaskProposalCRUD:
         self,
         proposal_id: UUID,
         reason: str,
-        user_id: Optional[int] = None,
-    ) -> Optional[TaskProposalPublic]:
+        user_id: int | None = None,
+    ) -> TaskProposalPublic | None:
         """Reject task proposal and decrement run.proposals_pending.
 
         Args:
@@ -223,9 +212,7 @@ class TaskProposalCRUD:
         Returns:
             Updated task proposal if found, None otherwise
         """
-        result = await self.session.execute(
-            select(TaskProposal).where(TaskProposal.id == proposal_id)
-        )
+        result = await self.session.execute(select(TaskProposal).where(TaskProposal.id == proposal_id))
         proposal = result.scalar_one_or_none()
 
         if not proposal:
@@ -239,9 +226,7 @@ class TaskProposalCRUD:
         proposal.reviewed_at = datetime.utcnow()
 
         # Decrement run.proposals_pending and increment run.proposals_rejected
-        run_result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == proposal.analysis_run_id)
-        )
+        run_result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == proposal.analysis_run_id))
         run = run_result.scalar_one_or_none()
         if run:
             run.proposals_pending = max(0, run.proposals_pending - 1)
@@ -256,8 +241,8 @@ class TaskProposalCRUD:
         self,
         proposal_id: UUID,
         target_task_id: UUID,
-        user_id: Optional[int] = None,
-    ) -> Optional[TaskProposalPublic]:
+        user_id: int | None = None,
+    ) -> TaskProposalPublic | None:
         """Merge proposal with existing task and decrement run.proposals_pending.
 
         Args:
@@ -268,9 +253,7 @@ class TaskProposalCRUD:
         Returns:
             Updated task proposal if found, None otherwise
         """
-        result = await self.session.execute(
-            select(TaskProposal).where(TaskProposal.id == proposal_id)
-        )
+        result = await self.session.execute(select(TaskProposal).where(TaskProposal.id == proposal_id))
         proposal = result.scalar_one_or_none()
 
         if not proposal:
@@ -284,9 +267,7 @@ class TaskProposalCRUD:
         proposal.reviewed_at = datetime.utcnow()
 
         # Decrement run.proposals_pending
-        run_result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == proposal.analysis_run_id)
-        )
+        run_result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == proposal.analysis_run_id))
         run = run_result.scalar_one_or_none()
         if run:
             run.proposals_pending = max(0, run.proposals_pending - 1)

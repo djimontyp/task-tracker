@@ -1,4 +1,5 @@
 """Enums for type safety across models."""
+
 from enum import Enum
 
 

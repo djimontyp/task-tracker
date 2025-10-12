@@ -5,22 +5,20 @@ Tests critical validation rules:
 - Cannot close run if proposals_pending > 0 (400)
 - Proposal approve/reject decrements proposals_pending
 """
-import pytest
+
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
+import pytest
 from app.models import (
+    AgentConfig,
+    AgentTaskAssignment,
     AnalysisRun,
     AnalysisRunStatus,
-    AgentTaskAssignment,
-    AgentConfig,
-    TaskConfig,
     LLMProvider,
+    TaskConfig,
     User,
-    ProjectConfig,
-    TaskProposal,
-    ProposalStatus,
 )
 
 
@@ -77,7 +75,7 @@ async def test_list_runs(client, db_session):
     # Create multiple runs
     for i in range(5):
         run = AnalysisRun(
-            time_window_start=datetime.utcnow() - timedelta(days=i+1),
+            time_window_start=datetime.utcnow() - timedelta(days=i + 1),
             time_window_end=datetime.utcnow() - timedelta(days=i),
             agent_assignment_id=assignment.id,
             config_snapshot={"test": f"data_{i}"},

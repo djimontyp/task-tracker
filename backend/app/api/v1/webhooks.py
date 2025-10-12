@@ -23,9 +23,7 @@ router = APIRouter(prefix="/webhook-settings", tags=["webhook-settings"])
     summary="Get webhook settings",
     response_description="Current webhook configuration and defaults",
 )
-async def get_webhook_settings(
-    db: DatabaseDep, settings: SettingsDep
-) -> WebhookConfigResponse:
+async def get_webhook_settings(db: DatabaseDep, settings: SettingsDep) -> WebhookConfigResponse:
     """
     Get current webhook configuration.
 
@@ -35,9 +33,7 @@ async def get_webhook_settings(
 
     api_base_url = settings.api_base_url
     default_protocol = "https" if api_base_url.startswith("https") else "http"
-    default_host = (
-        api_base_url.replace("http://", "").replace("https://", "").split(":")[0]
-    )
+    default_host = api_base_url.replace("http://", "").replace("https://", "").split(":")[0]
 
     return WebhookConfigResponse(
         telegram=telegram_config,
@@ -53,9 +49,7 @@ async def get_webhook_settings(
     response_description="Saved webhook configuration",
     responses={400: {"description": "Invalid host format"}},
 )
-async def save_webhook_settings(
-    request: SetWebhookRequest, db: DatabaseDep
-) -> TelegramWebhookConfig:
+async def save_webhook_settings(request: SetWebhookRequest, db: DatabaseDep) -> TelegramWebhookConfig:
     """
     Save webhook configuration without activating it.
 
@@ -79,9 +73,7 @@ async def save_webhook_settings(
             is_active=False,
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to save webhook settings: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to save webhook settings: {str(e)}")
 
 
 @router.post(
@@ -91,9 +83,7 @@ async def save_webhook_settings(
     response_description="Webhook activation result",
     responses={400: {"description": "Invalid host format"}},
 )
-async def set_telegram_webhook(
-    request: SetWebhookRequest, db: DatabaseDep
-) -> SetWebhookResponse:
+async def set_telegram_webhook(request: SetWebhookRequest, db: DatabaseDep) -> SetWebhookResponse:
     """
     Set Telegram webhook URL via Bot API.
 
@@ -142,9 +132,7 @@ async def delete_telegram_webhook(db: DatabaseDep):
         result = await telegram_webhook_service.delete_webhook()
 
         if result["success"]:
-            config = await webhook_settings_service.set_telegram_webhook_active(
-                db, False
-            )
+            config = await webhook_settings_service.set_telegram_webhook_active(db, False)
 
             return SetWebhookResponse(
                 success=True,
@@ -187,15 +175,11 @@ async def get_telegram_webhook_info():
             return {"success": False, "error": result.get("error", "Unknown error")}
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to get webhook info: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get webhook info: {str(e)}")
 
 
 @router.put("/telegram/group-ids", response_model=TelegramWebhookConfig)
-async def update_telegram_group_ids(
-    request: UpdateTelegramGroupIdsRequest, db: DatabaseDep
-):
+async def update_telegram_group_ids(request: UpdateTelegramGroupIdsRequest, db: DatabaseDep):
     try:
         groups = [{"id": gid, "name": None} for gid in request.group_ids]
 
@@ -214,9 +198,7 @@ async def update_telegram_group_ids(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to update group IDs: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to update group IDs: {str(e)}")
 
 
 @router.post("/telegram/groups", response_model=TelegramWebhookConfig)
@@ -230,9 +212,7 @@ async def add_telegram_group(request: AddTelegramGroupRequest, db: DatabaseDep):
                 "name": chat_info["data"]["name"],
             }
         else:
-            logger.warning(
-                f"Failed to fetch chat info for {request.group_id}: {chat_info.get('error')}"
-            )
+            logger.warning(f"Failed to fetch chat info for {request.group_id}: {chat_info.get('error')}")
             group_info = {
                 "id": request.group_id,
                 "name": None,
@@ -251,9 +231,7 @@ async def add_telegram_group(request: AddTelegramGroupRequest, db: DatabaseDep):
         raise HTTPException(status_code=500, detail=f"Failed to add group: {str(e)}")
 
 
-@router.delete(
-    "/telegram/groups/{group_id}", response_model=TelegramWebhookConfig
-)
+@router.delete("/telegram/groups/{group_id}", response_model=TelegramWebhookConfig)
 async def remove_telegram_group(group_id: int, db: DatabaseDep):
     try:
         config = await webhook_settings_service.remove_telegram_group(db, group_id)
@@ -266,19 +244,13 @@ async def remove_telegram_group(group_id: int, db: DatabaseDep):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to remove group: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to remove group: {str(e)}")
 
 
-@router.post(
-    "/telegram/groups/refresh-names", response_model=TelegramWebhookConfig
-)
+@router.post("/telegram/groups/refresh-names", response_model=TelegramWebhookConfig)
 async def refresh_telegram_group_names(db: DatabaseDep):
     try:
-        config = await webhook_settings_service.update_group_names(
-            db, telegram_webhook_service
-        )
+        config = await webhook_settings_service.update_group_names(db, telegram_webhook_service)
 
         if config:
             return config
@@ -288,6 +260,4 @@ async def refresh_telegram_group_names(db: DatabaseDep):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to refresh group names: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to refresh group names: {str(e)}")

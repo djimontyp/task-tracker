@@ -4,9 +4,8 @@ Provides secure encryption/decryption for LLM provider API keys and other
 sensitive credentials stored in the database.
 """
 
-from cryptography.fernet import Fernet, InvalidToken
-
 from core.config import settings
+from cryptography.fernet import Fernet, InvalidToken
 
 
 class CredentialEncryption:
@@ -81,9 +80,7 @@ class CredentialEncryption:
             decrypted_bytes = self._fernet.decrypt(encrypted)
             return decrypted_bytes.decode("utf-8")
         except InvalidToken as e:
-            raise ValueError(
-                "Failed to decrypt credential - invalid key or corrupted data"
-            ) from e
+            raise ValueError("Failed to decrypt credential - invalid key or corrupted data") from e
 
     @staticmethod
     def generate_key() -> str:

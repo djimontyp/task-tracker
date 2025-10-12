@@ -9,21 +9,21 @@ Tests the execution logic for analysis runs:
 - Update progress
 - Complete/fail run
 """
-import pytest
+
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, patch
-from uuid import uuid4
 
+import pytest
 from app.models import (
+    AgentConfig,
+    AgentTaskAssignment,
     AnalysisRun,
     AnalysisRunStatus,
-    AgentTaskAssignment,
-    AgentConfig,
-    TaskConfig,
     LLMProvider,
-    User,
-    ProjectConfig,
     Message,
+    ProjectConfig,
+    TaskConfig,
+    User,
 )
 from app.services.analysis_service import AnalysisExecutor
 
@@ -296,15 +296,9 @@ async def test_create_batches(db_session):
     """Test AnalysisExecutor.create_batches() - groups messages by time."""
     # Create messages with time gaps
     base_time = datetime.utcnow()
-    messages = [
-        Message(content=f"Message {i}", sent_at=base_time + timedelta(minutes=i))
-        for i in range(5)
-    ]
+    messages = [Message(content=f"Message {i}", sent_at=base_time + timedelta(minutes=i)) for i in range(5)]
     # Add gap (>10 minutes)
-    messages.extend([
-        Message(content=f"Message {i}", sent_at=base_time + timedelta(minutes=20+i))
-        for i in range(3)
-    ])
+    messages.extend([Message(content=f"Message {i}", sent_at=base_time + timedelta(minutes=20 + i)) for i in range(3)])
 
     executor = AnalysisExecutor(db_session)
     batches = await executor.create_batches(messages)

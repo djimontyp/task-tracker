@@ -6,24 +6,24 @@ Tests critical functionality:
 - Edit proposals
 - Merge with existing tasks
 """
-import pytest
+
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
+import pytest
 from app.models import (
+    AgentConfig,
+    AgentTaskAssignment,
     AnalysisRun,
     AnalysisRunStatus,
-    AgentTaskAssignment,
-    AgentConfig,
-    TaskConfig,
     LLMProvider,
-    User,
-    TaskProposal,
-    ProposalStatus,
     LLMRecommendation,
+    ProposalStatus,
+    TaskConfig,
     TaskPriority,
-    TaskCategory,
+    TaskProposal,
+    User,
 )
 
 
@@ -500,8 +500,7 @@ async def test_reject_proposal(client, db_session):
     with patch("app.api.v1.proposals.websocket_manager", AsyncMock()):
         # Reject proposal
         response = await client.put(
-            f"/api/proposals/{proposal.id}/reject",
-            json={"reason": "Not relevant to project goals"}
+            f"/api/proposals/{proposal.id}/reject", json={"reason": "Not relevant to project goals"}
         )
         assert response.status_code == 200
         data = response.json()
@@ -601,10 +600,7 @@ async def test_merge_proposal(client, db_session):
     # Mock WebSocket manager
     with patch("app.api.v1.proposals.websocket_manager", AsyncMock()):
         # Merge proposal
-        response = await client.put(
-            f"/api/proposals/{proposal.id}/merge",
-            json={"target_task_id": str(target_task_id)}
-        )
+        response = await client.put(f"/api/proposals/{proposal.id}/merge", json={"target_task_id": str(target_task_id)})
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == ProposalStatus.merged.value
@@ -705,7 +701,7 @@ async def test_edit_proposal(client, db_session):
                 "proposed_title": "Updated title",
                 "proposed_description": "Updated description",
                 "proposed_priority": TaskPriority.high.value,
-            }
+            },
         )
         assert response.status_code == 200
         data = response.json()

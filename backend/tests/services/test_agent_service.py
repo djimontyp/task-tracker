@@ -8,12 +8,12 @@ This test module provides complete coverage for the AgentTestService including:
 - Execution time measurement
 - Error scenarios and edge cases
 """
-import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-from uuid import uuid4
-from datetime import datetime
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
 
+from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
+from uuid import uuid4
+
+import pytest
 from app.models import (
     AgentConfig,
     LLMProvider,
@@ -22,9 +22,10 @@ from app.models import (
 )
 from app.services.agent_service import AgentTestService, TestAgentResponse
 from app.services.credential_encryption import CredentialEncryption
-
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # ==================== FIXTURES ====================
+
 
 @pytest.fixture
 def encryptor() -> CredentialEncryption:
@@ -184,11 +185,10 @@ async def openai_agent(db_session: AsyncSession, openai_provider: LLMProvider) -
 
 # ==================== SUCCESSFUL TEST SCENARIOS ====================
 
+
 @pytest.mark.asyncio
 async def test_agent_with_ollama_success(
-    db_session: AsyncSession,
-    ollama_agent: AgentConfig,
-    ollama_provider: LLMProvider
+    db_session: AsyncSession, ollama_agent: AgentConfig, ollama_provider: LLMProvider
 ):
     """Test successful agent testing with Ollama provider."""
     with patch("app.services.agent_service.PydanticAgent") as mock_agent_class:
@@ -220,9 +220,7 @@ async def test_agent_with_ollama_success(
 
 @pytest.mark.asyncio
 async def test_agent_with_openai_success(
-    db_session: AsyncSession,
-    openai_agent: AgentConfig,
-    openai_provider: LLMProvider
+    db_session: AsyncSession, openai_agent: AgentConfig, openai_provider: LLMProvider
 ):
     """Test successful agent testing with OpenAI provider."""
     with patch("app.services.agent_service.PydanticAgent") as mock_agent_class:
@@ -249,10 +247,7 @@ async def test_agent_with_openai_success(
 
 
 @pytest.mark.asyncio
-async def test_agent_execution_time_measurement(
-    db_session: AsyncSession,
-    ollama_agent: AgentConfig
-):
+async def test_agent_execution_time_measurement(db_session: AsyncSession, ollama_agent: AgentConfig):
     """Test that execution time is properly measured."""
     with patch("app.services.agent_service.PydanticAgent") as mock_agent_class:
         mock_agent = AsyncMock()
@@ -262,6 +257,7 @@ async def test_agent_execution_time_measurement(
         # Simulate delay in LLM response
         async def delayed_run(*args, **kwargs):
             import asyncio
+
             await asyncio.sleep(0.1)  # 100ms delay
             return mock_result
 
@@ -277,10 +273,7 @@ async def test_agent_execution_time_measurement(
 
 
 @pytest.mark.asyncio
-async def test_agent_with_custom_temperature(
-    db_session: AsyncSession,
-    ollama_provider: LLMProvider
-):
+async def test_agent_with_custom_temperature(db_session: AsyncSession, ollama_provider: LLMProvider):
     """Test agent with custom temperature setting."""
     # Create agent with specific temperature
     agent = AgentConfig(
@@ -311,10 +304,7 @@ async def test_agent_with_custom_temperature(
 
 
 @pytest.mark.asyncio
-async def test_agent_with_max_tokens(
-    db_session: AsyncSession,
-    ollama_provider: LLMProvider
-):
+async def test_agent_with_max_tokens(db_session: AsyncSession, ollama_provider: LLMProvider):
     """Test agent with custom max_tokens setting."""
     # Create agent with specific max_tokens
     agent = AgentConfig(
@@ -346,6 +336,7 @@ async def test_agent_with_max_tokens(
 
 # ==================== ERROR SCENARIOS ====================
 
+
 @pytest.mark.asyncio
 async def test_agent_not_found(db_session: AsyncSession):
     """Test ValueError raised when agent doesn't exist."""
@@ -360,10 +351,7 @@ async def test_agent_not_found(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_provider_not_found(
-    db_session: AsyncSession,
-    ollama_provider: LLMProvider
-):
+async def test_provider_not_found(db_session: AsyncSession, ollama_provider: LLMProvider):
     """Test ValueError raised when provider is deleted after agent creation."""
     # Create agent
     agent = AgentConfig(
@@ -390,10 +378,7 @@ async def test_provider_not_found(
 
 
 @pytest.mark.asyncio
-async def test_inactive_provider_error(
-    db_session: AsyncSession,
-    inactive_provider: LLMProvider
-):
+async def test_inactive_provider_error(db_session: AsyncSession, inactive_provider: LLMProvider):
     """Test ValueError raised when provider is inactive."""
     # Create agent with inactive provider
     agent = AgentConfig(
@@ -415,10 +400,7 @@ async def test_inactive_provider_error(
 
 
 @pytest.mark.asyncio
-async def test_unvalidated_provider_error(
-    db_session: AsyncSession,
-    unvalidated_provider: LLMProvider
-):
+async def test_unvalidated_provider_error(db_session: AsyncSession, unvalidated_provider: LLMProvider):
     """Test ValueError raised when provider validation status is not 'connected'."""
     # Create agent with unvalidated provider
     agent = AgentConfig(
@@ -441,10 +423,7 @@ async def test_unvalidated_provider_error(
 
 
 @pytest.mark.asyncio
-async def test_error_validation_status(
-    db_session: AsyncSession,
-    error_provider: LLMProvider
-):
+async def test_error_validation_status(db_session: AsyncSession, error_provider: LLMProvider):
     """Test ValueError raised when provider has error validation status."""
     # Create agent with error provider
     agent = AgentConfig(
@@ -467,10 +446,7 @@ async def test_error_validation_status(
 
 
 @pytest.mark.asyncio
-async def test_api_key_decryption_failure(
-    db_session: AsyncSession,
-    openai_provider: LLMProvider
-):
+async def test_api_key_decryption_failure(db_session: AsyncSession, openai_provider: LLMProvider):
     """Test ValueError raised when API key decryption fails."""
     # Create agent
     agent = AgentConfig(
@@ -484,11 +460,7 @@ async def test_api_key_decryption_failure(
     await db_session.refresh(agent)
 
     # Mock decryption to raise exception
-    with patch.object(
-        CredentialEncryption,
-        "decrypt",
-        side_effect=Exception("Decryption failed")
-    ):
+    with patch.object(CredentialEncryption, "decrypt", side_effect=Exception("Decryption failed")):
         service = AgentTestService(db_session)
 
         with pytest.raises(ValueError) as exc_info:
@@ -498,10 +470,7 @@ async def test_api_key_decryption_failure(
 
 
 @pytest.mark.asyncio
-async def test_llm_call_failure(
-    db_session: AsyncSession,
-    ollama_agent: AgentConfig
-):
+async def test_llm_call_failure(db_session: AsyncSession, ollama_agent: AgentConfig):
     """Test Exception raised when LLM request fails."""
     with patch("app.services.agent_service.PydanticAgent") as mock_agent_class:
         mock_agent = AsyncMock()
@@ -518,11 +487,9 @@ async def test_llm_call_failure(
 
 # ==================== MODEL BUILDING TESTS ====================
 
+
 @pytest.mark.asyncio
-async def test_build_model_ollama_without_base_url(
-    db_session: AsyncSession,
-    encryptor: CredentialEncryption
-):
+async def test_build_model_ollama_without_base_url(db_session: AsyncSession, encryptor: CredentialEncryption):
     """Test ValueError raised when Ollama provider is missing base_url."""
     # Create provider without base_url
     provider = LLMProvider(
@@ -556,9 +523,7 @@ async def test_build_model_ollama_without_base_url(
 
 
 @pytest.mark.asyncio
-async def test_build_model_openai_without_api_key(
-    db_session: AsyncSession
-):
+async def test_build_model_openai_without_api_key(db_session: AsyncSession):
     """Test ValueError raised when OpenAI provider is missing API key."""
     # Create provider without API key
     provider = LLMProvider(
@@ -593,11 +558,9 @@ async def test_build_model_openai_without_api_key(
 
 # ==================== RESPONSE STRUCTURE VALIDATION ====================
 
+
 @pytest.mark.asyncio
-async def test_response_structure_contains_all_fields(
-    db_session: AsyncSession,
-    ollama_agent: AgentConfig
-):
+async def test_response_structure_contains_all_fields(db_session: AsyncSession, ollama_agent: AgentConfig):
     """Test that TestAgentResponse contains all expected fields."""
     with patch("app.services.agent_service.PydanticAgent") as mock_agent_class:
         mock_agent = AsyncMock()
@@ -631,10 +594,7 @@ async def test_response_structure_contains_all_fields(
 
 
 @pytest.mark.asyncio
-async def test_response_with_complex_llm_output(
-    db_session: AsyncSession,
-    ollama_agent: AgentConfig
-):
+async def test_response_with_complex_llm_output(db_session: AsyncSession, ollama_agent: AgentConfig):
     """Test handling of complex LLM output (multiline, special chars)."""
     complex_output = """This is a multi-line response.
 
@@ -660,12 +620,10 @@ async def test_response_with_complex_llm_output(
 
 # ==================== ENCRYPTION/DECRYPTION TESTS ====================
 
+
 @pytest.mark.asyncio
 async def test_api_key_encryption_decryption_cycle(
-    db_session: AsyncSession,
-    openai_agent: AgentConfig,
-    openai_provider: LLMProvider,
-    encryptor: CredentialEncryption
+    db_session: AsyncSession, openai_agent: AgentConfig, openai_provider: LLMProvider, encryptor: CredentialEncryption
 ):
     """Test that API key is properly decrypted when testing agent."""
     original_key = "sk-original-key-12345"
@@ -675,9 +633,10 @@ async def test_api_key_encryption_decryption_cycle(
     db_session.add(openai_provider)
     await db_session.commit()
 
-    with patch("app.services.agent_service.PydanticAgent") as mock_agent_class, \
-         patch("app.services.agent_service.OpenAIProvider") as mock_provider_class:
-
+    with (
+        patch("app.services.agent_service.PydanticAgent") as mock_agent_class,
+        patch("app.services.agent_service.OpenAIProvider") as mock_provider_class,
+    ):
         mock_agent = AsyncMock()
         mock_result = Mock()
         mock_result.output = "Response"

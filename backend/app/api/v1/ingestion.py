@@ -1,15 +1,15 @@
 """API endpoints for message ingestion."""
+
 import logging
 from datetime import datetime
-from typing import List
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from sqlmodel import select
 
-from app.models import MessageIngestionJob, MessageIngestionJobPublic, IngestionStatus
-from app.tasks import ingest_telegram_messages_task
 from app.dependencies import DatabaseDep
+from app.models import IngestionStatus, MessageIngestionJob, MessageIngestionJobPublic
+from app.tasks import ingest_telegram_messages_task
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ingestion", tags=["ingestion"])
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/ingestion", tags=["ingestion"])
 class TelegramIngestionRequest(BaseModel):
     """Request to ingest messages from Telegram."""
 
-    chat_ids: List[str]
+    chat_ids: list[str]
     limit: int = 1000
 
 
@@ -37,7 +37,7 @@ async def start_telegram_ingestion(
 ):
     """
     Start ingesting messages from Telegram chats.
-    
+
     Creates a background job that fetches historical messages from specified chats.
     Progress can be tracked via WebSocket or by polling the job status endpoint.
     """
@@ -49,7 +49,7 @@ async def start_telegram_ingestion(
             status=IngestionStatus.pending,
             created_at=datetime.utcnow(),
         )
-        
+
         db.add(job)
         await db.commit()
         await db.refresh(job)
@@ -78,14 +78,14 @@ async def start_telegram_ingestion(
 async def get_ingestion_job(job_id: int, db: DatabaseDep):
     """Get status of an ingestion job."""
     job = await db.get(MessageIngestionJob, job_id)
-    
+
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-    
+
     return job
 
 
-@router.get("/jobs", response_model=List[MessageIngestionJobPublic])
+@router.get("/jobs", response_model=list[MessageIngestionJobPublic])
 async def list_ingestion_jobs(
     db: DatabaseDep,
     limit: int = 50,
@@ -93,15 +93,15 @@ async def list_ingestion_jobs(
 ):
     """List ingestion jobs with optional status filter."""
     stmt = select(MessageIngestionJob).order_by(MessageIngestionJob.created_at.desc()).limit(limit)
-    
+
     if status:
         try:
             status_enum = IngestionStatus(status)
             stmt = stmt.where(MessageIngestionJob.status == status_enum)
         except ValueError:
             raise HTTPException(status_code=400, detail=f"Invalid status: {status}")
-    
+
     result = await db.execute(stmt)
     jobs = result.scalars().all()
-    
+
     return jobs

@@ -4,7 +4,7 @@ Generates Pydantic models dynamically from TaskConfig response_schema JSONB
 for use with PydanticAI structured outputs.
 """
 
-from typing import Any, Dict, Type
+from typing import Any
 
 from pydantic import BaseModel, create_model
 
@@ -18,9 +18,9 @@ class SchemaGenerator:
 
     @staticmethod
     def generate_response_model(
-        schema: Dict[str, Any],
+        schema: dict[str, Any],
         model_name: str = "DynamicResponseModel",
-    ) -> Type[BaseModel]:
+    ) -> type[BaseModel]:
         """Generate Pydantic model from JSON schema.
 
         Supports two input formats:
@@ -45,7 +45,7 @@ class SchemaGenerator:
             raise ValueError("Schema must be a dictionary")
 
         # Build field definitions for create_model
-        field_definitions: Dict[str, Any] = {}
+        field_definitions: dict[str, Any] = {}
 
         # Full JSON Schema (object) path
         if ("properties" in schema) or (schema.get("type") == "object"):
@@ -64,15 +64,11 @@ class SchemaGenerator:
 
             for field_name, field_schema in properties.items():
                 if not isinstance(field_schema, dict):
-                    raise ValueError(
-                        f"Property schema for '{field_name}' must be a dictionary"
-                    )
+                    raise ValueError(f"Property schema for '{field_name}' must be a dictionary")
 
                 field_type_str = field_schema.get("type")
                 if not field_type_str:
-                    raise ValueError(
-                        f"Property '{field_name}' missing 'type' specification"
-                    )
+                    raise ValueError(f"Property '{field_name}' missing 'type' specification")
 
                 field_type = SchemaGenerator._map_json_type(field_type_str)
 
@@ -118,7 +114,7 @@ class SchemaGenerator:
         return create_model(model_name, **field_definitions)
 
     @staticmethod
-    def _map_json_type(json_type: str) -> Type:
+    def _map_json_type(json_type: str) -> type:
         """Map JSON schema type to Python type.
 
         Args:
@@ -140,15 +136,12 @@ class SchemaGenerator:
         }
 
         if json_type not in type_mapping:
-            raise ValueError(
-                f"Unsupported JSON type: {json_type}. "
-                f"Supported types: {', '.join(type_mapping.keys())}"
-            )
+            raise ValueError(f"Unsupported JSON type: {json_type}. Supported types: {', '.join(type_mapping.keys())}")
 
         return type_mapping[json_type]
 
     @staticmethod
-    def validate_schema(schema: Dict[str, Any]) -> bool:
+    def validate_schema(schema: dict[str, Any]) -> bool:
         """Validate JSON schema structure.
 
         Args:

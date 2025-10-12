@@ -1,12 +1,12 @@
 """AnalysisRun model for coordinating AI analysis runs."""
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
-from .base import IDMixin, TimestampMixin
 from .enums import AnalysisRunStatus
 
 
@@ -66,7 +66,7 @@ class AnalysisRun(SQLModel, table=True):
 
     # Lifecycle timestamps
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"server_default": func.now()},
     )

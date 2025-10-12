@@ -5,8 +5,6 @@ task proposals from batches of messages.
 """
 
 import logging
-from datetime import datetime
-from typing import List
 
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent as PydanticAgent
@@ -29,21 +27,15 @@ class TaskProposalOutput(BaseModel):
     category: str = Field(description="Category: feature/bug/improvement/question/docs")
     confidence: float = Field(ge=0.0, le=1.0, description="Confidence score 0-1")
     reasoning: str = Field(description="Why this is a task")
-    recommendation: str = Field(
-        description="Recommendation: new_task/update_existing/merge/reject"
-    )
-    project_name: str | None = Field(
-        default=None, description="Suggested project name (if applicable)"
-    )
-    tags: List[str] = Field(default_factory=list, description="Relevant tags")
+    recommendation: str = Field(description="Recommendation: new_task/update_existing/merge/reject")
+    project_name: str | None = Field(default=None, description="Suggested project name (if applicable)")
+    tags: list[str] = Field(default_factory=list, description="Relevant tags")
 
 
 class BatchProposalsOutput(BaseModel):
     """Structured output containing multiple proposals from a batch."""
 
-    proposals: List[TaskProposalOutput] = Field(
-        description="List of task proposals extracted from messages"
-    )
+    proposals: list[TaskProposalOutput] = Field(description="List of task proposals extracted from messages")
 
 
 class LLMProposalService:
@@ -66,9 +58,9 @@ class LLMProposalService:
 
     async def generate_proposals(
         self,
-        messages: List[Message],
+        messages: list[Message],
         project_config: ProjectConfig | None = None,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Generate task proposals from message batch using LLM.
 
         Args:
@@ -86,10 +78,7 @@ class LLMProposalService:
             >>> proposals = await service.generate_proposals(messages, project_config)
             >>> # Returns: [{"title": "...", "description": "...", ...}, ...]
         """
-        logger.info(
-            f"Generating proposals for {len(messages)} messages "
-            f"using agent '{self.agent_config.name}'"
-        )
+        logger.info(f"Generating proposals for {len(messages)} messages using agent '{self.agent_config.name}'")
 
         # Build prompt from messages
         prompt = self._build_prompt(messages, project_config)
@@ -100,9 +89,7 @@ class LLMProposalService:
             try:
                 api_key = self.encryptor.decrypt(self.provider.api_key_encrypted)
             except Exception as e:
-                raise ValueError(
-                    f"Failed to decrypt API key for provider '{self.provider.name}': {e}"
-                )
+                raise ValueError(f"Failed to decrypt API key for provider '{self.provider.name}': {e}")
 
         # Build model instance
         model = self._build_model_instance(api_key)
@@ -132,9 +119,7 @@ class LLMProposalService:
             batch_output: BatchProposalsOutput = result.output
             proposals = self._parse_proposals(batch_output.proposals, messages)
 
-            logger.info(
-                f"Generated {len(proposals)} proposals from {len(messages)} messages"
-            )
+            logger.info(f"Generated {len(proposals)} proposals from {len(messages)} messages")
 
             return proposals
 
@@ -143,14 +128,11 @@ class LLMProposalService:
                 f"LLM request failed for agent '{self.agent_config.name}': {e}",
                 exc_info=True,
             )
-            raise Exception(
-                f"LLM request failed: {str(e)}. "
-                "Check provider configuration and connectivity."
-            ) from e
+            raise Exception(f"LLM request failed: {str(e)}. Check provider configuration and connectivity.") from e
 
     def _build_prompt(
         self,
-        messages: List[Message],
+        messages: list[Message],
         project_config: ProjectConfig | None,
     ) -> str:
         """Build LLM prompt from messages and project context.
@@ -163,12 +145,9 @@ class LLMProposalService:
             Formatted prompt string
         """
         # Format messages
-        messages_text = "\n\n".join(
-            [
-                f"Message {i+1} (ID: {msg.id}, Time: {msg.sent_at}):\n{msg.content}"
-                for i, msg in enumerate(messages)
-            ]
-        )
+        messages_text = "\n\n".join([
+            f"Message {i + 1} (ID: {msg.id}, Time: {msg.sent_at}):\n{msg.content}" for i, msg in enumerate(messages)
+        ])
 
         # Build project context
         project_context = ""
@@ -176,8 +155,8 @@ class LLMProposalService:
             project_context = f"""
 Project Context:
 - Name: {project_config.name}
-- Keywords: {', '.join(project_config.keywords or [])}
-- Description: {project_config.description or 'N/A'}
+- Keywords: {", ".join(project_config.keywords or [])}
+- Description: {project_config.description or "N/A"}
 """
 
         # Build prompt
@@ -204,9 +183,9 @@ Return a structured list of task proposals.
 
     def _parse_proposals(
         self,
-        llm_proposals: List[TaskProposalOutput],
-        messages: List[Message],
-    ) -> List[dict]:
+        llm_proposals: list[TaskProposalOutput],
+        messages: list[Message],
+    ) -> list[dict]:
         """Parse LLM output into proposal dictionaries.
 
         Args:
@@ -286,7 +265,4 @@ Return a structured list of task proposals.
             )
 
         else:
-            raise ValueError(
-                f"Unsupported provider type: {self.provider.type}. "
-                "Supported types: ollama, openai"
-            )
+            raise ValueError(f"Unsupported provider type: {self.provider.type}. Supported types: ollama, openai")

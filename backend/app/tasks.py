@@ -1,16 +1,15 @@
 from datetime import datetime
-from typing import Dict, Any, List
-
-from loguru import logger
-from sqlmodel import select
+from typing import Any
 
 from core.taskiq_config import nats_broker
+from loguru import logger
+
 from .database import AsyncSessionLocal
-from .models import Source, Message, MessageIngestionJob, IngestionStatus, User, TelegramProfile
-from .services.user_service import identify_or_create_user, get_or_create_source
-from .webhook_service import telegram_webhook_service
-from .services.websocket_manager import websocket_manager
+from .models import IngestionStatus, Message, MessageIngestionJob
 from .services.telegram_ingestion_service import telegram_ingestion_service
+from .services.user_service import get_or_create_source, identify_or_create_user
+from .services.websocket_manager import websocket_manager
+from .webhook_service import telegram_webhook_service
 
 
 @nats_broker.task
@@ -23,7 +22,7 @@ async def process_message(message: str) -> str:
 
 
 @nats_broker.task
-async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
+async def save_telegram_message(telegram_data: dict[str, Any]) -> str:
     """Background task to save Telegram message to database"""
     try:
         logger.info(
@@ -64,17 +63,13 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
             avatar_url = user.avatar_url
             if not avatar_url:
                 try:
-                    avatar_url = await telegram_webhook_service.get_user_avatar_url(
-                        int(telegram_user_id)
-                    )
+                    avatar_url = await telegram_webhook_service.get_user_avatar_url(int(telegram_user_id))
                     if avatar_url:
                         user.avatar_url = avatar_url
                         await db.flush()
                         logger.info(f"Fetched and updated avatar for user {user.id}")
                 except Exception as exc:
-                    logger.warning(
-                        f"Failed to fetch avatar for Telegram user {telegram_user_id}: {exc}"
-                    )
+                    logger.warning(f"Failed to fetch avatar for Telegram user {telegram_user_id}: {exc}")
 
             # Create message
             db_message = Message(
@@ -93,13 +88,12 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
 
             # CRITICAL: Commit the transaction!
             await db.commit()
-            logger.info(
-                f"✅ Successfully committed Telegram message {message['message_id']} from {user.full_name}"
-            )
+            logger.info(f"✅ Successfully committed Telegram message {message['message_id']} from {user.full_name}")
 
             # Broadcast full message data after persisting to DB
             try:
                 from .services.websocket_manager import websocket_manager
+
                 connection_count = websocket_manager.get_connection_count("messages")
                 logger.info(f"📡 Broadcasting message.updated to {connection_count} WebSocket clients")
 
@@ -117,7 +111,7 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
                             "persisted": True,
                             "avatar_url": avatar_url,
                         },
-                    }
+                    },
                 )
                 logger.info(f"✅ message.updated broadcast sent for message {message['message_id']}")
             except Exception as exc:  # pragma: no cover - defensive logging
@@ -138,12 +132,12 @@ async def save_telegram_message(telegram_data: Dict[str, Any]) -> str:
 @nats_broker.task
 async def ingest_telegram_messages_task(
     job_id: int,
-    chat_ids: List[str],
+    chat_ids: list[str],
     limit: int = 1000,
 ) -> str:
     """
     Background task for ingesting messages from Telegram chats.
-    
+
     Args:
         job_id: MessageIngestionJob ID for tracking
         chat_ids: List of Telegram chat IDs or usernames
@@ -163,14 +157,17 @@ async def ingest_telegram_messages_task(
             await db.commit()
 
             # Broadcast start event
-            await websocket_manager.broadcast("messages", {
-                "type": "ingestion.started",
-                "data": {
-                    "job_id": job_id,
-                    "status": "running",
-                    "chat_ids": chat_ids,
-                }
-            })
+            await websocket_manager.broadcast(
+                "messages",
+                {
+                    "type": "ingestion.started",
+                    "data": {
+                        "job_id": job_id,
+                        "status": "running",
+                        "chat_ids": chat_ids,
+                    },
+                },
+            )
 
             # Get or create source
             source = await get_or_create_source(db, name="telegram")
@@ -183,7 +180,7 @@ async def ingest_telegram_messages_task(
             # Process each chat
             for chat_idx, chat_id in enumerate(chat_ids, 1):
                 logger.info(f"Processing chat {chat_idx}/{len(chat_ids)}: {chat_id}")
-                
+
                 # Fetch messages in batches
                 batch_size = 100  # Telegram API limit
                 offset_id = 0
@@ -207,10 +204,8 @@ async def ingest_telegram_messages_task(
                     batch_errors = 0
 
                     for msg in messages:
-                        success, reason = await telegram_ingestion_service.store_message(
-                            db, msg, source
-                        )
-                        
+                        success, reason = await telegram_ingestion_service.store_message(db, msg, source)
+
                         if reason == "stored":
                             batch_stored += 1
                         elif reason == "duplicate":
@@ -237,18 +232,21 @@ async def ingest_telegram_messages_task(
                     )
 
                     # Broadcast progress
-                    await websocket_manager.broadcast("messages", {
-                        "type": "ingestion.progress",
-                        "data": {
-                            "job_id": job_id,
-                            "chat_id": chat_id,
-                            "messages_fetched": total_fetched,
-                            "messages_stored": total_stored,
-                            "messages_skipped": total_skipped,
-                            "current_chat": chat_idx,
-                            "total_chats": len(chat_ids),
-                        }
-                    })
+                    await websocket_manager.broadcast(
+                        "messages",
+                        {
+                            "type": "ingestion.progress",
+                            "data": {
+                                "job_id": job_id,
+                                "chat_id": chat_id,
+                                "messages_fetched": total_fetched,
+                                "messages_stored": total_stored,
+                                "messages_skipped": total_skipped,
+                                "current_chat": chat_idx,
+                                "total_chats": len(chat_ids),
+                            },
+                        },
+                    )
 
                     # Get last message ID for next batch
                     if messages:
@@ -269,17 +267,20 @@ async def ingest_telegram_messages_task(
             await db.commit()
 
             # Broadcast completion
-            await websocket_manager.broadcast("messages", {
-                "type": "ingestion.completed",
-                "data": {
-                    "job_id": job_id,
-                    "status": "completed",
-                    "messages_fetched": total_fetched,
-                    "messages_stored": total_stored,
-                    "messages_skipped": total_skipped,
-                    "errors_count": total_errors,
-                }
-            })
+            await websocket_manager.broadcast(
+                "messages",
+                {
+                    "type": "ingestion.completed",
+                    "data": {
+                        "job_id": job_id,
+                        "status": "completed",
+                        "messages_fetched": total_fetched,
+                        "messages_stored": total_stored,
+                        "messages_skipped": total_skipped,
+                        "errors_count": total_errors,
+                    },
+                },
+            )
 
             logger.info(
                 f"✅ Ingestion job {job_id} completed: "
@@ -303,14 +304,17 @@ async def ingest_telegram_messages_task(
                     await db.commit()
 
                     # Broadcast failure
-                    await websocket_manager.broadcast("messages", {
-                        "type": "ingestion.failed",
-                        "data": {
-                            "job_id": job_id,
-                            "status": "failed",
-                            "error": str(e),
-                        }
-                    })
+                    await websocket_manager.broadcast(
+                        "messages",
+                        {
+                            "type": "ingestion.failed",
+                            "data": {
+                                "job_id": job_id,
+                                "status": "failed",
+                                "error": str(e),
+                            },
+                        },
+                    )
         except Exception as inner_e:
             logger.error(f"Failed to update job status: {inner_e}")
 
@@ -344,6 +348,7 @@ async def execute_analysis_run(run_id: str) -> dict:
         >>> await execute_analysis_run.kiq(str(run_id))
     """
     from uuid import UUID
+
     from .database import get_db_session_context
     from .services.analysis_service import AnalysisExecutor
 
@@ -379,10 +384,7 @@ async def execute_analysis_run(run_id: str) -> dict:
             # 5. Process each batch
             total_proposals = 0
             for batch_idx, batch in enumerate(batches):
-                logger.info(
-                    f"Run {run_id}: Processing batch {batch_idx + 1}/{len(batches)} "
-                    f"({len(batch)} messages)"
-                )
+                logger.info(f"Run {run_id}: Processing batch {batch_idx + 1}/{len(batches)} ({len(batch)} messages)")
 
                 # Update progress
                 await executor.update_progress(run_uuid, batch_idx + 1, len(batches))
@@ -394,10 +396,7 @@ async def execute_analysis_run(run_id: str) -> dict:
                 saved_count = await executor.save_proposals(run_uuid, proposals)
                 total_proposals += saved_count
 
-                logger.info(
-                    f"Run {run_id}: Batch {batch_idx + 1} completed, "
-                    f"created {saved_count} proposals"
-                )
+                logger.info(f"Run {run_id}: Batch {batch_idx + 1} completed, created {saved_count} proposals")
 
             # 6. Update status to "completed"
             logger.info(f"Run {run_id}: Completing run with {total_proposals} proposals")

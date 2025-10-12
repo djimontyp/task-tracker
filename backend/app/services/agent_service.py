@@ -21,9 +21,7 @@ logger = logging.getLogger(__name__)
 class TestAgentRequest(BaseModel):
     """Request schema for testing an agent."""
 
-    prompt: str = Field(
-        min_length=1, max_length=5000, description="Test prompt to send to the agent"
-    )
+    prompt: str = Field(min_length=1, max_length=5000, description="Test prompt to send to the agent")
 
 
 class TestAgentResponse(BaseModel):
@@ -73,17 +71,11 @@ class AgentTestService:
         # Load associated provider
         provider = await self.session.get(LLMProvider, agent.provider_id)
         if not provider:
-            raise ValueError(
-                f"Provider with ID '{agent.provider_id}' not found. "
-                "Agent configuration is invalid."
-            )
+            raise ValueError(f"Provider with ID '{agent.provider_id}' not found. Agent configuration is invalid.")
 
         # Verify provider is validated and active
         if not provider.is_active:
-            raise ValueError(
-                f"Provider '{provider.name}' is inactive. "
-                "Please activate the provider before testing."
-            )
+            raise ValueError(f"Provider '{provider.name}' is inactive. Please activate the provider before testing.")
 
         if provider.validation_status != ValidationStatus.connected:
             raise ValueError(
@@ -98,9 +90,7 @@ class AgentTestService:
             try:
                 api_key = self.encryptor.decrypt(provider.api_key_encrypted)
             except Exception as e:
-                raise ValueError(
-                    f"Failed to decrypt API key for provider '{provider.name}': {e}"
-                )
+                raise ValueError(f"Failed to decrypt API key for provider '{provider.name}': {e}")
 
         # Build model instance with provider configuration
         model = self._build_model_instance(provider, agent.model_name, api_key)
@@ -132,10 +122,7 @@ class AgentTestService:
             # Extract response text
             response_text = str(result.output)
 
-            logger.info(
-                f"Successfully tested agent '{agent.name}' "
-                f"(elapsed: {elapsed_time:.2f}s)"
-            )
+            logger.info(f"Successfully tested agent '{agent.name}' (elapsed: {elapsed_time:.2f}s)")
 
             return TestAgentResponse(
                 agent_id=agent.id,
@@ -154,10 +141,7 @@ class AgentTestService:
                 f"Agent test failed for '{agent.name}' after {elapsed_time:.2f}s: {e}",
                 exc_info=True,
             )
-            raise Exception(
-                f"LLM request failed: {str(e)}. "
-                "Check provider configuration and connectivity."
-            ) from e
+            raise Exception(f"LLM request failed: {str(e)}. Check provider configuration and connectivity.") from e
 
     def _build_model_instance(
         self,
@@ -200,8 +184,7 @@ class AgentTestService:
             # For OpenAI, create provider with API key
             if not api_key:
                 raise ValueError(
-                    f"Provider '{provider.name}' requires an API key. "
-                    "OpenAI providers must have an API key configured."
+                    f"Provider '{provider.name}' requires an API key. OpenAI providers must have an API key configured."
                 )
 
             openai_provider = OpenAIProvider(api_key=api_key)
@@ -211,7 +194,4 @@ class AgentTestService:
             )
 
         else:
-            raise ValueError(
-                f"Unsupported provider type: {provider.type}. "
-                "Supported types: ollama, openai"
-            )
+            raise ValueError(f"Unsupported provider type: {provider.type}. Supported types: ollama, openai")

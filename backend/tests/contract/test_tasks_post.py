@@ -1,4 +1,5 @@
 """Contract tests for POST /api/tasks endpoint."""
+
 import pytest
 from httpx import AsyncClient
 

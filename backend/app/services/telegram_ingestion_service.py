@@ -1,22 +1,21 @@
 """Service for ingesting historical messages from Telegram."""
+
 import logging
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Any
 
-import httpx
+from core.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.models import (
     Message,
-    Source,
     MessageIngestionJob,
-    IngestionStatus,
+    Source,
 )
-from app.webhook_service import TelegramWebhookService
 from app.services.telegram_client_service import get_telegram_client_service
-from app.services.user_service import identify_or_create_user, get_or_create_source
-from core.config import settings
+from app.services.user_service import identify_or_create_user
+from app.webhook_service import TelegramWebhookService
 
 logger = logging.getLogger(__name__)
 
@@ -37,41 +36,41 @@ class TelegramIngestionService:
         chat_id: str,
         limit: int = 100,
         offset_id: int = 0,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Fetch historical messages from a Telegram chat using Telethon Client API.
-        
+
         This uses Telegram Client API (MTProto) instead of Bot API,
         which allows fetching historical messages.
-        
+
         IMPORTANT: Requires Telegram user authentication (not bot token)!
-        
+
         Args:
             chat_id: Telegram chat ID (e.g., -1002988379206)
             limit: Number of messages to fetch
             offset_id: Message ID to start from (0 = latest)
-            
+
         Returns:
             List of message objects
         """
         logger.info(f"Attempting to fetch {limit} messages from chat {chat_id}")
-        
+
         try:
             # Get Telegram Client service
             client_service = get_telegram_client_service()
-            
+
             # Connect to Telegram (will use existing session if available)
             await client_service.connect()
-            
+
             # Fetch messages
             messages = await client_service.fetch_group_history(
                 chat_id=int(chat_id),
                 limit=limit,
             )
-            
+
             logger.info(f"Successfully fetched {len(messages)} messages from chat {chat_id}")
             return messages
-            
+
         except ValueError as e:
             logger.error(
                 f"⚠️  Telegram API credentials not configured: {e}. "
@@ -79,10 +78,7 @@ class TelegramIngestionService:
             )
             return []
         except RuntimeError as e:
-            logger.error(
-                f"⚠️  Telegram authentication required: {e}. "
-                f"Please run authentication setup first."
-            )
+            logger.error(f"⚠️  Telegram authentication required: {e}. Please run authentication setup first.")
             return []
         except Exception as e:
             logger.error(f"Error fetching chat history: {e}")
@@ -95,7 +91,7 @@ class TelegramIngestionService:
     async def store_message(
         self,
         db: AsyncSession,
-        message_data: Dict[str, Any],
+        message_data: dict[str, Any],
         source: Source,
     ) -> tuple[bool, str]:
         """
@@ -112,9 +108,7 @@ class TelegramIngestionService:
                 return False, "error"
 
             # Check for duplicate by external_message_id
-            existing_stmt = select(Message).where(
-                Message.external_message_id == message_id
-            )
+            existing_stmt = select(Message).where(Message.external_message_id == message_id)
             result = await db.execute(existing_stmt)
             existing = result.scalar_one_or_none()
 

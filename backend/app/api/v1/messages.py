@@ -1,6 +1,5 @@
 import logging
 from datetime import date, datetime
-from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import and_, func, select
@@ -97,18 +96,12 @@ async def get_messages(
     db: DatabaseDep,
     page: int = Query(1, ge=1, description="Page number (starting from 1)"),
     page_size: int = Query(50, ge=1, le=1000, description="Number of items per page"),
-    author: Optional[str] = Query(None, description="Filter by author name"),
-    source: Optional[str] = Query(None, description="Filter by source name"),
-    date_from: Optional[date] = Query(
-        None, description="Filter messages from this date"
-    ),
-    date_to: Optional[date] = Query(
-        None, description="Filter messages until this date"
-    ),
-    sort_by: Optional[str] = Query(
-        None, description="Column to sort by (author_name, source_name, analyzed, sent_at)"
-    ),
-    sort_order: Optional[str] = Query("desc", description="Sort order (asc or desc)"),
+    author: str | None = Query(None, description="Filter by author name"),
+    source: str | None = Query(None, description="Filter by source name"),
+    date_from: date | None = Query(None, description="Filter messages from this date"),
+    date_to: date | None = Query(None, description="Filter messages until this date"),
+    sort_by: str | None = Query(None, description="Column to sort by (author_name, source_name, analyzed, sent_at)"),
+    sort_order: str | None = Query("desc", description="Sort order (asc or desc)"),
 ) -> PaginatedMessagesResponse:
     """
     Retrieve messages with pagination and optional filtering.
@@ -127,23 +120,16 @@ async def get_messages(
 
     if author:
         # Search in User first_name or last_name
-        filters.append(
-            (User.first_name.ilike(f"%{author}%"))
-            | (User.last_name.ilike(f"%{author}%"))
-        )
+        filters.append((User.first_name.ilike(f"%{author}%")) | (User.last_name.ilike(f"%{author}%")))
 
     if source:
         filters.append(Source.name.ilike(f"%{source}%"))
 
     if date_from:
-        filters.append(
-            Message.sent_at >= datetime.combine(date_from, datetime.min.time())
-        )
+        filters.append(Message.sent_at >= datetime.combine(date_from, datetime.min.time()))
 
     if date_to:
-        filters.append(
-            Message.sent_at <= datetime.combine(date_to, datetime.max.time())
-        )
+        filters.append(Message.sent_at <= datetime.combine(date_to, datetime.max.time()))
 
     if filters:
         statement = statement.where(and_(*filters))
@@ -236,11 +222,7 @@ async def get_message_filters(db: DatabaseDep) -> MessageFiltersResponse:
     for building filter UI components.
     """
     # Get unique authors (User full names)
-    authors_statement = (
-        select(User.first_name, User.last_name)
-        .distinct()
-        .join(Message, Message.author_id == User.id)
-    )
+    authors_statement = select(User.first_name, User.last_name).distinct().join(Message, Message.author_id == User.id)
     authors_result = await db.execute(authors_statement)
     authors_data = authors_result.all()
 
@@ -253,16 +235,9 @@ async def get_message_filters(db: DatabaseDep) -> MessageFiltersResponse:
             authors.append(first_name)
 
     # Get unique sources
-    sources_statement = (
-        select(Source.id, Source.name)
-        .distinct()
-        .join(Message, Message.source_id == Source.id)
-    )
+    sources_statement = select(Source.id, Source.name).distinct().join(Message, Message.source_id == Source.id)
     sources_result = await db.execute(sources_statement)
-    sources = [
-        {"id": source_id, "name": source_name}
-        for source_id, source_name in sources_result.all()
-    ]
+    sources = [{"id": source_id, "name": source_name} for source_id, source_name in sources_result.all()]
 
     # Total messages count
     count_statement = select(func.count(Message.id))
@@ -270,9 +245,7 @@ async def get_message_filters(db: DatabaseDep) -> MessageFiltersResponse:
     total_messages = count_result.scalar() or 0
 
     # Date range
-    date_range_statement = select(
-        func.min(Message.sent_at), func.max(Message.sent_at)
-    )
+    date_range_statement = select(func.min(Message.sent_at), func.max(Message.sent_at))
     date_range_result = await db.execute(date_range_statement)
     min_date, max_date = date_range_result.one()
 

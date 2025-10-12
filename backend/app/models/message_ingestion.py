@@ -1,8 +1,8 @@
 """Models for message ingestion tracking."""
+
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
@@ -34,42 +34,26 @@ class MessageIngestionJob(IDMixin, TimestampMixin, SQLModel, table=True):
     )
 
     # Time window
-    time_window_start: datetime | None = Field(
-        default=None, description="Start of time window for fetching"
-    )
-    time_window_end: datetime | None = Field(
-        default=None, description="End of time window for fetching"
-    )
+    time_window_start: datetime | None = Field(default=None, description="Start of time window for fetching")
+    time_window_end: datetime | None = Field(default=None, description="End of time window for fetching")
 
     # Status tracking
-    status: IngestionStatus = Field(
-        default=IngestionStatus.pending, description="Current job status"
-    )
+    status: IngestionStatus = Field(default=IngestionStatus.pending, description="Current job status")
     messages_fetched: int = Field(default=0, description="Total messages fetched")
     messages_stored: int = Field(default=0, description="Messages successfully stored")
-    messages_skipped: int = Field(
-        default=0, description="Messages skipped (duplicates)"
-    )
+    messages_skipped: int = Field(default=0, description="Messages skipped (duplicates)")
     errors_count: int = Field(default=0, description="Number of errors encountered")
 
     # Progress tracking
     current_batch: int = Field(default=0, description="Current batch number")
-    total_batches: int | None = Field(
-        default=None, description="Estimated total batches"
-    )
+    total_batches: int | None = Field(default=None, description="Estimated total batches")
 
     # Results and errors
-    error_log: dict | None = Field(
-        default=None, sa_type=JSONB, description="Error details"
-    )
+    error_log: dict | None = Field(default=None, sa_type=JSONB, description="Error details")
 
     # Lifecycle timestamps
-    started_at: datetime | None = Field(
-        default=None, description="When job started processing"
-    )
-    completed_at: datetime | None = Field(
-        default=None, description="When job completed"
-    )
+    started_at: datetime | None = Field(default=None, description="When job started processing")
+    completed_at: datetime | None = Field(default=None, description="When job completed")
 
 
 class MessageIngestionJobCreate(SQLModel):

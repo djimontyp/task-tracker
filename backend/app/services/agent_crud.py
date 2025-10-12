@@ -4,7 +4,6 @@ Provides create, read, update, delete operations for agent configurations
 with provider relationship validation.
 """
 
-from typing import List, Optional
 from uuid import UUID
 
 from sqlmodel import select
@@ -73,7 +72,7 @@ class AgentCRUD:
 
         return AgentConfigPublic.model_validate(agent)
 
-    async def get(self, agent_id: UUID) -> Optional[AgentConfigPublic]:
+    async def get(self, agent_id: UUID) -> AgentConfigPublic | None:
         """Get agent by ID.
 
         Args:
@@ -82,16 +81,14 @@ class AgentCRUD:
         Returns:
             Agent if found, None otherwise
         """
-        result = await self.session.execute(
-            select(AgentConfig).where(AgentConfig.id == agent_id)
-        )
+        result = await self.session.execute(select(AgentConfig).where(AgentConfig.id == agent_id))
         agent = result.scalar_one_or_none()
 
         if agent:
             return AgentConfigPublic.model_validate(agent)
         return None
 
-    async def get_by_name(self, name: str) -> Optional[AgentConfigPublic]:
+    async def get_by_name(self, name: str) -> AgentConfigPublic | None:
         """Get agent by name.
 
         Args:
@@ -100,9 +97,7 @@ class AgentCRUD:
         Returns:
             Agent if found, None otherwise
         """
-        result = await self.session.execute(
-            select(AgentConfig).where(AgentConfig.name == name)
-        )
+        result = await self.session.execute(select(AgentConfig).where(AgentConfig.name == name))
         agent = result.scalar_one_or_none()
 
         if agent:
@@ -114,8 +109,8 @@ class AgentCRUD:
         skip: int = 0,
         limit: int = 100,
         active_only: bool = False,
-        provider_id: Optional[UUID] = None,
-    ) -> List[AgentConfigPublic]:
+        provider_id: UUID | None = None,
+    ) -> list[AgentConfigPublic]:
         """List agents with pagination and filters.
 
         Args:
@@ -145,7 +140,7 @@ class AgentCRUD:
         self,
         agent_id: UUID,
         update_data: AgentConfigUpdate,
-    ) -> Optional[AgentConfigPublic]:
+    ) -> AgentConfigPublic | None:
         """Update agent configuration.
 
         Args:
@@ -158,9 +153,7 @@ class AgentCRUD:
         Raises:
             ValueError: If provider_id provided but not found
         """
-        result = await self.session.execute(
-            select(AgentConfig).where(AgentConfig.id == agent_id)
-        )
+        result = await self.session.execute(select(AgentConfig).where(AgentConfig.id == agent_id))
         agent = result.scalar_one_or_none()
 
         if not agent:
@@ -176,9 +169,7 @@ class AgentCRUD:
             )
             provider = provider_result.scalar_one_or_none()
             if not provider:
-                raise ValueError(
-                    f"Provider with ID '{update_dict['provider_id']}' not found"
-                )
+                raise ValueError(f"Provider with ID '{update_dict['provider_id']}' not found")
 
         # Apply updates
         for field, value in update_dict.items():
@@ -203,9 +194,7 @@ class AgentCRUD:
             Running agent instances continue until task completion.
             Will cascade delete agent_task_assignments due to FK constraint.
         """
-        result = await self.session.execute(
-            select(AgentConfig).where(AgentConfig.id == agent_id)
-        )
+        result = await self.session.execute(select(AgentConfig).where(AgentConfig.id == agent_id))
         agent = result.scalar_one_or_none()
 
         if not agent:

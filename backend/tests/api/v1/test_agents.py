@@ -8,13 +8,12 @@ This test module provides complete coverage for all /api/agents endpoints includ
 - Delete agent (DELETE /api/agents/{id})
 - Test agent (POST /api/agents/{id}/test)
 """
-import pytest
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-from uuid import uuid4, UUID
+
 from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
+from uuid import uuid4
 
+import pytest
 from app.models import (
     AgentConfig,
     LLMProvider,
@@ -22,9 +21,11 @@ from app.models import (
     ValidationStatus,
 )
 from app.services.credential_encryption import CredentialEncryption
-
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # ==================== FIXTURES ====================
+
 
 @pytest.fixture
 async def test_provider(db_session: AsyncSession) -> LLMProvider:
@@ -147,6 +148,7 @@ async def multiple_agents(db_session: AsyncSession, test_provider: LLMProvider) 
 
 # ==================== LIST AGENTS (GET /api/agents) ====================
 
+
 @pytest.mark.asyncio
 async def test_list_agents_empty(client: AsyncClient):
     """Test listing agents when database is empty."""
@@ -213,10 +215,7 @@ async def test_list_agents_filter_active_only(client: AsyncClient, multiple_agen
 
 @pytest.mark.asyncio
 async def test_list_agents_filter_by_provider(
-    client: AsyncClient,
-    test_provider: LLMProvider,
-    test_openai_provider: LLMProvider,
-    db_session: AsyncSession
+    client: AsyncClient, test_provider: LLMProvider, test_openai_provider: LLMProvider, db_session: AsyncSession
 ):
     """Test filtering agents by provider_id."""
     # Create agent with Ollama provider
@@ -249,11 +248,7 @@ async def test_list_agents_filter_by_provider(
 
 
 @pytest.mark.asyncio
-async def test_list_agents_combine_filters(
-    client: AsyncClient,
-    test_provider: LLMProvider,
-    db_session: AsyncSession
-):
+async def test_list_agents_combine_filters(client: AsyncClient, test_provider: LLMProvider, db_session: AsyncSession):
     """Test combining active_only and provider_id filters."""
     # Create active agent
     active_agent = AgentConfig(
@@ -277,9 +272,7 @@ async def test_list_agents_combine_filters(
     await db_session.commit()
 
     # Filter by provider and active only
-    response = await client.get(
-        f"/api/agents?provider_id={test_provider.id}&active_only=true"
-    )
+    response = await client.get(f"/api/agents?provider_id={test_provider.id}&active_only=true")
 
     assert response.status_code == 200
     data = response.json()
@@ -312,6 +305,7 @@ async def test_list_agents_invalid_pagination_excessive_limit(client: AsyncClien
 
 
 # ==================== GET AGENT BY ID (GET /api/agents/{id}) ====================
+
 
 @pytest.mark.asyncio
 async def test_get_agent_success(client: AsyncClient, test_agent: AgentConfig):
@@ -352,6 +346,7 @@ async def test_get_agent_invalid_uuid(client: AsyncClient):
 
 
 # ==================== CREATE AGENT (POST /api/agents) ====================
+
 
 @pytest.mark.asyncio
 async def test_create_agent_all_fields(client: AsyncClient, test_provider: LLMProvider):
@@ -468,11 +463,7 @@ async def test_create_agent_missing_required_system_prompt(client: AsyncClient, 
 
 
 @pytest.mark.asyncio
-async def test_create_agent_duplicate_name(
-    client: AsyncClient,
-    test_provider: LLMProvider,
-    test_agent: AgentConfig
-):
+async def test_create_agent_duplicate_name(client: AsyncClient, test_provider: LLMProvider, test_agent: AgentConfig):
     """Test 409 conflict for duplicate agent name."""
     payload = {
         "name": test_agent.name,  # Same name as existing agent
@@ -509,10 +500,7 @@ async def test_create_agent_nonexistent_provider(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_create_agent_invalid_temperature_below_zero(
-    client: AsyncClient,
-    test_provider: LLMProvider
-):
+async def test_create_agent_invalid_temperature_below_zero(client: AsyncClient, test_provider: LLMProvider):
     """Test 400 error for temperature below 0.0."""
     payload = {
         "name": "Invalid Temp Agent",
@@ -530,10 +518,7 @@ async def test_create_agent_invalid_temperature_below_zero(
 
 
 @pytest.mark.asyncio
-async def test_create_agent_invalid_temperature_above_one(
-    client: AsyncClient,
-    test_provider: LLMProvider
-):
+async def test_create_agent_invalid_temperature_above_one(client: AsyncClient, test_provider: LLMProvider):
     """Test 400 error for temperature above 1.0."""
     payload = {
         "name": "Invalid Temp Agent",
@@ -551,10 +536,7 @@ async def test_create_agent_invalid_temperature_above_one(
 
 
 @pytest.mark.asyncio
-async def test_create_agent_empty_model_name(
-    client: AsyncClient,
-    test_provider: LLMProvider
-):
+async def test_create_agent_empty_model_name(client: AsyncClient, test_provider: LLMProvider):
     """Test validation error for empty model_name."""
     payload = {
         "name": "Empty Model Agent",
@@ -570,10 +552,7 @@ async def test_create_agent_empty_model_name(
 
 
 @pytest.mark.asyncio
-async def test_create_agent_empty_system_prompt(
-    client: AsyncClient,
-    test_provider: LLMProvider
-):
+async def test_create_agent_empty_system_prompt(client: AsyncClient, test_provider: LLMProvider):
     """Test validation error for empty system_prompt."""
     payload = {
         "name": "Empty Prompt Agent",
@@ -590,12 +569,9 @@ async def test_create_agent_empty_system_prompt(
 
 # ==================== UPDATE AGENT (PUT /api/agents/{id}) ====================
 
+
 @pytest.mark.asyncio
-async def test_update_agent_all_fields(
-    client: AsyncClient,
-    test_agent: AgentConfig,
-    test_openai_provider: LLMProvider
-):
+async def test_update_agent_all_fields(client: AsyncClient, test_agent: AgentConfig, test_openai_provider: LLMProvider):
     """Test updating all agent fields."""
     payload = {
         "name": "Updated Agent Name",
@@ -658,10 +634,7 @@ async def test_update_agent_not_found(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_update_agent_duplicate_name(
-    client: AsyncClient,
-    test_agent: AgentConfig,
-    test_provider: LLMProvider,
-    db_session: AsyncSession
+    client: AsyncClient, test_agent: AgentConfig, test_provider: LLMProvider, db_session: AsyncSession
 ):
     """Test 409 conflict when updating to duplicate name."""
     # Create another agent
@@ -707,15 +680,13 @@ async def test_update_agent_invalid_temperature(client: AsyncClient, test_agent:
 
 
 @pytest.mark.asyncio
-async def test_update_agent_timestamp_changes(
-    client: AsyncClient,
-    test_agent: AgentConfig
-):
+async def test_update_agent_timestamp_changes(client: AsyncClient, test_agent: AgentConfig):
     """Test that updated_at timestamp changes after update."""
     original_updated_at = test_agent.updated_at
 
     # Small delay to ensure timestamp difference
     import asyncio
+
     await asyncio.sleep(0.1)
 
     payload = {"description": "New description"}
@@ -731,12 +702,9 @@ async def test_update_agent_timestamp_changes(
 
 # ==================== DELETE AGENT (DELETE /api/agents/{id}) ====================
 
+
 @pytest.mark.asyncio
-async def test_delete_agent_success(
-    client: AsyncClient,
-    test_agent: AgentConfig,
-    db_session: AsyncSession
-):
+async def test_delete_agent_success(client: AsyncClient, test_agent: AgentConfig, db_session: AsyncSession):
     """Test successfully deleting an agent."""
     agent_id = test_agent.id
 
@@ -768,6 +736,7 @@ async def test_delete_agent_invalid_uuid(client: AsyncClient):
 
 
 # ==================== TEST AGENT (POST /api/agents/{id}/test) ====================
+
 
 @pytest.mark.asyncio
 async def test_test_agent_success(client: AsyncClient, test_agent: AgentConfig):
@@ -810,9 +779,7 @@ async def test_test_agent_not_found(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_test_agent_with_inactive_provider(
-    client: AsyncClient,
-    inactive_provider: LLMProvider,
-    db_session: AsyncSession
+    client: AsyncClient, inactive_provider: LLMProvider, db_session: AsyncSession
 ):
     """Test 400 error when testing agent with inactive provider."""
     # Create agent with inactive provider
@@ -837,9 +804,7 @@ async def test_test_agent_with_inactive_provider(
 
 @pytest.mark.asyncio
 async def test_test_agent_with_unvalidated_provider(
-    client: AsyncClient,
-    test_provider: LLMProvider,
-    db_session: AsyncSession
+    client: AsyncClient, test_provider: LLMProvider, db_session: AsyncSession
 ):
     """Test 400 error when provider is not validated."""
     # Update provider to unvalidated status
@@ -918,9 +883,7 @@ async def test_test_agent_llm_failure(client: AsyncClient, test_agent: AgentConf
 
 @pytest.mark.asyncio
 async def test_test_agent_with_openai_provider(
-    client: AsyncClient,
-    test_openai_provider: LLMProvider,
-    db_session: AsyncSession
+    client: AsyncClient, test_openai_provider: LLMProvider, db_session: AsyncSession
 ):
     """Test testing an agent configured with OpenAI provider."""
     # Create agent with OpenAI provider

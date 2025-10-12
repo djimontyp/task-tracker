@@ -5,7 +5,6 @@ AI-generated task proposals with WebSocket event broadcasting.
 """
 
 import logging
-from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -50,19 +49,11 @@ class MergeProposalRequest(BaseModel):
 )
 async def list_proposals(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(
-        100, ge=1, le=1000, description="Maximum number of records to return"
-    ),
-    run_id: Optional[UUID] = Query(None, description="Filter by analysis run ID"),
-    status: Optional[str] = Query(
-        None, description="Filter by status (pending, approved, rejected, merged)"
-    ),
-    confidence_min: Optional[float] = Query(
-        None, ge=0.0, le=1.0, description="Filter by confidence >= min"
-    ),
-    confidence_max: Optional[float] = Query(
-        None, ge=0.0, le=1.0, description="Filter by confidence <= max"
-    ),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    run_id: UUID | None = Query(None, description="Filter by analysis run ID"),
+    status: str | None = Query(None, description="Filter by status (pending, approved, rejected, merged)"),
+    confidence_min: float | None = Query(None, ge=0.0, le=1.0, description="Filter by confidence >= min"),
+    confidence_max: float | None = Query(None, ge=0.0, le=1.0, description="Filter by confidence <= max"),
     session: AsyncSession = Depends(get_session),
 ) -> TaskProposalListResponse:
     """List all task proposals with pagination and filters.
@@ -316,9 +307,7 @@ async def merge_proposal(
             detail=f"Task proposal with ID '{proposal_id}' not found",
         )
 
-    logger.info(
-        f"Merged task proposal {proposal_id} with task {merge_request.target_task_id}"
-    )
+    logger.info(f"Merged task proposal {proposal_id} with task {merge_request.target_task_id}")
 
     # Broadcast WebSocket event
     await ws_manager.broadcast(

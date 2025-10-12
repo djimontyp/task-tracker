@@ -6,7 +6,6 @@ Includes AnalysisExecutor for background job execution.
 
 import logging
 from datetime import datetime
-from typing import List, Optional
 from uuid import UUID
 
 from sqlalchemy import func
@@ -25,7 +24,6 @@ from app.models import (
     Message,
     ProjectConfig,
     TaskProposal,
-    TaskProposalCreate,
 )
 from app.services.llm_proposal_service import LLMProposalService
 from app.services.websocket_manager import websocket_manager
@@ -49,7 +47,7 @@ class AnalysisRunValidator:
         """
         self.session = session
 
-    async def can_start_new_run(self) -> tuple[bool, Optional[str]]:
+    async def can_start_new_run(self) -> tuple[bool, str | None]:
         """Check if new analysis run can be started.
 
         Validates that no unclosed runs exist. A run is considered unclosed
@@ -74,11 +72,7 @@ class AnalysisRunValidator:
             AnalysisRunStatus.reviewed.value,
         ]
 
-        result = await self.session.execute(
-            select(AnalysisRun).where(
-                AnalysisRun.status.in_(unclosed_statuses)
-            )
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.status.in_(unclosed_statuses)))
         unclosed_runs = result.scalars().all()
 
         if unclosed_runs:
@@ -92,7 +86,7 @@ class AnalysisRunValidator:
 
         return True, None
 
-    async def can_close_run(self, run_id: UUID) -> tuple[bool, Optional[str]]:
+    async def can_close_run(self, run_id: UUID) -> tuple[bool, str | None]:
         """Check if analysis run can be closed.
 
         Validates that all proposals have been reviewed (proposals_pending == 0).
@@ -111,9 +105,7 @@ class AnalysisRunValidator:
             >>> if not can_close:
             >>>     raise HTTPException(400, error)
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         run = result.scalar_one_or_none()
 
         if not run:
@@ -137,9 +129,7 @@ class AnalysisRunValidator:
         Returns:
             True if run exists, False otherwise
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         return result.scalar_one_or_none() is not None
 
 
@@ -168,15 +158,11 @@ class AnalysisRunCRUD:
         """
         # Verify agent assignment exists
         assignment_result = await self.session.execute(
-            select(AgentTaskAssignment).where(
-                AgentTaskAssignment.id == run_data.agent_assignment_id
-            )
+            select(AgentTaskAssignment).where(AgentTaskAssignment.id == run_data.agent_assignment_id)
         )
         assignment = assignment_result.scalar_one_or_none()
         if not assignment:
-            raise ValueError(
-                f"Agent assignment with ID '{run_data.agent_assignment_id}' not found"
-            )
+            raise ValueError(f"Agent assignment with ID '{run_data.agent_assignment_id}' not found")
 
         # Build config snapshot
         config_snapshot = {
@@ -190,15 +176,11 @@ class AnalysisRunCRUD:
         # Add project config to snapshot if provided
         if run_data.project_config_id:
             project_result = await self.session.execute(
-                select(ProjectConfig).where(
-                    ProjectConfig.id == run_data.project_config_id
-                )
+                select(ProjectConfig).where(ProjectConfig.id == run_data.project_config_id)
             )
             project = project_result.scalar_one_or_none()
             if not project:
-                raise ValueError(
-                    f"Project config with ID '{run_data.project_config_id}' not found"
-                )
+                raise ValueError(f"Project config with ID '{run_data.project_config_id}' not found")
             config_snapshot["project_config"] = {
                 "id": str(project.id),
                 "name": project.name,
@@ -224,7 +206,7 @@ class AnalysisRunCRUD:
 
         return AnalysisRunPublic.model_validate(run)
 
-    async def get(self, run_id: UUID) -> Optional[AnalysisRunPublic]:
+    async def get(self, run_id: UUID) -> AnalysisRunPublic | None:
         """Get analysis run by ID.
 
         Args:
@@ -233,9 +215,7 @@ class AnalysisRunCRUD:
         Returns:
             Analysis run if found, None otherwise
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         run = result.scalar_one_or_none()
 
         if run:
@@ -246,10 +226,10 @@ class AnalysisRunCRUD:
         self,
         skip: int = 0,
         limit: int = 100,
-        status: Optional[str] = None,
-        trigger_type: Optional[str] = None,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
+        status: str | None = None,
+        trigger_type: str | None = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
     ) -> tuple[list[AnalysisRunPublic], int]:
         """List analysis runs with pagination and filters.
 
@@ -296,7 +276,7 @@ class AnalysisRunCRUD:
         self,
         run_id: UUID,
         update_data: AnalysisRunUpdate,
-    ) -> Optional[AnalysisRunPublic]:
+    ) -> AnalysisRunPublic | None:
         """Update analysis run.
 
         Args:
@@ -306,9 +286,7 @@ class AnalysisRunCRUD:
         Returns:
             Updated analysis run if found, None otherwise
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         run = result.scalar_one_or_none()
 
         if not run:
@@ -326,7 +304,7 @@ class AnalysisRunCRUD:
 
         return AnalysisRunPublic.model_validate(run)
 
-    async def close(self, run_id: UUID) -> Optional[AnalysisRunPublic]:
+    async def close(self, run_id: UUID) -> AnalysisRunPublic | None:
         """Close analysis run and calculate accuracy metrics.
 
         Args:
@@ -335,9 +313,7 @@ class AnalysisRunCRUD:
         Returns:
             Updated analysis run if found, None otherwise
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         run = result.scalar_one_or_none()
 
         if not run:
@@ -349,12 +325,8 @@ class AnalysisRunCRUD:
             "proposals_total": total_proposals,
             "proposals_approved": run.proposals_approved,
             "proposals_rejected": run.proposals_rejected,
-            "approval_rate": (
-                run.proposals_approved / total_proposals if total_proposals > 0 else 0.0
-            ),
-            "rejection_rate": (
-                run.proposals_rejected / total_proposals if total_proposals > 0 else 0.0
-            ),
+            "approval_rate": (run.proposals_approved / total_proposals if total_proposals > 0 else 0.0),
+            "rejection_rate": (run.proposals_rejected / total_proposals if total_proposals > 0 else 0.0),
         }
 
         # Update run
@@ -402,9 +374,7 @@ class AnalysisExecutor:
         Raises:
             ValueError: If run not found
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         run = result.scalar_one_or_none()
 
         if not run:
@@ -432,7 +402,7 @@ class AnalysisExecutor:
 
         logger.info(f"Analysis run {run_id} started")
 
-    async def fetch_messages(self, run_id: UUID) -> List[Message]:
+    async def fetch_messages(self, run_id: UUID) -> list[Message]:
         """Fetch messages in the run's time window.
 
         Args:
@@ -444,9 +414,7 @@ class AnalysisExecutor:
         Raises:
             ValueError: If run not found
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         run = result.scalar_one_or_none()
 
         if not run:
@@ -454,7 +422,9 @@ class AnalysisExecutor:
 
         # Query messages in time window
         # Convert aware datetime to naive for comparison (DB uses naive timestamps)
-        start_naive = run.time_window_start.replace(tzinfo=None) if run.time_window_start.tzinfo else run.time_window_start
+        start_naive = (
+            run.time_window_start.replace(tzinfo=None) if run.time_window_start.tzinfo else run.time_window_start
+        )
         end_naive = run.time_window_end.replace(tzinfo=None) if run.time_window_end.tzinfo else run.time_window_end
 
         messages_result = await self.session.execute(
@@ -473,9 +443,7 @@ class AnalysisExecutor:
 
         return messages
 
-    async def prefilter_messages(
-        self, run_id: UUID, messages: List[Message]
-    ) -> List[Message]:
+    async def prefilter_messages(self, run_id: UUID, messages: list[Message]) -> list[Message]:
         """Pre-filter messages by keywords, length, and @mentions.
 
         Filters out spam/noise messages (~30% should remain).
@@ -490,9 +458,7 @@ class AnalysisExecutor:
         Raises:
             ValueError: If run not found
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         run = result.scalar_one_or_none()
 
         if not run:
@@ -515,10 +481,7 @@ class AnalysisExecutor:
 
             # Filter by keywords if project config available
             if project_config and project_config.keywords:
-                has_keyword = any(
-                    keyword.lower() in msg.content.lower()
-                    for keyword in project_config.keywords
-                )
+                has_keyword = any(keyword.lower() in msg.content.lower() for keyword in project_config.keywords)
                 if not has_keyword:
                     # Check for @mentions as alternative
                     if "@" not in msg.content:
@@ -530,13 +493,11 @@ class AnalysisExecutor:
         run.messages_after_prefilter = len(filtered)
         await self.session.commit()
 
-        logger.info(
-            f"Run {run_id}: {len(filtered)}/{len(messages)} messages after pre-filter"
-        )
+        logger.info(f"Run {run_id}: {len(filtered)}/{len(messages)} messages after pre-filter")
 
         return filtered
 
-    async def create_batches(self, messages: List[Message]) -> List[List[Message]]:
+    async def create_batches(self, messages: list[Message]) -> list[list[Message]]:
         """Group messages into batches for LLM processing.
 
         Groups messages by time proximity (5-10min windows) with max 50 messages per batch.
@@ -576,9 +537,7 @@ class AnalysisExecutor:
 
         return batches
 
-    async def process_batch(
-        self, run_id: UUID, batch: List[Message]
-    ) -> List[dict]:
+    async def process_batch(self, run_id: UUID, batch: list[Message]) -> list[dict]:
         """Process message batch with LLM to generate proposals.
 
         Args:
@@ -591,9 +550,7 @@ class AnalysisExecutor:
         Raises:
             ValueError: If run not found or agent/provider invalid
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         run = result.scalar_one_or_none()
 
         if not run:
@@ -601,30 +558,22 @@ class AnalysisExecutor:
 
         # Get agent assignment
         assignment_result = await self.session.execute(
-            select(AgentTaskAssignment).where(
-                AgentTaskAssignment.id == run.agent_assignment_id
-            )
+            select(AgentTaskAssignment).where(AgentTaskAssignment.id == run.agent_assignment_id)
         )
         assignment = assignment_result.scalar_one_or_none()
 
         if not assignment:
-            raise ValueError(
-                f"Agent assignment with ID '{run.agent_assignment_id}' not found"
-            )
+            raise ValueError(f"Agent assignment with ID '{run.agent_assignment_id}' not found")
 
         # Get agent config
-        agent_result = await self.session.execute(
-            select(AgentConfig).where(AgentConfig.id == assignment.agent_id)
-        )
+        agent_result = await self.session.execute(select(AgentConfig).where(AgentConfig.id == assignment.agent_id))
         agent = agent_result.scalar_one_or_none()
 
         if not agent:
             raise ValueError(f"Agent with ID '{assignment.agent_id}' not found")
 
         # Get provider
-        provider_result = await self.session.execute(
-            select(LLMProvider).where(LLMProvider.id == agent.provider_id)
-        )
+        provider_result = await self.session.execute(select(LLMProvider).where(LLMProvider.id == agent.provider_id))
         provider = provider_result.scalar_one_or_none()
 
         if not provider:
@@ -646,9 +595,7 @@ class AnalysisExecutor:
 
         return proposals
 
-    async def save_proposals(
-        self, run_id: UUID, proposals: List[dict]
-    ) -> int:
+    async def save_proposals(self, run_id: UUID, proposals: list[dict]) -> int:
         """Save proposals to database and update run counts.
 
         Args:
@@ -661,9 +608,7 @@ class AnalysisExecutor:
         Raises:
             ValueError: If run not found
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         run = result.scalar_one_or_none()
 
         if not run:
@@ -705,9 +650,7 @@ class AnalysisExecutor:
 
         return saved_count
 
-    async def update_progress(
-        self, run_id: UUID, current: int, total: int
-    ) -> None:
+    async def update_progress(self, run_id: UUID, current: int, total: int) -> None:
         """Update run progress and broadcast via WebSocket.
 
         Args:
@@ -718,9 +661,7 @@ class AnalysisExecutor:
         Raises:
             ValueError: If run not found
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         run = result.scalar_one_or_none()
 
         if not run:
@@ -761,9 +702,7 @@ class AnalysisExecutor:
         Raises:
             ValueError: If run not found
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         run = result.scalar_one_or_none()
 
         if not run:
@@ -793,8 +732,7 @@ class AnalysisExecutor:
         )
 
         logger.info(
-            f"Analysis run {run_id} completed: "
-            f"{run.proposals_total} proposals from {run.batches_created} batches"
+            f"Analysis run {run_id} completed: {run.proposals_total} proposals from {run.batches_created} batches"
         )
 
         return {
@@ -816,9 +754,7 @@ class AnalysisExecutor:
         Raises:
             ValueError: If run not found
         """
-        result = await self.session.execute(
-            select(AnalysisRun).where(AnalysisRun.id == run_id)
-        )
+        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.id == run_id))
         run = result.scalar_one_or_none()
 
         if not run:

@@ -1,4 +1,5 @@
 """Contract tests for DELETE /api/tasks/{id} endpoint."""
+
 import pytest
 from httpx import AsyncClient
 

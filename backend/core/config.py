@@ -1,4 +1,4 @@
-from pydantic import Field, AliasChoices
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,16 +19,12 @@ class Settings(BaseSettings):
         default="postgresql+asyncpg://postgres:postgres@localhost:5555/tasktracker",
         validation_alias=AliasChoices("DATABASE_URL", "database_url"),
     )
-    migration_database_url: str = (
-        "postgresql+asyncpg://postgres:postgres@localhost:5555/tasktracker"
-    )
+    migration_database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5555/tasktracker"
     ollama_base_url: str = Field(
         default="http://localhost:11434",
         validation_alias=AliasChoices("OLLAMA_BASE_URL", "ollama_base_url"),
     )
-    llm_provider: str = Field(
-        default="ollama", validation_alias=AliasChoices("LLM_PROVIDER", "llm_provider")
-    )
+    llm_provider: str = Field(default="ollama", validation_alias=AliasChoices("LLM_PROVIDER", "llm_provider"))
     ollama_model: str = Field(
         default="mistral-nemo:12b-instruct-2407-q4_k_m",
         validation_alias=AliasChoices("OLLAMA_MODEL", "ollama_model"),
@@ -48,9 +44,7 @@ class Settings(BaseSettings):
     )
     telegram_session_string: str | None = Field(
         default=None,
-        validation_alias=AliasChoices(
-            "TELEGRAM_SESSION_STRING", "telegram_session_string"
-        ),
+        validation_alias=AliasChoices("TELEGRAM_SESSION_STRING", "telegram_session_string"),
     )
     taskiq_nats_servers: str = Field(
         default="nats://localhost:4222",

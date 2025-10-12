@@ -10,8 +10,8 @@ from datetime import datetime
 import httpx
 from sqlmodel import select
 
-from app.models import LLMProvider, ProviderType, ValidationStatus
 from app.database import AsyncSessionLocal
+from app.models import LLMProvider, ProviderType, ValidationStatus
 from app.services.websocket_manager import websocket_manager
 
 
@@ -45,9 +45,7 @@ class ProviderValidator:
         async with AsyncSessionLocal() as session:
             try:
                 # Load provider from database
-                result = await session.execute(
-                    select(LLMProvider).where(LLMProvider.id == provider_id)
-                )
+                result = await session.execute(select(LLMProvider).where(LLMProvider.id == provider_id))
                 provider = result.scalar_one_or_none()
 
                 if not provider:
@@ -88,9 +86,7 @@ class ProviderValidator:
                             "provider_id": str(provider.id),
                             "validation_status": provider.validation_status.value,
                             "validation_error": provider.validation_error,
-                            "validated_at": provider.validated_at.isoformat()
-                            if provider.validated_at
-                            else None,
+                            "validated_at": provider.validated_at.isoformat() if provider.validated_at else None,
                         },
                     )
                 except Exception:
@@ -115,17 +111,17 @@ class ProviderValidator:
         if not provider.base_url:
             raise ValueError("Ollama provider requires base_url")
 
-        base_url = provider.base_url.rstrip('/')
-        
+        base_url = provider.base_url.rstrip("/")
+
         # If base_url already contains /v1, use OpenAI-compatible endpoint
         # Otherwise use native Ollama API
-        if base_url.endswith('/v1'):
+        if base_url.endswith("/v1"):
             # Test OpenAI-compatible endpoint (used by pydantic-ai)
             url = f"{base_url}/models"
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.get(url)
             response.raise_for_status()
-            
+
             # Verify response has expected structure
             data = response.json()
             if "data" not in data:
@@ -159,9 +155,7 @@ class ProviderValidator:
 
         # TODO: Decrypt API key using CredentialEncryption service (T032)
         # For now, raise error indicating encryption service needed
-        raise NotImplementedError(
-            "OpenAI validation requires CredentialEncryption service (T032)"
-        )
+        raise NotImplementedError("OpenAI validation requires CredentialEncryption service (T032)")
 
     async def close(self) -> None:
         """Close resources (no-op: clients are context-managed)."""

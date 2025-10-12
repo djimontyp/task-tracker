@@ -1,4 +1,5 @@
 """SQLModel models for the application."""
+
 from .agent_config import (
     AgentConfig,
     AgentConfigCreate,
@@ -46,9 +47,6 @@ from .legacy import (
     WebhookSettingsPublic,
     WebhookSettingsUpdate,
 )
-from .message import Message
-from .telegram_profile import TelegramProfile
-from .user import User
 from .llm_provider import (
     LLMProvider,
     LLMProviderCreate,
@@ -57,28 +55,31 @@ from .llm_provider import (
     ProviderType,
     ValidationStatus,
 )
-from .task_config import TaskConfig, TaskConfigCreate, TaskConfigPublic, TaskConfigUpdate
+from .message import Message
 from .message_ingestion import (
+    IngestionStatus,
     MessageIngestionJob,
     MessageIngestionJobCreate,
     MessageIngestionJobPublic,
-    IngestionStatus,
 )
 from .project_config import (
     ProjectConfig,
     ProjectConfigCreate,
+    ProjectConfigListResponse,
     ProjectConfigPublic,
     ProjectConfigUpdate,
-    ProjectConfigListResponse,
 )
+from .task_config import TaskConfig, TaskConfigCreate, TaskConfigPublic, TaskConfigUpdate
 from .task_entity import TaskEntity, TaskEntityPublic
 from .task_proposal import (
     TaskProposal,
     TaskProposalCreate,
+    TaskProposalListResponse,
     TaskProposalPublic,
     TaskProposalUpdate,
-    TaskProposalListResponse,
 )
+from .telegram_profile import TelegramProfile
+from .user import User
 
 __all__ = [
     # Base

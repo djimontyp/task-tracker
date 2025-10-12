@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any, Dict
+from typing import Any
 
 import httpx
 from aiogram import Bot, Dispatcher, html
@@ -28,16 +28,8 @@ async def command_start_handler(message: Message) -> None:
 
     webapp_button = InlineKeyboardMarkup(
         inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="🎯 Create Task", web_app=WebAppInfo(url=settings.webapp_url)
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="📊 Dashboard", url=f"{settings.api_base_url}/dashboard"
-                )
-            ],
+            [InlineKeyboardButton(text="🎯 Create Task", web_app=WebAppInfo(url=settings.webapp_url))],
+            [InlineKeyboardButton(text="📊 Dashboard", url=f"{settings.api_base_url}/dashboard")],
         ]
     )
 
@@ -68,8 +60,7 @@ async def webapp_command(message: Message) -> None:
     )
 
     await message.answer(
-        f"{hbold('Task Creator WebApp')} 📱\n\n"
-        f"Click the button below to open the task creation interface:",
+        f"{hbold('Task Creator WebApp')} 📱\n\nClick the button below to open the task creation interface:",
         reply_markup=webapp_button,
     )
 
@@ -78,13 +69,7 @@ async def webapp_command(message: Message) -> None:
 async def dashboard_command(message: Message) -> None:
     """Handle /dashboard command"""
     dashboard_button = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="📊 Open Dashboard", url=f"{settings.api_base_url}/dashboard"
-                )
-            ]
-        ]
+        inline_keyboard=[[InlineKeyboardButton(text="📊 Open Dashboard", url=f"{settings.api_base_url}/dashboard")]]
     )
 
     await message.answer(
@@ -146,9 +131,7 @@ async def process_message(message: Message) -> None:
 
         # Send to FastAPI backend
         async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{settings.api_base_url}/api/messages", json=message_data, timeout=5.0
-            )
+            response = await client.post(f"{settings.api_base_url}/api/messages", json=message_data, timeout=5.0)
 
             if response.status_code == 200:
                 logger.info(f"✅ Message sent to API: {message_data['id']}")
@@ -168,7 +151,7 @@ async def process_message(message: Message) -> None:
         await message.reply("❌ Failed to process message. Please try again.")
 
 
-async def notify_task_created(chat_id: int, task_data: Dict[str, Any]) -> None:
+async def notify_task_created(chat_id: int, task_data: dict[str, Any]) -> None:
     """Send notification when a task is created"""
     try:
         notification_text = f"""

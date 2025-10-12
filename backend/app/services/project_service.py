@@ -4,7 +4,6 @@ Provides database operations for project configuration management.
 """
 
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from packaging.version import Version
@@ -61,7 +60,7 @@ class ProjectConfigCRUD:
 
         return ProjectConfigPublic.model_validate(project)
 
-    async def get(self, project_id: UUID) -> Optional[ProjectConfigPublic]:
+    async def get(self, project_id: UUID) -> ProjectConfigPublic | None:
         """Get project configuration by ID.
 
         Args:
@@ -70,16 +69,14 @@ class ProjectConfigCRUD:
         Returns:
             Project configuration if found, None otherwise
         """
-        result = await self.session.execute(
-            select(ProjectConfig).where(ProjectConfig.id == project_id)
-        )
+        result = await self.session.execute(select(ProjectConfig).where(ProjectConfig.id == project_id))
         project = result.scalar_one_or_none()
 
         if project:
             return ProjectConfigPublic.model_validate(project)
         return None
 
-    async def get_by_name(self, name: str) -> Optional[ProjectConfigPublic]:
+    async def get_by_name(self, name: str) -> ProjectConfigPublic | None:
         """Get project configuration by name.
 
         Args:
@@ -88,9 +85,7 @@ class ProjectConfigCRUD:
         Returns:
             Project configuration if found, None otherwise
         """
-        result = await self.session.execute(
-            select(ProjectConfig).where(ProjectConfig.name == name)
-        )
+        result = await self.session.execute(select(ProjectConfig).where(ProjectConfig.name == name))
         project = result.scalar_one_or_none()
 
         if project:
@@ -101,7 +96,7 @@ class ProjectConfigCRUD:
         self,
         skip: int = 0,
         limit: int = 100,
-        is_active: Optional[bool] = None,
+        is_active: bool | None = None,
     ) -> tuple[list[ProjectConfigPublic], int]:
         """List project configurations with pagination and filters.
 
@@ -137,7 +132,7 @@ class ProjectConfigCRUD:
         self,
         project_id: UUID,
         update_data: ProjectConfigUpdate,
-    ) -> Optional[ProjectConfigPublic]:
+    ) -> ProjectConfigPublic | None:
         """Update project configuration with version increment.
 
         Args:
@@ -147,9 +142,7 @@ class ProjectConfigCRUD:
         Returns:
             Updated project configuration if found, None otherwise
         """
-        result = await self.session.execute(
-            select(ProjectConfig).where(ProjectConfig.id == project_id)
-        )
+        result = await self.session.execute(select(ProjectConfig).where(ProjectConfig.id == project_id))
         project = result.scalar_one_or_none()
 
         if not project:
@@ -159,10 +152,7 @@ class ProjectConfigCRUD:
         update_dict = update_data.model_dump(exclude_unset=True)
 
         # Increment version if config changes (semantic versioning)
-        if any(
-            key in update_dict
-            for key in ["keywords", "glossary", "components", "priority_rules"]
-        ):
+        if any(key in update_dict for key in ["keywords", "glossary", "components", "priority_rules"]):
             current_version = Version(project.version)
             # Increment minor version for config changes
             new_version = f"{current_version.major}.{current_version.minor + 1}.0"
@@ -189,9 +179,7 @@ class ProjectConfigCRUD:
         Returns:
             True if deleted, False if not found
         """
-        result = await self.session.execute(
-            select(ProjectConfig).where(ProjectConfig.id == project_id)
-        )
+        result = await self.session.execute(select(ProjectConfig).where(ProjectConfig.id == project_id))
         project = result.scalar_one_or_none()
 
         if not project:

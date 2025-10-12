@@ -6,7 +6,7 @@ duplicate instantiations for identical agent+task configurations.
 
 import asyncio
 import weakref
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 from uuid import UUID
 
 from pydantic_ai import Agent
@@ -30,8 +30,8 @@ class AgentRegistry:
         """Ensure singleton pattern."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._registry: Dict[Tuple[UUID, UUID], Any] = {}
-            cls._instance._locks: Dict[Tuple[UUID, UUID], asyncio.Lock] = {}
+            cls._instance._registry: dict[tuple[UUID, UUID], Any] = {}
+            cls._instance._locks: dict[tuple[UUID, UUID], asyncio.Lock] = {}
             cls._instance._global_lock = asyncio.Lock()
         return cls._instance
 

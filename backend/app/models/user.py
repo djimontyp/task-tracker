@@ -1,7 +1,6 @@
 """User model for central identity management."""
-from datetime import datetime
 
-from pydantic import computed_field, EmailStr, field_validator
+from pydantic import computed_field, field_validator
 from sqlalchemy import String
 from sqlmodel import Field, SQLModel
 
@@ -15,9 +14,7 @@ class User(IDMixin, TimestampMixin, SQLModel, table=True):
 
     # Name fields (used project-wide)
     first_name: str = Field(max_length=100, description="User's first name")
-    last_name: str | None = Field(
-        default=None, max_length=100, description="User's last name"
-    )
+    last_name: str | None = Field(default=None, max_length=100, description="User's last name")
 
     # Contact information for auto-linking
     email: str | None = Field(
@@ -36,13 +33,9 @@ class User(IDMixin, TimestampMixin, SQLModel, table=True):
     )
 
     # Additional fields
-    avatar_url: str | None = Field(
-        default=None, max_length=500, description="URL to user's avatar image"
-    )
+    avatar_url: str | None = Field(default=None, max_length=500, description="URL to user's avatar image")
     is_active: bool = Field(default=True, description="Whether user is active")
-    is_bot: bool = Field(
-        default=False, description="Whether this is a bot/system user"
-    )
+    is_bot: bool = Field(default=False, description="Whether this is a bot/system user")
 
     @computed_field  # type: ignore[misc]
     @property

@@ -1,23 +1,22 @@
 """Tests for TaskProposal model."""
-import pytest
+
 from datetime import datetime
 from uuid import uuid4
 
-from sqlmodel import select
-
+import pytest
 from app.models import (
-    TaskProposal,
-    ProposalStatus,
-    LLMRecommendation,
-    SimilarityType,
-    TaskPriority,
-    TaskCategory,
+    AgentConfig,
+    AgentTaskAssignment,
     AnalysisRun,
     AnalysisRunStatus,
-    AgentTaskAssignment,
-    AgentConfig,
-    TaskConfig,
     LLMProvider,
+    LLMRecommendation,
+    ProposalStatus,
+    SimilarityType,
+    TaskCategory,
+    TaskConfig,
+    TaskPriority,
+    TaskProposal,
     User,
 )
 

@@ -1,7 +1,7 @@
 """LLM Provider model for managing AI service configurations."""
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Optional
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, Text, func
@@ -47,12 +47,12 @@ class LLMProvider(SQLModel, table=True):
     type: ProviderType = Field(description="Provider type (ollama, openai)")
 
     # Connection Configuration
-    base_url: Optional[str] = Field(
+    base_url: str | None = Field(
         default=None,
         sa_type=Text,
         description="Base URL for provider API (e.g., http://localhost:11434)",
     )
-    api_key_encrypted: Optional[bytes] = Field(
+    api_key_encrypted: bytes | None = Field(
         default=None,
         description="Fernet-encrypted API key",
     )
@@ -63,12 +63,12 @@ class LLMProvider(SQLModel, table=True):
         default=ValidationStatus.pending,
         description="Connection validation status",
     )
-    validation_error: Optional[str] = Field(
+    validation_error: str | None = Field(
         default=None,
         sa_type=Text,
         description="Last validation error message",
     )
-    validated_at: Optional[datetime] = Field(
+    validated_at: datetime | None = Field(
         default=None,
         sa_type=DateTime(timezone=True),
         description="Timestamp of last validation attempt",
@@ -76,12 +76,12 @@ class LLMProvider(SQLModel, table=True):
 
     # Timestamps
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"server_default": func.now()},
     )
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"server_default": func.now(), "onupdate": func.now()},
     )
@@ -106,19 +106,19 @@ class LLMProviderCreate(SQLModel):
 
     name: str
     type: ProviderType
-    base_url: Optional[str] = None
-    api_key: Optional[str] = None  # Plain text, will be encrypted
+    base_url: str | None = None
+    api_key: str | None = None  # Plain text, will be encrypted
     is_active: bool = True
 
 
 class LLMProviderUpdate(SQLModel):
     """Schema for updating LLM provider."""
 
-    name: Optional[str] = None
-    type: Optional[ProviderType] = None
-    base_url: Optional[str] = None
-    api_key: Optional[str] = None  # Plain text, will be encrypted
-    is_active: Optional[bool] = None
+    name: str | None = None
+    type: ProviderType | None = None
+    base_url: str | None = None
+    api_key: str | None = None  # Plain text, will be encrypted
+    is_active: bool | None = None
 
 
 class LLMProviderPublic(SQLModel):
@@ -127,11 +127,11 @@ class LLMProviderPublic(SQLModel):
     id: UUID
     name: str
     type: ProviderType
-    base_url: Optional[str] = None
+    base_url: str | None = None
     # Note: api_key_encrypted NOT included in public response
     is_active: bool
     validation_status: ValidationStatus
-    validation_error: Optional[str] = None
-    validated_at: Optional[datetime] = None
+    validation_error: str | None = None
+    validated_at: datetime | None = None
     created_at: datetime
     updated_at: datetime

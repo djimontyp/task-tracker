@@ -1,9 +1,9 @@
 """Tests for stats API endpoints."""
-import pytest
-from httpx import AsyncClient
 
+import pytest
 from app.models import AnalysisRun, TaskProposal
 from app.models.enums import AnalysisRunStatus, ProposalStatus
+from httpx import AsyncClient
 
 
 @pytest.mark.asyncio

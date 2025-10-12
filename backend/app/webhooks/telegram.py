@@ -2,9 +2,8 @@ from datetime import datetime
 
 from fastapi import APIRouter, Request
 
-from ..schemas.messages import MessageResponse
-from ..tasks import save_telegram_message
 from ..services.websocket_manager import websocket_manager
+from ..tasks import save_telegram_message
 from ..webhook_service import telegram_webhook_service
 
 router = APIRouter(prefix="/webhook", tags=["webhooks"])
@@ -22,9 +21,7 @@ async def telegram_webhook(request: Request):
             user_id = from_user.get("id")
             avatar_url = None
 
-            print(
-                f"🔍 Webhook received: user_id={user_id}, author={from_user.get('first_name')}"
-            )
+            print(f"🔍 Webhook received: user_id={user_id}, author={from_user.get('first_name')}")
 
             # Fetch real Telegram avatar if user_id available
             if user_id:
@@ -65,9 +62,7 @@ async def telegram_webhook(request: Request):
 
             try:
                 await save_telegram_message.kiq(update_data)
-                print(
-                    f"✅ TaskIQ завдання відправлено для повідомлення {message['message_id']}"
-                )
+                print(f"✅ TaskIQ завдання відправлено для повідомлення {message['message_id']}")
             except Exception as e:
                 print(f"❌ TaskIQ помилка: {e}")
 

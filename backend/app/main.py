@@ -1,10 +1,9 @@
 import os
 
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-
 from core.config import settings
 from core.taskiq_config import nats_broker
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 
 from .api.v1.router import api_router
 from .database import create_db_and_tables
@@ -73,10 +72,7 @@ def create_app() -> FastAPI:
 
     # CORS configuration - restrict origins for security
     # Default allows localhost development, override with CORS_ORIGINS env var for production
-    cors_origins = os.getenv(
-        "CORS_ORIGINS",
-        "http://localhost:3000,http://localhost,http://localhost:80"
-    ).split(",")
+    cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost,http://localhost:80").split(",")
 
     app.add_middleware(
         CORSMiddleware,
@@ -98,6 +94,7 @@ def create_app() -> FastAPI:
     async def legacy_health_check():
         """Legacy health check endpoint for backward compatibility"""
         from datetime import datetime
+
         return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
     @app.post("/")

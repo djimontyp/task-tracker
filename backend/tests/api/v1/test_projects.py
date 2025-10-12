@@ -6,11 +6,12 @@ Tests CRUD operations and validation:
 - Version increments
 - Name uniqueness
 """
-import pytest
+
 from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
-from app.models import User, ProjectConfig
+import pytest
+from app.models import ProjectConfig, User
 
 
 @pytest.mark.asyncio
@@ -178,18 +179,12 @@ async def test_version_increments(client, db_session):
     # Mock WebSocket manager
     with patch("app.api.v1.projects.websocket_manager", AsyncMock()):
         # Update keywords (should increment version)
-        response = await client.put(
-            f"/api/projects/{project.id}",
-            json={"keywords": ["test", "new"]}
-        )
+        response = await client.put(f"/api/projects/{project.id}", json={"keywords": ["test", "new"]})
         assert response.status_code == 200
         assert response.json()["version"] == "1.1.0"
 
         # Update glossary (should increment version again)
-        response = await client.put(
-            f"/api/projects/{project.id}",
-            json={"glossary": {"term": "definition"}}
-        )
+        response = await client.put(f"/api/projects/{project.id}", json={"glossary": {"term": "definition"}})
         assert response.status_code == 200
         assert response.json()["version"] == "1.2.0"
 

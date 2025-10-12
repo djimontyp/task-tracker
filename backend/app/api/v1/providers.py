@@ -5,7 +5,6 @@ with async validation and encrypted credentials.
 """
 
 import logging
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -62,18 +61,16 @@ async def create_provider(
 
 @router.get(
     "",
-    response_model=List[LLMProviderPublic],
+    response_model=list[LLMProviderPublic],
     summary="List all providers",
     description="Get list of all configured LLM providers with pagination and filters.",
 )
 async def list_providers(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(
-        100, ge=1, le=1000, description="Maximum number of records to return"
-    ),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     active_only: bool = Query(False, description="Filter for active providers only"),
     session: AsyncSession = Depends(get_session),
-) -> List[LLMProviderPublic]:
+) -> list[LLMProviderPublic]:
     """List all LLM providers.
 
     Args:
