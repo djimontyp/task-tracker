@@ -18,7 +18,7 @@ import { proposalService } from '@/features/proposals/api/proposalService'
 import { ProposalCard, RejectProposalDialog } from '@/features/proposals/components'
 import type { ProposalFilters, ProposalListResponse } from '@/features/proposals/types'
 import toast from 'react-hot-toast'
-import { Filter } from 'lucide-react'
+import { FunnelIcon } from '@heroicons/react/24/outline'
 
 const ProposalsPage = () => {
   const queryClient = useQueryClient()
@@ -185,7 +185,7 @@ const ProposalsPage = () => {
         </div>
 
         <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-          <Filter className="h-4 w-4" />
+          <FunnelIcon className="h-4 w-4" />
           <span>
             Showing {filteredProposals.length} of {totalProposals} proposals
           </span>

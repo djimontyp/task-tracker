@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react'
 import { Card, Badge, Button } from '@/shared/ui'
-import { CheckCircle, XCircle, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react'
+import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { formatFullDate } from '@/shared/utils/date'
 import type { TaskProposal } from '../types'
 
@@ -68,7 +68,7 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
               {getConfidenceBadge(proposal.confidence)}
               {proposal.similar_task_id && (
                 <Badge className="bg-yellow-500 text-white flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3" />
+                  <ExclamationTriangleIcon className="h-3 w-3" />
                   Similar Task
                 </Badge>
               )}
@@ -123,7 +123,7 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
             aria-label="Toggle LLM reasoning details"
             className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
           >
-            {showReasoning ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            {showReasoning ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />}
             LLM Reasoning
           </button>
           {showReasoning && (
@@ -141,7 +141,7 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
             aria-label={`Toggle source messages list (${proposal.source_message_ids.length} items)`}
             className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
           >
-            {showSources ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            {showSources ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />}
             Source Messages ({proposal.source_message_ids.length})
           </button>
           {showSources && (
@@ -182,7 +182,7 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
                 disabled={isLoading}
                 className="flex-1"
               >
-                <CheckCircle className="h-4 w-4 mr-1" />
+                <CheckCircleIcon className="h-4 w-4 mr-1" />
                 Approve
               </Button>
             )}
@@ -203,7 +203,7 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
                 onClick={() => onReject(proposal.id)}
                 disabled={isLoading}
               >
-                <XCircle className="h-4 w-4 mr-1" />
+                <XCircleIcon className="h-4 w-4 mr-1" />
                 Reject
               </Button>
             )}

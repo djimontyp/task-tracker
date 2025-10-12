@@ -1,5 +1,5 @@
 import { Table } from '@tanstack/react-table'
-import { LucideIcon } from 'lucide-react'
+import React from 'react'
 
 import { DataTableFacetedFilter as SharedFilter } from '@/shared/components/DataTableFacetedFilter'
 
@@ -12,7 +12,7 @@ export function DataTableFacetedFilter<TData>({
   columnKey: string
   table: Table<TData>
   title: string
-  options: { label: string; value: string; icon?: LucideIcon }[]
+  options: { label: string; value: string; icon?: React.ComponentType<{ className?: string }> }[]
 }) {
   const column = table.getColumn(columnKey)
   if (!column) return null

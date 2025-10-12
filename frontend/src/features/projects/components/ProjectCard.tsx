@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { Card, Badge, Button, Separator } from '@/shared/ui'
-import { Pencil, Trash2 } from 'lucide-react'
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
 import type { ProjectConfig } from '../types'
 
 interface ProjectCardProps {
@@ -174,7 +174,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                 disabled={isLoading}
                 className="flex-1"
               >
-                <Pencil className="h-4 w-4 mr-1" />
+                <PencilIcon className="h-4 w-4 mr-1" />
                 Edit
               </Button>
             )}
@@ -185,7 +185,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                 onClick={() => onDelete(project.id)}
                 disabled={isLoading}
               >
-                <Trash2 className="h-4 w-4" />
+                <TrashIcon className="h-4 w-4" />
               </Button>
             )}
           </div>

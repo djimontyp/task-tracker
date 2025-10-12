@@ -7,7 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/shared/ui'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import { Table as TableType } from '@tanstack/react-table'
 
 interface DataTableToolbarProps<TData> {
@@ -40,7 +40,7 @@ export function DataTableToolbar<TData>({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm">
-            View <ChevronDown className="ml-1 h-4 w-4" />
+            View <ChevronDownIcon className="ml-1 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40">

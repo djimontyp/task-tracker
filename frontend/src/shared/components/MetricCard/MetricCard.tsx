@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { ArrowUp, ArrowDown, Minus, LucideIcon } from 'lucide-react'
+import { ArrowUpIcon, ArrowDownIcon, MinusIcon } from '@heroicons/react/24/outline'
 import { Card, CardContent } from '@/shared/ui/card'
 import { cn } from '@/shared/lib'
 
@@ -11,7 +11,7 @@ export interface MetricCardProps extends React.HTMLAttributes<HTMLDivElement> {
     value: number
     direction: 'up' | 'down' | 'neutral'
   }
-  icon?: LucideIcon
+  icon?: React.ComponentType<{ className?: string }>
   iconColor?: string
 }
 
@@ -21,11 +21,11 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
       if (!trend) return null
       switch (trend.direction) {
         case 'up':
-          return <ArrowUp className="w-4 h-4" aria-hidden="true" />
+          return <ArrowUpIcon className="w-4 h-4" aria-hidden="true" />
         case 'down':
-          return <ArrowDown className="w-4 h-4" aria-hidden="true" />
+          return <ArrowDownIcon className="w-4 h-4" aria-hidden="true" />
         default:
-          return <Minus className="w-4 h-4" aria-hidden="true" />
+          return <MinusIcon className="w-4 h-4" aria-hidden="true" />
       }
     }
 

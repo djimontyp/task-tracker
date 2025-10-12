@@ -4,7 +4,7 @@ import { Card, CardContent, Button, Spinner } from '@/shared/ui'
 import { agentService } from '@/features/agents/api'
 import { AgentConfig, AgentConfigCreate, AgentConfigUpdate } from '@/features/agents/types'
 import { toast } from 'sonner'
-import { Plus } from 'lucide-react'
+import { PlusIcon } from '@heroicons/react/24/outline'
 import AgentForm from './AgentForm'
 import AgentCard from './AgentCard'
 import TaskAssignment from './TaskAssignment'
@@ -104,7 +104,7 @@ const AgentList = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">AI Agents</h2>
         <Button onClick={handleCreate}>
-          <Plus className="mr-2 h-4 w-4" />
+          <PlusIcon className="mr-2 h-4 w-4" />
           Add Agent
         </Button>
       </div>

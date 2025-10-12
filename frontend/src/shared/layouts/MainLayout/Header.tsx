@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Sun, Moon } from 'lucide-react'
+import { SwatchIcon } from '@heroicons/react/24/outline'
 import { useLocation, Link } from 'react-router-dom'
 import { useTheme } from '@/shared/components/ThemeProvider'
 import { SidebarTrigger } from '@/shared/ui/sidebar'
@@ -102,11 +102,7 @@ const Header = () => {
             aria-label="Toggle theme"
             title={`Current: ${theme} (${effectiveTheme})`}
           >
-            {effectiveTheme === 'light' ? (
-              <Moon className="w-5 h-5 text-foreground" />
-            ) : (
-              <Sun className="w-5 h-5 text-foreground" />
-            )}
+            <SwatchIcon className="w-5 h-5 text-foreground" />
           </button>
         </div>
       </div>

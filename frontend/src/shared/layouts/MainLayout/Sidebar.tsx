@@ -1,18 +1,18 @@
 import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
-  LayoutDashboard,
-  CheckSquare,
-  BarChart3,
-  Settings,
-  ChevronLeft,
-  Activity,
-  FileCheck,
-  MessageSquare,
-  Bot,
-  Users,
-  FolderKanban,
-} from 'lucide-react'
+  Squares2X2Icon,
+  CheckCircleIcon,
+  ChartBarIcon,
+  Cog6ToothIcon,
+  ChevronLeftIcon,
+  ChartBarIcon as ActivityIcon,
+  DocumentCheckIcon,
+  ChatBubbleLeftRightIcon,
+  CpuChipIcon,
+  UsersIcon,
+  FolderIcon,
+} from '@heroicons/react/24/outline'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useUiStore } from '@/shared/store/uiStore'
 import { Badge } from '@/shared/ui'
@@ -77,34 +77,34 @@ const Sidebar = () => {
 
   const navItems = [
     // Workspace Section
-    { path: '/', label: 'Dashboard', Icon: LayoutDashboard, section: 'workspace' },
-    { path: '/messages', label: 'Messages', Icon: MessageSquare, section: 'workspace' },
-    { path: '/tasks', label: 'Tasks', Icon: CheckSquare, section: 'workspace' },
+    { path: '/', label: 'Dashboard', Icon: Squares2X2Icon, section: 'workspace' },
+    { path: '/messages', label: 'Messages', Icon: ChatBubbleLeftRightIcon, section: 'workspace' },
+    { path: '/tasks', label: 'Tasks', Icon: CheckCircleIcon, section: 'workspace' },
 
     // AI Analysis Section
     {
       path: '/analysis',
       label: 'Analysis Runs',
-      Icon: Activity,
+      Icon: ActivityIcon,
       badge: counts?.unclosed_runs,
       section: 'analysis',
     },
     {
       path: '/proposals',
       label: 'Task Proposals',
-      Icon: FileCheck,
+      Icon: DocumentCheckIcon,
       badge: counts?.pending_proposals,
       section: 'analysis',
     },
 
     // AI Config Section
-    { path: '/agents', label: 'Agents', Icon: Bot, section: 'config' },
-    { path: '/providers', label: 'Providers', Icon: Users, section: 'config' },
-    { path: '/projects', label: 'Projects', Icon: FolderKanban, section: 'config' },
+    { path: '/agents', label: 'Agents', Icon: CpuChipIcon, section: 'config' },
+    { path: '/providers', label: 'Providers', Icon: UsersIcon, section: 'config' },
+    { path: '/projects', label: 'Projects', Icon: FolderIcon, section: 'config' },
 
     // Insights Section
-    { path: '/analytics', label: 'Analytics', Icon: BarChart3, section: 'insights' },
-    { path: '/settings', label: 'Settings', Icon: Settings, section: 'insights' },
+    { path: '/analytics', label: 'Analytics', Icon: ChartBarIcon, section: 'insights' },
+    { path: '/settings', label: 'Settings', Icon: Cog6ToothIcon, section: 'insights' },
   ]
 
   const getSectionLabel = (section: string) => {
@@ -144,7 +144,7 @@ const Sidebar = () => {
             className="p-1.5 rounded-lg hover:bg-accent/10 transition-all duration-200 cursor-pointer"
             aria-label="Toggle sidebar"
           >
-            <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${!sidebarOpen ? 'rotate-180' : ''}`} />
+            <ChevronLeftIcon className={`w-4 h-4 transition-transform duration-300 ${!sidebarOpen ? 'rotate-180' : ''}`} />
           </button>
         </div>
 

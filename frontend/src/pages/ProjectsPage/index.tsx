@@ -9,7 +9,7 @@ import { projectService } from '@/features/projects/api/projectService'
 import { ProjectCard, ProjectForm } from '@/features/projects/components'
 import type { ProjectConfig, ProjectListResponse } from '@/features/projects/types'
 import toast from 'react-hot-toast'
-import { Plus, Search } from 'lucide-react'
+import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
 const ProjectsPage = () => {
   const queryClient = useQueryClient()
@@ -174,7 +174,7 @@ const ProjectsPage = () => {
           </p>
         </div>
         <Button onClick={handleCreate}>
-          <Plus className="h-4 w-4 mr-2" />
+          <PlusIcon className="h-4 w-4 mr-2" />
           Create Project
         </Button>
       </div>
@@ -182,7 +182,7 @@ const ProjectsPage = () => {
       {/* Search */}
       <Card className="p-4">
         <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlassIcon className="h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search projects by name, keywords, or components..."
             value={searchQuery}

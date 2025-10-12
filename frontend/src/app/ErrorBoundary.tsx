@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from 'react'
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import { ExclamationTriangleIcon, ArrowPathIcon, HomeIcon } from '@heroicons/react/24/outline'
 import { logger } from '@/shared/utils/logger'
 
 interface ErrorBoundaryProps {
@@ -65,7 +65,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             {/* Error Icon */}
             <div className="flex justify-center">
               <div className="rounded-full bg-destructive/10 p-4">
-                <AlertTriangle className="h-12 w-12 text-destructive" aria-hidden="true" />
+                <ExclamationTriangleIcon className="h-12 w-12 text-destructive" aria-hidden="true" />
               </div>
             </div>
 
@@ -111,7 +111,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 aria-label="Retry the previous action"
               >
-                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                <ArrowPathIcon className="h-4 w-4" aria-hidden="true" />
                 Try Again
               </button>
               <button
@@ -119,7 +119,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-secondary text-secondary-foreground rounded-md font-medium hover:bg-secondary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 aria-label="Go back to home page"
               >
-                <Home className="h-4 w-4" aria-hidden="true" />
+                <HomeIcon className="h-4 w-4" aria-hidden="true" />
                 Go Home
               </button>
             </div>

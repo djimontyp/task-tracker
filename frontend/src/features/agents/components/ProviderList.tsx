@@ -10,7 +10,7 @@ import {
 import { providerService } from '@/features/providers/api'
 import { LLMProvider, LLMProviderCreate, LLMProviderUpdate } from '@/features/providers/types'
 import { toast } from 'sonner'
-import { Pencil, Trash2, Plus } from 'lucide-react'
+import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
 import ProviderForm from './ProviderForm'
 import { ValidationStatus } from '@/features/providers/components'
 
@@ -98,7 +98,7 @@ const ProviderList = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">LLM Providers</h2>
         <Button onClick={handleCreate}>
-          <Plus className="mr-2 h-4 w-4" />
+          <PlusIcon className="mr-2 h-4 w-4" />
           Add Provider
         </Button>
       </div>
@@ -131,7 +131,7 @@ const ProviderList = () => {
                         onClick={() => handleEdit(provider)}
                         aria-label="Edit provider"
                       >
-                        <Pencil className="h-4 w-4" />
+                        <PencilIcon className="h-4 w-4" />
                       </Button>
                       <Button
                         size="icon"
@@ -140,7 +140,7 @@ const ProviderList = () => {
                         aria-label="Delete provider"
                         disabled={deleteMutation.isPending}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <TrashIcon className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>

@@ -1,19 +1,19 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal, Circle, CheckCircle2, Timer, XCircle, LucideIcon } from 'lucide-react'
+import { EllipsisHorizontalIcon, CircleStackIcon, CheckCircleIcon, ClockIcon, XCircleIcon } from '@heroicons/react/24/outline'
 
 import type { Task } from '@/shared/types'
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
 
-export const statusLabels: Record<string, { label: string; icon: LucideIcon }> = {
-  open: { label: 'Backlog', icon: Timer },
-  in_progress: { label: 'In Progress', icon: Circle },
-  completed: { label: 'Done', icon: CheckCircle2 },
-  closed: { label: 'Canceled', icon: XCircle },
-  pending: { label: 'Pending', icon: Timer },
+export const statusLabels: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+  open: { label: 'Backlog', icon: ClockIcon },
+  in_progress: { label: 'In Progress', icon: CircleStackIcon },
+  completed: { label: 'Done', icon: CheckCircleIcon },
+  closed: { label: 'Canceled', icon: XCircleIcon },
+  pending: { label: 'Pending', icon: ClockIcon },
 }
 
-export const priorityLabels: Record<string, { label: string; icon?: LucideIcon }> = {
+export const priorityLabels: Record<string, { label: string; icon?: React.ComponentType<{ className?: string }> }> = {
   low: { label: 'Low' },
   medium: { label: 'Medium' },
   high: { label: 'High' },
@@ -71,7 +71,7 @@ export const columns: ColumnDef<Task>[] = [
     ),
     cell: ({ row }) => {
       const value = row.getValue<string>('status')
-      const meta = statusLabels[value] ?? { label: value, icon: Circle }
+      const meta = statusLabels[value] ?? { label: value, icon: CircleStackIcon }
       const Icon = meta.icon
       return (
         <div className="flex w-[100px] items-center">
@@ -128,7 +128,7 @@ export const columns: ColumnDef<Task>[] = [
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
+              <EllipsisHorizontalIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
