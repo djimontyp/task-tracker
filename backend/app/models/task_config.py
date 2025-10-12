@@ -1,6 +1,6 @@
 """Task Configuration model for defining agent task schemas."""
-from datetime import datetime, timezone
-from typing import Dict, Optional
+
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, Text, func
@@ -28,14 +28,14 @@ class TaskConfig(SQLModel, table=True):
         index=True,
         description="Unique task name",
     )
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         sa_type=Text,
         description="Task description",
     )
 
     # Pydantic Schema (JSON Schema format)
-    response_schema: Dict = Field(
+    response_schema: dict = Field(
         sa_column=Column(JSONB, nullable=False),
         description="JSON Schema for task response validation",
     )
@@ -45,12 +45,12 @@ class TaskConfig(SQLModel, table=True):
 
     # Timestamps
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"server_default": func.now()},
     )
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"server_default": func.now(), "onupdate": func.now()},
     )
@@ -83,18 +83,18 @@ class TaskConfigCreate(SQLModel):
     """Schema for creating new task configuration."""
 
     name: str
-    description: Optional[str] = None
-    response_schema: Dict
+    description: str | None = None
+    response_schema: dict
     is_active: bool = True
 
 
 class TaskConfigUpdate(SQLModel):
     """Schema for updating task configuration."""
 
-    name: Optional[str] = None
-    description: Optional[str] = None
-    response_schema: Optional[Dict] = None
-    is_active: Optional[bool] = None
+    name: str | None = None
+    description: str | None = None
+    response_schema: dict | None = None
+    is_active: bool | None = None
 
 
 class TaskConfigPublic(SQLModel):
@@ -102,8 +102,8 @@ class TaskConfigPublic(SQLModel):
 
     id: UUID
     name: str
-    description: Optional[str] = None
-    response_schema: Dict
+    description: str | None = None
+    response_schema: dict
     is_active: bool
     created_at: datetime
     updated_at: datetime

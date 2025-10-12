@@ -1,15 +1,13 @@
 """Legacy models from old task tracker system."""
-from datetime import datetime
-from typing import Dict, Optional
 
-from pydantic import BaseModel
-from sqlalchemy import BigInteger, DateTime, Text, func
+from datetime import datetime
+
+from sqlalchemy import Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
 from .base import IDMixin, TimestampMixin
-from .enums import TaskStatus, TaskCategory, TaskPriority, SourceType
-
+from .enums import SourceType, TaskCategory, TaskPriority, TaskStatus
 
 # ~~~~~~~~~~~~~~~~ Source Models ~~~~~~~~~~~~~~~~
 
@@ -19,12 +17,8 @@ class SourceBase(SQLModel):
 
     name: str = Field(max_length=100, description="Display name for the source")
     type: SourceType = Field(description="Type of communication source")
-    config: dict | None = Field(
-        default=None, sa_type=JSONB, description="Source-specific configuration"
-    )
-    is_active: bool = Field(
-        default=True, description="Whether source is actively monitored"
-    )
+    config: dict | None = Field(default=None, sa_type=JSONB, description="Source-specific configuration")
+    is_active: bool = Field(default=True, description="Whether source is actively monitored")
 
 
 class Source(IDMixin, TimestampMixin, SourceBase, table=True):
@@ -104,15 +98,9 @@ class TaskBase(SQLModel):
     category: TaskCategory = Field(description="Task category")
     priority: TaskPriority = Field(description="Task priority level")
     status: TaskStatus = Field(default=TaskStatus.open, description="Current status")
-    classification_data: dict | None = Field(
-        default=None, sa_type=JSONB, description="AI classification metadata"
-    )
-    ai_generated: bool = Field(
-        default=False, description="Whether task was AI-generated"
-    )
-    confidence_score: float | None = Field(
-        default=None, description="AI confidence score"
-    )
+    classification_data: dict | None = Field(default=None, sa_type=JSONB, description="AI classification metadata")
+    ai_generated: bool = Field(default=False, description="Whether task was AI-generated")
+    confidence_score: float | None = Field(default=None, description="AI confidence score")
 
 
 class Task(IDMixin, TimestampMixin, TaskBase, table=True):
@@ -126,12 +114,8 @@ class Task(IDMixin, TimestampMixin, TaskBase, table=True):
     )
 
     # User assignments
-    assigned_to: int | None = Field(
-        default=None, foreign_key="users.id", description="User assigned to this task"
-    )
-    created_by: int | None = Field(
-        default=None, foreign_key="users.id", description="User who created this task"
-    )
+    assigned_to: int | None = Field(default=None, foreign_key="users.id", description="User assigned to this task")
+    created_by: int | None = Field(default=None, foreign_key="users.id", description="User who created this task")
 
 
 class TaskCreate(TaskBase):

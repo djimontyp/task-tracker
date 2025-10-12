@@ -1,7 +1,8 @@
-from app.schemas import EntityExtraction, EntityStructured, TextClassification
 from core.llm import ollama_model
 from pydantic_ai import Agent, ModelSettings
 from rich.pretty import pprint
+
+from app.schemas import EntityExtraction, EntityStructured, TextClassification
 
 agent_classification = Agent(
     model=ollama_model,

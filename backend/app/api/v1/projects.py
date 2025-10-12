@@ -5,7 +5,6 @@ with keyword management and version tracking.
 """
 
 import logging
-from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -37,12 +36,8 @@ def get_ws_manager():
 )
 async def list_projects(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(
-        100, ge=1, le=1000, description="Maximum number of records to return"
-    ),
-    is_active: Optional[bool] = Query(
-        None, description="Filter by active status (null = all)"
-    ),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    is_active: bool | None = Query(None, description="Filter by active status (null = all)"),
     session: AsyncSession = Depends(get_session),
 ) -> ProjectConfigListResponse:
     """List all project configurations with pagination and filters.
@@ -228,9 +223,7 @@ async def update_project(
                 detail=f"Project configuration with ID '{project_id}' not found",
             )
 
-        logger.info(
-            f"Updated project config '{project.name}' (ID: {project.id}, version: {project.version})"
-        )
+        logger.info(f"Updated project config '{project.name}' (ID: {project.id}, version: {project.version})")
 
         # Broadcast WebSocket event
         await ws_manager.broadcast(

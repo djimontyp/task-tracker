@@ -1,14 +1,14 @@
 import logging
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any
 
 import httpx
+from core.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-from core.config import settings
 from .models import WebhookSettings
-from .schemas import TelegramWebhookConfig, TelegramGroupInfo
+from .schemas import TelegramWebhookConfig
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class TelegramWebhookService:
         # Simple in-memory cache for user avatar URLs to reduce Telegram API calls
         self._avatar_cache: dict[int, str] = {}
 
-    async def set_webhook(self, webhook_url: str) -> Dict[str, Any]:
+    async def set_webhook(self, webhook_url: str) -> dict[str, Any]:
         """Set Telegram webhook URL via Bot API"""
         url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/setWebhook"
 
@@ -89,7 +89,7 @@ class TelegramWebhookService:
             photos = result.get("result", {}).get("photos", [])
             total_count = result.get("result", {}).get("total_count", 0)
             print(f"📸 get_user_avatar_url: user {user_id} has {total_count} photos, got {len(photos)} in response")
-            
+
             if not photos:
                 print(f"⚠️  get_user_avatar_url: user {user_id} has no profile photos")
                 return None
@@ -99,9 +99,7 @@ class TelegramWebhookService:
 
             get_file_url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/getFile"
             async with httpx.AsyncClient() as client:
-                file_response = await client.post(
-                    get_file_url, json={"file_id": file_id}, timeout=30.0
-                )
+                file_response = await client.post(get_file_url, json={"file_id": file_id}, timeout=30.0)
                 file_response.raise_for_status()
                 file_result = file_response.json()
 
@@ -130,7 +128,7 @@ class TelegramWebhookService:
             logger.error("Unexpected error fetching avatar for user %s: %s", user_id, exc)
             return None
 
-    async def delete_webhook(self) -> Dict[str, Any]:
+    async def delete_webhook(self) -> dict[str, Any]:
         """Remove Telegram webhook"""
         url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/deleteWebhook"
         try:
@@ -156,7 +154,7 @@ class TelegramWebhookService:
             logger.error(f"Unexpected error deleting webhook: {e}")
             return {"success": False, "error": f"Unexpected error: {str(e)}"}
 
-    async def get_webhook_info(self) -> Dict[str, Any]:
+    async def get_webhook_info(self) -> dict[str, Any]:
         """Get current webhook information from Telegram"""
         url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/getWebhookInfo"
 
@@ -182,15 +180,13 @@ class TelegramWebhookService:
             logger.error(f"Unexpected error getting webhook info: {e}")
             return {"success": False, "error": f"Unexpected error: {str(e)}"}
 
-    async def get_chat_info(self, chat_id: int) -> Dict[str, Any]:
+    async def get_chat_info(self, chat_id: int) -> dict[str, Any]:
         """Get chat information from Telegram"""
         url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/getChat"
 
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    url, json={"chat_id": chat_id}, timeout=30.0
-                )
+                response = await client.post(url, json={"chat_id": chat_id}, timeout=30.0)
                 response.raise_for_status()
                 result = response.json()
 
@@ -200,9 +196,7 @@ class TelegramWebhookService:
                         "success": True,
                         "data": {
                             "id": chat_data["id"],
-                            "name": chat_data.get("title")
-                            or chat_data.get("first_name")
-                            or f"Chat {chat_id}",
+                            "name": chat_data.get("title") or chat_data.get("first_name") or f"Chat {chat_id}",
                             "type": chat_data.get("type"),
                         },
                     }
@@ -226,14 +220,10 @@ class WebhookSettingsService:
 
     TELEGRAM_SETTINGS_NAME = "telegram_webhook"
 
-    async def get_telegram_config(
-        self, db: AsyncSession
-    ) -> TelegramWebhookConfig | None:
+    async def get_telegram_config(self, db: AsyncSession) -> TelegramWebhookConfig | None:
         """Get Telegram webhook configuration from database"""
         try:
-            statement = select(WebhookSettings).where(
-                WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME
-            )
+            statement = select(WebhookSettings).where(WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME)
             result = await db.execute(statement)
             settings_record = result.scalars().first()
 
@@ -272,15 +262,14 @@ class WebhookSettingsService:
 
         try:
             # Check if settings exist
-            statement = select(WebhookSettings).where(
-                WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME
-            )
+            statement = select(WebhookSettings).where(WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME)
             result = await db.execute(statement)
             existing = result.scalars().first()
 
             if existing:
                 # Update existing
                 from sqlalchemy.orm.attributes import flag_modified
+
                 existing.config = config_data
                 existing.is_active = is_active
                 flag_modified(existing, "config")
@@ -304,29 +293,24 @@ class WebhookSettingsService:
             logger.error(f"Error saving telegram config: {e}")
             raise
 
-    async def set_telegram_webhook_active(
-        self, db: AsyncSession, is_active: bool
-    ) -> TelegramWebhookConfig | None:
+    async def set_telegram_webhook_active(self, db: AsyncSession, is_active: bool) -> TelegramWebhookConfig | None:
         """Update the active status of Telegram webhook"""
         try:
-            statement = select(WebhookSettings).where(
-                WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME
-            )
+            statement = select(WebhookSettings).where(WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME)
             result = await db.execute(statement)
             settings_record = result.scalars().first()
 
             if settings_record:
                 # Create a deep copy and update
                 import copy
+
                 from sqlalchemy.orm.attributes import flag_modified
 
                 config = copy.deepcopy(settings_record.config)
                 if "telegram" in config:
                     config["telegram"]["is_active"] = is_active
                     if is_active:
-                        config["telegram"]["last_set_at"] = (
-                            datetime.utcnow().isoformat()
-                        )
+                        config["telegram"]["last_set_at"] = datetime.utcnow().isoformat()
                     else:
                         config["telegram"]["last_set_at"] = None
 
@@ -349,19 +333,16 @@ class WebhookSettingsService:
             logger.error(f"Error updating webhook active status: {e}")
             return None
 
-    async def add_telegram_group(
-        self, db: AsyncSession, group_info: dict
-    ) -> TelegramWebhookConfig | None:
+    async def add_telegram_group(self, db: AsyncSession, group_info: dict) -> TelegramWebhookConfig | None:
         """Add a Telegram group to configuration"""
         try:
-            statement = select(WebhookSettings).where(
-                WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME
-            )
+            statement = select(WebhookSettings).where(WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME)
             result = await db.execute(statement)
             settings_record = result.scalars().first()
 
             if settings_record:
                 import copy
+
                 from sqlalchemy.orm.attributes import flag_modified
 
                 config = copy.deepcopy(settings_record.config)
@@ -406,19 +387,16 @@ class WebhookSettingsService:
             logger.error(f"Error adding telegram group: {e}")
             return None
 
-    async def remove_telegram_group(
-        self, db: AsyncSession, group_id: int
-    ) -> TelegramWebhookConfig | None:
+    async def remove_telegram_group(self, db: AsyncSession, group_id: int) -> TelegramWebhookConfig | None:
         """Remove a Telegram group from configuration"""
         try:
-            statement = select(WebhookSettings).where(
-                WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME
-            )
+            statement = select(WebhookSettings).where(WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME)
             result = await db.execute(statement)
             settings_record = result.scalars().first()
 
             if settings_record:
                 import copy
+
                 from sqlalchemy.orm.attributes import flag_modified
 
                 config = copy.deepcopy(settings_record.config)
@@ -446,14 +424,13 @@ class WebhookSettingsService:
     ) -> TelegramWebhookConfig | None:
         """Update all group names by fetching from Telegram"""
         try:
-            statement = select(WebhookSettings).where(
-                WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME
-            )
+            statement = select(WebhookSettings).where(WebhookSettings.name == self.TELEGRAM_SETTINGS_NAME)
             result = await db.execute(statement)
             settings_record = result.scalars().first()
 
             if settings_record:
                 import copy
+
                 from sqlalchemy.orm.attributes import flag_modified
 
                 config = copy.deepcopy(settings_record.config)
@@ -464,12 +441,10 @@ class WebhookSettingsService:
                     for group in groups:
                         chat_info = await telegram_service.get_chat_info(group["id"])
                         if chat_info["success"]:
-                            updated_groups.append(
-                                {
-                                    "id": group["id"],
-                                    "name": chat_info["data"]["name"],
-                                }
-                            )
+                            updated_groups.append({
+                                "id": group["id"],
+                                "name": chat_info["data"]["name"],
+                            })
                         else:
                             # Keep old data if fetch fails
                             updated_groups.append(group)

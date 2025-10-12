@@ -1,6 +1,3 @@
-from datetime import datetime
-from typing import List
-
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
@@ -16,11 +13,11 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 @router.get(
     "",
-    response_model=List[TaskResponse],
+    response_model=list[TaskResponse],
     summary="Get all tasks",
     response_description="List of all tasks ordered by creation date",
 )
-async def get_tasks(db: DatabaseDep) -> List[TaskResponse]:
+async def get_tasks(db: DatabaseDep) -> list[TaskResponse]:
     """
     Retrieve all tasks ordered by most recent first.
 
@@ -98,9 +95,7 @@ async def get_task(task_id: int, db: DatabaseDep) -> TaskResponse:
     response_description="Confirmation of status update",
     responses={404: {"description": "Task not found"}},
 )
-async def update_task_status(
-    task_id: int, status: str, db: DatabaseDep
-) -> TaskStatusUpdateResponse:
+async def update_task_status(task_id: int, status: str, db: DatabaseDep) -> TaskStatusUpdateResponse:
     """
     Update the status of a specific task.
 
@@ -118,6 +113,4 @@ async def update_task_status(
     db.add(task)
     await db.commit()
 
-    return TaskStatusUpdateResponse(
-        message="Task status updated", task_id=task_id, status=status
-    )
+    return TaskStatusUpdateResponse(message="Task status updated", task_id=task_id, status=status)

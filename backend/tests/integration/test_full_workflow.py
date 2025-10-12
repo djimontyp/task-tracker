@@ -6,22 +6,21 @@ Tests end-to-end workflows:
 - WebSocket event broadcasting (mocked)
 - Complete approval/rejection workflow
 """
-import pytest
+
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, patch
 
+import pytest
 from app.models import (
+    AgentConfig,
+    AgentTaskAssignment,
     AnalysisRun,
     AnalysisRunStatus,
-    AgentTaskAssignment,
-    AgentConfig,
-    TaskConfig,
     LLMProvider,
-    User,
-    ProjectConfig,
-    TaskProposal,
-    ProposalStatus,
     LLMRecommendation,
+    ProposalStatus,
+    TaskConfig,
+    User,
 )
 
 
@@ -129,18 +128,19 @@ async def test_full_analysis_workflow(client, db_session):
     for i in range(5):
         proposal_data = {
             "analysis_run_id": run_id,
-            "proposed_title": f"Task {i+1}",
-            "proposed_description": f"Description for task {i+1}",
-            "source_message_ids": [i*10, i*10+1, i*10+2],
+            "proposed_title": f"Task {i + 1}",
+            "proposed_description": f"Description for task {i + 1}",
+            "source_message_ids": [i * 10, i * 10 + 1, i * 10 + 2],
             "message_count": 3,
             "time_span_seconds": 1800,
             "llm_recommendation": LLMRecommendation.new_task.value,
             "confidence": 0.85 + (i * 0.02),
-            "reasoning": f"Extracted from discussion about feature {i+1}",
+            "reasoning": f"Extracted from discussion about feature {i + 1}",
         }
 
         # Create proposal directly via service
         from app.models import TaskProposalCreate
+
         proposal = await crud.create(TaskProposalCreate(**proposal_data))
         proposal_ids.append(str(proposal.id))
 
@@ -156,7 +156,7 @@ async def test_full_analysis_workflow(client, db_session):
             completed_at=datetime.utcnow(),
             proposals_total=5,
             proposals_pending=5,
-        )
+        ),
     )
 
     # Step 4: Review proposals
@@ -170,8 +170,7 @@ async def test_full_analysis_workflow(client, db_session):
         # Reject 2 proposals
         for proposal_id in proposal_ids[3:]:
             response = await client.put(
-                f"/api/proposals/{proposal_id}/reject",
-                json={"reason": "Not relevant to current sprint"}
+                f"/api/proposals/{proposal_id}/reject", json={"reason": "Not relevant to current sprint"}
             )
             assert response.status_code == 200
             assert response.json()["status"] == ProposalStatus.rejected.value
@@ -294,7 +293,7 @@ async def test_lifecycle_enforcement(client, db_session):
             status=AnalysisRunStatus.completed.value,
             proposals_total=3,
             proposals_pending=3,  # Still pending!
-        )
+        ),
     )
 
     # Try to close run - should fail (400)
@@ -310,7 +309,7 @@ async def test_lifecycle_enforcement(client, db_session):
             proposals_pending=0,
             proposals_approved=2,
             proposals_rejected=1,
-        )
+        ),
     )
 
     # Now close should succeed
@@ -398,8 +397,8 @@ async def test_websocket_events_broadcast(client, db_session):
         assert call_args[0][1]["event"] == "run_created"
 
     # Create proposal
-    from app.services import TaskProposalCRUD
     from app.models import TaskProposalCreate
+    from app.services import TaskProposalCRUD
 
     crud = TaskProposalCRUD(db_session)
     proposal_data = TaskProposalCreate(
@@ -426,7 +425,7 @@ async def test_websocket_events_broadcast(client, db_session):
             status=AnalysisRunStatus.completed.value,
             proposals_total=1,
             proposals_pending=1,
-        )
+        ),
     )
 
     ws_mock.reset_mock()
@@ -528,8 +527,8 @@ async def test_proposal_edit_before_review(client, db_session):
     await db_session.refresh(run)
 
     # Create proposal
-    from app.services import TaskProposalCRUD
     from app.models import TaskProposalCreate
+    from app.services import TaskProposalCRUD
 
     crud = TaskProposalCRUD(db_session)
     proposal_data = TaskProposalCreate(

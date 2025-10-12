@@ -1,12 +1,13 @@
 from datetime import date, datetime, timedelta
-from typing import Literal, Optional
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import and_, func, select
 
-from ...models import AnalysisRun, Message, Source, Task, TaskProposal, User
-from ...models.enums import AnalysisRunStatus, ProposalStatus
 from app.schemas.stats import StatsResponse
+
+from ...models import AnalysisRun, Message, Source, Task, TaskProposal
+from ...models.enums import AnalysisRunStatus, ProposalStatus
 from ...services.websocket_manager import websocket_manager
 from ..deps import DatabaseDep
 from .response_models import (
@@ -27,11 +28,9 @@ router = APIRouter(tags=["statistics"])
 )
 async def get_activity_data(
     db: DatabaseDep,
-    period: Literal["week", "month"] = Query(
-        "week", description="Period type: 'week' or 'month'"
-    ),
-    month: Optional[int] = Query(None, description="Month (0-11, for month period)"),
-    year: Optional[int] = Query(None, description="Year (for month period)"),
+    period: Literal["week", "month"] = Query("week", description="Period type: 'week' or 'month'"),
+    month: int | None = Query(None, description="Month (0-11, for month period)"),
+    year: int | None = Query(None, description="Year (for month period)"),
 ) -> ActivityDataResponse:
     """
     Get message activity data for heatmap visualization.
@@ -55,11 +54,7 @@ async def get_activity_data(
     statement = (
         select(Message, Source)
         .join(Source, Message.source_id == Source.id)
-        .where(
-            and_(
-                Message.sent_at >= start_date, Message.sent_at <= end_date
-            )
-        )
+        .where(and_(Message.sent_at >= start_date, Message.sent_at <= end_date))
         .order_by(Message.sent_at)
     )
 
@@ -68,13 +63,11 @@ async def get_activity_data(
 
     activity_data = []
     for message, source in messages_with_sources:
-        activity_data.append(
-            {
-                "timestamp": message.sent_at.isoformat(),
-                "source": source.name,
-                "count": 1,
-            }
-        )
+        activity_data.append({
+            "timestamp": message.sent_at.isoformat(),
+            "source": source.name,
+            "count": 1,
+        })
 
     from .response_models import ActivityDataPoint, ActivityPeriod
 
@@ -141,9 +134,7 @@ async def get_stats(db: DatabaseDep) -> StatsResponse:
     summary="Analyze messages for a day",
     response_description="Analysis summary with tasks created",
 )
-async def analyze_day(
-    db: DatabaseDep, target_date: Optional[str] = None
-) -> AnalyzeDayResponse:
+async def analyze_day(db: DatabaseDep, target_date: str | None = None) -> AnalyzeDayResponse:
     """
     Analyze unanalyzed messages for a specific day and create summary task.
 
@@ -183,9 +174,7 @@ async def analyze_day(
             summary_content += f"- {msg.author}: {msg.content[:50]}...\n"
 
         if len(unanalyzed_messages) > 5:
-            summary_content += (
-                f"... and {len(unanalyzed_messages) - 5} more messages"
-            )
+            summary_content += f"... and {len(unanalyzed_messages) - 5} more messages"
 
         summary_task = Task(
             title=f"Daily Summary - {analysis_date}",
@@ -256,18 +245,14 @@ async def get_sidebar_counts(db: DatabaseDep) -> SidebarCountsResponse:
     ]
 
     unclosed_runs_statement = (
-        select(func.count())
-        .select_from(AnalysisRun)
-        .where(AnalysisRun.status.in_(unclosed_statuses))
+        select(func.count()).select_from(AnalysisRun).where(AnalysisRun.status.in_(unclosed_statuses))
     )
     unclosed_runs_result = await db.execute(unclosed_runs_statement)
     unclosed_runs_count = unclosed_runs_result.scalar() or 0
 
     # Count pending proposals
     pending_proposals_statement = (
-        select(func.count())
-        .select_from(TaskProposal)
-        .where(TaskProposal.status == ProposalStatus.pending.value)
+        select(func.count()).select_from(TaskProposal).where(TaskProposal.status == ProposalStatus.pending.value)
     )
     pending_proposals_result = await db.execute(pending_proposals_statement)
     pending_proposals_count = pending_proposals_result.scalar() or 0

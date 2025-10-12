@@ -5,7 +5,6 @@ and agent testing functionality.
 """
 
 import logging
-from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -84,19 +83,17 @@ async def create_agent(
 
 @router.get(
     "",
-    response_model=List[AgentConfigPublic],
+    response_model=list[AgentConfigPublic],
     summary="List all agents",
     description="Get list of all configured agents with pagination and filters.",
 )
 async def list_agents(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(
-        100, ge=1, le=1000, description="Maximum number of records to return"
-    ),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     active_only: bool = Query(False, description="Filter for active agents only"),
-    provider_id: Optional[UUID] = Query(None, description="Filter by provider ID"),
+    provider_id: UUID | None = Query(None, description="Filter by provider ID"),
     session: AsyncSession = Depends(get_session),
-) -> List[AgentConfigPublic]:
+) -> list[AgentConfigPublic]:
     """List all agent configurations.
 
     Args:
@@ -274,10 +271,7 @@ async def assign_task(
     try:
         crud = AssignmentCRUD(session)
         assignment = await crud.create(assignment_data)
-        logger.info(
-            f"Assigned task '{assignment.task_id}' to agent '{agent_id}' "
-            f"(assignment ID: {assignment.id})"
-        )
+        logger.info(f"Assigned task '{assignment.task_id}' to agent '{agent_id}' (assignment ID: {assignment.id})")
         return assignment
     except ValueError as e:
         if "already exists" in str(e):
@@ -298,7 +292,7 @@ async def assign_task(
 
 @router.get(
     "/{agent_id}/tasks",
-    response_model=List[AgentTaskAssignmentPublic],
+    response_model=list[AgentTaskAssignmentPublic],
     summary="List agent's tasks",
     description="Get all tasks assigned to this agent.",
 )
@@ -306,7 +300,7 @@ async def get_agent_tasks(
     agent_id: UUID,
     active_only: bool = Query(False, description="Filter for active assignments only"),
     session: AsyncSession = Depends(get_session),
-) -> List[AgentTaskAssignmentPublic]:
+) -> list[AgentTaskAssignmentPublic]:
     """List tasks assigned to agent.
 
     Args:
@@ -355,10 +349,7 @@ async def unassign_task(
         )
 
     await crud.delete(assignment.id)
-    logger.info(
-        f"Unassigned task '{task_id}' from agent '{agent_id}' "
-        f"(assignment ID: {assignment.id})"
-    )
+    logger.info(f"Unassigned task '{task_id}' from agent '{agent_id}' (assignment ID: {assignment.id})")
 
 
 # ============================================================================
@@ -402,10 +393,7 @@ async def test_agent(
 
     try:
         result = await service.test_agent(agent_id, request.prompt)
-        logger.info(
-            f"Successfully tested agent '{agent_id}' "
-            f"(execution time: {result.elapsed_time:.2f}s)"
-        )
+        logger.info(f"Successfully tested agent '{agent_id}' (execution time: {result.elapsed_time:.2f}s)")
         return result
     except ValueError as e:
         # Handle known validation errors

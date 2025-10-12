@@ -1,7 +1,8 @@
 """Tests for ProjectConfig model."""
-import pytest
+
 from datetime import datetime
 
+import pytest
 from app.models import (
     ProjectConfig,
     User,

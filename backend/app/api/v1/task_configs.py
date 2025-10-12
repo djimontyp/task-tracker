@@ -5,7 +5,6 @@ Task configurations define structured output formats for AI agents.
 """
 
 import logging
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -67,18 +66,16 @@ async def create_task_config(
 
 @router.get(
     "",
-    response_model=List[TaskConfigPublic],
+    response_model=list[TaskConfigPublic],
     summary="List all task configurations",
     description="Get list of all configured task configurations with pagination.",
 )
 async def list_task_configs(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(
-        100, ge=1, le=1000, description="Maximum number of records to return"
-    ),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     active_only: bool = Query(False, description="Filter for active tasks only"),
     session: AsyncSession = Depends(get_session),
-) -> List[TaskConfigPublic]:
+) -> list[TaskConfigPublic]:
     """List all task configurations.
 
     Args:

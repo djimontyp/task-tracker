@@ -3,12 +3,14 @@ Encryption and decryption utilities for sensitive configuration data.
 
 Uses AES-256-GCM for authenticated encryption with a key derived from environment.
 """
-import os
+
 import base64
+import os
+
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.backends import default_backend
 
 
 class SettingsCrypto:
@@ -30,7 +32,7 @@ class SettingsCrypto:
             length=32,  # 256 bits for AES-256
             salt=salt,
             iterations=100000,
-            backend=default_backend()
+            backend=default_backend(),
         )
         return kdf.derive(password)
 
@@ -51,11 +53,7 @@ class SettingsCrypto:
         iv = os.urandom(12)
 
         # Create cipher
-        cipher = Cipher(
-            algorithms.AES(self._key),
-            modes.GCM(iv),
-            backend=default_backend()
-        )
+        cipher = Cipher(algorithms.AES(self._key), modes.GCM(iv), backend=default_backend())
         encryptor = cipher.encryptor()
 
         # Encrypt the data
@@ -65,7 +63,7 @@ class SettingsCrypto:
         encrypted_data = iv + ciphertext + encryptor.tag
 
         # Return base64 encoded result
-        return base64.b64encode(encrypted_data).decode('utf-8')
+        return base64.b64encode(encrypted_data).decode("utf-8")
 
     def decrypt(self, encrypted_data: str) -> str:
         """
@@ -85,7 +83,7 @@ class SettingsCrypto:
 
         try:
             # Decode from base64
-            data = base64.b64decode(encrypted_data.encode('utf-8'))
+            data = base64.b64decode(encrypted_data.encode("utf-8"))
 
             # Extract components (IV: 12 bytes, tag: 16 bytes at end)
             iv = data[:12]
@@ -93,16 +91,12 @@ class SettingsCrypto:
             tag = data[-16:]
 
             # Create cipher
-            cipher = Cipher(
-                algorithms.AES(self._key),
-                modes.GCM(iv, tag),
-                backend=default_backend()
-            )
+            cipher = Cipher(algorithms.AES(self._key), modes.GCM(iv, tag), backend=default_backend())
             decryptor = cipher.decryptor()
 
             # Decrypt and return
             plaintext = decryptor.update(ciphertext) + decryptor.finalize()
-            return plaintext.decode('utf-8')
+            return plaintext.decode("utf-8")
 
         except Exception as e:
             raise ValueError(f"Failed to decrypt data: {e}")

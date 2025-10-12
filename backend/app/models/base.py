@@ -1,5 +1,7 @@
 """Base models and mixins for all entities."""
+
 from datetime import datetime
+
 from sqlalchemy import BigInteger, DateTime, func
 from sqlmodel import Field, SQLModel
 

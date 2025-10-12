@@ -1,4 +1,5 @@
 """Contract tests for GET /api/agents/{id}/tasks endpoint."""
+
 import pytest
 from httpx import AsyncClient
 

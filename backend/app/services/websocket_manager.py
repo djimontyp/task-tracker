@@ -6,7 +6,7 @@ state changes to connected clients.
 
 import asyncio
 import json
-from typing import Any, Dict, List, Set
+from typing import Any
 
 from fastapi import WebSocket
 
@@ -21,11 +21,11 @@ class WebSocketManager:
     def __init__(self):
         """Initialize WebSocket manager."""
         # Map of topic -> set of connected websockets
-        self._connections: Dict[str, Set[WebSocket]] = {}
+        self._connections: dict[str, set[WebSocket]] = {}
         # Lock for thread-safe connection management
         self._lock = asyncio.Lock()
 
-    async def connect(self, websocket: WebSocket, topics: List[str] = None, accept: bool = True) -> None:
+    async def connect(self, websocket: WebSocket, topics: list[str] = None, accept: bool = True) -> None:
         """Accept WebSocket connection and subscribe to topics.
 
         Args:
@@ -85,7 +85,7 @@ class WebSocketManager:
             if topic in self._connections:
                 self._connections[topic].discard(websocket)
 
-    async def broadcast(self, topic: str, message: Dict[str, Any]) -> None:
+    async def broadcast(self, topic: str, message: dict[str, Any]) -> None:
         """Broadcast message to all subscribers of a topic.
 
         Args:

@@ -1,18 +1,18 @@
 """User management API endpoints."""
+
 import logging
-from typing import List
 
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
-from app.models import User, TelegramProfile
+from app.models import TelegramProfile, User
 from app.schemas.users import (
     LinkTelegramProfileRequest,
     TelegramProfileResponse,
     UserCreateRequest,
     UserResponse,
 )
-from app.services.user_service import identify_or_create_user
+
 from ..deps import DatabaseDep
 
 logger = logging.getLogger(__name__)
@@ -21,11 +21,11 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get(
     "",
-    response_model=List[UserResponse],
+    response_model=list[UserResponse],
     summary="Get all users",
     response_description="List of all users",
 )
-async def get_users(db: DatabaseDep) -> List[UserResponse]:
+async def get_users(db: DatabaseDep) -> list[UserResponse]:
     """
     Retrieve all users.
 
@@ -134,9 +134,7 @@ async def create_user(user_data: UserCreateRequest, db: DatabaseDep) -> UserResp
     response_description="Telegram profile details",
     responses={404: {"description": "User or TelegramProfile not found"}},
 )
-async def get_user_telegram_profile(
-    user_id: int, db: DatabaseDep
-) -> TelegramProfileResponse:
+async def get_user_telegram_profile(user_id: int, db: DatabaseDep) -> TelegramProfileResponse:
     """
     Retrieve Telegram profile for a user.
 
@@ -153,9 +151,7 @@ async def get_user_telegram_profile(
     tg_profile = result.scalar_one_or_none()
 
     if not tg_profile:
-        raise HTTPException(
-            status_code=404, detail="TelegramProfile not found for this user"
-        )
+        raise HTTPException(status_code=404, detail="TelegramProfile not found for this user")
 
     return TelegramProfileResponse(
         id=tg_profile.id,
@@ -199,9 +195,7 @@ async def link_telegram_profile(
         raise HTTPException(status_code=404, detail="User not found")
 
     # Find Telegram profile by telegram_user_id
-    stmt = select(TelegramProfile).where(
-        TelegramProfile.telegram_user_id == request.telegram_user_id
-    )
+    stmt = select(TelegramProfile).where(TelegramProfile.telegram_user_id == request.telegram_user_id)
     result = await db.execute(stmt)
     tg_profile = result.scalar_one_or_none()
 

@@ -1,4 +1,5 @@
 """Message model for storing messages from various sources."""
+
 from datetime import datetime
 
 from sqlalchemy import Text
@@ -20,19 +21,13 @@ class Message(IDMixin, TimestampMixin, SQLModel, table=True):
     __tablename__ = "messages"
 
     # Message identification
-    external_message_id: str = Field(
-        index=True, max_length=100, description="ID from external system"
-    )
+    external_message_id: str = Field(index=True, max_length=100, description="ID from external system")
     content: str = Field(sa_type=Text, description="Message content")
     sent_at: datetime = Field(description="When message was sent")
 
     # Core relationships (ALWAYS required)
-    source_id: int = Field(
-        foreign_key="sources.id", description="Source where message came from"
-    )
-    author_id: int = Field(
-        foreign_key="users.id", description="Author of the message (User.id)"
-    )
+    source_id: int = Field(foreign_key="sources.id", description="Source where message came from")
+    author_id: int = Field(foreign_key="users.id", description="Author of the message (User.id)")
 
     # Platform-specific profiles (optional)
     telegram_profile_id: int | None = Field(
@@ -42,17 +37,11 @@ class Message(IDMixin, TimestampMixin, SQLModel, table=True):
     )
 
     # Cached fields for performance
-    avatar_url: str | None = Field(
-        default=None, max_length=500, description="Cached avatar URL from User"
-    )
+    avatar_url: str | None = Field(default=None, max_length=500, description="Cached avatar URL from User")
 
     # AI classification fields
-    classification: str | None = Field(
-        default=None, max_length=50, description="AI classification result"
-    )
-    confidence: float | None = Field(
-        default=None, ge=0.0, le=1.0, description="Classification confidence score"
-    )
+    classification: str | None = Field(default=None, max_length=50, description="AI classification result")
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0, description="Classification confidence score")
     analyzed: bool = Field(default=False, description="Whether message was analyzed")
 
     # Analysis tracking fields (Phase 1)

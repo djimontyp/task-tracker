@@ -1,8 +1,9 @@
 """Agent-Task Assignment model for linking agents to tasks."""
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, ForeignKey, UniqueConstraint, func
+from sqlalchemy import DateTime, UniqueConstraint, func
 from sqlmodel import Field, SQLModel
 
 
@@ -15,9 +16,7 @@ class AgentTaskAssignment(SQLModel, table=True):
     """
 
     __tablename__ = "agent_task_assignments"
-    __table_args__ = (
-        UniqueConstraint("agent_id", "task_id", name="uq_agent_task"),
-    )
+    __table_args__ = (UniqueConstraint("agent_id", "task_id", name="uq_agent_task"),)
 
     # Primary Key
     id: UUID = Field(default_factory=uuid4, primary_key=True)
@@ -37,7 +36,7 @@ class AgentTaskAssignment(SQLModel, table=True):
 
     # Timestamps
     assigned_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"server_default": func.now()},
     )

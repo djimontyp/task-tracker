@@ -4,7 +4,6 @@ Provides create, read, update, delete operations for LLM providers
 with encryption support and validation scheduling.
 """
 
-from typing import List, Optional
 from uuid import UUID
 
 from sqlmodel import select
@@ -28,8 +27,8 @@ class ProviderCRUD:
     def __init__(
         self,
         session: AsyncSession,
-        encryptor: Optional[CredentialEncryption] = None,
-        validator: Optional[ProviderValidator] = None,
+        encryptor: CredentialEncryption | None = None,
+        validator: ProviderValidator | None = None,
     ):
         """Initialize CRUD service.
 
@@ -62,9 +61,7 @@ class ProviderCRUD:
         # Check name uniqueness
         existing = await self.get_by_name(provider_data.name)
         if existing:
-            raise ValueError(
-                f"Provider with name '{provider_data.name}' already exists"
-            )
+            raise ValueError(f"Provider with name '{provider_data.name}' already exists")
 
         # Encrypt API key if provided
         api_key_encrypted = None
@@ -80,9 +77,7 @@ class ProviderCRUD:
             is_active=provider_data.is_active,
             # If validation is scheduled, immediately mark as 'validating' for API response
             # and persisted state. Otherwise keep as 'pending'.
-            validation_status=(
-                ValidationStatus.validating if schedule_validation else ValidationStatus.pending
-            ),
+            validation_status=(ValidationStatus.validating if schedule_validation else ValidationStatus.pending),
         )
 
         self.session.add(provider)
@@ -95,7 +90,7 @@ class ProviderCRUD:
 
         return LLMProviderPublic.model_validate(provider)
 
-    async def get(self, provider_id: UUID) -> Optional[LLMProviderPublic]:
+    async def get(self, provider_id: UUID) -> LLMProviderPublic | None:
         """Get provider by ID.
 
         Args:
@@ -104,16 +99,14 @@ class ProviderCRUD:
         Returns:
             Provider if found, None otherwise
         """
-        result = await self.session.execute(
-            select(LLMProvider).where(LLMProvider.id == provider_id)
-        )
+        result = await self.session.execute(select(LLMProvider).where(LLMProvider.id == provider_id))
         provider = result.scalar_one_or_none()
 
         if provider:
             return LLMProviderPublic.model_validate(provider)
         return None
 
-    async def get_by_name(self, name: str) -> Optional[LLMProviderPublic]:
+    async def get_by_name(self, name: str) -> LLMProviderPublic | None:
         """Get provider by name.
 
         Args:
@@ -122,9 +115,7 @@ class ProviderCRUD:
         Returns:
             Provider if found, None otherwise
         """
-        result = await self.session.execute(
-            select(LLMProvider).where(LLMProvider.name == name)
-        )
+        result = await self.session.execute(select(LLMProvider).where(LLMProvider.name == name))
         provider = result.scalar_one_or_none()
 
         if provider:
@@ -136,7 +127,7 @@ class ProviderCRUD:
         skip: int = 0,
         limit: int = 100,
         active_only: bool = False,
-    ) -> List[LLMProviderPublic]:
+    ) -> list[LLMProviderPublic]:
         """List providers with pagination.
 
         Args:
@@ -163,7 +154,7 @@ class ProviderCRUD:
         provider_id: UUID,
         update_data: LLMProviderUpdate,
         schedule_validation: bool = True,
-    ) -> Optional[LLMProviderPublic]:
+    ) -> LLMProviderPublic | None:
         """Update provider configuration.
 
         Args:
@@ -174,9 +165,7 @@ class ProviderCRUD:
         Returns:
             Updated provider if found, None otherwise
         """
-        result = await self.session.execute(
-            select(LLMProvider).where(LLMProvider.id == provider_id)
-        )
+        result = await self.session.execute(select(LLMProvider).where(LLMProvider.id == provider_id))
         provider = result.scalar_one_or_none()
 
         if not provider:
@@ -229,9 +218,7 @@ class ProviderCRUD:
               setting is_active=False and return True.
             - Otherwise, perform hard delete.
         """
-        result = await self.session.execute(
-            select(LLMProvider).where(LLMProvider.id == provider_id)
-        )
+        result = await self.session.execute(select(LLMProvider).where(LLMProvider.id == provider_id))
         provider = result.scalar_one_or_none()
 
         if not provider:
@@ -254,7 +241,7 @@ class ProviderCRUD:
         await self.session.commit()
         return True
 
-    async def get_decrypted_api_key(self, provider_id: UUID) -> Optional[str]:
+    async def get_decrypted_api_key(self, provider_id: UUID) -> str | None:
         """Get decrypted API key for provider.
 
         Args:
@@ -268,9 +255,7 @@ class ProviderCRUD:
             that need the actual API key (e.g., PydanticAI agent initialization).
             Never expose decrypted keys via API endpoints.
         """
-        result = await self.session.execute(
-            select(LLMProvider).where(LLMProvider.id == provider_id)
-        )
+        result = await self.session.execute(select(LLMProvider).where(LLMProvider.id == provider_id))
         provider = result.scalar_one_or_none()
 
         if not provider or not provider.api_key_encrypted:

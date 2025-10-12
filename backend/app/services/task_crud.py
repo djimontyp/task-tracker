@@ -4,7 +4,6 @@ Provides create, read, update, delete operations for task configurations
 with schema validation support.
 """
 
-from typing import List, Optional
 from uuid import UUID
 
 from sqlmodel import select
@@ -63,7 +62,7 @@ class TaskCRUD:
 
         return TaskConfigPublic.model_validate(task)
 
-    async def get(self, task_id: UUID) -> Optional[TaskConfigPublic]:
+    async def get(self, task_id: UUID) -> TaskConfigPublic | None:
         """Get task by ID.
 
         Args:
@@ -72,16 +71,14 @@ class TaskCRUD:
         Returns:
             Task if found, None otherwise
         """
-        result = await self.session.execute(
-            select(TaskConfig).where(TaskConfig.id == task_id)
-        )
+        result = await self.session.execute(select(TaskConfig).where(TaskConfig.id == task_id))
         task = result.scalar_one_or_none()
 
         if task:
             return TaskConfigPublic.model_validate(task)
         return None
 
-    async def get_by_name(self, name: str) -> Optional[TaskConfigPublic]:
+    async def get_by_name(self, name: str) -> TaskConfigPublic | None:
         """Get task by name.
 
         Args:
@@ -90,9 +87,7 @@ class TaskCRUD:
         Returns:
             Task if found, None otherwise
         """
-        result = await self.session.execute(
-            select(TaskConfig).where(TaskConfig.name == name)
-        )
+        result = await self.session.execute(select(TaskConfig).where(TaskConfig.name == name))
         task = result.scalar_one_or_none()
 
         if task:
@@ -104,7 +99,7 @@ class TaskCRUD:
         skip: int = 0,
         limit: int = 100,
         active_only: bool = False,
-    ) -> List[TaskConfigPublic]:
+    ) -> list[TaskConfigPublic]:
         """List tasks with pagination.
 
         Args:
@@ -130,7 +125,7 @@ class TaskCRUD:
         self,
         task_id: UUID,
         update_data: TaskConfigUpdate,
-    ) -> Optional[TaskConfigPublic]:
+    ) -> TaskConfigPublic | None:
         """Update task configuration.
 
         Args:
@@ -143,9 +138,7 @@ class TaskCRUD:
         Raises:
             ValueError: If new response_schema is invalid
         """
-        result = await self.session.execute(
-            select(TaskConfig).where(TaskConfig.id == task_id)
-        )
+        result = await self.session.execute(select(TaskConfig).where(TaskConfig.id == task_id))
         task = result.scalar_one_or_none()
 
         if not task:
@@ -182,9 +175,7 @@ class TaskCRUD:
         Note:
             Will cascade delete agent_task_assignments due to FK constraint.
         """
-        result = await self.session.execute(
-            select(TaskConfig).where(TaskConfig.id == task_id)
-        )
+        result = await self.session.execute(select(TaskConfig).where(TaskConfig.id == task_id))
         task = result.scalar_one_or_none()
 
         if not task:

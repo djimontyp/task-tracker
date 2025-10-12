@@ -1,13 +1,12 @@
-from logging.config import fileConfig
 import asyncio
 import sys
+from logging.config import fileConfig
 from pathlib import Path
 
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine, async_engine_from_config
 from sqlmodel import SQLModel
-
-from alembic import context
 
 # Ensure project root is on sys.path so that `from src...` imports work
 THIS_DIR = Path(__file__).resolve().parent

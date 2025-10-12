@@ -1,19 +1,18 @@
 """Tests for AnalysisRun model."""
-import pytest
+
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-from sqlmodel import select
-
+import pytest
 from app.models import (
+    AgentConfig,
+    AgentTaskAssignment,
     AnalysisRun,
     AnalysisRunStatus,
-    AgentTaskAssignment,
-    AgentConfig,
-    TaskConfig,
     LLMProvider,
-    User,
     ProjectConfig,
+    TaskConfig,
+    User,
 )
 
 

@@ -5,7 +5,6 @@ with detailed information from joined tables.
 """
 
 import logging
-from typing import List
 
 from fastapi import APIRouter, Depends, Query
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -20,7 +19,7 @@ router = APIRouter(prefix="/assignments", tags=["assignments"])
 
 @router.get(
     "",
-    response_model=List[AgentTaskAssignmentWithDetails],
+    response_model=list[AgentTaskAssignmentWithDetails],
     summary="List all assignments with details",
     description="""
 Get all agent-task assignments with detailed information from joined tables.
@@ -50,7 +49,7 @@ async def list_all_assignments(
         description="Maximum number of records to return (max: 1000)",
     ),
     session: AsyncSession = Depends(get_session),
-) -> List[AgentTaskAssignmentWithDetails]:
+) -> list[AgentTaskAssignmentWithDetails]:
     """List all agent-task assignments with detailed information.
 
     Executes optimized JOIN queries to retrieve assignment data along with
@@ -77,8 +76,5 @@ async def list_all_assignments(
         skip=skip,
         limit=limit,
     )
-    logger.info(
-        f"Retrieved {len(assignments)} assignments "
-        f"(active_only={active_only}, skip={skip}, limit={limit})"
-    )
+    logger.info(f"Retrieved {len(assignments)} assignments (active_only={active_only}, skip={skip}, limit={limit})")
     return assignments

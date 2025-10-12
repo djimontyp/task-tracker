@@ -4,10 +4,9 @@ Provides operations for managing assignments between agents and tasks,
 ensuring proper M2M relationship handling.
 """
 
-from typing import List, Optional
+import builtins
 from uuid import UUID
 
-from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -34,9 +33,7 @@ class AssignmentCRUD:
         """
         self.session = session
 
-    async def create(
-        self, assignment_data: AgentTaskAssignmentCreate
-    ) -> AgentTaskAssignmentPublic:
+    async def create(self, assignment_data: AgentTaskAssignmentCreate) -> AgentTaskAssignmentPublic:
         """Create new agent-task assignment.
 
         Args:
@@ -49,17 +46,13 @@ class AssignmentCRUD:
             ValueError: If agent or task not found, or assignment already exists
         """
         # Verify agent exists
-        agent_result = await self.session.execute(
-            select(AgentConfig).where(AgentConfig.id == assignment_data.agent_id)
-        )
+        agent_result = await self.session.execute(select(AgentConfig).where(AgentConfig.id == assignment_data.agent_id))
         agent = agent_result.scalar_one_or_none()
         if not agent:
             raise ValueError(f"Agent with ID '{assignment_data.agent_id}' not found")
 
         # Verify task exists
-        task_result = await self.session.execute(
-            select(TaskConfig).where(TaskConfig.id == assignment_data.task_id)
-        )
+        task_result = await self.session.execute(select(TaskConfig).where(TaskConfig.id == assignment_data.task_id))
         task = task_result.scalar_one_or_none()
         if not task:
             raise ValueError(f"Task with ID '{assignment_data.task_id}' not found")
@@ -87,7 +80,7 @@ class AssignmentCRUD:
 
         return AgentTaskAssignmentPublic.model_validate(assignment)
 
-    async def get(self, assignment_id: UUID) -> Optional[AgentTaskAssignmentPublic]:
+    async def get(self, assignment_id: UUID) -> AgentTaskAssignmentPublic | None:
         """Get assignment by ID.
 
         Args:
@@ -96,18 +89,14 @@ class AssignmentCRUD:
         Returns:
             Assignment if found, None otherwise
         """
-        result = await self.session.execute(
-            select(AgentTaskAssignment).where(AgentTaskAssignment.id == assignment_id)
-        )
+        result = await self.session.execute(select(AgentTaskAssignment).where(AgentTaskAssignment.id == assignment_id))
         assignment = result.scalar_one_or_none()
 
         if assignment:
             return AgentTaskAssignmentPublic.model_validate(assignment)
         return None
 
-    async def get_by_agent_and_task(
-        self, agent_id: UUID, task_id: UUID
-    ) -> Optional[AgentTaskAssignmentPublic]:
+    async def get_by_agent_and_task(self, agent_id: UUID, task_id: UUID) -> AgentTaskAssignmentPublic | None:
         """Get assignment by agent and task IDs.
 
         Args:
@@ -132,7 +121,7 @@ class AssignmentCRUD:
         self,
         agent_id: UUID,
         active_only: bool = False,
-    ) -> List[AgentTaskAssignmentPublic]:
+    ) -> list[AgentTaskAssignmentPublic]:
         """List all task assignments for an agent.
 
         Args:
@@ -142,9 +131,7 @@ class AssignmentCRUD:
         Returns:
             List of assignments
         """
-        query = select(AgentTaskAssignment).where(
-            AgentTaskAssignment.agent_id == agent_id
-        )
+        query = select(AgentTaskAssignment).where(AgentTaskAssignment.agent_id == agent_id)
 
         if active_only:
             query = query.where(AgentTaskAssignment.is_active == True)  # noqa: E712
@@ -158,7 +145,7 @@ class AssignmentCRUD:
         self,
         task_id: UUID,
         active_only: bool = False,
-    ) -> List[AgentTaskAssignmentPublic]:
+    ) -> list[AgentTaskAssignmentPublic]:
         """List all agent assignments for a task.
 
         Args:
@@ -168,9 +155,7 @@ class AssignmentCRUD:
         Returns:
             List of assignments
         """
-        query = select(AgentTaskAssignment).where(
-            AgentTaskAssignment.task_id == task_id
-        )
+        query = select(AgentTaskAssignment).where(AgentTaskAssignment.task_id == task_id)
 
         if active_only:
             query = query.where(AgentTaskAssignment.is_active == True)  # noqa: E712
@@ -185,7 +170,7 @@ class AssignmentCRUD:
         skip: int = 0,
         limit: int = 100,
         active_only: bool = False,
-    ) -> List[AgentTaskAssignmentPublic]:
+    ) -> list[AgentTaskAssignmentPublic]:
         """List all assignments with pagination.
 
         Args:
@@ -211,7 +196,7 @@ class AssignmentCRUD:
         self,
         assignment_id: UUID,
         is_active: bool,
-    ) -> Optional[AgentTaskAssignmentPublic]:
+    ) -> AgentTaskAssignmentPublic | None:
         """Update assignment active status.
 
         Args:
@@ -221,9 +206,7 @@ class AssignmentCRUD:
         Returns:
             Updated assignment if found, None otherwise
         """
-        result = await self.session.execute(
-            select(AgentTaskAssignment).where(AgentTaskAssignment.id == assignment_id)
-        )
+        result = await self.session.execute(select(AgentTaskAssignment).where(AgentTaskAssignment.id == assignment_id))
         assignment = result.scalar_one_or_none()
 
         if not assignment:
@@ -244,9 +227,7 @@ class AssignmentCRUD:
         Returns:
             True if deleted, False if not found
         """
-        result = await self.session.execute(
-            select(AgentTaskAssignment).where(AgentTaskAssignment.id == assignment_id)
-        )
+        result = await self.session.execute(select(AgentTaskAssignment).where(AgentTaskAssignment.id == assignment_id))
         assignment = result.scalar_one_or_none()
 
         if not assignment:
@@ -261,7 +242,7 @@ class AssignmentCRUD:
         active_only: bool = False,
         skip: int = 0,
         limit: int = 100,
-    ) -> List[AgentTaskAssignmentWithDetails]:
+    ) -> builtins.list[AgentTaskAssignmentWithDetails]:
         """List assignments with detailed information from joined tables.
 
         Performs JOIN queries to fetch agent, task, and provider details

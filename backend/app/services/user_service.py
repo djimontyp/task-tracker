@@ -1,20 +1,18 @@
 """User service for user identification and management."""
+
 import logging
-from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-from app.models.user import User
-from app.models.telegram_profile import TelegramProfile
 from app.models.legacy import Source
+from app.models.telegram_profile import TelegramProfile
+from app.models.user import User
 
 logger = logging.getLogger(__name__)
 
 
-async def get_or_create_source(
-    db: AsyncSession, name: str
-) -> Source:
+async def get_or_create_source(db: AsyncSession, name: str) -> Source:
     """Get existing source or create new one.
 
     Args:
@@ -44,7 +42,7 @@ async def get_or_create_source(
     return source
 
 
-async def find_user_by_phone(db: AsyncSession, phone: str) -> Optional[User]:
+async def find_user_by_phone(db: AsyncSession, phone: str) -> User | None:
     """Find user by phone number.
 
     Args:
@@ -59,7 +57,7 @@ async def find_user_by_phone(db: AsyncSession, phone: str) -> Optional[User]:
     return result.scalar_one_or_none()
 
 
-async def find_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
+async def find_user_by_email(db: AsyncSession, email: str) -> User | None:
     """Find user by email address.
 
     Args:
@@ -107,10 +105,10 @@ async def identify_or_create_user(
     db: AsyncSession,
     telegram_user_id: int,
     first_name: str,
-    last_name: Optional[str] = None,
-    phone: Optional[str] = None,
-    email: Optional[str] = None,
-    language_code: Optional[str] = None,
+    last_name: str | None = None,
+    phone: str | None = None,
+    email: str | None = None,
+    language_code: str | None = None,
     is_bot: bool = False,
     is_premium: bool = False,
 ) -> tuple[User, TelegramProfile]:
@@ -143,9 +141,7 @@ async def identify_or_create_user(
     telegram_source = await get_or_create_source(db, name="telegram")
 
     # Try to find existing TelegramProfile
-    stmt = select(TelegramProfile).where(
-        TelegramProfile.telegram_user_id == telegram_user_id
-    )
+    stmt = select(TelegramProfile).where(TelegramProfile.telegram_user_id == telegram_user_id)
     result = await db.execute(stmt)
     tg_profile = result.scalar_one_or_none()
 
@@ -163,9 +159,7 @@ async def identify_or_create_user(
         user_result = await db.execute(user_stmt)
         user = user_result.scalar_one()
 
-        logger.info(
-            f"Found existing user {user.id} for Telegram user {telegram_user_id}"
-        )
+        logger.info(f"Found existing user {user.id} for Telegram user {telegram_user_id}")
         return user, tg_profile
 
     # Try auto-linking

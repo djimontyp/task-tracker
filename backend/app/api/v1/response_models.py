@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -17,9 +16,7 @@ class ConfigResponse(BaseModel):
     apiBaseUrl: str
 
     class Config:
-        schema_extra = {
-            "example": {"wsUrl": "ws://localhost/ws", "apiBaseUrl": "http://localhost"}
-        }
+        schema_extra = {"example": {"wsUrl": "ws://localhost/ws", "apiBaseUrl": "http://localhost"}}
 
 
 class MessageCreateResponse(BaseModel):
@@ -36,9 +33,7 @@ class TaskStatusUpdateResponse(BaseModel):
     status: str
 
     class Config:
-        schema_extra = {
-            "example": {"message": "Task status updated", "task_id": 1, "status": "completed"}
-        }
+        schema_extra = {"example": {"message": "Task status updated", "task_id": 1, "status": "completed"}}
 
 
 class ActivityDataPoint(BaseModel):
@@ -51,12 +46,12 @@ class ActivityPeriod(BaseModel):
     type: str
     start: str
     end: str
-    month: Optional[int] = None
-    year: Optional[int] = None
+    month: int | None = None
+    year: int | None = None
 
 
 class ActivityDataResponse(BaseModel):
-    data: List[ActivityDataPoint]
+    data: list[ActivityDataPoint]
     period: ActivityPeriod
     total_messages: int
 
@@ -66,8 +61,8 @@ class AnalyzeDayResponse(BaseModel):
     message: str
     messages_processed: int
     tasks_created: int
-    date: Optional[str] = None
-    summary_task_id: Optional[int] = None
+    date: str | None = None
+    summary_task_id: int | None = None
 
     class Config:
         schema_extra = {
@@ -86,17 +81,18 @@ class WebhookInfo(BaseModel):
     url: str
     has_custom_certificate: bool
     pending_update_count: int
-    ip_address: Optional[str] = None
-    last_error_date: Optional[int] = None
-    last_error_message: Optional[str] = None
-    max_connections: Optional[int] = None
-    allowed_updates: Optional[List[str]] = None
+    ip_address: str | None = None
+    last_error_date: int | None = None
+    last_error_message: str | None = None
+    max_connections: int | None = None
+    allowed_updates: list[str] | None = None
 
 
 class WebhookInfoResponse(BaseModel):
     success: bool
-    webhook_info: Optional[WebhookInfo] = None
-    error: Optional[str] = None
+    webhook_info: WebhookInfo | None = None
+    error: str | None = None
+
 
 # ---------------------
 # Messages API Schemas
@@ -104,20 +100,21 @@ class WebhookInfoResponse(BaseModel):
 
 from app.schemas.messages import MessageResponse
 
+
 class DateRange(BaseModel):
-    earliest: Optional[str] = None
-    latest: Optional[str] = None
+    earliest: str | None = None
+    latest: str | None = None
 
 
 class MessageFiltersResponse(BaseModel):
-    authors: List[str]
-    sources: List[str]
+    authors: list[str]
+    sources: list[str]
     total_messages: int
     date_range: DateRange
 
 
 class PaginatedMessagesResponse(BaseModel):
-    items: List[MessageResponse]
+    items: list[MessageResponse]
     total: int
     page: int
     page_size: int
@@ -128,22 +125,23 @@ class PaginatedMessagesResponse(BaseModel):
 # Tasks API Schemas
 # ------------------
 
+
 class TaskCreateRequest(BaseModel):
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     category: str
     priority: str
-    source: Optional[str] = None
+    source: str | None = None
 
 
 class TaskResponse(BaseModel):
     id: int
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     status: str
     priority: str
     category: str
-    source: Optional[str] = None
+    source: str | None = None
     created_at: datetime
 
     class Config:
@@ -158,6 +156,7 @@ class TaskResponse(BaseModel):
 # ----------------------
 # Statistics API Schemas
 # ----------------------
+
 
 class StatsResponse(BaseModel):
     total_tasks: int

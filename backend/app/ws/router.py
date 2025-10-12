@@ -37,16 +37,14 @@ async def websocket_endpoint(websocket: WebSocket, topics: str = None):
     try:
         # Send connection confirmation
         await websocket.send_text(
-            json.dumps(
-                {
-                    "type": "connection",
-                    "data": {
-                        "status": "connected",
-                        "message": "Ready for real-time updates",
-                        "topics": topic_list,
-                    },
-                }
-            )
+            json.dumps({
+                "type": "connection",
+                "data": {
+                    "status": "connected",
+                    "message": "Ready for real-time updates",
+                    "topics": topic_list,
+                },
+            })
         )
 
         # Listen for subscription changes
@@ -61,22 +59,18 @@ async def websocket_endpoint(websocket: WebSocket, topics: str = None):
                 if action == "subscribe" and topic:
                     await websocket_manager.subscribe(websocket, topic)
                     await websocket.send_text(
-                        json.dumps(
-                            {
-                                "type": "subscription",
-                                "data": {"action": "subscribed", "topic": topic},
-                            }
-                        )
+                        json.dumps({
+                            "type": "subscription",
+                            "data": {"action": "subscribed", "topic": topic},
+                        })
                     )
                 elif action == "unsubscribe" and topic:
                     await websocket_manager.unsubscribe(websocket, topic)
                     await websocket.send_text(
-                        json.dumps(
-                            {
-                                "type": "subscription",
-                                "data": {"action": "unsubscribed", "topic": topic},
-                            }
-                        )
+                        json.dumps({
+                            "type": "subscription",
+                            "data": {"action": "unsubscribed", "topic": topic},
+                        })
                     )
             except json.JSONDecodeError:
                 # Ignore invalid JSON messages

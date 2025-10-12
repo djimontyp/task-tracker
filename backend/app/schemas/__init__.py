@@ -30,28 +30,18 @@ class TelegramGroupInfo(BaseModel):
     """Schema for Telegram group/chat information"""
 
     id: int = Field(description="Telegram chat/group ID")
-    name: Optional[str] = Field(default=None, description="Chat/group name")
+    name: str | None = Field(default=None, description="Chat/group name")
 
 
 class TelegramWebhookConfig(BaseModel):
     """Schema for Telegram webhook configuration"""
 
-    protocol: Literal["http", "https"] = Field(
-        default="https", description="Protocol for webhook URL"
-    )
-    host: str = Field(
-        ..., description="Host for webhook URL (e.g., 'example.ngrok.io')"
-    )
-    webhook_url: str | None = Field(
-        default=None, description="Complete webhook URL (computed)"
-    )
+    protocol: Literal["http", "https"] = Field(default="https", description="Protocol for webhook URL")
+    host: str = Field(..., description="Host for webhook URL (e.g., 'example.ngrok.io')")
+    webhook_url: str | None = Field(default=None, description="Complete webhook URL (computed)")
     is_active: bool = Field(default=False, description="Whether webhook is active")
-    last_set_at: datetime | None = Field(
-        default=None, description="When webhook was last set"
-    )
-    groups: list[TelegramGroupInfo] = Field(
-        default_factory=list, description="Telegram groups/chats to monitor"
-    )
+    last_set_at: datetime | None = Field(default=None, description="When webhook was last set")
+    groups: list[TelegramGroupInfo] = Field(default_factory=list, description="Telegram groups/chats to monitor")
 
 
 class WebhookConfigResponse(BaseModel):
@@ -65,9 +55,7 @@ class WebhookConfigResponse(BaseModel):
 class SetWebhookRequest(BaseModel):
     """Request schema for setting webhook"""
 
-    protocol: Literal["http", "https"] = Field(
-        ..., description="Protocol for webhook URL"
-    )
+    protocol: Literal["http", "https"] = Field(..., description="Protocol for webhook URL")
     host: str = Field(..., description="Host for webhook URL")
 
 
@@ -83,9 +71,7 @@ class SetWebhookResponse(BaseModel):
 class UpdateTelegramGroupIdsRequest(BaseModel):
     """Request schema for updating Telegram group IDs"""
 
-    group_ids: list[int] = Field(
-        description="List of Telegram group/chat IDs to monitor"
-    )
+    group_ids: list[int] = Field(description="List of Telegram group/chat IDs to monitor")
 
 
 class AddTelegramGroupRequest(BaseModel):

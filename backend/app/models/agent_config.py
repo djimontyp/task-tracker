@@ -1,9 +1,9 @@
 """Agent Configuration model for managing AI agent definitions."""
-from datetime import datetime, timezone
-from typing import Optional
+
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, ForeignKey, Text, func
+from sqlalchemy import DateTime, Text, func
 from sqlmodel import Field, SQLModel
 
 
@@ -27,7 +27,7 @@ class AgentConfig(SQLModel, table=True):
         index=True,
         description="Unique agent name",
     )
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         sa_type=Text,
         description="Agent description",
@@ -48,11 +48,11 @@ class AgentConfig(SQLModel, table=True):
     )
 
     # Agent Behavior
-    temperature: Optional[float] = Field(
+    temperature: float | None = Field(
         default=0.7,
         description="Model temperature (0.0-1.0)",
     )
-    max_tokens: Optional[int] = Field(
+    max_tokens: int | None = Field(
         default=None,
         description="Maximum tokens for response",
     )
@@ -62,12 +62,12 @@ class AgentConfig(SQLModel, table=True):
 
     # Timestamps
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"server_default": func.now()},
     )
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"server_default": func.now(), "onupdate": func.now()},
     )
@@ -91,26 +91,26 @@ class AgentConfigCreate(SQLModel):
     """Schema for creating new agent configuration."""
 
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     provider_id: UUID
     model_name: str
     system_prompt: str
-    temperature: Optional[float] = 0.7
-    max_tokens: Optional[int] = None
+    temperature: float | None = 0.7
+    max_tokens: int | None = None
     is_active: bool = True
 
 
 class AgentConfigUpdate(SQLModel):
     """Schema for updating agent configuration."""
 
-    name: Optional[str] = None
-    description: Optional[str] = None
-    provider_id: Optional[UUID] = None
-    model_name: Optional[str] = None
-    system_prompt: Optional[str] = None
-    temperature: Optional[float] = None
-    max_tokens: Optional[int] = None
-    is_active: Optional[bool] = None
+    name: str | None = None
+    description: str | None = None
+    provider_id: UUID | None = None
+    model_name: str | None = None
+    system_prompt: str | None = None
+    temperature: float | None = None
+    max_tokens: int | None = None
+    is_active: bool | None = None
 
 
 class AgentConfigPublic(SQLModel):
@@ -118,12 +118,12 @@ class AgentConfigPublic(SQLModel):
 
     id: UUID
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     provider_id: UUID
     model_name: str
     system_prompt: str
-    temperature: Optional[float] = None
-    max_tokens: Optional[int] = None
+    temperature: float | None = None
+    max_tokens: int | None = None
     is_active: bool
     created_at: datetime
     updated_at: datetime
