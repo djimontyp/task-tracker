@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ListTodo, Clock, Loader2, CheckCircle2, Wifi, WifiOff } from 'lucide-react'
+import { ListBulletIcon, ClockIcon, ArrowPathIcon, CheckCircleIcon, WifiIcon } from '@heroicons/react/24/outline'
+import { SignalSlashIcon } from '@heroicons/react/24/outline'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Badge, Skeleton } from '@/shared/ui'
 import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar'
@@ -107,7 +108,7 @@ const DashboardPage = () => {
               value={metrics.total.value}
               subtitle={metrics.total.subtitle}
               trend={metrics.total.trend}
-              icon={ListTodo}
+              icon={ListBulletIcon}
               iconColor="text-primary"
               onClick={() => handleMetricClick('all')}
             />
@@ -116,7 +117,7 @@ const DashboardPage = () => {
               value={metrics.pending.value}
               subtitle={metrics.pending.subtitle}
               trend={metrics.pending.trend}
-              icon={Clock}
+              icon={ClockIcon}
               iconColor="text-primary-400"
               onClick={() => handleMetricClick('pending')}
             />
@@ -125,7 +126,7 @@ const DashboardPage = () => {
               value={metrics.inProgress.value}
               subtitle={metrics.inProgress.subtitle}
               trend={metrics.inProgress.trend}
-              icon={Loader2}
+              icon={ArrowPathIcon}
               iconColor="text-secondary-foreground"
               onClick={() => handleMetricClick('in_progress')}
             />
@@ -134,7 +135,7 @@ const DashboardPage = () => {
               value={metrics.successRate.value}
               subtitle={metrics.successRate.subtitle}
               trend={metrics.successRate.trend}
-              icon={CheckCircle2}
+              icon={CheckCircleIcon}
               iconColor="text-green-600"
               onClick={() => handleMetricClick('completed')}
             />
@@ -151,9 +152,9 @@ const DashboardPage = () => {
               <span>Recent Messages</span>
               <div className="flex items-center gap-2">
                 {isConnected ? (
-                  <Wifi className="h-4 w-4 text-green-500" />
+                  <WifiIcon className="h-4 w-4 text-green-500" />
                 ) : (
-                  <WifiOff className="h-4 w-4 text-amber-500" />
+                  <SignalSlashIcon className="h-4 w-4 text-amber-500" />
                 )}
               </div>
             </CardTitle>

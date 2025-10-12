@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react'
-import { LayoutDashboard, CheckSquare, BarChart3, Settings, Radar, Bot, Brain, Mail, MessageSquare, ListChecks, ClipboardList, Server, FolderKanban } from 'lucide-react'
+import { Squares2X2Icon, CheckCircleIcon, ChartBarIcon, Cog6ToothIcon, SignalIcon, CpuChipIcon, LightBulbIcon, EnvelopeIcon, ChatBubbleLeftRightIcon, ListBulletIcon, ClipboardDocumentListIcon, ServerIcon, FolderIcon } from '@heroicons/react/24/outline'
 import { Link, useLocation } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -25,38 +25,38 @@ const navGroups = [
   {
     label: 'Workspace',
     items: [
-      { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-      { path: '/messages', label: 'Messages', icon: Mail },
-      { path: '/topics', label: 'Topics', icon: MessageSquare },
-      { path: '/tasks', label: 'Tasks', icon: CheckSquare },
+      { path: '/', label: 'Dashboard', icon: Squares2X2Icon },
+      { path: '/messages', label: 'Messages', icon: EnvelopeIcon },
+      { path: '/topics', label: 'Topics', icon: ChatBubbleLeftRightIcon },
+      { path: '/tasks', label: 'Tasks', icon: CheckCircleIcon },
     ],
   },
   {
     label: 'AI Analysis',
     items: [
-      { path: '/analysis', label: 'Analysis Runs', icon: Brain },
-      { path: '/proposals', label: 'Task Proposals', icon: ClipboardList },
+      { path: '/analysis', label: 'Analysis Runs', icon: LightBulbIcon },
+      { path: '/proposals', label: 'Task Proposals', icon: ClipboardDocumentListIcon },
     ],
   },
   {
     label: 'AI Configuration',
     items: [
-      { path: '/agents', label: 'Agents', icon: Bot },
-      { path: '/agent-tasks', label: 'Agent Tasks', icon: ListChecks },
-      { path: '/providers', label: 'Providers', icon: Server },
-      { path: '/projects', label: 'Projects', icon: FolderKanban },
+      { path: '/agents', label: 'Agents', icon: CpuChipIcon },
+      { path: '/agent-tasks', label: 'Agent Tasks', icon: ListBulletIcon },
+      { path: '/providers', label: 'Providers', icon: ServerIcon },
+      { path: '/projects', label: 'Projects', icon: FolderIcon },
     ],
   },
   {
     label: 'Insights',
     items: [
-      { path: '/analytics', label: 'Analytics', icon: BarChart3 },
+      { path: '/analytics', label: 'Analytics', icon: ChartBarIcon },
     ],
   },
 ]
 
 const footerItems = [
-  { path: '/settings', label: 'Settings', icon: Settings },
+  { path: '/settings', label: 'Settings', icon: Cog6ToothIcon },
 ]
 
 export function AppSidebar() {
@@ -138,7 +138,7 @@ export function AppSidebar() {
       <SidebarHeader className="h-[56px] px-2 border-b border-border flex items-center">
         <div className="flex w-full items-center gap-3 px-2 group-data-[collapsible=icon]:justify-center">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-            <Radar className="size-4" />
+            <SignalIcon className="size-4" />
           </div>
           <div className="flex flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
             <span className="text-sm font-semibold">{import.meta.env.VITE_APP_NAME || 'Pulse Radar'}</span>

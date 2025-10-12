@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { Card, Badge, Button } from '@/shared/ui'
-import { Clock, PlayCircle, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
+import { ClockIcon, PlayCircleIcon, CheckCircleIcon, XCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { formatFullDate } from '@/shared/utils/date'
 import type { AnalysisRun } from '../types'
 
@@ -15,13 +15,13 @@ interface RunCardProps {
 }
 
 const statusConfig: Record<string, { label: string; icon: React.ElementType; className: string }> = {
-  pending: { label: 'Pending', icon: Clock, className: 'bg-slate-500 text-white' },
-  running: { label: 'Running', icon: PlayCircle, className: 'bg-blue-500 text-white' },
-  completed: { label: 'Waiting Review', icon: AlertCircle, className: 'bg-amber-500 text-white' },
-  reviewed: { label: 'Reviewed', icon: CheckCircle, className: 'bg-emerald-500 text-white' },
-  closed: { label: 'Closed', icon: CheckCircle, className: 'bg-emerald-700 text-white' },
-  failed: { label: 'Failed', icon: XCircle, className: 'bg-rose-500 text-white' },
-  cancelled: { label: 'Cancelled', icon: XCircle, className: 'bg-slate-400 text-white' },
+  pending: { label: 'Pending', icon: ClockIcon, className: 'bg-slate-500 text-white' },
+  running: { label: 'Running', icon: PlayCircleIcon, className: 'bg-blue-500 text-white' },
+  completed: { label: 'Waiting Review', icon: ExclamationCircleIcon, className: 'bg-amber-500 text-white' },
+  reviewed: { label: 'Reviewed', icon: CheckCircleIcon, className: 'bg-emerald-500 text-white' },
+  closed: { label: 'Closed', icon: CheckCircleIcon, className: 'bg-emerald-700 text-white' },
+  failed: { label: 'Failed', icon: XCircleIcon, className: 'bg-rose-500 text-white' },
+  cancelled: { label: 'Cancelled', icon: XCircleIcon, className: 'bg-slate-400 text-white' },
 }
 
 export const RunCard: React.FC<RunCardProps> = ({ run, onClose, onStart }) => {
@@ -78,16 +78,16 @@ export const RunCard: React.FC<RunCardProps> = ({ run, onClose, onStart }) => {
               <span className="font-semibold">{run.proposals_total}</span>
             </div>
             <div className="flex items-center gap-1 text-emerald-600">
-              <CheckCircle className="h-4 w-4" />
+              <CheckCircleIcon className="h-4 w-4" />
               <span>{run.proposals_approved}</span>
             </div>
             <div className="flex items-center gap-1 text-rose-600">
-              <XCircle className="h-4 w-4" />
+              <XCircleIcon className="h-4 w-4" />
               <span>{run.proposals_rejected}</span>
             </div>
             {run.proposals_pending > 0 && (
               <div className="flex items-center gap-1 text-amber-600">
-                <Clock className="h-4 w-4" />
+                <ClockIcon className="h-4 w-4" />
                 <span>{run.proposals_pending}</span>
               </div>
             )}
@@ -125,7 +125,7 @@ export const RunCard: React.FC<RunCardProps> = ({ run, onClose, onStart }) => {
               onClick={() => onStart(run.id)}
               className="flex-1"
             >
-              <PlayCircle className="h-4 w-4 mr-1" />
+              <PlayCircleIcon className="h-4 w-4 mr-1" />
               Start
             </Button>
           )}

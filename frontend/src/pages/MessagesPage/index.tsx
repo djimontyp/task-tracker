@@ -26,7 +26,7 @@ import { DataTable } from '@/shared/components/DataTable'
 import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
 import { DataTablePagination } from '@/shared/components/DataTablePagination'
 import { DataTableFacetedFilter } from './faceted-filter'
-import { Download, RefreshCw, UserCheck } from 'lucide-react'
+import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon } from '@heroicons/react/24/outline'
 import { IngestionModal } from './IngestionModal'
 
 interface MessageQueryParams {
@@ -212,15 +212,15 @@ const MessagesPage = () => {
         <h2 className="text-2xl font-bold tracking-tight">Messages</h2>
         <div className="flex gap-2">
           <Button onClick={handleRefreshMessages} size="sm" variant="outline">
-            <RefreshCw className="mr-2 h-4 w-4" />
+            <ArrowPathIcon className="mr-2 h-4 w-4" />
             Refresh
           </Button>
           <Button onClick={handleUpdateAuthors} size="sm" variant="outline">
-            <UserCheck className="mr-2 h-4 w-4" />
+            <UserIcon className="mr-2 h-4 w-4" />
             Update Authors
           </Button>
           <Button onClick={handleIngestMessages} size="sm">
-            <Download className="mr-2 h-4 w-4" />
+            <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
             Ingest Messages
           </Button>
         </div>

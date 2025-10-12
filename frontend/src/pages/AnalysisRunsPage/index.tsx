@@ -20,7 +20,7 @@ import {
 } from '@tanstack/react-table'
 import { createColumns, statusConfig, triggerTypeLabels } from './columns'
 import { DataTableFacetedFilter } from './faceted-filter'
-import { Plus } from 'lucide-react'
+import { PlusIcon } from '@heroicons/react/24/outline'
 import { CreateRunModal } from '@/features/analysis/components'
 import { analysisService } from '@/features/analysis/api/analysisService'
 import toast from 'react-hot-toast'
@@ -214,7 +214,7 @@ const AnalysisRunsPage = () => {
         <h2 className="text-2xl font-bold tracking-tight">Analysis Runs</h2>
         <div className="flex gap-2">
           <Button onClick={() => setCreateModalOpen(true)} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
+            <PlusIcon className="h-4 w-4 mr-2" />
             Create Run
           </Button>
         </div>

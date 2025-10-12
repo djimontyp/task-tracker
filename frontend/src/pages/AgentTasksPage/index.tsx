@@ -10,7 +10,7 @@ import {
 import { taskService } from '@/features/agents/api'
 import { TaskConfig, TaskConfigCreate, TaskConfigUpdate } from '@/features/agents/types'
 import { toast } from 'sonner'
-import { Pencil, Trash2, Plus } from 'lucide-react'
+import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { TaskForm } from '@/features/agents/components'
 
 const AgentTasksPage = () => {
@@ -102,7 +102,7 @@ const AgentTasksPage = () => {
           </p>
         </div>
         <Button onClick={handleCreate}>
-          <Plus className="mr-2 h-4 w-4" />
+          <PlusIcon className="mr-2 h-4 w-4" />
           Add Task
         </Button>
       </div>
@@ -137,7 +137,7 @@ const AgentTasksPage = () => {
                         onClick={() => handleEdit(task)}
                         aria-label="Edit task"
                       >
-                        <Pencil className="h-4 w-4" />
+                        <PencilIcon className="h-4 w-4" />
                       </Button>
                       <Button
                         size="icon"
@@ -146,7 +146,7 @@ const AgentTasksPage = () => {
                         aria-label="Delete task"
                         disabled={deleteMutation.isPending}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <TrashIcon className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>

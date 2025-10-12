@@ -17,7 +17,7 @@ import {
   Checkbox,
   Badge,
 } from '@/shared/ui'
-import { X } from 'lucide-react'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 import type { ProjectConfig, CreateProjectConfig, ProjectComponent } from '../types'
 
 interface ProjectFormProps {
@@ -325,7 +325,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     onClick={() => handleRemoveKeyword(keyword)}
                     className="ml-1 hover:text-destructive"
                   >
-                    <X className="h-3 w-3" />
+                    <XMarkIcon className="h-3 w-3" />
                   </button>
                 </Badge>
               ))}
@@ -373,7 +373,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                       onClick={() => handleRemoveComponent(index)}
                       className="text-muted-foreground hover:text-destructive"
                     >
-                      <X className="h-4 w-4" />
+                      <XMarkIcon className="h-4 w-4" />
                     </button>
                   </div>
                   {component.description && (
@@ -422,7 +422,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     onClick={() => handleRemoveAssignee(assigneeId)}
                     className="ml-1 hover:text-destructive"
                   >
-                    <X className="h-3 w-3" />
+                    <XMarkIcon className="h-3 w-3" />
                   </button>
                 </Badge>
               ))}
@@ -460,7 +460,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     onClick={() => handleRemoveGlossaryEntry(term)}
                     className="text-muted-foreground hover:text-destructive"
                   >
-                    <X className="h-4 w-4" />
+                    <XMarkIcon className="h-4 w-4" />
                   </button>
                 </div>
               ))}

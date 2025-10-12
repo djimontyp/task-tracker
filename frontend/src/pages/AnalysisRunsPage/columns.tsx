@@ -1,26 +1,26 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { Clock, PlayCircle, CheckCircle, XCircle, AlertCircle, LucideIcon, X, Calendar, Webhook, UserCircle } from 'lucide-react'
+import { ClockIcon, PlayCircleIcon, CheckCircleIcon, XCircleIcon, ExclamationCircleIcon, XMarkIcon, CalendarIcon, GlobeAltIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 
 import { Button, Badge, Checkbox } from '@/shared/ui'
 import { formatFullDate } from '@/shared/utils/date'
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
 import type { AnalysisRun, AnalysisRunStatus, AnalysisRunTriggerType } from '@/features/analysis/types'
 
-export const statusConfig: Record<AnalysisRunStatus, { label: string; icon: LucideIcon; className: string }> = {
-  pending: { label: 'Pending', icon: Clock, className: 'bg-slate-500 text-white' },
-  running: { label: 'Running', icon: PlayCircle, className: 'bg-blue-500 text-white' },
-  completed: { label: 'Waiting Review', icon: AlertCircle, className: 'bg-amber-500 text-white' },
-  reviewed: { label: 'Reviewed', icon: CheckCircle, className: 'bg-emerald-500 text-white' },
-  closed: { label: 'Closed', icon: CheckCircle, className: 'bg-emerald-700 text-white' },
-  failed: { label: 'Failed', icon: XCircle, className: 'bg-rose-500 text-white' },
-  cancelled: { label: 'Cancelled', icon: XCircle, className: 'bg-slate-400 text-white' },
+export const statusConfig: Record<AnalysisRunStatus, { label: string; icon: React.ComponentType<{ className?: string }>; className: string }> = {
+  pending: { label: 'Pending', icon: ClockIcon, className: 'bg-slate-500 text-white' },
+  running: { label: 'Running', icon: PlayCircleIcon, className: 'bg-blue-500 text-white' },
+  completed: { label: 'Waiting Review', icon: ExclamationCircleIcon, className: 'bg-amber-500 text-white' },
+  reviewed: { label: 'Reviewed', icon: CheckCircleIcon, className: 'bg-emerald-500 text-white' },
+  closed: { label: 'Closed', icon: CheckCircleIcon, className: 'bg-emerald-700 text-white' },
+  failed: { label: 'Failed', icon: XCircleIcon, className: 'bg-rose-500 text-white' },
+  cancelled: { label: 'Cancelled', icon: XCircleIcon, className: 'bg-slate-400 text-white' },
 }
 
-export const triggerTypeLabels: Record<AnalysisRunTriggerType, { label: string; icon: LucideIcon }> = {
-  manual: { label: 'Manual', icon: UserCircle },
-  scheduled: { label: 'Scheduled', icon: Calendar },
-  custom: { label: 'Custom', icon: PlayCircle },
-  webhook: { label: 'Webhook', icon: Webhook },
+export const triggerTypeLabels: Record<AnalysisRunTriggerType, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+  manual: { label: 'Manual', icon: UserCircleIcon },
+  scheduled: { label: 'Scheduled', icon: CalendarIcon },
+  custom: { label: 'Custom', icon: PlayCircleIcon },
+  webhook: { label: 'Webhook', icon: GlobeAltIcon },
 }
 
 const formatCost = (cost: number) => {
@@ -96,7 +96,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<AnalysisR
     cell: ({ row }) => {
       const triggerType = row.getValue<AnalysisRunTriggerType>('trigger_type')
       const triggeredByUserId = row.original.triggered_by_user_id
-      const meta = triggerTypeLabels[triggerType] ?? { label: triggerType, icon: UserCircle }
+      const meta = triggerTypeLabels[triggerType] ?? { label: triggerType, icon: UserCircleIcon }
       const Icon = meta.icon
 
       return (
@@ -231,7 +231,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<AnalysisR
             onClick={callbacks.onReset}
             className="h-8 w-8 p-0 hover:bg-destructive/10"
           >
-            <X className="h-4 w-4 text-destructive/70 hover:text-destructive" />
+            <XMarkIcon className="h-4 w-4 text-destructive/70 hover:text-destructive" />
             <span className="sr-only">Reset filters</span>
           </Button>
         )
@@ -247,13 +247,13 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<AnalysisR
         <div className="flex gap-2">
           {status === 'pending' && callbacks?.onStartRun && (
             <Button size="sm" onClick={() => callbacks.onStartRun!(runId)}>
-              <PlayCircle className="h-4 w-4 mr-1" />
+              <PlayCircleIcon className="h-4 w-4 mr-1" />
               Start
             </Button>
           )}
           {(status === 'completed' || status === 'reviewed') && callbacks?.onCloseRun && (
             <Button size="sm" variant="outline" onClick={() => callbacks.onCloseRun!(runId)}>
-              <CheckCircle className="h-4 w-4 mr-1" />
+              <CheckCircleIcon className="h-4 w-4 mr-1" />
               Close
             </Button>
           )}

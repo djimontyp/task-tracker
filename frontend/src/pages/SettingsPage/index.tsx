@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AxiosError } from 'axios'
 import toast from 'react-hot-toast'
-import { Copy, Check, Info, MessageSquare } from 'lucide-react'
+import { ClipboardIcon, CheckIcon, InformationCircleIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline'
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Skeleton } from '@/shared/ui'
 import { useTheme } from '@/shared/components/ThemeProvider'
 import { apiClient } from '@/shared/lib/api/client'
@@ -399,7 +399,7 @@ const SettingsPage = () => {
                   aria-describedby="webhook-url-help"
                 />
                 <div id="webhook-url-help" className="mt-2 flex items-start gap-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-md">
-                  <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                  <InformationCircleIcon className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
                   <p className="text-xs text-muted-foreground">
                     Provide the publicly accessible base URL, for example <code className="text-xs bg-muted px-1 py-0.5 rounded">https://ecf34ba1bf9a.ngrok-free.app</code>.
                     The system will append <code className="text-xs bg-muted px-1 py-0.5 rounded">{WEBHOOK_PATH}</code> automatically.
@@ -425,9 +425,9 @@ const SettingsPage = () => {
                       title={copiedWebhookUrl ? "Copied!" : "Copy to clipboard"}
                     >
                       {copiedWebhookUrl ? (
-                        <Check className="h-4 w-4" />
+                        <CheckIcon className="h-4 w-4" />
                       ) : (
-                        <Copy className="h-4 w-4" />
+                        <ClipboardIcon className="h-4 w-4" />
                       )}
                     </Button>
                   </div>
@@ -447,7 +447,7 @@ const SettingsPage = () => {
               </div>
 
               <div className="flex items-start gap-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded-md">
-                <Info className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                <InformationCircleIcon className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-muted-foreground">
                   <strong>Workflow:</strong> Save your changes first, then activate the webhook with Telegram
                 </p>
@@ -546,7 +546,7 @@ const SettingsPage = () => {
               </Button>
             </div>
             <div className="flex items-start gap-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-md">
-              <MessageSquare className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+              <ChatBubbleLeftRightIcon className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
                 Copy group ID from Telegram Web URL (e.g., <code className="text-xs bg-muted px-1 py-0.5 rounded">https://web.telegram.org/k/#-2988379206</code>)
               </p>
@@ -560,7 +560,7 @@ const SettingsPage = () => {
                   <Card key={group.id} className="p-3">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-center h-10 w-10 rounded-full bg-blue-500/10 shrink-0">
-                        <MessageSquare className="h-5 w-5 text-blue-500" />
+                        <ChatBubbleLeftRightIcon className="h-5 w-5 text-blue-500" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -591,7 +591,7 @@ const SettingsPage = () => {
               </div>
               {groups.some(g => !g.name) && (
                 <div className="flex items-start gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-md">
-                  <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                  <InformationCircleIcon className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
                   <div className="text-xs text-muted-foreground">
                     <p className="font-medium mb-2">To fetch group names:</p>
                     <ol className="list-decimal list-inside space-y-1">

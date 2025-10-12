@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Check, PlusCircle } from 'lucide-react'
+import { CheckIcon, PlusCircleIcon } from '@heroicons/react/24/outline'
 
 import { Button, Popover, PopoverTrigger, PopoverContent, Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandSeparator, Badge, Separator } from '@/shared/ui'
 import { cn } from '@/shared/lib'
@@ -31,7 +31,7 @@ export function DataTableFacetedFilter<TData>({ columnKey, table, title, options
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="h-8 border-dashed border-border">
-          <PlusCircle className="mr-2 h-4 w-4" />
+          <PlusCircleIcon className="mr-2 h-4 w-4" />
           {title}
           {selectedValues.size > 0 && (
             <>
@@ -85,7 +85,7 @@ export function DataTableFacetedFilter<TData>({ columnKey, table, title, options
                         isSelected ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
                       )}
                     >
-                      <Check />
+                      <CheckIcon />
                     </div>
                     {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
                     <span>{option.label}</span>

@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal, Mail, User, X, LucideIcon } from 'lucide-react'
+import { EllipsisHorizontalIcon, EnvelopeIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
@@ -11,10 +11,10 @@ export interface ColumnsCallbacks {
   hasActiveFilters?: boolean
 }
 
-export const sourceLabels: Record<string, { label: string; icon: LucideIcon }> = {
-  telegram: { label: 'Telegram', icon: Mail },
-  api: { label: 'API', icon: Mail },
-  slack: { label: 'Slack', icon: Mail },
+export const sourceLabels: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+  telegram: { label: 'Telegram', icon: EnvelopeIcon },
+  api: { label: 'API', icon: EnvelopeIcon },
+  slack: { label: 'Slack', icon: EnvelopeIcon },
 }
 
 export const statusLabels: Record<string, { label: string }> = {
@@ -63,7 +63,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
             <img src={avatarUrl} alt={authorName} className="h-6 w-6 rounded-full" />
           ) : (
             <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
-              <User className="h-4 w-4 text-muted-foreground" />
+              <UserIcon className="h-4 w-4 text-muted-foreground" />
             </div>
           )}
           <span className="font-medium">{authorName}</span>
@@ -90,7 +90,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     ),
     cell: ({ row }) => {
       const value = row.getValue<string>('source_name')
-      const meta = sourceLabels[value] ?? { label: value, icon: Mail }
+      const meta = sourceLabels[value] ?? { label: value, icon: EnvelopeIcon }
       const Icon = meta.icon
       return (
         <div className="flex w-[100px] items-center">
@@ -146,7 +146,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
             onClick={callbacks.onReset}
             className="h-8 w-8 p-0 hover:bg-destructive/10"
           >
-            <X className="h-4 w-4 text-destructive/70 hover:text-destructive" />
+            <XMarkIcon className="h-4 w-4 text-destructive/70 hover:text-destructive" />
             <span className="sr-only">Reset filters</span>
           </Button>
         )
@@ -161,7 +161,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
+              <EllipsisHorizontalIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

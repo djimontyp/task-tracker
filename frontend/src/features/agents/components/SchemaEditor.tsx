@@ -13,7 +13,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/shared/ui'
-import { Plus, Trash2 } from 'lucide-react'
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { JsonSchema, SchemaPropertyConfig } from '@/features/agents/types'
 
 interface SchemaField {
@@ -118,7 +118,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Schema Fields</CardTitle>
             <Button size="sm" onClick={handleAddField}>
-              <Plus className="h-4 w-4 mr-1" />
+              <PlusIcon className="h-4 w-4 mr-1" />
               Add Field
             </Button>
           </div>
@@ -199,7 +199,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
                       aria-label="Remove field"
                       className="mt-5"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <TrashIcon className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>

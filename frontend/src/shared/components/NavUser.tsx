@@ -1,4 +1,4 @@
-import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react'
+import { CheckBadgeIcon, ChevronUpDownIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar'
 import {
   DropdownMenu,
@@ -46,7 +46,7 @@ export function NavUser({
                 <span className="truncate font-semibold">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <ChevronUpDownIcon className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -72,13 +72,13 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <BadgeCheck />
+                <CheckBadgeIcon />
                 Account
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <LogOut />
+              <ArrowRightOnRectangleIcon />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

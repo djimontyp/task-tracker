@@ -1,6 +1,6 @@
 import { Card, CardContent, Button, Badge } from '@/shared/ui'
 import { AgentConfig } from '@/features/agents/types'
-import { Pencil, Trash2, Settings, FlaskConical } from 'lucide-react'
+import { PencilIcon, TrashIcon, Cog6ToothIcon, BeakerIcon } from '@heroicons/react/24/outline'
 
 interface AgentCardProps {
   agent: AgentConfig
@@ -37,7 +37,7 @@ const AgentCard = ({
                 onClick={() => onEdit(agent)}
                 aria-label="Edit agent"
               >
-                <Pencil className="h-4 w-4" />
+                <PencilIcon className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"
@@ -45,7 +45,7 @@ const AgentCard = ({
                 onClick={() => onManageTasks(agent)}
                 aria-label="Manage tasks"
               >
-                <Settings className="h-4 w-4" />
+                <Cog6ToothIcon className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"
@@ -53,7 +53,7 @@ const AgentCard = ({
                 onClick={() => onTest(agent)}
                 aria-label="Test agent"
               >
-                <FlaskConical className="h-4 w-4" />
+                <BeakerIcon className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"
@@ -62,7 +62,7 @@ const AgentCard = ({
                 aria-label="Delete agent"
                 disabled={isDeleting}
               >
-                <Trash2 className="h-4 w-4" />
+                <TrashIcon className="h-4 w-4" />
               </Button>
             </div>
           </div>
