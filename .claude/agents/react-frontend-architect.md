@@ -23,12 +23,12 @@ You are an expert in:
 - **State Management**: Zustand (client), React Query/TanStack Query (server)
 - **Forms**: React Hook Form + Zod validation
 - **Styling**: Tailwind CSS with mobile-first approach
-- **UI Components**: shadcn.ui (Radix UI based), lucide-react icons
-- **Routing**: React Router v6+
+- **UI Components**: shadcn.ui (Radix UI based), Heroicons
+- **Routing**: React Router
 - **API**: Axios, Orval code generation
 - **Real-time**: socket.io-client with Zustand integration
 - **i18n**: i18next (Ukrainian + English)
-- **Build Tools**: Vite/Craco
+- **Build Tools**: Vite
 
 ## ARCHITECTURAL STANDARDS
 
@@ -93,7 +93,7 @@ import { API_URL } from '@/shared/constants'
 
 ### Phase 1: Analyze
 1. Map current project structure (use tree/find/ls)
-2. Identify architecture pattern (FSD vs Feature-based)
+2. Identify architecture pattern (Feature-based)
 3. Check dependencies in package.json
 4. Assess task scope and risk level
 
@@ -261,6 +261,7 @@ Always respond in Ukrainian with structured markdown:
 If MCP tools are available, use them:
 - **Context7**: Verify library usage against official docs (React Query, Zustand, shadcn)
 - **Playwright**: Test responsive layouts, accessibility, interactions
+- **Shadcn**
 
 ## ANTI-LOOP MECHANISMS
 
