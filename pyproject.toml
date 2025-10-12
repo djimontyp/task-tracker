@@ -55,3 +55,68 @@ markers = [
     "asyncio: mark test as asyncio",
 ]
 pythonpath = ["backend"]
+
+[tool.ruff]
+# Line length
+line-length = 120
+indent-width = 4
+
+# Target Python version
+target-version = "py312"
+
+# Exclude directories
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "build",
+    "dist",
+    "node_modules",
+]
+
+[tool.ruff.lint]
+# Minimal linting rules (focus on auto-fixable improvements)
+select = [
+    "I",     # isort - import sorting
+    "F401",  # unused imports
+    "UP",    # pyupgrade - modernize Python syntax
+]
+
+# Allow automatic fixes
+fixable = ["ALL"]
+unfixable = []
+
+# Per-file ignores
+[tool.ruff.lint.per-file-ignores]
+"backend/alembic/versions/*.py" = ["ALL"]  # Auto-generated migration files
+"backend/alembic/env.py" = ["E402"]
+"backend/core/config.py" = ["F403", "F405"]  # Allow star imports in settings
+"backend/tests/**/*.py" = ["S101", "INP001"]  # Allow asserts in tests
+"scripts/*.py" = ["T20", "INP001"]  # Allow print statements in scripts
+"__init__.py" = ["F401", "E402"]  # Allow re-exports
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.format]
+# Quote style
+quote-style = "double"
+
+# Indentation
+indent-style = "space"
+
+# Line endings
+line-ending = "auto"
+
+# Magic trailing comma behavior (like Black)
+skip-magic-trailing-comma = false
+
+# Format code examples in docstrings
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+# Enable preview features
+preview = true

@@ -23,6 +23,7 @@ theme:
 nav:
   - Home: index.md
   - Context Spaces (Topics): topics.md
+  - Event Flow & Sequencing: event-flow.md
 plugins:
   - search
   - i18n:
