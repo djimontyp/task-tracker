@@ -33,6 +33,7 @@ export { Label } from './label'
 export { Skeleton } from './skeleton'
 export { Toaster } from './sonner'
 export { Checkbox } from './checkbox'
+export { Switch } from './switch'
 export {
   Tooltip,
   TooltipTrigger,

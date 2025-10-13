@@ -70,6 +70,7 @@ export const API_ENDPOINTS = {
   agents: buildApiPath('agents'),
   providers: buildApiPath('providers'),
   projects: buildApiPath('projects'),
+  topics: buildApiPath('topics'),
 
   // WebSocket
   ws: '/ws',

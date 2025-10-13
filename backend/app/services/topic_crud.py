@@ -1,0 +1,181 @@
+"""CRUD operations for Topic management."""
+
+from sqlmodel import func, select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from app.models import (
+    Topic,
+    TopicCreate,
+    TopicPublic,
+    TopicUpdate,
+    auto_select_color,
+    auto_select_icon,
+    convert_to_hex_if_needed,
+)
+
+
+class TopicCRUD:
+    """CRUD service for Topic operations."""
+
+    def __init__(self, session: AsyncSession):
+        """Initialize CRUD service.
+
+        Args:
+            session: Async database session
+        """
+        self.session = session
+
+    async def get(self, topic_id: int) -> TopicPublic | None:
+        """Get topic by ID.
+
+        Args:
+            topic_id: Topic ID to retrieve
+
+        Returns:
+            Topic or None if not found
+        """
+        query = select(Topic).where(Topic.id == topic_id)
+        result = await self.session.execute(query)
+        topic = result.scalar_one_or_none()
+
+        if not topic:
+            return None
+
+        color = convert_to_hex_if_needed(topic.color) if topic.color else None
+
+        return TopicPublic(
+            id=topic.id,
+            name=topic.name,
+            description=topic.description,
+            icon=topic.icon,
+            color=color,
+            created_at=topic.created_at.isoformat(),
+            updated_at=topic.updated_at.isoformat(),
+        )
+
+    async def list(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> tuple[list[TopicPublic], int]:
+        """List topics with pagination.
+
+        Args:
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+
+        Returns:
+            Tuple of (list of topics, total count)
+        """
+        # Get total count
+        count_query = select(func.count()).select_from(Topic)
+        count_result = await self.session.execute(count_query)
+        total = count_result.scalar_one()
+
+        # Get paginated topics
+        query = select(Topic).offset(skip).limit(limit).order_by(Topic.created_at.desc())
+        result = await self.session.execute(query)
+        topics = result.scalars().all()
+
+        # Convert to public schema
+        public_topics = []
+        for topic in topics:
+            # Ensure color is in hex format for backward compatibility
+            color = convert_to_hex_if_needed(topic.color) if topic.color else None
+            public_topics.append(
+                TopicPublic(
+                    id=topic.id,
+                    name=topic.name,
+                    description=topic.description,
+                    icon=topic.icon,
+                    color=color,
+                    created_at=topic.created_at.isoformat(),
+                    updated_at=topic.updated_at.isoformat(),
+                )
+            )
+
+        return public_topics, total
+
+    async def create(self, topic_data: TopicCreate) -> TopicPublic:
+        """Create a new topic.
+
+        Args:
+            topic_data: Topic creation data
+
+        Returns:
+            Created topic
+        """
+        if not topic_data.icon:
+            topic_data.icon = auto_select_icon(topic_data.name, topic_data.description)
+
+        if not topic_data.color and topic_data.icon:
+            topic_data.color = auto_select_color(topic_data.icon)
+
+        # Ensure color is in hex format
+        color = convert_to_hex_if_needed(topic_data.color) if topic_data.color else None
+
+        topic = Topic(
+            name=topic_data.name,
+            description=topic_data.description,
+            icon=topic_data.icon,
+            color=color,
+        )
+
+        self.session.add(topic)
+        await self.session.commit()
+        await self.session.refresh(topic)
+
+        # Ensure color is in hex format for response
+        color = convert_to_hex_if_needed(topic.color) if topic.color else None
+
+        return TopicPublic(
+            id=topic.id,
+            name=topic.name,
+            description=topic.description,
+            icon=topic.icon,
+            color=color,
+            created_at=topic.created_at.isoformat(),
+            updated_at=topic.updated_at.isoformat(),
+        )
+
+    async def update(self, topic_id: int, topic_data: TopicUpdate) -> TopicPublic | None:
+        """Update an existing topic.
+
+        Args:
+            topic_id: Topic ID to update
+            topic_data: Topic update data
+
+        Returns:
+            Updated topic or None if not found
+        """
+        query = select(Topic).where(Topic.id == topic_id)
+        result = await self.session.execute(query)
+        topic = result.scalar_one_or_none()
+
+        if not topic:
+            return None
+
+        if topic_data.name is not None:
+            topic.name = topic_data.name
+        if topic_data.description is not None:
+            topic.description = topic_data.description
+        if topic_data.icon is not None:
+            topic.icon = topic_data.icon
+        if topic_data.color is not None:
+            topic.color = convert_to_hex_if_needed(topic_data.color) if topic_data.color else None
+
+        await self.session.commit()
+        await self.session.refresh(topic)
+
+        # Ensure color is in hex format for response
+        color = convert_to_hex_if_needed(topic.color) if topic.color else None
+
+        return TopicPublic(
+            id=topic.id,
+            name=topic.name,
+            description=topic.description,
+            icon=topic.icon,
+            color=color,
+            created_at=topic.created_at.isoformat(),
+            updated_at=topic.updated_at.isoformat(),
+        )

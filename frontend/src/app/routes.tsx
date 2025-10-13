@@ -7,6 +7,7 @@ import Spinner from '@/shared/ui/Spinner'
 const DashboardPage = lazy(() => import('@pages/DashboardPage'))
 const TasksPage = lazy(() => import('@pages/TasksPage'))
 const TopicsPage = lazy(() => import('@pages/TopicsPage'))
+const TopicDetailPage = lazy(() => import('@pages/TopicDetailPage'))
 const MessagesPage = lazy(() => import('@pages/MessagesPage'))
 const AgentsPage = lazy(() => import('@pages/AgentsPage'))
 const AgentTasksPage = lazy(() => import('@pages/AgentTasksPage'))
@@ -30,6 +31,7 @@ const AppRoutes = () => {
         <Route element={<MainLayout><DashboardPage /></MainLayout>} path="/" />
         <Route element={<MainLayout><MessagesPage /></MainLayout>} path="/messages" />
         <Route element={<MainLayout><TopicsPage /></MainLayout>} path="/topics" />
+        <Route element={<MainLayout><TopicDetailPage /></MainLayout>} path="/topics/:topicId" />
         <Route element={<MainLayout><TasksPage /></MainLayout>} path="/tasks" />
         <Route element={<MainLayout><AnalysisRunsPage /></MainLayout>} path="/analysis" />
         <Route element={<MainLayout><ProposalsPage /></MainLayout>} path="/proposals" />
