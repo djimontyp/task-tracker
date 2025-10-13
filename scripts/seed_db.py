@@ -10,14 +10,19 @@ Usage:
 import argparse
 import asyncio
 import random
-from datetime import datetime, timedelta
+import sys
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from backend.app.models.task import Task
-from backend.core.config import settings
+from app.models.legacy import Task, Source
+from app.models.enums import SourceType
+from core.config import settings
 
 
 # Task templates
@@ -33,7 +38,7 @@ TASK_TEMPLATES = [
         "category": "bug",
         "title": "WebSocket connection drops randomly",
         "description": "Real-time updates stop working after ~5 minutes. Connection closes with code 1006. Investigate server-side connection handling.",
-        "priority": "urgent",
+        "priority": "critical",
     },
     {
         "category": "bug",
@@ -86,66 +91,65 @@ TASK_TEMPLATES = [
     },
     # Documentation
     {
-        "category": "documentation",
+        "category": "chore",
         "title": "API documentation for webhook endpoints",
         "description": "Document all webhook endpoints with request/response examples. Include authentication and error handling.",
         "priority": "medium",
     },
     {
-        "category": "documentation",
+        "category": "chore",
         "title": "Setup guide for local development",
         "description": "Create comprehensive guide for setting up development environment. Include Docker, dependencies, and troubleshooting.",
         "priority": "low",
     },
     {
-        "category": "documentation",
+        "category": "chore",
         "title": "Architecture decision records",
         "description": "Document key architectural decisions and rationale. Include WebSocket implementation and database schema choices.",
         "priority": "low",
     },
     {
-        "category": "documentation",
+        "category": "chore",
         "title": "User guide for task management",
         "description": "Write end-user documentation for creating, updating, and tracking tasks. Include screenshots and examples.",
         "priority": "medium",
     },
     # Tasks
     {
-        "category": "task",
+        "category": "chore",
         "title": "Update dependencies to latest versions",
         "description": "Review and update all npm and Python dependencies. Test for breaking changes and update lockfiles.",
         "priority": "medium",
     },
     {
-        "category": "task",
+        "category": "chore",
         "title": "Database migration for new schema",
         "description": "Create Alembic migration for agent_task_assignments table. Test migration rollback procedure.",
         "priority": "high",
     },
     {
-        "category": "task",
+        "category": "chore",
         "title": "Code review for WebSocket implementation",
         "description": "Review recent WebSocket changes for performance and security. Check connection management and error handling.",
         "priority": "medium",
     },
     {
-        "category": "task",
+        "category": "chore",
         "title": "Performance testing for API endpoints",
         "description": "Run load tests on critical endpoints. Identify bottlenecks and optimize slow queries.",
         "priority": "high",
     },
     {
-        "category": "task",
+        "category": "chore",
         "title": "Security audit of authentication flow",
         "description": "Review authentication and authorization logic. Check for common vulnerabilities and implement fixes.",
         "priority": "critical",
     },
 ]
 
-CATEGORIES = ["bug", "feature", "documentation", "task"]
-PRIORITIES = ["low", "medium", "high", "urgent", "critical"]
-SOURCES = ["telegram", "slack", "email", "internal"]
-STATUSES = ["open", "in_progress", "completed", "closed", "pending"]
+CATEGORIES = ["bug", "feature", "improvement", "question", "chore"]
+PRIORITIES = ["low", "medium", "high", "critical"]
+STATUSES = ["open", "in_progress", "completed", "closed"]
 
 
 async def clear_data(session: AsyncSession):
@@ -159,10 +163,25 @@ async def clear_data(session: AsyncSession):
 async def seed_data(session: AsyncSession, count: int = 50):
     """Seed test data into database."""
     print(f"🌱 Seeding {count} tasks...")
-    
+
+    # Get or create sources
+    result = await session.execute(select(Source))
+    sources = list(result.scalars().all())
+
+    if not sources:
+        print("  Creating default sources...")
+        default_sources = [
+            Source(name="Legacy Tasks", type=SourceType.api, is_active=True),
+            Source(name="Manual Entry", type=SourceType.api, is_active=True),
+        ]
+        session.add_all(default_sources)
+        await session.flush()
+        sources = default_sources
+        print(f"    ✓ Created {len(sources)} sources")
+
     tasks = []
-    now = datetime.utcnow()
-    
+    now = datetime.now(UTC)
+
     for i in range(count):
         # Use template or generate generic task
         if i < len(TASK_TEMPLATES):
@@ -181,16 +200,14 @@ async def seed_data(session: AsyncSession, count: int = 50):
         
         # Random status distribution
         pick = random.random()
-        if pick < 0.40:
+        if pick < 0.45:
             status = "open"
-        elif pick < 0.55:
+        elif pick < 0.65:
             status = "in_progress"
-        elif pick < 0.75:
-            status = "completed"
         elif pick < 0.85:
-            status = "closed"
+            status = "completed"
         else:
-            status = "pending"
+            status = "closed"
         
         # Random created_at in last 30 days
         days_ago = random.randint(0, 30)
@@ -202,7 +219,7 @@ async def seed_data(session: AsyncSession, count: int = 50):
             category=category,
             priority=priority,
             status=status,
-            source=random.choice(SOURCES),
+            source_id=random.choice(sources).id,
             created_at=created_at,
         )
         tasks.append(task)
@@ -227,7 +244,7 @@ async def main():
         return
     
     # Create async engine
-    engine = create_async_engine(settings.DATABASE_URL, echo=False)
+    engine = create_async_engine(settings.database_url, echo=False)
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     
     async with async_session() as session:

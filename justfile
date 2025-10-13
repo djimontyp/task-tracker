@@ -12,6 +12,11 @@ alias dbr := db-reset
 alias dbtc := db-topics-clear
 alias dbts := db-topics-seed
 alias dbtr := db-topics-reset
+alias dbac := db-analysis-clear
+alias dbas := db-analysis-seed
+alias dbar := db-analysis-reset
+alias dbfs := db-full-seed
+alias dbfr := db-full-reset
 alias f := fmt
 alias fc := fmt-check
 
@@ -162,6 +167,41 @@ clear-topics:
 reset-topics COUNT="5":
     @echo "Resetting topics data..."
     uv run python scripts/seed_topics_atoms.py --clear --seed --topics {{COUNT}}
+
+# Clear Analysis System data (providers, agents, tasks, runs, proposals)
+db-analysis-clear:
+    @echo "Clearing Analysis System data..."
+    cd backend && uv run python scripts/seed_analysis_system.py --clear
+
+# Seed Analysis System data
+db-analysis-seed RUNS="10" PROPOSALS="30":
+    @echo "Seeding Analysis System: {{RUNS}} runs, {{PROPOSALS}} proposals..."
+    cd backend && uv run python scripts/seed_analysis_system.py --seed --runs {{RUNS}} --proposals {{PROPOSALS}}
+
+# Clear and seed Analysis System (fresh start)
+db-analysis-reset RUNS="10" PROPOSALS="30":
+    @echo "Resetting Analysis System with {{RUNS}} runs, {{PROPOSALS}} proposals..."
+    cd backend && uv run python scripts/seed_analysis_system.py --clear --seed --runs {{RUNS}} --proposals {{PROPOSALS}}
+
+# Seed EVERYTHING: tasks + topics + analysis system
+db-full-seed:
+    @echo "🌱 Full database seeding..."
+    @just db-seed 50
+    @just db-topics-seed 5 10 20
+    @just db-analysis-seed 10 30
+    @echo "✅ Complete database populated!"
+
+# Clear and seed EVERYTHING (nuclear reset)
+db-full-reset:
+    @echo "🗑️  Nuclear database reset..."
+    @just db-clear
+    @just db-topics-clear
+    @just db-analysis-clear
+    @echo "🌱 Reseeding everything..."
+    @just db-seed 50
+    @just db-topics-seed 5 10 20
+    @just db-analysis-seed 10 30
+    @echo "✅ Complete database reset finished!"
 
 # Run API tests for atoms
 test-atoms:

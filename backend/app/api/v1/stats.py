@@ -65,7 +65,7 @@ async def get_activity_data(
     for message, source in messages_with_sources:
         activity_data.append({
             "timestamp": message.sent_at.isoformat(),
-            "source": source.name,
+            "source": source.type.value,
             "count": 1,
         })
 
@@ -75,7 +75,7 @@ async def get_activity_data(
         data=[
             ActivityDataPoint(
                 timestamp=message.sent_at.isoformat(),
-                source=source.name,
+                source=source.type.value,
                 count=1,
             )
             for message, source in messages_with_sources
