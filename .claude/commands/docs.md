@@ -95,9 +95,9 @@ markdown_extensions:
   - pymdownx.superfences
 ```
 
-**Basic syntax** - Use `!!!` for static admonitions:
+**Basic syntax** - Use three exclamation marks for static admonitions:
 
-```markdown
+```
 !!! note
     Content must be indented (4 spaces or 1 tab).
     Empty line before content is optional but recommended.
@@ -123,9 +123,9 @@ markdown_extensions:
 - `example` - Usage examples
 - `quote` - Quotations
 
-**Collapsible admonitions** - Use `???` instead of `!!!`:
+**Collapsible admonitions** - Use three question marks instead of three exclamation marks:
 
-```markdown
+```
 ??? note "Click to expand"
     Starts collapsed. User must click to see content.
 
