@@ -11,7 +11,7 @@ from app.models.topic import (
 class TestHexColorValidation:
     """Test hex color validation functionality."""
 
-    def test_validate_hex_color_valid_formats(self):
+    def test_validate_hex_color_valid_formats(self) -> None:
         """Test valid hex color formats."""
         # Test valid 6-digit hex codes
         assert validate_hex_color("#FF5733") == "#FF5733"
@@ -23,7 +23,7 @@ class TestHexColorValidation:
         assert validate_hex_color("FF5733") == "#FF5733"
         assert validate_hex_color("ff5733") == "#FF5733"
 
-    def test_validate_hex_color_invalid_formats(self):
+    def test_validate_hex_color_invalid_formats(self) -> None:
         """Test invalid hex color formats."""
         # Empty string
         with pytest.raises(ValueError, match="Color cannot be empty"):
@@ -45,7 +45,7 @@ class TestHexColorValidation:
         with pytest.raises(ValueError, match="Invalid hex color format"):
             validate_hex_color("FF57GG")
 
-    def test_convert_to_hex_if_needed_hex_input(self):
+    def test_convert_to_hex_if_needed_hex_input(self) -> None:
         """Test conversion when input is already hex."""
         # Valid hex codes
         assert convert_to_hex_if_needed("#FF5733") == "#FF5733"
@@ -56,7 +56,7 @@ class TestHexColorValidation:
         assert convert_to_hex_if_needed("#ABCDEF") == "#ABCDEF"
         assert convert_to_hex_if_needed("abcdef") == "#ABCDEF"
 
-    def test_convert_to_hex_if_needed_tailwind_names(self):
+    def test_convert_to_hex_if_needed_tailwind_names(self) -> None:
         """Test conversion of Tailwind color names to hex."""
         # Test known Tailwind colors
         assert convert_to_hex_if_needed("blue") == "#3B82F6"
@@ -84,12 +84,12 @@ class TestHexColorValidation:
         assert convert_to_hex_if_needed("unknown") == "#64748B"
         assert convert_to_hex_if_needed("custom") == "#64748B"
 
-    def test_convert_to_hex_if_needed_empty_input(self):
+    def test_convert_to_hex_if_needed_empty_input(self) -> None:
         """Test conversion with empty or None input."""
         assert convert_to_hex_if_needed("") == "#64748B"
         assert convert_to_hex_if_needed(None) == "#64748B"  # type: ignore[arg-type]
 
-    def test_auto_select_color_hex_output(self):
+    def test_auto_select_color_hex_output(self) -> None:
         """Test that auto_select_color returns hex codes."""
         # Test known icons
         assert auto_select_color("BriefcaseIcon") == "#3B82F6"
@@ -101,7 +101,7 @@ class TestHexColorValidation:
         # Test unknown icon (should default to slate)
         assert auto_select_color("UnknownIcon") == "#64748B"
 
-    def test_hex_color_format_consistency(self):
+    def test_hex_color_format_consistency(self) -> None:
         """Test that all hex colors are consistent uppercase format."""
         # Test that all predefined colors are uppercase
         for color in [

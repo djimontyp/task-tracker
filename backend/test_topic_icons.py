@@ -3,7 +3,7 @@
 from app.models import auto_select_icon
 
 
-def test_auto_select_icon():
+def test_auto_select_icon() -> bool:
     """Test auto_select_icon function with various inputs."""
     test_cases = [
         ("Office Work", "All work-related items", "BriefcaseIcon"),
@@ -53,4 +53,5 @@ def test_auto_select_icon():
 
 
 if __name__ == "__main__":
-    test_auto_select_icon()
+    result: bool = test_auto_select_icon()
+    print(f"Test result: {'PASSED' if result else 'FAILED'}")

@@ -18,14 +18,14 @@ class WebSocketManager:
     to subscribe to specific topics for targeted updates.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize WebSocket manager."""
         # Map of topic -> set of connected websockets
         self._connections: dict[str, set[WebSocket]] = {}
         # Lock for thread-safe connection management
         self._lock = asyncio.Lock()
 
-    async def connect(self, websocket: WebSocket, topics: list[str] = None, accept: bool = True) -> None:
+    async def connect(self, websocket: WebSocket, topics: list[str] | None = None, accept: bool = True) -> None:
         """Accept WebSocket connection and subscribe to topics.
 
         Args:
@@ -124,7 +124,7 @@ class WebSocketManager:
                     for topic_connections in self._connections.values():
                         topic_connections.discard(websocket)
 
-    def get_connection_count(self, topic: str = None) -> int:
+    def get_connection_count(self, topic: str | None = None) -> int:
         """Get number of active connections.
 
         Args:

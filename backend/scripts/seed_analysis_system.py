@@ -39,10 +39,8 @@ from app.models import (
     ProviderType,
     Source,
     SourceType,
-    TaskCategory,
     TaskConfig,
     TaskEntity,
-    TaskPriority,
     TaskProposal,
     TaskStatus,
     TelegramProfile,
@@ -326,9 +324,7 @@ async def clear_data(session: AsyncSession):
     await session.execute(delete(LLMProvider))
     await session.execute(delete(Source))
 
-    result = await session.execute(
-        select(User).where(User.email.like("%@tasktracker.test"))
-    )
+    result = await session.execute(select(User).where(User.email.like("%@tasktracker.test")))
     test_users = result.scalars().all()
     for user in test_users:
         await session.delete(user)
@@ -535,7 +531,7 @@ async def seed_data(
         content = random.choice(MESSAGE_TEMPLATES)
 
         msg_dict = {
-            "external_message_id": f"{source.name[:3].upper()}-{i+1}-{random.randint(1000, 9999)}",
+            "external_message_id": f"{source.name[:3].upper()}-{i + 1}-{random.randint(1000, 9999)}",
             "content": content,
             "sent_at": sent_at,
             "source_id": source.id,
@@ -715,9 +711,9 @@ async def seed_data(
 
     # Only use reviewed/closed runs for proposals (they can have approved status)
     reviewable_runs = [
-        r for r in runs
-        if r.status in [AnalysisRunStatus.reviewed.value, AnalysisRunStatus.closed.value]
-        and r.proposals_total > 0
+        r
+        for r in runs
+        if r.status in [AnalysisRunStatus.reviewed.value, AnalysisRunStatus.closed.value] and r.proposals_total > 0
     ]
 
     # Fallback: if no reviewable runs, use any run with proposals_total > 0
@@ -751,18 +747,12 @@ async def seed_data(
             reviewed_at = None
             review_action = None
         elif run.status == AnalysisRunStatus.reviewed.value:
-            status = random.choices(
-                [ProposalStatus.approved, ProposalStatus.rejected],
-                weights=[70, 30]
-            )[0]
+            status = random.choices([ProposalStatus.approved, ProposalStatus.rejected], weights=[70, 30])[0]
             reviewed_by = pm_user.id
             reviewed_at = run.completed_at + timedelta(hours=random.randint(1, 48))
             review_action = "approve" if status == ProposalStatus.approved else "reject"
         else:
-            status = random.choices(
-                [ProposalStatus.approved, ProposalStatus.rejected],
-                weights=[80, 20]
-            )[0]
+            status = random.choices([ProposalStatus.approved, ProposalStatus.rejected], weights=[80, 20])[0]
             reviewed_by = pm_user.id
             reviewed_at = run.completed_at + timedelta(hours=random.randint(1, 48))
             review_action = "approve" if status == ProposalStatus.approved else "reject"
@@ -838,9 +828,7 @@ async def main():
     parser.add_argument("--clear", action="store_true", help="Clear all data")
     parser.add_argument("--seed", action="store_true", help="Seed test data")
     parser.add_argument("--runs", type=int, default=10, help="Number of analysis runs (default: 10)")
-    parser.add_argument(
-        "--proposals", type=int, default=30, help="Number of task proposals (default: 30)"
-    )
+    parser.add_argument("--proposals", type=int, default=30, help="Number of task proposals (default: 30)")
     args = parser.parse_args()
 
     if not args.clear and not args.seed:

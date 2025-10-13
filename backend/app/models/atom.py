@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 
 from pydantic import field_validator
-from sqlalchemy import JSON, BigInteger, DateTime, ForeignKey, Text, func
+from sqlalchemy import JSON, BigInteger, Column, DateTime, Text, func
 from sqlmodel import Field, SQLModel
 
 from .base import IDMixin, TimestampMixin
@@ -76,7 +76,7 @@ class Atom(IDMixin, TimestampMixin, SQLModel, table=True):
 
     @field_validator("type", mode="before")
     @classmethod
-    def validate_atom_type(cls, v):
+    def validate_atom_type(cls, v: str | AtomType) -> str:
         """Validate that atom type is one of the allowed values."""
         if isinstance(v, AtomType):
             return v.value
@@ -119,13 +119,12 @@ class AtomLink(SQLModel, table=True):
     )
     created_at: datetime | None = Field(
         default=None,
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"server_default": func.now()},
+        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
     )
 
     @field_validator("link_type", mode="before")
     @classmethod
-    def validate_link_type(cls, v):
+    def validate_link_type(cls, v: str | LinkType) -> str:
         """Validate that link type is one of the allowed values."""
         if isinstance(v, LinkType):
             return v.value
@@ -167,8 +166,7 @@ class TopicAtom(SQLModel, table=True):
     )
     created_at: datetime | None = Field(
         default=None,
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"server_default": func.now()},
+        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
     )
 
 
@@ -219,7 +217,7 @@ class AtomCreate(SQLModel):
 
     @field_validator("type", mode="before")
     @classmethod
-    def validate_atom_type(cls, v):
+    def validate_atom_type(cls, v: str | AtomType) -> str:
         """Validate that atom type is one of the allowed values."""
         if isinstance(v, AtomType):
             return v.value
@@ -264,7 +262,7 @@ class AtomUpdate(SQLModel):
 
     @field_validator("type", mode="before")
     @classmethod
-    def validate_atom_type(cls, v):
+    def validate_atom_type(cls, v: str | AtomType | None) -> str | None:
         """Validate that atom type is one of the allowed values."""
         if v is None:
             return v
@@ -307,7 +305,7 @@ class AtomLinkCreate(SQLModel):
 
     @field_validator("link_type", mode="before")
     @classmethod
-    def validate_link_type(cls, v):
+    def validate_link_type(cls, v: str | LinkType) -> str:
         """Validate that link type is one of the allowed values."""
         if isinstance(v, LinkType):
             return v.value

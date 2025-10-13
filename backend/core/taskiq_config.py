@@ -10,7 +10,7 @@ nats_broker = NatsBroker(
     max_reconnect_attempts=-1,  # The endless number of re -attachment attempts
 )
 
-result_backend = NATSObjectStoreResultBackend(servers=settings.taskiq_nats_servers)
+result_backend: NATSObjectStoreResultBackend = NATSObjectStoreResultBackend(servers=settings.taskiq_nats_servers)
 
 nats_broker = nats_broker.with_result_backend(result_backend)
 

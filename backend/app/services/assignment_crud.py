@@ -4,7 +4,6 @@ Provides operations for managing assignments between agents and tasks,
 ensuring proper M2M relationship handling.
 """
 
-import builtins
 from uuid import UUID
 
 from sqlalchemy.exc import IntegrityError
@@ -165,7 +164,7 @@ class AssignmentCRUD:
 
         return [AgentTaskAssignmentPublic.model_validate(a) for a in assignments]
 
-    async def list(
+    async def list_assignments(
         self,
         skip: int = 0,
         limit: int = 100,
@@ -242,7 +241,7 @@ class AssignmentCRUD:
         active_only: bool = False,
         skip: int = 0,
         limit: int = 100,
-    ) -> builtins.list[AgentTaskAssignmentWithDetails]:
+    ) -> list[AgentTaskAssignmentWithDetails]:
         """List assignments with detailed information from joined tables.
 
         Performs JOIN queries to fetch agent, task, and provider details
@@ -262,16 +261,16 @@ class AssignmentCRUD:
         """
         # Build query with JOINs
         query = (
-            select(
+            select(  # type: ignore[call-overload]
                 AgentTaskAssignment.id,
                 AgentTaskAssignment.agent_id,
                 AgentTaskAssignment.task_id,
                 AgentTaskAssignment.is_active,
                 AgentTaskAssignment.assigned_at,
-                AgentConfig.name.label("agent_name"),
-                TaskConfig.name.label("task_name"),
-                LLMProvider.name.label("provider_name"),
-                LLMProvider.type.label("provider_type"),
+                AgentConfig.name.label("agent_name"),  # type: ignore[attr-defined]
+                TaskConfig.name.label("task_name"),  # type: ignore[attr-defined]
+                LLMProvider.name.label("provider_name"),  # type: ignore[attr-defined]
+                LLMProvider.type.label("provider_type"),  # type: ignore[attr-defined]
             )
             .join(AgentConfig, AgentTaskAssignment.agent_id == AgentConfig.id)
             .join(TaskConfig, AgentTaskAssignment.task_id == TaskConfig.id)

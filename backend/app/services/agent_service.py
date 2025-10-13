@@ -10,6 +10,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent as PydanticAgent
+from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.settings import ModelSettings
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models import AgentConfig, LLMProvider, ProviderType, ValidationStatus
@@ -104,17 +106,19 @@ class AgentTestService:
                 system_prompt=agent.system_prompt,
             )
 
-            # Build model kwargs
-            model_settings = {}
-            if agent.temperature is not None:
-                model_settings["temperature"] = agent.temperature
-            if agent.max_tokens is not None:
-                model_settings["max_tokens"] = agent.max_tokens
+            # Build model settings
+            model_settings_obj: ModelSettings | None = None
+            if agent.temperature is not None or agent.max_tokens is not None:
+                model_settings_obj = {}
+                if agent.temperature is not None:
+                    model_settings_obj["temperature"] = agent.temperature
+                if agent.max_tokens is not None:
+                    model_settings_obj["max_tokens"] = agent.max_tokens
 
             # Run the agent
             result = await pydantic_agent.run(
                 test_prompt,
-                model_settings=model_settings if model_settings else None,
+                model_settings=model_settings_obj,
             )
 
             elapsed_time = time.time() - start_time
@@ -148,7 +152,7 @@ class AgentTestService:
         provider: LLMProvider,
         model_name: str,
         api_key: str | None = None,
-    ):
+    ) -> OpenAIChatModel:
         """Build pydantic-ai model instance from provider configuration.
 
         Args:

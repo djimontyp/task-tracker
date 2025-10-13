@@ -1,10 +1,11 @@
 import sys
 
-from config import settings
 from loguru import logger
 
+from core.config import settings
 
-def setup_logging():
+
+def setup_logging() -> None:
     """Setup logging configuration"""
     logger.remove()
     logger.add(

@@ -157,13 +157,13 @@ async def identify_or_create_user(
         # Load User
         user_stmt = select(User).where(User.id == tg_profile.user_id)
         user_result = await db.execute(user_stmt)
-        user = user_result.scalar_one()
+        existing_user = user_result.scalar_one()
 
-        logger.info(f"Found existing user {user.id} for Telegram user {telegram_user_id}")
-        return user, tg_profile
+        logger.info(f"Found existing user {existing_user.id} for Telegram user {telegram_user_id}")
+        return existing_user, tg_profile
 
     # Try auto-linking
-    user = None
+    user: User | None = None
     if phone:
         user = await find_user_by_phone(db, phone)
         if user:

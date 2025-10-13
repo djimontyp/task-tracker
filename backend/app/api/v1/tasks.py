@@ -23,7 +23,9 @@ async def get_tasks(db: DatabaseDep) -> list[TaskResponse]:
 
     Returns complete task information including status, priority, and metadata.
     """
-    statement = select(Task).order_by(Task.created_at.desc())
+    from sqlalchemy import desc as sa_desc
+
+    statement = select(Task).order_by(sa_desc(Task.created_at))  # type: ignore[arg-type]
     result = await db.execute(statement)
     tasks = result.scalars().all()
 
@@ -43,13 +45,15 @@ async def create_task(task: TaskCreateRequest, db: DatabaseDep) -> TaskResponse:
 
     Automatically sets status to 'open' and broadcasts to WebSocket clients.
     """
+    from app.models.enums import TaskStatus
+
     db_task = Task(
         title=task.title,
         description=task.description,
         category=task.category,
         priority=task.priority,
-        source_id=task.source_id,
-        status=task.status,
+        source_id=1,  # Default source ID for manually created tasks
+        status=TaskStatus.open,
     )
 
     db.add(db_task)
@@ -102,6 +106,8 @@ async def update_task_status(task_id: int, status: str, db: DatabaseDep) -> Task
     Allows changing task status (e.g., from 'open' to 'completed').
     Raises 404 error if task doesn't exist.
     """
+    from app.models.enums import TaskStatus
+
     statement = select(Task).where(Task.id == task_id)
     result = await db.execute(statement)
     task = result.scalar_one_or_none()
@@ -109,7 +115,7 @@ async def update_task_status(task_id: int, status: str, db: DatabaseDep) -> Task
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    task.status = status
+    task.status = TaskStatus(status)
     db.add(task)
     await db.commit()
 

@@ -70,20 +70,22 @@ class SchemaGenerator:
                 if not field_type_str:
                     raise ValueError(f"Property '{field_name}' missing 'type' specification")
 
-                field_type = SchemaGenerator._map_json_type(field_type_str)
+                base_type = SchemaGenerator._map_json_type(field_type_str)
 
                 # Optionality driven by top-level 'required' list
                 if field_name not in required_list:
-                    field_type = field_type | None
+                    final_field_type: Any = base_type | None
+                else:
+                    final_field_type = base_type
 
                 description = field_schema.get("description", "")
                 if description:
                     field_definitions[field_name] = (
-                        field_type,
+                        final_field_type,
                         Field(description=description),
                     )
                 else:
-                    field_definitions[field_name] = (field_type, ...)
+                    field_definitions[field_name] = (final_field_type, ...)
 
             return create_model(model_name, **field_definitions)
 
@@ -96,20 +98,22 @@ class SchemaGenerator:
             if not field_type_str:
                 raise ValueError(f"Field '{field_name}' missing 'type' specification")
 
-            field_type = SchemaGenerator._map_json_type(field_type_str)
+            base_type = SchemaGenerator._map_json_type(field_type_str)
 
             required = field_config.get("required", True)
             if not required:
-                field_type = field_type | None
+                legacy_field_type: Any = base_type | None
+            else:
+                legacy_field_type = base_type
 
             description = field_config.get("description", "")
 
             from pydantic import Field
 
             if description:
-                field_definitions[field_name] = (field_type, Field(description=description))
+                field_definitions[field_name] = (legacy_field_type, Field(description=description))
             else:
-                field_definitions[field_name] = (field_type, ...)
+                field_definitions[field_name] = (legacy_field_type, ...)
 
         return create_model(model_name, **field_definitions)
 

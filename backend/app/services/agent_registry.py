@@ -6,7 +6,7 @@ duplicate instantiations for identical agent+task configurations.
 
 import asyncio
 import weakref
-from typing import Any, Optional
+from typing import Optional
 from uuid import UUID
 
 from pydantic_ai import Agent
@@ -26,13 +26,17 @@ class AgentRegistry:
     _instance: Optional["AgentRegistry"] = None
     _lock = asyncio.Lock()
 
+    def __init__(self) -> None:
+        """Initialize registry attributes."""
+        if not hasattr(self, "_registry"):
+            self._registry: dict[tuple[UUID, UUID], weakref.ref[Agent]] = {}
+            self._locks: dict[tuple[UUID, UUID], asyncio.Lock] = {}
+            self._global_lock: asyncio.Lock = asyncio.Lock()
+
     def __new__(cls) -> "AgentRegistry":
         """Ensure singleton pattern."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._registry: dict[tuple[UUID, UUID], Any] = {}
-            cls._instance._locks: dict[tuple[UUID, UUID], asyncio.Lock] = {}
-            cls._instance._global_lock = asyncio.Lock()
         return cls._instance
 
     async def get_or_create(
@@ -77,7 +81,7 @@ class AgentRegistry:
             agent = await self._create_agent(agent_config, task_config)
 
             # Store weak reference with cleanup callback
-            def cleanup(_):
+            def cleanup(_: weakref.ref[Agent]) -> None:
                 """Remove entry from registry when agent is garbage collected."""
                 self._registry.pop(key, None)
                 self._locks.pop(key, None)

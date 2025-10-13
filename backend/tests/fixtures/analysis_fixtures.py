@@ -17,8 +17,6 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models import (
     AgentConfig,
     AgentTaskAssignment,
@@ -37,6 +35,7 @@ from app.models import (
     ValidationStatus,
 )
 from app.services.credential_encryption import CredentialEncryption
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.fixture

@@ -15,7 +15,7 @@ class CredentialEncryption:
     All credentials are encrypted before storage and decrypted on retrieval.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize encryption service with key from settings.
 
         Raises:
@@ -29,7 +29,7 @@ class CredentialEncryption:
             )
 
         # Ensure key is bytes for Fernet
-        key = settings.encryption_key
+        key: str | bytes = settings.encryption_key
         if isinstance(key, str):
             key = key.encode()
 

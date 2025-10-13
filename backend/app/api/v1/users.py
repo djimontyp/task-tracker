@@ -31,7 +31,9 @@ async def get_users(db: DatabaseDep) -> list[UserResponse]:
 
     Returns complete user information including computed full_name.
     """
-    statement = select(User).order_by(User.created_at.desc())
+    from sqlalchemy import desc
+
+    statement = select(User).order_by(desc(User.created_at))  # type: ignore[arg-type]
     result = await db.execute(statement)
     users = result.scalars().all()
 
@@ -69,6 +71,8 @@ async def get_user(user_id: int, db: DatabaseDep) -> UserResponse:
     user = await db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    assert user.id is not None
 
     return UserResponse(
         id=user.id,
@@ -111,6 +115,8 @@ async def create_user(user_data: UserCreateRequest, db: DatabaseDep) -> UserResp
     db.add(user)
     await db.commit()
     await db.refresh(user)
+
+    assert user.id is not None
 
     return UserResponse(
         id=user.id,

@@ -26,7 +26,9 @@ class TelegramClientService:
     This is different from Bot API - it requires user account authentication.
     """
 
-    def __init__(self, api_id: int = None, api_hash: str = None, session_name: str = "task_tracker"):
+    def __init__(
+        self, api_id: int | None = None, api_hash: str | None = None, session_name: str = "task_tracker"
+    ) -> None:
         """
         Initialize Telegram Client.
 
@@ -40,7 +42,7 @@ class TelegramClientService:
         self.session_string = getattr(settings, "telegram_session_string", None)
         self.client: TelegramClient | None = None
 
-    async def connect(self, phone: str = None):
+    async def connect(self, phone: str | None = None) -> None:
         """
         Connect to Telegram and authenticate.
 
@@ -71,7 +73,7 @@ class TelegramClientService:
 
         logger.info("✅ Successfully connected to Telegram with existing session")
 
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Disconnect from Telegram."""
         if self.client:
             await self.client.disconnect()

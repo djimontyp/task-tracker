@@ -11,7 +11,7 @@ This test module provides complete coverage for all /api/v1/atoms endpoints incl
 - Get topic messages (GET /api/v1/topics/{id}/messages)
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from app.models import (
@@ -97,7 +97,7 @@ async def sample_message(
     message = Message(
         external_message_id="test_msg_123",
         content="Test message content",
-        sent_at=datetime.now(timezone.utc),
+        sent_at=datetime.now(UTC),
         source_id=sample_source.id,
         author_id=sample_user.id,
         topic_id=sample_topic.id,
@@ -509,9 +509,7 @@ async def test_link_atom_to_topic(client: AsyncClient, sample_atom: Atom, sample
 
 
 @pytest.mark.asyncio
-async def test_link_atom_to_topic_with_position_and_note(
-    client: AsyncClient, sample_atom: Atom, sample_topic: Topic
-):
+async def test_link_atom_to_topic_with_position_and_note(client: AsyncClient, sample_atom: Atom, sample_topic: Topic):
     """Test linking atom to topic with position and note."""
     response = await client.post(
         f"/api/v1/atoms/{sample_atom.id}/topics/{sample_topic.id}?position=1&note=Important+context"
@@ -645,7 +643,7 @@ async def test_get_topic_messages_multiple(
         message = Message(
             external_message_id=f"msg_{i}",
             content=f"Message {i}",
-            sent_at=datetime.now(timezone.utc),
+            sent_at=datetime.now(UTC),
             source_id=sample_source.id,
             author_id=sample_user.id,
             topic_id=sample_topic.id,

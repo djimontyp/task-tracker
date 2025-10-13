@@ -25,7 +25,7 @@ router = APIRouter(prefix="/messages", tags=["messages"])
     response_description="Confirmation with created message ID",
     status_code=201,
 )
-async def create_message(message: MessageCreateRequest, db: DatabaseDep):
+async def create_message(message: MessageCreateRequest, db: DatabaseDep) -> dict[str, str | int]:
     """
     Create a new message.
 
@@ -59,13 +59,13 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
 
     # Build response
     response = MessageResponse(
-        id=db_message.id,
+        id=db_message.id or 0,
         external_message_id=db_message.external_message_id,
         content=db_message.content,
         sent_at=db_message.sent_at,
-        source_id=source.id,
+        source_id=source.id or 0,
         source_name=source.name,
-        author_id=user.id,
+        author_id=user.id or 0,
         author_name=user.full_name,
         avatar_url=db_message.avatar_url,
         telegram_profile_id=db_message.telegram_profile_id,
@@ -83,7 +83,7 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep):
         response_data["created_at"] = response_data["created_at"].isoformat()
     await websocket_manager.broadcast("messages", {"type": "message.new", "data": response_data})
 
-    return {"status": "message received", "id": db_message.id}
+    return {"status": "message received", "id": db_message.id or 0}
 
 
 @router.get(
@@ -110,37 +110,30 @@ async def get_messages(
     Returns most recent messages first with pagination support.
     """
     # Build base query with joins
-    statement = (
-        select(Message, User, Source)
-        .join(User, Message.author_id == User.id)
-        .join(Source, Message.source_id == Source.id)
-    )
+    from sqlalchemy import column, or_
+
+    statement = select(Message, User, Source).join(User).join(Source)
 
     filters = []
 
     if author:
         # Search in User first_name or last_name
-        filters.append((User.first_name.ilike(f"%{author}%")) | (User.last_name.ilike(f"%{author}%")))
+        filters.append(or_(column("first_name").ilike(f"%{author}%"), column("last_name").ilike(f"%{author}%")))
 
     if source:
-        filters.append(Source.name.ilike(f"%{source}%"))
+        filters.append(column("name").ilike(f"%{source}%"))
 
     if date_from:
-        filters.append(Message.sent_at >= datetime.combine(date_from, datetime.min.time()))
+        filters.append(Message.sent_at >= datetime.combine(date_from, datetime.min.time()))  # type: ignore[arg-type]
 
     if date_to:
-        filters.append(Message.sent_at <= datetime.combine(date_to, datetime.max.time()))
+        filters.append(Message.sent_at <= datetime.combine(date_to, datetime.max.time()))  # type: ignore[arg-type]
 
     if filters:
         statement = statement.where(and_(*filters))
 
     # Count total items
-    count_statement = (
-        select(func.count(Message.id))
-        .select_from(Message)
-        .join(User, Message.author_id == User.id)
-        .join(Source, Message.source_id == Source.id)
-    )
+    count_statement = select(func.count()).select_from(Message).join(User).join(Source)
     if filters:
         count_statement = count_statement.where(and_(*filters))
 
@@ -152,23 +145,28 @@ async def get_messages(
     offset = (page - 1) * page_size
 
     # Apply sorting
+    from typing import Any
+
+    from sqlalchemy import ColumnElement, asc, desc
+
+    sort_column: ColumnElement[Any]
     if sort_by == "author_name":
-        sort_column = User.first_name
+        sort_column = column("first_name")
     elif sort_by == "source_name":
-        sort_column = Source.name
+        sort_column = column("name")
     elif sort_by == "analyzed":
-        sort_column = Message.analyzed
+        sort_column = column("analyzed")
     elif sort_by == "sent_at":
-        sort_column = Message.sent_at
+        sort_column = column("sent_at")
     else:
         # Default: sort by sent_at (when message was actually sent)
-        sort_column = Message.sent_at
+        sort_column = column("sent_at")
 
     # Apply sort order
     if sort_order == "asc":
-        statement = statement.order_by(sort_column.asc())
+        statement = statement.order_by(asc(sort_column))
     else:
-        statement = statement.order_by(sort_column.desc())
+        statement = statement.order_by(desc(sort_column))
 
     # Fetch paginated data
     statement = statement.offset(offset).limit(page_size)
@@ -178,16 +176,18 @@ async def get_messages(
 
     # Build response
     items = []
-    for msg, user, source in messages_data:
+    for msg, user, source_item in messages_data:
+        # Type assertion: we know source_item is Source from our query
+        source_obj = source_item if isinstance(source_item, Source) else Source()
         items.append(
             MessageResponse(
-                id=msg.id,
+                id=msg.id or 0,
                 external_message_id=msg.external_message_id,
                 content=msg.content,
                 sent_at=msg.sent_at,
-                source_id=source.id,
-                source_name=source.name,
-                author_id=user.id,
+                source_id=source_obj.id or 0,
+                source_name=source_obj.name,
+                author_id=user.id or 0,
                 author_name=user.full_name,
                 avatar_url=msg.avatar_url,
                 telegram_profile_id=msg.telegram_profile_id,
@@ -222,7 +222,9 @@ async def get_message_filters(db: DatabaseDep) -> MessageFiltersResponse:
     for building filter UI components.
     """
     # Get unique authors (User full names)
-    authors_statement = select(User.first_name, User.last_name).distinct().join(Message, Message.author_id == User.id)
+    from sqlalchemy import column
+
+    authors_statement = select(User.first_name, User.last_name).distinct().join(Message)
     authors_result = await db.execute(authors_statement)
     authors_data = authors_result.all()
 
@@ -235,12 +237,19 @@ async def get_message_filters(db: DatabaseDep) -> MessageFiltersResponse:
             authors.append(first_name)
 
     # Get unique sources
-    sources_statement = select(Source.id, Source.name).distinct().join(Message, Message.source_id == Source.id)
+    from typing import Any
+
+    from sqlalchemy.sql import Select
+
+    sources_statement: Select[Any] = select(column("id"), column("name")).select_from(Source).distinct().join(Message)
     sources_result = await db.execute(sources_statement)
-    sources = [{"id": source_id, "name": source_name} for source_id, source_name in sources_result.all()]
+    sources: list[dict[str, int | str]] = [
+        {"id": int(source_id) if source_id else 0, "name": str(source_name)}
+        for source_id, source_name in sources_result.all()
+    ]
 
     # Total messages count
-    count_statement = select(func.count(Message.id))
+    count_statement = select(func.count())
     count_result = await db.execute(count_statement)
     total_messages = count_result.scalar() or 0
 

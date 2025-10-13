@@ -18,7 +18,7 @@ class TelegramWebhookService:
 
     TELEGRAM_API_BASE = "https://api.telegram.org/bot"
 
-    def __init__(self, bot_token: str = None):
+    def __init__(self, bot_token: str | None = None):
         self.bot_token = bot_token or settings.telegram_bot_token
         if not self.bot_token:
             raise ValueError("Telegram bot token is required")
@@ -220,6 +220,26 @@ class WebhookSettingsService:
 
     TELEGRAM_SETTINGS_NAME = "telegram_webhook"
 
+    @staticmethod
+    def _dict_to_telegram_config(data: dict[str, Any]) -> TelegramWebhookConfig:
+        """Convert dict to TelegramWebhookConfig, handling type conversions"""
+        from .schemas import TelegramGroupInfo
+
+        last_set_at_str = data.get("last_set_at")
+        last_set_at = datetime.fromisoformat(last_set_at_str) if last_set_at_str else None
+
+        groups_raw = data.get("groups", [])
+        groups = [TelegramGroupInfo(**g) if isinstance(g, dict) else g for g in groups_raw]
+
+        return TelegramWebhookConfig(
+            protocol=data.get("protocol", "https"),
+            host=data.get("host", ""),
+            webhook_url=data.get("webhook_url"),
+            is_active=data.get("is_active", False),
+            last_set_at=last_set_at,
+            groups=groups,
+        )
+
     async def get_telegram_config(self, db: AsyncSession) -> TelegramWebhookConfig | None:
         """Get Telegram webhook configuration from database"""
         try:
@@ -229,7 +249,7 @@ class WebhookSettingsService:
 
             if settings_record:
                 telegram_config = settings_record.config.get("telegram", {})
-                return TelegramWebhookConfig(**telegram_config)
+                return self._dict_to_telegram_config(telegram_config)
 
             return None
 
@@ -286,7 +306,7 @@ class WebhookSettingsService:
             await db.commit()
             await db.refresh(existing if existing else new_settings)
 
-            return TelegramWebhookConfig(**config_data["telegram"])
+            return self._dict_to_telegram_config(config_data["telegram"])
 
         except Exception as e:
             await db.rollback()
@@ -324,7 +344,7 @@ class WebhookSettingsService:
                     db.add(settings_record)
                     await db.commit()
                     await db.refresh(settings_record)
-                    return TelegramWebhookConfig(**config["telegram"])
+                    return self._dict_to_telegram_config(config["telegram"])
 
             return None
 
@@ -357,7 +377,7 @@ class WebhookSettingsService:
                         db.add(settings_record)
                         await db.commit()
                         await db.refresh(settings_record)
-                    return TelegramWebhookConfig(**config["telegram"])
+                    return self._dict_to_telegram_config(config["telegram"])
             else:
                 # Create new settings if not exists
                 config_data = {
@@ -378,7 +398,7 @@ class WebhookSettingsService:
                 db.add(new_settings)
                 await db.commit()
                 await db.refresh(new_settings)
-                return TelegramWebhookConfig(**config_data["telegram"])
+                return self._dict_to_telegram_config(config_data["telegram"])
 
             return None
 
@@ -410,7 +430,7 @@ class WebhookSettingsService:
                     db.add(settings_record)
                     await db.commit()
                     await db.refresh(settings_record)
-                    return TelegramWebhookConfig(**config["telegram"])
+                    return self._dict_to_telegram_config(config["telegram"])
 
             return None
 
@@ -455,7 +475,7 @@ class WebhookSettingsService:
                     db.add(settings_record)
                     await db.commit()
                     await db.refresh(settings_record)
-                    return TelegramWebhookConfig(**config["telegram"])
+                    return self._dict_to_telegram_config(config["telegram"])
 
             return None
 

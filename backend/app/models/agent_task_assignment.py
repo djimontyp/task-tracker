@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, UniqueConstraint, func
+from sqlalchemy import Column, DateTime, UniqueConstraint, func
 from sqlmodel import Field, SQLModel
 
 
@@ -37,8 +37,7 @@ class AgentTaskAssignment(SQLModel, table=True):
     # Timestamps
     assigned_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"server_default": func.now()},
+        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
     )
 
     class Config:

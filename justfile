@@ -19,6 +19,8 @@ alias dbfs := db-full-seed
 alias dbfr := db-full-reset
 alias f := fmt
 alias fc := fmt-check
+alias tc := typecheck
+alias tcs := typecheck-strict
 
 
 # Reinstall UV venv and all deps localy
@@ -107,6 +109,20 @@ fmt-check PATH='backend':
     @uv run ruff check {{PATH}} --select I,F401,UP
     @uv run ruff format {{PATH}} --check
     @echo "✅ Format check passed!"
+
+# Run mypy type checking
+[group: 'Quality']
+typecheck PATH='.':
+    @echo "🔎 Running mypy type checking on {{PATH}}..."
+    @cd backend && uv run mypy {{PATH}}
+    @echo "✅ Type check passed!"
+
+# Run strict mypy type checking (show all errors)
+[group: 'Quality']
+typecheck-strict PATH='.':
+    @echo "🔬 Running strict mypy type checking on {{PATH}}..."
+    @cd backend && uv run mypy {{PATH}} --strict --show-error-context
+    @echo "✅ Strict type check passed!"
 
 # Install dependencies
 install-dev:

@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, func
+from sqlalchemy import Column, DateTime, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
@@ -25,11 +25,11 @@ class AnalysisRun(SQLModel, table=True):
 
     # Time window for analysis
     time_window_start: datetime = Field(
-        sa_type=DateTime(timezone=True),
+        sa_column=Column(DateTime(timezone=True)),
         description="Start of analysis time window",
     )
     time_window_end: datetime = Field(
-        sa_type=DateTime(timezone=True),
+        sa_column=Column(DateTime(timezone=True)),
         description="End of analysis time window",
     )
 
@@ -67,22 +67,21 @@ class AnalysisRun(SQLModel, table=True):
     # Lifecycle timestamps
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"server_default": func.now()},
+        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
     )
     started_at: datetime | None = Field(
         default=None,
-        sa_type=DateTime(timezone=True),
+        sa_column=Column(DateTime(timezone=True)),
         description="When run started processing",
     )
     completed_at: datetime | None = Field(
         default=None,
-        sa_type=DateTime(timezone=True),
+        sa_column=Column(DateTime(timezone=True)),
         description="When run completed processing",
     )
     closed_at: datetime | None = Field(
         default=None,
-        sa_type=DateTime(timezone=True),
+        sa_column=Column(DateTime(timezone=True)),
         description="When PM closed the run",
     )
 

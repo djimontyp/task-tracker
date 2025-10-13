@@ -42,7 +42,7 @@ class TelegramProfile(IDMixin, TimestampMixin, SQLModel, table=True):
         description="Link to Telegram source",
     )
 
-    @computed_field  # type: ignore[misc]
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def full_name(self) -> str:
         """Telegram full name (for point-specific usage).

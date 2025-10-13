@@ -1,9 +1,9 @@
 """TaskProposal model for AI-generated task proposals."""
 
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Text, func
+from sqlalchemy import Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
@@ -151,11 +151,7 @@ class TaskProposal(SQLModel, table=True):
         foreign_key="users.id",
         description="User who reviewed this proposal",
     )
-    reviewed_at: datetime | None = Field(
-        default=None,
-        sa_type=DateTime(timezone=True),
-        description="When proposal was reviewed",
-    )
+    reviewed_at: datetime | None = None
     review_action: str | None = Field(
         default=None,
         max_length=50,
@@ -168,11 +164,7 @@ class TaskProposal(SQLModel, table=True):
     )
 
     # Timestamps
-    created_at: datetime = Field(
-        default_factory=lambda: datetime.now(UTC),
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"server_default": func.now()},
-    )
+    created_at: datetime = Field(sa_column_kwargs={"server_default": func.now()})
 
     class Config:
         """Pydantic configuration."""

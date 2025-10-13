@@ -25,7 +25,7 @@ class TelegramIngestionService:
 
     TELEGRAM_API_BASE = "https://api.telegram.org/bot"
 
-    def __init__(self, bot_token: str = None):
+    def __init__(self, bot_token: str | None = None) -> None:
         self.bot_token = bot_token or settings.telegram_bot_token
         if not self.bot_token:
             raise ValueError("Telegram bot token is required")
@@ -191,7 +191,7 @@ class TelegramIngestionService:
         messages_skipped: int = 0,
         errors_count: int = 0,
         current_batch: int = 0,
-    ):
+    ) -> None:
         """Update job progress counters."""
         if messages_fetched > 0:
             job.messages_fetched += messages_fetched

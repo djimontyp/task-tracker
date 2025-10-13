@@ -10,7 +10,7 @@ router = APIRouter(prefix="/webhook", tags=["webhooks"])
 
 
 @router.post("/telegram")
-async def telegram_webhook(request: Request):
+async def telegram_webhook(request: Request) -> dict[str, str]:
     try:
         update_data = await request.json()
 

@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from core.config import settings
+from core.config import Settings, settings
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,8 +11,8 @@ DatabaseDep = Annotated[AsyncSession, Depends(get_db_session)]
 
 
 # Settings dependency
-def get_settings():
+def get_settings() -> Settings:
     return settings
 
 
-SettingsDep = Annotated[type(settings), Depends(get_settings)]
+SettingsDep = Annotated[Settings, Depends(get_settings)]

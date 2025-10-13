@@ -8,7 +8,7 @@ router = APIRouter(tags=["websocket"])
 
 
 @router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, topics: str = None):
+async def websocket_endpoint(websocket: WebSocket, topics: str | None = None) -> None:
     """WebSocket endpoint with topic-based subscriptions.
 
     Query params:
