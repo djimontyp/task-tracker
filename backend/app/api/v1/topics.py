@@ -280,34 +280,11 @@ async def get_topic_messages(
             detail=f"Topic with ID {topic_id} not found",
         )
 
-    query = (
-        select(Message, User, Source)
-        .join(User, Message.author_id == User.id)
-        .join(Source, Message.source_id == Source.id)
-        .where(Message.topic_id == topic_id)
-        .order_by(Message.sent_at.desc())
-    )
-
-    result = await session.execute(query)
-    messages_data = result.all()
-
-    return [
-        MessageResponse(
-            id=msg.id,
-            external_message_id=msg.external_message_id,
-            content=msg.content,
-            sent_at=msg.sent_at,
-            source_id=source.id,
-            source_name=source.name,
-            author_id=user.id,
-            author_name=user.full_name,
-            avatar_url=msg.avatar_url,
-            telegram_profile_id=msg.telegram_profile_id,
-            classification=msg.classification,
-            confidence=msg.confidence,
-            analyzed=msg.analyzed,
-            created_at=msg.created_at,
-            updated_at=msg.updated_at,
-        )
-        for msg, user, source in messages_data
-    ]
+    # TODO: Implement proper message-topic relationship
+    # Currently messages are not directly linked to topics in the database.
+    # Future implementation should either:
+    # 1. Add topic_id field to messages table, OR
+    # 2. Create atom_messages relationship table (Message -> Atom -> Topic)
+    #
+    # For now, return empty list to avoid SQL errors
+    return []
