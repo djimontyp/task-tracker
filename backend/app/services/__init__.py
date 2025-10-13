@@ -4,6 +4,7 @@ from .agent_crud import AgentCRUD
 from .agent_registry import AgentRegistry
 from .analysis_service import AnalysisRunCRUD, AnalysisRunValidator
 from .assignment_crud import AssignmentCRUD
+from .atom_crud import AtomCRUD
 from .credential_encryption import CredentialEncryption
 from .project_service import ProjectConfigCRUD
 from .proposal_service import TaskProposalCRUD
@@ -20,6 +21,7 @@ __all__ = [
     "AnalysisRunCRUD",
     "AnalysisRunValidator",
     "AssignmentCRUD",
+    "AtomCRUD",
     "CredentialEncryption",
     "ProjectConfigCRUD",
     "ProviderCRUD",
