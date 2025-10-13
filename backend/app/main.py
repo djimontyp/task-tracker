@@ -59,6 +59,10 @@ tags_metadata = [
         "name": "projects",
         "description": "Project Configuration management for defining classification keywords and team settings.",
     },
+    {
+        "name": "topics",
+        "description": "Topic management for categorizing messages and tasks into organized groups.",
+    },
 ]
 
 

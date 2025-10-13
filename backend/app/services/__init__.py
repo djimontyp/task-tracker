@@ -11,6 +11,7 @@ from .provider_crud import ProviderCRUD
 from .provider_validator import ProviderValidator
 from .schema_generator import SchemaGenerator
 from .task_crud import TaskCRUD
+from .topic_crud import TopicCRUD
 from .websocket_manager import websocket_manager
 
 __all__ = [
@@ -26,5 +27,6 @@ __all__ = [
     "SchemaGenerator",
     "TaskCRUD",
     "TaskProposalCRUD",
+    "TopicCRUD",
     "websocket_manager",
 ]

@@ -14,6 +14,7 @@ from . import (
     stats,
     task_configs,
     tasks,
+    topics,
     users,
     webhooks,
 )
@@ -37,3 +38,4 @@ api_router.include_router(providers.router)
 api_router.include_router(agents.router)
 api_router.include_router(task_configs.router)
 api_router.include_router(assignments.router)
+api_router.include_router(topics.router)

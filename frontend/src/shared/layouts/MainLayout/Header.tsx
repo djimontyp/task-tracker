@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import { SwatchIcon } from '@heroicons/react/24/outline'
 import { useLocation, Link } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTheme } from '@/shared/components/ThemeProvider'
 import { SidebarTrigger } from '@/shared/ui/sidebar'
 import {
@@ -11,6 +12,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/shared/ui/breadcrumb'
+import { topicService } from '@/features/topics/api/topicService'
+import type { Topic } from '@/features/topics/types'
 
 interface BreadcrumbSegment {
   label: string
@@ -26,6 +29,10 @@ const breadcrumbMap: Record<string, BreadcrumbSegment[]> = {
     { label: 'Home', href: '/' },
     { label: 'Tasks' },
   ],
+  '/topics': [
+    { label: 'Home', href: '/' },
+    { label: 'Topics' },
+  ],
   '/analytics': [
     { label: 'Home', href: '/' },
     { label: 'Analytics' },
@@ -36,8 +43,31 @@ const breadcrumbMap: Record<string, BreadcrumbSegment[]> = {
 const Header = () => {
   const { effectiveTheme, setTheme, theme } = useTheme()
   const location = useLocation()
+  const queryClient = useQueryClient()
+
+  const topicDetailMatch = location.pathname.match(/^\/topics\/(\d+)$/)
+  const topicIdFromUrl = topicDetailMatch ? parseInt(topicDetailMatch[1], 10) : null
+
+  const { data: topicData } = useQuery<Topic>({
+    queryKey: ['topic', topicIdFromUrl],
+    queryFn: () => topicService.getTopicById(topicIdFromUrl!),
+    enabled: topicIdFromUrl !== null,
+    staleTime: 5 * 60 * 1000,
+    initialData: () => {
+      if (topicIdFromUrl === null) return undefined
+      return queryClient.getQueryData<Topic>(['topic', topicIdFromUrl])
+    },
+  })
 
   const crumbs = useMemo((): BreadcrumbSegment[] => {
+    if (topicDetailMatch && topicIdFromUrl) {
+      return [
+        { label: 'Home', href: '/' },
+        { label: 'Topics', href: '/topics' },
+        { label: topicData?.name || 'Topic' },
+      ]
+    }
+
     const segments = breadcrumbMap[location.pathname]
 
     if (!segments) {
@@ -50,7 +80,7 @@ const Header = () => {
     }
 
     return segments
-  }, [location.pathname])
+  }, [location.pathname, topicDetailMatch, topicIdFromUrl, topicData])
 
   const handleToggleTheme = () => {
     // Cycle: light -> dark -> system

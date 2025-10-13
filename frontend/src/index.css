@@ -184,3 +184,30 @@ code {
     max-width: 1728px; /* 3xl custom */
   }
 }
+
+/* React Colorful Custom Styles */
+.react-colorful {
+  width: 100% !important;
+  height: 150px !important;
+}
+
+.react-colorful__saturation {
+  border-radius: 4px 4px 0 0;
+  border-bottom: none;
+}
+
+.react-colorful__hue {
+  height: 12px;
+  border-radius: 0 0 4px 4px;
+  margin-top: 8px;
+}
+
+.react-colorful__pointer {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.dark .react-colorful__pointer {
+  border-color: hsl(var(--border));
+}

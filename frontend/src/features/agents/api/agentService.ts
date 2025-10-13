@@ -16,7 +16,7 @@ import {
 } from "../types";
 import { API_ENDPOINTS } from "@/shared/config/api";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL = '';
 
 class AgentService {
   /**

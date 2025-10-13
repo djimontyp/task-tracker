@@ -79,6 +79,19 @@ from .task_proposal import (
     TaskProposalUpdate,
 )
 from .telegram_profile import TelegramProfile
+from .topic import (
+    ICON_COLORS,
+    TOPIC_ICONS,
+    Topic,
+    TopicCreate,
+    TopicListResponse,
+    TopicPublic,
+    TopicUpdate,
+    auto_select_color,
+    auto_select_icon,
+    convert_to_hex_if_needed,
+    validate_hex_color,
+)
 from .user import User
 
 __all__ = [
@@ -164,6 +177,18 @@ __all__ = [
     # Task Entity (Phase 2 placeholder)
     "TaskEntity",
     "TaskEntityPublic",
+    # Topic
+    "Topic",
+    "TopicCreate",
+    "TopicUpdate",
+    "TopicPublic",
+    "TopicListResponse",
+    "TOPIC_ICONS",
+    "ICON_COLORS",
+    "auto_select_icon",
+    "auto_select_color",
+    "convert_to_hex_if_needed",
+    "validate_hex_color",
     # List Responses
     "TaskProposalListResponse",
 ]
