@@ -12,15 +12,20 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session
 from app.models import (
     TOPIC_ICONS,
+    Source,
     Topic,
     TopicCreate,
     TopicListResponse,
     TopicPublic,
     TopicUpdate,
+    User,
     auto_select_color,
     auto_select_icon,
 )
-from app.services import TopicCRUD
+from app.models.atom import AtomPublic
+from app.models.message import Message
+from app.schemas.messages import MessageResponse
+from app.services import AtomCRUD, TopicCRUD
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/topics", tags=["topics"])
@@ -204,3 +209,105 @@ async def suggest_topic_color(
         "suggested_color": suggested_color,
         "icon": icon,
     }
+
+
+@router.get(
+    "/{topic_id}/atoms",
+    response_model=list[AtomPublic],
+    summary="Get atoms for topic",
+    description="Retrieve all atoms associated with a specific topic.",
+)
+async def get_topic_atoms(
+    topic_id: int,
+    session: AsyncSession = Depends(get_session),
+) -> list[AtomPublic]:
+    """Get all atoms belonging to a topic.
+
+    Returns atoms ordered by their position within the topic (if set),
+    then by creation date (newest first).
+
+    Args:
+        topic_id: Topic ID to retrieve atoms for
+        session: Database session
+
+    Returns:
+        List of atoms associated with the topic
+
+    Raises:
+        HTTPException: 404 if topic not found
+    """
+    topic = await session.get(Topic, topic_id)
+    if not topic:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Topic with ID {topic_id} not found",
+        )
+
+    crud = AtomCRUD(session)
+    return await crud.list_by_topic(topic_id)
+
+
+@router.get(
+    "/{topic_id}/messages",
+    response_model=list[MessageResponse],
+    summary="Get messages for topic",
+    description="Retrieve all messages associated with a specific topic.",
+)
+async def get_topic_messages(
+    topic_id: int,
+    session: AsyncSession = Depends(get_session),
+) -> list[MessageResponse]:
+    """Get all messages belonging to a topic.
+
+    Returns messages ordered by sent date (newest first).
+    Useful for viewing conversation threads or message collections
+    organized under a specific topic.
+
+    Args:
+        topic_id: Topic ID to retrieve messages for
+        session: Database session
+
+    Returns:
+        List of messages associated with the topic
+
+    Raises:
+        HTTPException: 404 if topic not found
+    """
+    topic = await session.get(Topic, topic_id)
+    if not topic:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Topic with ID {topic_id} not found",
+        )
+
+    query = (
+        select(Message, User, Source)
+        .join(User, Message.author_id == User.id)
+        .join(Source, Message.source_id == Source.id)
+        .where(Message.topic_id == topic_id)
+        .order_by(Message.sent_at.desc())
+    )
+
+    result = await session.execute(query)
+    messages_data = result.all()
+
+    return [
+        MessageResponse(
+            id=msg.id,
+            external_message_id=msg.external_message_id,
+            content=msg.content,
+            sent_at=msg.sent_at,
+            source_id=source.id,
+            source_name=source.name,
+            author_id=user.id,
+            author_name=user.full_name,
+            avatar_url=msg.avatar_url,
+            telegram_profile_id=msg.telegram_profile_id,
+            classification=msg.classification,
+            confidence=msg.confidence,
+            analyzed=msg.analyzed,
+            created_at=msg.created_at,
+            updated_at=msg.updated_at,
+        )
+        for msg, user, source in messages_data
+    ]

@@ -9,6 +9,9 @@ alias sca := services-clean-all
 alias dbc := db-clear
 alias dbs := db-seed
 alias dbr := db-reset
+alias dbtc := db-topics-clear
+alias dbts := db-topics-seed
+alias dbtr := db-topics-reset
 alias f := fmt
 alias fc := fmt-check
 
@@ -129,3 +132,43 @@ db-seed COUNT="50":
 db-reset COUNT="50":
     @echo "Resetting database with {{COUNT}} tasks..."
     uv run python scripts/seed_db.py --clear --seed --count {{COUNT}}
+
+# Clear topics, atoms, messages and relationships
+db-topics-clear:
+    @echo "Clearing topics, atoms, and messages..."
+    cd backend && uv run python scripts/seed_topics_atoms.py --clear
+
+# Seed topics, atoms, messages and relationships
+db-topics-seed TOPICS="5" ATOMS="10" MESSAGES="20":
+    @echo "Seeding {{TOPICS}} topics with {{ATOMS}} atoms and {{MESSAGES}} messages each..."
+    cd backend && uv run python scripts/seed_topics_atoms.py --seed --topics {{TOPICS}} --atoms {{ATOMS}} --messages {{MESSAGES}}
+
+# Clear and seed topics/atoms (fresh start)
+db-topics-reset TOPICS="5" ATOMS="10" MESSAGES="20":
+    @echo "Resetting topics with {{TOPICS}} topics, {{ATOMS}} atoms, {{MESSAGES}} messages..."
+    cd backend && uv run python scripts/seed_topics_atoms.py --clear --seed --topics {{TOPICS}} --atoms {{ATOMS}} --messages {{MESSAGES}}
+
+# Seed topics, atoms, and messages for testing
+seed-topics COUNT="5":
+    @echo "Seeding {{COUNT}} topics with atoms and messages..."
+    uv run python scripts/seed_topics_atoms.py --seed --topics {{COUNT}}
+
+# Clear all topics, atoms, and messages
+clear-topics:
+    @echo "Clearing topics, atoms, and messages..."
+    uv run python scripts/seed_topics_atoms.py --clear
+
+# Reset topics data (clear + seed)
+reset-topics COUNT="5":
+    @echo "Resetting topics data..."
+    uv run python scripts/seed_topics_atoms.py --clear --seed --topics {{COUNT}}
+
+# Run API tests for atoms
+test-atoms:
+    @echo "Running atoms API tests..."
+    uv run pytest tests/api/test_atoms.py -v
+
+# Run all tests with coverage
+test-all:
+    @echo "Running all tests with coverage..."
+    uv run pytest --cov=app --cov-report=term-missing

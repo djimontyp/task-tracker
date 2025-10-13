@@ -1,6 +1,9 @@
 """Test configuration and fixtures."""
 
+import os
+
 import pytest
+from cryptography.fernet import Fernet
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import JSON, event
 from sqlalchemy.dialects import postgresql
@@ -8,6 +11,12 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.types import TypeDecorator
 from sqlmodel import SQLModel
+
+# Set test environment variables BEFORE any app imports
+if not os.getenv("TELEGRAM_BOT_TOKEN"):
+    os.environ["TELEGRAM_BOT_TOKEN"] = "test_dummy_token_for_testing"
+if not os.getenv("ENCRYPTION_KEY"):
+    os.environ["ENCRYPTION_KEY"] = Fernet.generate_key().decode()
 
 
 # Monkey patch JSONB BEFORE any imports from app
@@ -26,11 +35,6 @@ postgresql.JSONB = SQLiteJSON
 from app.database import get_db_session
 from app.main import app
 from core.config import settings
-from cryptography.fernet import Fernet
-
-# Ensure test-safe ENCRYPTION_KEY for CredentialEncryption usage
-if not settings.encryption_key:
-    settings.encryption_key = Fernet.generate_key().decode()
 
 
 # Test database URL (in-memory SQLite)
@@ -44,13 +48,29 @@ test_engine = create_async_engine(
 )
 
 
-# Enable foreign keys for SQLite
+# Enable foreign keys for SQLite and handle BigInteger autoincrement
 @event.listens_for(test_engine.sync_engine, "connect")
 def set_sqlite_pragma(dbapi_conn, connection_record):
     """Configure SQLite for better testing."""
     cursor = dbapi_conn.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
+
+
+# Monkey patch BigInteger to use INTEGER for SQLite
+# This ensures AUTOINCREMENT works properly with RETURNING clause
+from sqlalchemy import BigInteger
+from sqlalchemy.dialects.sqlite.base import SQLiteTypeCompiler
+
+original_visit_big_integer = getattr(SQLiteTypeCompiler, "visit_BIGINT", None)
+
+
+def visit_BIGINT(self, type_, **kw):
+    """Override BIGINT to INTEGER for SQLite to support AUTOINCREMENT."""
+    return "INTEGER"
+
+
+SQLiteTypeCompiler.visit_BIGINT = visit_BIGINT
 
 
 # Create test session factory

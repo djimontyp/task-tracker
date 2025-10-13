@@ -5,6 +5,7 @@ from . import (
     analysis,
     analysis_runs,
     assignments,
+    atoms,
     health,
     ingestion,
     messages,
@@ -39,3 +40,4 @@ api_router.include_router(agents.router)
 api_router.include_router(task_configs.router)
 api_router.include_router(assignments.router)
 api_router.include_router(topics.router)
+api_router.include_router(atoms.router)

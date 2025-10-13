@@ -92,6 +92,21 @@ from .topic import (
     convert_to_hex_if_needed,
     validate_hex_color,
 )
+from .atom import (
+    Atom,
+    AtomCreate,
+    AtomUpdate,
+    AtomPublic,
+    AtomListResponse,
+    AtomLink,
+    AtomLinkCreate,
+    AtomLinkPublic,
+    TopicAtom,
+    TopicAtomCreate,
+    TopicAtomPublic,
+    AtomType,
+    LinkType,
+)
 from .user import User
 
 __all__ = [
@@ -189,6 +204,20 @@ __all__ = [
     "auto_select_color",
     "convert_to_hex_if_needed",
     "validate_hex_color",
+    # Atom (Zettelkasten)
+    "Atom",
+    "AtomCreate",
+    "AtomUpdate",
+    "AtomPublic",
+    "AtomListResponse",
+    "AtomLink",
+    "AtomLinkCreate",
+    "AtomLinkPublic",
+    "TopicAtom",
+    "TopicAtomCreate",
+    "TopicAtomPublic",
+    "AtomType",
+    "LinkType",
     # List Responses
     "TaskProposalListResponse",
 ]

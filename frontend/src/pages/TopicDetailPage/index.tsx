@@ -1,13 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeftIcon, CheckCircleIcon, CloudArrowUpIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, CheckCircleIcon, CloudArrowUpIcon, ExclamationCircleIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { Card, Input, Textarea, Button, Skeleton, Switch, Label } from '@/shared/ui'
 import { ColorPickerPopover } from '@/shared/components'
 import { topicService } from '@/features/topics/api/topicService'
+import { atomService } from '@/features/atoms/api/atomService'
+import { messageService } from '@/features/messages/api/messageService'
+import { AtomCard, CreateAtomDialog } from '@/features/atoms/components'
 import { renderTopicIcon } from '@/features/topics/utils/renderIcon'
 import { useDebounce } from '@/shared/hooks'
 import type { Topic } from '@/features/topics/types'
+import type { Atom } from '@/features/atoms/types'
+import type { Message } from '@/shared/types'
 import toast from 'react-hot-toast'
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -24,6 +29,7 @@ const TopicDetailPage = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
   const initialValuesRef = useRef<{ name: string; description: string } | null>(null)
   const saveTimeoutRef = useRef<NodeJS.Timeout>()
@@ -35,6 +41,18 @@ const TopicDetailPage = () => {
   const { data: topic, isLoading, error } = useQuery<Topic>({
     queryKey: ['topic', parseInt(topicId!)],
     queryFn: () => topicService.getTopicById(parseInt(topicId!)),
+    enabled: !!topicId,
+  })
+
+  const { data: atoms = [], isLoading: isLoadingAtoms } = useQuery<Atom[]>({
+    queryKey: ['atoms', 'topic', parseInt(topicId!)],
+    queryFn: () => atomService.getAtomsByTopic(parseInt(topicId!)),
+    enabled: !!topicId,
+  })
+
+  const { data: messages = [], isLoading: isLoadingMessages } = useQuery<Message[]>({
+    queryKey: ['messages', 'topic', parseInt(topicId!)],
+    queryFn: () => messageService.getMessagesByTopic(parseInt(topicId!)),
     enabled: !!topicId,
   })
 
@@ -397,6 +415,99 @@ const TopicDetailPage = () => {
           </div>
         </div>
       </Card>
+
+      <div className="space-y-6">
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Knowledge Atoms</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsCreateDialogOpen(true)}
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Create Atom
+            </Button>
+          </div>
+
+          {isLoadingAtoms ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-40 rounded-lg" />
+              ))}
+            </div>
+          ) : atoms.length === 0 ? (
+            <Card className="p-8 text-center">
+              <div className="text-muted-foreground">
+                <p className="text-lg mb-2">No atoms yet</p>
+                <p className="text-sm">Create your first knowledge atom to get started.</p>
+              </div>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {atoms.map((atom) => (
+                <AtomCard key={atom.id} atom={atom} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Related Messages</h2>
+
+          {isLoadingMessages ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-24 rounded-lg" />
+              ))}
+            </div>
+          ) : messages.length === 0 ? (
+            <Card className="p-8 text-center">
+              <div className="text-muted-foreground">
+                <p className="text-lg">No messages linked to this topic yet.</p>
+              </div>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {messages.map((message) => (
+                <Card key={message.id} className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <p className="text-sm text-foreground line-clamp-2">
+                          {message.content}
+                        </p>
+                      </div>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {new Date(message.sent_at).toLocaleString('uk-UA', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span className="font-medium">{message.author_name}</span>
+                      <span>•</span>
+                      <span>{message.source_name}</span>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <CreateAtomDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        topicId={parseInt(topicId!)}
+        onAtomCreated={() => {
+          queryClient.invalidateQueries({ queryKey: ['atoms', 'topic', parseInt(topicId!)] })
+        }}
+      />
     </div>
   )
 }

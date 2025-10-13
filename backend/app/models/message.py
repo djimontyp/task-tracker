@@ -36,6 +36,14 @@ class Message(IDMixin, TimestampMixin, SQLModel, table=True):
         description="Telegram profile if message is from Telegram",
     )
 
+    # Topic relationship (optional)
+    topic_id: int | None = Field(
+        default=None,
+        foreign_key="topics.id",
+        index=True,
+        description="Topic this message belongs to",
+    )
+
     # Cached fields for performance
     avatar_url: str | None = Field(default=None, max_length=500, description="Cached avatar URL from User")
 
