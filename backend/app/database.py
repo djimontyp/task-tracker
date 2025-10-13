@@ -1,3 +1,5 @@
+from collections.abc import AsyncGenerator
+
 from core.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlmodel import SQLModel
@@ -15,13 +17,13 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
-async def create_db_and_tables():
+async def create_db_and_tables() -> None:
     """Create database tables"""
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 
 
-async def get_db_session() -> AsyncSession:
+async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Dependency for getting database session"""
     async with AsyncSessionLocal() as session:
         try:
@@ -33,7 +35,7 @@ async def get_db_session() -> AsyncSession:
             await session.close()
 
 
-async def get_db_session_context():
+async def get_db_session_context() -> AsyncGenerator[AsyncSession, None]:
     """Context manager for database session in background tasks"""
     async with AsyncSessionLocal() as session:
         try:

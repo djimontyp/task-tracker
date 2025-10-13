@@ -72,7 +72,9 @@ class AnalysisRunValidator:
             AnalysisRunStatus.reviewed.value,
         ]
 
-        result = await self.session.execute(select(AnalysisRun).where(AnalysisRun.status.in_(unclosed_statuses)))
+        result = await self.session.execute(
+            select(AnalysisRun).where(AnalysisRun.status.in_(unclosed_statuses))  # type: ignore[attr-defined]
+        )
         unclosed_runs = result.scalars().all()
 
         if unclosed_runs:

@@ -11,7 +11,7 @@ from ...schemas import (
     WebhookConfigResponse,
 )
 from ...webhook_service import telegram_webhook_service, webhook_settings_service
-from ..deps import DatabaseDep, SettingsDep
+from ..deps import DatabaseDep
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/webhook-settings", tags=["webhook-settings"])
@@ -23,12 +23,14 @@ router = APIRouter(prefix="/webhook-settings", tags=["webhook-settings"])
     summary="Get webhook settings",
     response_description="Current webhook configuration and defaults",
 )
-async def get_webhook_settings(db: DatabaseDep, settings: SettingsDep) -> WebhookConfigResponse:
+async def get_webhook_settings(db: DatabaseDep) -> WebhookConfigResponse:
     """
     Get current webhook configuration.
 
     Returns Telegram webhook config along with default protocol and host values.
     """
+    from core.config import settings
+
     telegram_config = await webhook_settings_service.get_telegram_config(db)
 
     api_base_url = settings.api_base_url
@@ -127,7 +129,7 @@ async def set_telegram_webhook(request: SetWebhookRequest, db: DatabaseDep) -> S
 
 
 @router.delete("/telegram", response_model=SetWebhookResponse)
-async def delete_telegram_webhook(db: DatabaseDep):
+async def delete_telegram_webhook(db: DatabaseDep) -> SetWebhookResponse:
     try:
         result = await telegram_webhook_service.delete_webhook()
 
@@ -159,7 +161,7 @@ async def delete_telegram_webhook(db: DatabaseDep):
     summary="Get Telegram webhook info",
     response_description="Current webhook information from Telegram API",
 )
-async def get_telegram_webhook_info():
+async def get_telegram_webhook_info() -> dict[str, bool | dict[str, str] | str]:
     """
     Get current webhook information from Telegram Bot API.
 
@@ -179,7 +181,7 @@ async def get_telegram_webhook_info():
 
 
 @router.put("/telegram/group-ids", response_model=TelegramWebhookConfig)
-async def update_telegram_group_ids(request: UpdateTelegramGroupIdsRequest, db: DatabaseDep):
+async def update_telegram_group_ids(request: UpdateTelegramGroupIdsRequest, db: DatabaseDep) -> TelegramWebhookConfig:
     try:
         groups = [{"id": gid, "name": None} for gid in request.group_ids]
 
@@ -202,7 +204,7 @@ async def update_telegram_group_ids(request: UpdateTelegramGroupIdsRequest, db: 
 
 
 @router.post("/telegram/groups", response_model=TelegramWebhookConfig)
-async def add_telegram_group(request: AddTelegramGroupRequest, db: DatabaseDep):
+async def add_telegram_group(request: AddTelegramGroupRequest, db: DatabaseDep) -> TelegramWebhookConfig:
     try:
         chat_info = await telegram_webhook_service.get_chat_info(request.group_id)
 
@@ -232,7 +234,7 @@ async def add_telegram_group(request: AddTelegramGroupRequest, db: DatabaseDep):
 
 
 @router.delete("/telegram/groups/{group_id}", response_model=TelegramWebhookConfig)
-async def remove_telegram_group(group_id: int, db: DatabaseDep):
+async def remove_telegram_group(group_id: int, db: DatabaseDep) -> TelegramWebhookConfig:
     try:
         config = await webhook_settings_service.remove_telegram_group(db, group_id)
 
@@ -248,7 +250,7 @@ async def remove_telegram_group(group_id: int, db: DatabaseDep):
 
 
 @router.post("/telegram/groups/refresh-names", response_model=TelegramWebhookConfig)
-async def refresh_telegram_group_names(db: DatabaseDep):
+async def refresh_telegram_group_names(db: DatabaseDep) -> TelegramWebhookConfig:
     try:
         config = await webhook_settings_service.update_group_names(db, telegram_webhook_service)
 

@@ -34,8 +34,6 @@ postgresql.JSONB = SQLiteJSON
 # Now safe to import app modules
 from app.database import get_db_session
 from app.main import app
-from core.config import settings
-
 
 # Test database URL (in-memory SQLite)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -59,7 +57,6 @@ def set_sqlite_pragma(dbapi_conn, connection_record):
 
 # Monkey patch BigInteger to use INTEGER for SQLite
 # This ensures AUTOINCREMENT works properly with RETURNING clause
-from sqlalchemy import BigInteger
 from sqlalchemy.dialects.sqlite.base import SQLiteTypeCompiler
 
 original_visit_big_integer = getattr(SQLiteTypeCompiler, "visit_BIGINT", None)

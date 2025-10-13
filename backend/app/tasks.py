@@ -322,7 +322,7 @@ async def ingest_telegram_messages_task(
 
 
 @nats_broker.task
-async def execute_analysis_run(run_id: str) -> dict:
+async def execute_analysis_run(run_id: str) -> dict[str, str | int]:
     """Execute analysis run: process messages and create proposals.
 
     This is the main background job that coordinates the entire analysis run:
@@ -357,88 +357,86 @@ async def execute_analysis_run(run_id: str) -> dict:
     # Convert string UUID to UUID object
     run_uuid = UUID(run_id)
 
-    # Get database session context for background task
-    async for db in get_db_session_context():
-        executor = AnalysisExecutor(db)
+    # Get database session using async context manager
+    db_context = get_db_session_context()
+    db = await anext(db_context)
+    executor = AnalysisExecutor(db)  # type: ignore[arg-type]
+
+    try:
+        # 1. Update status to "running"
+        logger.info(f"Run {run_id}: Starting run")
+        await executor.start_run(run_uuid)
+
+        # 2. Fetch messages in time window
+        logger.info(f"Run {run_id}: Fetching messages")
+        messages = await executor.fetch_messages(run_uuid)
+        logger.info(f"Run {run_id}: Found {len(messages)} messages in window")
+
+        # 3. Pre-filter messages (keywords, length, @mentions)
+        logger.info(f"Run {run_id}: Pre-filtering messages")
+        filtered = await executor.prefilter_messages(run_uuid, messages)
+        logger.info(f"Run {run_id}: {len(filtered)} messages after pre-filter")
+
+        # 4. Group into batches
+        logger.info(f"Run {run_id}: Creating batches")
+        batches = await executor.create_batches(filtered)
+        logger.info(f"Run {run_id}: Created {len(batches)} batches")
+
+        # 5. Process each batch
+        total_proposals = 0
+        for batch_idx, batch in enumerate(batches):
+            logger.info(f"Run {run_id}: Processing batch {batch_idx + 1}/{len(batches)} ({len(batch)} messages)")
+
+            # Update progress
+            await executor.update_progress(run_uuid, batch_idx + 1, len(batches))
+
+            # Create proposals from batch
+            proposals = await executor.process_batch(run_uuid, batch)
+
+            # Save proposals
+            saved_count = await executor.save_proposals(run_uuid, proposals)
+            total_proposals += saved_count
+
+            logger.info(f"Run {run_id}: Batch {batch_idx + 1} completed, created {saved_count} proposals")
+
+        # 6. Update status to "completed"
+        logger.info(f"Run {run_id}: Completing run with {total_proposals} proposals")
+        result = await executor.complete_run(run_uuid)
+
+        logger.info(f"Run {run_id}: Successfully completed")
+        return {
+            "run_id": run_id,
+            "status": "completed",
+            "messages_fetched": len(messages),
+            "messages_filtered": len(filtered),
+            "batches_processed": len(batches),
+            "proposals_created": total_proposals,
+        }
+
+    except Exception as e:
+        # Handle errors - update run to failed status
+        logger.error(
+            f"Run {run_id}: Failed with error: {e}",
+            exc_info=True,
+        )
 
         try:
-            # 1. Update status to "running"
-            logger.info(f"Run {run_id}: Starting run")
-            await executor.start_run(run_uuid)
-
-            # 2. Fetch messages in time window
-            logger.info(f"Run {run_id}: Fetching messages")
-            messages = await executor.fetch_messages(run_uuid)
-            logger.info(f"Run {run_id}: Found {len(messages)} messages in window")
-
-            # 3. Pre-filter messages (keywords, length, @mentions)
-            logger.info(f"Run {run_id}: Pre-filtering messages")
-            filtered = await executor.prefilter_messages(run_uuid, messages)
-            logger.info(f"Run {run_id}: {len(filtered)} messages after pre-filter")
-
-            # 4. Group into batches
-            logger.info(f"Run {run_id}: Creating batches")
-            batches = await executor.create_batches(filtered)
-            logger.info(f"Run {run_id}: Created {len(batches)} batches")
-
-            # 5. Process each batch
-            total_proposals = 0
-            for batch_idx, batch in enumerate(batches):
-                logger.info(f"Run {run_id}: Processing batch {batch_idx + 1}/{len(batches)} ({len(batch)} messages)")
-
-                # Update progress
-                await executor.update_progress(run_uuid, batch_idx + 1, len(batches))
-
-                # Create proposals from batch
-                proposals = await executor.process_batch(run_uuid, batch)
-
-                # Save proposals
-                saved_count = await executor.save_proposals(run_uuid, proposals)
-                total_proposals += saved_count
-
-                logger.info(f"Run {run_id}: Batch {batch_idx + 1} completed, created {saved_count} proposals")
-
-            # 6. Update status to "completed"
-            logger.info(f"Run {run_id}: Completing run with {total_proposals} proposals")
-            result = await executor.complete_run(run_uuid)
-
-            logger.info(f"Run {run_id}: Successfully completed")
-            return {
-                "run_id": run_id,
-                "status": "completed",
-                "messages_fetched": len(messages),
-                "messages_filtered": len(filtered),
-                "batches_processed": len(batches),
-                "proposals_created": total_proposals,
-            }
-
-        except Exception as e:
-            # Handle errors - update run to failed status
+            await executor.fail_run(run_uuid, str(e))
+        except Exception as fail_error:
             logger.error(
-                f"Run {run_id}: Failed with error: {e}",
+                f"Run {run_id}: Failed to update run status: {fail_error}",
                 exc_info=True,
             )
 
-            try:
-                await executor.fail_run(run_uuid, str(e))
-            except Exception as fail_error:
-                logger.error(
-                    f"Run {run_id}: Failed to update run status: {fail_error}",
-                    exc_info=True,
-                )
-
-            # Re-raise to mark TaskIQ job as failed
-            raise
+        # Re-raise to mark TaskIQ job as failed
+        raise
 
 
 if __name__ == "__main__":
-    # Example usage of TaskIQ with NATS
-
     import asyncio
 
-    async def main():
+    async def main() -> None:
         """Main function for sending example task"""
-
         logger.info("Sending task for message processing...")
         task = await process_message.kiq("Example message for processing")
 

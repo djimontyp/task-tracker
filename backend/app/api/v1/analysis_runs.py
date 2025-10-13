@@ -14,12 +14,13 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session
 from app.models import AnalysisRunCreate, AnalysisRunListResponse, AnalysisRunPublic
 from app.services import AnalysisRunCRUD, AnalysisRunValidator, websocket_manager
+from app.services.websocket_manager import WebSocketManager
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/runs", tags=["analysis"])
 
 
-def get_ws_manager():
+def get_ws_manager() -> WebSocketManager:
     """Dependency for getting WebSocket manager."""
     return websocket_manager
 
@@ -84,7 +85,7 @@ async def list_runs(
 async def create_run(
     run_data: AnalysisRunCreate,
     session: AsyncSession = Depends(get_session),
-    ws_manager=Depends(get_ws_manager),
+    ws_manager: WebSocketManager = Depends(get_ws_manager),
 ) -> AnalysisRunPublic:
     """Create new analysis run with config snapshot.
 
@@ -206,7 +207,7 @@ async def get_run(
 async def close_run(
     run_id: UUID,
     session: AsyncSession = Depends(get_session),
-    ws_manager=Depends(get_ws_manager),
+    ws_manager: WebSocketManager = Depends(get_ws_manager),
 ) -> AnalysisRunPublic:
     """Close analysis run and calculate accuracy metrics.
 

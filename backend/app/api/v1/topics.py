@@ -12,18 +12,15 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session
 from app.models import (
     TOPIC_ICONS,
-    Source,
     Topic,
     TopicCreate,
     TopicListResponse,
     TopicPublic,
     TopicUpdate,
-    User,
     auto_select_color,
     auto_select_icon,
 )
 from app.models.atom import AtomPublic
-from app.models.message import Message
 from app.schemas.messages import MessageResponse
 from app.services import AtomCRUD, TopicCRUD
 

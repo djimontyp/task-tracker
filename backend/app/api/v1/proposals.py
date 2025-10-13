@@ -18,12 +18,13 @@ from app.models import (
     TaskProposalUpdate,
 )
 from app.services import TaskProposalCRUD, websocket_manager
+from app.services.websocket_manager import WebSocketManager
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/proposals", tags=["proposals"])
 
 
-def get_ws_manager():
+def get_ws_manager() -> WebSocketManager:
     """Dependency for getting WebSocket manager."""
     return websocket_manager
 
@@ -141,7 +142,7 @@ async def get_proposal(
 async def approve_proposal(
     proposal_id: UUID,
     session: AsyncSession = Depends(get_session),
-    ws_manager=Depends(get_ws_manager),
+    ws_manager: WebSocketManager = Depends(get_ws_manager),
 ) -> TaskProposalPublic:
     """Approve task proposal for implementation.
 
@@ -205,7 +206,7 @@ async def reject_proposal(
     proposal_id: UUID,
     reject_request: RejectProposalRequest,
     session: AsyncSession = Depends(get_session),
-    ws_manager=Depends(get_ws_manager),
+    ws_manager: WebSocketManager = Depends(get_ws_manager),
 ) -> TaskProposalPublic:
     """Reject task proposal with rejection reason.
 
@@ -273,7 +274,7 @@ async def merge_proposal(
     proposal_id: UUID,
     merge_request: MergeProposalRequest,
     session: AsyncSession = Depends(get_session),
-    ws_manager=Depends(get_ws_manager),
+    ws_manager: WebSocketManager = Depends(get_ws_manager),
 ) -> TaskProposalPublic:
     """Merge proposal with existing task.
 
@@ -337,7 +338,7 @@ async def update_proposal(
     proposal_id: UUID,
     update_data: TaskProposalUpdate,
     session: AsyncSession = Depends(get_session),
-    ws_manager=Depends(get_ws_manager),
+    ws_manager: WebSocketManager = Depends(get_ws_manager),
 ) -> TaskProposalPublic:
     """Update task proposal fields.
 

@@ -18,12 +18,13 @@ from app.models import (
     ProjectConfigUpdate,
 )
 from app.services import ProjectConfigCRUD, websocket_manager
+from app.services.websocket_manager import WebSocketManager
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/projects", tags=["projects"])
 
 
-def get_ws_manager():
+def get_ws_manager() -> WebSocketManager:
     """Dependency for getting WebSocket manager."""
     return websocket_manager
 
@@ -79,7 +80,7 @@ async def list_projects(
 async def create_project(
     project_data: ProjectConfigCreate,
     session: AsyncSession = Depends(get_session),
-    ws_manager=Depends(get_ws_manager),
+    ws_manager: WebSocketManager = Depends(get_ws_manager),
 ) -> ProjectConfigPublic:
     """Create new project configuration.
 
@@ -190,7 +191,7 @@ async def update_project(
     project_id: UUID,
     update_data: ProjectConfigUpdate,
     session: AsyncSession = Depends(get_session),
-    ws_manager=Depends(get_ws_manager),
+    ws_manager: WebSocketManager = Depends(get_ws_manager),
 ) -> ProjectConfigPublic:
     """Update project configuration with version tracking.
 
@@ -257,7 +258,7 @@ async def update_project(
 async def delete_project(
     project_id: UUID,
     session: AsyncSession = Depends(get_session),
-    ws_manager=Depends(get_ws_manager),
+    ws_manager: WebSocketManager = Depends(get_ws_manager),
 ) -> None:
     """Delete project configuration.
 

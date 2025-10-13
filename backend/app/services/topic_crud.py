@@ -1,5 +1,6 @@
 """CRUD operations for Topic management."""
 
+from sqlalchemy import desc
 from sqlmodel import func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -49,8 +50,8 @@ class TopicCRUD:
             description=topic.description,
             icon=topic.icon,
             color=color,
-            created_at=topic.created_at.isoformat(),
-            updated_at=topic.updated_at.isoformat(),
+            created_at=topic.created_at.isoformat() if topic.created_at else "",
+            updated_at=topic.updated_at.isoformat() if topic.updated_at else "",
         )
 
     async def list(
@@ -73,7 +74,7 @@ class TopicCRUD:
         total = count_result.scalar_one()
 
         # Get paginated topics
-        query = select(Topic).offset(skip).limit(limit).order_by(Topic.created_at.desc())
+        query = select(Topic).offset(skip).limit(limit).order_by(desc(Topic.created_at))  # type: ignore[arg-type]
         result = await self.session.execute(query)
         topics = result.scalars().all()
 
@@ -89,8 +90,8 @@ class TopicCRUD:
                     description=topic.description,
                     icon=topic.icon,
                     color=color,
-                    created_at=topic.created_at.isoformat(),
-                    updated_at=topic.updated_at.isoformat(),
+                    created_at=topic.created_at.isoformat() if topic.created_at else "",
+                    updated_at=topic.updated_at.isoformat() if topic.updated_at else "",
                 )
             )
 
@@ -134,8 +135,8 @@ class TopicCRUD:
             description=topic.description,
             icon=topic.icon,
             color=color,
-            created_at=topic.created_at.isoformat(),
-            updated_at=topic.updated_at.isoformat(),
+            created_at=topic.created_at.isoformat() if topic.created_at else "",
+            updated_at=topic.updated_at.isoformat() if topic.updated_at else "",
         )
 
     async def update(self, topic_id: int, topic_data: TopicUpdate) -> TopicPublic | None:

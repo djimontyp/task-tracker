@@ -16,7 +16,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 class SettingsCrypto:
     """Handles encryption/decryption of sensitive settings data"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._key = self._derive_key()
 
     def _derive_key(self) -> bytes:

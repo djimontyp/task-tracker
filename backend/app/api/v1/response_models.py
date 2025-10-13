@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -145,11 +146,11 @@ class TaskResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        # Pydantic v2: allow attribute-based validation for ORM objects
         from_attributes = True
 
     @classmethod
-    def from_orm(cls, obj):  # Backward-compat shim (v1-style API)
+    def from_orm(cls, obj: Any) -> "TaskResponse":
+        """Backward-compat shim (v1-style API)"""
         return cls.model_validate(obj, from_attributes=True)
 
 
@@ -160,10 +161,8 @@ class TaskResponse(BaseModel):
 
 class StatsResponse(BaseModel):
     total_tasks: int
-    open_tasks: int
-    completed_tasks: int
-    categories: dict
-    priorities: dict
+    categories: dict[str, int]
+    priorities: dict[str, int]
 
 
 class SidebarCountsResponse(BaseModel):

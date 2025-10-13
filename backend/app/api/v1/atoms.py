@@ -49,7 +49,7 @@ async def list_atoms(
         List of atoms with pagination metadata
     """
     crud = AtomCRUD(session)
-    atoms, total = await crud.list(skip=skip, limit=limit)
+    atoms, total = await crud.list_atoms(skip=skip, limit=limit)
     page = (skip // limit) + 1 if limit else 1
     return AtomListResponse(
         items=atoms,

@@ -11,6 +11,7 @@ from pydantic_ai import Agent as PydanticAgent
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.ollama import OllamaProvider
 from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_ai.settings import ModelSettings
 
 from app.models import AgentConfig, LLMProvider, Message, ProjectConfig, ProviderType
 from app.services.credential_encryption import CredentialEncryption
@@ -102,17 +103,19 @@ class LLMProposalService:
         )
 
         # Build model settings
-        model_settings = {}
-        if self.agent_config.temperature is not None:
-            model_settings["temperature"] = self.agent_config.temperature
-        if self.agent_config.max_tokens is not None:
-            model_settings["max_tokens"] = self.agent_config.max_tokens
+        model_settings_obj: ModelSettings | None = None
+        if self.agent_config.temperature is not None or self.agent_config.max_tokens is not None:
+            model_settings_obj = ModelSettings()
+            if self.agent_config.temperature is not None:
+                model_settings_obj["temperature"] = self.agent_config.temperature
+            if self.agent_config.max_tokens is not None:
+                model_settings_obj["max_tokens"] = self.agent_config.max_tokens
 
         try:
             # Run LLM
             result = await agent.run(
                 prompt,
-                model_settings=model_settings if model_settings else None,
+                model_settings=model_settings_obj,
             )
 
             # Extract proposals
@@ -224,7 +227,7 @@ Return a structured list of task proposals.
 
         return proposals
 
-    def _build_model_instance(self, api_key: str | None = None):
+    def _build_model_instance(self, api_key: str | None = None) -> OpenAIChatModel:
         """Build pydantic-ai model instance from provider configuration.
 
         Args:

@@ -19,6 +19,21 @@ from .analysis_run import (
     AnalysisRunPublic,
     AnalysisRunUpdate,
 )
+from .atom import (
+    Atom,
+    AtomCreate,
+    AtomLink,
+    AtomLinkCreate,
+    AtomLinkPublic,
+    AtomListResponse,
+    AtomPublic,
+    AtomType,
+    AtomUpdate,
+    LinkType,
+    TopicAtom,
+    TopicAtomCreate,
+    TopicAtomPublic,
+)
 from .base import IDMixin, TimestampMixin
 from .enums import (
     AnalysisRunStatus,
@@ -91,21 +106,6 @@ from .topic import (
     auto_select_icon,
     convert_to_hex_if_needed,
     validate_hex_color,
-)
-from .atom import (
-    Atom,
-    AtomCreate,
-    AtomUpdate,
-    AtomPublic,
-    AtomListResponse,
-    AtomLink,
-    AtomLinkCreate,
-    AtomLinkPublic,
-    TopicAtom,
-    TopicAtomCreate,
-    TopicAtomPublic,
-    AtomType,
-    LinkType,
 )
 from .user import User
 

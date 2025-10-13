@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Text, func
+from sqlalchemy import Column, DateTime, Text, func
 from sqlmodel import Field, SQLModel
 
 from .enums import TaskCategory, TaskPriority, TaskStatus
@@ -44,16 +44,11 @@ class TaskEntity(SQLModel, table=True):
     # Timestamps
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"server_default": func.now()},
+        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
     )
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={
-            "server_default": func.now(),
-            "onupdate": func.now(),
-        },
+        sa_column=Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now()),
     )
 
 

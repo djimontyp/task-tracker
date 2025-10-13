@@ -37,7 +37,7 @@ class User(IDMixin, TimestampMixin, SQLModel, table=True):
     is_active: bool = Field(default=True, description="Whether user is active")
     is_bot: bool = Field(default=False, description="Whether this is a bot/system user")
 
-    @computed_field  # type: ignore[misc]
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def full_name(self) -> str:
         """Computed full name from first_name and last_name.

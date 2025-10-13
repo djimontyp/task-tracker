@@ -24,6 +24,8 @@ dp = Dispatcher()
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
     """Handle /start command"""
+    if not message.from_user:
+        return
     user_name = html.bold(message.from_user.full_name)
 
     webapp_button = InlineKeyboardMarkup(
@@ -106,6 +108,9 @@ Just send me any message and I'll help classify it as a task, or use the WebApp 
 @dp.message()
 async def process_message(message: Message) -> None:
     """Process regular messages and send to API for classification"""
+    if not message.from_user:
+        return
+
     try:
         avatar_url = None
 

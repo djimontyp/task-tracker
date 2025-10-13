@@ -4,8 +4,6 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import and_, func, select
 
-from app.schemas.stats import StatsResponse
-
 from ...models import AnalysisRun, Message, Source, Task, TaskProposal
 from ...models.enums import AnalysisRunStatus, ProposalStatus
 from ...services.websocket_manager import websocket_manager
@@ -53,9 +51,15 @@ async def get_activity_data(
 
     statement = (
         select(Message, Source)
-        .join(Source, Message.source_id == Source.id)
-        .where(and_(Message.sent_at >= start_date, Message.sent_at <= end_date))
-        .order_by(Message.sent_at)
+        .join(Source)
+        .where(
+            and_(
+                Message.source_id == Source.id,
+                Message.sent_at >= start_date,
+                Message.sent_at <= end_date,
+            )
+        )
+        .order_by(Message.sent_at)  # type: ignore[arg-type]
     )
 
     result = await db.execute(statement)
@@ -112,8 +116,8 @@ async def get_stats(db: DatabaseDep) -> StatsResponse:
     open_tasks = len([task for task in tasks if task.status == "open"])
     completed_tasks = len([task for task in tasks if task.status == "completed"])
 
-    categories = {}
-    priorities = {}
+    categories: dict[str, int] = {}
+    priorities: dict[str, int] = {}
 
     for task in tasks:
         categories[task.category] = categories.get(task.category, 0) + 1
@@ -121,8 +125,6 @@ async def get_stats(db: DatabaseDep) -> StatsResponse:
 
     return StatsResponse(
         total_tasks=total_tasks,
-        open_tasks=open_tasks,
-        completed_tasks=completed_tasks,
         categories=categories,
         priorities=priorities,
     )
@@ -154,7 +156,7 @@ async def analyze_day(db: DatabaseDep, target_date: str | None = None) -> Analyz
             and_(
                 Message.sent_at >= start_datetime,
                 Message.sent_at <= end_datetime,
-                ~Message.analyzed,
+                Message.analyzed == False,  # noqa: E712
             )
         )
         result = await db.execute(statement)
@@ -201,7 +203,7 @@ async def analyze_day(db: DatabaseDep, target_date: str | None = None) -> Analyz
             "status": summary_task.status,
             "priority": summary_task.priority,
             "category": summary_task.category,
-            "created_at": summary_task.created_at.isoformat(),
+            "created_at": summary_task.created_at.isoformat() if summary_task.created_at else None,
         }
         await websocket_manager.broadcast("tasks", {"type": "task_created", "data": task_data})
 
@@ -245,7 +247,11 @@ async def get_sidebar_counts(db: DatabaseDep) -> SidebarCountsResponse:
     ]
 
     unclosed_runs_statement = (
-        select(func.count()).select_from(AnalysisRun).where(AnalysisRun.status.in_(unclosed_statuses))
+        select(func.count())
+        .select_from(AnalysisRun)
+        .where(
+            AnalysisRun.status.in_(unclosed_statuses)  # type: ignore[attr-defined]
+        )
     )
     unclosed_runs_result = await db.execute(unclosed_runs_statement)
     unclosed_runs_count = unclosed_runs_result.scalar() or 0

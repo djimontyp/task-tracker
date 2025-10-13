@@ -2,9 +2,11 @@
 
 import logging
 from datetime import datetime
+from typing import cast
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from sqlalchemy import Column
 from sqlmodel import select
 
 from app.dependencies import DatabaseDep
@@ -34,7 +36,7 @@ class IngestionJobResponse(BaseModel):
 async def start_telegram_ingestion(
     request: TelegramIngestionRequest,
     db: DatabaseDep,
-):
+) -> IngestionJobResponse:
     """
     Start ingesting messages from Telegram chats.
 
@@ -53,6 +55,9 @@ async def start_telegram_ingestion(
         db.add(job)
         await db.commit()
         await db.refresh(job)
+
+        if job.id is None:
+            raise HTTPException(status_code=500, detail="Failed to create job: ID is None")
 
         logger.info(f"Created ingestion job {job.id} for chats: {request.chat_ids}")
 
@@ -75,14 +80,14 @@ async def start_telegram_ingestion(
 
 
 @router.get("/jobs/{job_id}", response_model=MessageIngestionJobPublic)
-async def get_ingestion_job(job_id: int, db: DatabaseDep):
+async def get_ingestion_job(job_id: int, db: DatabaseDep) -> MessageIngestionJobPublic:
     """Get status of an ingestion job."""
     job = await db.get(MessageIngestionJob, job_id)
 
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
 
-    return job
+    return MessageIngestionJobPublic.model_validate(job)
 
 
 @router.get("/jobs", response_model=list[MessageIngestionJobPublic])
@@ -90,9 +95,11 @@ async def list_ingestion_jobs(
     db: DatabaseDep,
     limit: int = 50,
     status: str | None = None,
-):
+) -> list[MessageIngestionJobPublic]:
     """List ingestion jobs with optional status filter."""
-    stmt = select(MessageIngestionJob).order_by(MessageIngestionJob.created_at.desc()).limit(limit)
+    stmt = (
+        select(MessageIngestionJob).order_by(cast(Column[datetime], MessageIngestionJob.created_at).desc()).limit(limit)
+    )
 
     if status:
         try:
@@ -104,4 +111,4 @@ async def list_ingestion_jobs(
     result = await db.execute(stmt)
     jobs = result.scalars().all()
 
-    return jobs
+    return [MessageIngestionJobPublic.model_validate(job) for job in jobs]

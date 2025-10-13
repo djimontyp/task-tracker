@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from sqlalchemy import desc
 from sqlmodel import func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -53,7 +54,7 @@ class AtomCRUD:
             updated_at=atom.updated_at.isoformat(),
         )
 
-    async def list(
+    async def list_atoms(
         self,
         skip: int = 0,
         limit: int = 100,
@@ -71,7 +72,7 @@ class AtomCRUD:
         count_result = await self.session.execute(count_query)
         total = count_result.scalar_one()
 
-        query = select(Atom).offset(skip).limit(limit).order_by(Atom.created_at.desc())
+        query = select(Atom).offset(skip).limit(limit).order_by(desc(Atom.created_at))  # type: ignore[arg-type]
         result = await self.session.execute(query)
         atoms = result.scalars().all()
 
@@ -84,8 +85,8 @@ class AtomCRUD:
                 confidence=atom.confidence,
                 user_approved=atom.user_approved,
                 meta=atom.meta,
-                created_at=atom.created_at.isoformat(),
-                updated_at=atom.updated_at.isoformat(),
+                created_at=atom.created_at.isoformat() if atom.created_at else "",
+                updated_at=atom.updated_at.isoformat() if atom.updated_at else "",
             )
             for atom in atoms
         ]
@@ -122,8 +123,8 @@ class AtomCRUD:
             confidence=atom.confidence,
             user_approved=atom.user_approved,
             meta=atom.meta,
-            created_at=atom.created_at.isoformat(),
-            updated_at=atom.updated_at.isoformat(),
+            created_at=atom.created_at.isoformat() if atom.created_at else "",
+            updated_at=atom.updated_at.isoformat() if atom.updated_at else "",
         )
 
     async def update(self, atom_id: int, atom_data: AtomUpdate) -> AtomPublic | None:
@@ -167,8 +168,8 @@ class AtomCRUD:
             confidence=atom.confidence,
             user_approved=atom.user_approved,
             meta=atom.meta,
-            created_at=atom.created_at.isoformat(),
-            updated_at=atom.updated_at.isoformat(),
+            created_at=atom.created_at.isoformat() if atom.created_at else "",
+            updated_at=atom.updated_at.isoformat() if atom.updated_at else "",
         )
 
     async def delete(self, atom_id: int) -> bool:
@@ -239,9 +240,9 @@ class AtomCRUD:
         """
         query = (
             select(Atom)
-            .join(TopicAtom, Atom.id == TopicAtom.atom_id)
+            .join(TopicAtom, TopicAtom.atom_id == Atom.id)  # type: ignore[arg-type]
             .where(TopicAtom.topic_id == topic_id)
-            .order_by(TopicAtom.position.asc().nulls_last(), Atom.created_at.desc())
+            .order_by(TopicAtom.position.asc().nulls_last(), desc(Atom.created_at))  # type: ignore[union-attr, arg-type]
         )
 
         result = await self.session.execute(query)
@@ -256,8 +257,8 @@ class AtomCRUD:
                 confidence=atom.confidence,
                 user_approved=atom.user_approved,
                 meta=atom.meta,
-                created_at=atom.created_at.isoformat(),
-                updated_at=atom.updated_at.isoformat(),
+                created_at=atom.created_at.isoformat() if atom.created_at else "",
+                updated_at=atom.updated_at.isoformat() if atom.updated_at else "",
             )
             for atom in atoms
         ]

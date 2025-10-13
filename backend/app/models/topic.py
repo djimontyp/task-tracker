@@ -256,7 +256,7 @@ class TopicCreate(SQLModel):
 
     @field_validator("color", mode="before")
     @classmethod
-    def validate_and_convert_color(cls, v):
+    def validate_and_convert_color(cls, v: str | None) -> str | None:
         """Validate hex color or convert Tailwind name to hex for backward compatibility."""
         if v is None:
             return None
@@ -290,7 +290,7 @@ class TopicUpdate(SQLModel):
 
     @field_validator("color", mode="before")
     @classmethod
-    def validate_and_convert_color(cls, v):
+    def validate_and_convert_color(cls, v: str | None) -> str | None:
         """Validate hex color or convert Tailwind name to hex for backward compatibility."""
         if v is None:
             return None

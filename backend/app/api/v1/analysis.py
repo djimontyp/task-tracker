@@ -3,6 +3,7 @@
 Provides endpoints for managing analysis runs and task proposals.
 """
 
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -20,7 +21,7 @@ router = APIRouter(prefix="/analysis", tags=["analysis"])
 async def create_analysis_run(
     run_data: AnalysisRunCreate,
     db: AsyncSession = Depends(get_db_session),
-):
+) -> AnalysisRunPublic:
     """Create new analysis run.
 
     Validates that no unclosed runs exist before creating a new run.
@@ -56,7 +57,7 @@ async def create_analysis_run(
 async def start_analysis_run(
     run_id: UUID,
     db: AsyncSession = Depends(get_db_session),
-):
+) -> dict[str, Any]:
     """Start analysis run execution via TaskIQ background job.
 
     Triggers the background job to process messages and create proposals.
@@ -102,7 +103,7 @@ async def list_analysis_runs(
     status: str | None = None,
     trigger_type: str | None = None,
     db: AsyncSession = Depends(get_db_session),
-):
+) -> list[AnalysisRunPublic]:
     """List analysis runs with pagination and filters.
 
     Args:
@@ -116,7 +117,7 @@ async def list_analysis_runs(
         List of analysis runs
     """
     crud = AnalysisRunCRUD(db)
-    runs = await crud.list(
+    runs, _ = await crud.list(
         skip=skip,
         limit=limit,
         status=status,
@@ -129,7 +130,7 @@ async def list_analysis_runs(
 async def get_analysis_run(
     run_id: UUID,
     db: AsyncSession = Depends(get_db_session),
-):
+) -> AnalysisRunPublic:
     """Get specific analysis run by ID.
 
     Args:
@@ -155,7 +156,7 @@ async def get_analysis_run(
 async def close_analysis_run(
     run_id: UUID,
     db: AsyncSession = Depends(get_db_session),
-):
+) -> AnalysisRunPublic:
     """Close analysis run and calculate accuracy metrics.
 
     Validates that all proposals have been reviewed before closing.

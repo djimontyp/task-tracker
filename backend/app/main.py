@@ -91,18 +91,18 @@ def create_app() -> FastAPI:
     app.include_router(ws_router)
 
     @app.get("/")
-    async def root():
+    async def root() -> dict[str, str]:
         return {"message": f"{settings.app_name} API", "status": "running"}
 
     @app.get("/api/health")
-    async def legacy_health_check():
+    async def legacy_health_check() -> dict[str, str]:
         """Legacy health check endpoint for backward compatibility"""
         from datetime import datetime
 
         return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
     @app.post("/")
-    async def root_post(request: Request):
+    async def root_post(request: Request) -> dict[str, str]:
         try:
             body = await request.body()
             print(f"⚠️ Unexpected POST to root endpoint. Body: {body.decode()[:200]}...")
@@ -121,7 +121,7 @@ app = create_app()
 
 
 @app.on_event("startup")
-async def startup():
+async def startup() -> None:
     """Initialize database and TaskIQ broker on startup"""
     await create_db_and_tables()
     if not nats_broker.is_worker_process:
@@ -129,7 +129,7 @@ async def startup():
 
 
 @app.on_event("shutdown")
-async def shutdown():
+async def shutdown() -> None:
     """Shutdown TaskIQ broker on application shutdown"""
     if not nats_broker.is_worker_process:
         await nats_broker.shutdown()
