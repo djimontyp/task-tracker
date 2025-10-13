@@ -2,9 +2,11 @@ import asyncio
 import sys
 from logging.config import fileConfig
 from pathlib import Path
+from typing import Any
 
 from alembic import context
 from sqlalchemy import pool
+from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine, async_engine_from_config
 from sqlmodel import SQLModel
 
@@ -16,12 +18,12 @@ if str(PROJECT_ROOT) not in sys.path:
 
 # Import all models (new agent management + legacy task tracker)
 try:
-    import backend.app.models  # noqa: F401, E402
-    from backend.core.config import settings  # type: ignore  # noqa: E402
+    import backend.app.models  # type: ignore[import-not-found]  # noqa: F401, E402
+    from backend.core.config import settings  # type: ignore[import-not-found]  # noqa: E402
 except ModuleNotFoundError:
     # Running in Docker container where structure is flat
     import app.models  # noqa: F401, E402
-    from core.config import settings  # type: ignore  # noqa: E402
+    from core.config import settings  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -36,7 +38,7 @@ target_metadata = SQLModel.metadata
 
 
 def get_url() -> str:
-    return settings.migration_database_url
+    return settings.migration_database_url  # type: ignore[no-any-return]
 
 
 def get_offline_url() -> str:
@@ -50,7 +52,7 @@ def get_offline_url() -> str:
     return url.replace("+asyncpg", "")
 
 
-def process_revision_directives(context, revision, directives):
+def process_revision_directives(context: Any, revision: Any, directives: Any) -> None:
     """Drop empty autogenerate revisions to avoid noise."""
     cmd_opts = getattr(config, "cmd_opts", None)
     if cmd_opts and getattr(cmd_opts, "autogenerate", False):
@@ -82,7 +84,7 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def do_run_migrations(connection) -> None:
+def do_run_migrations(connection: Connection) -> None:
     context.configure(
         connection=connection,
         target_metadata=target_metadata,
