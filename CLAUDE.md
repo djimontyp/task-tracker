@@ -11,12 +11,16 @@ Event-driven microservices: **Telegram Bot** → **FastAPI Backend** (REST + Web
 ## Commands
 - `just services` - Start all (postgres, nats, worker, api, dashboard, nginx)
 - `just services-dev` - Development mode with live reload
+- `just typecheck` / `just tc` - Run mypy type checking on backend
+- `just fmt` / `just f` - Format code with ruff
 - See @justfile for full list
 
 ## Guidelines
 - **Delegation**: Use specialized agents (fastapi-backend-expert, react-frontend-architect)
-- **Patterns**: Async/await, dependency injection, type safety
-- **Forbidden**: Modify dependencies without approval, commit secrets
+- **Patterns**: Async/await, dependency injection, type safety with mypy static analysis
+- **Quality**: Run `just typecheck` after backend changes to ensure type safety
+- **Imports**: Use absolute imports only (e.g., `from app.models import User`), never relative imports (e.g., `from . import User`)
+- **Forbidden**: Modify dependencies without approval, commit secrets, use relative imports
 
 ## Code Quality Standards
 - **Comments**: Write self-documenting code. Comments should only explain complex logic/algorithms, not describe obvious code structure
