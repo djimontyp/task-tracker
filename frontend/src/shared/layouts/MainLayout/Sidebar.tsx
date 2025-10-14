@@ -76,12 +76,9 @@ const Sidebar = () => {
   }, [queryClient])
 
   const navItems = [
-    // Workspace Section
     { path: '/', label: 'Dashboard', Icon: Squares2X2Icon, section: 'workspace' },
     { path: '/messages', label: 'Messages', Icon: ChatBubbleLeftRightIcon, section: 'workspace' },
     { path: '/tasks', label: 'Tasks', Icon: CheckCircleIcon, section: 'workspace' },
-
-    // AI Analysis Section
     {
       path: '/analysis',
       label: 'Analysis Runs',
@@ -96,13 +93,9 @@ const Sidebar = () => {
       badge: counts?.pending_proposals,
       section: 'analysis',
     },
-
-    // AI Config Section
     { path: '/agents', label: 'Agents', Icon: CpuChipIcon, section: 'config' },
     { path: '/providers', label: 'Providers', Icon: UsersIcon, section: 'config' },
     { path: '/projects', label: 'Projects', Icon: FolderIcon, section: 'config' },
-
-    // Insights Section
     { path: '/analytics', label: 'Analytics', Icon: ChartBarIcon, section: 'insights' },
     { path: '/settings', label: 'Settings', Icon: Cog6ToothIcon, section: 'insights' },
   ]
@@ -157,14 +150,12 @@ const Sidebar = () => {
 
             return (
               <div key={item.path}>
-                {/* Section Label */}
                 {showSectionLabel && sidebarOpen && (
                   <div className="px-3 py-1 mt-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {sectionLabel}
                   </div>
                 )}
 
-                {/* Navigation Item */}
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
@@ -183,7 +174,6 @@ const Sidebar = () => {
                   >
                     {item.label}
                   </span>
-                  {/* Badge for notifications */}
                   {item.badge !== undefined && item.badge > 0 && sidebarOpen && (
                     <Badge variant="default" className="ml-auto">
                       {item.badge}

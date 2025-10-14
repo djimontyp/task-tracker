@@ -36,7 +36,6 @@ const resolveWebSocketUrl = () => {
   const host = resolveHost()
   const path = normalizePath(import.meta.env.VITE_WS_PATH)
 
-  // Use window.location.port if available for correct port resolution
   const port = typeof window !== 'undefined' && window.location.port
     ? `:${window.location.port}`
     : ''
@@ -71,13 +70,11 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   const isConnectingRef = useRef(false)
 
   const connect = () => {
-    // Guard: prevent multiple simultaneous connections
     if (isConnectingRef.current) {
       logger.debug('⚠️  Connection already in progress, skipping...')
       return
     }
 
-    // Guard: check if there's already an active connection
     if (wsRef.current) {
       const currentState = wsRef.current.readyState
       if (currentState === WebSocket.CONNECTING || currentState === WebSocket.OPEN) {
@@ -89,7 +86,6 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     try {
       isConnectingRef.current = true
       setConnectionState('connecting')
-      // Resolve WebSocket URL at runtime, not at module load time
       const wsUrl = import.meta.env.VITE_WS_URL || resolveWebSocketUrl()
       logger.debug('🔌 Connecting to WebSocket:', wsUrl)
       const ws = new WebSocket(wsUrl)
@@ -115,7 +111,6 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
           const data = JSON.parse(event.data)
           logger.debug('📨 WebSocket message received:', data)
 
-          // Log the message type for debugging
           if (data.type) {
             logger.debug(`📬 Message type: ${data.type}`)
           }
@@ -133,7 +128,6 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
         isConnectingRef.current = false
 
-        // Only show toast for initial connection errors, not during reconnect
         if (connectionState === 'connecting') {
           logger.debug('⚠️  Error during initial connection, will retry...')
         }
@@ -174,12 +168,10 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       logger.error('❌ Failed to create WebSocket:', error)
       isConnectingRef.current = false
 
-      // Only show toast for initial connection failures
       if (connectionState === 'connecting') {
         toast.error('Не вдалося підключитися до сервера')
       }
 
-      // Try to reconnect if enabled and component is mounted
       if (reconnect && isMountedRef.current) {
         logger.debug(`⏳ Will retry connection in ${reconnectInterval}ms...`)
         setConnectionState('reconnecting')

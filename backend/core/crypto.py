@@ -21,10 +21,7 @@ class SettingsCrypto:
 
     def _derive_key(self) -> bytes:
         """Derive encryption key from environment or generate a default one"""
-        # Use a consistent salt for key derivation
         salt = b"task-tracker-settings-salt-v1"
-
-        # Try to get encryption key from environment, otherwise use a default
         password = os.environ.get("SETTINGS_ENCRYPTION_KEY", "default-dev-key").encode()
 
         kdf = PBKDF2HMAC(

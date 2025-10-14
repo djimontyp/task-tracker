@@ -18,10 +18,8 @@ class TaskConfig(SQLModel, table=True):
 
     __tablename__ = "task_configs"
 
-    # Primary Key
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 
-    # Core Fields
     name: str = Field(
         sa_type=Text,
         unique=True,
@@ -34,16 +32,13 @@ class TaskConfig(SQLModel, table=True):
         description="Task description",
     )
 
-    # Pydantic Schema (JSON Schema format)
     response_schema: dict = Field(
         sa_column=Column(JSONB, nullable=False),
         description="JSON Schema for task response validation",
     )
 
-    # Status
     is_active: bool = Field(default=True, description="Task is active")
 
-    # Timestamps
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
         sa_column=Column(DateTime(timezone=True), server_default=func.now()),
@@ -76,7 +71,6 @@ class TaskConfig(SQLModel, table=True):
         }
 
 
-# API Schemas
 class TaskConfigCreate(SQLModel):
     """Schema for creating new task configuration."""
 

@@ -86,7 +86,6 @@ ICON_COLORS = {
     "UserIcon": "#D946EF",
 }
 
-# Tailwind color names to hex mapping for backward compatibility
 TAILWIND_TO_HEX = {
     "blue": "#3B82F6",
     "emerald": "#10B981",

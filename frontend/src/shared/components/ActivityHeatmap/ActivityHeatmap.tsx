@@ -8,7 +8,6 @@ import { cn } from '@/shared/lib'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 
-// Types
 export interface ActivityDataPoint {
   timestamp: string
   source: 'telegram' | 'slack' | 'email'
@@ -22,7 +21,6 @@ export interface ActivityHeatmapProps extends React.HTMLAttributes<HTMLDivElemen
   onTitleChange?: (title: string) => void
 }
 
-// Helper types
 interface HeatmapCell {
   day: number
   hour: number
@@ -38,7 +36,6 @@ interface ProcessedData {
   }
 }
 
-// Source colors
 const SOURCE_COLORS = {
   telegram: {
     light: 'hsl(200, 80%, 50%)',
@@ -54,11 +51,9 @@ const SOURCE_COLORS = {
   },
 } as const
 
-// Days of week labels
 const DAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const DAYS_FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-// Hours array (0-23)
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
 
 const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
@@ -109,7 +104,6 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
       [selectedSources]
     )
 
-    // Process data into heatmap format
     const processedData = useMemo(() => {
       const data = activityResponse?.data || []
       const dataMap: ProcessedData = {}
@@ -120,7 +114,6 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
         const date = new Date(point.timestamp)
 
         if (selectedPeriod === 'month') {
-          // For month view, filter by selected month/year
           if (date.getMonth() !== selectedMonth || date.getFullYear() !== selectedYear) {
             return
           }
@@ -130,14 +123,12 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
 
         let key: string
         if (selectedPeriod === 'week') {
-          const day = date.getDay() // 0 = Sunday, 1 = Monday, etc.
-          // Convert Sunday (0) to end of week (6)
+          const day = date.getDay()
           const dayIndex = day === 0 ? 6 : day - 1
           key = `${dayIndex}-${hour}`
         } else {
-          // Month view: use day of month (1-31)
           const dayOfMonth = date.getDate()
-          key = `${dayOfMonth - 1}-${hour}` // 0-indexed for consistency
+          key = `${dayOfMonth - 1}-${hour}`
         }
 
         if (!dataMap[key]) {
@@ -149,15 +140,10 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
       return dataMap
     }, [activityResponse?.data, activeSources, selectedPeriod, selectedMonth, selectedYear])
 
-    // Get number of days in selected month
     const daysInMonth = useMemo(() => {
       return new Date(selectedYear, selectedMonth + 1, 0).getDate()
     }, [selectedMonth, selectedYear])
 
-    // Generate cells for the grid
-    // Note: cells variable is prepared for future use (e.g., exporting, filtering)
-    // Currently rendering is done inline, but keeping this for extensibility
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _cells = useMemo(() => {
       const result: HeatmapCell[] = []
       const daysToShow = selectedPeriod === 'week' ? 7 : daysInMonth
@@ -172,7 +158,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
             hour,
             count: cellData?.count || 0,
             source: cellData?.source || 'telegram',
-            date: new Date(), // Placeholder
+            date: new Date(),
           })
         }
       }
@@ -180,14 +166,12 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
       return result
     }, [processedData, selectedPeriod, daysInMonth])
 
-    // Get color for cell based on count and source
     const getCellColor = (count: number, source: 'telegram' | 'slack' | 'email') => {
       if (count === 0) return 'hsl(var(--muted))'
 
       const colors = SOURCE_COLORS[source]
       const baseColor = colors.light
 
-      // Intensity based on count (darker = more messages)
       const maxCount = Math.max(...Object.values(processedData).map((d) => d.count), 1)
       const intensity = Math.min(count / maxCount, 1)
       const opacity = 0.2 + intensity * 0.8
@@ -204,7 +188,6 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
     return (
       <Card ref={ref} className={cn('w-full', className)} {...props}>
         <CardHeader className="space-y-4 pb-4">
-          {/* Title */}
           <div className="flex items-center justify-between">
             {isEditingTitle ? (
               <input
@@ -226,9 +209,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
             )}
           </div>
 
-          {/* Controls */}
           <div className="flex flex-wrap items-center gap-4">
-            {/* Period Toggle (Week/Month) */}
             <Tabs value={selectedPeriod} onValueChange={(v) => setSelectedPeriod(v as 'week' | 'month')}>
               <TabsList>
                 <TabsTrigger value="week">Week</TabsTrigger>
@@ -236,7 +217,6 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
               </TabsList>
             </Tabs>
 
-            {/* Month/Year selectors (shown only for month view) */}
             {selectedPeriod === 'month' && (
               <>
                 <Select
@@ -272,7 +252,6 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
               </>
             )}
 
-            {/* Source Checkboxes */}
             <div className="flex items-center gap-4 border-l pl-4">
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -307,11 +286,9 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
         <CardContent>
           <TooltipProvider>
             <div className="overflow-x-auto">
-              {/* Heatmap Grid */}
               <div className="inline-block min-w-full">
-                {/* Days header */}
                 <div className="flex mb-2">
-                  <div className="w-12 flex-shrink-0" /> {/* Hour label space */}
+                  <div className="w-12 flex-shrink-0" />
                   {selectedPeriod === 'week'
                     ? DAYS_SHORT.map((day, i) => (
                         <div
@@ -331,18 +308,15 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                       ))}
                 </div>
 
-                {/* Hour rows */}
                 {HOURS.map((hour) => {
                   const numDays = selectedPeriod === 'week' ? 7 : daysInMonth
 
                   return (
                     <div key={hour} className="flex items-center mb-1">
-                      {/* Hour label */}
                       <div className="w-12 flex-shrink-0 text-xs text-right pr-2 text-muted-foreground">
                         {hour.toString().padStart(2, '0')}:00
                       </div>
 
-                      {/* Day cells */}
                       {Array.from({ length: numDays }, (_, dayIndex) => {
                         const key = `${dayIndex}-${hour}`
                         const cellData = processedData[key]
@@ -391,7 +365,6 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                 })}
               </div>
 
-              {/* Legend */}
               <div className="mt-6 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span>Less</span>

@@ -18,7 +18,6 @@ async def process_message(message: str) -> str:
     """Example function for message processing"""
 
     logger.info(f"Processing message: {message}")
-    # Implementation of message processing will be here
     return f"Processed: {message}"
 
 
@@ -34,7 +33,6 @@ async def save_telegram_message(telegram_data: dict[str, Any]) -> str:
             message = telegram_data["message"]
             logger.debug(f"Processing message data: {message}")
 
-            # Get or create telegram source
             source = await get_or_create_source(db, name="telegram")
 
             from_user = message.get("from", {})
@@ -44,13 +42,12 @@ async def save_telegram_message(telegram_data: dict[str, Any]) -> str:
                 logger.warning(f"Message {message['message_id']} has no sender, skipping")
                 return f"❌ Skipped message {message['message_id']}: no sender"
 
-            # Extract user data
             first_name = from_user.get("first_name", "Unknown")
             last_name = from_user.get("last_name")
             language_code = from_user.get("language_code")
             is_bot = from_user.get("is_bot", False)
 
-            # Identify or create User + TelegramProfile
+            # Create or identify Telegram user with profile
             user, tg_profile = await identify_or_create_user(
                 db=db,
                 telegram_user_id=telegram_user_id,
@@ -60,7 +57,7 @@ async def save_telegram_message(telegram_data: dict[str, Any]) -> str:
                 is_bot=is_bot,
             )
 
-            # Fetch avatar if not set
+            # Attempt to retrieve user avatar
             avatar_url = user.avatar_url
             if not avatar_url:
                 try:
@@ -72,7 +69,7 @@ async def save_telegram_message(telegram_data: dict[str, Any]) -> str:
                 except Exception as exc:
                     logger.warning(f"Failed to fetch avatar for Telegram user {telegram_user_id}: {exc}")
 
-            # Create message
+            # Persist message in database
             db_message = Message(
                 external_message_id=str(message["message_id"]),
                 content=message.get("text", message.get("caption", "[Media]")),
@@ -87,7 +84,6 @@ async def save_telegram_message(telegram_data: dict[str, Any]) -> str:
             db.add(db_message)
             logger.debug(f"Added message to session: {db_message.external_message_id}")
 
-            # CRITICAL: Commit the transaction!
             await db.commit()
             logger.info(f"✅ Successfully committed Telegram message {message['message_id']} from {user.full_name}")
 
@@ -146,18 +142,18 @@ async def ingest_telegram_messages_task(
     """
     try:
         async with AsyncSessionLocal() as db:
-            # Get job
+            # Retrieve ingestion job or return error
             job = await db.get(MessageIngestionJob, job_id)
             if not job:
                 logger.error(f"Job {job_id} not found")
                 return f"Error: Job {job_id} not found"
 
-            # Update job status to running
+            # Mark job as running and initialize database
             job.status = IngestionStatus.running
             job.started_at = datetime.utcnow()
             await db.commit()
 
-            # Broadcast start event
+            # Notify WebSocket clients about job start
             await websocket_manager.broadcast(
                 "messages",
                 {
@@ -170,7 +166,7 @@ async def ingest_telegram_messages_task(
                 },
             )
 
-            # Get or create source
+            # Obtain telegram source
             source = await get_or_create_source(db, name="telegram")
 
             total_fetched = 0
@@ -178,17 +174,16 @@ async def ingest_telegram_messages_task(
             total_skipped = 0
             total_errors = 0
 
-            # Process each chat
+            # Process each chat sequentially
             for chat_idx, chat_id in enumerate(chat_ids, 1):
                 logger.info(f"Processing chat {chat_idx}/{len(chat_ids)}: {chat_id}")
 
-                # Fetch messages in batches
                 batch_size = 100  # Telegram API limit
                 offset_id = 0
                 messages_from_chat = 0
 
                 while messages_from_chat < limit:
-                    # Fetch batch
+                    # Fetch messages in batches
                     messages = await telegram_ingestion_service.fetch_chat_history(
                         chat_id=chat_id,
                         limit=min(batch_size, limit - messages_from_chat),
@@ -199,7 +194,7 @@ async def ingest_telegram_messages_task(
                         logger.info(f"No more messages from chat {chat_id}")
                         break
 
-                    # Process each message
+                    # Process messages in current batch
                     batch_stored = 0
                     batch_skipped = 0
                     batch_errors = 0
@@ -214,14 +209,14 @@ async def ingest_telegram_messages_task(
                         else:
                             batch_errors += 1
 
-                    # Update counters
+                    # Update job statistics
                     total_fetched += len(messages)
                     total_stored += batch_stored
                     total_skipped += batch_skipped
                     total_errors += batch_errors
                     messages_from_chat += len(messages)
 
-                    # Update job progress
+                    # Update progress tracking
                     await telegram_ingestion_service.update_job_progress(
                         db=db,
                         job=job,
@@ -232,7 +227,7 @@ async def ingest_telegram_messages_task(
                         current_batch=chat_idx,
                     )
 
-                    # Broadcast progress
+                    # Send real-time progress updates
                     await websocket_manager.broadcast(
                         "messages",
                         {
@@ -249,11 +244,11 @@ async def ingest_telegram_messages_task(
                         },
                     )
 
-                    # Get last message ID for next batch
+                    # Set offset for next batch
                     if messages:
                         offset_id = messages[-1].get("message_id", 0)
 
-                    # Commit batch
+                    # Persist batch changes
                     await db.commit()
 
                     logger.info(
@@ -261,13 +256,13 @@ async def ingest_telegram_messages_task(
                         f"stored={batch_stored}, skipped={batch_skipped}, errors={batch_errors}"
                     )
 
-            # Mark job as completed
+            # Finalize ingestion job
             job.status = IngestionStatus.completed
             job.completed_at = datetime.utcnow()
             job.total_batches = len(chat_ids)
             await db.commit()
 
-            # Broadcast completion
+            # Broadcast final job status
             await websocket_manager.broadcast(
                 "messages",
                 {
@@ -355,52 +350,52 @@ async def execute_analysis_run(run_id: str) -> dict[str, str | int]:
 
     logger.info(f"Starting analysis run execution: {run_id}")
 
-    # Convert string UUID to UUID object
+    # Convert input identifier to UUID
     run_uuid = UUID(run_id)
 
-    # Get database session using async context manager
+    # Initialize database context and executor
     db_context = get_db_session_context()
     db = await anext(db_context)
     executor = AnalysisExecutor(db)  # type: ignore[arg-type]
 
     try:
-        # 1. Update status to "running"
+        # Start analysis run
         logger.info(f"Run {run_id}: Starting run")
         await executor.start_run(run_uuid)
 
-        # 2. Fetch messages in time window
+        # Retrieve messages for analysis
         logger.info(f"Run {run_id}: Fetching messages")
         messages = await executor.fetch_messages(run_uuid)
         logger.info(f"Run {run_id}: Found {len(messages)} messages in window")
 
-        # 3. Pre-filter messages (keywords, length, @mentions)
+        # Apply initial message filtering
         logger.info(f"Run {run_id}: Pre-filtering messages")
         filtered = await executor.prefilter_messages(run_uuid, messages)
         logger.info(f"Run {run_id}: {len(filtered)} messages after pre-filter")
 
-        # 4. Group into batches
+        # Organize messages into processing batches
         logger.info(f"Run {run_id}: Creating batches")
         batches = await executor.create_batches(filtered)
         logger.info(f"Run {run_id}: Created {len(batches)} batches")
 
-        # 5. Process each batch
+        # Process messages in sequential batches
         total_proposals = 0
         for batch_idx, batch in enumerate(batches):
             logger.info(f"Run {run_id}: Processing batch {batch_idx + 1}/{len(batches)} ({len(batch)} messages)")
 
-            # Update progress
+            # Update overall progress tracking
             await executor.update_progress(run_uuid, batch_idx + 1, len(batches))
 
-            # Create proposals from batch
+            # Generate proposals for current batch
             proposals = await executor.process_batch(run_uuid, batch)
 
-            # Save proposals
+            # Persist batch proposals
             saved_count = await executor.save_proposals(run_uuid, proposals)
             total_proposals += saved_count
 
             logger.info(f"Run {run_id}: Batch {batch_idx + 1} completed, created {saved_count} proposals")
 
-        # 6. Update status to "completed"
+        # Mark run as completed
         logger.info(f"Run {run_id}: Completing run with {total_proposals} proposals")
         result = await executor.complete_run(run_uuid)
 
@@ -467,14 +462,17 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
     db = await anext(db_context)
 
     try:
+        # Retrieve experiment metadata
         experiment = await db.get(ClassificationExperiment, experiment_id)
         if not experiment:
             raise ValueError(f"Experiment {experiment_id} not found")
 
+        # Start experiment tracking
         experiment.status = ExperimentStatus.running
         experiment.started_at = datetime.now(UTC)
         await db.commit()
 
+        # Notify WebSocket clients about experiment start
         await websocket_manager.broadcast(
             "experiments",
             {
@@ -484,6 +482,7 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
             },
         )
 
+        # Load available topics
         logger.info(f"Experiment {experiment_id}: Loading topics")
         topics_result = await db.execute(select(Topic).order_by(Topic.id))
         topics = list(topics_result.scalars().all())
@@ -491,6 +490,7 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
         if not topics:
             raise ValueError("No topics available for classification")
 
+        # Retrieve messages with pre-assigned topics
         logger.info(f"Experiment {experiment_id}: Loading messages with topics")
         messages_result = await db.execute(
             select(Message).where(Message.topic_id.isnot(None)).order_by(func.random()).limit(experiment.message_count)
@@ -503,22 +503,26 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
                 f"requested {experiment.message_count}"
             )
 
+        # Load LLM provider for classification
         from .models import LLMProvider
-
         provider = await db.get(LLMProvider, experiment.provider_id)
         if not provider:
             raise ValueError(f"Provider {experiment.provider_id} not found")
 
         service = TopicClassificationService(db)
 
+        # Classify messages and track results
         classification_results = []
         for idx, message in enumerate(messages, 1):
             start_time = time.perf_counter()
             try:
+                # Perform message classification
                 result, exec_time = await service.classify_message(message, topics, provider, experiment.model_name)
 
+                # Identify actual topic
                 actual_topic = next((t for t in topics if t.id == message.topic_id), None)
 
+                # Record classification result
                 classification_result = {
                     "message_id": message.id,
                     "message_content": message.content[:200],
@@ -534,6 +538,7 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
 
                 classification_results.append(classification_result)
 
+                # Periodic progress updates
                 if idx % 10 == 0 or idx == len(messages):
                     percentage = int((idx / len(messages)) * 100)
                     await websocket_manager.broadcast(
@@ -549,6 +554,7 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
                     logger.info(f"Experiment {experiment_id}: Processed {idx}/{len(messages)} messages ({percentage}%)")
 
             except Exception as e:
+                # Handle and log classification errors
                 exec_time = (time.perf_counter() - start_time) * 1000
                 logger.error(
                     f"Experiment {experiment_id}: Failed to classify message {message.id} after {exec_time:.2f}ms: {e}"
@@ -567,9 +573,11 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
                     "alternatives": [],
                 })
 
+        # Calculate experiment metrics
         logger.info(f"Experiment {experiment_id}: Calculating metrics")
         metrics = await service.calculate_metrics(classification_results)
 
+        # Update experiment status and results
         experiment.status = ExperimentStatus.completed
         experiment.completed_at = datetime.now(UTC)
         experiment.accuracy = metrics["accuracy"]
@@ -579,6 +587,7 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
         experiment.classification_results = classification_results
         await db.commit()
 
+        # Broadcast experiment completion
         await websocket_manager.broadcast(
             "experiments",
             {
