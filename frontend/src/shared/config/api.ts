@@ -72,6 +72,12 @@ export const API_ENDPOINTS = {
   projects: buildApiPath('projects'),
   topics: buildApiPath('topics'),
 
+  // Experiments
+  experiments: {
+    base: buildApiPath('experiments/topic-classification'),
+    detail: (id: number) => buildApiPath(`experiments/topic-classification/${id}`),
+  },
+
   // WebSocket
   ws: '/ws',
 } as const

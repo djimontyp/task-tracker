@@ -4,7 +4,7 @@ from pydantic_ai.providers.ollama import OllamaProvider
 from core.config import settings
 
 providers = {
-    "ollama": OllamaProvider(base_url=settings.ollama_base_url),
+    "ollama": OllamaProvider(base_url=settings.ollama_url),
 }
 
 ollama_model = OpenAIChatModel(  # noqa

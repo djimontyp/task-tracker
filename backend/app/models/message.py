@@ -55,3 +55,11 @@ class Message(IDMixin, TimestampMixin, SQLModel, table=True):
         sa_type=JSONB,
         description="UUIDs of AnalysisRuns that processed this message",
     )
+
+    # Topic classification fields (for experiment validation)
+    topic_id: int | None = Field(
+        default=None,
+        foreign_key="topics.id",
+        index=True,
+        description="Ground truth topic ID for classification experiments",
+    )

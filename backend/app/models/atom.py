@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 
 from pydantic import field_validator
-from sqlalchemy import JSON, BigInteger, Column, DateTime, Text, func
+from sqlalchemy import JSON, BigInteger, DateTime, Text, func
 from sqlmodel import Field, SQLModel
 
 from .base import IDMixin, TimestampMixin
@@ -119,7 +119,13 @@ class AtomLink(SQLModel, table=True):
     )
     created_at: datetime | None = Field(
         default=None,
-        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
+        sa_type=DateTime(timezone=True),
+        sa_column_kwargs={"server_default": func.now()},
+    )
+    updated_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),
+        sa_column_kwargs={"server_default": func.now(), "onupdate": func.now()},
     )
 
     @field_validator("link_type", mode="before")
@@ -166,7 +172,13 @@ class TopicAtom(SQLModel, table=True):
     )
     created_at: datetime | None = Field(
         default=None,
-        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
+        sa_type=DateTime(timezone=True),
+        sa_column_kwargs={"server_default": func.now()},
+    )
+    updated_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),
+        sa_column_kwargs={"server_default": func.now(), "onupdate": func.now()},
     )
 
 
@@ -281,6 +293,7 @@ class AtomLinkPublic(SQLModel):
     link_type: str
     strength: float | None
     created_at: str
+    updated_at: str
 
 
 class AtomLinkCreate(SQLModel):
@@ -322,6 +335,7 @@ class TopicAtomPublic(SQLModel):
     position: int | None
     note: str | None
     created_at: str
+    updated_at: str
 
 
 class TopicAtomCreate(SQLModel):

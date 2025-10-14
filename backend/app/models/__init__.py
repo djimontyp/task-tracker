@@ -35,6 +35,16 @@ from .atom import (
     TopicAtomPublic,
 )
 from .base import IDMixin, TimestampMixin
+from .classification_experiment import (
+    ClassificationExperiment,
+    ClassificationResultDetail,
+    ExperimentCreate,
+    ExperimentDetailPublic,
+    ExperimentListResponse,
+    ExperimentPublic,
+    ExperimentStatus,
+    ExperimentUpdate,
+)
 from .enums import (
     AnalysisRunStatus,
     AnalysisStatus,
@@ -183,6 +193,16 @@ __all__ = [
     "TaskProposalCreate",
     "TaskProposalPublic",
     "TaskProposalUpdate",
+    "TaskProposalListResponse",
+    # Classification Experiment
+    "ClassificationExperiment",
+    "ExperimentCreate",
+    "ExperimentUpdate",
+    "ExperimentPublic",
+    "ExperimentDetailPublic",
+    "ExperimentListResponse",
+    "ExperimentStatus",
+    "ClassificationResultDetail",
     # Project Config
     "ProjectConfig",
     "ProjectConfigCreate",
@@ -218,6 +238,4 @@ __all__ = [
     "TopicAtomPublic",
     "AtomType",
     "LinkType",
-    # List Responses
-    "TaskProposalListResponse",
 ]

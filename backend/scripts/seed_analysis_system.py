@@ -57,7 +57,7 @@ LLM_PROVIDERS_DATA = [
     {
         "name": "Local Ollama",
         "type": ProviderType.ollama,
-        "base_url": "http://localhost:11434",
+        "base_url": "http://host.docker.internal:11434/v1",
         "api_key": None,
         "is_active": True,
         "validation_status": ValidationStatus.connected,
