@@ -96,6 +96,7 @@ export {
 
 // Separator
 export { Separator } from './separator'
+export { Slider } from './slider'
 
 // Custom components (not from shadcn)
 export { default as Spinner } from './Spinner/Spinner'

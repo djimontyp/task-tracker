@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from typing import Any
 
@@ -429,6 +430,200 @@ async def execute_analysis_run(run_id: str) -> dict[str, str | int]:
             )
 
         # Re-raise to mark TaskIQ job as failed
+        raise
+
+
+@nats_broker.task
+async def execute_classification_experiment(experiment_id: int) -> dict[str, str | int | float]:
+    """Execute classification experiment in background.
+
+    Processes messages with topic_id, classifies them using LLM,
+    calculates accuracy metrics, and broadcasts progress via WebSocket.
+
+    Args:
+        experiment_id: ClassificationExperiment ID to execute
+
+    Returns:
+        Summary dictionary with execution statistics
+
+    Raises:
+        Exception: If critical errors occur during processing
+
+    Example:
+        >>> await execute_classification_experiment.kiq(experiment_id)
+    """
+    from datetime import UTC, datetime
+
+    from sqlalchemy import func, select
+
+    from .database import get_db_session_context
+    from .models import ClassificationExperiment, ExperimentStatus, Message, Topic
+    from .services.topic_classification_service import TopicClassificationService
+    from .services.websocket_manager import websocket_manager
+
+    logger.info(f"Starting classification experiment execution: {experiment_id}")
+
+    db_context = get_db_session_context()
+    db = await anext(db_context)
+
+    try:
+        experiment = await db.get(ClassificationExperiment, experiment_id)
+        if not experiment:
+            raise ValueError(f"Experiment {experiment_id} not found")
+
+        experiment.status = ExperimentStatus.running
+        experiment.started_at = datetime.now(UTC)
+        await db.commit()
+
+        await websocket_manager.broadcast(
+            "experiments",
+            {
+                "type": "experiment_started",
+                "experiment_id": experiment_id,
+                "message_count": experiment.message_count,
+            },
+        )
+
+        logger.info(f"Experiment {experiment_id}: Loading topics")
+        topics_result = await db.execute(select(Topic).order_by(Topic.id))
+        topics = list(topics_result.scalars().all())
+
+        if not topics:
+            raise ValueError("No topics available for classification")
+
+        logger.info(f"Experiment {experiment_id}: Loading messages with topics")
+        messages_result = await db.execute(
+            select(Message).where(Message.topic_id.isnot(None)).order_by(func.random()).limit(experiment.message_count)
+        )
+        messages = list(messages_result.scalars().all())
+
+        if len(messages) < experiment.message_count:
+            logger.warning(
+                f"Experiment {experiment_id}: Only {len(messages)} messages with topics available, "
+                f"requested {experiment.message_count}"
+            )
+
+        from .models import LLMProvider
+
+        provider = await db.get(LLMProvider, experiment.provider_id)
+        if not provider:
+            raise ValueError(f"Provider {experiment.provider_id} not found")
+
+        service = TopicClassificationService(db)
+
+        classification_results = []
+        for idx, message in enumerate(messages, 1):
+            start_time = time.perf_counter()
+            try:
+                result, exec_time = await service.classify_message(message, topics, provider, experiment.model_name)
+
+                actual_topic = next((t for t in topics if t.id == message.topic_id), None)
+
+                classification_result = {
+                    "message_id": message.id,
+                    "message_content": message.content[:200],
+                    "actual_topic_id": message.topic_id,
+                    "actual_topic_name": actual_topic.name if actual_topic else None,
+                    "predicted_topic_id": result.topic_id,
+                    "predicted_topic_name": result.topic_name,
+                    "confidence": result.confidence,
+                    "execution_time_ms": exec_time,
+                    "reasoning": result.reasoning,
+                    "alternatives": [alt.model_dump() for alt in result.alternatives],
+                }
+
+                classification_results.append(classification_result)
+
+                if idx % 10 == 0 or idx == len(messages):
+                    percentage = int((idx / len(messages)) * 100)
+                    await websocket_manager.broadcast(
+                        "experiments",
+                        {
+                            "type": "experiment_progress",
+                            "experiment_id": experiment_id,
+                            "current": idx,
+                            "total": len(messages),
+                            "percentage": percentage,
+                        },
+                    )
+                    logger.info(f"Experiment {experiment_id}: Processed {idx}/{len(messages)} messages ({percentage}%)")
+
+            except Exception as e:
+                exec_time = (time.perf_counter() - start_time) * 1000
+                logger.error(
+                    f"Experiment {experiment_id}: Failed to classify message {message.id} after {exec_time:.2f}ms: {e}"
+                )
+                actual_topic = next((t for t in topics if t.id == message.topic_id), None)
+                classification_results.append({
+                    "message_id": message.id,
+                    "message_content": message.content[:200],
+                    "actual_topic_id": message.topic_id,
+                    "actual_topic_name": actual_topic.name if actual_topic else None,
+                    "predicted_topic_id": -1,
+                    "predicted_topic_name": "ERROR",
+                    "confidence": 0.0,
+                    "execution_time_ms": exec_time,
+                    "reasoning": f"Classification failed: {str(e)}",
+                    "alternatives": [],
+                })
+
+        logger.info(f"Experiment {experiment_id}: Calculating metrics")
+        metrics = await service.calculate_metrics(classification_results)
+
+        experiment.status = ExperimentStatus.completed
+        experiment.completed_at = datetime.now(UTC)
+        experiment.accuracy = metrics["accuracy"]
+        experiment.avg_confidence = metrics["avg_confidence"]
+        experiment.avg_execution_time_ms = metrics["avg_execution_time_ms"]
+        experiment.confusion_matrix = metrics["confusion_matrix"]
+        experiment.classification_results = classification_results
+        await db.commit()
+
+        await websocket_manager.broadcast(
+            "experiments",
+            {
+                "type": "experiment_completed",
+                "experiment_id": experiment_id,
+                "accuracy": metrics["accuracy"],
+            },
+        )
+
+        logger.info(
+            f"Experiment {experiment_id}: Completed successfully - "
+            f"Accuracy: {metrics['accuracy']:.2%}, "
+            f"Avg Confidence: {metrics['avg_confidence']:.2f}"
+        )
+
+        return {
+            "experiment_id": experiment_id,
+            "status": "completed",
+            "messages_classified": len(classification_results),
+            "accuracy": metrics["accuracy"],
+            "avg_confidence": metrics["avg_confidence"],
+        }
+
+    except Exception as e:
+        logger.error(f"Experiment {experiment_id}: Failed with error: {e}", exc_info=True)
+
+        try:
+            experiment = await db.get(ClassificationExperiment, experiment_id)
+            if experiment:
+                experiment.status = ExperimentStatus.failed
+                experiment.completed_at = datetime.now(UTC)
+                experiment.error_message = str(e)
+                await db.commit()
+
+                await websocket_manager.broadcast(
+                    "experiments",
+                    {
+                        "type": "experiment_failed",
+                        "experiment_id": experiment_id,
+                        "error": str(e),
+                    },
+                )
+        except Exception as inner_e:
+            logger.error(f"Experiment {experiment_id}: Failed to update status: {inner_e}")
+
         raise
 
 

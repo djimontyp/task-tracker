@@ -28,6 +28,14 @@ class Settings(BaseSettings):
         default="http://localhost:11434",
         validation_alias=AliasChoices("OLLAMA_BASE_URL", "ollama_base_url"),
     )
+    ollama_base_url_docker: str = Field(
+        default="http://host.docker.internal:11434",
+        validation_alias=AliasChoices("OLLAMA_BASE_URL_DOCKER", "ollama_base_url_docker"),
+    )
+    running_in_docker: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("RUNNING_IN_DOCKER", "running_in_docker"),
+    )
     llm_provider: str = Field(default="ollama", validation_alias=AliasChoices("LLM_PROVIDER", "llm_provider"))
     ollama_model: str = Field(
         default="mistral-nemo:12b-instruct-2407-q4_k_m",
@@ -78,6 +86,13 @@ class Settings(BaseSettings):
         default="",
         validation_alias=AliasChoices("ENCRYPTION_KEY", "encryption_key"),
     )
+
+    @property
+    def ollama_url(self) -> str:
+        """Returns appropriate Ollama URL based on environment (Docker vs local)."""
+        if self.running_in_docker:
+            return self.ollama_base_url_docker
+        return self.ollama_base_url
 
 
 settings = Settings()
