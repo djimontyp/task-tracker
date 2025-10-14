@@ -3,7 +3,6 @@ from pathlib import Path
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Find .env in project root (parent of backend/)
 ENV_FILE = Path(__file__).parent.parent.parent / ".env"
 
 

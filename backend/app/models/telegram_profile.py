@@ -12,7 +12,6 @@ class TelegramProfile(IDMixin, TimestampMixin, SQLModel, table=True):
 
     __tablename__ = "telegram_profiles"
 
-    # Telegram user identification
     telegram_user_id: int = Field(
         unique=True,
         index=True,
@@ -20,18 +19,15 @@ class TelegramProfile(IDMixin, TimestampMixin, SQLModel, table=True):
         description="Unique Telegram user ID",
     )
 
-    # Telegram names (for point-specific usage when needed)
     first_name: str = Field(max_length=100, description="Telegram first name")
     last_name: str | None = Field(default=None, max_length=100, description="Telegram last name")
 
-    # Additional Telegram fields
     language_code: str | None = Field(
         default=None, max_length=10, description="Telegram language code (e.g., 'en', 'uk')"
     )
     is_bot: bool = Field(default=False, description="Whether this Telegram account is a bot")
     is_premium: bool = Field(default=False, description="Whether user has Telegram Premium")
 
-    # Relationships
     user_id: int = Field(
         foreign_key="users.id",
         unique=True,

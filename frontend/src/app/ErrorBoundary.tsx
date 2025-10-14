@@ -62,14 +62,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
           <div className="max-w-md w-full space-y-6 text-center">
-            {/* Error Icon */}
             <div className="flex justify-center">
               <div className="rounded-full bg-destructive/10 p-4">
                 <ExclamationTriangleIcon className="h-12 w-12 text-destructive" aria-hidden="true" />
               </div>
             </div>
 
-            {/* Error Title */}
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-foreground">
                 Oops! Something went wrong
@@ -79,7 +77,6 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               </p>
             </div>
 
-            {/* Error Details (Development Mode) */}
             {import.meta.env.MODE === 'development' && this.state.error && (
               <details className="text-left bg-muted/50 rounded-lg p-4 border border-border">
                 <summary className="cursor-pointer font-semibold text-sm text-foreground hover:text-primary transition-colors">
@@ -104,7 +101,6 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               </details>
             )}
 
-            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 onClick={this.handleRetry}
@@ -124,7 +120,6 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               </button>
             </div>
 
-            {/* Help Text */}
             <p className="text-xs text-muted-foreground">
               If this problem persists, please contact support or refresh the page.
             </p>

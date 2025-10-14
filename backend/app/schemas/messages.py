@@ -25,28 +25,22 @@ class MessageResponse(BaseModel):
     content: str
     sent_at: datetime
 
-    # Source
     source_id: int
     source_name: str | None = None  # Joined from Source
 
-    # Author (User)
     author_id: int
     author_name: str | None = None  # User.full_name
     avatar_url: str | None = None
 
-    # Platform-specific
     telegram_profile_id: int | None = None
 
-    # AI fields
     classification: str | None = None
     confidence: float | None = None
     analyzed: bool = False
 
-    # Legacy compatibility (deprecated - for backward compatibility with frontend)
     author: str | None = None  # @deprecated Use author_name
     persisted: bool = True
 
-    # Timestamps
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

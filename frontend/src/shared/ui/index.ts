@@ -1,6 +1,3 @@
-// Barrel export for shared UI components
-
-// Shadcn UI components
 export { Button } from './button'
 export {
   Card,
@@ -47,7 +44,6 @@ export {
   TabsContent
 } from './tabs'
 
-// Table primitives
 export {
   Table,
   TableHeader,
@@ -56,8 +52,6 @@ export {
   TableRow,
   TableCell,
 } from './table'
-
-// Dropdown menu primitives
 export {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -67,8 +61,6 @@ export {
   DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
 } from './dropdown-menu'
-
-// Pagination primitives
 export {
   Pagination,
   PaginationContent,
@@ -78,11 +70,7 @@ export {
   PaginationNext,
   PaginationEllipsis,
 } from './pagination'
-
-// Popover primitives
 export { Popover, PopoverTrigger, PopoverContent } from './popover'
-
-// Command primitives
 export {
   Command,
   CommandEmpty,
@@ -93,11 +81,7 @@ export {
   CommandSeparator,
   CommandShortcut,
 } from './command'
-
-// Separator
 export { Separator } from './separator'
 export { Slider } from './slider'
-
-// Custom components (not from shadcn)
 export { default as Spinner } from './Spinner/Spinner'
 export { NotificationBadge } from './notification-badge'

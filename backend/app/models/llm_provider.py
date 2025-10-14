@@ -34,10 +34,8 @@ class LLMProvider(SQLModel, table=True):
 
     __tablename__ = "llm_providers"
 
-    # Primary Key
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 
-    # Core Fields
     name: str = Field(
         sa_type=Text,
         unique=True,
@@ -46,7 +44,6 @@ class LLMProvider(SQLModel, table=True):
     )
     type: ProviderType = Field(description="Provider type (ollama, openai)")
 
-    # Connection Configuration
     base_url: str | None = Field(
         default=None,
         sa_type=Text,
@@ -57,7 +54,6 @@ class LLMProvider(SQLModel, table=True):
         description="Fernet-encrypted API key",
     )
 
-    # Status & Validation
     is_active: bool = Field(default=True, description="Provider is active")
     validation_status: ValidationStatus = Field(
         default=ValidationStatus.pending,
@@ -74,7 +70,6 @@ class LLMProvider(SQLModel, table=True):
         description="Timestamp of last validation attempt",
     )
 
-    # Timestamps
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
         sa_column=Column(DateTime(timezone=True), server_default=func.now()),
@@ -98,14 +93,13 @@ class LLMProvider(SQLModel, table=True):
         }
 
 
-# API Schemas
 class LLMProviderCreate(SQLModel):
     """Schema for creating new LLM provider."""
 
     name: str
     type: ProviderType
     base_url: str | None = None
-    api_key: str | None = None  # Plain text, will be encrypted
+    api_key: str | None = None
     is_active: bool = True
 
 
@@ -115,7 +109,7 @@ class LLMProviderUpdate(SQLModel):
     name: str | None = None
     type: ProviderType | None = None
     base_url: str | None = None
-    api_key: str | None = None  # Plain text, will be encrypted
+    api_key: str | None = None
     is_active: bool | None = None
 
 
@@ -126,7 +120,6 @@ class LLMProviderPublic(SQLModel):
     name: str
     type: ProviderType
     base_url: str | None = None
-    # Note: api_key_encrypted NOT included in public response
     is_active: bool
     validation_status: ValidationStatus
     validation_error: str | None = None

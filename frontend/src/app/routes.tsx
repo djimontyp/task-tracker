@@ -3,7 +3,6 @@ import { Routes, Route } from 'react-router-dom'
 import { MainLayout } from '@/shared/layouts'
 import Spinner from '@/shared/ui/Spinner'
 
-// Lazy load all pages for better initial bundle size
 const DashboardPage = lazy(() => import('@pages/DashboardPage'))
 const TasksPage = lazy(() => import('@pages/TasksPage'))
 const TopicsPage = lazy(() => import('@pages/TopicsPage'))
