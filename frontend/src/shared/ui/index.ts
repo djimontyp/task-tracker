@@ -85,3 +85,13 @@ export { Separator } from './separator'
 export { Slider } from './slider'
 export { default as Spinner } from './Spinner/Spinner'
 export { NotificationBadge } from './notification-badge'
+export {
+  Sheet,
+  SheetTrigger,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetFooter,
+  SheetTitle,
+  SheetDescription,
+} from './sheet'
