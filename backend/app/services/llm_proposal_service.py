@@ -12,9 +12,11 @@ from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.ollama import OllamaProvider
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.settings import ModelSettings
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import AgentConfig, LLMProvider, Message, ProjectConfig, ProviderType
 from app.services.credential_encryption import CredentialEncryption
+from app.services.rag_context_builder import RAGContext, RAGContextBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -46,16 +48,20 @@ class LLMProposalService:
     (Ollama, OpenAI). Handles API key encryption/decryption and provider validation.
     """
 
-    def __init__(self, agent_config: AgentConfig, provider: LLMProvider):
+    def __init__(
+        self, agent_config: AgentConfig, provider: LLMProvider, rag_context_builder: RAGContextBuilder | None = None
+    ):
         """Initialize LLM proposal service.
 
         Args:
             agent_config: Agent configuration with system prompt and model settings
             provider: LLM provider configuration
+            rag_context_builder: Optional RAG context builder for enhanced proposals
         """
         self.agent_config = agent_config
         self.provider = provider
         self.encryptor = CredentialEncryption()
+        self.rag_context_builder = rag_context_builder
 
     async def generate_proposals(
         self,
@@ -81,10 +87,8 @@ class LLMProposalService:
         """
         logger.info(f"Generating proposals for {len(messages)} messages using agent '{self.agent_config.name}'")
 
-        # Build prompt from messages
         prompt = self._build_prompt(messages, project_config)
 
-        # Get API key if needed
         api_key = None
         if self.provider.api_key_encrypted:
             try:
@@ -92,17 +96,14 @@ class LLMProposalService:
             except Exception as e:
                 raise ValueError(f"Failed to decrypt API key for provider '{self.provider.name}': {e}")
 
-        # Build model instance
         model = self._build_model_instance(api_key)
 
-        # Create pydantic-ai agent with structured output
         agent = PydanticAgent(
             model=model,
             system_prompt=self.agent_config.system_prompt,
             output_type=BatchProposalsOutput,
         )
 
-        # Build model settings
         model_settings_obj: ModelSettings | None = None
         if self.agent_config.temperature is not None or self.agent_config.max_tokens is not None:
             model_settings_obj = ModelSettings()
@@ -118,11 +119,111 @@ class LLMProposalService:
                 model_settings=model_settings_obj,
             )
 
-            # Extract proposals
             batch_output: BatchProposalsOutput = result.output
             proposals = self._parse_proposals(batch_output.proposals, messages)
 
             logger.info(f"Generated {len(proposals)} proposals from {len(messages)} messages")
+
+            return proposals
+
+        except Exception as e:
+            logger.error(
+                f"LLM request failed for agent '{self.agent_config.name}': {e}",
+                exc_info=True,
+            )
+            raise Exception(f"LLM request failed: {str(e)}. Check provider configuration and connectivity.") from e
+
+    async def generate_proposals_with_rag(
+        self,
+        session: AsyncSession,
+        messages: list[Message],
+        project_config: ProjectConfig | None = None,
+        use_rag: bool = True,
+    ) -> list[dict]:
+        """Generate task proposals with RAG (Retrieval-Augmented Generation) context.
+
+        Enhances proposal generation by retrieving and injecting relevant historical
+        context from past proposals, knowledge base atoms, and related messages.
+
+        Flow:
+        1. Build RAG context if enabled
+        2. Inject context into prompt
+        3. Generate proposals with enhanced context
+        4. Return proposals
+
+        Args:
+            session: Database session for RAG queries
+            messages: List of messages to analyze
+            project_config: Optional project configuration for classification hints
+            use_rag: Enable RAG context retrieval (default: True)
+
+        Returns:
+            List of proposal dictionaries ready for database insertion
+
+        Raises:
+            ValueError: If provider configuration is invalid or RAG builder not initialized
+            Exception: If LLM request fails
+
+        Example:
+            >>> service = LLMProposalService(agent, provider, rag_builder)
+            >>> proposals = await service.generate_proposals_with_rag(session, messages, project_config, use_rag=True)
+            >>> # Returns enhanced proposals with historical context
+        """
+        if use_rag and not self.rag_context_builder:
+            raise ValueError("RAG context builder not initialized. Cannot use RAG mode.")
+
+        logger.info(
+            f"Generating proposals for {len(messages)} messages using agent '{self.agent_config.name}' "
+            f"(RAG: {'enabled' if use_rag else 'disabled'})"
+        )
+
+        rag_context: RAGContext | None = None
+        if use_rag and self.rag_context_builder:
+            try:
+                rag_context = await self.rag_context_builder.build_context(session, messages, top_k=5)
+                logger.info(f"Built RAG context: {rag_context['context_summary']}")
+            except Exception as e:
+                logger.error(f"Failed to build RAG context: {e}. Falling back to standard generation.")
+                rag_context = None
+
+        prompt = self._build_prompt_with_rag(messages, project_config, rag_context)
+
+        api_key = None
+        if self.provider.api_key_encrypted:
+            try:
+                api_key = self.encryptor.decrypt(self.provider.api_key_encrypted)
+            except Exception as e:
+                raise ValueError(f"Failed to decrypt API key for provider '{self.provider.name}': {e}")
+
+        model = self._build_model_instance(api_key)
+
+        agent = PydanticAgent(
+            model=model,
+            system_prompt=self.agent_config.system_prompt,
+            output_type=BatchProposalsOutput,
+        )
+
+        model_settings_obj: ModelSettings | None = None
+        if self.agent_config.temperature is not None or self.agent_config.max_tokens is not None:
+            model_settings_obj = ModelSettings()
+            if self.agent_config.temperature is not None:
+                model_settings_obj["temperature"] = self.agent_config.temperature
+            if self.agent_config.max_tokens is not None:
+                model_settings_obj["max_tokens"] = self.agent_config.max_tokens
+
+        try:
+            result = await agent.run(
+                prompt,
+                model_settings=model_settings_obj,
+            )
+
+            batch_output: BatchProposalsOutput = result.output
+            proposals = self._parse_proposals(batch_output.proposals, messages)
+
+            logger.info(
+                f"Generated {len(proposals)} proposals from {len(messages)} messages "
+                f"(with RAG: {'yes' if rag_context else 'no'})"
+            )
 
             return proposals
 
@@ -147,12 +248,10 @@ class LLMProposalService:
         Returns:
             Formatted prompt string
         """
-        # Format messages
         messages_text = "\n\n".join([
             f"Message {i + 1} (ID: {msg.id}, Time: {msg.sent_at}):\n{msg.content}" for i, msg in enumerate(messages)
         ])
 
-        # Build project context
         project_context = ""
         if project_config:
             project_context = f"""
@@ -162,7 +261,6 @@ Project Context:
 - Description: {project_config.description or "N/A"}
 """
 
-        # Build prompt
         prompt = f"""
 Analyze the following messages and extract actionable task proposals.
 
@@ -184,6 +282,67 @@ Return a structured list of task proposals.
 """
         return prompt
 
+    def _build_prompt_with_rag(
+        self,
+        messages: list[Message],
+        project_config: ProjectConfig | None,
+        rag_context: RAGContext | None,
+    ) -> str:
+        """Build LLM prompt with optional RAG context injection.
+
+        Creates an enhanced prompt that includes historical context from past
+        proposals, knowledge base items, and related messages when available.
+
+        Args:
+            messages: Messages to analyze
+            project_config: Optional project configuration
+            rag_context: Optional RAG context with historical data
+
+        Returns:
+            Formatted prompt string with RAG context (if available)
+        """
+        prompt_parts = []
+
+        if rag_context:
+            context_text = self.rag_context_builder.format_context(rag_context) if self.rag_context_builder else ""
+            if context_text:
+                prompt_parts.append(context_text)
+                prompt_parts.append("\n---\n")
+
+        prompt_parts.append("## Current Messages to Analyze\n")
+        for i, msg in enumerate(messages):
+            prompt_parts.append(f"Message {i + 1} (ID: {msg.id}, Time: {msg.sent_at}):\n{msg.content}\n")
+
+        prompt_parts.append("\n## Instructions")
+
+        if rag_context:
+            prompt_parts.append(
+                "\nConsider the past context above when generating proposals. "
+                "Look for patterns, similar issues, and relevant knowledge from previous work. "
+                "Avoid duplicating existing proposals unless there's significant new information.\n"
+            )
+
+        prompt_parts.append(
+            "\n1. Group related messages into coherent tasks\n"
+            "2. Extract clear task titles and descriptions\n"
+            "3. Assign priority based on urgency and impact\n"
+            "4. Categorize as feature/bug/improvement/question/docs\n"
+            "5. Provide confidence score (0.0-1.0) for each proposal\n"
+            "6. Explain your reasoning\n"
+            "7. Recommend action: new_task/update_existing/merge/reject\n"
+        )
+
+        if project_config:
+            prompt_parts.append(f"\nProject Context:\n")
+            prompt_parts.append(f"- Name: {project_config.name}\n")
+            prompt_parts.append(f"- Keywords: {', '.join(project_config.keywords or [])}\n")
+            if project_config.description:
+                prompt_parts.append(f"- Description: {project_config.description}\n")
+
+        prompt_parts.append("\nReturn a structured list of task proposals.")
+
+        return "".join(prompt_parts)
+
     def _parse_proposals(
         self,
         llm_proposals: list[TaskProposalOutput],
@@ -201,7 +360,6 @@ Return a structured list of task proposals.
         proposals = []
 
         for llm_prop in llm_proposals:
-            # Calculate time span
             if len(messages) > 1:
                 first_time = min(msg.sent_at for msg in messages)
                 last_time = max(msg.sent_at for msg in messages)

@@ -69,6 +69,7 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep) -> dict
         author_name=user.full_name,
         avatar_url=db_message.avatar_url,
         telegram_profile_id=db_message.telegram_profile_id,
+        topic_id=db_message.topic_id,
         classification=db_message.classification,
         confidence=db_message.confidence,
         analyzed=db_message.analyzed,
@@ -98,6 +99,7 @@ async def get_messages(
     page_size: int = Query(50, ge=1, le=1000, description="Number of items per page"),
     author: str | None = Query(None, description="Filter by author name"),
     source: str | None = Query(None, description="Filter by source name"),
+    topic_id: int | None = Query(None, description="Filter by topic ID"),
     date_from: date | None = Query(None, description="Filter messages from this date"),
     date_to: date | None = Query(None, description="Filter messages until this date"),
     sort_by: str | None = Query(None, description="Column to sort by (author_name, source_name, analyzed, sent_at)"),
@@ -106,7 +108,7 @@ async def get_messages(
     """
     Retrieve messages with pagination and optional filtering.
 
-    Supports filtering by author, source, and date range.
+    Supports filtering by author, source, topic, and date range.
     Returns most recent messages first with pagination support.
     """
     # Build base query with joins
@@ -122,6 +124,9 @@ async def get_messages(
 
     if source:
         filters.append(column("name").ilike(f"%{source}%"))
+
+    if topic_id is not None:
+        filters.append(Message.topic_id == topic_id)  # type: ignore[arg-type]
 
     if date_from:
         filters.append(Message.sent_at >= datetime.combine(date_from, datetime.min.time()))  # type: ignore[arg-type]
@@ -191,6 +196,7 @@ async def get_messages(
                 author_name=user.full_name,
                 avatar_url=msg.avatar_url,
                 telegram_profile_id=msg.telegram_profile_id,
+                topic_id=msg.topic_id,
                 classification=msg.classification,
                 confidence=msg.confidence,
                 analyzed=msg.analyzed,

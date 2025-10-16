@@ -10,6 +10,7 @@ Usage:
 
 import argparse
 import asyncio
+import os
 import random
 import sys
 from datetime import UTC, datetime, timedelta
@@ -30,7 +31,7 @@ from app.models import (
     User,
 )
 from core.config import settings
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -214,6 +215,18 @@ MESSAGE_TEMPLATES = [
     "Can someone review {topic}? {detail}",
     "Brainstorming {topic} ideas. {detail}",
 ]
+
+
+async def test_connection(engine) -> bool:
+    """Test database connection before operations."""
+    try:
+        async with engine.begin() as conn:
+            await conn.execute(text("SELECT 1"))
+        print("✅ Database connection successful")
+        return True
+    except Exception as e:
+        print(f"❌ Database connection failed: {e}")
+        return False
 
 
 async def clear_data(session: AsyncSession):
@@ -472,7 +485,22 @@ async def main():
         parser.print_help()
         return
 
-    engine = create_async_engine(settings.database_url, echo=False)
+    database_url = os.getenv(
+        "DATABASE_URL_LOCAL",
+        "postgresql+asyncpg://postgres:postgres@localhost:5555/tasktracker"
+    )
+
+    print(f"📊 Connecting to database: {database_url.replace('postgres:postgres@', 'postgres:***@')}")
+
+    engine = create_async_engine(database_url, echo=False)
+
+    if not await test_connection(engine):
+        print("\n❌ Cannot connect to database. Make sure PostgreSQL is running:")
+        print("   docker ps | grep postgres")
+        print("   Expected: task-tracker-postgres on port 5555")
+        await engine.dispose()
+        return
+
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with async_session() as session:

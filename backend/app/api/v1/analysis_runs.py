@@ -275,10 +275,14 @@ async def close_run(
 @router.post(
     "/{run_id}/start",
     summary="Start analysis run",
-    description="Trigger background job to execute analysis run (TaskIQ).",
+    description="Trigger background job to execute analysis run (TaskIQ) with optional RAG support.",
 )
 async def start_run(
     run_id: UUID,
+    use_rag: bool = Query(
+        False,
+        description="Enable RAG (Retrieval-Augmented Generation) for context-aware proposal generation",
+    ),
     session: AsyncSession = Depends(get_session),
 ) -> dict:
     """Trigger background job to execute analysis run.
@@ -287,12 +291,19 @@ async def start_run(
     The job will:
     1. Fetch messages in time window
     2. Apply prefiltering
-    3. Send to LLM for task extraction
+    3. Send to LLM for task extraction (with optional RAG context)
     4. Create task proposals
     5. Update run metrics
 
+    RAG (Retrieval-Augmented Generation) enhances proposal quality by:
+    - Retrieving similar past proposals
+    - Finding relevant knowledge base items
+    - Including related historical messages
+    - Providing context to avoid duplicate proposals
+
     Args:
         run_id: Analysis run UUID
+        use_rag: Enable RAG for enhanced context-aware proposals
         session: Database session
 
     Returns:
@@ -301,9 +312,9 @@ async def start_run(
     Raises:
         HTTPException 404: Run not found
 
-    Note:
-        This endpoint is a placeholder for Phase 2 TaskIQ integration.
-        Currently returns success without executing background job.
+    Example:
+        >>> POST /api/v1/analysis/runs/{run_id}/start?use_rag=true
+        >>> # Returns: {"status": "started", "use_rag": true, ...}
     """
     # Validate run exists
     validator = AnalysisRunValidator(session)
@@ -317,12 +328,13 @@ async def start_run(
     # Trigger TaskIQ background job
     from app.tasks import execute_analysis_run
 
-    await execute_analysis_run.kiq(str(run_id))
+    await execute_analysis_run.kiq(str(run_id), use_rag=use_rag)
 
-    logger.info(f"Triggered analysis run {run_id} via TaskIQ background job")
+    logger.info(f"Triggered analysis run {run_id} via TaskIQ background job (RAG: {use_rag})")
 
     return {
         "status": "started",
         "message": "Analysis run job submitted for background processing",
         "run_id": str(run_id),
+        "use_rag": use_rag,
     }

@@ -22,7 +22,7 @@ from app.models import (
 )
 from app.models.atom import AtomPublic
 from app.schemas.messages import MessageResponse
-from app.services import AtomCRUD, TopicCRUD
+from app.services import AtomCRUD, MessageCRUD, TopicCRUD
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/topics", tags=["topics"])
@@ -252,6 +252,8 @@ async def get_topic_atoms(
 )
 async def get_topic_messages(
     topic_id: int,
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     session: AsyncSession = Depends(get_session),
 ) -> list[MessageResponse]:
     """Get all messages belonging to a topic.
@@ -262,6 +264,8 @@ async def get_topic_messages(
 
     Args:
         topic_id: Topic ID to retrieve messages for
+        skip: Number of records to skip (pagination)
+        limit: Maximum number of records to return
         session: Database session
 
     Returns:
@@ -277,11 +281,5 @@ async def get_topic_messages(
             detail=f"Topic with ID {topic_id} not found",
         )
 
-    # TODO: Implement proper message-topic relationship
-    # Currently messages are not directly linked to topics in the database.
-    # Future implementation should either:
-    # 1. Add topic_id field to messages table, OR
-    # 2. Create atom_messages relationship table (Message -> Atom -> Topic)
-    #
-    # For now, return empty list to avoid SQL errors
-    return []
+    crud = MessageCRUD(session)
+    return await crud.list_by_topic(topic_id, skip=skip, limit=limit)
