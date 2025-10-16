@@ -201,13 +201,13 @@ async def test_search_messages_empty_query(
 @pytest.mark.asyncio
 async def test_search_messages_provider_not_found(client: AsyncClient) -> None:
     """Test error when provider doesn't exist."""
-    fake_provider_id = 99999
+    fake_provider_id = uuid4()
 
     response = await client.get(
         "/api/v1/search/messages",
         params={
             "query": "test query",
-            "provider_id": fake_provider_id,
+            "provider_id": str(fake_provider_id),
         },
     )
 
@@ -457,13 +457,13 @@ async def test_search_atoms_semantic_success(
 @pytest.mark.asyncio
 async def test_search_atoms_provider_not_found(client: AsyncClient) -> None:
     """Test error when provider doesn't exist for atom search."""
-    fake_provider_id = 99999
+    fake_provider_id = uuid4()
 
     response = await client.get(
         "/api/v1/search/atoms",
         params={
             "query": "test query",
-            "provider_id": fake_provider_id,
+            "provider_id": str(fake_provider_id),
         },
     )
 

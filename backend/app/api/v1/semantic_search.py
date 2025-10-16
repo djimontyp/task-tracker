@@ -5,6 +5,7 @@ finding similar items, and detecting potential duplicates.
 """
 
 import logging
+from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -51,7 +52,7 @@ class AtomSearchResult(SemanticSearchResult):
 async def search_messages_semantic(
     db: DatabaseDep,
     query: str = Query(..., min_length=1, description="Search query text"),
-    provider_id: int = Query(..., description="LLM provider ID for generating query embeddings"),
+    provider_id: UUID = Query(..., description="LLM provider UUID for generating query embeddings"),
     limit: int = Query(10, ge=1, le=100, description="Maximum number of results"),
     threshold: float = Query(0.7, ge=0.0, le=1.0, description="Minimum similarity score"),
 ) -> list[MessageSearchResult]:
@@ -63,11 +64,11 @@ async def search_messages_semantic(
     by similarity score.
 
     Example:
-        GET /api/v1/search/messages?query=bug+in+production&provider_id=1&limit=10&threshold=0.7
+        GET /api/v1/search/messages?query=bug+in+production&provider_id=550e8400-e29b-41d4-a716-446655440000&limit=10&threshold=0.7
 
     Args:
         query: Natural language search query
-        provider_id: ID of LLM provider to use for embedding generation
+        provider_id: UUID of LLM provider to use for embedding generation
         limit: Maximum results to return (1-100)
         threshold: Minimum similarity score (0.0-1.0)
 
@@ -269,7 +270,7 @@ async def find_duplicate_messages(
 async def search_atoms_semantic(
     db: DatabaseDep,
     query: str = Query(..., min_length=1, description="Search query text"),
-    provider_id: int = Query(..., description="LLM provider ID for generating query embeddings"),
+    provider_id: UUID = Query(..., description="LLM provider UUID for generating query embeddings"),
     limit: int = Query(10, ge=1, le=100, description="Maximum number of results"),
     threshold: float = Query(0.7, ge=0.0, le=1.0, description="Minimum similarity score"),
 ) -> list[AtomSearchResult]:
@@ -281,11 +282,11 @@ async def search_atoms_semantic(
     content. Results are ranked by similarity score.
 
     Example:
-        GET /api/v1/search/atoms?query=dependency+injection&provider_id=1&limit=10&threshold=0.7
+        GET /api/v1/search/atoms?query=dependency+injection&provider_id=550e8400-e29b-41d4-a716-446655440000&limit=10&threshold=0.7
 
     Args:
         query: Natural language search query
-        provider_id: ID of LLM provider to use for embedding generation
+        provider_id: UUID of LLM provider to use for embedding generation
         limit: Maximum results to return (1-100)
         threshold: Minimum similarity score (0.0-1.0)
 
