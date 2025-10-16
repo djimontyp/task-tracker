@@ -3,8 +3,9 @@
 from datetime import datetime
 from enum import Enum
 
+from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
 from pydantic import field_validator
-from sqlalchemy import JSON, BigInteger, DateTime, Text, func
+from sqlalchemy import JSON, BigInteger, Column, DateTime, Text, func
 from sqlmodel import Field, SQLModel
 
 from .base import IDMixin, TimestampMixin
@@ -74,6 +75,12 @@ class Atom(IDMixin, TimestampMixin, SQLModel, table=True):
         description="Additional structured metadata (tags, sources, etc.)",
     )
 
+    embedding: list[float] | None = Field(
+        default=None,
+        sa_column=Column(Vector(1536)),
+        description="Vector embedding for semantic search (must match settings.openai_embedding_dimensions)",
+    )
+
     @field_validator("type", mode="before")
     @classmethod
     def validate_atom_type(cls, v: str | AtomType) -> str:
@@ -85,7 +92,7 @@ class Atom(IDMixin, TimestampMixin, SQLModel, table=True):
         return v
 
 
-class AtomLink(SQLModel, table=True):
+class AtomLink(TimestampMixin, SQLModel, table=True):
     """
     Bidirectional links between atoms.
 
@@ -117,16 +124,6 @@ class AtomLink(SQLModel, table=True):
         le=1.0,
         description="Strength of the relationship (0-1, optional)",
     )
-    created_at: datetime | None = Field(
-        default=None,
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"server_default": func.now()},
-    )
-    updated_at: datetime | None = Field(
-        default=None,
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"server_default": func.now(), "onupdate": func.now()},
-    )
 
     @field_validator("link_type", mode="before")
     @classmethod
@@ -139,7 +136,7 @@ class AtomLink(SQLModel, table=True):
         return v
 
 
-class TopicAtom(SQLModel, table=True):
+class TopicAtom(TimestampMixin, SQLModel, table=True):
     """
     Many-to-many relationship: Topics ↔ Atoms.
 
@@ -170,16 +167,6 @@ class TopicAtom(SQLModel, table=True):
         sa_type=Text,
         description="Contextual note about why this atom belongs to this topic",
     )
-    created_at: datetime | None = Field(
-        default=None,
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"server_default": func.now()},
-    )
-    updated_at: datetime | None = Field(
-        default=None,
-        sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"server_default": func.now(), "onupdate": func.now()},
-    )
 
 
 class AtomPublic(SQLModel):
@@ -192,6 +179,8 @@ class AtomPublic(SQLModel):
     confidence: float | None
     user_approved: bool
     meta: dict | None
+    embedding: list[float] | None = None
+    has_embedding: bool = False
     created_at: str
     updated_at: str
 

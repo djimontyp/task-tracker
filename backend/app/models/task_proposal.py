@@ -3,7 +3,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Text, func
+from sqlalchemy import Column, DateTime, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
@@ -164,7 +164,7 @@ class TaskProposal(SQLModel, table=True):
     )
 
     # Timestamps
-    created_at: datetime = Field(sa_column_kwargs={"server_default": func.now()})
+    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now()))
 
     class Config:
         """Pydantic configuration."""

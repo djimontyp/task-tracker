@@ -6,6 +6,7 @@ Includes AnalysisExecutor for background job execution.
 
 import logging
 from datetime import datetime
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from sqlalchemy import func
@@ -27,6 +28,11 @@ from app.models import (
 )
 from app.services.llm_proposal_service import LLMProposalService
 from app.services.websocket_manager import websocket_manager
+
+if TYPE_CHECKING:
+    from app.services.embedding_service import EmbeddingService
+    from app.services.rag_context_builder import RAGContextBuilder
+    from app.services.semantic_search_service import SemanticSearchService
 
 logger = logging.getLogger(__name__)
 
@@ -158,7 +164,6 @@ class AnalysisRunCRUD:
         Raises:
             ValueError: If agent_assignment or project_config not found
         """
-        # Verify agent assignment exists
         assignment_result = await self.session.execute(
             select(AgentTaskAssignment).where(AgentTaskAssignment.id == run_data.agent_assignment_id)
         )
@@ -166,7 +171,6 @@ class AnalysisRunCRUD:
         if not assignment:
             raise ValueError(f"Agent assignment with ID '{run_data.agent_assignment_id}' not found")
 
-        # Build config snapshot
         config_snapshot = {
             "agent_assignment_id": str(run_data.agent_assignment_id),
             "time_window": {
@@ -175,7 +179,6 @@ class AnalysisRunCRUD:
             },
         }
 
-        # Add project config to snapshot if provided
         if run_data.project_config_id:
             project_result = await self.session.execute(
                 select(ProjectConfig).where(ProjectConfig.id == run_data.project_config_id)
@@ -190,7 +193,6 @@ class AnalysisRunCRUD:
                 "keywords": project.keywords,
             }
 
-        # Create analysis run
         run = AnalysisRun(
             time_window_start=run_data.time_window_start,
             time_window_end=run_data.time_window_end,
@@ -321,7 +323,6 @@ class AnalysisRunCRUD:
         if not run:
             return None
 
-        # Calculate accuracy metrics
         total_proposals = run.proposals_total
         accuracy_metrics = {
             "proposals_total": total_proposals,
@@ -331,7 +332,6 @@ class AnalysisRunCRUD:
             "rejection_rate": (run.proposals_rejected / total_proposals if total_proposals > 0 else 0.0),
         }
 
-        # Update run
         run.status = AnalysisRunStatus.closed.value
         run.closed_at = datetime.utcnow()
         run.accuracy_metrics = accuracy_metrics
@@ -382,14 +382,12 @@ class AnalysisExecutor:
         if not run:
             raise ValueError(f"Run with ID '{run_id}' not found")
 
-        # Update status and timestamp
         run.status = AnalysisRunStatus.running.value
         run.started_at = datetime.utcnow()
 
         await self.session.commit()
         await self.session.refresh(run)
 
-        # Broadcast WebSocket event
         await websocket_manager.broadcast(
             "analysis_runs",
             {
@@ -422,7 +420,6 @@ class AnalysisExecutor:
         if not run:
             raise ValueError(f"Run with ID '{run_id}' not found")
 
-        # Query messages in time window
         # Convert aware datetime to naive for comparison (DB uses naive timestamps)
         start_naive = (
             run.time_window_start.replace(tzinfo=None) if run.time_window_start.tzinfo else run.time_window_start
@@ -437,7 +434,6 @@ class AnalysisExecutor:
         )
         messages = list(messages_result.scalars().all())
 
-        # Update count
         run.total_messages_in_window = len(messages)
         await self.session.commit()
 
@@ -474,24 +470,18 @@ class AnalysisExecutor:
             )
             project_config = project_result.scalar_one_or_none()
 
-        # Apply filters
         filtered = []
         for msg in messages:
-            # Filter by length (skip very short messages)
             if len(msg.content.strip()) < 10:
                 continue
 
-            # Filter by keywords if project config available
             if project_config and project_config.keywords:
                 has_keyword = any(keyword.lower() in msg.content.lower() for keyword in project_config.keywords)
-                if not has_keyword:
-                    # Check for @mentions as alternative
-                    if "@" not in msg.content:
-                        continue
+                if not has_keyword and "@" not in msg.content:
+                    continue
 
             filtered.append(msg)
 
-        # Update count
         run.messages_after_prefilter = len(filtered)
         await self.session.commit()
 
@@ -539,12 +529,13 @@ class AnalysisExecutor:
 
         return batches
 
-    async def process_batch(self, run_id: UUID, batch: list[Message]) -> list[dict]:
+    async def process_batch(self, run_id: UUID, batch: list[Message], use_rag: bool = False) -> list[dict]:
         """Process message batch with LLM to generate proposals.
 
         Args:
             run_id: Analysis run UUID
             batch: List of messages in batch
+            use_rag: Enable RAG (Retrieval-Augmented Generation) for context-aware proposals
 
         Returns:
             List of proposal dictionaries
@@ -589,11 +580,22 @@ class AnalysisExecutor:
             )
             project_config = project_result.scalar_one_or_none()
 
-        # Create LLM service and generate proposals
-        llm_service = LLMProposalService(agent, provider)
-        proposals = await llm_service.generate_proposals(batch, project_config)
+        if use_rag:
+            from app.services.embedding_service import EmbeddingService
+            from app.services.rag_context_builder import RAGContextBuilder
+            from app.services.semantic_search_service import SemanticSearchService
 
-        logger.info(f"Run {run_id}: Generated {len(proposals)} proposals from batch")
+            embedding_service = EmbeddingService(provider)
+            search_service = SemanticSearchService(embedding_service)
+            rag_builder = RAGContextBuilder(embedding_service, search_service)
+
+            llm_service = LLMProposalService(agent, provider, rag_builder)
+            proposals = await llm_service.generate_proposals_with_rag(self.session, batch, project_config, use_rag=True)
+        else:
+            llm_service = LLMProposalService(agent, provider)
+            proposals = await llm_service.generate_proposals(batch, project_config)
+
+        logger.info(f"Run {run_id}: Generated {len(proposals)} proposals from batch (RAG: {use_rag})")
 
         return proposals
 
@@ -619,7 +621,6 @@ class AnalysisExecutor:
         saved_count = 0
 
         for proposal_data in proposals:
-            # Create proposal
             proposal = TaskProposal(
                 analysis_run_id=run_id,
                 **proposal_data,
@@ -628,7 +629,6 @@ class AnalysisExecutor:
             self.session.add(proposal)
             saved_count += 1
 
-        # Update run counts
         run.proposals_total += saved_count
         run.proposals_pending += saved_count
 
@@ -669,12 +669,10 @@ class AnalysisExecutor:
         if not run:
             raise ValueError(f"Run with ID '{run_id}' not found")
 
-        # Update batches count
         run.batches_created = total
 
         await self.session.commit()
 
-        # Broadcast WebSocket event
         await websocket_manager.broadcast(
             "analysis_runs",
             {
@@ -710,14 +708,12 @@ class AnalysisExecutor:
         if not run:
             raise ValueError(f"Run with ID '{run_id}' not found")
 
-        # Update status and timestamp
         run.status = AnalysisRunStatus.completed.value
         run.completed_at = datetime.utcnow()
 
         await self.session.commit()
         await self.session.refresh(run)
 
-        # Broadcast WebSocket event
         await websocket_manager.broadcast(
             "analysis_runs",
             {
@@ -762,7 +758,6 @@ class AnalysisExecutor:
         if not run:
             raise ValueError(f"Run with ID '{run_id}' not found")
 
-        # Update status and error log
         run.status = AnalysisRunStatus.failed.value
         run.error_log = {
             "timestamp": datetime.utcnow().isoformat(),
@@ -772,7 +767,6 @@ class AnalysisExecutor:
         await self.session.commit()
         await self.session.refresh(run)
 
-        # Broadcast WebSocket event
         await websocket_manager.broadcast(
             "analysis_runs",
             {

@@ -33,10 +33,14 @@ class MessageResponse(BaseModel):
     avatar_url: str | None = None
 
     telegram_profile_id: int | None = None
+    topic_id: int | None = None
 
     classification: str | None = None
     confidence: float | None = None
     analyzed: bool = False
+
+    embedding: list[float] | None = None
+    has_embedding: bool = False
 
     author: str | None = None  # @deprecated Use author_name
     persisted: bool = True

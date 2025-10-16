@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, func
+from sqlalchemy import BigInteger, Column, DateTime, func
 from sqlmodel import Field, SQLModel
 
 
@@ -18,10 +18,10 @@ class TimestampMixin(SQLModel):
     created_at: datetime | None = Field(
         default=None,
         sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"server_default": func.now()},
+        sa_column_kwargs={"server_default": func.now()},  # type: ignore[arg-type]
     )
     updated_at: datetime | None = Field(
         default=None,
         sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"server_default": func.now(), "onupdate": func.now()},
+        sa_column_kwargs={"server_default": func.now(), "onupdate": func.now()},  # type: ignore[arg-type]
     )

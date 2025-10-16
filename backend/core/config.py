@@ -86,6 +86,37 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("ENCRYPTION_KEY", "encryption_key"),
     )
 
+    openai_embedding_model: str = Field(
+        default="text-embedding-3-small",
+        validation_alias=AliasChoices("OPENAI_EMBEDDING_MODEL", "openai_embedding_model"),
+    )
+    openai_embedding_dimensions: int = Field(
+        default=1536,
+        validation_alias=AliasChoices("OPENAI_EMBEDDING_DIMENSIONS", "openai_embedding_dimensions"),
+    )
+    ollama_embedding_model: str = Field(
+        default="llama3",
+        validation_alias=AliasChoices("OLLAMA_EMBEDDING_MODEL", "ollama_embedding_model"),
+    )
+    vector_similarity_threshold: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
+        validation_alias=AliasChoices("VECTOR_SIMILARITY_THRESHOLD", "vector_similarity_threshold"),
+    )
+    vector_search_limit: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        validation_alias=AliasChoices("VECTOR_SEARCH_LIMIT", "vector_search_limit"),
+    )
+    embedding_batch_size: int = Field(
+        default=100,
+        ge=1,
+        le=1000,
+        validation_alias=AliasChoices("EMBEDDING_BATCH_SIZE", "embedding_batch_size"),
+    )
+
     @property
     def ollama_url(self) -> str:
         """Returns appropriate Ollama URL based on environment (Docker vs local)."""

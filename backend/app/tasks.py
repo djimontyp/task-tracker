@@ -318,7 +318,7 @@ async def ingest_telegram_messages_task(
 
 
 @nats_broker.task
-async def execute_analysis_run(run_id: str) -> dict[str, str | int]:
+async def execute_analysis_run(run_id: str, use_rag: bool = False) -> dict[str, str | int]:
     """Execute analysis run: process messages and create proposals.
 
     This is the main background job that coordinates the entire analysis run:
@@ -326,13 +326,14 @@ async def execute_analysis_run(run_id: str) -> dict[str, str | int]:
     2. Fetch messages in time window
     3. Pre-filter messages (keywords, length, @mentions)
     4. Group into batches
-    5. Process each batch with LLM
+    5. Process each batch with LLM (optionally with RAG context)
     6. Update status to "completed" or "failed"
 
     WebSocket events are broadcast at each stage for real-time updates.
 
     Args:
         run_id: UUID as string for the analysis run to execute
+        use_rag: Enable RAG (Retrieval-Augmented Generation) for context-aware proposals
 
     Returns:
         Summary dictionary with execution statistics
@@ -341,7 +342,7 @@ async def execute_analysis_run(run_id: str) -> dict[str, str | int]:
         Exception: If critical errors occur during processing
 
     Example:
-        >>> await execute_analysis_run.kiq(str(run_id))
+        >>> await execute_analysis_run.kiq(str(run_id), use_rag=True)
     """
     from uuid import UUID
 
@@ -387,13 +388,15 @@ async def execute_analysis_run(run_id: str) -> dict[str, str | int]:
             await executor.update_progress(run_uuid, batch_idx + 1, len(batches))
 
             # Generate proposals for current batch
-            proposals = await executor.process_batch(run_uuid, batch)
+            proposals = await executor.process_batch(run_uuid, batch, use_rag=use_rag)
 
             # Persist batch proposals
             saved_count = await executor.save_proposals(run_uuid, proposals)
             total_proposals += saved_count
 
-            logger.info(f"Run {run_id}: Batch {batch_idx + 1} completed, created {saved_count} proposals")
+            logger.info(
+                f"Run {run_id}: Batch {batch_idx + 1} completed, created {saved_count} proposals (RAG: {use_rag})"
+            )
 
         # Mark run as completed
         logger.info(f"Run {run_id}: Completing run with {total_proposals} proposals")
@@ -505,6 +508,7 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
 
         # Load LLM provider for classification
         from .models import LLMProvider
+
         provider = await db.get(LLMProvider, experiment.provider_id)
         if not provider:
             raise ValueError(f"Provider {experiment.provider_id} not found")
@@ -633,6 +637,106 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
         except Exception as inner_e:
             logger.error(f"Experiment {experiment_id}: Failed to update status: {inner_e}")
 
+        raise
+
+
+@nats_broker.task
+async def embed_messages_batch_task(message_ids: list[int], provider_id: str) -> dict[str, int]:
+    """Background task for batch embedding messages.
+
+    Processes messages in batches and generates embeddings using specified LLM provider.
+    Designed for long-running embedding operations with automatic error handling.
+
+    Args:
+        message_ids: List of message IDs to embed
+        provider_id: LLMProvider UUID as string
+
+    Returns:
+        Statistics dictionary with success/failed/skipped counts
+
+    Example:
+        >>> task = await embed_messages_batch_task.kiq([1, 2, 3], str(provider_id))
+        >>> result = await task.wait_result()
+        >>> print(result.return_value)  # {"success": 3, "failed": 0, "skipped": 0}
+    """
+    from uuid import UUID
+
+    from .database import get_db_session_context
+    from .models.llm_provider import LLMProvider
+    from .services.embedding_service import EmbeddingService
+
+    logger.info(f"Starting batch embedding task: {len(message_ids)} messages with provider {provider_id}")
+
+    db_context = get_db_session_context()
+    db = await anext(db_context)
+
+    try:
+        provider = await db.get(LLMProvider, UUID(provider_id))
+        if not provider:
+            raise ValueError(f"Provider {provider_id} not found")
+
+        service = EmbeddingService(provider)
+        stats = await service.embed_messages_batch(db, message_ids, batch_size=100)
+
+        logger.info(
+            f"Batch embedding task completed: {stats['success']} success, "
+            f"{stats['failed']} failed, {stats['skipped']} skipped"
+        )
+
+        return stats
+
+    except Exception as e:
+        logger.error(f"Batch embedding task failed: {e}", exc_info=True)
+        raise
+
+
+@nats_broker.task
+async def embed_atoms_batch_task(atom_ids: list[int], provider_id: str) -> dict[str, int]:
+    """Background task for batch embedding atoms.
+
+    Processes atoms in batches and generates embeddings using specified LLM provider.
+    Designed for long-running embedding operations with automatic error handling.
+
+    Args:
+        atom_ids: List of atom IDs to embed
+        provider_id: LLMProvider UUID as string
+
+    Returns:
+        Statistics dictionary with success/failed/skipped counts
+
+    Example:
+        >>> task = await embed_atoms_batch_task.kiq([1, 2, 3], str(provider_id))
+        >>> result = await task.wait_result()
+        >>> print(result.return_value)  # {"success": 3, "failed": 0, "skipped": 0}
+    """
+    from uuid import UUID
+
+    from .database import get_db_session_context
+    from .models.llm_provider import LLMProvider
+    from .services.embedding_service import EmbeddingService
+
+    logger.info(f"Starting batch atom embedding task: {len(atom_ids)} atoms with provider {provider_id}")
+
+    db_context = get_db_session_context()
+    db = await anext(db_context)
+
+    try:
+        provider = await db.get(LLMProvider, UUID(provider_id))
+        if not provider:
+            raise ValueError(f"Provider {provider_id} not found")
+
+        service = EmbeddingService(provider)
+        stats = await service.embed_atoms_batch(db, atom_ids, batch_size=100)
+
+        logger.info(
+            f"Batch atom embedding task completed: {stats['success']} success, "
+            f"{stats['failed']} failed, {stats['skipped']} skipped"
+        )
+
+        return stats
+
+    except Exception as e:
+        logger.error(f"Batch atom embedding task failed: {e}", exc_info=True)
         raise
 
 
