@@ -64,6 +64,7 @@ class MessageCRUD:
                 author_name=user.full_name,
                 avatar_url=msg.avatar_url,
                 telegram_profile_id=msg.telegram_profile_id,
+                topic_id=msg.topic_id,
                 classification=msg.classification,
                 confidence=msg.confidence,
                 analyzed=msg.analyzed,

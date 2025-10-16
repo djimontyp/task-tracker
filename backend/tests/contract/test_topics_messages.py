@@ -3,12 +3,11 @@
 from datetime import UTC, datetime
 
 import pytest
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models import Message, Topic, User
 from app.models.enums import SourceType
 from app.models.legacy import Source
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.fixture
