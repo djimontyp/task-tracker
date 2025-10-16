@@ -2,7 +2,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import Text
+from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
+from sqlalchemy import Column, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
@@ -55,4 +56,10 @@ class Message(IDMixin, TimestampMixin, SQLModel, table=True):
         foreign_key="topics.id",
         index=True,
         description="Ground truth topic ID for classification experiments",
+    )
+
+    embedding: list[float] | None = Field(
+        default=None,
+        sa_column=Column(Vector(1536)),
+        description="Vector embedding for semantic search (must match settings.openai_embedding_dimensions)",
     )

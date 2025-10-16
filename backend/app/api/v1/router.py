@@ -6,6 +6,7 @@ from . import (
     analysis_runs,
     assignments,
     atoms,
+    embeddings,
     experiments,
     health,
     ingestion,
@@ -13,6 +14,7 @@ from . import (
     projects,
     proposals,
     providers,
+    semantic_search,
     stats,
     task_configs,
     tasks,
@@ -43,3 +45,5 @@ api_router.include_router(assignments.router)
 api_router.include_router(topics.router)
 api_router.include_router(atoms.router)
 api_router.include_router(experiments.router)
+api_router.include_router(embeddings.router)
+api_router.include_router(semantic_search.router)
