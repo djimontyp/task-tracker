@@ -100,5 +100,42 @@ The Messages tab includes powerful filtering capabilities:
 - Task Entity system
 - Advanced task hierarchy
 - More complex incident tracking
+## 📚 Documentation
+
+### Core Concepts
+
+- **[User Needs](./USER_NEEDS.md)** - Business requirements and user journey (what we're solving)
+- **[Noise Filtering Architecture](./NOISE_FILTERING_ARCHITECTURE.md)** - Technical implementation of information overload solution
+
+### Technical Documentation
+
+- **[Analysis System Architecture](./ANALYSIS_SYSTEM_ARCHITECTURE.md)** - AI-powered analysis pipeline
+- **[Vector DB Implementation](./VECTOR_DB_IMPLEMENTATION_PLAN.md)** - Semantic search with pgvector
+- **[Claude AI Guide](./CLAUDE.md)** - Development guidelines and patterns
+
+### Key Innovation: Information Noise Filtering
+
+**Problem:** 100 messages/day with 80% noise (chitchat, "+1", memes) → Information overload
+
+**Solution:** Four-layer architecture:
+```
+Layer 4: Dashboard (trends & issues) ← Human works here
+    ↓ drill down (5% cases)
+Layer 3: Atoms (structured extracts)
+    ↓ drill down (edgecase)
+Layer 2: Signal Messages (filtered)
+    ↓
+Layer 1: All Messages (raw + noise)
+```
+
+**Result:**
+- 50x less information to process
+- 10x faster insight discovery
+- Focus on trends, not individual messages
+
+See [USER_NEEDS.md](./USER_NEEDS.md) for detailed explanation.
+
+---
+
 ## Licensing
 MIT License
