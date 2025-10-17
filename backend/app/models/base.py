@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Column, DateTime, func
+from sqlalchemy import BigInteger, DateTime, func
 from sqlmodel import Field, SQLModel
 
 

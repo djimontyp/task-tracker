@@ -30,7 +30,6 @@ from app.models import (
     TopicAtom,
     User,
 )
-from core.config import settings
 from sqlalchemy import delete, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -485,10 +484,7 @@ async def main():
         parser.print_help()
         return
 
-    database_url = os.getenv(
-        "DATABASE_URL_LOCAL",
-        "postgresql+asyncpg://postgres:postgres@localhost:5555/tasktracker"
-    )
+    database_url = os.getenv("DATABASE_URL_LOCAL", "postgresql+asyncpg://postgres:postgres@localhost:5555/tasktracker")
 
     print(f"📊 Connecting to database: {database_url.replace('postgres:postgres@', 'postgres:***@')}")
 

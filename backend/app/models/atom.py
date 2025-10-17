@@ -1,11 +1,10 @@
 """Atom model for Zettelkasten knowledge graph system."""
 
-from datetime import datetime
 from enum import Enum
 
 from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
 from pydantic import field_validator
-from sqlalchemy import JSON, BigInteger, Column, DateTime, Text, func
+from sqlalchemy import JSON, BigInteger, Column, Text
 from sqlmodel import Field, SQLModel
 
 from .base import IDMixin, TimestampMixin

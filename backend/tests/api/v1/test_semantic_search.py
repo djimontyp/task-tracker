@@ -19,11 +19,11 @@ from uuid import uuid4
 
 import pytest
 from app.models.atom import Atom
+from app.models.enums import SourceType
+from app.models.legacy import Source
 from app.models.llm_provider import LLMProvider, ProviderType
 from app.models.message import Message
 from app.models.user import User
-from app.models.enums import SourceType
-from app.models.legacy import Source
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -155,9 +155,7 @@ async def test_search_messages_semantic_success(
         mock_embedding_class.return_value = mock_embedding_service
 
         mock_search_service = MagicMock()
-        mock_search_service.search_messages = AsyncMock(
-            return_value=[(messages_with_embeddings[0], 0.92)]
-        )
+        mock_search_service.search_messages = AsyncMock(return_value=[(messages_with_embeddings[0], 0.92)])
         mock_search_class.return_value = mock_search_service
 
         response = await client.get(
@@ -294,9 +292,7 @@ async def test_find_similar_messages_success(
 
     with patch("app.api.v1.semantic_search.SemanticSearchService") as mock_search_class:
         mock_search_service = MagicMock()
-        mock_search_service.find_similar_messages = AsyncMock(
-            return_value=[(messages_with_embeddings[2], 0.88)]
-        )
+        mock_search_service.find_similar_messages = AsyncMock(return_value=[(messages_with_embeddings[2], 0.88)])
         mock_search_class.return_value = mock_search_service
 
         response = await client.get(
@@ -372,9 +368,7 @@ async def test_find_duplicate_messages_success(
 
     with patch("app.api.v1.semantic_search.SemanticSearchService") as mock_search_class:
         mock_search_service = MagicMock()
-        mock_search_service.find_duplicates = AsyncMock(
-            return_value=[(messages_with_embeddings[2], 0.97)]
-        )
+        mock_search_service.find_duplicates = AsyncMock(return_value=[(messages_with_embeddings[2], 0.97)])
         mock_search_class.return_value = mock_search_service
 
         response = await client.get(
@@ -428,9 +422,7 @@ async def test_search_atoms_semantic_success(
         mock_embedding_class.return_value = mock_embedding_service
 
         mock_search_service = MagicMock()
-        mock_search_service.search_atoms = AsyncMock(
-            return_value=[(atoms_with_embeddings[0], 0.91)]
-        )
+        mock_search_service.search_atoms = AsyncMock(return_value=[(atoms_with_embeddings[0], 0.91)])
         mock_search_class.return_value = mock_search_service
 
         response = await client.get(
@@ -480,9 +472,7 @@ async def test_find_similar_atoms_success(
 
     with patch("app.api.v1.semantic_search.SemanticSearchService") as mock_search_class:
         mock_search_service = MagicMock()
-        mock_search_service.find_similar_atoms = AsyncMock(
-            return_value=[(atoms_with_embeddings[2], 0.89)]
-        )
+        mock_search_service.find_similar_atoms = AsyncMock(return_value=[(atoms_with_embeddings[2], 0.89)])
         mock_search_class.return_value = mock_search_service
 
         response = await client.get(
@@ -506,9 +496,7 @@ async def test_find_similar_atoms_not_found(client: AsyncClient) -> None:
 
     with patch("app.api.v1.semantic_search.SemanticSearchService") as mock_search_class:
         mock_search_service = MagicMock()
-        mock_search_service.find_similar_atoms = AsyncMock(
-            side_effect=ValueError(f"Atom {fake_atom_id} not found")
-        )
+        mock_search_service.find_similar_atoms = AsyncMock(side_effect=ValueError(f"Atom {fake_atom_id} not found"))
         mock_search_class.return_value = mock_search_service
 
         response = await client.get(f"/api/v1/search/atoms/{fake_atom_id}/similar")
@@ -532,9 +520,7 @@ async def test_search_response_schema_validation(
         mock_embedding_class.return_value = mock_embedding_service
 
         mock_search_service = MagicMock()
-        mock_search_service.search_messages = AsyncMock(
-            return_value=[(messages_with_embeddings[0], 0.92)]
-        )
+        mock_search_service.search_messages = AsyncMock(return_value=[(messages_with_embeddings[0], 0.92)])
         mock_search_class.return_value = mock_search_service
 
         response = await client.get(

@@ -13,11 +13,11 @@ from datetime import UTC, datetime
 
 import pytest
 from app.models.atom import Atom
-from app.models.message import Message
-from app.models.user import User
 from app.models.enums import SourceType
 from app.models.legacy import Source
-from sqlalchemy import select, text
+from app.models.message import Message
+from app.models.user import User
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

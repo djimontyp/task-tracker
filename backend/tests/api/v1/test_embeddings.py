@@ -19,11 +19,11 @@ from uuid import uuid4
 
 import pytest
 from app.models.atom import Atom
+from app.models.enums import SourceType
+from app.models.legacy import Source
 from app.models.llm_provider import LLMProvider, ProviderType
 from app.models.message import Message
 from app.models.user import User
-from app.models.enums import SourceType
-from app.models.legacy import Source
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
