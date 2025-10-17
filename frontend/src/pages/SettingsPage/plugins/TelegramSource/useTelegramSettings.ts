@@ -148,7 +148,8 @@ export const useTelegramSettings = () => {
 
   useEffect(() => {
     loadConfig()
-  }, [loadConfig])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleSave = async () => {
     if (!isValidBaseUrl) {
