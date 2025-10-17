@@ -833,62 +833,80 @@ async def get_system_metrics(db: DatabaseDep) -> SystemMetrics:
 
 ---
 
-## 🎯 Implementation Roadmap
+## 🎯 Implementation Status
 
-### Week 1: Scoring Infrastructure
+### ✅ IMPLEMENTED (October 2025)
 
-**Day 1-2:**
-- [ ] Add new fields to Message model
-- [ ] Run migration
-- [ ] Implement `ImportanceScorer` class
+**Scoring Infrastructure:**
+- [x] Add new fields to Message model (importance_score, noise_classification, noise_factors)
+- [x] Database migration (7e130ec89a37_add_noise_filtering_fields_to_messages.py)
+- [x] Implement `ImportanceScorer` class (backend/app/services/importance_scorer.py)
 
-**Day 3-4:**
-- [ ] Create `score_unscored_messages_task`
-- [ ] Test scoring on 100 messages
-- [ ] Tune content analysis weights
+**Scoring Engine:**
+- [x] 4-factor importance scoring system:
+  - Content analysis (40%): length, signal/noise keywords, questions, URLs, code
+  - Author reputation (20%): historical signal/noise ratio
+  - Temporal context (20%): recency, topic activity windows
+  - Topic relevance (20%): message count, topic importance
+- [x] Classification thresholds:
+  - Noise: < 0.3
+  - Weak Signal: 0.3-0.7
+  - Signal: > 0.7
 
-**Day 5:**
-- [ ] Create `filter_noise_task`
-- [ ] Test noise filtering
-- [ ] Monitor false positives/negatives
+**API Endpoints:**
+- [x] GET `/api/v1/noise/stats` - Dashboard statistics with trends and top noise sources
+- [x] POST `/api/v1/noise/score/{message_id}` - Score individual message
+- [x] POST `/api/v1/noise/score-batch` - Batch score unscored messages
+
+**Background Tasks:**
+- [x] `score_message_task` - Score individual messages
+- [x] `score_unscored_messages_task` - Batch score unscored messages
+- [x] Auto-scoring on Telegram message receipt (webhook integration)
+
+**Database Schema:**
+```python
+Message model additions:
+├─ importance_score: float (0.0-1.0)
+├─ noise_classification: str ('signal', 'noise', 'weak_signal')
+└─ noise_factors: JSONB (scoring breakdown)
+```
+
+**Testing:**
+- [x] Unit tests for ImportanceScorer (backend/tests/services/test_importance_scorer.py)
 
 ---
 
-### Week 2: Modified Pipeline
+### 📋 Files Created/Modified
 
-**Day 6-7:**
-- [ ] Update `execute_analysis_run` to exclude noise
-- [ ] Update `embed_messages_batch_task` to prioritize signal
-- [ ] Test end-to-end with real data
+**Backend Services:**
+- `/backend/app/services/importance_scorer.py` - Core scoring engine (317 lines)
+- `/backend/app/api/v1/noise.py` - API endpoints (245 lines)
+- `/backend/app/schemas/noise.py` - Response schemas (32 lines)
+- `/backend/alembic/versions/7e130ec89a37_*.py` - Database migration
 
-**Day 8-9:**
-- [ ] Implement dashboard insights endpoint
-- [ ] Implement drill-down endpoint
-- [ ] Implement mark-irrelevant endpoint
-
-**Day 10:**
-- [ ] Create monitoring metrics endpoint
-- [ ] Test full workflow
-- [ ] Document API changes
+**Tests:**
+- `/backend/tests/services/test_importance_scorer.py` - Unit tests
 
 ---
 
-### Week 3: Frontend + Polish
+### 🚀 Next Steps (Future)
 
-**Day 11-12:**
-- [ ] Dashboard UI (aggregated view)
-- [ ] Drill-down UI
-- [ ] Mark irrelevant button
+**Frontend Dashboard:**
+- [ ] Noise filtering statistics widget
+- [ ] Signal/noise ratio visualization
+- [ ] Drill-down to source messages
+- [ ] Mark message as irrelevant UI
 
-**Day 13-14:**
-- [ ] System metrics dashboard (admin)
-- [ ] Tune thresholds based on real data
-- [ ] Performance optimization
+**Pipeline Integration:**
+- [ ] Integrate noise filtering into analysis runs
+- [ ] Filter out noise messages from embeddings
+- [ ] Reduce analysis processing load
 
-**Day 15:**
-- [ ] End-to-end testing
-- [ ] Documentation
-- [ ] Deploy to production
+**Advanced Features:**
+- [ ] Machine learning model training (moving from heuristics)
+- [ ] User feedback learning loop
+- [ ] Per-topic noise thresholds
+- [ ] Anomaly detection (sudden noise spikes)
 
 ---
 
@@ -940,15 +958,21 @@ async def test_full_pipeline():
 
 ## 📝 Document Status
 
-- **Version:** 1.0
+- **Version:** 2.0
 - **Date:** 2025-10-17
-- **Status:** ✅ Architecture Approved
+- **Status:** ✅ Core Implementation Complete
+- **Last Updated:** October 17, 2025
+- **Implementation Progress:** 50% (backend scoring, API endpoints implemented; frontend UI pending)
 - **Dependencies:**
   - USER_NEEDS.md (requirements)
   - ANALYSIS_SYSTEM_ARCHITECTURE.md (existing system)
   - VECTOR_DB_IMPLEMENTATION_PLAN.md (embeddings)
-- **Next Step:** Implementation Week 1
+- **Next Steps:**
+  - Frontend dashboard integration
+  - Noise filtering in analysis pipeline
+  - User feedback learning loop
 
 ---
 
-**This is the technical implementation of the noise filtering system.**
+**This document describes the noise filtering system. Core backend implementation complete as of October 2025.**
+**See CLAUDE.md for API usage examples and patterns.**

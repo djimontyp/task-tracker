@@ -359,16 +359,23 @@ Result: 100 messages → 5 atoms → 2 human reviews
 - Vector DB (embeddings, semantic search, RAG)
 - Dashboard (messages, tasks, analytics)
 - Background jobs (TaskIQ + NATS)
+- **Message importance scoring** ✅ (October 2025)
+  - 4-factor scoring system (content 40%, author 20%, temporal 20%, topics 20%)
+  - API endpoints: GET /noise/stats, POST /noise/score/{message_id}, POST /noise/score-batch
+  - Background tasks for batch and individual message scoring
+  - Auto-scoring on Telegram message receipt
 
-### 🚧 To Be Implemented (Noise Filtering)
-- [ ] Message importance scoring
-- [ ] Noise filtering pipeline
-- [ ] Signal-only analysis runs
-- [ ] Aggregated insights dashboard
-- [ ] Drill-down UI
-- [ ] Human feedback loop
+### 🚧 In Progress / To Be Implemented
+- [x] Message importance scoring
+- [ ] Frontend dashboard widget (signal/noise visualization)
+- [ ] Noise filtering in analysis pipeline (exclude noise from processing)
+- [ ] Signal-only embeddings generation
+- [ ] Aggregated insights dashboard (trends, anomalies)
+- [ ] Drill-down UI (view source messages)
+- [ ] Human feedback loop (mark irrelevant, re-score)
 
-**Estimated Timeline:** 3 weeks (see [NOISE_FILTERING_ARCHITECTURE.md § Implementation Roadmap](./NOISE_FILTERING_ARCHITECTURE.md#-implementation-roadmap))
+**Current Progress:** 50% complete (backend core done, frontend UI pending)
+**See:** [NOISE_FILTERING_ARCHITECTURE.md § Implementation Status](./NOISE_FILTERING_ARCHITECTURE.md#-implementation-status)
 
 ---
 
