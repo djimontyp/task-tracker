@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React, { useState, useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Spinner,
   Button,
@@ -20,12 +20,13 @@ import {
   getFacetedUniqueValues,
   useReactTable,
 } from '@tanstack/react-table'
-import { createColumns, sourceLabels, statusLabels } from './columns'
-import { Message } from '@/shared/types'
+import { createColumns, sourceLabels, statusLabels, classificationLabels } from './columns'
+import { Message, NoiseClassification } from '@/shared/types'
 import { DataTable } from '@/shared/components/DataTable'
 import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
 import { DataTablePagination } from '@/shared/components/DataTablePagination'
 import { DataTableFacetedFilter } from './faceted-filter'
+import { ImportanceScoreFilter } from './importance-score-filter'
 import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon } from '@heroicons/react/24/outline'
 import { IngestionModal } from './IngestionModal'
 
@@ -45,6 +46,7 @@ interface PaginatedResponse {
 }
 
 const MessagesPage = () => {
+  const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
@@ -67,7 +69,6 @@ const MessagesPage = () => {
           page_size: pageSize
         }
 
-        // Add sorting parameters
         if (sorting.length > 0) {
           const sort = sorting[0]
           params.sort_by = sort.id
@@ -82,6 +83,46 @@ const MessagesPage = () => {
       }
     },
   })
+
+  useEffect(() => {
+    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost/ws'
+    const ws = new WebSocket(`${wsUrl}?topics=noise_filtering`)
+
+    ws.onopen = () => {
+      console.log('[MessagesPage] WebSocket connected')
+    }
+
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data)
+        const { topic, event: eventType } = message
+
+        if (topic === 'noise_filtering') {
+          if (eventType === 'message_scored') {
+            queryClient.invalidateQueries({ queryKey: ['messages'] })
+          }
+
+          if (eventType === 'batch_scored') {
+            queryClient.invalidateQueries({ queryKey: ['messages'] })
+          }
+        }
+      } catch (error) {
+        console.error('[MessagesPage] Error parsing WebSocket message:', error)
+      }
+    }
+
+    ws.onerror = (error) => {
+      console.error('[MessagesPage] WebSocket error:', error)
+    }
+
+    ws.onclose = () => {
+      console.log('[MessagesPage] WebSocket disconnected')
+    }
+
+    return () => {
+      ws.close()
+    }
+  }, [queryClient])
 
 
   const hasActiveFilters = React.useMemo(() => {
@@ -250,6 +291,19 @@ const MessagesPage = () => {
             value,
             label: meta.label
           }))}
+        />
+        <DataTableFacetedFilter
+          columnKey="noise_classification"
+          table={table}
+          title="Classification"
+          options={Object.entries(classificationLabels).map(([value, meta]) => ({
+            value: value as NoiseClassification,
+            label: meta.label
+          }))}
+        />
+        <ImportanceScoreFilter
+          column={table.getColumn('importance_score')}
+          title="Importance"
         />
       </DataTableToolbar>
 

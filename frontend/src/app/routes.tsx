@@ -15,6 +15,7 @@ const ProjectsPage = lazy(() => import('@pages/ProjectsPage'))
 const AnalyticsPage = lazy(() => import('@pages/AnalyticsPage'))
 const AnalysisRunsPage = lazy(() => import('@pages/AnalysisRunsPage'))
 const ProposalsPage = lazy(() => import('@pages/ProposalsPage'))
+const NoiseFilteringDashboard = lazy(() => import('@pages/NoiseFilteringDashboard'))
 const SettingsPage = lazy(() => import('@pages/SettingsPage'))
 
 const AppRoutes = () => {
@@ -38,6 +39,7 @@ const AppRoutes = () => {
         <Route element={<MainLayout><AgentTasksPage /></MainLayout>} path="/agent-tasks" />
         <Route element={<MainLayout><ProvidersPage /></MainLayout>} path="/providers" />
         <Route element={<MainLayout><ProjectsPage /></MainLayout>} path="/projects" />
+        <Route element={<MainLayout><NoiseFilteringDashboard /></MainLayout>} path="/noise-filtering" />
         <Route element={<MainLayout><AnalyticsPage /></MainLayout>} path="/analytics" />
         <Route element={<MainLayout><SettingsPage /></MainLayout>} path="/settings" />
       </Routes>

@@ -63,3 +63,20 @@ class Message(IDMixin, TimestampMixin, SQLModel, table=True):
         sa_column=Column(Vector(1536)),
         description="Vector embedding for semantic search (must match settings.openai_embedding_dimensions)",
     )
+
+    importance_score: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Importance score for noise filtering (0.0=noise, 1.0=critical signal)",
+    )
+    noise_classification: str | None = Field(
+        default=None,
+        max_length=50,
+        description="Noise classification type (signal/noise/spam/low_quality/high_quality)",
+    )
+    noise_factors: dict[str, float] | None = Field(
+        default=None,
+        sa_type=JSONB,
+        description="Contributing factors for noise score (JSONB: {factor_name: weight})",
+    )

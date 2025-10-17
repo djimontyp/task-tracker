@@ -111,3 +111,13 @@ class AnalysisStatus(str, Enum):
     analyzed = "analyzed"
     spam = "spam"
     noise = "noise"
+
+
+class NoiseClassification(str, Enum):
+    """Noise classification types for message filtering."""
+
+    signal = "signal"
+    noise = "noise"
+    spam = "spam"
+    low_quality = "low_quality"
+    high_quality = "high_quality"

@@ -27,6 +27,15 @@ export interface Task {
   due_date?: string
 }
 
+export type NoiseClassification = 'noise' | 'signal' | 'weak_signal'
+
+export interface NoiseFactors {
+  content: number
+  author: number
+  temporal: number
+  topics: number
+}
+
 export interface Message {
   id: number | string
   external_message_id: string
@@ -45,6 +54,11 @@ export interface Message {
 
   // Platform-specific profiles
   telegram_profile_id?: number | null
+
+  // Noise classification fields
+  importance_score?: number
+  noise_classification?: NoiseClassification
+  noise_factors?: NoiseFactors
 
   // Legacy compatibility fields - DO NOT USE IN NEW CODE
   /** @deprecated Use author_name instead */

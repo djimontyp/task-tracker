@@ -42,6 +42,10 @@ class MessageResponse(BaseModel):
     embedding: list[float] | None = None
     has_embedding: bool = False
 
+    importance_score: float | None = None
+    noise_classification: str | None = None
+    noise_factors: dict[str, float] | None = None
+
     author: str | None = None  # @deprecated Use author_name
     persisted: bool = True
 

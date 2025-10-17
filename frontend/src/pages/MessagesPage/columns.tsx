@@ -1,9 +1,9 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { EllipsisHorizontalIcon, EnvelopeIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { EllipsisHorizontalIcon, EnvelopeIcon, UserIcon, XMarkIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
 
-import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'
+import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui'
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
-import { Message } from '@/shared/types'
+import { Message, NoiseClassification } from '@/shared/types'
 import { formatFullDate } from '@/shared/utils/date'
 
 export interface ColumnsCallbacks {
@@ -20,6 +20,24 @@ export const sourceLabels: Record<string, { label: string; icon: React.Component
 export const statusLabels: Record<string, { label: string }> = {
   analyzed: { label: 'Analyzed' },
   pending: { label: 'Pending' },
+}
+
+export const classificationLabels: Record<NoiseClassification, { label: string; variant: 'default' | 'destructive' | 'outline' | 'secondary' }> = {
+  signal: { label: 'Signal', variant: 'default' },
+  weak_signal: { label: 'Needs Review', variant: 'secondary' },
+  noise: { label: 'Noise', variant: 'destructive' },
+}
+
+const getImportanceColor = (score: number): string => {
+  if (score < 0.3) return 'text-red-600 bg-red-50 border-red-200'
+  if (score < 0.7) return 'text-yellow-600 bg-yellow-50 border-yellow-200'
+  return 'text-green-600 bg-green-50 border-green-200'
+}
+
+const getClassification = (score: number): NoiseClassification => {
+  if (score < 0.3) return 'noise'
+  if (score < 0.7) return 'weak_signal'
+  return 'signal'
 }
 
 export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[] => [
@@ -123,6 +141,72 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       const analyzed = row.getValue<boolean>(id)
       const status = analyzed ? 'analyzed' : 'pending'
       return filterValues.includes(status)
+    },
+  },
+  {
+    accessorKey: 'importance_score',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Importance" />
+    ),
+    cell: ({ row }) => {
+      const score = row.getValue<number>('importance_score')
+      if (score === undefined || score === null) return <div className="text-muted-foreground text-xs">-</div>
+
+      const colorClass = getImportanceColor(score)
+      const percentage = Math.round(score * 100)
+
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs font-medium ${colorClass}`}>
+                {percentage}%
+                {row.original.noise_factors && (
+                  <InformationCircleIcon className="h-3 w-3" />
+                )}
+              </div>
+            </TooltipTrigger>
+            {row.original.noise_factors && (
+              <TooltipContent>
+                <div className="space-y-1 text-xs">
+                  <div>Content: {Math.round(row.original.noise_factors.content * 100)}%</div>
+                  <div>Author: {Math.round(row.original.noise_factors.author * 100)}%</div>
+                  <div>Temporal: {Math.round(row.original.noise_factors.temporal * 100)}%</div>
+                  <div>Topics: {Math.round(row.original.noise_factors.topics * 100)}%</div>
+                </div>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      )
+    },
+    filterFn: (row, id, filterValue: [number, number]) => {
+      if (!filterValue) return true
+      const score = row.getValue<number>(id)
+      if (score === undefined || score === null) return false
+      return score >= filterValue[0] && score <= filterValue[1]
+    },
+  },
+  {
+    accessorKey: 'noise_classification',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Classification" />
+    ),
+    cell: ({ row }) => {
+      const score = row.getValue<number>('importance_score')
+      const classification = row.original.noise_classification ?? (score !== undefined ? getClassification(score) : null)
+
+      if (!classification) return <div className="text-muted-foreground text-xs">-</div>
+
+      const meta = classificationLabels[classification]
+      return <Badge variant={meta.variant}>{meta.label}</Badge>
+    },
+    filterFn: (row, id, filterValues: NoiseClassification[]) => {
+      if (!filterValues || filterValues.length === 0) return true
+      const score = row.getValue<number>('importance_score')
+      const classification = row.original.noise_classification ?? (score !== undefined ? getClassification(score) : null)
+      if (!classification) return false
+      return filterValues.includes(classification)
     },
   },
   {

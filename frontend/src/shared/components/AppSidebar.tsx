@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react'
-import { Squares2X2Icon, CheckCircleIcon, ChartBarIcon, Cog6ToothIcon, SignalIcon, CpuChipIcon, LightBulbIcon, EnvelopeIcon, ChatBubbleLeftRightIcon, ListBulletIcon, ClipboardDocumentListIcon, ServerIcon, FolderIcon } from '@heroicons/react/24/outline'
+import { Squares2X2Icon, CheckCircleIcon, ChartBarIcon, Cog6ToothIcon, SignalIcon, CpuChipIcon, LightBulbIcon, EnvelopeIcon, ChatBubbleLeftRightIcon, ListBulletIcon, ClipboardDocumentListIcon, ServerIcon, FolderIcon, FunnelIcon } from '@heroicons/react/24/outline'
 import { Link, useLocation } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -36,6 +36,7 @@ const navGroups = [
     items: [
       { path: '/analysis', label: 'Analysis Runs', icon: LightBulbIcon },
       { path: '/proposals', label: 'Task Proposals', icon: ClipboardDocumentListIcon },
+      { path: '/noise-filtering', label: 'Noise Filtering', icon: FunnelIcon },
     ],
   },
   {
@@ -75,7 +76,7 @@ export function AppSidebar() {
   // WebSocket integration for real-time updates
   useEffect(() => {
     const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost/ws'
-    const ws = new WebSocket(`${wsUrl}?topics=analysis,proposals`)
+    const ws = new WebSocket(`${wsUrl}?topics=analysis,proposals,noise_filtering`)
 
     ws.onopen = () => {
       console.log('[Sidebar] WebSocket connected for counts')
@@ -97,6 +98,13 @@ export function AppSidebar() {
         if (
           topic === 'proposals' &&
           ['proposal_created', 'proposal_approved', 'proposal_rejected'].includes(eventType)
+        ) {
+          queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
+        }
+
+        if (
+          topic === 'noise_filtering' &&
+          ['message_scored', 'batch_scored'].includes(eventType)
         ) {
           queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
         }
