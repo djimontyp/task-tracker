@@ -73,6 +73,9 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep) -> dict
         classification=db_message.classification,
         confidence=db_message.confidence,
         analyzed=db_message.analyzed,
+        importance_score=db_message.importance_score,
+        noise_classification=db_message.noise_classification,
+        noise_factors=db_message.noise_factors,
         created_at=db_message.created_at,
         updated_at=db_message.updated_at,
     )
@@ -102,13 +105,19 @@ async def get_messages(
     topic_id: int | None = Query(None, description="Filter by topic ID"),
     date_from: date | None = Query(None, description="Filter messages from this date"),
     date_to: date | None = Query(None, description="Filter messages until this date"),
+    importance_min: float | None = Query(None, ge=0.0, le=1.0, description="Filter by importance score >= min"),
+    importance_max: float | None = Query(None, ge=0.0, le=1.0, description="Filter by importance score <= max"),
+    classification: list[str] | None = Query(
+        None, description="Filter by noise classification (signal, noise, spam, low_quality, high_quality)"
+    ),
     sort_by: str | None = Query(None, description="Column to sort by (author_name, source_name, analyzed, sent_at)"),
     sort_order: str | None = Query("desc", description="Sort order (asc or desc)"),
 ) -> PaginatedMessagesResponse:
     """
     Retrieve messages with pagination and optional filtering.
 
-    Supports filtering by author, source, topic, and date range.
+    Supports filtering by author, source, topic, date range, and noise classification.
+    Importance score filtering allows finding high-signal messages (>0.7) or noise (<0.3).
     Returns most recent messages first with pagination support.
     """
     # Build base query with joins
@@ -133,6 +142,15 @@ async def get_messages(
 
     if date_to:
         filters.append(Message.sent_at <= datetime.combine(date_to, datetime.max.time()))  # type: ignore[arg-type]
+
+    if importance_min is not None:
+        filters.append(Message.importance_score >= importance_min)  # type: ignore[arg-type,operator]
+
+    if importance_max is not None:
+        filters.append(Message.importance_score <= importance_max)  # type: ignore[arg-type,operator]
+
+    if classification:
+        filters.append(Message.noise_classification.in_(classification))  # type: ignore[union-attr]
 
     if filters:
         statement = statement.where(and_(*filters))
@@ -200,6 +218,9 @@ async def get_messages(
                 classification=msg.classification,
                 confidence=msg.confidence,
                 analyzed=msg.analyzed,
+                importance_score=msg.importance_score,
+                noise_classification=msg.noise_classification,
+                noise_factors=msg.noise_factors,
                 created_at=msg.created_at,
                 updated_at=msg.updated_at,
             )

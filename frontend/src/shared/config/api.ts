@@ -78,6 +78,13 @@ export const API_ENDPOINTS = {
     detail: (id: number) => buildApiPath(`experiments/topic-classification/${id}`),
   },
 
+  // Noise Filtering
+  noise: {
+    stats: buildApiPath('noise/stats'),
+    scoreMessage: (messageId: number) => buildApiPath(`noise/score/${messageId}`),
+    scoreBatch: buildApiPath('noise/score-batch'),
+  },
+
   // WebSocket
   ws: '/ws',
 } as const
