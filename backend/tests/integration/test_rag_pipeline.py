@@ -17,12 +17,12 @@ from uuid import uuid4
 
 import pytest
 from app.models.atom import Atom
+from app.models.enums import ProposalStatus, SourceType
+from app.models.legacy import Source
 from app.models.llm_provider import LLMProvider, ProviderType
 from app.models.message import Message
 from app.models.task_proposal import TaskProposal
 from app.models.user import User
-from app.models.enums import SourceType, ProposalStatus
-from app.models.legacy import Source
 from app.services.embedding_service import EmbeddingService
 from app.services.rag_context_builder import RAGContextBuilder
 from app.services.semantic_search_service import SemanticSearchService

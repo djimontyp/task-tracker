@@ -8,6 +8,7 @@ import logging
 from typing import Protocol
 
 import httpx
+from core.config import settings
 from openai import AsyncOpenAI
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +17,6 @@ from app.models.atom import Atom
 from app.models.llm_provider import LLMProvider, ProviderType
 from app.models.message import Message
 from app.services.credential_encryption import CredentialEncryption
-from core.config import settings
 
 logger = logging.getLogger(__name__)
 

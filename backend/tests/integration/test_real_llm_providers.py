@@ -31,8 +31,9 @@ class TestOpenAIProvider:
 
     async def test_openai_embedding_generation(self, db_session: AsyncSession) -> None:
         """Test real OpenAI embedding generation."""
-        from app.services.credential_encryption import CredentialEncryption
         from uuid import uuid4
+
+        from app.services.credential_encryption import CredentialEncryption
 
         encryptor = CredentialEncryption()
 
@@ -59,8 +60,9 @@ class TestOpenAIProvider:
 
     async def test_openai_different_texts_different_embeddings(self, db_session: AsyncSession) -> None:
         """Test that different texts produce different embeddings."""
-        from app.services.credential_encryption import CredentialEncryption
         from uuid import uuid4
+
+        from app.services.credential_encryption import CredentialEncryption
 
         encryptor = CredentialEncryption()
 
@@ -86,8 +88,9 @@ class TestOpenAIProvider:
 
     async def test_openai_similar_texts_similar_embeddings(self, db_session: AsyncSession) -> None:
         """Test that similar texts produce similar embeddings."""
-        from app.services.credential_encryption import CredentialEncryption
         from uuid import uuid4
+
+        from app.services.credential_encryption import CredentialEncryption
 
         encryptor = CredentialEncryption()
 
@@ -111,8 +114,9 @@ class TestOpenAIProvider:
 
     async def test_openai_embedding_error_handling(self, db_session: AsyncSession) -> None:
         """Test error handling with invalid API key."""
-        from app.services.credential_encryption import CredentialEncryption
         from uuid import uuid4
+
+        from app.services.credential_encryption import CredentialEncryption
 
         encryptor = CredentialEncryption()
 
@@ -213,8 +217,9 @@ class TestProviderValidation:
 
     async def test_empty_text_handling(self, db_session: AsyncSession) -> None:
         """Test error handling for empty text input."""
-        from app.services.credential_encryption import CredentialEncryption
         from uuid import uuid4
+
+        from app.services.credential_encryption import CredentialEncryption
 
         encryptor = CredentialEncryption()
 

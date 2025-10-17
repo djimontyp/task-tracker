@@ -10,7 +10,7 @@ Tests cover:
 
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import pytest
 from app.models.atom import Atom
@@ -118,9 +118,7 @@ class TestEmbeddingBackgroundTasks:
             mock_client.embeddings.create.return_value = mock_response
             mock_openai.return_value = mock_client
 
-            result = await embed_messages_batch_task(
-                message_ids=message_ids, provider_id=str(test_provider.id)
-            )
+            result = await embed_messages_batch_task(message_ids=message_ids, provider_id=str(test_provider.id))
 
             assert result["success"] == 5
             assert result["failed"] == 0
@@ -248,9 +246,7 @@ class TestEmbeddingBackgroundTasks:
             mock_client.embeddings.create.return_value = mock_response
             mock_openai.return_value = mock_client
 
-            result = await embed_messages_batch_task(
-                message_ids=message_ids, provider_id=str(test_provider.id)
-            )
+            result = await embed_messages_batch_task(message_ids=message_ids, provider_id=str(test_provider.id))
 
             assert result["success"] >= 1
 

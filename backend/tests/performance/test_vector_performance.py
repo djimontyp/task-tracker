@@ -22,11 +22,11 @@ from uuid import uuid4
 
 import pytest
 from app.models.atom import Atom
+from app.models.enums import SourceType
+from app.models.legacy import Source
 from app.models.llm_provider import LLMProvider, ProviderType
 from app.models.message import Message
 from app.models.user import User
-from app.models.enums import SourceType
-from app.models.legacy import Source
 from app.services.embedding_service import EmbeddingService
 from app.services.rag_context_builder import RAGContextBuilder
 from app.services.semantic_search_service import SemanticSearchService
@@ -232,9 +232,7 @@ async def test_semantic_search_performance_small_dataset(
         search_service = SemanticSearchService(embedding_service)
 
         start_time = time.time()
-        results = await search_service.search_messages(
-            db_session, "test query", limit=10, threshold=0.7
-        )
+        results = await search_service.search_messages(db_session, "test query", limit=10, threshold=0.7)
         duration = time.time() - start_time
 
         print(f"\n✓ Semantic search (50 messages): {duration * 1000:.2f}ms, {len(results)} results")
@@ -388,9 +386,7 @@ async def test_find_similar_messages_performance(
     search_service = SemanticSearchService()
 
     start_time = time.time()
-    results = await search_service.find_similar_messages(
-        db_session, source_message.id, limit=10, threshold=0.7
-    )
+    results = await search_service.find_similar_messages(db_session, source_message.id, limit=10, threshold=0.7)
     duration = time.time() - start_time
 
     print(f"\n✓ Find similar messages (100 total): {duration * 1000:.2f}ms, {len(results)} results")
@@ -436,9 +432,7 @@ async def test_atom_search_performance(
         search_service = SemanticSearchService(embedding_service)
 
         start_time = time.time()
-        results = await search_service.search_atoms(
-            db_session, "test pattern", limit=10, threshold=0.7
-        )
+        results = await search_service.search_atoms(db_session, "test pattern", limit=10, threshold=0.7)
         duration = time.time() - start_time
 
         print(f"\n✓ Atom search (50 atoms): {duration * 1000:.2f}ms, {len(results)} results")

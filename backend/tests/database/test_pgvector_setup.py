@@ -191,9 +191,8 @@ class TestPgvectorSetup:
 
         await db_session.commit()
 
-        from sqlalchemy import select
-
         from app.models.message import Message
+        from sqlalchemy import select
 
         result = await db_session.execute(
             select(Message).where(Message.external_message_id.like("pgvector_dim_%"))  # type: ignore[union-attr]

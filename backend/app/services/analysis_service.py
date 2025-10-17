@@ -30,9 +30,7 @@ from app.services.llm_proposal_service import LLMProposalService
 from app.services.websocket_manager import websocket_manager
 
 if TYPE_CHECKING:
-    from app.services.embedding_service import EmbeddingService
-    from app.services.rag_context_builder import RAGContextBuilder
-    from app.services.semantic_search_service import SemanticSearchService
+    pass
 
 logger = logging.getLogger(__name__)
 
