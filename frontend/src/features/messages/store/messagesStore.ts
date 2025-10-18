@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { devtools } from 'zustand/middleware'
 import type { Message } from '@/shared/types'
 
 export type MessageList = Message & {
@@ -62,108 +63,139 @@ const enhanceMessage = (message: Message): MessageList => {
 const sortBySentAtDesc = (messages: MessageList[]) =>
   [...messages].sort((a, b) => toTimestamp(b.sent_at) - toTimestamp(a.sent_at))
 
-export const useMessagesStore = create<MessagesStoreState>((set, get) => ({
-  messages: [],
-  statusByExternalId: {},
-  lastUpdatedAt: null,
-  isHydrated: false,
+export const useMessagesStore = create<MessagesStoreState>()(
+  devtools(
+    (set, get) => ({
+      messages: [],
+      statusByExternalId: {},
+      lastUpdatedAt: null,
+      isHydrated: false,
 
-  hydrate: (incoming) => {
-    const normalized = sortBySentAtDesc(incoming.map(enhanceMessage))
+      hydrate: (incoming) => {
+        const normalized = sortBySentAtDesc(incoming.map(enhanceMessage))
 
-    const statusByExternalId = normalized.reduce<Record<string, MessageStatus>>((acc, item) => {
-      acc[item.external_message_id] = item.persisted === false ? 'pending' : 'persisted'
-      return acc
-    }, {})
+        const statusByExternalId = normalized.reduce<Record<string, MessageStatus>>((acc, item) => {
+          acc[item.external_message_id] = item.persisted === false ? 'pending' : 'persisted'
+          return acc
+        }, {})
 
-    set({
-      messages: normalized,
-      statusByExternalId,
-      lastUpdatedAt: new Date().toISOString(),
-      isHydrated: true,
-    })
-  },
-
-  upsertMessage: (incoming) => {
-    const normalized = enhanceMessage(incoming)
-    const { messages, statusByExternalId } = get()
-
-    const existingIndex = messages.findIndex(
-      (msg) => msg.external_message_id === normalized.external_message_id
-    )
-
-    const nextStatus: MessageStatus = normalized.persisted === false ? 'pending' : 'persisted'
-
-    if (existingIndex >= 0) {
-      const updated = [...messages]
-      updated[existingIndex] = {
-        ...updated[existingIndex],
-        ...normalized,
-      }
-
-      set({
-        messages: sortBySentAtDesc(updated),
-        statusByExternalId: {
-          ...statusByExternalId,
-          [normalized.external_message_id]: nextStatus,
-        },
-        lastUpdatedAt: new Date().toISOString(),
-      })
-      return
-    }
-
-    set({
-      messages: sortBySentAtDesc([normalized, ...messages]),
-      statusByExternalId: {
-        ...statusByExternalId,
-        [normalized.external_message_id]: nextStatus,
+        set(
+          {
+            messages: normalized,
+            statusByExternalId,
+            lastUpdatedAt: new Date().toISOString(),
+            isHydrated: true,
+          },
+          false,
+          'messages/hydrate'
+        )
       },
-      lastUpdatedAt: new Date().toISOString(),
-    })
-  },
 
-  markPersisted: (externalId, patch) => {
-    const { messages, statusByExternalId } = get()
+      upsertMessage: (incoming) => {
+        const normalized = enhanceMessage(incoming)
+        const { messages, statusByExternalId } = get()
 
-    const updatedMessages = messages.map((msg) => {
-      if (msg.external_message_id !== externalId) {
-        return msg
-      }
+        const existingIndex = messages.findIndex(
+          (msg) => msg.external_message_id === normalized.external_message_id
+        )
 
-      const next: Message = {
-        ...msg,
-        ...patch,
-        persisted: true,
-      }
+        const nextStatus: MessageStatus = normalized.persisted === false ? 'pending' : 'persisted'
 
-      const enhanced = enhanceMessage(next)
-      // Preserve avatar_url from patch if provided
-      if (patch?.avatar_url !== undefined) {
-        enhanced.avatar_url = patch.avatar_url
-      }
+        if (existingIndex >= 0) {
+          const updated = [...messages]
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            ...normalized,
+          }
 
-      return enhanced
-    })
+          set(
+            {
+              messages: sortBySentAtDesc(updated),
+              statusByExternalId: {
+                ...statusByExternalId,
+                [normalized.external_message_id]: nextStatus,
+              },
+              lastUpdatedAt: new Date().toISOString(),
+            },
+            false,
+            'messages/update'
+          )
+          return
+        }
 
-    set({
-      messages: updatedMessages,
-      statusByExternalId: {
-        ...statusByExternalId,
-        [externalId]: 'persisted',
+        const newMessages = sortBySentAtDesc([normalized, ...messages])
+
+        set(
+          {
+            messages: newMessages,
+            statusByExternalId: {
+              ...statusByExternalId,
+              [normalized.external_message_id]: nextStatus,
+            },
+            lastUpdatedAt: new Date().toISOString(),
+          },
+          false,
+          'messages/add'
+        )
       },
-      lastUpdatedAt: new Date().toISOString(),
-    })
-  },
 
-  setPending: (externalId) => {
-    const { statusByExternalId } = get()
-    set({
-      statusByExternalId: {
-        ...statusByExternalId,
-        [externalId]: 'pending',
+      markPersisted: (externalId, patch) => {
+        const { messages, statusByExternalId } = get()
+
+        const updatedMessages = messages.map((msg) => {
+          if (msg.external_message_id !== externalId) {
+            return msg
+          }
+
+          const next: Message = {
+            ...msg,
+            ...patch,
+            persisted: true,
+          }
+
+          const enhanced = enhanceMessage(next)
+          if (patch?.avatar_url !== undefined) {
+            enhanced.avatar_url = patch.avatar_url
+          }
+
+          return enhanced
+        })
+
+        set(
+          {
+            messages: updatedMessages,
+            statusByExternalId: {
+              ...statusByExternalId,
+              [externalId]: 'persisted',
+            },
+            lastUpdatedAt: new Date().toISOString(),
+          },
+          false,
+          'messages/markPersisted'
+        )
       },
-    })
-  },
 
-  clear: () => set({ messages: [], statusByExternalId: {}, lastUpdatedAt: null, isHydrated: false }),
-}))
+      setPending: (externalId) => {
+        const { statusByExternalId } = get()
+        set(
+          {
+            statusByExternalId: {
+              ...statusByExternalId,
+              [externalId]: 'pending',
+            },
+          },
+          false,
+          'messages/setPending'
+        )
+      },
+
+      clear: () =>
+        set(
+          { messages: [], statusByExternalId: {}, lastUpdatedAt: null, isHydrated: false },
+          false,
+          'messages/clear'
+        ),
+    }),
+    { name: 'MessagesStore' }
+  )
+)

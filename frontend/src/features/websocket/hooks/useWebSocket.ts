@@ -31,7 +31,7 @@ const resolveHost = () => {
   return 'localhost'
 }
 
-const resolveWebSocketUrl = () => {
+const resolveWebSocketUrl = (topics?: string[]) => {
   const scheme = resolveScheme()
   const host = resolveHost()
   const path = normalizePath(import.meta.env.VITE_WS_PATH)
@@ -40,12 +40,19 @@ const resolveWebSocketUrl = () => {
     ? `:${window.location.port}`
     : ''
 
-  return `${scheme}://${host}${port}${path}`
+  let url = `${scheme}://${host}${port}${path}`
+
+  if (topics && topics.length > 0) {
+    url += `?topics=${topics.join(',')}`
+  }
+
+  return url
 }
 
 type WebSocketState = 'connecting' | 'connected' | 'reconnecting' | 'disconnected'
 
 interface UseWebSocketOptions {
+  topics?: string[]
   onMessage?: (data: unknown) => void
   onConnect?: () => void
   onDisconnect?: () => void
@@ -55,6 +62,7 @@ interface UseWebSocketOptions {
 
 export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   const {
+    topics,
     onMessage,
     onConnect,
     onDisconnect,
@@ -86,7 +94,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     try {
       isConnectingRef.current = true
       setConnectionState('connecting')
-      const wsUrl = import.meta.env.VITE_WS_URL || resolveWebSocketUrl()
+      const wsUrl = import.meta.env.VITE_WS_URL || resolveWebSocketUrl(topics)
       logger.debug('🔌 Connecting to WebSocket:', wsUrl)
       const ws = new WebSocket(wsUrl)
 
