@@ -13,9 +13,62 @@ from .response_models import (
     AnalyzeDayResponse,
     SidebarCountsResponse,
     StatsResponse,
+    TaskStatusCounts,
+    TrendData,
 )
 
 router = APIRouter(tags=["statistics"])
+
+
+def calculate_trend(current: int, previous: int) -> TrendData:
+    """
+    Calculate trend comparison between current and previous period.
+
+    Args:
+        current: Count from current period
+        previous: Count from previous period
+
+    Returns:
+        TrendData with percentage change and direction
+    """
+    if previous == 0:
+        change_percent = 100.0 if current > 0 else 0.0
+        direction = "up" if current > 0 else "neutral"
+    else:
+        change_percent = ((current - previous) / previous) * 100
+        if change_percent > 0:
+            direction = "up"
+        elif change_percent < 0:
+            direction = "down"
+        else:
+            direction = "neutral"
+
+    return TrendData(
+        current=current,
+        previous=previous,
+        change_percent=abs(change_percent),
+        direction=direction,
+    )
+
+
+def count_by_status(tasks: list[Task]) -> TaskStatusCounts:
+    """
+    Group tasks by status and return counts.
+
+    Args:
+        tasks: List of Task objects
+
+    Returns:
+        TaskStatusCounts with counts for each status
+    """
+    from ...models.enums import TaskStatus
+
+    return TaskStatusCounts(
+        open=len([t for t in tasks if t.status == TaskStatus.open]),
+        in_progress=len([t for t in tasks if t.status == TaskStatus.in_progress]),
+        completed=len([t for t in tasks if t.status == TaskStatus.completed]),
+        closed=len([t for t in tasks if t.status == TaskStatus.closed]),
+    )
 
 
 @router.get(
@@ -98,33 +151,96 @@ async def get_activity_data(
 @router.get(
     "/stats",
     response_model=StatsResponse,
-    summary="Get task statistics",
-    response_description="Task counts by status, category, and priority",
+    summary="Get task statistics with trends",
+    response_description="Task counts by status with trend comparison vs previous period",
 )
-async def get_stats(db: DatabaseDep) -> StatsResponse:
+async def get_stats(
+    db: DatabaseDep,
+    period: int = Query(7, description="Trend comparison period in days (default: 7)"),
+) -> StatsResponse:
     """
-    Get aggregated task statistics.
+    Get aggregated task statistics with trend comparison.
 
-    Returns total, open, and completed task counts,
-    plus breakdowns by category and priority.
+    Calculates task counts by status, category, and priority, plus trend data
+    comparing current period vs previous period (default: 7 days).
+
+    Args:
+        db: Database session
+        period: Number of days for trend comparison (default: 7)
+
+    Returns:
+        StatsResponse with counts, breakdowns, and trend data
     """
-    statement = select(Task)
-    result = await db.execute(statement)
-    tasks = result.scalars().all()
+    now = datetime.utcnow()
+    current_start = now - timedelta(days=period)
+    previous_start = current_start - timedelta(days=period)
 
-    total_tasks = len(tasks)
-    open_tasks = len([task for task in tasks if task.status == "open"])
-    completed_tasks = len([task for task in tasks if task.status == "completed"])
+    # Query current period tasks
+    current_statement = select(Task).where(
+        and_(
+            Task.created_at.isnot(None),  # type: ignore[union-attr]
+            Task.created_at >= current_start,  # type: ignore[operator]
+        )
+    )
+    current_result = await db.execute(current_statement)
+    current_tasks = list(current_result.scalars().all())
+
+    # Query previous period tasks
+    previous_statement = select(Task).where(
+        and_(
+            Task.created_at.isnot(None),  # type: ignore[union-attr]
+            Task.created_at >= previous_start,  # type: ignore[operator]
+            Task.created_at < current_start,  # type: ignore[operator]
+        )
+    )
+    previous_result = await db.execute(previous_statement)
+    previous_tasks = list(previous_result.scalars().all())
+
+    # Count by status for both periods
+    current_by_status = count_by_status(current_tasks)
+    previous_by_status = count_by_status(previous_tasks)
+
+    # Calculate trends
+    total_trend = calculate_trend(len(current_tasks), len(previous_tasks))
+    open_trend = calculate_trend(current_by_status.open, previous_by_status.open)
+    in_progress_trend = calculate_trend(current_by_status.in_progress, previous_by_status.in_progress)
+    completed_trend = calculate_trend(current_by_status.completed, previous_by_status.completed)
+
+    # Calculate completion rates for current and previous periods
+    current_completion_rate = (
+        (current_by_status.completed / len(current_tasks)) * 100 if len(current_tasks) > 0 else 0.0
+    )
+
+    previous_completion_rate = (
+        (previous_by_status.completed / len(previous_tasks)) * 100 if len(previous_tasks) > 0 else 0.0
+    )
+
+    # Calculate completion rate trend
+    completion_rate_trend = calculate_trend(
+        int(current_completion_rate),
+        int(previous_completion_rate),
+    )
+
+    # Query all tasks for categories and priorities breakdown
+    all_statement = select(Task)
+    all_result = await db.execute(all_statement)
+    all_tasks = all_result.scalars().all()
 
     categories: dict[str, int] = {}
     priorities: dict[str, int] = {}
 
-    for task in tasks:
-        categories[task.category] = categories.get(task.category, 0) + 1
-        priorities[task.priority] = priorities.get(task.priority, 0) + 1
+    for task in all_tasks:
+        categories[task.category.value] = categories.get(task.category.value, 0) + 1
+        priorities[task.priority.value] = priorities.get(task.priority.value, 0) + 1
 
     return StatsResponse(
-        total_tasks=total_tasks,
+        total_tasks=len(current_tasks),
+        by_status=current_by_status,
+        total_trend=total_trend,
+        open_trend=open_trend,
+        in_progress_trend=in_progress_trend,
+        completed_trend=completed_trend,
+        completion_rate_trend=completion_rate_trend,
         categories=categories,
         priorities=priorities,
     )
