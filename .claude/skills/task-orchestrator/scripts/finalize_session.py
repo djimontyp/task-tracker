@@ -15,6 +15,11 @@ from pathlib import Path
 from typing import Dict, Any
 
 
+def is_interactive() -> bool:
+    """Check if running in interactive terminal."""
+    return sys.stdin.isatty()
+
+
 def load_session_context(session_dir: Path) -> Dict[str, Any]:
     """Load session context from context.json."""
     context_file = session_dir / "context.json"
@@ -64,23 +69,31 @@ def aggregate_reports_if_needed(session_dir: Path) -> None:
         print(f"⚠️  Failed to aggregate reports: {e.stderr}")
 
 
-def prompt_session_continuation() -> bool:
+def prompt_session_continuation(auto_yes: bool = False) -> bool:
     """Ask user if session will continue."""
     print("\n" + "="*60)
     print("📋 Session Finalization")
     print("="*60)
 
+    if auto_yes or not is_interactive():
+        print("\nWill you continue working on this feature later? (yes/no) [no]: no (auto)")
+        return False
+
     response = input("\nWill you continue working on this feature later? (yes/no) [no]: ").strip().lower()
     return response in ("yes", "y")
 
 
-def prompt_cleanup_artifacts(base_dir: Path, retention_days: int = 7) -> bool:
+def prompt_cleanup_artifacts(base_dir: Path, retention_days: int = 7, auto_yes: bool = False) -> bool:
     """Ask user if they want to clean up old artifacts."""
     print("\n" + "="*60)
     print("🧹 Artifact Cleanup")
     print("="*60)
     print(f"\nArtifacts are temporary and should not be long-term storage.")
     print(f"Would you like to clean up artifacts older than {retention_days} days?")
+
+    if auto_yes or not is_interactive():
+        print("\nRun interactive cleanup? (yes/no) [yes]: no (auto)")
+        return False
 
     response = input("\nRun interactive cleanup? (yes/no) [yes]: ").strip().lower()
     return response in ("yes", "y", "")
@@ -142,7 +155,8 @@ def finalize_session(
     session_dir: Path,
     skip_aggregation: bool = False,
     skip_cleanup: bool = False,
-    retention_days: int = 7
+    retention_days: int = 7,
+    auto_yes: bool = False
 ) -> None:
     """
     Finalize orchestration session and optionally clean up artifacts.
@@ -152,6 +166,7 @@ def finalize_session(
         skip_aggregation: Skip report aggregation step
         skip_cleanup: Skip cleanup prompt
         retention_days: Days to retain artifacts for cleanup
+        auto_yes: Automatically answer prompts (non-interactive mode)
     """
     if not session_dir.exists():
         print(f"❌ Session directory not found: {session_dir}")
@@ -168,6 +183,10 @@ def finalize_session(
     current_status = context.get("status", "unknown")
     if current_status == "completed":
         print("\n⚠️  Session is already marked as completed")
+        if auto_yes or not is_interactive():
+            print("Finalize again? (yes/no) [no]: no (auto)")
+            print("⏹️  Finalization cancelled")
+            return
         response = input("Finalize again? (yes/no) [no]: ").strip().lower()
         if response not in ("yes", "y"):
             print("⏹️  Finalization cancelled")
@@ -176,7 +195,7 @@ def finalize_session(
     if not skip_aggregation:
         aggregate_reports_if_needed(session_dir)
 
-    will_continue = prompt_session_continuation()
+    will_continue = prompt_session_continuation(auto_yes)
 
     if will_continue:
         print("\n✅ Session remains active for continued work")
@@ -192,7 +211,7 @@ def finalize_session(
     if not skip_cleanup:
         base_dir = session_dir.parent.parent
 
-        if prompt_cleanup_artifacts(base_dir, retention_days):
+        if prompt_cleanup_artifacts(base_dir, retention_days, auto_yes):
             run_interactive_cleanup(base_dir, retention_days)
         else:
             print("\n⏭️  Skipping cleanup")
@@ -229,6 +248,11 @@ def main():
         default=7,
         help="Number of days to retain artifacts (default: 7)"
     )
+    parser.add_argument(
+        "--yes", "-y",
+        action="store_true",
+        help="Automatically answer prompts (non-interactive mode)"
+    )
 
     args = parser.parse_args()
 
@@ -241,7 +265,8 @@ def main():
             session_dir=session_dir,
             skip_aggregation=args.skip_aggregation,
             skip_cleanup=args.skip_cleanup,
-            retention_days=args.retention_days
+            retention_days=args.retention_days,
+            auto_yes=args.yes
         )
     except KeyboardInterrupt:
         print("\n\n⏹️  Finalization cancelled by user")
