@@ -26,37 +26,53 @@ def create_session_structure(
         working_dir: Working directory (default: current directory)
 
     Returns:
-        Dictionary with session metadata
+        Dictionary with session metadata (with RELATIVE paths)
     """
     if working_dir is None:
         working_dir = Path.cwd()
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    session_dir = working_dir / base_dir / feature_name / timestamp
+    session_dir_abs = working_dir / base_dir / feature_name / timestamp
+    session_dir_rel = Path(base_dir) / feature_name / timestamp
 
-    session_dir.mkdir(parents=True, exist_ok=True)
-    (session_dir / "agent-reports").mkdir(exist_ok=True)
+    session_dir_abs.mkdir(parents=True, exist_ok=True)
+    (session_dir_abs / "agent-reports").mkdir(exist_ok=True)
 
     session_metadata = {
         "feature_name": feature_name,
         "timestamp": timestamp,
-        "session_dir": str(session_dir),
+        "session_dir": str(session_dir_rel),
         "created_at": datetime.now().isoformat(),
         "status": "initialized",
         "agents_executed": [],
         "artifacts_created": []
     }
 
-    context_file = session_dir / "context.json"
+    context_file = session_dir_abs / "context.json"
     with open(context_file, "w") as f:
         json.dump(session_metadata, f, indent=2)
 
-    print(f"✅ Session initialized: {session_dir}")
-    print(f"📁 Session directory: {session_dir}")
-    print(f"📝 Context file: {context_file}")
+    print(f"✅ Session initialized: {session_dir_rel}")
+    print(f"📁 Session directory: {session_dir_rel}")
+    print(f"📝 Context file: {session_dir_rel / 'context.json'}")
 
     return session_metadata
+
+
+def save_task_breakdown(session_dir: Path, tasks: list) -> None:
+    """
+    Save task breakdown to session for resumption.
+
+    Args:
+        session_dir: Session directory path
+        tasks: List of task dictionaries from TodoWrite
+    """
+    breakdown_file = session_dir / "task-breakdown.json"
+    with open(breakdown_file, "w") as f:
+        json.dump(tasks, f, indent=2)
+
+    print(f"💾 Task breakdown saved: {breakdown_file}")
 
 
 def main():

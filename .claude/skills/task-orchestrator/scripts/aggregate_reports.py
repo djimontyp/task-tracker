@@ -166,18 +166,28 @@ def main():
     parser = argparse.ArgumentParser(description="Aggregate agent reports into summary")
     parser.add_argument(
         "session_dir",
-        type=Path,
-        help="Path to orchestration session directory"
+        type=str,
+        help="Path to orchestration session directory (relative or absolute)"
     )
     parser.add_argument(
         "--output",
-        type=Path,
+        type=str,
         help="Custom output file path (default: session_dir/summary.md)"
     )
 
     args = parser.parse_args()
 
-    aggregate_reports(args.session_dir, args.output)
+    session_dir = Path(args.session_dir)
+    if not session_dir.is_absolute():
+        session_dir = Path.cwd() / session_dir
+
+    output = None
+    if args.output:
+        output = Path(args.output)
+        if not output.is_absolute():
+            output = Path.cwd() / output
+
+    aggregate_reports(session_dir, output)
 
 
 if __name__ == "__main__":
