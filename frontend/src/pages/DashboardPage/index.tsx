@@ -15,6 +15,7 @@ import MetricCard from '@/shared/components/MetricCard'
 import ActivityHeatmap from '@/shared/components/ActivityHeatmap'
 import { useTasksStore } from '@/features/tasks/store/tasksStore'
 import { useMessagesFeed } from '@/features/messages/hooks/useMessagesFeed'
+import { MessagesErrorBoundary } from '@/features/messages/components'
 import { formatMessageDate } from '@/shared/utils/date'
 import { generateTaskAvatars } from '@/shared/utils/avatars'
 
@@ -35,8 +36,11 @@ const DashboardPage = () => {
     navigate('/tasks')
   }
 
-  // Use the new messages feed with WebSocket support
   const { messages, isLoading: messagesLoading, isConnected } = useMessagesFeed({ limit: 50 })
+
+  const recentMessages = useMemo(() => {
+    return messages.slice(0, 5)
+  }, [messages])
 
   const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['tasks'],
@@ -146,7 +150,8 @@ const DashboardPage = () => {
       {/* Recent Activities */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 3xl:gap-8 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
         {/* Recent Messages */}
-        <Card>
+        <MessagesErrorBoundary>
+          <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Recent Messages</span>
@@ -173,8 +178,8 @@ const DashboardPage = () => {
                     </div>
                   ))}
                 </>
-              ) : messages && messages.length > 0 ? (
-                messages.slice(0, 5).map((message) => (
+              ) : recentMessages.length > 0 ? (
+                recentMessages.map((message) => (
                   <div
                     key={message.id}
                     className="group flex items-start gap-3 py-2 border-b last:border-b-0 rounded-md cursor-pointer transition-all duration-200 hover:bg-accent/50 -mx-2 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -236,6 +241,7 @@ const DashboardPage = () => {
             </div>
           </CardContent>
         </Card>
+        </MessagesErrorBoundary>
 
         {/* Recent Tasks */}
         <Card>
