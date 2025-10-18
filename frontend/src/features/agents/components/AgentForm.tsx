@@ -19,6 +19,8 @@ import {
 } from '@/shared/ui'
 import { AgentConfigCreate, AgentConfigUpdate } from '@/features/agents/types'
 import { providerService } from '@/features/providers/api'
+import { useOllamaModels } from '@/features/providers/hooks'
+import { ProviderType, ValidationStatus } from '@/features/providers/types'
 
 interface AgentFormProps {
   open: boolean
@@ -48,10 +50,27 @@ const AgentForm = ({
     is_active: initialData?.is_active ?? true,
   })
 
+  const [manualModelInput, setManualModelInput] = useState(false)
+
   const { data: providers, isLoading: providersLoading } = useQuery({
     queryKey: ['providers', 'active'],
     queryFn: () => providerService.listProviders({ active_only: true }),
+    refetchInterval: (query) => {
+      const hasActiveValidation = query.state.data?.some(
+        (p) => p.validation_status === ValidationStatus.VALIDATING || p.validation_status === ValidationStatus.PENDING
+      )
+      return hasActiveValidation ? 2000 : false
+    },
   })
+
+  const selectedProvider = providers?.find((p) => p.id === formData.provider_id)
+  const isOllamaProvider = selectedProvider?.type === ProviderType.OLLAMA
+  const hasProviderSelected = !!formData.provider_id && !!selectedProvider
+
+  const { models, isLoading: modelsLoading, error: modelsError } = useOllamaModels(
+    selectedProvider?.base_url || '',
+    hasProviderSelected && isOllamaProvider && !manualModelInput
+  )
 
   useEffect(() => {
     if (initialData) {
@@ -67,6 +86,17 @@ const AgentForm = ({
       })
     }
   }, [initialData])
+
+  useEffect(() => {
+    setManualModelInput(false)
+    setFormData((prev) => ({ ...prev, model_name: '' }))
+  }, [formData.provider_id])
+
+  useEffect(() => {
+    if (models.length > 0 && !formData.model_name && !isEdit) {
+      setFormData((prev) => ({ ...prev, model_name: models[0].name }))
+    }
+  }, [models, isEdit])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -127,14 +157,83 @@ const AgentForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="model_name">Model Name *</Label>
-              <Input
-                id="model_name"
-                value={formData.model_name}
-                onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
-                placeholder="llama3.2:latest"
-                required
-              />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="model_name">Model Name *</Label>
+                {hasProviderSelected && isOllamaProvider && models.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setManualModelInput(!manualModelInput)}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    {manualModelInput ? 'Use dropdown' : 'Manual input'}
+                  </button>
+                )}
+              </div>
+
+              {!hasProviderSelected ? (
+                <div className="px-3 py-2 text-sm border border-input bg-muted rounded-md text-muted-foreground">
+                  Please select a provider first
+                </div>
+              ) : isOllamaProvider && !manualModelInput ? (
+                <>
+                  {modelsLoading ? (
+                    <div className="flex items-center gap-2 px-3 py-2 text-sm border border-input bg-background rounded-md">
+                      <Spinner className="w-4 h-4" />
+                      <span className="text-muted-foreground">Loading models...</span>
+                    </div>
+                  ) : modelsError ? (
+                    <div className="space-y-2">
+                      <div className="px-3 py-2 text-sm border border-destructive bg-destructive/10 rounded-md text-destructive">
+                        {modelsError}
+                      </div>
+                      <Input
+                        id="model_name"
+                        value={formData.model_name}
+                        onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
+                        placeholder="llama3.2:latest"
+                        required
+                      />
+                    </div>
+                  ) : models.length > 0 ? (
+                    <Select
+                      value={formData.model_name}
+                      onValueChange={(value) => setFormData({ ...formData, model_name: value })}
+                    >
+                      <SelectTrigger id="model_name">
+                        <SelectValue placeholder="Select model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {models.map((model) => (
+                          <SelectItem key={model.name} value={model.name}>
+                            {model.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="px-3 py-2 text-sm border border-input bg-muted rounded-md text-muted-foreground">
+                        No models found. Please enter model name manually.
+                      </div>
+                      <Input
+                        id="model_name"
+                        value={formData.model_name}
+                        onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
+                        placeholder="llama3.2:latest"
+                        required
+                      />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Input
+                  id="model_name"
+                  value={formData.model_name}
+                  onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
+                  placeholder="llama3.2:latest"
+                  required
+                />
+              )}
             </div>
 
             <div className="space-y-2">

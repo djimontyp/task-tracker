@@ -8,6 +8,7 @@ import {
   LLMProvider,
   LLMProviderCreate,
   LLMProviderUpdate,
+  OllamaModelsResponse,
 } from "../types";
 import { API_ENDPOINTS } from "@/shared/config/api";
 
@@ -121,6 +122,28 @@ class ProviderService {
       }
       throw new Error(error.detail || "Failed to delete provider");
     }
+  }
+
+  async fetchOllamaModels(host: string): Promise<OllamaModelsResponse> {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.ollamaModels(host)}`);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: response.statusText }));
+
+      if (response.status === 400) {
+        throw new Error("Invalid or empty Ollama host URL");
+      }
+      if (response.status === 502) {
+        throw new Error("Cannot connect to Ollama server. Check if host URL is correct and Ollama is running");
+      }
+      if (response.status === 504) {
+        throw new Error("Request timeout. Ollama server is not responding");
+      }
+
+      throw new Error(error.detail || "Failed to fetch Ollama models");
+    }
+
+    return response.json();
   }
 }
 

@@ -69,6 +69,7 @@ export const API_ENDPOINTS = {
   // AI Configuration
   agents: buildApiPath('agents'),
   providers: buildApiPath('providers'),
+  ollamaModels: (host: string) => buildApiPath(`providers/ollama/models?host=${encodeURIComponent(host)}`),
   projects: buildApiPath('projects'),
   topics: buildApiPath('topics'),
 

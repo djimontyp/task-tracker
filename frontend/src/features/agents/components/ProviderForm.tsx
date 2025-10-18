@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -41,6 +41,26 @@ const ProviderForm = ({
     api_key: '',
     is_active: initialData?.is_active ?? true,
   })
+
+  useEffect(() => {
+    if (open && initialData) {
+      setFormData({
+        name: initialData.name || '',
+        type: initialData.type || ProviderType.OLLAMA,
+        base_url: initialData.base_url || '',
+        api_key: '',
+        is_active: initialData.is_active ?? true,
+      })
+    } else if (open && !initialData) {
+      setFormData({
+        name: '',
+        type: ProviderType.OLLAMA,
+        base_url: '',
+        api_key: '',
+        is_active: true,
+      })
+    }
+  }, [open, initialData])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

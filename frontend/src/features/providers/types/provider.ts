@@ -45,3 +45,17 @@ export interface LLMProviderUpdate {
   api_key?: string; // Plain text, will be encrypted by backend
   is_active?: boolean;
 }
+
+export interface OllamaModel {
+  name: string;
+  size: number;
+  modified_at: string;
+}
+
+export interface OllamaModelsResponse {
+  models: OllamaModel[];
+}
+
+export interface OllamaModelsErrorResponse {
+  detail: string;
+}

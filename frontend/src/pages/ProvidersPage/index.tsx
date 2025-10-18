@@ -8,12 +8,15 @@ import {
   Spinner,
 } from '@/shared/ui'
 import { providerService } from '@/features/providers/api'
-import { LLMProvider, LLMProviderCreate, LLMProviderUpdate } from '@/features/providers/types'
+import { LLMProvider, LLMProviderCreate, LLMProviderUpdate, ValidationStatus as ValidationStatusEnum } from '@/features/providers/types'
 import { toast } from 'sonner'
 import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { ProviderForm } from '@/features/agents/components'
 import { ValidationStatus } from '@/features/providers/components'
 import { formatFullDate } from '@/shared/utils/date'
+
+const POLLING_INTERVAL_MS = 1000
+const MAX_POLLING_ATTEMPTS = 15
 
 const ProvidersPage = () => {
   const queryClient = useQueryClient()
@@ -23,14 +26,49 @@ const ProvidersPage = () => {
   const { data: providers, isLoading } = useQuery<LLMProvider[]>({
     queryKey: ['providers'],
     queryFn: () => providerService.listProviders(),
+    refetchInterval: (query) => {
+      const hasActiveValidation = query.state.data?.some(
+        (p) => p.validation_status === ValidationStatusEnum.VALIDATING || p.validation_status === ValidationStatusEnum.PENDING
+      )
+      return hasActiveValidation ? 2000 : false
+    },
   })
+
+  const pollValidationStatus = async (providerId: string, action: 'created' | 'updated') => {
+    toast.success(`Provider ${action}. Validating connection...`)
+
+    for (let attempt = 0; attempt < MAX_POLLING_ATTEMPTS; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS))
+      await queryClient.refetchQueries({ queryKey: ['providers'] })
+
+      const providers = queryClient.getQueryData<LLMProvider[]>(['providers'])
+      const provider = providers?.find(p => p.id === providerId)
+
+      if (!provider) {
+        toast.error('Provider not found')
+        return
+      }
+
+      if (provider.validation_status === ValidationStatusEnum.CONNECTED) {
+        toast.success('Provider validated successfully!')
+        return
+      }
+
+      if (provider.validation_status === ValidationStatusEnum.ERROR) {
+        toast.error(`Validation failed: ${provider.validation_error || 'Unknown error'}`)
+        return
+      }
+    }
+
+    toast.error('Validation timeout. Please check provider status.')
+  }
 
   const createMutation = useMutation({
     mutationFn: (data: LLMProviderCreate) => providerService.createProvider(data),
-    onSuccess: () => {
+    onSuccess: async (createdProvider) => {
       queryClient.invalidateQueries({ queryKey: ['providers'] })
-      toast.success('Provider created successfully')
       setFormOpen(false)
+      await pollValidationStatus(createdProvider.id, 'created')
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to create provider')
@@ -40,11 +78,11 @@ const ProvidersPage = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: LLMProviderUpdate }) =>
       providerService.updateProvider(id, data),
-    onSuccess: () => {
+    onSuccess: async (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['providers'] })
-      toast.success('Provider updated successfully')
       setFormOpen(false)
       setEditingProvider(null)
+      await pollValidationStatus(id, 'updated')
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update provider')

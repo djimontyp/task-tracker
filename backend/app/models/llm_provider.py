@@ -126,3 +126,20 @@ class LLMProviderPublic(SQLModel):
     validated_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
+
+
+class OllamaModel(SQLModel):
+    """Schema for single Ollama model information."""
+
+    name: str = Field(description="Model name (e.g., 'llama3.2:latest')")
+    size: int = Field(description="Model size in bytes")
+    modified_at: str = Field(description="Last modification timestamp")
+
+
+class OllamaModelsResponse(SQLModel):
+    """Response schema for Ollama models listing."""
+
+    models: list[OllamaModel] = Field(
+        default_factory=list,
+        description="List of available Ollama models",
+    )
