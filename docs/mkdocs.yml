@@ -1,32 +1,65 @@
 site_name: Task Tracker Documentation
 site_description: Internal documentation for the Task Tracker project
 docs_dir: content
+
 theme:
   name: material
   language: en
   features:
+    # Navigation
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
     - navigation.top
+    - navigation.tracking
+    # Search
+    - search.highlight
+    - search.suggest
+    - search.share
+    # Content
     - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    # Table of Contents
+    - toc.follow
   palette:
     - scheme: default
-      primary: indigo
-      accent: indigo
+      primary: deep orange
+      accent: orange
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
-      primary: indigo
-      accent: indigo
+      primary: deep orange
+      accent: orange
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+  font:
+    text: Inter
+    code: Roboto Mono
+  icon:
+    repo: fontawesome/brands/github
+
 nav:
-  - Home: index.md
-  - Context Spaces (Topics): topics.md
-  - Event Flow & Sequencing: event-flow.md
-  - Auto-Save Feature: auto-save.md
+  - User Guide:
+    - Home: index.md
+    - Context Spaces (Topics): topics.md
+    - Event Flow & Sequencing: event-flow.md
+    - Auto-Save Feature: auto-save.md
+  - Architecture:
+    - Overview: architecture/overview.md
+    - Noise Filtering: architecture/noise-filtering.md
+    - Analysis System: architecture/analysis-system.md
+    - Vector Database: architecture/vector-database.md
+
 plugins:
-  - search
+  - search:
+      lang:
+        - en
+        - uk
+      separator: '[\s\-,:!=\[\]()"/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - i18n:
       docs_structure: folder
       languages:
@@ -34,20 +67,78 @@ plugins:
           default: true
           name: English
           site_name: Task Tracker Documentation
+          nav_translations:
+            User Guide: User Guide
+            Home: Home
+            Context Spaces (Topics): Context Spaces (Topics)
+            Event Flow & Sequencing: Event Flow & Sequencing
+            Auto-Save Feature: Auto-Save Feature
+            Architecture: Architecture
+            Overview: Overview
+            Noise Filtering: Noise Filtering
+            Analysis System: Analysis System
+            Vector Database: Vector Database
         - locale: uk
           name: Українська
           site_name: Документація Task Tracker
+          nav_translations:
+            User Guide: Посібник користувача
+            Home: Головна
+            Context Spaces (Topics): Контекстні простори (Топіки)
+            Event Flow & Sequencing: Потік подій та послідовність
+            Auto-Save Feature: Функція автозбереження
+            Architecture: Архітектура
+            Overview: Огляд
+            Noise Filtering: Фільтрація шуму
+            Analysis System: Система аналізу
+            Vector Database: Векторна база даних
+
 markdown_extensions:
+  # Python Markdown
+  - abbr
   - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      permalink_title: Link to this section
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+
+  # PyMdown Extensions
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
   - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
-  - toc:
-      permalink: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/djimontyp/task-tracker
+
+extra_css:
+  - stylesheets/custom.css

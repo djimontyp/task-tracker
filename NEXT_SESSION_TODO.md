@@ -160,10 +160,9 @@
 
 ## 🔗 Related Documents
 
-- [NOISE_FILTERING_ARCHITECTURE.md](./NOISE_FILTERING_ARCHITECTURE.md) - Technical architecture
-- [USER_NEEDS.md](./USER_NEEDS.md) - User requirements
-- [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) - Implementation guide
-- [CONCEPTS_INDEX.md](./CONCEPTS_INDEX.md) - Project concepts
+- [NOISE_FILTERING.md](./docs/architecture/NOISE_FILTERING.md) - Technical architecture
+- [OVERVIEW.md](./docs/architecture/OVERVIEW.md) - System overview and user requirements
+- [ANALYSIS_SYSTEM.md](./docs/architecture/ANALYSIS_SYSTEM.md) - Analysis pipeline architecture
 
 ---
 
