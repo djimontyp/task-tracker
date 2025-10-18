@@ -1,8 +1,9 @@
 """Models for message ingestion tracking."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 
+from sqlalchemy import Column, DateTime, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
@@ -34,8 +35,16 @@ class MessageIngestionJob(IDMixin, TimestampMixin, SQLModel, table=True):
     )
 
     # Time window
-    time_window_start: datetime | None = Field(default=None, description="Start of time window for fetching")
-    time_window_end: datetime | None = Field(default=None, description="End of time window for fetching")
+    time_window_start: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True)),
+        description="Start of time window for fetching",
+    )
+    time_window_end: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True)),
+        description="End of time window for fetching",
+    )
 
     # Status tracking
     status: IngestionStatus = Field(default=IngestionStatus.pending, description="Current job status")
@@ -52,8 +61,16 @@ class MessageIngestionJob(IDMixin, TimestampMixin, SQLModel, table=True):
     error_log: dict | None = Field(default=None, sa_type=JSONB, description="Error details")
 
     # Lifecycle timestamps
-    started_at: datetime | None = Field(default=None, description="When job started processing")
-    completed_at: datetime | None = Field(default=None, description="When job completed")
+    started_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True)),
+        description="When job started processing",
+    )
+    completed_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True)),
+        description="When job completed",
+    )
 
 
 class MessageIngestionJobCreate(SQLModel):

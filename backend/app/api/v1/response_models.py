@@ -159,8 +159,36 @@ class TaskResponse(BaseModel):
 # ----------------------
 
 
+class TaskStatusCounts(BaseModel):
+    """Task counts grouped by status."""
+
+    open: int
+    in_progress: int
+    completed: int
+    closed: int
+
+
+class TrendData(BaseModel):
+    """Trend comparison data for metrics."""
+
+    current: int
+    previous: int
+    change_percent: float
+    direction: str  # "up", "down", or "neutral"
+
+
 class StatsResponse(BaseModel):
+    """Enhanced statistics response with real trend data."""
+
     total_tasks: int
+    by_status: TaskStatusCounts
+
+    total_trend: TrendData
+    open_trend: TrendData
+    in_progress_trend: TrendData
+    completed_trend: TrendData
+    completion_rate_trend: TrendData
+
     categories: dict[str, int]
     priorities: dict[str, int]
 
