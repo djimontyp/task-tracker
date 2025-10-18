@@ -8,9 +8,15 @@ It only lists what COULD be cleaned up and asks for confirmation.
 
 import argparse
 import json
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Any
+
+
+def is_interactive() -> bool:
+    """Check if running in interactive terminal."""
+    return sys.stdin.isatty()
 
 
 def is_git_tracked(path: Path) -> bool:
@@ -159,7 +165,7 @@ def cleanup_sessions(
     dry_run: bool = True
 ) -> None:
     """
-    Clean up old sessions.
+    Clean up old sessions and empty feature directories.
 
     Args:
         sessions: List of sessions to clean up
@@ -168,6 +174,7 @@ def cleanup_sessions(
     if dry_run:
         print("🔍 DRY RUN MODE - No files will be deleted\n")
 
+    feature_dirs = set()
     for session in sessions:
         if dry_run:
             print(f"Would delete: {session['path']}")
@@ -176,14 +183,23 @@ def cleanup_sessions(
                 import shutil
                 shutil.rmtree(session['path'])
                 print(f"✅ Deleted: {session['path']}")
+                feature_dirs.add(session['path'].parent)
             except Exception as e:
                 print(f"❌ Failed to delete {session['path']}: {e}")
 
-    if not dry_run:
+    if not dry_run and feature_dirs:
+        for feature_dir in feature_dirs:
+            if feature_dir.exists() and not any(feature_dir.iterdir()):
+                try:
+                    feature_dir.rmdir()
+                    print(f"🗑️  Removed empty feature directory: {feature_dir}")
+                except Exception as e:
+                    print(f"⚠️  Could not remove {feature_dir}: {e}")
+
         print(f"\n✅ Cleanup complete. Removed {len(sessions)} session(s)")
 
 
-def interactive_cleanup(base_dir: Path, retention_days: int, intelligent: bool = False) -> None:
+def interactive_cleanup(base_dir: Path, retention_days: int, intelligent: bool = False, auto_yes: bool = False) -> None:
     """
     Interactive cleanup with user confirmation for each session.
     """
@@ -196,9 +212,20 @@ def interactive_cleanup(base_dir: Path, retention_days: int, intelligent: bool =
     mode = "intelligent" if intelligent else "standard"
     print(f"⚠️  Found {len(old_sessions)} session(s) eligible for cleanup ({mode} mode)\n")
 
+    if not is_interactive() and not auto_yes:
+        print("❌ Cannot run interactive cleanup in non-interactive mode")
+        print("💡 Use --confirm or --dry-run instead")
+        return
+
     to_delete = []
     for session in old_sessions:
         print(format_session_info(session))
+
+        if auto_yes:
+            print("\n  Delete this session? (yes/no) [no]: no (auto)")
+            print("  ⏭️  Skipped\n")
+            continue
+
         response = input("\n  Delete this session? (yes/no) [no]: ").strip().lower()
 
         if response in ("yes", "y"):
@@ -212,6 +239,12 @@ def interactive_cleanup(base_dir: Path, retention_days: int, intelligent: bool =
         return
 
     print(f"\n⚠️  About to delete {len(to_delete)} session(s)")
+
+    if auto_yes:
+        print("Proceed with deletion? (yes/no) [no]: no (auto)")
+        print("❌ Cleanup cancelled")
+        return
+
     final_confirm = input("Proceed with deletion? (yes/no) [no]: ").strip().lower()
 
     if final_confirm in ("yes", "y"):
@@ -256,11 +289,16 @@ def main():
         action="store_true",
         help="Intelligent mode - skip active sessions and uncommitted changes"
     )
+    parser.add_argument(
+        "--yes", "-y",
+        action="store_true",
+        help="Automatically answer prompts (non-interactive mode)"
+    )
 
     args = parser.parse_args()
 
     if args.interactive:
-        interactive_cleanup(args.base_dir, args.retention_days, args.intelligent)
+        interactive_cleanup(args.base_dir, args.retention_days, args.intelligent, args.yes)
     elif args.confirm or args.dry_run:
         old_sessions = find_old_sessions(args.base_dir, args.retention_days, args.intelligent)
         if old_sessions:
