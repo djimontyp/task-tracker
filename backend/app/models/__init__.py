@@ -77,6 +77,8 @@ from .llm_provider import (
     LLMProviderCreate,
     LLMProviderPublic,
     LLMProviderUpdate,
+    OllamaModel,
+    OllamaModelsResponse,
     ProviderType,
     ValidationStatus,
 )
@@ -161,6 +163,8 @@ __all__ = [
     "LLMProviderCreate",
     "LLMProviderPublic",
     "LLMProviderUpdate",
+    "OllamaModel",
+    "OllamaModelsResponse",
     "ProviderType",
     "ValidationStatus",
     # Task Config

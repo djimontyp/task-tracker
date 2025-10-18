@@ -8,6 +8,7 @@ from .atom_crud import AtomCRUD
 from .credential_encryption import CredentialEncryption
 from .embedding_service import EmbeddingService
 from .message_crud import MessageCRUD
+from .ollama_service import OllamaService
 from .project_service import ProjectConfigCRUD
 from .proposal_service import TaskProposalCRUD
 from .provider_crud import ProviderCRUD
@@ -30,6 +31,7 @@ __all__ = [
     "CredentialEncryption",
     "EmbeddingService",
     "MessageCRUD",
+    "OllamaService",
     "ProjectConfigCRUD",
     "ProviderCRUD",
     "ProviderValidator",

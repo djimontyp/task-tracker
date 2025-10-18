@@ -7,12 +7,13 @@ with async validation and encrypted credentials.
 import logging
 from uuid import UUID
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database import get_session
-from app.models import LLMProviderCreate, LLMProviderPublic, LLMProviderUpdate
-from app.services import ProviderCRUD
+from app.models import LLMProviderCreate, LLMProviderPublic, LLMProviderUpdate, OllamaModelsResponse
+from app.services import OllamaService, ProviderCRUD
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/providers", tags=["providers"])
@@ -205,3 +206,59 @@ async def delete_provider(
                 detail="Cannot delete provider - it is referenced by active agents",
             )
         raise
+
+
+@router.get(
+    "/ollama/models",
+    response_model=OllamaModelsResponse,
+    summary="List Ollama models",
+    description="Fetch available models from configured Ollama host for model selection during provider setup.",
+)
+async def list_ollama_models(
+    host: str = Query(..., description="Ollama host URL (e.g., 'http://localhost:11434')"),
+) -> OllamaModelsResponse:
+    """List available models from Ollama instance.
+
+    Args:
+        host: Ollama host URL to query
+
+    Returns:
+        List of available Ollama models with metadata
+
+    Raises:
+        HTTPException 400: Invalid host URL or empty
+        HTTPException 502: Connection to Ollama failed
+        HTTPException 504: Request to Ollama timed out
+    """
+    if not host or not host.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ollama host URL is required",
+        )
+
+    ollama_service = OllamaService(timeout=10)
+
+    try:
+        models = await ollama_service.list_models(host)
+        logger.info(f"Successfully fetched {len(models.models)} models from Ollama at {host}")
+        return models
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except httpx.TimeoutException:
+        raise HTTPException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            detail=f"Request to Ollama at '{host}' timed out. Ensure the host is reachable.",
+        )
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Ollama API error: {e.response.status_code} - {e.response.text}",
+        )
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Failed to connect to Ollama at '{host}': {str(e)}",
+        )

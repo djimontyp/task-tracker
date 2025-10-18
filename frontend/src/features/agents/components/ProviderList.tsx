@@ -8,11 +8,14 @@ import {
   Spinner,
 } from '@/shared/ui'
 import { providerService } from '@/features/providers/api'
-import { LLMProvider, LLMProviderCreate, LLMProviderUpdate } from '@/features/providers/types'
+import { LLMProvider, LLMProviderCreate, LLMProviderUpdate, ValidationStatus } from '@/features/providers/types'
 import { toast } from 'sonner'
 import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
 import ProviderForm from './ProviderForm'
-import { ValidationStatus } from '@/features/providers/components'
+import { ValidationStatus as ValidationStatusComponent } from '@/features/providers/components'
+
+const POLLING_INTERVAL_MS = 1000
+const MAX_POLLING_ATTEMPTS = 15
 
 const ProviderList = () => {
   const queryClient = useQueryClient()
@@ -22,14 +25,49 @@ const ProviderList = () => {
   const { data: providers, isLoading } = useQuery<LLMProvider[]>({
     queryKey: ['providers'],
     queryFn: () => providerService.listProviders(),
+    refetchInterval: (query) => {
+      const hasActiveValidation = query.state.data?.some(
+        (p) => p.validation_status === ValidationStatus.VALIDATING || p.validation_status === ValidationStatus.PENDING
+      )
+      return hasActiveValidation ? 2000 : false
+    },
   })
+
+  const pollValidationStatus = async (providerId: string, action: 'created' | 'updated') => {
+    toast.success(`Provider ${action}. Validating connection...`)
+
+    for (let attempt = 0; attempt < MAX_POLLING_ATTEMPTS; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS))
+      await queryClient.refetchQueries({ queryKey: ['providers'] })
+
+      const providers = queryClient.getQueryData<LLMProvider[]>(['providers'])
+      const provider = providers?.find(p => p.id === providerId)
+
+      if (!provider) {
+        toast.error('Provider not found')
+        return
+      }
+
+      if (provider.validation_status === ValidationStatus.CONNECTED) {
+        toast.success('Provider validated successfully!')
+        return
+      }
+
+      if (provider.validation_status === ValidationStatus.ERROR) {
+        toast.error(`Validation failed: ${provider.validation_error || 'Unknown error'}`)
+        return
+      }
+    }
+
+    toast.error('Validation timeout. Please check provider status.')
+  }
 
   const createMutation = useMutation({
     mutationFn: (data: LLMProviderCreate) => providerService.createProvider(data),
-    onSuccess: () => {
+    onSuccess: async (createdProvider) => {
       queryClient.invalidateQueries({ queryKey: ['providers'] })
-      toast.success('Provider created successfully')
       setFormOpen(false)
+      await pollValidationStatus(createdProvider.id, 'created')
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to create provider')
@@ -39,11 +77,11 @@ const ProviderList = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: LLMProviderUpdate }) =>
       providerService.updateProvider(id, data),
-    onSuccess: () => {
+    onSuccess: async (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['providers'] })
-      toast.success('Provider updated successfully')
       setFormOpen(false)
       setEditingProvider(null)
+      await pollValidationStatus(id, 'updated')
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update provider')
@@ -52,8 +90,8 @@ const ProviderList = () => {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => providerService.deleteProvider(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['providers'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['providers'] })
       toast.success('Provider deleted successfully')
     },
     onError: (error: Error) => {
@@ -155,7 +193,7 @@ const ProviderList = () => {
 
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Status:</span>
-                      <ValidationStatus
+                      <ValidationStatusComponent
                         status={provider.validation_status}
                         error={provider.validation_error}
                       />
