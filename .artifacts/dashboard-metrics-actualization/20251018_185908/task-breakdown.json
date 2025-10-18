@@ -1,0 +1,32 @@
+[
+  {
+    "content": "Initialize orchestration session for dashboard metrics",
+    "status": "completed",
+    "activeForm": "Initializing orchestration session"
+  },
+  {
+    "content": "Analyze current dashboard state and identify placeholder metrics",
+    "status": "completed",
+    "activeForm": "Analyzing current dashboard state"
+  },
+  {
+    "content": "Design real metrics: task stats, classification analytics, system health",
+    "status": "in_progress",
+    "activeForm": "Designing real metrics architecture"
+  },
+  {
+    "content": "Document backend API requirements",
+    "status": "pending",
+    "activeForm": "Documenting backend API requirements"
+  },
+  {
+    "content": "Document frontend integration plan",
+    "status": "pending",
+    "activeForm": "Documenting frontend integration plan"
+  },
+  {
+    "content": "Aggregate preparation reports",
+    "status": "pending",
+    "activeForm": "Aggregating preparation reports"
+  }
+]
