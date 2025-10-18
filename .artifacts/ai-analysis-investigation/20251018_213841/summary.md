@@ -1,18 +1,20 @@
 # Orchestration Summary: unknown
 
 **Session ID:** 2025-10-18T21:38:41Z
-**Date:** 2025-10-18 21:47:22
-**Agents Executed:** 1
+**Date:** 2025-10-18 22:16:13
+**Agents Executed:** 3
 
 ---
 
 ## Executive Summary
 
-This orchestration session coordinated 1 specialized agent(s) to implement the **unknown** feature.
+This orchestration session coordinated 3 specialized agent(s) to implement the **unknown** feature.
 
 ### Agents Involved
 
 - **backend-implementation**: Report generated
+- **frontend-ui**: Report generated
+- **topics-workflow**: Report generated
 
 ---
 
@@ -23,6 +25,22 @@ This orchestration session coordinated 1 specialized agent(s) to implement the *
 **Source:** `/home/maks/projects/task-tracker/.artifacts/ai-analysis-investigation/20251018_213841/agent-reports/backend-implementation-report.md`
 
 See full report: [backend-implementation-report.md](/home/maks/projects/task-tracker/.artifacts/ai-analysis-investigation/20251018_213841/agent-reports/backend-implementation-report.md)
+
+---
+
+### frontend-ui Report
+
+**Source:** `/home/maks/projects/task-tracker/.artifacts/ai-analysis-investigation/20251018_213841/agent-reports/frontend-ui-report.md`
+
+See full report: [frontend-ui-report.md](/home/maks/projects/task-tracker/.artifacts/ai-analysis-investigation/20251018_213841/agent-reports/frontend-ui-report.md)
+
+---
+
+### topics-workflow Report
+
+**Source:** `/home/maks/projects/task-tracker/.artifacts/ai-analysis-investigation/20251018_213841/agent-reports/topics-workflow-report.md`
+
+See full report: [topics-workflow-report.md](/home/maks/projects/task-tracker/.artifacts/ai-analysis-investigation/20251018_213841/agent-reports/topics-workflow-report.md)
 
 ---
 
