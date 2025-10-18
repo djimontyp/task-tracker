@@ -1,0 +1,407 @@
+# Artifact Standards
+
+This document defines the standards for agent reports and orchestration artifacts.
+
+## Directory Structure
+
+```
+.artifacts/
+└── {feature-name}/
+    └── {timestamp}/
+        ├── context.json              # Session metadata
+        ├── task-breakdown.md         # TodoWrite tasks
+        ├── agent-reports/            # Individual agent reports
+        │   ├── backend-report.md
+        │   ├── frontend-report.md
+        │   └── test-results.md
+        └── summary.md               # Aggregated summary
+```
+
+### Naming Conventions
+
+- **Feature names:** lowercase-with-dashes (e.g., `user-profile-editing`)
+- **Timestamps:** `YYYYMMDD_HHMMSS` (e.g., `20251018_143022`)
+- **Agent reports:** `{agent-name}-report.md` (e.g., `backend-report.md`, `frontend-report.md`)
+
+## context.json Structure
+
+```json
+{
+  "feature_name": "user-profile-editing",
+  "timestamp": "20251018_143022",
+  "session_dir": "/path/to/.artifacts/user-profile-editing/20251018_143022",
+  "created_at": "2025-10-18T14:30:22.123456",
+  "status": "initialized|in_progress|completed|failed",
+  "agents_executed": [
+    {
+      "name": "fastapi-backend-expert",
+      "started_at": "2025-10-18T14:30:25.000000",
+      "completed_at": "2025-10-18T14:45:10.000000",
+      "status": "completed|failed",
+      "report_path": "agent-reports/backend-report.md"
+    }
+  ],
+  "artifacts_created": [
+    "agent-reports/backend-report.md",
+    "agent-reports/frontend-report.md"
+  ],
+  "summary_created_at": "2025-10-18T15:00:00.000000",
+  "reports_aggregated": 2,
+  "summary_path": "summary.md"
+}
+```
+
+## Agent Report Format
+
+All agent reports must follow this structure:
+
+### Required Sections
+
+1. **Summary** - Executive summary of what was accomplished
+2. **Changes Made** - Specific files created, modified, or deleted
+3. **Implementation Details** - Technical approach and decisions
+4. **Technical Decisions** - Key architectural or design choices
+5. **Testing Results** - Test execution results and coverage
+6. **Issues Encountered** - Problems found and solutions applied
+7. **Dependencies** - New dependencies or changes to existing ones
+8. **Next Steps** - Recommended follow-up actions
+9. **Completion Checklist** - Verification items
+
+### Report Template
+
+```markdown
+# {Agent Name} Report
+
+**Feature:** {feature-name}
+**Session:** {timestamp}
+**Agent:** {agent-name}
+**Completed:** {completion-timestamp}
+
+---
+
+## Summary
+
+Brief overview of what was accomplished (2-3 paragraphs).
+
+Key achievements:
+- Achievement 1
+- Achievement 2
+- Achievement 3
+
+---
+
+## Changes Made
+
+### Files Created
+
+- `path/to/new/file1.py` - Description of file
+- `path/to/new/file2.tsx` - Description of file
+
+### Files Modified
+
+- `path/to/existing/file1.py` - Description of changes
+- `path/to/existing/file2.tsx` - Description of changes
+
+### Files Deleted
+
+- `path/to/old/file.py` - Reason for deletion
+
+---
+
+## Implementation Details
+
+### Approach
+
+Describe the technical approach taken to implement the feature.
+
+### Architecture
+
+Explain how the implementation fits into the overall architecture.
+
+### Code Organization
+
+Detail how code is organized and structured.
+
+---
+
+## Technical Decisions
+
+### Decision 1: {Title}
+
+**Context:** Why this decision was needed
+
+**Options Considered:**
+1. Option A - Pros and cons
+2. Option B - Pros and cons
+
+**Decision:** Chosen option and rationale
+
+**Consequences:** Expected impact
+
+### Decision 2: {Title}
+
+...
+
+---
+
+## Testing Results
+
+### Tests Written
+
+- Test 1: Description and purpose
+- Test 2: Description and purpose
+
+### Test Coverage
+
+```
+Coverage Report:
+  File: module.py
+    Statements: 95%
+    Branches: 90%
+    Functions: 100%
+```
+
+### Test Execution
+
+```
+pytest results:
+  ✅ 42 passed
+  ❌ 0 failed
+  ⚠️  2 skipped
+```
+
+---
+
+## Issues Encountered
+
+### Issue 1: {Title}
+
+**Description:** What went wrong
+
+**Impact:** How it affected the work
+
+**Resolution:** How it was solved
+
+### Issue 2: {Title}
+
+...
+
+---
+
+## Dependencies
+
+### Added Dependencies
+
+- `package-name@version` - Purpose and justification
+
+### Updated Dependencies
+
+- `package-name@old-version → new-version` - Reason for update
+
+### Removed Dependencies
+
+- `package-name` - Reason for removal
+
+---
+
+## Next Steps
+
+### Immediate Actions
+
+1. Action item 1
+2. Action item 2
+
+### Future Enhancements
+
+1. Enhancement idea 1
+2. Enhancement idea 2
+
+### Known Limitations
+
+- Limitation 1 and potential solution
+- Limitation 2 and potential solution
+
+---
+
+## Completion Checklist
+
+- [ ] All planned features implemented
+- [ ] Tests written and passing
+- [ ] Code reviewed for quality
+- [ ] Documentation updated
+- [ ] No breaking changes (or documented if necessary)
+- [ ] Type checking passes (`just typecheck`)
+- [ ] Formatting applied (`just fmt`)
+- [ ] Integration tested
+- [ ] Performance considered
+- [ ] Security reviewed
+
+---
+
+*Report generated by {agent-name} on {timestamp}*
+```
+
+## Report Quality Guidelines
+
+### Writing Style
+
+- Use clear, concise language
+- Write in past tense (work is completed)
+- Be specific with file paths and line numbers
+- Include code examples when relevant
+- Link to related documentation
+
+### Technical Accuracy
+
+- Verify all file paths are correct
+- Include actual test results, not placeholders
+- Document real issues encountered
+- Be honest about limitations
+
+### Completeness
+
+- Fill in ALL required sections
+- Don't leave TODO placeholders
+- Include relevant code snippets
+- Provide context for decisions
+
+## Summary Report Format
+
+The aggregated summary combines all agent reports:
+
+```markdown
+# Orchestration Summary: {feature-name}
+
+**Session ID:** {timestamp}
+**Date:** {date-time}
+**Agents Executed:** {count}
+
+---
+
+## Executive Summary
+
+High-level overview of the orchestration session.
+
+### Agents Involved
+
+- **Agent 1**: Brief description of work
+- **Agent 2**: Brief description of work
+
+---
+
+## Detailed Reports
+
+### Agent 1 Report
+
+Summary from agent 1 report...
+
+[Link to full report](agent-reports/agent1-report.md)
+
+---
+
+### Agent 2 Report
+
+Summary from agent 2 report...
+
+[Link to full report](agent-reports/agent2-report.md)
+
+---
+
+## Next Steps
+
+1. Aggregated next steps from all reports
+2. Overall recommendations
+3. Priority actions
+
+---
+
+*This summary was automatically generated by the Task Orchestrator.*
+```
+
+## Artifact Lifecycle
+
+### Creation
+
+1. Session initialized via `init_orchestration.py`
+2. Directory structure created
+3. `context.json` initialized
+
+### Active Session
+
+1. Agents write individual reports to `agent-reports/`
+2. `context.json` updated with agent execution metadata
+3. TodoWrite tracks progress
+
+### Completion
+
+1. All agent reports completed
+2. `aggregate_reports.py` creates `summary.md`
+3. `context.json` updated with summary metadata
+4. Session marked as completed
+
+### Retention
+
+1. Sessions retained according to `retention_policy`
+2. Default: 7 days
+3. `cleanup_artifacts.py` lists eligible sessions
+4. **User must explicitly confirm deletion**
+
+## Best Practices
+
+### For Agents Writing Reports
+
+1. **Write reports immediately after completing work**
+2. **Use the standard template** - don't deviate from structure
+3. **Be comprehensive** - future readers need full context
+4. **Include file paths** - use `file:line` format for references
+5. **Document decisions** - explain WHY, not just WHAT
+6. **Verify all sections are complete** - no TODOs or placeholders
+7. **Include actual results** - real test output, not examples
+
+### For Orchestrator
+
+1. **Initialize session before delegating**
+2. **Update context.json as agents complete**
+3. **Aggregate reports when all agents finish**
+4. **Present summary to user**
+5. **Never auto-delete without user confirmation**
+
+### For Users
+
+1. **Review summary.md first** for high-level overview
+2. **Check individual reports** for technical details
+3. **Verify completion checklists** are satisfied
+4. **Archive important sessions** before cleanup
+5. **Explicitly confirm deletion** when cleaning up
+
+## Anti-Patterns to Avoid
+
+❌ **Don't:**
+- Create reports with TODO placeholders
+- Skip required sections
+- Use generic descriptions ("updated file")
+- Auto-delete artifacts without confirmation
+- Write reports in different formats
+- Omit technical decisions
+- Leave incomplete checklists
+
+✅ **Do:**
+- Complete all sections fully
+- Provide specific details
+- Use consistent formatting
+- Require user confirmation for cleanup
+- Follow the standard template
+- Document all important decisions
+- Check off completed items
+
+## Artifact Versioning
+
+If the artifact standards change:
+
+1. Update this document with new version
+2. Add migration guide for old artifacts
+3. Update templates in `assets/report-templates/`
+4. Update `aggregate_reports.py` if needed
+5. Document changes in `CHANGELOG.md`
+
+Current version: **1.0.0**
