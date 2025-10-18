@@ -109,16 +109,35 @@ export interface TaskFilters {
   search?: string
 }
 
-export interface TaskStats {
-  total: number
-  pending: number
+export interface TrendData {
+  current: number
+  previous: number
+  change_percent: number
+  direction: 'up' | 'down' | 'neutral'
+}
+
+export interface TaskStatusCounts {
+  open: number
   in_progress: number
   completed: number
-  cancelled: number
-  byPriority: {
-    low: number
-    medium: number
-    high: number
-    urgent: number
-  }
+  closed: number
+}
+
+export interface TaskStats {
+  total_tasks: number
+  by_status: TaskStatusCounts
+
+  total_trend: TrendData
+  open_trend: TrendData
+  in_progress_trend: TrendData
+  completed_trend: TrendData
+  completion_rate_trend: TrendData
+
+  by_priority: Record<string, number>
+  by_category: Record<string, number>
+}
+
+export interface SidebarCounts {
+  unclosed_runs: number
+  pending_proposals: number
 }

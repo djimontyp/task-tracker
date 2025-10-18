@@ -1,0 +1,22 @@
+[
+  {
+    "content": "Initialize orchestration session for AI analysis investigation",
+    "status": "completed",
+    "activeForm": "Initializing orchestration session"
+  },
+  {
+    "content": "Backend analysis: inspect Analysis System implementation and APIs",
+    "status": "pending",
+    "activeForm": "Analyzing backend Analysis System"
+  },
+  {
+    "content": "Create comprehensive usage documentation for running AI analysis",
+    "status": "pending",
+    "activeForm": "Creating usage documentation"
+  },
+  {
+    "content": "Aggregate reports and present findings to user",
+    "status": "pending",
+    "activeForm": "Aggregating reports"
+  }
+]

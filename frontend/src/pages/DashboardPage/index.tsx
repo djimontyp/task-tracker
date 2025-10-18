@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ListBulletIcon, ClockIcon, ArrowPathIcon, CheckCircleIcon, WifiIcon } from '@heroicons/react/24/outline'
+import { ListBulletIcon, ClockIcon, ArrowPathIcon, CheckCircleIcon, WifiIcon, CpuChipIcon, DocumentCheckIcon } from '@heroicons/react/24/outline'
 import { SignalSlashIcon } from '@heroicons/react/24/outline'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Badge, Skeleton } from '@/shared/ui'
@@ -10,7 +10,7 @@ import { AvatarGroup } from '@/shared/components/AvatarGroup'
 import { TelegramIcon } from '@/shared/components/TelegramIcon'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
-import { Task, TaskStats } from '@/shared/types'
+import { Task, TaskStats, SidebarCounts } from '@/shared/types'
 import MetricCard from '@/shared/components/MetricCard'
 import ActivityHeatmap from '@/shared/components/ActivityHeatmap'
 import { useTasksStore } from '@/features/tasks/store/tasksStore'
@@ -31,7 +31,15 @@ const DashboardPage = () => {
     },
   })
 
-  const handleMetricClick = (filter: 'all' | 'pending' | 'in_progress' | 'completed') => {
+  const { data: sidebarCounts, isLoading: sidebarLoading } = useQuery<SidebarCounts>({
+    queryKey: ['sidebar-counts'],
+    queryFn: async () => {
+      const response = await apiClient.get(API_ENDPOINTS.sidebarCounts)
+      return response.data
+    },
+  })
+
+  const handleMetricClick = (filter: 'all' | 'pending' | 'in_progress' | 'completed' | 'open') => {
     setFilterStatus(filter)
     navigate('/tasks')
   }
@@ -50,33 +58,45 @@ const DashboardPage = () => {
     },
   })
 
-  // Calculate metrics with trends
   const metrics = useMemo(() => {
-    const total = stats?.total || 0
-    const pending = stats?.pending || 0
-    const inProgress = stats?.in_progress || 0
-    const completed = stats?.completed || 0
-    const successRate = total > 0 ? Math.round((completed / total) * 100) : 0
+    if (!stats) return null
+
+    const { by_status, total_trend, open_trend, in_progress_trend, completion_rate_trend } = stats
+    const completionRate = stats.total_tasks > 0
+      ? Math.round((by_status.completed / stats.total_tasks) * 100)
+      : 0
 
     return {
       total: {
-        value: total,
-        trend: { value: 12, direction: 'up' as const },
-        subtitle: 'vs last month',
+        value: stats.total_tasks,
+        trend: {
+          value: Math.abs(total_trend.change_percent),
+          direction: total_trend.direction,
+        },
+        subtitle: 'vs last week',
       },
-      pending: {
-        value: pending,
-        trend: { value: 8, direction: 'down' as const },
+      open: {
+        value: by_status.open,
+        trend: {
+          value: Math.abs(open_trend.change_percent),
+          direction: open_trend.direction,
+        },
         subtitle: 'awaiting action',
       },
       inProgress: {
-        value: inProgress,
-        trend: { value: 5, direction: 'up' as const },
+        value: by_status.in_progress,
+        trend: {
+          value: Math.abs(in_progress_trend.change_percent),
+          direction: in_progress_trend.direction,
+        },
         subtitle: 'actively working',
       },
       successRate: {
-        value: `${successRate}%`,
-        trend: { value: 3, direction: 'up' as const },
+        value: `${completionRate}%`,
+        trend: {
+          value: Math.abs(completion_rate_trend.change_percent),
+          direction: completion_rate_trend.direction,
+        },
         subtitle: 'completion rate',
       },
     }
@@ -87,15 +107,15 @@ const DashboardPage = () => {
 
       {/* Metric Cards */}
       <div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 3xl:gap-6 animate-fade-in-up"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5 3xl:gap-6 animate-fade-in-up"
         role="region"
         aria-label="Task statistics"
         aria-live="polite"
         aria-atomic="false"
       >
-        {statsLoading ? (
+        {statsLoading || !metrics ? (
           <>
-            {[...Array(4)].map((_, i) => (
+            {[...Array(6)].map((_, i) => (
               <Card key={i}>
                 <CardContent className="pt-6">
                   <Skeleton className="h-4 w-20 mb-2" />
@@ -117,13 +137,13 @@ const DashboardPage = () => {
               onClick={() => handleMetricClick('all')}
             />
             <MetricCard
-              title="Pending Tasks"
-              value={metrics.pending.value}
-              subtitle={metrics.pending.subtitle}
-              trend={metrics.pending.trend}
+              title="Open Tasks"
+              value={metrics.open.value}
+              subtitle={metrics.open.subtitle}
+              trend={metrics.open.trend}
               icon={ClockIcon}
               iconColor="text-primary-400"
-              onClick={() => handleMetricClick('pending')}
+              onClick={() => handleMetricClick('open')}
             />
             <MetricCard
               title="In Progress"
@@ -142,6 +162,22 @@ const DashboardPage = () => {
               icon={CheckCircleIcon}
               iconColor="text-green-600"
               onClick={() => handleMetricClick('completed')}
+            />
+            <MetricCard
+              title="Pending Analysis"
+              value={sidebarCounts?.unclosed_runs || 0}
+              subtitle="AI runs active"
+              icon={CpuChipIcon}
+              iconColor="text-blue-600"
+              onClick={() => navigate('/analysis')}
+            />
+            <MetricCard
+              title="Proposals to Review"
+              value={sidebarCounts?.pending_proposals || 0}
+              subtitle="awaiting review"
+              icon={DocumentCheckIcon}
+              iconColor="text-amber-600"
+              onClick={() => navigate('/proposals')}
             />
           </>
         )}
