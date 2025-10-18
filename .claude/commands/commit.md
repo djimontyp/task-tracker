@@ -78,23 +78,16 @@ ci(github): add automated type checking workflow
 
 If user provided custom message in $ARGUMENTS:
 - Use it as-is (assume it follows conventions)
-- Add the standard footer
 
 Otherwise:
 - Generate message based on analysis
-- Include body if changes are complex
-- Add footer
+- **DO NOT** include body/footer unless explicitly requested
+- Keep it simple: just `<type>(<scope>): <subject>`
 
 Execute commit with this format:
 
 ```bash
-git commit -m "$(cat <<'EOF'
-<type>(<scope>): <subject>
-
-[Optional body explaining the changes]
-
-EOF
-)"
+git commit -m "<type>(<scope>): <subject>"
 ```
 
 ### Step 6: Verify
