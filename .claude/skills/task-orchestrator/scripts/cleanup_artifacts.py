@@ -13,9 +13,25 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 
+def is_git_tracked(path: Path) -> bool:
+    """Check if path has uncommitted git changes."""
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["git", "status", "--porcelain", str(path)],
+            capture_output=True,
+            text=True,
+            cwd=path.parent
+        )
+        return bool(result.stdout.strip())
+    except Exception:
+        return False
+
+
 def find_old_sessions(
     base_dir: Path,
-    retention_days: int
+    retention_days: int,
+    intelligent: bool = False
 ) -> List[Dict[str, Any]]:
     """
     Find sessions older than retention period.
@@ -23,6 +39,7 @@ def find_old_sessions(
     Args:
         base_dir: Base artifacts directory
         retention_days: Number of days to retain
+        intelligent: If True, skip active/uncommitted sessions
 
     Returns:
         List of session metadata for old sessions
@@ -54,6 +71,15 @@ def find_old_sessions(
                     continue
 
                 created_at = datetime.fromisoformat(created_at_str)
+                status = context.get("status", "unknown")
+
+                if intelligent:
+                    if status != "completed":
+                        continue
+
+                    if is_git_tracked(session_dir):
+                        continue
+
                 if created_at < cutoff_date:
                     session_size = sum(
                         f.stat().st_size
@@ -68,7 +94,7 @@ def find_old_sessions(
                         "created_at": created_at,
                         "age_days": (datetime.now() - created_at).days,
                         "size_mb": session_size / (1024 * 1024),
-                        "status": context.get("status", "unknown")
+                        "status": status
                     })
             except (json.JSONDecodeError, ValueError):
                 continue
@@ -90,17 +116,24 @@ def format_session_info(session: Dict[str, Any]) -> str:
 
 def list_cleanup_candidates(
     base_dir: Path,
-    retention_days: int
+    retention_days: int,
+    intelligent: bool = False
 ) -> None:
     """
     List artifacts that could be cleaned up.
 
     IMPORTANT: This only lists, never deletes without confirmation.
     """
-    print(f"🔍 Scanning for sessions older than {retention_days} days...")
-    print(f"📂 Base directory: {base_dir}\n")
+    mode = "intelligent" if intelligent else "standard"
+    print(f"🔍 Scanning for sessions older than {retention_days} days ({mode} mode)...")
+    print(f"📂 Base directory: {base_dir}")
 
-    old_sessions = find_old_sessions(base_dir, retention_days)
+    if intelligent:
+        print("🧠 Intelligent mode: Skipping active/uncommitted sessions\n")
+    else:
+        print()
+
+    old_sessions = find_old_sessions(base_dir, retention_days, intelligent)
 
     if not old_sessions:
         print(f"✅ No sessions older than {retention_days} days found")
@@ -150,17 +183,18 @@ def cleanup_sessions(
         print(f"\n✅ Cleanup complete. Removed {len(sessions)} session(s)")
 
 
-def interactive_cleanup(base_dir: Path, retention_days: int) -> None:
+def interactive_cleanup(base_dir: Path, retention_days: int, intelligent: bool = False) -> None:
     """
     Interactive cleanup with user confirmation for each session.
     """
-    old_sessions = find_old_sessions(base_dir, retention_days)
+    old_sessions = find_old_sessions(base_dir, retention_days, intelligent)
 
     if not old_sessions:
         print(f"✅ No sessions older than {retention_days} days found")
         return
 
-    print(f"⚠️  Found {len(old_sessions)} session(s) eligible for cleanup\n")
+    mode = "intelligent" if intelligent else "standard"
+    print(f"⚠️  Found {len(old_sessions)} session(s) eligible for cleanup ({mode} mode)\n")
 
     to_delete = []
     for session in old_sessions:
@@ -217,19 +251,24 @@ def main():
         action="store_true",
         help="Show what would be deleted without actually deleting"
     )
+    parser.add_argument(
+        "--intelligent",
+        action="store_true",
+        help="Intelligent mode - skip active sessions and uncommitted changes"
+    )
 
     args = parser.parse_args()
 
     if args.interactive:
-        interactive_cleanup(args.base_dir, args.retention_days)
+        interactive_cleanup(args.base_dir, args.retention_days, args.intelligent)
     elif args.confirm or args.dry_run:
-        old_sessions = find_old_sessions(args.base_dir, args.retention_days)
+        old_sessions = find_old_sessions(args.base_dir, args.retention_days, args.intelligent)
         if old_sessions:
             cleanup_sessions(old_sessions, dry_run=args.dry_run or not args.confirm)
         else:
             print(f"✅ No sessions older than {args.retention_days} days found")
     else:
-        list_cleanup_candidates(args.base_dir, args.retention_days)
+        list_cleanup_candidates(args.base_dir, args.retention_days, args.intelligent)
 
 
 if __name__ == "__main__":
