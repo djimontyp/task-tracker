@@ -57,93 +57,128 @@ Look at existing docs (like `docs/content/en/topics.md`) to maintain:
 - User-focused language
 - Practical examples and use cases
 
-## Markdown Formatting
+## MkDocs Material Features
 
-Use rich Markdown features for better readability (MkDocs Material theme supports these):
+This project uses MkDocs Material v9.x with modern markdown extensions. Use these features to create professional, user-friendly documentation.
 
-### Headings
-- `#` Main title (once per page)
-- `##` Major sections
-- `###` Subsections
-- `####` Minor subsections
+### Content Organization
 
-### Lists
-- Unordered lists with `-` or `*`
-- Ordered lists with `1.`, `2.`, etc.
-- Nested lists with proper indentation
-- Task lists with `- [ ]` and `- [x]`
+**Grids for Feature Showcases:**
+```markdown
+<div class="grid cards" markdown>
 
-### Code Blocks
+- :material-flash: **Fast Feature**
+
+    Brief description of the feature
+
+- :material-brain: **Smart Feature**
+
+    Another feature description
+
+</div>
+```
+
+**Content Tabs for Multi-Platform Examples:**
+```markdown
+=== "Python"
+    ```python
+    async def example():
+        return await db.query()
+    ```
+
+=== "TypeScript"
+    ```typescript
+    async function example() {
+        return await fetch('/api')
+    }
+    ```
+```
+
+**Use tabs for:**
+- Multi-language code examples
+- Platform-specific instructions (Docker, local, cloud)
+- Alternative approaches to same task
+
+### Code Documentation
+
+**Code Annotations for Complex Logic:**
 ```python
-# Use language-specific syntax highlighting
-def example():
-    pass
+async def analyze_message(msg: Message):  # (1)!
+    score = score_importance(msg)  # (2)!
+    if score > config.threshold:  # (3)!
+        await emit_signal(msg)
+
+1. Messages from Telegram webhook
+2. 4-factor algorithm: length, keywords, recency, author
+3. Threshold configurable via ProjectConfig
 ```
 
-### Tables
-| Column 1 | Column 2 | Column 3 |
-|----------|----------|----------|
-| Value    | Value    | Value    |
+**When to annotate:**
+- Complex algorithms or business logic
+- Non-obvious configuration values
+- Performance-critical sections
+- Integration points with external systems
 
-### Callouts/Admonitions
+### Typography & Formatting
 
-**Required extensions in mkdocs.yml:**
-```yaml
-markdown_extensions:
-  - admonition
-  - pymdownx.details
-  - pymdownx.superfences
+**Abbreviations for Technical Terms:**
+```markdown
+The system uses RAG for enhanced context.
+
+*[RAG]: Retrieval-Augmented Generation
 ```
 
-**Basic syntax** - Use three exclamation marks for static admonitions:
+**Keyboard Shortcuts:**
+```markdown
+Press ++ctrl+k++ to search
+Use ++cmd+shift+p++ for commands
+```
 
+**Text Formatting:**
+- ==Highlighted text== for important concepts (requires `pymdownx.mark`)
+- H~2~O for subscripts (requires `pymdownx.tilde`)
+- x^2^ for superscripts (requires `pymdownx.caret`)
+
+### Admonitions
+
+**Basic syntax:**
 ```
 !!! note
     Content must be indented (4 spaces or 1 tab).
-    Empty line before content is optional but recommended.
 
-!!! note "Custom Title"
-    You can add a custom title in quotes.
+!!! tip "Custom Title"
+    You can add a custom title.
 
-!!! note ""
-    Empty quotes remove the title completely.
+!!! warning ""
+    Empty quotes remove the title.
 ```
 
 **Available types:**
 - `note` - Additional information
-- `abstract` - Summary or overview
-- `info` - General information
 - `tip` - Helpful suggestions
-- `success` - Positive outcomes
-- `question` - Questions or FAQs
+- `info` - General information
 - `warning` - Important warnings
-- `failure` - Failed operations
 - `danger` - Critical alerts
-- `bug` - Bug information
+- `success` - Positive outcomes
 - `example` - Usage examples
 - `quote` - Quotations
 
-**Collapsible admonitions** - Use three question marks instead of three exclamation marks:
-
+**Collapsible admonitions:**
 ```
 ??? note "Click to expand"
-    Starts collapsed. User must click to see content.
+    Starts collapsed.
 
 ???+ tip "Expanded by default"
-    Starts open. User can collapse it.
+    Starts open, can be collapsed.
 ```
 
-**IMPORTANT FORMATTING RULES:**
-1. Content MUST be indented (4 spaces or tab)
-2. Add empty lines between blocks inside admonitions
-3. For code blocks inside admonitions, use proper indentation:
-
+**Admonitions with code:**
 ```markdown
 ???+ example "Example with code"
     This is text.
 
     ```python
-    # Code block inside - note the empty line above
+    # Note the empty line above
     def example():
         pass
     ```
@@ -151,21 +186,108 @@ markdown_extensions:
     More text after code.
 ```
 
-### Links
-- Internal: `[Link text](other-page.md)`
-- External: `[Link text](https://example.com)`
-- Anchors: `[Link to section](#section-heading)`
+### Search Optimization
 
-### Emphasis
+**Boost important pages:**
+```markdown
+---
+search:
+  boost: 2
+---
+
+# Important Page Title
+```
+
+**Use for:**
+- Getting started guides
+- API reference pages
+- Common troubleshooting guides
+
+### Visual Design Patterns
+
+**Landing Pages:**
+1. Start with overview in info/tip admonition
+2. Use grids/cards for feature highlights
+3. Add Mermaid diagrams for architecture
+4. Include quick navigation links
+
+**Architecture Pages:**
+1. Overview diagram (Mermaid)
+2. Component descriptions in grid cards
+3. Technical details in expandable notes
+4. Code examples with annotations
+
+**Feature Documentation:**
+1. Quick overview (what it does)
+2. Use cases with examples
+3. Multi-language code in tabs
+4. Related documentation links
+
+### Common Patterns
+
+**Multi-step processes:**
+1. Use numbered lists for sequential steps
+2. Add code examples for each step
+3. Use admonitions for warnings/tips
+4. Include troubleshooting section
+
+**API endpoints:**
+1. Request/response in content tabs
+2. Authentication in warning admonition
+3. Error scenarios with examples
+4. Code annotations for parameters
+
+**Configuration guides:**
+1. Overview of what's being configured
+2. Default values in tables
+3. Examples with annotations
+4. Common issues in warning admonitions
+
+### Troubleshooting Tips
+
+**MkDocs build fails:**
+- Check indentation in admonitions (must be 4 spaces or 1 tab)
+- Verify markdown extension is enabled in mkdocs.yml
+- Ensure code blocks have proper language tags
+
+**Content tabs not working:**
+- Requires `pymdownx.tabbed` with `alternate_style: true`
+- Tab content must be indented
+- Use `===` for tab labels
+
+**Icons not showing:**
+- Requires `pymdownx.emoji` with Material emoji config
+- Use `:material-icon-name:` syntax
+- Check icon exists in Material Icons set
+
+### Basic Markdown
+
+**Headings:**
+- `#` Main title (once per page)
+- `##` Major sections
+- `###` Subsections
+- `####` Minor subsections
+
+**Lists:**
+- Unordered: `-` or `*`
+- Ordered: `1.`, `2.`
+- Task lists: `- [ ]` and `- [x]`
+
+**Links:**
+- Internal: `[Text](other-page.md)`
+- External: `[Text](https://example.com)`
+- Anchors: `[Text](#section-heading)`
+
+**Emphasis:**
 - **Bold** with `**text**`
 - *Italic* with `*text*`
 - `Inline code` with backticks
-- ~~Strikethrough~~ with `~~text~~`
 
-### Horizontal Rules
-Use `---` for section separators
+**Tables:**
+```markdown
+| Column 1 | Column 2 |
+|----------|----------|
+| Value    | Value    |
+```
 
-### Blockquotes
-> Use `>` for quotes or highlighted text
-
-Use these formatting features appropriately to make documentation scannable, organized, and visually appealing.
+Use these features to make documentation scannable, organized, and visually appealing.

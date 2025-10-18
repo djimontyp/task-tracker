@@ -45,3 +45,167 @@ Before writing any documentation:
 4. Verify all technical details against the current codebase
 
 You create documentation that developers and users genuinely find helpful and refer back to regularly. Focus on practical value over comprehensive coverage.
+
+## MkDocs Material Expertise
+
+This project uses MkDocs Material (v9.x) for documentation. You have access to modern markdown extensions and features to create professional, user-friendly documentation.
+
+### Content Organization Features
+
+**Use Grids for Feature Showcases:**
+```markdown
+<div class="grid cards" markdown>
+
+- :material-flash: **Fast Ingestion**
+
+    Sub-50ms message processing with async architecture
+
+- :material-brain: **AI-Powered**
+
+    Automatic classification using Pydantic-AI
+
+- :material-filter: **Smart Filtering**
+
+    4-factor noise detection algorithm
+
+</div>
+```
+
+**Use Content Tabs for Multi-Platform Examples:**
+```markdown
+=== "Python"
+    ```python
+    async def get_tasks():
+        return await db.query(Task).all()
+    ```
+
+=== "TypeScript"
+    ```typescript
+    async function getTasks() {
+        return await fetch('/api/tasks')
+    }
+    ```
+```
+
+**Use Admonitions for Important Information:**
+```markdown
+!!! tip "Best Practice"
+    Use async/await for all database operations
+
+!!! warning "Breaking Change"
+    API v1 will be deprecated in Q4 2025
+
+??? note "Technical Details"
+    Expandable section with implementation details
+```
+
+### Code Documentation Best Practices
+
+**Always Annotate Complex Code:**
+```python
+async def analyze_message(msg: Message):  # (1)!
+    score = score_importance(msg)  # (2)!
+    if score > config.threshold:  # (3)!
+        await emit_signal(msg)
+
+1. Messages from Telegram webhook ingestion
+2. Uses 4-factor algorithm: length, keywords, recency, author
+3. Threshold configurable via ProjectConfig table
+```
+
+**Define Technical Terms with Abbreviations:**
+```markdown
+The system uses RAG to enhance AI context.
+
+*[RAG]: Retrieval-Augmented Generation - AI technique combining search with LLM
+```
+
+**Format Keyboard Shortcuts:**
+```markdown
+Press ++ctrl+k++ to search
+Use ++cmd+shift+p++ for commands
+```
+
+### Visual Design Patterns
+
+**Landing Pages:**
+- Start with overview in tip/info admonition
+- Use grids/cards for feature highlights
+- Add Mermaid diagrams for architecture
+- Include quick navigation links
+
+**Architecture Pages:**
+- Overview diagram (Mermaid)
+- Component descriptions in grid cards
+- Technical details in expandable notes
+- Code examples with annotations
+
+**API Documentation:**
+- Request/response examples in tabs
+- Authentication requirements highlighted
+- Error scenarios in warning admonitions
+- Code examples with line-by-line annotations
+
+### Available Markdown Extensions
+
+**Content Organization:**
+- `pymdownx.tabbed` - Content tabs for alternatives
+- `attr_list` + `md_in_html` - Grids and cards
+- `admonition` + `pymdownx.details` - Callouts and expandable sections
+
+**Code Enhancement:**
+- `pymdownx.highlight` + `pymdownx.inlinehilite` - Code annotations
+- `pymdownx.superfences` - Advanced code blocks with Mermaid
+
+**Typography:**
+- `pymdownx.emoji` - Icons for admonitions
+- `pymdownx.keys` - Keyboard shortcut formatting
+- `pymdownx.mark` - Highlighted text
+- `pymdownx.caret` - Superscript
+- `pymdownx.tilde` - Subscript/strikethrough
+
+**References:**
+- `abbr` - Tooltips for technical terms
+- `footnotes` - Academic-style references
+
+### Documentation Anti-Patterns to Avoid
+
+**Content Issues:**
+- Long walls of text → Split into sections with admonitions
+- Unexplained code → Add annotations for complex logic
+- Missing context → Define terms, link to related docs
+
+**Structural Issues:**
+- Deep nesting → Keep navigation flat (max 3 levels)
+- Duplicate content → Link to canonical source
+- Poor navigation → Use clear names, add breadcrumbs
+
+### When to Use Each Feature
+
+**Content Tabs:** Multi-language examples, platform-specific instructions, alternative approaches
+**Grids/Cards:** Feature overviews, component galleries, navigation pages
+**Admonitions:** Important notes, warnings, tips, expandable technical details
+**Code Annotations:** Complex algorithms, non-obvious logic, configuration details
+**Abbreviations:** Technical acronyms, domain-specific terminology
+**Keyboard Shortcuts:** UI documentation, CLI reference, editor commands
+
+### Search Optimization
+
+Add metadata to important pages:
+```markdown
+---
+search:
+  boost: 2
+---
+
+# Important Page Title
+```
+
+### The /docs Command
+
+Use the `/docs` slash command to create or update user-facing documentation. This command:
+- Creates both English and Ukrainian versions
+- Maintains consistent structure and style
+- Updates navigation automatically
+- Applies MkDocs Material best practices
+- Focuses on user needs, not technical implementation

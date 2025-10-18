@@ -114,14 +114,14 @@ The Messages tab includes powerful filtering capabilities:
 
 ### Core Concepts & Architecture
 
-- **[Concepts Index](./CONCEPTS_INDEX.md)** - Complete system overview and navigation guide
-- **[User Needs](./USER_NEEDS.md)** - Business requirements and user journey (what we're solving)
-- **[Noise Filtering Architecture](./NOISE_FILTERING_ARCHITECTURE.md)** - Technical implementation of information overload solution (status: Phase 2 in progress)
+- **[System Overview](./docs/architecture/OVERVIEW.md)** - Complete system overview and architecture
+- **[User Requirements](./docs/architecture/OVERVIEW.md#user-requirements)** - Business requirements and user journey (what we're solving)
+- **[Noise Filtering Architecture](./docs/architecture/NOISE_FILTERING.md)** - Technical implementation of information overload solution (status: Phase 2 in progress)
 
 ### Technical Documentation
 
-- **[Analysis System Architecture](./ANALYSIS_SYSTEM_ARCHITECTURE.md)** - AI-powered analysis pipeline
-- **[Vector DB Implementation](./VECTOR_DB_IMPLEMENTATION_PLAN.md)** - Semantic search with pgvector
+- **[Analysis System Architecture](./docs/architecture/ANALYSIS_SYSTEM.md)** - AI-powered analysis pipeline
+- **[Vector DB Implementation](./docs/architecture/VECTOR_DATABASE.md)** - Semantic search with pgvector
 - **[Claude AI Guide](./CLAUDE.md)** - Development guidelines, patterns, and API reference
 
 ### API Reference
@@ -139,7 +139,7 @@ POST /api/v1/noise/score/{message_id}
 POST /api/v1/noise/score-batch?limit=100
 ```
 
-See [NOISE_FILTERING_ARCHITECTURE.md](./NOISE_FILTERING_ARCHITECTURE.md#-dashboard-api) for detailed endpoint documentation.
+See [NOISE_FILTERING.md](./docs/architecture/NOISE_FILTERING.md#dashboard-api) for detailed endpoint documentation.
 
 ### Key Innovation: Information Noise Filtering
 
@@ -161,7 +161,7 @@ Layer 1: All Messages (raw + noise)
 - 10x faster insight discovery
 - Focus on trends, not individual messages
 
-See [USER_NEEDS.md](./USER_NEEDS.md) for detailed explanation.
+See [OVERVIEW.md - User Requirements](./docs/architecture/OVERVIEW.md#user-requirements) for detailed explanation.
 
 ---
 
