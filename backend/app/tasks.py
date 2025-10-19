@@ -496,7 +496,7 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
 
         # Load available topics
         logger.info(f"Experiment {experiment_id}: Loading topics")
-        topics_result = await db.execute(select(Topic).order_by(Topic.id))
+        topics_result = await db.execute(select(Topic).order_by(Topic.id))  # type: ignore[arg-type]
         topics = list(topics_result.scalars().all())
 
         if not topics:
@@ -505,7 +505,7 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
         # Retrieve messages with pre-assigned topics
         logger.info(f"Experiment {experiment_id}: Loading messages with topics")
         messages_result = await db.execute(
-            select(Message).where(Message.topic_id.isnot(None)).order_by(func.random()).limit(experiment.message_count)
+            select(Message).where(Message.topic_id.isnot(None)).order_by(func.random()).limit(experiment.message_count)  # type: ignore[arg-type,union-attr]
         )
         messages = list(messages_result.scalars().all())
 
@@ -864,7 +864,7 @@ async def score_unscored_messages_task(limit: int = 100) -> dict[str, int]:
         stmt = (
             select(Message)
             .where(Message.importance_score.is_(None))  # type: ignore[union-attr]
-            .order_by(sql_desc(Message.sent_at))
+            .order_by(sql_desc(Message.sent_at))  # type: ignore[arg-type]
             .limit(limit)
         )
 

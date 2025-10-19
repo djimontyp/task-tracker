@@ -1,9 +1,9 @@
 """Models for message ingestion tracking."""
 
-from datetime import UTC, datetime
+from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Column, DateTime, func
+from sqlalchemy import Column, DateTime
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 

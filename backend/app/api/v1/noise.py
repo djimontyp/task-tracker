@@ -225,7 +225,7 @@ async def score_batch(
     from app.tasks import score_unscored_messages_task
 
     stmt = (
-        select(func.count(Message.id)).where(Message.importance_score.is_(None))  # type: ignore[arg-type]  # type: ignore[union-attr]
+        select(func.count(Message.id)).where(Message.importance_score.is_(None))  # type: ignore[arg-type,union-attr]
     )
 
     result = await session.execute(stmt)
