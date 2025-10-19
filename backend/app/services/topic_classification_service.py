@@ -164,8 +164,10 @@ Provide your reasoning and confidence score. If uncertain, suggest alternative t
             raise ValueError("No topics available in database")
 
         messages_with_topics_count = await self.session.scalar(
-            select(func.count(Message.id)).where(Message.topic_id.isnot(None))
+            select(func.count(Message.id)).where(Message.topic_id.isnot(None))  # type: ignore[union-attr]
         )
+        if messages_with_topics_count is None:
+            messages_with_topics_count = 0
         if messages_with_topics_count < message_count:
             raise ValueError(
                 f"Not enough messages with topics. Requested: {message_count}, Available: {messages_with_topics_count}"
@@ -254,7 +256,7 @@ Provide your reasoning and confidence score. If uncertain, suggest alternative t
 
     async def _fetch_topics_snapshot(self) -> list[Topic]:
         """Fetch all active topics for experiment snapshot."""
-        result = await self.session.execute(select(Topic).order_by(Topic.id))
+        result = await self.session.execute(select(Topic).order_by(Topic.id))  # type: ignore[arg-type]
         return list(result.scalars().all())
 
     def _build_classification_prompt(
