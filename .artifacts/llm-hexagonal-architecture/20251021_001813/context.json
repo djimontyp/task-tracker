@@ -1,0 +1,9 @@
+{
+  "feature_name": "llm-hexagonal-architecture",
+  "timestamp": "20251021_001813",
+  "status": "in_progress",
+  "description": "Refactor LLM integration to Hexagonal Architecture (Ports & Adapters) for framework independence",
+  "agents_executed": [],
+  "created_at": "2025-10-21T00:18:13Z",
+  "working_directory": "/home/maks/projects/task-tracker/backend"
+}
