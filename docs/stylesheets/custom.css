@@ -1,0 +1,15 @@
+/**
+ * Custom styles for Task Tracker documentation
+ */
+
+/* Increase content width for better screen utilization */
+.md-grid {
+  max-width: 1440px;
+}
+
+/* Responsive width adjustment for larger screens */
+@media screen and (min-width: 100em) {
+  .md-grid {
+    max-width: 1600px;
+  }
+}
