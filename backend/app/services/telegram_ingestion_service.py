@@ -26,7 +26,7 @@ class TelegramIngestionService:
     TELEGRAM_API_BASE = "https://api.telegram.org/bot"
 
     def __init__(self, bot_token: str | None = None) -> None:
-        self.bot_token = bot_token or settings.telegram_bot_token
+        self.bot_token = bot_token or settings.telegram.telegram_bot_token
         if not self.bot_token:
             raise ValueError("Telegram bot token is required")
         self.telegram_service = TelegramWebhookService(bot_token=self.bot_token)

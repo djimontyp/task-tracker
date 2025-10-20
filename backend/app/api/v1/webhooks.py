@@ -33,7 +33,7 @@ async def get_webhook_settings(db: DatabaseDep) -> WebhookConfigResponse:
 
     telegram_config = await webhook_settings_service.get_telegram_config(db)
 
-    api_base_url = settings.api_base_url
+    api_base_url = settings.app.api_base_url
     default_protocol = "https" if api_base_url.startswith("https") else "http"
     default_host = api_base_url.replace("http://", "").replace("https://", "").split(":")[0]
 

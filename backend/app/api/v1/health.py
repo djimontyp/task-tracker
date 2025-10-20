@@ -36,5 +36,5 @@ async def get_client_config(settings: SettingsDep) -> ConfigResponse:
 
     Returns properly formatted URLs based on current API base URL setting.
     """
-    base_url = settings.api_base_url.replace("http://", "").replace("https://", "")
+    base_url = settings.app.api_base_url.replace("http://", "").replace("https://", "")
     return ConfigResponse(wsUrl=f"ws://{base_url}/ws", apiBaseUrl=f"http://{base_url}")
