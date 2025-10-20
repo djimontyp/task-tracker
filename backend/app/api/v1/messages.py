@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import and_, func, select
 
 from app.dependencies import DatabaseDep
-from app.models import Message, Source, User
+from app.models import Message, Source, Topic, User
 from app.schemas.messages import (
     MessageCreateRequest,
     MessageFiltersResponse,
@@ -57,6 +57,12 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep) -> dict
     await db.commit()
     await db.refresh(db_message)
 
+    # Fetch topic if assigned
+    topic_name = None
+    if db_message.topic_id:
+        topic = await db.get(Topic, db_message.topic_id)
+        topic_name = topic.name if topic else None
+
     # Build response
     response = MessageResponse(
         id=db_message.id or 0,
@@ -70,6 +76,7 @@ async def create_message(message: MessageCreateRequest, db: DatabaseDep) -> dict
         avatar_url=db_message.avatar_url,
         telegram_profile_id=db_message.telegram_profile_id,
         topic_id=db_message.topic_id,
+        topic_name=topic_name,
         classification=db_message.classification,
         confidence=db_message.confidence,
         analyzed=db_message.analyzed,
@@ -123,7 +130,7 @@ async def get_messages(
     # Build base query with joins
     from sqlalchemy import column, or_
 
-    statement = select(Message, User, Source).join(User).join(Source)
+    statement = select(Message, User, Source, Topic).join(User).join(Source).outerjoin(Topic)
 
     filters = []
 
@@ -199,9 +206,10 @@ async def get_messages(
 
     # Build response
     items = []
-    for msg, user, source_item in messages_data:
+    for msg, user, source_item, topic_item in messages_data:
         # Type assertion: we know source_item is Source from our query
         source_obj = source_item if isinstance(source_item, Source) else Source()
+        topic_obj = topic_item if isinstance(topic_item, Topic) else None
         items.append(
             MessageResponse(
                 id=msg.id or 0,
@@ -215,6 +223,7 @@ async def get_messages(
                 avatar_url=msg.avatar_url,
                 telegram_profile_id=msg.telegram_profile_id,
                 topic_id=msg.topic_id,
+                topic_name=topic_obj.name if topic_obj else None,
                 classification=msg.classification,
                 confidence=msg.confidence,
                 analyzed=msg.analyzed,

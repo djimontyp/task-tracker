@@ -55,6 +55,10 @@ export interface Message {
   // Platform-specific profiles
   telegram_profile_id?: number | null
 
+  // Knowledge extraction fields
+  topic_id?: number | null
+  topic_name?: string | null
+
   // Noise classification fields
   importance_score?: number
   noise_classification?: NoiseClassification
@@ -141,3 +145,25 @@ export interface SidebarCounts {
   unclosed_runs: number
   pending_proposals: number
 }
+
+export interface Topic {
+  id: number
+  name: string
+  description?: string
+  icon?: string
+  color?: string
+  created_at: string
+  updated_at: string
+  message_count?: number
+  atoms_count?: number
+  last_message_at?: string
+}
+
+export interface TopicListResponse {
+  items: Topic[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export type TimePeriod = 'today' | 'yesterday' | 'week' | 'month' | 'custom'

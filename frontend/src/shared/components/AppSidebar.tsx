@@ -23,7 +23,7 @@ import { NotificationBadge } from '@/shared/ui'
 
 const navGroups = [
   {
-    label: 'Workspace',
+    label: 'Data Management',
     items: [
       { path: '/', label: 'Dashboard', icon: Squares2X2Icon },
       { path: '/messages', label: 'Messages', icon: EnvelopeIcon },
@@ -32,7 +32,7 @@ const navGroups = [
     ],
   },
   {
-    label: 'AI Analysis',
+    label: 'AI Operations',
     items: [
       { path: '/analysis', label: 'Analysis Runs', icon: LightBulbIcon },
       { path: '/proposals', label: 'Task Proposals', icon: ClipboardDocumentListIcon },
@@ -40,16 +40,16 @@ const navGroups = [
     ],
   },
   {
-    label: 'AI Configuration',
+    label: 'AI Setup',
     items: [
       { path: '/agents', label: 'Agents', icon: CpuChipIcon },
-      { path: '/agent-tasks', label: 'Agent Tasks', icon: ListBulletIcon },
+      { path: '/agent-tasks', label: 'Task Templates', icon: ListBulletIcon },
       { path: '/providers', label: 'Providers', icon: ServerIcon },
       { path: '/projects', label: 'Projects', icon: FolderIcon },
     ],
   },
   {
-    label: 'Insights',
+    label: 'Analytics & Reports',
     items: [
       { path: '/analytics', label: 'Analytics', icon: ChartBarIcon },
     ],

@@ -109,6 +109,8 @@ from .telegram_profile import TelegramProfile
 from .topic import (
     ICON_COLORS,
     TOPIC_ICONS,
+    RecentTopicItem,
+    RecentTopicsResponse,
     Topic,
     TopicCreate,
     TopicListResponse,
@@ -222,6 +224,8 @@ __all__ = [
     "TopicUpdate",
     "TopicPublic",
     "TopicListResponse",
+    "RecentTopicItem",
+    "RecentTopicsResponse",
     "TOPIC_ICONS",
     "ICON_COLORS",
     "auto_select_icon",

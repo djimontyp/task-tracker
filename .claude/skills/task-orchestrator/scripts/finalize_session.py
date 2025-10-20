@@ -216,7 +216,7 @@ def finalize_session(
         else:
             print("\n⏭️  Skipping cleanup")
             print(f"💡 You can run cleanup later with:")
-            print(f"   python {Path(__file__).parent / 'cleanup_artifacts.py'} --interactive")
+            print(f"   uv run python {Path(__file__).parent / 'cleanup_artifacts.py'} --interactive")
 
     print("\n" + "="*60)
     print("🎉 Session Finalized Successfully")

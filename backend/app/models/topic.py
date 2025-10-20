@@ -303,3 +303,23 @@ class TopicListResponse(SQLModel):
     total: int
     page: int
     page_size: int
+
+
+class RecentTopicItem(SQLModel):
+    """Schema for a recent topic with activity metrics."""
+
+    id: int
+    name: str
+    description: str
+    icon: str | None
+    color: str | None
+    last_message_at: str
+    message_count: int
+    atoms_count: int
+
+
+class RecentTopicsResponse(SQLModel):
+    """Response schema for recent topics endpoint."""
+
+    items: list[RecentTopicItem]
+    total: int

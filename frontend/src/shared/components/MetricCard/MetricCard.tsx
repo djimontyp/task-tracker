@@ -13,10 +13,12 @@ export interface MetricCardProps extends React.HTMLAttributes<HTMLDivElement> {
   }
   icon?: React.ComponentType<{ className?: string }>
   iconColor?: string
+  loading?: boolean
+  emptyMessage?: string
 }
 
 const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
-  ({ title, value, subtitle, trend, icon: Icon, iconColor, className, onClick, ...props }, ref) => {
+  ({ title, value, subtitle, trend, icon: Icon, iconColor, className, onClick, loading = false, emptyMessage, ...props }, ref) => {
     const getTrendIcon = () => {
       if (!trend) return null
       switch (trend.direction) {
@@ -82,30 +84,45 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
       }
     }, [onClick])
 
+    if (loading) {
+      return (
+        <Card ref={ref} className={cn('min-h-[7rem] sm:min-h-[8rem] animate-pulse', className)} {...props}>
+          <CardContent className="p-4 sm:p-6">
+            <div className="h-24 bg-muted/30 rounded" />
+          </CardContent>
+        </Card>
+      )
+    }
+
+    const isZeroValue = value === 0 || value === '0'
+    const displaySubtitle = isZeroValue && emptyMessage ? emptyMessage : subtitle
+    const shouldShowTrend = trend && !isZeroValue
+
     return (
       <Card
         ref={ref}
         className={cn(
-          'ripple-container click-feedback cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[7rem] sm:min-h-[8rem]',
+          'transition-all duration-300 min-h-[7rem] sm:min-h-[8rem]',
+          onClick && 'ripple-container click-feedback cursor-pointer hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           className
         )}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-        role="button"
+        onClick={onClick ? handleClick : undefined}
+        onKeyDown={onClick ? handleKeyDown : undefined}
+        tabIndex={onClick ? 0 : undefined}
+        role={onClick ? 'button' : undefined}
         aria-label={`${title}: ${value}`}
         {...props}
       >
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
+              {Icon && <Icon className={cn('w-4 h-4', iconColor || 'text-muted-foreground')} />}
               <p className="text-sm font-medium text-muted-foreground">{title}</p>
             </div>
 
             <p className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl 3xl:text-5xl font-bold text-foreground">{value}</p>
 
-            {trend && (
+            {shouldShowTrend && (
               <div
                 className={cn('flex items-center gap-1 text-sm font-medium', getTrendColor())}
                 aria-label={`${trend.direction === 'up' ? 'Increased' : trend.direction === 'down' ? 'Decreased' : 'No change'} by ${Math.abs(trend.value)} percent`}
@@ -115,8 +132,10 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
               </div>
             )}
 
-            {subtitle && (
-              <p className="text-sm text-muted-foreground">{subtitle}</p>
+            {displaySubtitle && (
+              <p className={cn('text-sm', isZeroValue && emptyMessage ? 'text-muted-foreground/80 italic' : 'text-muted-foreground')}>
+                {displaySubtitle}
+              </p>
             )}
           </div>
         </CardContent>

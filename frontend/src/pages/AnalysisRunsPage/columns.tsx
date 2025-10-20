@@ -7,13 +7,13 @@ import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader
 import type { AnalysisRun, AnalysisRunStatus, AnalysisRunTriggerType } from '@/features/analysis/types'
 
 export const statusConfig: Record<AnalysisRunStatus, { label: string; icon: React.ComponentType<{ className?: string }>; className: string }> = {
-  pending: { label: 'Pending', icon: ClockIcon, className: 'bg-slate-500 text-white' },
-  running: { label: 'Running', icon: PlayCircleIcon, className: 'bg-blue-500 text-white' },
-  completed: { label: 'Waiting Review', icon: ExclamationCircleIcon, className: 'bg-amber-500 text-white' },
-  reviewed: { label: 'Reviewed', icon: CheckCircleIcon, className: 'bg-emerald-500 text-white' },
-  closed: { label: 'Closed', icon: CheckCircleIcon, className: 'bg-emerald-700 text-white' },
-  failed: { label: 'Failed', icon: XCircleIcon, className: 'bg-rose-500 text-white' },
-  cancelled: { label: 'Cancelled', icon: XCircleIcon, className: 'bg-slate-400 text-white' },
+  pending: { label: 'Pending', icon: ClockIcon, className: 'badge-neutral' },
+  running: { label: 'Running', icon: PlayCircleIcon, className: 'badge-info' },
+  completed: { label: 'Waiting Review', icon: ExclamationCircleIcon, className: 'badge-warning' },
+  reviewed: { label: 'Reviewed', icon: CheckCircleIcon, className: 'badge-success' },
+  closed: { label: 'Closed', icon: CheckCircleIcon, className: 'badge-complete' },
+  failed: { label: 'Failed', icon: XCircleIcon, className: 'badge-error' },
+  cancelled: { label: 'Cancelled', icon: XCircleIcon, className: 'badge-neutral' },
 }
 
 export const triggerTypeLabels: Record<AnalysisRunTriggerType, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -77,7 +77,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<AnalysisR
       const Icon = config?.icon
 
       return (
-        <Badge className={config?.className || 'bg-slate-500 text-white'}>
+        <Badge variant="outline" className={config?.className || 'badge-neutral'}>
           {Icon && <Icon className="mr-1 h-3 w-3" />}
           {config?.label || status}
         </Badge>

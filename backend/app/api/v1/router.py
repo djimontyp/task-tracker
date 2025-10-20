@@ -10,6 +10,7 @@ from . import (
     experiments,
     health,
     ingestion,
+    knowledge,
     messages,
     noise,
     projects,
@@ -49,3 +50,4 @@ api_router.include_router(experiments.router)
 api_router.include_router(embeddings.router)
 api_router.include_router(semantic_search.router)
 api_router.include_router(noise.router)
+api_router.include_router(knowledge.router, prefix="/knowledge", tags=["knowledge"])

@@ -12,23 +12,23 @@ const ValidationStatus = ({ status, error }: ValidationStatusProps) => {
       case Status.CONNECTED:
         return {
           text: 'Connected',
-          className: 'bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20',
+          className: 'badge-success',
         }
       case Status.ERROR:
         return {
           text: 'Error',
-          className: 'bg-red-500/10 text-red-700 border-red-500/20 hover:bg-red-500/20',
+          className: 'badge-error',
         }
       case Status.VALIDATING:
         return {
           text: 'Validating...',
-          className: 'bg-blue-500/10 text-blue-700 border-blue-500/20 hover:bg-blue-500/20',
+          className: 'badge-info',
         }
       case Status.PENDING:
       default:
         return {
           text: 'Pending',
-          className: 'bg-gray-500/10 text-gray-700 border-gray-500/20 hover:bg-gray-500/20',
+          className: 'badge-warning',
         }
     }
   }
@@ -36,7 +36,7 @@ const ValidationStatus = ({ status, error }: ValidationStatusProps) => {
   const config = getStatusConfig()
 
   return (
-    <Badge className={config.className} title={error}>
+    <Badge variant="outline" className={config.className} title={error}>
       {config.text}
     </Badge>
   )
