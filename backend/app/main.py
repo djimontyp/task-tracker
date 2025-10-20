@@ -5,6 +5,8 @@ from core.taskiq_config import nats_broker
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.llm.startup import initialize_llm_system
+
 from .api.v1.router import api_router
 from .database import create_db_and_tables
 from .webhooks.router import webhook_router
@@ -68,8 +70,8 @@ tags_metadata = [
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title=f"{settings.app_name} API",
-        description=settings.app_description,
+        title=f"{settings.app.app_name} API",
+        description=settings.app.app_description,
         version="1.0.0",
         openapi_tags=tags_metadata,
     )
@@ -92,7 +94,7 @@ def create_app() -> FastAPI:
 
     @app.get("/")
     async def root() -> dict[str, str]:
-        return {"message": f"{settings.app_name} API", "status": "running"}
+        return {"message": f"{settings.app.app_name} API", "status": "running"}
 
     @app.get("/api/health")
     async def legacy_health_check() -> dict[str, str]:
@@ -122,7 +124,8 @@ app = create_app()
 
 @app.on_event("startup")
 async def startup() -> None:
-    """Initialize database and TaskIQ broker on startup"""
+    """Initialize database, LLM system, and TaskIQ broker on startup"""
+    initialize_llm_system()
     await create_db_and_tables()
     if not nats_broker.is_worker_process:
         await nats_broker.startup()

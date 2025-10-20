@@ -109,4 +109,4 @@ async def client(db_session):
         yield ac
 
 
-pytest_plugins = ["tests.fixtures.analysis_fixtures"]
+pytest_plugins = ["tests.fixtures.analysis_fixtures", "tests.fixtures.llm_fixtures"]

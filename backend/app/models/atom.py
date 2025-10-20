@@ -77,7 +77,7 @@ class Atom(IDMixin, TimestampMixin, SQLModel, table=True):
     embedding: list[float] | None = Field(
         default=None,
         sa_column=Column(Vector(1536)),
-        description="Vector embedding for semantic search (must match settings.openai_embedding_dimensions)",
+        description="Vector embedding for semantic search (must match settings.embedding.openai_embedding_dimensions)",
     )
 
     @field_validator("type", mode="before")
