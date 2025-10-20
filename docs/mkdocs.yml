@@ -52,6 +52,7 @@ nav:
   - Architecture:
     - Overview: architecture/overview.md
     - System Diagrams: architecture/diagrams.md
+    - LLM Architecture: architecture/llm-architecture.md
     - Noise Filtering: architecture/noise-filtering.md
     - Analysis System: architecture/analysis-system.md
     - Knowledge Extraction: architecture/knowledge-extraction.md
@@ -82,6 +83,7 @@ plugins:
             Architecture: Architecture
             Overview: Overview
             System Diagrams: System Diagrams
+            LLM Architecture: LLM Architecture
             Noise Filtering: Noise Filtering
             Analysis System: Analysis System
             Vector Database: Vector Database
@@ -99,6 +101,7 @@ plugins:
             Architecture: Архітектура
             Overview: Огляд
             System Diagrams: Діаграми системи
+            LLM Architecture: Архітектура LLM
             Noise Filtering: Фільтрація шуму
             Analysis System: Система аналізу
             Vector Database: Векторна база даних
