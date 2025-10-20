@@ -17,17 +17,17 @@ interface ProposalCardProps {
 }
 
 const priorityConfig: Record<string, { label: string; className: string }> = {
-  low: { label: 'Low', className: 'bg-slate-500 text-white' },
-  medium: { label: 'Medium', className: 'bg-blue-500 text-white' },
-  high: { label: 'High', className: 'bg-orange-500 text-white' },
-  critical: { label: 'Critical', className: 'bg-rose-600 text-white' },
+  low: { label: 'Low', className: 'badge-neutral' },
+  medium: { label: 'Medium', className: 'badge-info' },
+  high: { label: 'High', className: 'badge-critical' },
+  critical: { label: 'Critical', className: 'badge-error' },
 }
 
 const statusConfig = {
-  pending: { label: 'Pending', className: 'bg-amber-500 text-white' },
-  approved: { label: 'Approved', className: 'bg-emerald-500 text-white' },
-  rejected: { label: 'Rejected', className: 'bg-rose-500 text-white' },
-  merged: { label: 'Merged', className: 'bg-purple-500 text-white' },
+  pending: { label: 'Pending', className: 'badge-warning' },
+  approved: { label: 'Approved', className: 'badge-success' },
+  rejected: { label: 'Rejected', className: 'badge-error' },
+  merged: { label: 'Merged', className: 'badge-purple' },
 }
 
 export const ProposalCard: React.FC<ProposalCardProps> = ({
@@ -42,17 +42,17 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
 
   const getConfidenceBadge = (confidence: number) => {
     if (confidence < 0.7) {
-      return <Badge className="bg-rose-500 text-white">Low {(confidence * 100).toFixed(0)}%</Badge>
+      return <Badge variant="outline" className="badge-error">Low {(confidence * 100).toFixed(0)}%</Badge>
     }
     if (confidence < 0.9) {
-      return <Badge className="bg-amber-500 text-white">Medium {(confidence * 100).toFixed(0)}%</Badge>
+      return <Badge variant="outline" className="badge-warning">Medium {(confidence * 100).toFixed(0)}%</Badge>
     }
-    return <Badge className="bg-emerald-500 text-white">High {(confidence * 100).toFixed(0)}%</Badge>
+    return <Badge variant="outline" className="badge-success">High {(confidence * 100).toFixed(0)}%</Badge>
   }
 
   const priorityCfg = priorityConfig[proposal.proposed_priority] ?? {
     label: proposal.proposed_priority,
-    className: 'bg-slate-500 text-white',
+    className: 'badge-neutral',
   }
   const statusCfg = statusConfig[proposal.status]
 
@@ -63,11 +63,11 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <Badge className={statusCfg.className}>{statusCfg.label}</Badge>
-              <Badge className={priorityCfg.className}>{priorityCfg.label}</Badge>
+              <Badge variant="outline" className={statusCfg.className}>{statusCfg.label}</Badge>
+              <Badge variant="outline" className={priorityCfg.className}>{priorityCfg.label}</Badge>
               {getConfidenceBadge(proposal.confidence)}
               {proposal.similar_task_id && (
-                <Badge className="bg-yellow-500 text-white flex items-center gap-1">
+                <Badge variant="outline" className="badge-warning flex items-center gap-1">
                   <ExclamationTriangleIcon className="h-3 w-3" />
                   Similar Task
                 </Badge>

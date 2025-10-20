@@ -29,9 +29,9 @@ export const classificationLabels: Record<NoiseClassification, { label: string; 
 }
 
 const getImportanceColor = (score: number): string => {
-  if (score < 0.3) return 'text-red-600 bg-red-50 border-red-200'
-  if (score < 0.7) return 'text-yellow-600 bg-yellow-50 border-yellow-200'
-  return 'text-green-600 bg-green-50 border-green-200'
+  if (score < 0.3) return 'badge-error'
+  if (score < 0.7) return 'badge-warning'
+  return 'badge-success'
 }
 
 const getClassification = (score: number): NoiseClassification => {
@@ -159,12 +159,12 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs font-medium ${colorClass}`}>
+              <Badge variant="outline" className={`inline-flex items-center gap-1 ${colorClass}`}>
                 {percentage}%
                 {row.original.noise_factors && (
                   <InformationCircleIcon className="h-3 w-3" />
                 )}
-              </div>
+              </Badge>
             </TooltipTrigger>
             {row.original.noise_factors && (
               <TooltipContent>
@@ -207,6 +207,17 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       const classification = row.original.noise_classification ?? (score !== undefined ? getClassification(score) : null)
       if (!classification) return false
       return filterValues.includes(classification)
+    },
+  },
+  {
+    accessorKey: 'topic_name',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Topic" />
+    ),
+    cell: ({ row }) => {
+      const topicName = row.getValue<string | null>('topic_name')
+      if (!topicName) return <div className="text-muted-foreground text-xs">-</div>
+      return <Badge variant="outline">{topicName}</Badge>
     },
   },
   {

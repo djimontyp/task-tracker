@@ -4,6 +4,8 @@ Provides endpoints for managing topics including CRUD operations and icon listin
 """
 
 import logging
+from datetime import datetime
+from enum import Enum
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel import select
@@ -12,6 +14,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session
 from app.models import (
     TOPIC_ICONS,
+    RecentTopicsResponse,
     Topic,
     TopicCreate,
     TopicListResponse,
@@ -26,6 +29,15 @@ from app.services import AtomCRUD, MessageCRUD, TopicCRUD
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/topics", tags=["topics"])
+
+
+class TimePeriod(str, Enum):
+    """Time period filter for recent topics."""
+
+    today = "today"
+    yesterday = "yesterday"
+    week = "week"
+    month = "month"
 
 
 @router.get(
@@ -79,6 +91,46 @@ async def list_available_icons() -> dict[str, list[str]]:
     """
     unique_icons = sorted(set(TOPIC_ICONS.values()))
     return {"icons": unique_icons}
+
+
+@router.get(
+    "/recent",
+    response_model=RecentTopicsResponse,
+    summary="Get recent topics",
+    description="Retrieve topics ordered by last message activity with filtering by time period.",
+)
+async def get_recent_topics(
+    period: TimePeriod | None = Query(None, description="Time period filter (today, yesterday, week, month)"),
+    start_date: datetime | None = Query(None, description="Custom start date for filtering (ISO 8601)"),
+    end_date: datetime | None = Query(None, description="Custom end date for filtering (ISO 8601)"),
+    limit: int = Query(10, ge=1, le=100, description="Maximum number of topics to return"),
+    session: AsyncSession = Depends(get_session),
+) -> RecentTopicsResponse:
+    """Get recent topics ordered by last message timestamp.
+
+    Filters topics by message activity within specified time period or custom date range.
+    Returns topics with message count, atoms count, and last message timestamp.
+
+    Args:
+        period: Predefined time period (today, yesterday, week, month)
+        start_date: Custom start date (used if period not specified)
+        end_date: Custom end date (used if period not specified)
+        limit: Maximum number of topics to return
+        session: Database session
+
+    Returns:
+        List of recent topics with activity metrics
+
+    Raises:
+        HTTPException: 400 if both period and custom dates are provided
+    """
+    crud = TopicCRUD(session)
+    return await crud.get_recent_topics(
+        period=period,
+        start_date=start_date,
+        end_date=end_date,
+        limit=limit,
+    )
 
 
 @router.get(

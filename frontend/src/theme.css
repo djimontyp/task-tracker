@@ -10,15 +10,15 @@
 
   /* Map Tailwind HSL tokens to legacy CSS vars */
   --bg-primary: hsl(var(--background));
-  --bg-secondary: color-mix(in srgb, hsl(var(--background)) 92%, hsl(var(--foreground)) 8%);
-  --bg-tertiary: color-mix(in srgb, hsl(var(--background)) 85%, hsl(var(--foreground)) 15%);
+  --bg-secondary: color-mix(in srgb, hsl(var(--background)) 85%, hsl(var(--foreground)) 15%);
+  --bg-tertiary: color-mix(in srgb, hsl(var(--background)) 75%, hsl(var(--foreground)) 25%);
   --bg-card: hsl(var(--card));
   --bg-elevated: color-mix(in srgb, hsl(var(--card)) 88%, black 12%);
 
   --text-primary: hsl(var(--foreground));
-  --text-secondary: color-mix(in srgb, hsl(var(--foreground)) 70%, hsl(var(--background)) 30%);
-  --text-tertiary: color-mix(in srgb, hsl(var(--foreground)) 55%, hsl(var(--background)) 45%);
-  --text-muted: color-mix(in srgb, hsl(var(--foreground)) 40%, hsl(var(--background)) 60%);
+  --text-secondary: color-mix(in srgb, hsl(var(--foreground)) 85%, hsl(var(--background)) 15%);
+  --text-tertiary: color-mix(in srgb, hsl(var(--foreground)) 75%, hsl(var(--background)) 25%);
+  --text-muted: color-mix(in srgb, hsl(var(--foreground)) 65%, hsl(var(--background)) 35%);
 
   --border-primary: hsl(var(--border));
   --border-secondary: color-mix(in srgb, hsl(var(--border)) 70%, hsl(var(--foreground)) 30%);
@@ -61,6 +61,12 @@
   --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Accessibility */
+  --touch-target-min: 44px;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 4px;
+  --focus-ring-color: hsl(var(--ring));
 }
 
 [data-theme='dark'] {
@@ -71,9 +77,9 @@
   --bg-elevated: color-mix(in srgb, hsl(var(--card)) 92%, white 8%);
 
   --text-primary: hsl(var(--foreground));
-  --text-secondary: color-mix(in srgb, hsl(var(--foreground)) 72%, hsl(var(--background)) 28%);
-  --text-tertiary: color-mix(in srgb, hsl(var(--foreground)) 55%, hsl(var(--background)) 45%);
-  --text-muted: color-mix(in srgb, hsl(var(--foreground)) 38%, hsl(var(--background)) 62%);
+  --text-secondary: color-mix(in srgb, hsl(var(--foreground)) 78%, hsl(var(--background)) 22%);
+  --text-tertiary: color-mix(in srgb, hsl(var(--foreground)) 62%, hsl(var(--background)) 38%);
+  --text-muted: color-mix(in srgb, hsl(var(--foreground)) 48%, hsl(var(--background)) 52%);
 
   --border-primary: hsl(var(--border));
   --border-secondary: color-mix(in srgb, hsl(var(--border)) 65%, hsl(var(--foreground)) 35%);
@@ -248,10 +254,44 @@ body {
 .transition-normal { transition: var(--transition-normal); }
 .transition-slow { transition: var(--transition-slow); }
 
-/* Focus styles */
+/* Focus styles - WCAG 2.1 AA compliant */
 .focus-ring:focus {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
+}
+
+.focus-visible-ring:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* Minimum touch target for mobile accessibility */
+.touch-target {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+}
+
+/* Button typography utilities */
+.typography-button-lg {
+  font-size: 1rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.5;
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.typography-button-md {
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.43;
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.typography-button-sm {
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 /* Animation keyframes */

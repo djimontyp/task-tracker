@@ -15,13 +15,13 @@ interface RunCardProps {
 }
 
 const statusConfig: Record<string, { label: string; icon: React.ElementType; className: string }> = {
-  pending: { label: 'Pending', icon: ClockIcon, className: 'bg-slate-500 text-white' },
-  running: { label: 'Running', icon: PlayCircleIcon, className: 'bg-blue-500 text-white' },
-  completed: { label: 'Waiting Review', icon: ExclamationCircleIcon, className: 'bg-amber-500 text-white' },
-  reviewed: { label: 'Reviewed', icon: CheckCircleIcon, className: 'bg-emerald-500 text-white' },
-  closed: { label: 'Closed', icon: CheckCircleIcon, className: 'bg-emerald-700 text-white' },
-  failed: { label: 'Failed', icon: XCircleIcon, className: 'bg-rose-500 text-white' },
-  cancelled: { label: 'Cancelled', icon: XCircleIcon, className: 'bg-slate-400 text-white' },
+  pending: { label: 'Pending', icon: ClockIcon, className: 'badge-neutral' },
+  running: { label: 'Running', icon: PlayCircleIcon, className: 'badge-info' },
+  completed: { label: 'Waiting Review', icon: ExclamationCircleIcon, className: 'badge-warning' },
+  reviewed: { label: 'Reviewed', icon: CheckCircleIcon, className: 'badge-success' },
+  closed: { label: 'Closed', icon: CheckCircleIcon, className: 'badge-complete' },
+  failed: { label: 'Failed', icon: XCircleIcon, className: 'badge-error' },
+  cancelled: { label: 'Cancelled', icon: XCircleIcon, className: 'badge-neutral' },
 }
 
 export const RunCard: React.FC<RunCardProps> = ({ run, onClose, onStart }) => {
@@ -32,7 +32,7 @@ export const RunCard: React.FC<RunCardProps> = ({ run, onClose, onStart }) => {
     <Card className="p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Badge className={statusCfg?.className || 'bg-slate-500 text-white'}>
+          <Badge variant="outline" className={statusCfg?.className || 'badge-neutral'}>
             {Icon && <Icon className="mr-1 h-3 w-3" />}
             {statusCfg?.label || run.status}
           </Badge>

@@ -8,13 +8,13 @@ interface AtomCardProps {
 }
 
 const atomTypeColors: Record<AtomType, string> = {
-  problem: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-  solution: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-  decision: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-  question: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-  insight: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-  pattern: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
-  requirement: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+  problem: 'badge-error',
+  solution: 'badge-success',
+  decision: 'badge-info',
+  question: 'badge-warning',
+  insight: 'badge-purple',
+  pattern: 'badge-purple',
+  requirement: 'badge-info',
 }
 
 const atomTypeLabels: Record<AtomType, string> = {

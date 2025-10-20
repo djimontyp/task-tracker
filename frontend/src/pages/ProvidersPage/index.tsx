@@ -213,7 +213,7 @@ const ProvidersPage = () => {
 
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Active:</span>
-                      <Badge variant={provider.is_active ? 'default' : 'secondary'}>
+                      <Badge variant="outline" className={provider.is_active ? 'badge-success' : 'badge-neutral'}>
                         {provider.is_active ? 'Yes' : 'No'}
                       </Badge>
                     </div>

@@ -46,13 +46,18 @@ nav:
   - User Guide:
     - Home: index.md
     - Context Spaces (Topics): topics.md
+    - Knowledge Extraction: knowledge-extraction.md
     - Event Flow & Sequencing: event-flow.md
     - Auto-Save Feature: auto-save.md
   - Architecture:
     - Overview: architecture/overview.md
+    - System Diagrams: architecture/diagrams.md
     - Noise Filtering: architecture/noise-filtering.md
     - Analysis System: architecture/analysis-system.md
+    - Knowledge Extraction: architecture/knowledge-extraction.md
     - Vector Database: architecture/vector-database.md
+  - API Reference:
+    - Knowledge Extraction: api/knowledge.md
 
 plugins:
   - search:
@@ -71,13 +76,16 @@ plugins:
             User Guide: User Guide
             Home: Home
             Context Spaces (Topics): Context Spaces (Topics)
+            Knowledge Extraction: Knowledge Extraction
             Event Flow & Sequencing: Event Flow & Sequencing
             Auto-Save Feature: Auto-Save Feature
             Architecture: Architecture
             Overview: Overview
+            System Diagrams: System Diagrams
             Noise Filtering: Noise Filtering
             Analysis System: Analysis System
             Vector Database: Vector Database
+            API Reference: API Reference
         - locale: uk
           name: Українська
           site_name: Документація Task Tracker
@@ -85,13 +93,16 @@ plugins:
             User Guide: Посібник користувача
             Home: Головна
             Context Spaces (Topics): Контекстні простори (Топіки)
+            Knowledge Extraction: Витягування знань
             Event Flow & Sequencing: Потік подій та послідовність
             Auto-Save Feature: Функція автозбереження
             Architecture: Архітектура
             Overview: Огляд
+            System Diagrams: Діаграми системи
             Noise Filtering: Фільтрація шуму
             Analysis System: Система аналізу
             Vector Database: Векторна база даних
+            API Reference: Довідник API
 
 markdown_extensions:
   # Python Markdown

@@ -34,6 +34,7 @@ class MessageResponse(BaseModel):
 
     telegram_profile_id: int | None = None
     topic_id: int | None = None
+    topic_name: str | None = None  # Joined from Topic
 
     classification: str | None = None
     confidence: float | None = None

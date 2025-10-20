@@ -1,27 +1,28 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { ListBulletIcon, ClockIcon, ArrowPathIcon, CheckCircleIcon, WifiIcon, CpuChipIcon, DocumentCheckIcon } from '@heroicons/react/24/outline'
 import { SignalSlashIcon } from '@heroicons/react/24/outline'
+import { OnboardingWizard } from '@/features/onboarding'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Badge, Skeleton } from '@/shared/ui'
 import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar'
-import { AvatarGroup } from '@/shared/components/AvatarGroup'
 import { TelegramIcon } from '@/shared/components/TelegramIcon'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
-import { Task, TaskStats, SidebarCounts } from '@/shared/types'
+import { TaskStats, SidebarCounts } from '@/shared/types'
 import MetricCard from '@/shared/components/MetricCard'
 import ActivityHeatmap from '@/shared/components/ActivityHeatmap'
 import { useTasksStore } from '@/features/tasks/store/tasksStore'
 import { useMessagesFeed } from '@/features/messages/hooks/useMessagesFeed'
 import { MessagesErrorBoundary } from '@/features/messages/components'
 import { formatMessageDate } from '@/shared/utils/date'
-import { generateTaskAvatars } from '@/shared/utils/avatars'
+import { RecentTopics } from './RecentTopics'
 
 const DashboardPage = () => {
   const navigate = useNavigate()
   const { setFilterStatus } = useTasksStore()
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   const { data: stats, isLoading: statsLoading } = useQuery<TaskStats>({
     queryKey: ['stats'],
@@ -49,14 +50,6 @@ const DashboardPage = () => {
   const recentMessages = useMemo(() => {
     return messages.slice(0, 5)
   }, [messages])
-
-  const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
-    queryKey: ['tasks'],
-    queryFn: async () => {
-      const response = await apiClient.get(API_ENDPOINTS.tasks)
-      return response.data
-    },
-  })
 
   const metrics = useMemo(() => {
     if (!stats) return null
@@ -102,8 +95,21 @@ const DashboardPage = () => {
     }
   }, [stats])
 
+  useEffect(() => {
+    const hasCompletedOnboarding = localStorage.getItem('onboarding_completed')
+    const hasSkippedOnboarding = localStorage.getItem('onboarding_skipped')
+
+    if (!hasCompletedOnboarding && !hasSkippedOnboarding && !statsLoading && stats) {
+      const hasNoData = stats.total_tasks === 0 && messages.length === 0
+      if (hasNoData) {
+        setShowOnboarding(true)
+      }
+    }
+  }, [statsLoading, stats, messages.length])
+
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
+      <OnboardingWizard open={showOnboarding} onClose={() => setShowOnboarding(false)} />
 
       {/* Metric Cards */}
       <div
@@ -135,6 +141,7 @@ const DashboardPage = () => {
               icon={ListBulletIcon}
               iconColor="text-primary"
               onClick={() => handleMetricClick('all')}
+              emptyMessage="Import messages to start tracking"
             />
             <MetricCard
               title="Open Tasks"
@@ -183,9 +190,14 @@ const DashboardPage = () => {
         )}
       </div>
 
-      {/* Recent Activities */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 3xl:gap-8 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
-        {/* Recent Messages */}
+      {/* Recent Topics and Messages */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 3xl:gap-8 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+        {/* Recent Topics - 2/3 width on large screens */}
+        <div className="lg:col-span-2">
+          <RecentTopics />
+        </div>
+
+        {/* Recent Messages - 1/3 width on large screens */}
         <MessagesErrorBoundary>
           <Card>
           <CardHeader>
@@ -225,11 +237,9 @@ const DashboardPage = () => {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
-                        // Handle message click if needed
                       }
                     }}
                   >
-                    {/* Avatar with Telegram Badge */}
                     <div className="relative shrink-0">
                       <Avatar className="h-10 w-10 border border-border/80 shadow-sm ring-1 ring-black/5">
                         {message.avatar_url ? (
@@ -239,7 +249,6 @@ const DashboardPage = () => {
                           {message.author_name?.charAt(0).toUpperCase() || '?'}
                         </AvatarFallback>
                       </Avatar>
-                      {/* Telegram Badge - positioned bottom-right */}
                       <div className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-[#0088cc] flex items-center justify-center shadow-md ring-2 ring-background">
                         <TelegramIcon size={14} className="text-white drop-shadow-sm" />
                       </div>
@@ -278,69 +287,6 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
         </MessagesErrorBoundary>
-
-        {/* Recent Tasks */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Tasks</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3" role="feed" aria-label="Recent tasks feed" aria-busy={tasksLoading}>
-              {tasksLoading ? (
-                <>
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="flex items-start gap-3 py-2 border-b last:border-b-0">
-                      <div className="flex-1 space-y-1.5">
-                        <div className="flex flex-col">
-                          <Skeleton className="h-4 w-2/3" />
-                        </div>
-                      </div>
-                      <Skeleton className="h-10 w-10 rounded-full shrink-0" />
-                      <Skeleton className="h-3 w-12" />
-                    </div>
-                  ))}
-                </>
-              ) : tasks && tasks.length > 0 ? (
-                tasks.slice(0, 5).map((task) => (
-                  <div
-                    key={task.id}
-                    className="group flex items-start gap-3 py-2 border-b last:border-b-0 rounded-md cursor-pointer transition-all duration-200 hover:bg-accent/50 -mx-2 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`Task: ${task.title}, Status: ${task.status}`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        // Handle task click if needed - could navigate to task details
-                      }
-                    }}
-                  >
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-foreground truncate">
-                          {task.title}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {/* Right-aligned Avatar Group */}
-                    <div className="relative shrink-0">
-                      <AvatarGroup avatars={generateTaskAvatars(task.id)} size="lg" max={3} />
-                    </div>
-
-                    <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                      {formatMessageDate(task.created_at || task.createdAt)}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">No tasks yet</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Activity Heatmap */}

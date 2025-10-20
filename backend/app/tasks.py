@@ -12,6 +12,78 @@ from .services.user_service import get_or_create_source, identify_or_create_user
 from .services.websocket_manager import websocket_manager
 from .webhook_service import telegram_webhook_service
 
+KNOWLEDGE_EXTRACTION_THRESHOLD = 10
+KNOWLEDGE_EXTRACTION_LOOKBACK_HOURS = 24
+
+
+async def queue_knowledge_extraction_if_needed(message_id: int, db: Any) -> None:
+    """Queue knowledge extraction task if unprocessed message threshold is reached.
+
+    Checks if there are enough recent unprocessed messages to trigger automatic
+    knowledge extraction. When threshold is reached, queues background task with
+    active LLM provider.
+
+    Args:
+        message_id: ID of newly created message
+        db: Database session
+
+    Logic:
+        - Count messages without topic_id in last 24 hours
+        - If count >= KNOWLEDGE_EXTRACTION_THRESHOLD, trigger extraction
+        - Use first active LLM provider found
+        - Process all unprocessed messages in batch
+    """
+    from datetime import datetime, timedelta
+
+    from sqlalchemy import func, select
+
+    from .models import AgentConfig
+
+    cutoff_time = datetime.utcnow() - timedelta(hours=KNOWLEDGE_EXTRACTION_LOOKBACK_HOURS)
+
+    count_stmt = (
+        select(func.count()).select_from(Message).where(Message.topic_id.is_(None), Message.sent_at >= cutoff_time)  # type: ignore[union-attr]
+    )
+    result = await db.execute(count_stmt)
+    unprocessed_count = result.scalar() or 0
+
+    logger.debug(
+        f"Knowledge extraction check: {unprocessed_count} unprocessed messages in last "
+        f"{KNOWLEDGE_EXTRACTION_LOOKBACK_HOURS}h (threshold: {KNOWLEDGE_EXTRACTION_THRESHOLD})"
+    )
+
+    if unprocessed_count < KNOWLEDGE_EXTRACTION_THRESHOLD:
+        return
+
+    agent_config_stmt = (
+        select(AgentConfig).where(AgentConfig.is_active == True, AgentConfig.name == "knowledge_extractor").limit(1)  # noqa: E712
+    )
+    agent_config_result = await db.execute(agent_config_stmt)
+    agent_config = agent_config_result.scalar_one_or_none()
+
+    if not agent_config:
+        logger.warning("No active agent config 'knowledge_extractor' found for knowledge extraction, skipping")
+        return
+
+    messages_stmt = (
+        select(Message.id)
+        .where(Message.topic_id.is_(None), Message.sent_at >= cutoff_time)  # type: ignore[union-attr]
+        .order_by(Message.sent_at)
+        .limit(50)
+    )
+    messages_result = await db.execute(messages_stmt)
+    message_ids = [row[0] for row in messages_result.all()]
+
+    if len(message_ids) == 0:
+        return
+
+    logger.info(
+        f"🧠 Threshold reached ({unprocessed_count} >= {KNOWLEDGE_EXTRACTION_THRESHOLD}), "
+        f"queueing knowledge extraction for {len(message_ids)} messages using agent '{agent_config.name}'"
+    )
+
+    await extract_knowledge_from_messages_task.kiq(message_ids=message_ids, agent_config_id=str(agent_config.id))
+
 
 @nats_broker.task
 async def process_message(message: str) -> str:
@@ -95,6 +167,12 @@ async def save_telegram_message(telegram_data: dict[str, Any]) -> str:
                     logger.info(f"📊 Queued scoring task for message {db_message.id}")
                 except Exception as exc:
                     logger.warning(f"Failed to queue scoring task for message {db_message.id}: {exc}")
+
+                # Queue knowledge extraction if threshold reached
+                try:
+                    await queue_knowledge_extraction_if_needed(db_message.id, db)
+                except Exception as exc:
+                    logger.warning(f"Failed to queue knowledge extraction for message {db_message.id}: {exc}")
 
             # Broadcast full message data after persisting to DB
             try:
@@ -505,7 +583,7 @@ async def execute_classification_experiment(experiment_id: int) -> dict[str, str
         # Retrieve messages with pre-assigned topics
         logger.info(f"Experiment {experiment_id}: Loading messages with topics")
         messages_result = await db.execute(
-            select(Message).where(Message.topic_id.isnot(None)).order_by(func.random()).limit(experiment.message_count)  # type: ignore[arg-type,union-attr]
+            select(Message).where(Message.topic_id.isnot(None)).order_by(func.random()).limit(experiment.message_count)  # type: ignore[union-attr]
         )
         messages = list(messages_result.scalars().all())
 
@@ -922,6 +1000,157 @@ async def score_unscored_messages_task(limit: int = 100) -> dict[str, int]:
 
     except Exception as e:
         logger.error(f"Batch scoring task failed: {e}", exc_info=True)
+        raise
+
+
+@nats_broker.task
+async def extract_knowledge_from_messages_task(message_ids: list[int], agent_config_id: str) -> dict[str, int]:
+    """Background task for extracting knowledge (topics and atoms) from message batches.
+
+    Analyzes messages using LLM to identify discussion topics and atomic knowledge units
+    (problems, solutions, decisions, insights). Automatically creates database entities
+    and establishes relationships between atoms and topics.
+
+    Args:
+        message_ids: IDs of messages to analyze (10-50 recommended for best results)
+        agent_config_id: AgentConfig UUID as string
+
+    Returns:
+        Statistics dictionary with:
+            - topics_created: Number of new topics created
+            - atoms_created: Number of new atoms created
+            - links_created: Number of atom links created
+            - messages_updated: Number of messages assigned to topics
+
+    Example:
+        >>> task = await extract_knowledge_from_messages_task.kiq([1, 2, 3], str(agent_config_id))
+        >>> result = await task.wait_result()
+        >>> print(result.return_value)
+        {"topics_created": 2, "atoms_created": 5, "links_created": 3, "messages_updated": 3}
+    """
+    from uuid import UUID
+
+    from sqlalchemy import select
+
+    from app.database import get_db_session_context
+    from app.models import AgentConfig, LLMProvider
+    from app.services.knowledge_extraction_service import KnowledgeExtractionService
+    from app.services.websocket_manager import websocket_manager
+
+    logger.info(f"Starting knowledge extraction task: {len(message_ids)} messages with agent {agent_config_id}")
+
+    db_context = get_db_session_context()
+    db = await anext(db_context)
+
+    try:
+        agent_config = await db.get(AgentConfig, UUID(agent_config_id))
+        if not agent_config:
+            raise ValueError(f"Agent config {agent_config_id} not found")
+
+        provider = await db.get(LLMProvider, agent_config.provider_id)
+        if not provider:
+            raise ValueError(f"Provider {agent_config.provider_id} not found")
+
+        stmt = select(Message).where(Message.id.in_(message_ids))  # type: ignore[union-attr]
+        result = await db.execute(stmt)
+        messages = list(result.scalars().all())
+
+        if len(messages) == 0:
+            logger.warning("No messages found for extraction")
+            return {"topics_created": 0, "atoms_created": 0, "links_created": 0, "messages_updated": 0}
+
+        logger.info(f"Found {len(messages)} messages to process")
+
+        await websocket_manager.broadcast(
+            "knowledge",
+            {
+                "type": "knowledge.extraction_started",
+                "data": {
+                    "message_count": len(messages),
+                    "agent_config_id": agent_config_id,
+                    "agent_name": agent_config.name,
+                },
+            },
+        )
+
+        service = KnowledgeExtractionService(agent_config=agent_config, provider=provider)
+
+        extraction_output = await service.extract_knowledge(messages)
+
+        logger.info(
+            f"LLM extraction completed: {len(extraction_output.topics)} topics, {len(extraction_output.atoms)} atoms"
+        )
+
+        topic_map = await service.save_topics(extraction_output.topics, db)
+        saved_atoms = await service.save_atoms(extraction_output.atoms, topic_map, db)
+        links_created = await service.link_atoms(extraction_output.atoms, saved_atoms, db)
+        messages_updated = await service.update_messages(messages, topic_map, extraction_output.topics, db)
+
+        logger.info(
+            f"Knowledge extraction completed: {len(topic_map)} topics created, "
+            f"{len(saved_atoms)} atoms created, {links_created} links created, "
+            f"{messages_updated} messages updated"
+        )
+
+        await websocket_manager.broadcast(
+            "knowledge",
+            {
+                "type": "knowledge.extraction_completed",
+                "data": {
+                    "message_count": len(messages),
+                    "topics_created": len(topic_map),
+                    "atoms_created": len(saved_atoms),
+                    "links_created": links_created,
+                    "messages_updated": messages_updated,
+                },
+            },
+        )
+
+        for topic_name in topic_map:
+            await websocket_manager.broadcast(
+                "knowledge",
+                {
+                    "type": "knowledge.topic_created",
+                    "data": {
+                        "topic_id": topic_map[topic_name].id,
+                        "topic_name": topic_name,
+                    },
+                },
+            )
+
+        for atom in saved_atoms:
+            await websocket_manager.broadcast(
+                "knowledge",
+                {
+                    "type": "knowledge.atom_created",
+                    "data": {
+                        "atom_id": atom.id,
+                        "atom_title": atom.title,
+                        "atom_type": atom.type,
+                    },
+                },
+            )
+
+        return {
+            "topics_created": len(topic_map),
+            "atoms_created": len(saved_atoms),
+            "links_created": links_created,
+            "messages_updated": messages_updated,
+        }
+
+    except Exception as e:
+        logger.error(f"Knowledge extraction task failed: {e}", exc_info=True)
+
+        await websocket_manager.broadcast(
+            "knowledge",
+            {
+                "type": "knowledge.extraction_failed",
+                "data": {
+                    "error": str(e),
+                },
+            },
+        )
+
         raise
 
 
