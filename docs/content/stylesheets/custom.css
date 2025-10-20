@@ -238,11 +238,11 @@
 
 /* Increase content area width for better screen utilization */
 .md-grid {
-  max-width: 1600px !important;
+  max-width: 1750px !important;
 }
 
 .md-main__inner {
-  max-width: 1600px !important;
+  max-width: 1750px !important;
 }
 
 .md-content {
@@ -252,21 +252,21 @@
 /* Responsive width adjustment for 2K and larger screens */
 @media screen and (min-width: 120em) {
   .md-grid {
-    max-width: 1920px !important;
+    max-width: 2100px !important;
   }
 
   .md-main__inner {
-    max-width: 1920px !important;
+    max-width: 2100px !important;
   }
 }
 
 /* Ultra-wide screens (2K+) */
 @media screen and (min-width: 160em) {
   .md-grid {
-    max-width: 2200px !important;
+    max-width: 2400px !important;
   }
 
   .md-main__inner {
-    max-width: 2200px !important;
+    max-width: 2400px !important;
   }
 }
