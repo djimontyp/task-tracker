@@ -17,7 +17,7 @@ from core.logging import logger, setup_logging
 
 setup_logging()
 
-bot = Bot(settings.telegram_bot_token, parse_mode=ParseMode.HTML)
+bot = Bot(settings.telegram.telegram_bot_token, parse_mode=ParseMode.HTML)
 dp = Dispatcher()
 
 
@@ -30,8 +30,8 @@ async def command_start_handler(message: Message) -> None:
 
     webapp_button = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🎯 Create Task", web_app=WebAppInfo(url=settings.webapp_url))],
-            [InlineKeyboardButton(text="📊 Dashboard", url=f"{settings.api_base_url}/dashboard")],
+            [InlineKeyboardButton(text="🎯 Create Task", web_app=WebAppInfo(url=settings.app.webapp_url))],
+            [InlineKeyboardButton(text="📊 Dashboard", url=f"{settings.app.api_base_url}/dashboard")],
         ]
     )
 
@@ -55,7 +55,7 @@ async def webapp_command(message: Message) -> None:
             [
                 InlineKeyboardButton(
                     text="🎯 Open Task Creator",
-                    web_app=WebAppInfo(url=settings.webapp_url),
+                    web_app=WebAppInfo(url=settings.app.webapp_url),
                 )
             ]
         ]
@@ -71,7 +71,7 @@ async def webapp_command(message: Message) -> None:
 async def dashboard_command(message: Message) -> None:
     """Handle /dashboard command"""
     dashboard_button = InlineKeyboardMarkup(
-        inline_keyboard=[[InlineKeyboardButton(text="📊 Open Dashboard", url=f"{settings.api_base_url}/dashboard")]]
+        inline_keyboard=[[InlineKeyboardButton(text="📊 Open Dashboard", url=f"{settings.app.api_base_url}/dashboard")]]
     )
 
     await message.answer(
@@ -119,7 +119,7 @@ async def process_message(message: Message) -> None:
             if photos.total_count > 0:
                 largest_photo = photos.photos[0][-1]
                 file = await bot.get_file(largest_photo.file_id)
-                avatar_url = f"https://api.telegram.org/file/bot{settings.telegram_bot_token}/{file.file_path}"
+                avatar_url = f"https://api.telegram.org/file/bot{settings.telegram.telegram_bot_token}/{file.file_path}"
         except Exception as exc:  # pragma: no cover - defensive logging
             logger.warning("Failed to fetch avatar for user %s: %s", message.from_user.id, exc)
 
@@ -136,7 +136,7 @@ async def process_message(message: Message) -> None:
 
         # Send to FastAPI backend
         async with httpx.AsyncClient() as client:
-            response = await client.post(f"{settings.api_base_url}/api/messages", json=message_data, timeout=5.0)
+            response = await client.post(f"{settings.app.api_base_url}/api/messages", json=message_data, timeout=5.0)
 
             if response.status_code == 200:
                 logger.info(f"✅ Message sent to API: {message_data['id']}")

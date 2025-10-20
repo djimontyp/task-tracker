@@ -27,7 +27,7 @@ async def main():
     print()
 
     # Check if credentials are configured
-    if not settings.telegram_api_id or not settings.telegram_api_hash:
+    if not settings.telegram.telegram_api_id or not settings.telegram.telegram_api_hash:
         print("❌ ERROR: Telegram API credentials not configured!")
         print()
         print("Please set the following environment variables:")
@@ -37,8 +37,8 @@ async def main():
         print("Get them from: https://my.telegram.org/apps")
         return
 
-    print(f"✅ API ID: {settings.telegram_api_id}")
-    print(f"✅ API Hash: {settings.telegram_api_hash[:8]}...")
+    print(f"✅ API ID: {settings.telegram.telegram_api_id}")
+    print(f"✅ API Hash: {settings.telegram.telegram_api_hash[:8]}...")
     print()
 
     # Get phone number
@@ -60,7 +60,7 @@ async def main():
 
     from telethon import TelegramClient
 
-    client = TelegramClient(session_path, settings.telegram_api_id, settings.telegram_api_hash)
+    client = TelegramClient(session_path, settings.telegram.telegram_api_id, settings.telegram.telegram_api_hash)
 
     try:
         await client.start(phone=phone)

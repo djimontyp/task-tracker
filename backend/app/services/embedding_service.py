@@ -64,7 +64,7 @@ class EmbeddingService:
             ValueError: If dimensions don't match
         """
         actual_dims = len(embedding)
-        expected_dims = settings.openai_embedding_dimensions
+        expected_dims = settings.embedding.openai_embedding_dimensions
 
         if actual_dims != expected_dims:
             raise ValueError(
@@ -132,7 +132,7 @@ class EmbeddingService:
         try:
             client = AsyncOpenAI(api_key=api_key)
             response = await client.embeddings.create(
-                model=settings.openai_embedding_model, input=text, encoding_format="float"
+                model=settings.embedding.openai_embedding_model, input=text, encoding_format="float"
             )
             embedding = response.data[0].embedding
             return await self._validate_embedding(embedding)
@@ -163,7 +163,7 @@ class EmbeddingService:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     f"{self.provider.base_url}/api/embeddings",
-                    json={"model": settings.ollama_embedding_model, "prompt": text},
+                    json={"model": settings.embedding.ollama_embedding_model, "prompt": text},
                 )
                 response.raise_for_status()
                 data = response.json()
@@ -270,7 +270,7 @@ class EmbeddingService:
             >>> print(f"Success: {stats['success']}, Failed: {stats['failed']}")
         """
         if batch_size is None:
-            batch_size = settings.embedding_batch_size
+            batch_size = settings.embedding.embedding_batch_size
 
         stats = {"success": 0, "failed": 0, "skipped": 0}
 
@@ -342,7 +342,7 @@ class EmbeddingService:
             >>> print(f"Success: {stats['success']}, Failed: {stats['failed']}")
         """
         if batch_size is None:
-            batch_size = settings.embedding_batch_size
+            batch_size = settings.embedding.embedding_batch_size
 
         stats = {"success": 0, "failed": 0, "skipped": 0}
 

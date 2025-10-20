@@ -21,7 +21,7 @@ class CredentialEncryption:
         Raises:
             ValueError: If ENCRYPTION_KEY not configured in settings
         """
-        if not settings.encryption_key:
+        if not settings.app.encryption_key:
             raise ValueError(
                 "ENCRYPTION_KEY not configured. Generate with: "
                 'python -c "from cryptography.fernet import Fernet; '
@@ -29,7 +29,7 @@ class CredentialEncryption:
             )
 
         # Ensure key is bytes for Fernet
-        key: str | bytes = settings.encryption_key
+        key: str | bytes = settings.app.encryption_key
         if isinstance(key, str):
             key = key.encode()
 

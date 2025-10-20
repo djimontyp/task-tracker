@@ -38,7 +38,7 @@ target_metadata = SQLModel.metadata
 
 
 def get_url() -> str:
-    return settings.migration_database_url  # type: ignore[no-any-return]
+    return settings.database.migration_database_url  # type: ignore[no-any-return]
 
 
 def get_offline_url() -> str:

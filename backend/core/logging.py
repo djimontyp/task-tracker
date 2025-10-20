@@ -11,5 +11,5 @@ def setup_logging() -> None:
     logger.add(
         sys.stdout,
         format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <level>{message}</level>",
-        level=settings.log_level,
+        level=settings.app.log_level,
     )
