@@ -87,7 +87,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-2xl overflow-y-auto">
+      <SheetContent className="sm:max-w-2xl overflow-y-auto" aria-describedby="telegram-sheet-description">
         <SheetHeader>
           <div className="flex items-center justify-between">
             <SheetTitle>Telegram Integration</SheetTitle>
@@ -104,6 +104,9 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
               </Badge>
             )}
           </div>
+          <p id="telegram-sheet-description" className="text-sm text-muted-foreground mt-2">
+            Configure your Telegram bot webhook URL and manage monitored groups for message tracking
+          </p>
         </SheetHeader>
 
         <div className="space-y-8 mt-6">
@@ -128,7 +131,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                       onChange={(event) => setWebhookBaseUrl(event.target.value)}
                       autoComplete="off"
                       aria-label="Webhook base URL"
-                      className="flex-1"
+                      className="flex-1 text-xs sm:text-sm"
                     />
                     <Button
                       type="button"
@@ -239,7 +242,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                       <div className="text-2xl shrink-0">🔵</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <p className="text-sm font-medium text-foreground truncate">
+                          <p className="text-sm font-medium text-foreground break-words">
                             {group.name || `Group ${group.id}`}
                           </p>
                           {!group.name && (

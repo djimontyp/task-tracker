@@ -2,10 +2,11 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card, ColorPickerPopover } from '@/shared/components'
-import { Spinner } from '@/shared/ui'
+import { Spinner, Button } from '@/shared/ui'
 import { topicService } from '@/features/topics/api/topicService'
 import type { TopicListResponse } from '@/features/topics/types'
 import { renderTopicIcon } from '@/features/topics/utils/renderIcon'
+import { FolderIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline'
 
 const TopicsPage = () => {
   const navigate = useNavigate()
@@ -135,10 +136,24 @@ const TopicsPage = () => {
           ))}
         </div>
       ) : (
-        <Card className="p-12">
-          <div className="text-center text-muted-foreground">
-            <p className="text-lg font-medium mb-2">No topics found</p>
-            <p className="text-sm">Create your first topic to get started</p>
+        <Card className="p-12 border-dashed border-2">
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+              <FolderIcon className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No Topics Yet</h3>
+            <p className="text-muted-foreground mb-6 max-w-md">
+              Topics help organize messages by theme. They are automatically created during AI analysis of your messages.
+            </p>
+            <div className="flex gap-3 flex-wrap justify-center">
+              <Button onClick={() => navigate('/messages')}>
+                <ChatBubbleLeftRightIcon className="mr-2 h-5 w-5" />
+                View Messages
+              </Button>
+              <Button onClick={() => navigate('/analysis')} variant="outline">
+                Run Analysis
+              </Button>
+            </div>
           </div>
         </Card>
       )}

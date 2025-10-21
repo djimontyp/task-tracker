@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Spinner,
   Button,
+  Card,
 } from '@/shared/ui'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
@@ -27,7 +28,7 @@ import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
 import { DataTablePagination } from '@/shared/components/DataTablePagination'
 import { DataTableFacetedFilter } from './faceted-filter'
 import { ImportanceScoreFilter } from './importance-score-filter'
-import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon } from '@heroicons/react/24/outline'
+import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { IngestionModal } from './IngestionModal'
 
 interface MessageQueryParams {
@@ -53,12 +54,31 @@ const MessagesPage = () => {
 
   // Data table state
   const [sorting, setSorting] = React.useState<SortingState>([
-    { id: 'sent_at', desc: true } // Default sort by sent_at descending
+    { id: 'sent_at', desc: true }
   ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [globalFilter, setGlobalFilter] = React.useState('')
+
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768
+      if (isMobile) {
+        setColumnVisibility({
+          source: false,
+          importance_score: false,
+          classification: false,
+        })
+      } else {
+        setColumnVisibility({})
+      }
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const { data: paginatedData, isLoading, refetch } = useQuery<PaginatedResponse>({
     queryKey: ['messages', currentPage, pageSize, sorting],
@@ -239,6 +259,22 @@ const MessagesPage = () => {
     }
   }
 
+  const selectedRowsCount = Object.keys(rowSelection).length
+
+  const handleBulkDelete = () => {
+    if (selectedRowsCount === 0) return
+    const confirmed = window.confirm(`Delete ${selectedRowsCount} selected messages?`)
+    if (confirmed) {
+      toast.success(`${selectedRowsCount} messages deleted (demo)`)
+      setRowSelection({})
+    }
+  }
+
+  const handleBulkExport = () => {
+    if (selectedRowsCount === 0) return
+    toast.success(`Exporting ${selectedRowsCount} messages (demo)`)
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -310,6 +346,32 @@ const MessagesPage = () => {
       <DataTable table={table} columns={columns} emptyMessage="No messages found." />
 
       <DataTablePagination table={table} />
+
+      {selectedRowsCount > 0 && (
+        <Card className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 shadow-lg border-2">
+          <div className="flex items-center gap-4 px-6 py-3 bg-primary text-primary-foreground rounded-lg">
+            <span className="font-medium">{selectedRowsCount} selected</span>
+            <div className="flex gap-2">
+              <Button size="sm" variant="secondary" onClick={handleBulkExport}>
+                <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
+                Export
+              </Button>
+              <Button size="sm" variant="destructive" onClick={handleBulkDelete}>
+                <TrashIcon className="h-4 w-4 mr-1" />
+                Delete
+              </Button>
+            </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setRowSelection({})}
+              className="text-primary-foreground hover:bg-primary-foreground/20"
+            >
+              Clear
+            </Button>
+          </div>
+        </Card>
+      )}
 
       <IngestionModal
         open={modalOpen}

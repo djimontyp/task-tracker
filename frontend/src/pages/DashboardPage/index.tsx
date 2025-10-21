@@ -1,11 +1,11 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ListBulletIcon, ClockIcon, ArrowPathIcon, CheckCircleIcon, WifiIcon, CpuChipIcon, DocumentCheckIcon } from '@heroicons/react/24/outline'
+import { ListBulletIcon, ClockIcon, ArrowPathIcon, CheckCircleIcon, WifiIcon, CpuChipIcon, DocumentCheckIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
 import { SignalSlashIcon } from '@heroicons/react/24/outline'
 import { OnboardingWizard } from '@/features/onboarding'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
-import { Badge, Skeleton } from '@/shared/ui'
+import { Badge, Skeleton, Button } from '@/shared/ui'
 import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar'
 import { TelegramIcon } from '@/shared/components/TelegramIcon'
 import { apiClient } from '@/shared/lib/api/client'
@@ -107,9 +107,34 @@ const DashboardPage = () => {
     }
   }, [statsLoading, stats, messages.length])
 
+  const hasNoData = stats && stats.total_tasks === 0 && messages.length === 0
+
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
       <OnboardingWizard open={showOnboarding} onClose={() => setShowOnboarding(false)} />
+
+      {hasNoData && !statsLoading && (
+        <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
+          <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-16 h-16 mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+              <ListBulletIcon className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No Messages Yet</h3>
+            <p className="text-muted-foreground mb-6 max-w-md">
+              Connect your Telegram to start tracking messages and analyzing tasks
+            </p>
+            <div className="flex gap-3 flex-wrap justify-center">
+              <Button onClick={() => navigate('/settings')} size="lg">
+                <Cog6ToothIcon className="mr-2 h-5 w-5" />
+                Configure Settings
+              </Button>
+              <Button onClick={() => navigate('/messages')} variant="outline" size="lg">
+                View Messages
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Metric Cards */}
       <div
