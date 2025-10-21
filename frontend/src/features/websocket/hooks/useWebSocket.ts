@@ -58,6 +58,7 @@ interface UseWebSocketOptions {
   onDisconnect?: () => void
   reconnect?: boolean
   reconnectInterval?: number
+  maxReconnectAttempts?: number
 }
 
 export const useWebSocket = (options: UseWebSocketOptions = {}) => {
@@ -67,7 +68,8 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     onConnect,
     onDisconnect,
     reconnect = true,
-    reconnectInterval = 3000,
+    reconnectInterval = 1000,
+    maxReconnectAttempts = 5,
   } = options
 
   const [isConnected, setIsConnected] = useState(false)
@@ -76,6 +78,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>()
   const isMountedRef = useRef(true)
   const isConnectingRef = useRef(false)
+  const reconnectAttemptsRef = useRef(0)
 
   const connect = () => {
     if (isConnectingRef.current) {
@@ -101,6 +104,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       ws.onopen = () => {
         logger.debug('✅ WebSocket opened successfully')
         isConnectingRef.current = false
+        reconnectAttemptsRef.current = 0
 
         if (!isMountedRef.current) {
           logger.debug('⚠️  Component unmounted, closing connection')
@@ -111,7 +115,10 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         setIsConnected(true)
         setConnectionState('connected')
         onConnect?.()
-        toast.success('З\'єднання встановлено')
+
+        if (reconnectAttemptsRef.current > 0) {
+          toast.success('З\'єднання відновлено')
+        }
       }
 
       ws.onmessage = (event) => {
@@ -158,8 +165,11 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         setConnectionState(reconnect ? 'reconnecting' : 'disconnected')
         onDisconnect?.()
 
-        if (reconnect && isMountedRef.current) {
-          logger.debug(`⏳ Will reconnect in ${reconnectInterval}ms...`)
+        if (reconnect && isMountedRef.current && reconnectAttemptsRef.current < maxReconnectAttempts) {
+          reconnectAttemptsRef.current += 1
+          const delay = Math.min(reconnectInterval * Math.pow(2, reconnectAttemptsRef.current - 1), 30000)
+          logger.debug(`⏳ Reconnect attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts} in ${delay}ms...`)
+
           reconnectTimeoutRef.current = setTimeout(() => {
             if (isMountedRef.current) {
               logger.debug('🔄 Attempting to reconnect...')
@@ -167,7 +177,11 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
             } else {
               logger.debug('⚠️  Component unmounted during reconnect delay, skipping')
             }
-          }, reconnectInterval)
+          }, delay)
+        } else if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
+          logger.error('❌ Max reconnection attempts reached')
+          setConnectionState('disconnected')
+          toast.error('Не вдалося підключитися. Перезавантажте сторінку.')
         }
       }
 
@@ -176,18 +190,21 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       logger.error('❌ Failed to create WebSocket:', error)
       isConnectingRef.current = false
 
-      if (connectionState === 'connecting') {
-        toast.error('Не вдалося підключитися до сервера')
-      }
-
-      if (reconnect && isMountedRef.current) {
-        logger.debug(`⏳ Will retry connection in ${reconnectInterval}ms...`)
+      if (reconnect && isMountedRef.current && reconnectAttemptsRef.current < maxReconnectAttempts) {
+        reconnectAttemptsRef.current += 1
+        const delay = Math.min(reconnectInterval * Math.pow(2, reconnectAttemptsRef.current - 1), 30000)
+        logger.debug(`⏳ Retry attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts} in ${delay}ms...`)
         setConnectionState('reconnecting')
+
         reconnectTimeoutRef.current = setTimeout(() => {
           if (isMountedRef.current) {
             connect()
           }
-        }, reconnectInterval)
+        }, delay)
+      } else if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
+        logger.error('❌ Max connection attempts reached')
+        setConnectionState('disconnected')
+        toast.error('Не вдалося підключитися до сервера')
       }
     }
   }
