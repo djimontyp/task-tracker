@@ -95,3 +95,17 @@ export {
   SheetTitle,
   SheetDescription,
 } from './sheet'
+export {
+  AlertDialog,
+  AlertDialogPortal,
+  AlertDialogOverlay,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from './alert-dialog'
+export { RadioGroup, RadioGroupItem } from './radio-group'
