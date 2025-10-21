@@ -269,6 +269,13 @@ class WebhookSettingsService:
         normalized_host = host.strip().rstrip("/")
         webhook_url = f"{protocol}://{normalized_host}/webhook/telegram"
 
+        if groups is None:
+            existing_config = await self.get_telegram_config(db)
+            if existing_config and existing_config.groups:
+                groups = [{"id": g.id, "name": g.name} for g in existing_config.groups]
+            else:
+                groups = []
+
         config_data = {
             "telegram": {
                 "protocol": protocol,
@@ -276,7 +283,7 @@ class WebhookSettingsService:
                 "webhook_url": webhook_url,
                 "is_active": is_active,
                 "last_set_at": datetime.utcnow().isoformat() if is_active else None,
-                "groups": groups or [],
+                "groups": groups,
             }
         }
 
