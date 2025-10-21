@@ -12,10 +12,10 @@ export interface SourceCardProps {
   onSettings: () => void
 }
 
-const statusVariants = {
-  active: 'default',
-  inactive: 'secondary',
-  'not-configured': 'outline',
+const statusColors = {
+  active: 'bg-green-500',
+  inactive: 'bg-gray-400',
+  'not-configured': 'bg-yellow-500',
 } as const
 
 const SourceCard = ({
@@ -28,7 +28,7 @@ const SourceCard = ({
   onToggle,
   onSettings,
 }: SourceCardProps) => {
-  const badgeText = statusLabel || (status === 'active' ? 'Active' : status === 'inactive' ? 'Inactive' : 'Not configured')
+  const badgeText = statusLabel || (status === 'active' ? 'Active' : status === 'inactive' ? 'Inactive' : 'Setup needed')
 
   return (
     <Card className="flex flex-col h-full hover:shadow-md transition-shadow">
@@ -37,15 +37,23 @@ const SourceCard = ({
           <Icon className="h-6 w-6 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-lg leading-none mb-2">{name}</h3>
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="font-semibold text-lg leading-none">{name}</h3>
+            <div className="flex items-center gap-1.5">
+              <div className={`h-2 w-2 rounded-full ${statusColors[status]}`} />
+              <Badge
+                variant="outline"
+                className={`text-xs ${status === 'active' ? 'border-green-600 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400 dark:border-green-800' : ''} ${status === 'inactive' ? 'border-gray-400 bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-400' : ''} ${status === 'not-configured' ? 'border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400' : ''}`}
+              >
+                {badgeText}
+              </Badge>
+            </div>
+          </div>
           <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
         </div>
       </CardHeader>
 
       <CardContent className="flex-1 pb-3">
-        <Badge variant={statusVariants[status]} className="text-xs">
-          {badgeText}
-        </Badge>
       </CardContent>
 
       <Separator />

@@ -89,6 +89,39 @@ const extractErrorMessage = (error: unknown) => {
   return axiosError.message || fallback
 }
 
+const parseGroupInput = (input: string): number | null => {
+  const cleaned = input.trim()
+
+  const urlMatch = cleaned.match(/(?:web\.telegram\.org|t\.me).*#?(-?\d+)/)
+  if (urlMatch) {
+    return parseInt(urlMatch[1], 10)
+  }
+
+  const directNumber = parseInt(cleaned, 10)
+  if (!isNaN(directNumber)) {
+    return directNumber
+  }
+
+  return null
+}
+
+const convertToLongFormat = (groupId: number): number => {
+  if (groupId < 0 && groupId.toString().startsWith('-100')) {
+    return groupId
+  }
+
+  if (groupId < 0) {
+    return parseInt(`-100${Math.abs(groupId)}`, 10)
+  }
+
+  return groupId
+}
+
+const isValidGroupId = (input: string): boolean => {
+  const parsed = parseGroupInput(input)
+  return parsed !== null && parsed < 0
+}
+
 export const useTelegramSettings = () => {
   const [isLoadingConfig, setIsLoadingConfig] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -218,6 +251,45 @@ export const useTelegramSettings = () => {
     }
   }
 
+  const handleUpdateWebhook = async () => {
+    if (!isValidBaseUrl) {
+      toast.error('Webhook URL must not be empty')
+      return
+    }
+
+    setIsSaving(true)
+    setIsSettingWebhook(true)
+
+    try {
+      const { data: savedConfig } = await apiClient.post<TelegramWebhookConfigDto>(
+        API_ENDPOINTS.webhookSettings,
+        { protocol, host }
+      )
+
+      const updatedBaseUrl = buildBaseUrl(savedConfig.protocol, savedConfig.host)
+      setWebhookBaseUrl(updatedBaseUrl)
+      setServerWebhookUrl(savedConfig.webhook_url || null)
+      writeLocalConfig(updatedBaseUrl)
+
+      const { data: activateResult } = await apiClient.post<SetWebhookResponseDto>(
+        API_ENDPOINTS.telegramWebhook.set,
+        { protocol: savedConfig.protocol, host: savedConfig.host }
+      )
+
+      if (activateResult.success) {
+        toast.success('Webhook updated and activated successfully')
+        await loadConfig()
+      } else {
+        toast.error(activateResult.error || 'Failed to activate webhook')
+      }
+    } catch (error) {
+      toast.error(`Failed to update webhook: ${extractErrorMessage(error)}`)
+    } finally {
+      setIsSaving(false)
+      setIsSettingWebhook(false)
+    }
+  }
+
   const handleDeleteWebhook = async () => {
     setIsDeletingWebhook(true)
     try {
@@ -239,17 +311,20 @@ export const useTelegramSettings = () => {
   }
 
   const handleAddGroup = async () => {
-    let groupId = parseInt(newGroupId.trim(), 10)
-    if (isNaN(groupId)) {
-      toast.error('Please enter a valid group ID')
+    const parsedId = parseGroupInput(newGroupId)
+
+    if (parsedId === null) {
+      toast.error('Invalid group ID or URL. Paste a Telegram group link or enter -100XXXXXXXXX')
       return
     }
 
-    if (groupId < 0 && !newGroupId.trim().startsWith('-100')) {
-      const converted = parseInt(`-100${Math.abs(groupId)}`, 10)
-      logger.debug(`Converting group ID from ${groupId} to ${converted}`)
-      groupId = converted
+    if (parsedId >= 0) {
+      toast.error('Group ID must be negative. Use format: -100XXXXXXXXX')
+      return
     }
+
+    const groupId = convertToLongFormat(parsedId)
+    logger.debug(`Parsed group ID: ${parsedId}, converted to: ${groupId}`)
 
     setIsAddingGroup(true)
     try {
@@ -325,10 +400,14 @@ export const useTelegramSettings = () => {
     removingGroupIds,
     handleSave,
     handleSetWebhook,
+    handleUpdateWebhook,
     handleDeleteWebhook,
     handleAddGroup,
     handleRemoveGroup,
     handleRefreshNames,
     loadConfig,
+    parseGroupInput,
+    convertToLongFormat,
+    isValidGroupId,
   }
 }
