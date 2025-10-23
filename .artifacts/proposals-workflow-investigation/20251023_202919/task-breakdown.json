@@ -1,0 +1,27 @@
+[
+  {
+    "content": "Initialize orchestration session for proposals investigation",
+    "status": "completed",
+    "activeForm": "Initializing orchestration session"
+  },
+  {
+    "content": "Delegate backend investigation to fastapi-backend-expert (models, services, API flows)",
+    "status": "pending",
+    "activeForm": "Investigating backend proposal flows"
+  },
+  {
+    "content": "Delegate frontend investigation to react-frontend-architect (UI components, workflows)",
+    "status": "pending",
+    "activeForm": "Investigating frontend proposal flows"
+  },
+  {
+    "content": "Aggregate findings from both agents",
+    "status": "pending",
+    "activeForm": "Aggregating investigation reports"
+  },
+  {
+    "content": "Present comprehensive summary to user",
+    "status": "pending",
+    "activeForm": "Presenting summary"
+  }
+]
