@@ -22,11 +22,17 @@ import {
   Badge,
   Checkbox,
   Spinner,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@/shared/ui'
+import { InformationCircleIcon } from '@heroicons/react/24/outline'
 import { analysisService } from '../api/analysisService'
 import { agentService } from '@/features/agents/api/agentService'
 import type { CreateAnalysisRun } from '../types'
 import toast from 'react-hot-toast'
+import { TimeWindowSelector } from './TimeWindowSelector'
 
 interface CreateRunModalProps {
   open: boolean
@@ -83,7 +89,7 @@ export const CreateRunModal: React.FC<CreateRunModalProps> = ({ open, onOpenChan
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-w-[95vw]">
         <DialogHeader>
           <DialogTitle>Create Analysis Run</DialogTitle>
           <DialogDescription>
@@ -91,35 +97,44 @@ export const CreateRunModal: React.FC<CreateRunModalProps> = ({ open, onOpenChan
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="time_window_start">Time Window Start *</Label>
-            <Input
-              id="time_window_start"
-              type="datetime-local"
-              value={formData.time_window_start}
-              onChange={(e) =>
-                setFormData({ ...formData, time_window_start: e.target.value })
+            <Label className="text-base sm:text-sm">
+              When should we analyze? *
+            </Label>
+            <TimeWindowSelector
+              value={{
+                start: formData.time_window_start,
+                end: formData.time_window_end,
+              }}
+              onChange={({ start, end }) =>
+                setFormData({ ...formData, time_window_start: start, time_window_end: end })
               }
-              required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="time_window_end">Time Window End *</Label>
-            <Input
-              id="time_window_end"
-              type="datetime-local"
-              value={formData.time_window_end}
-              onChange={(e) =>
-                setFormData({ ...formData, time_window_end: e.target.value })
-              }
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="agent_assignment_id">Agent Assignment *</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="agent_assignment_id" className="text-base sm:text-sm">
+                Which AI should analyze these messages? *
+              </Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <InformationCircleIcon
+                      className="h-5 w-5 sm:h-4 sm:w-4 text-muted-foreground cursor-help shrink-0"
+                      aria-label="Help about agent selection"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[280px] sm:max-w-xs">
+                    <p>Agent assignments pair an AI model with a specific task. Choose based on your analysis goal.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Select the agent best suited for your analysis type
+            </p>
             {assignmentsLoading ? (
               <div className="flex items-center justify-center p-4">
                 <Spinner className="h-6 w-6" />
@@ -135,23 +150,38 @@ export const CreateRunModal: React.FC<CreateRunModalProps> = ({ open, onOpenChan
                   setFormData({ ...formData, agent_assignment_id: value })
                 }
               >
-                <SelectTrigger id="agent_assignment_id" aria-label="Select agent assignment">
+                <SelectTrigger
+                  id="agent_assignment_id"
+                  aria-label="Select agent assignment"
+                  className="min-h-[44px]"
+                >
                   <SelectValue placeholder="Select agent assignment" />
                 </SelectTrigger>
                 <SelectContent>
                   {assignments && assignments.length > 0 ? (
                     assignments.map((assignment) => (
-                      <SelectItem key={assignment.id} value={assignment.id}>
-                        <div className="flex items-center gap-2">
-                          <span>
-                            Agent: {assignment.agent_name} | Task: {assignment.task_name} (
-                            {assignment.provider_type})
+                      <SelectItem
+                        key={assignment.id}
+                        value={assignment.id}
+                        aria-label={`${assignment.agent_name}: ${assignment.task_name} (${assignment.provider_type})`}
+                      >
+                        <div className="flex flex-col gap-0.5 py-1 w-full">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium text-base md:text-sm">
+                              {assignment.agent_name}
+                            </span>
+                            {!assignment.is_active && (
+                              <Badge variant="outline" className="text-xs shrink-0">
+                                Inactive
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="text-sm text-muted-foreground md:text-xs">
+                            {assignment.task_name}
                           </span>
-                          {!assignment.is_active && (
-                            <Badge variant="outline" className="ml-2 text-xs">
-                              Inactive
-                            </Badge>
-                          )}
+                          <span className="text-xs text-muted-foreground hidden sm:block">
+                            {assignment.provider_type}
+                          </span>
                         </div>
                       </SelectItem>
                     ))
@@ -169,6 +199,7 @@ export const CreateRunModal: React.FC<CreateRunModalProps> = ({ open, onOpenChan
                 checked={showInactive}
                 onCheckedChange={(checked) => setShowInactive(checked === true)}
                 aria-label="Show inactive assignments"
+                className="min-h-[20px] min-w-[20px]"
               />
               <Label htmlFor="show_inactive" className="text-sm font-normal cursor-pointer">
                 Show inactive assignments
@@ -177,7 +208,27 @@ export const CreateRunModal: React.FC<CreateRunModalProps> = ({ open, onOpenChan
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="project_config_id">Project Config ID (Optional)</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="project_config_id" className="text-base sm:text-sm">
+                Project settings (optional)
+              </Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <InformationCircleIcon
+                      className="h-5 w-5 sm:h-4 sm:w-4 text-muted-foreground cursor-help shrink-0"
+                      aria-label="Help about project settings"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[280px] sm:max-w-xs">
+                    <p>Leave empty to use your default project settings (keywords, filters, output format)</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Most users can leave this empty
+            </p>
             <Input
               id="project_config_id"
               type="text"
@@ -186,19 +237,25 @@ export const CreateRunModal: React.FC<CreateRunModalProps> = ({ open, onOpenChan
               onChange={(e) =>
                 setFormData({ ...formData, project_config_id: e.target.value || undefined })
               }
+              className="min-h-[44px]"
             />
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex-col gap-2 sm:flex-row sm:gap-0">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={createMutation.isPending}
+              className="min-h-[44px] w-full sm:w-auto"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
+            <Button
+              type="submit"
+              disabled={createMutation.isPending}
+              className="min-h-[44px] w-full sm:w-auto"
+            >
               {createMutation.isPending ? 'Creating...' : 'Create Run'}
             </Button>
           </DialogFooter>

@@ -4,8 +4,10 @@
  * TypeScript interfaces matching backend TaskConfig models
  */
 
+export type FieldType = 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object' | 'date' | 'email' | 'url'
+
 export interface SchemaPropertyConfig {
-  type: string
+  type: FieldType
   description?: string
 }
 
@@ -13,6 +15,13 @@ export interface JsonSchema {
   type: 'object'
   properties: Record<string, SchemaPropertyConfig>
   required: string[]
+}
+
+export interface SchemaField {
+  name: string
+  type: FieldType
+  description?: string
+  required?: boolean
 }
 
 export interface TaskConfig {
