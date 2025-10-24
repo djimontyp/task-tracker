@@ -1,5 +1,7 @@
 # Task Tracker - AI-powered Task Classification System
 
+## **Important** Use SKILLS proactively!
+
 ## Architecture
 Event-driven microservices: **Telegram Bot** → **FastAPI Backend** (REST + WebSocket) → **React Dashboard** + **TaskIQ Worker** (NATS broker) + **PostgreSQL** + **Docker**
 
