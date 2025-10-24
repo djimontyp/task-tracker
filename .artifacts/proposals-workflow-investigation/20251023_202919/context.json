@@ -1,0 +1,13 @@
+{
+  "feature_name": "proposals-workflow-investigation",
+  "timestamp": "20251023_202919",
+  "session_dir": ".artifacts/proposals-workflow-investigation/20251023_202919",
+  "created_at": "2025-10-23T20:29:19.375378",
+  "status": "completed",
+  "agents_executed": [],
+  "artifacts_created": [],
+  "summary_created_at": "2025-10-23T20:43:49.757774",
+  "reports_aggregated": 2,
+  "summary_path": ".artifacts/proposals-workflow-investigation/20251023_202919/summary.md",
+  "completed_at": "2025-10-23T20:43:49.757779"
+}

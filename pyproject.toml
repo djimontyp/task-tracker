@@ -24,6 +24,7 @@ dependencies = [
     "telethon>=1.38.1",
     "email-validator>=2.2.0",
     "pgvector>=0.4.1",
+    "deepdiff>=8.6.1",
 ]
 
 

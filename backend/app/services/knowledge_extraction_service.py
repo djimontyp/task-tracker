@@ -7,6 +7,8 @@ knowledge units like problems, solutions, insights).
 
 import logging
 from collections.abc import Sequence
+from datetime import UTC, datetime, timedelta
+from typing import Literal
 
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent as PydanticAgent
@@ -20,29 +22,42 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import AgentConfig, Atom, AtomLink, LLMProvider, Message, ProviderType, Topic, TopicAtom
 from app.models.topic import auto_select_color, auto_select_icon
 from app.services.credential_encryption import CredentialEncryption
+from app.services.versioning_service import VersioningService
 
 logger = logging.getLogger(__name__)
+
+PeriodType = Literal["last_24h", "last_7d", "last_30d", "custom"]
 
 
 class ExtractedTopic(BaseModel):
     """Topic extracted from messages."""
 
     name: str = Field(max_length=100, description="Concise topic name (2-4 words max)")
-    description: str = Field(description="Clear description of the discussion theme")
-    confidence: float = Field(ge=0.0, le=1.0, description="Extraction confidence (0.7+ recommended for auto-creation)")
-    keywords: list[str] = Field(description="Key terms associated with this topic")
-    related_message_ids: list[int] = Field(description="Source message IDs that contributed to this topic")
+    description: str = Field(default="", description="Clear description of the discussion theme")
+    confidence: float = Field(
+        default=0.7, ge=0.0, le=1.0, description="Extraction confidence (0.7+ recommended for auto-creation)"
+    )
+    keywords: list[str] = Field(default_factory=list, description="Key terms associated with this topic")
+    related_message_ids: list[int] = Field(
+        default_factory=list, description="Source message IDs that contributed to this topic"
+    )
 
 
 class ExtractedAtom(BaseModel):
     """Atom extracted from messages."""
 
-    type: str = Field(description="Atom type: problem/solution/decision/insight/question/pattern/requirement")
+    type: str = Field(
+        default="insight", description="Atom type: problem/solution/decision/insight/question/pattern/requirement"
+    )
     title: str = Field(max_length=200, description="Brief title summarizing the atomic knowledge unit")
-    content: str = Field(description="Full self-contained content of the atom")
-    confidence: float = Field(ge=0.0, le=1.0, description="Extraction confidence (0.7+ recommended for auto-creation)")
-    topic_name: str = Field(description="Parent topic name this atom belongs to")
-    related_message_ids: list[int] = Field(description="Source message IDs that contributed to this atom")
+    content: str = Field(default="", description="Full self-contained content of the atom")
+    confidence: float = Field(
+        default=0.7, ge=0.0, le=1.0, description="Extraction confidence (0.7+ recommended for auto-creation)"
+    )
+    topic_name: str = Field(default="", description="Parent topic name this atom belongs to")
+    related_message_ids: list[int] = Field(
+        default_factory=list, description="Source message IDs that contributed to this atom"
+    )
     links_to_atom_titles: list[str] = Field(default_factory=list, description="Titles of related atoms to link with")
     link_types: list[str] = Field(
         default_factory=list,
@@ -57,48 +72,48 @@ class KnowledgeExtractionOutput(BaseModel):
     atoms: list[ExtractedAtom] = Field(description="Extracted atomic knowledge units")
 
 
-KNOWLEDGE_EXTRACTION_SYSTEM_PROMPT = """You are a knowledge extraction expert analyzing conversation messages.
+KNOWLEDGE_EXTRACTION_SYSTEM_PROMPT = """You are a knowledge extraction expert. Your ONLY job is to analyze messages and return valid JSON.
 
-Your task is to identify:
-1. TOPICS - Discussion themes, problem domains, or contexts (e.g., "API Design", "Database Migration")
-2. ATOMS - Specific atomic knowledge units: problems, solutions, decisions, insights, questions, patterns, requirements
+CRITICAL: You must respond with ONLY a JSON object. No explanations, no markdown, no extra text.
 
-Guidelines for Topics:
-- Keep names concise: 2-4 words maximum
-- Each topic should represent a coherent discussion theme
-- Confidence 0.7+ for auto-creation, lower for review flagging
-- Extract 2-5 keywords that characterize the topic
+Extract two things:
+1. TOPICS - Main discussion themes (2-4 words each)
+2. ATOMS - Specific knowledge units (problem/solution/insight/decision/question/pattern/requirement)
 
-Guidelines for Atoms:
-- Each atom must be self-contained and actionable
-- Title: Brief but descriptive (under 200 chars)
-- Content: Complete thought that stands alone
-- Type classification:
-  * problem: Issues, bugs, challenges identified
-  * solution: Answers, fixes, resolutions proposed
-  * decision: Choices made, directions selected
-  * insight: Realizations, observations, learnings
-  * question: Unclear points needing clarification
-  * pattern: Recurring themes, architectural patterns
-  * requirement: Needs, constraints, specifications
-- Confidence 0.7+ for auto-creation
-- Link atoms that have relationships:
-  * solves: Solution atom solves problem atom
-  * supports: Atom provides evidence/reasoning for another
-  * contradicts: Atom conflicts with another
-  * continues: Atom builds upon another
-  * refines: Atom adds detail/nuance to another
-  * relates_to: General thematic connection
-  * depends_on: Atom requires another as prerequisite
+JSON STRUCTURE (respond with EXACTLY this format):
+{
+  "topics": [
+    {
+      "name": "Topic Name",
+      "description": "Brief description",
+      "confidence": 0.8,
+      "keywords": ["keyword1", "keyword2"],
+      "related_message_ids": [1, 2]
+    }
+  ],
+  "atoms": [
+    {
+      "type": "problem",
+      "title": "Brief title",
+      "content": "Full description",
+      "confidence": 0.8,
+      "topic_name": "Topic Name",
+      "related_message_ids": [1],
+      "links_to_atom_titles": [],
+      "link_types": []
+    }
+  ]
+}
 
-Quality standards:
-- Avoid duplicating existing knowledge
-- Only extract clear, meaningful knowledge units
-- Ensure atoms are genuinely atomic (single complete thought)
-- Link related atoms to build knowledge graph
-- If confidence is low (<0.7), still extract but flag with lower score
+RULES:
+1. ALL fields must be present (use empty arrays [] for lists if no data)
+2. confidence must be a number between 0.0 and 1.0
+3. type must be one of: problem, solution, insight, decision, question, pattern, requirement
+4. NO extra fields allowed
+5. Respond ONLY with JSON - no markdown formatting, no explanations
 
-Return structured output with topics and atoms."""
+If you cannot extract any topics or atoms, return:
+{"topics": [], "atoms": []}"""
 
 
 class KnowledgeExtractionService:
@@ -160,6 +175,7 @@ class KnowledgeExtractionService:
             model=model,
             system_prompt=self.agent_config.system_prompt,
             output_type=KnowledgeExtractionOutput,
+            output_retries=5,
         )
 
         model_settings_obj: ModelSettings | None = None
@@ -186,22 +202,54 @@ class KnowledgeExtractionService:
                 f"LLM knowledge extraction failed for agent '{self.agent_config.name}': {e}",
                 exc_info=True,
             )
+
+            error_details = []
+            error_details.append(f"Agent: {self.agent_config.name}")
+            error_details.append(f"Model: {self.agent_config.model_name}")
+            error_details.append(f"Provider type: {self.provider.type}")
+            error_details.append(f"Messages analyzed: {len(messages)}")
+
+            logger.error(f"Exception type: {type(e).__name__}")
+            logger.error(f"Exception details: {repr(e)}")
+
+            if hasattr(e, "__cause__") and e.__cause__ is not None:
+                logger.error(f"Root cause: {type(e.__cause__).__name__}: {str(e.__cause__)}")
+
+            if "validation" in str(e).lower() or "retries" in str(e).lower() or "ToolRetryError" in str(type(e)):
+                error_details.append(
+                    "LLM output validation failed - model may not be following the required JSON schema. "
+                    "Consider using a more capable model (e.g., GPT-4, Claude) or adjusting the prompt."
+                )
+
+            logger.error(" | ".join(error_details))
             raise Exception(f"Knowledge extraction failed: {str(e)}. Check provider configuration.") from e
 
     async def save_topics(
-        self, extracted_topics: list[ExtractedTopic], session: AsyncSession, confidence_threshold: float = 0.7
-    ) -> dict[str, Topic]:
+        self,
+        extracted_topics: list[ExtractedTopic],
+        session: AsyncSession,
+        confidence_threshold: float = 0.7,
+        created_by: str | None = None,
+    ) -> tuple[dict[str, Topic], list[int]]:
         """Create or update topics in database.
+
+        For existing topics, creates a version snapshot instead of direct update.
+        For new topics, creates Topic record normally.
 
         Args:
             extracted_topics: Topics extracted from LLM
             session: Database session
             confidence_threshold: Minimum confidence to auto-create (default: 0.7)
+            created_by: User ID who triggered extraction (default: "knowledge_extraction")
 
         Returns:
-            Mapping of topic name -> Topic entity (only for topics meeting threshold)
+            Tuple of (topic_map, version_created_topic_ids):
+                - topic_map: Mapping of topic name -> Topic entity
+                - version_created_topic_ids: List of topic IDs that had versions created
         """
+        versioning_service = VersioningService()
         topic_map: dict[str, Topic] = {}
+        version_created_topic_ids: list[int] = []
 
         for extracted_topic in extracted_topics:
             if extracted_topic.confidence < confidence_threshold:
@@ -215,7 +263,31 @@ class KnowledgeExtractionService:
             existing_topic = result.scalar_one_or_none()
 
             if existing_topic:
-                logger.info(f"Topic '{extracted_topic.name}' already exists (ID: {existing_topic.id}), reusing")
+                logger.info(
+                    f"Topic '{extracted_topic.name}' already exists (ID: {existing_topic.id}), "
+                    "creating version snapshot"
+                )
+
+                icon = auto_select_icon(extracted_topic.name, extracted_topic.description)
+                color = auto_select_color(icon)
+
+                version_data = {
+                    "name": extracted_topic.name,
+                    "description": extracted_topic.description,
+                    "icon": icon,
+                    "color": color,
+                }
+
+                version = await versioning_service.create_topic_version(
+                    db=session,
+                    topic_id=existing_topic.id,
+                    data=version_data,
+                    created_by=created_by or "knowledge_extraction",
+                )
+
+                if existing_topic.id is not None:
+                    version_created_topic_ids.append(existing_topic.id)
+
                 topic_map[extracted_topic.name] = existing_topic
             else:
                 icon = auto_select_icon(extracted_topic.name, extracted_topic.description)
@@ -237,8 +309,10 @@ class KnowledgeExtractionService:
                 topic_map[extracted_topic.name] = new_topic
 
         await session.commit()
-        logger.info(f"Saved {len(topic_map)} topics to database")
-        return topic_map
+        logger.info(
+            f"Saved {len(topic_map)} topics to database ({len(version_created_topic_ids)} had versions created)"
+        )
+        return topic_map, version_created_topic_ids
 
     async def save_atoms(
         self,
@@ -246,19 +320,28 @@ class KnowledgeExtractionService:
         topic_map: dict[str, Topic],
         session: AsyncSession,
         confidence_threshold: float = 0.7,
-    ) -> list[Atom]:
+        created_by: str | None = None,
+    ) -> tuple[list[Atom], list[int]]:
         """Create atoms and link them to topics.
+
+        For existing atoms, creates a version snapshot instead of direct update.
+        For new atoms, creates Atom record normally.
 
         Args:
             extracted_atoms: Atoms extracted from LLM
             topic_map: Mapping of topic names to Topic entities
             session: Database session
             confidence_threshold: Minimum confidence to auto-create (default: 0.7)
+            created_by: User ID who triggered extraction (default: "knowledge_extraction")
 
         Returns:
-            List of created Atom entities
+            Tuple of (saved_atoms, version_created_atom_ids):
+                - saved_atoms: List of created or matched Atom entities
+                - version_created_atom_ids: List of atom IDs that had versions created
         """
+        versioning_service = VersioningService()
         saved_atoms: list[Atom] = []
+        version_created_atom_ids: list[int] = []
 
         for extracted_atom in extracted_atoms:
             if extracted_atom.confidence < confidence_threshold:
@@ -275,34 +358,64 @@ class KnowledgeExtractionService:
                 )
                 continue
 
-            new_atom = Atom(
-                type=extracted_atom.type,
-                title=extracted_atom.title,
-                content=extracted_atom.content,
-                confidence=extracted_atom.confidence,
-                user_approved=False,
-                meta={"source": "llm_extraction", "message_ids": extracted_atom.related_message_ids},
-            )
-            session.add(new_atom)
-            await session.flush()
+            result = await session.execute(select(Atom).where(Atom.title == extracted_atom.title))  # type: ignore[arg-type]
+            existing_atom = result.scalar_one_or_none()
 
-            topic = topic_map[extracted_atom.topic_name]
-            topic_atom = TopicAtom(
-                topic_id=topic.id,
-                atom_id=new_atom.id,
-                note=f"Auto-extracted with confidence {extracted_atom.confidence:.2f}",
-            )
-            session.add(topic_atom)
+            if existing_atom:
+                logger.info(
+                    f"Atom '{extracted_atom.title}' already exists (ID: {existing_atom.id}), creating version snapshot"
+                )
 
-            logger.info(
-                f"Created atom '{extracted_atom.title}' (ID: {new_atom.id}, type: {extracted_atom.type}, "
-                f"topic: {extracted_atom.topic_name}, confidence: {extracted_atom.confidence:.2f})"
-            )
-            saved_atoms.append(new_atom)
+                version_data = {
+                    "type": extracted_atom.type,
+                    "title": extracted_atom.title,
+                    "content": extracted_atom.content,
+                    "confidence": extracted_atom.confidence,
+                    "meta": {"source": "llm_extraction", "message_ids": extracted_atom.related_message_ids},
+                }
+
+                version = await versioning_service.create_atom_version(
+                    db=session,
+                    atom_id=existing_atom.id,
+                    data=version_data,
+                    created_by=created_by or "knowledge_extraction",
+                )
+
+                if existing_atom.id is not None:
+                    version_created_atom_ids.append(existing_atom.id)
+
+                saved_atoms.append(existing_atom)
+            else:
+                new_atom = Atom(
+                    type=extracted_atom.type,
+                    title=extracted_atom.title,
+                    content=extracted_atom.content,
+                    confidence=extracted_atom.confidence,
+                    user_approved=False,
+                    meta={"source": "llm_extraction", "message_ids": extracted_atom.related_message_ids},
+                )
+                session.add(new_atom)
+                await session.flush()
+
+                topic = topic_map[extracted_atom.topic_name]
+                topic_atom = TopicAtom(
+                    topic_id=topic.id,
+                    atom_id=new_atom.id,
+                    note=f"Auto-extracted with confidence {extracted_atom.confidence:.2f}",
+                )
+                session.add(topic_atom)
+
+                logger.info(
+                    f"Created atom '{extracted_atom.title}' (ID: {new_atom.id}, type: {extracted_atom.type}, "
+                    f"topic: {extracted_atom.topic_name}, confidence: {extracted_atom.confidence:.2f})"
+                )
+                saved_atoms.append(new_atom)
 
         await session.commit()
-        logger.info(f"Saved {len(saved_atoms)} atoms to database")
-        return saved_atoms
+        logger.info(
+            f"Saved {len(saved_atoms)} atoms to database ({len(version_created_atom_ids)} had versions created)"
+        )
+        return saved_atoms, version_created_atom_ids
 
     async def link_atoms(
         self, extracted_atoms: list[ExtractedAtom], saved_atoms: list[Atom], session: AsyncSession
@@ -492,3 +605,71 @@ Return structured output with topics and atoms."""
 
         else:
             raise ValueError(f"Unsupported provider type: {self.provider.type}. Supported types: ollama, openai")
+
+
+async def get_messages_by_period(
+    db: AsyncSession,
+    period_type: PeriodType,
+    topic_id: int | None = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
+) -> list[int]:
+    """Get message IDs by time period and optional topic filter.
+
+    Args:
+        db: Database session
+        period_type: Time period type (last_24h/last_7d/last_30d/custom)
+        topic_id: Optional topic ID to filter messages
+        start_date: Start date for custom period (timezone-aware)
+        end_date: End date for custom period (timezone-aware)
+
+    Returns:
+        List of message IDs matching criteria
+
+    Raises:
+        ValueError: If custom period dates are invalid or missing
+    """
+    now = datetime.now(UTC)
+
+    if period_type == "last_24h":
+        start_time = now - timedelta(hours=24)
+        end_time = now
+    elif period_type == "last_7d":
+        start_time = now - timedelta(days=7)
+        end_time = now
+    elif period_type == "last_30d":
+        start_time = now - timedelta(days=30)
+        end_time = now
+    elif period_type == "custom":
+        if not start_date or not end_date:
+            raise ValueError("Custom period requires both start_date and end_date")
+
+        if start_date > now or end_date > now:
+            raise ValueError("Custom period dates cannot be in the future")
+
+        if start_date >= end_date:
+            raise ValueError("start_date must be before end_date")
+
+        start_time = start_date.replace(tzinfo=UTC) if start_date.tzinfo is None else start_date
+        end_time = end_date.replace(tzinfo=UTC) if end_date.tzinfo is None else end_date
+    else:
+        raise ValueError(f"Invalid period_type: {period_type}")
+
+    start_time_naive = start_time.replace(tzinfo=None)
+    end_time_naive = end_time.replace(tzinfo=None)
+
+    stmt = select(Message).where(Message.sent_at >= start_time_naive, Message.sent_at <= end_time_naive)  # type: ignore[arg-type]
+
+    if topic_id is not None:
+        stmt = stmt.where(Message.topic_id == topic_id)  # type: ignore[arg-type]
+
+    result = await db.execute(stmt)
+    messages = result.scalars().all()
+    message_ids = [msg.id for msg in messages if msg.id is not None]
+
+    logger.info(
+        f"Found {len(message_ids)} messages for period {period_type} "
+        f"(start: {start_time}, end: {end_time}, topic_id: {topic_id})"
+    )
+
+    return message_ids

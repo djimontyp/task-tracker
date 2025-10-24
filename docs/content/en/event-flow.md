@@ -53,9 +53,36 @@ sequenceDiagram
         deactivate Worker
     end
 
-    %% Phase 2: Analysis Run Creation
+    %% Phase 2: Knowledge Extraction
     rect rgb(255, 250, 240)
-        Note over TG,Client: Phase 2: Analysis Run Creation
+        Note over TG,Client: Phase 2: Knowledge Extraction (Topics/Atoms)
+        Client->>API: POST /api/knowledge/extract (from messages)
+        API->>NATS: knowledge_extraction.kiq()
+        API-->>Client: 202 Accepted (extraction_id)
+
+        activate Worker
+        NATS->>Worker: Deliver extraction task
+        Worker->>DB: SELECT messages in time window
+        Worker->>Worker: LLM Extract Topics/Atoms (Pydantic-AI)
+        Worker->>DB: INSERT topic_proposals, atom_proposals (status=pending)
+        Worker->>WS: broadcast("knowledge_extraction", proposals_created)
+        WS-->>Client: WebSocket: proposals_created
+        deactivate Worker
+    end
+
+    %% Phase 3: Approve Topics/Atoms
+    rect rgb(240, 255, 200)
+        Note over TG,Client: Phase 3: Human Review of TopicProposals
+        Client->>API: GET /api/knowledge/proposals (review)
+        Client->>API: POST /api/knowledge/proposals/{id}/approve
+        API->>DB: INSERT topic/atom (from approved proposal)
+        API->>WS: broadcast("topics", topic_created)
+        WS-->>Client: WebSocket: topic_created
+    end
+
+    %% Phase 4: Analysis Run Creation
+    rect rgb(255, 250, 240)
+        Note over TG,Client: Phase 4: Analysis Run Creation
         Client->>API: POST /api/runs (create analysis run)
         API->>DB: Check for unclosed runs
         alt Unclosed run exists
@@ -66,9 +93,9 @@ sequenceDiagram
         end
     end
 
-    %% Phase 3: Start Analysis Run
+    %% Phase 5: Start Analysis Run
     rect rgb(240, 255, 240)
-        Note over TG,Client: Phase 3: Background Analysis Execution
+        Note over TG,Client: Phase 5: Background Task Proposal Analysis
         Client->>API: POST /api/runs/{id}/start
         API->>NATS: execute_analysis_run.kiq(run_id)
         API-->>Client: 202 Accepted
@@ -81,19 +108,19 @@ sequenceDiagram
         Worker->>WS: broadcast("analysis_runs", run_started)
         WS-->>Client: WebSocket: run_started
 
-        %% Step 2: Fetch messages
-        Worker->>DB: SELECT messages WHERE sent_at IN [window]
-        DB-->>Worker: messages[]
+        %% Step 2: Fetch approved topics/atoms
+        Worker->>DB: SELECT topics, atoms WHERE approved=true
+        DB-->>Worker: topics[], atoms[]
 
-        %% Step 3: Pre-filter
-        Note over Worker: Filter by keywords, length, mentions
+        %% Step 3: Prepare knowledge context
+        Note over Worker: Prepare accumulated knowledge from topics/atoms
 
         %% Step 4: Create batches
-        Note over Worker: Group into 10min windows, max 50 msgs
+        Note over Worker: Group into 10min windows, max 50 items
 
         %% Step 5: Process each batch
         loop For each batch
-            Worker->>Worker: LLM Analysis (Pydantic-AI)
+            Worker->>Worker: LLM Analyze Knowledge (Pydantic-AI)
             Worker->>DB: INSERT task_proposals (batch)
             Worker->>DB: UPDATE run progress
             Worker->>WS: broadcast("analysis_runs", proposals_created)
@@ -109,9 +136,9 @@ sequenceDiagram
         deactivate Worker
     end
 
-    %% Phase 4: Proposal Review
+    %% Phase 6: Proposal Review
     rect rgb(255, 240, 255)
-        Note over TG,Client: Phase 4: PM Review Workflow
+        Note over TG,Client: Phase 6: PM Review TaskProposals
 
         %% Approve proposal
         Client->>API: PUT /api/proposals/{id}/approve
@@ -126,9 +153,9 @@ sequenceDiagram
         Note over Client: Repeat for reject/merge actions
     end
 
-    %% Phase 5: Close Analysis Run
+    %% Phase 7: Close Analysis Run
     rect rgb(255, 255, 240)
-        Note over TG,Client: Phase 5: Close Analysis Run
+        Note over TG,Client: Phase 7: Close Analysis Run
         Client->>API: PUT /api/runs/{id}/close
         API->>DB: SELECT run WHERE proposals_pending > 0
         alt Pending proposals exist

@@ -1,5 +1,7 @@
 # Task Tracker - AI-powered Task Classification System
 
+## **Important** Use SKILLS proactively!
+
 ## Architecture
 Event-driven microservices: **Telegram Bot** → **FastAPI Backend** (REST + WebSocket) → **React Dashboard** + **TaskIQ Worker** (NATS broker) + **PostgreSQL** + **Docker**
 
@@ -21,9 +23,11 @@ Event-driven microservices: **Telegram Bot** → **FastAPI Backend** (REST + Web
 
 ## Guidelines
 - **Delegation**: Use specialized agents (fastapi-backend-expert, react-frontend-architect, ...(from available agents list))
+  - **Research/Investigation**: Prefer specialized agents over direct exploration - they're more efficient and thorough
 - **Patterns**: Async/await, dependency injection, type safety with mypy static analysis
 - **Quality**: Run `just typecheck` after backend changes to ensure type safety
 - **Imports**: Use absolute imports only (e.g., `from app.models import User`), never relative imports (e.g., `from . import User`)
+- **Estimations**: NEVER provide time/effort estimates unless explicitly requested by user
 - **Forbidden**: Modify dependencies without approval, commit secrets, use relative imports
 
 ## Code Quality Standards
@@ -33,3 +37,46 @@ Event-driven microservices: **Telegram Bot** → **FastAPI Backend** (REST + Web
     - ❌ BAD: `{/* Navigation Item */}`, `# Step 2: Update via API`, `// Create user object`
     - ✅ GOOD: Explain WHY, not WHAT (e.g., complex business rules, non-obvious optimizations, workarounds)
     - Rule: If code is self-explanatory, don't comment it. 80-90% of structural comments are noise
+
+## Documentation
+
+Project documentation is organized in `docs/content/{en,uk}/`:
+
+```
+docs/content/
+├── en/
+│   ├── api/
+│   │   └── knowledge.md
+│   ├── architecture/
+│   │   ├── analysis-system.md
+│   │   ├── diagrams.md
+│   │   ├── knowledge-extraction.md
+│   │   ├── noise-filtering.md
+│   │   ├── overview.md
+│   │   └── vector-database.md
+│   ├── auto-save.md
+│   ├── event-flow.md
+│   ├── index.md
+│   ├── knowledge-extraction.md
+│   └── topics.md
+├── uk/
+│   ├── api/
+│   │   └── knowledge.md
+│   ├── architecture/
+│   │   ├── analysis-system.md
+│   │   ├── diagrams.md
+│   │   ├── knowledge-extraction.md
+│   │   ├── noise-filtering.md
+│   │   ├── overview.md
+│   │   └── vector-database.md
+│   ├── auto-save.md
+│   ├── event-flow.md
+│   ├── index.md
+│   ├── knowledge-extraction.md
+│   └── topics.md
+```
+
+**Commands:**
+- `just docs` - Serve documentation locally on http://127.0.0.1:8081
+- **Source**: Bilingual markdown files in `docs/content/{en,uk}/`
+- **Built site**: `docs/site/` (generated, gitignored)

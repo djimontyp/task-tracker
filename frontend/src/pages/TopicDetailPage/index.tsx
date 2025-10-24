@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeftIcon, CheckCircleIcon, CloudArrowUpIcon, ExclamationCircleIcon, PlusIcon } from '@heroicons/react/24/outline'
-import { Card, Input, Textarea, Button, Skeleton, Switch, Label } from '@/shared/ui'
+import { ArrowLeftIcon, CheckCircleIcon, CloudArrowUpIcon, ExclamationCircleIcon, PlusIcon, ClockIcon, SparklesIcon } from '@heroicons/react/24/outline'
+import { Card, Input, Textarea, Button, Skeleton, Switch, Label, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Badge } from '@/shared/ui'
 import { ColorPickerPopover } from '@/shared/components'
 import { topicService } from '@/features/topics/api/topicService'
 import { atomService } from '@/features/atoms/api/atomService'
 import { messageService } from '@/features/messages/api/messageService'
 import { AtomCard, CreateAtomDialog } from '@/features/atoms/components'
+import { VersionHistoryList, VersionDiffViewer, KnowledgeExtractionPanel } from '@/features/knowledge'
 import { renderTopicIcon } from '@/features/topics/utils/renderIcon'
 import { useDebounce } from '@/shared/hooks'
+import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
 import type { Topic } from '@/features/topics/types'
 import type { Atom } from '@/features/atoms/types'
 import type { Message } from '@/shared/types'
@@ -30,6 +32,11 @@ const TopicDetailPage = () => {
   const [isInitialized, setIsInitialized] = useState(false)
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [showVersionHistory, setShowVersionHistory] = useState(false)
+  const [selectedVersion, setSelectedVersion] = useState<number | null>(null)
+  const [compareToVersion, setCompareToVersion] = useState<number | null>(null)
+  const [showExtractionPanel, setShowExtractionPanel] = useState(false)
+  const [pendingVersionsCount, setPendingVersionsCount] = useState(0)
 
   const initialValuesRef = useRef<{ name: string; description: string } | null>(null)
   const saveTimeoutRef = useRef<NodeJS.Timeout>()
@@ -54,6 +61,20 @@ const TopicDetailPage = () => {
     queryKey: ['messages', 'topic', parseInt(topicId!)],
     queryFn: () => messageService.getMessagesByTopic(parseInt(topicId!)),
     enabled: !!topicId,
+  })
+
+  const { isConnected } = useWebSocket({
+    topics: ['knowledge'],
+    onMessage: (data: unknown) => {
+      const event = data as { type?: string; data?: { entity_type?: string; entity_id?: number } }
+
+      if (event.type === 'knowledge.version_created' &&
+          event.data?.entity_type === 'topic' &&
+          event.data?.entity_id === parseInt(topicId!)) {
+        setPendingVersionsCount((prev) => prev + 1)
+        queryClient.invalidateQueries({ queryKey: ['topic', parseInt(topicId!)] })
+      }
+    },
   })
 
   useEffect(() => {
@@ -346,18 +367,78 @@ const TopicDetailPage = () => {
             </div>
 
             <div className="flex-1 space-y-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                  Topic Name
-                </label>
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter topic name"
-                  className={`text-2xl font-bold h-auto py-2 transition-colors ${
-                    hasUnsavedChanges ? 'border-amber-300 dark:border-amber-700' : ''
-                  }`}
-                />
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Topic Name
+                  </label>
+                  <Input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter topic name"
+                    className={`text-2xl font-bold h-auto py-2 transition-colors ${
+                      hasUnsavedChanges ? 'border-amber-300 dark:border-amber-700' : ''
+                    }`}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 pt-7">
+                  <Sheet open={showVersionHistory} onOpenChange={setShowVersionHistory}>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" size="sm" aria-label="View version history">
+                        <ClockIcon className="h-4 w-4 mr-2" />
+                        Version History
+                        {pendingVersionsCount > 0 && (
+                          <Badge className="ml-2 bg-amber-500 text-white hover:bg-amber-600">
+                            {pendingVersionsCount} pending
+                          </Badge>
+                        )}
+                      </Button>
+                    </SheetTrigger>
+
+                    <SheetContent side="right" className="w-[500px] sm:w-[600px] overflow-y-auto">
+                      <SheetHeader>
+                        <SheetTitle>Version History - {topic.name}</SheetTitle>
+                      </SheetHeader>
+
+                      <div className="mt-6">
+                        <VersionHistoryList
+                          entityType="topic"
+                          entityId={topic.id}
+                          onSelectVersion={(version) => {
+                            setSelectedVersion(version)
+                            setCompareToVersion(version - 1)
+                          }}
+                        />
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+
+                  <Dialog open={showExtractionPanel} onOpenChange={setShowExtractionPanel}>
+                    <DialogTrigger asChild>
+                      <Button variant="default" size="sm" aria-label="Extract knowledge from messages">
+                        <SparklesIcon className="h-4 w-4 mr-2" />
+                        Extract Knowledge
+                      </Button>
+                    </DialogTrigger>
+
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Extract Knowledge from Messages</DialogTitle>
+                      </DialogHeader>
+
+                      <KnowledgeExtractionPanel
+                        messageIds={messages.filter(m => typeof m.id === 'number').map((m) => m.id as number)}
+                        topicId={parseInt(topicId!)}
+                        onComplete={() => {
+                          setShowExtractionPanel(false)
+                          queryClient.invalidateQueries({ queryKey: ['topic', parseInt(topicId!)] })
+                          queryClient.invalidateQueries({ queryKey: ['atoms', 'topic', parseInt(topicId!)] })
+                        }}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </div>
 
               <div className="flex items-center gap-3">
@@ -508,6 +589,41 @@ const TopicDetailPage = () => {
           queryClient.invalidateQueries({ queryKey: ['atoms', 'topic', parseInt(topicId!)] })
         }}
       />
+
+      {selectedVersion && compareToVersion !== null && (
+        <Dialog
+          open={selectedVersion !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedVersion(null)
+              setCompareToVersion(null)
+            }
+          }}
+        >
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Version Comparison</DialogTitle>
+            </DialogHeader>
+
+            <VersionDiffViewer
+              entityType="topic"
+              entityId={topic.id}
+              version={selectedVersion}
+              compareToVersion={compareToVersion}
+              onApprove={() => {
+                setPendingVersionsCount((prev) => Math.max(0, prev - 1))
+                setSelectedVersion(null)
+                setCompareToVersion(null)
+                queryClient.invalidateQueries({ queryKey: ['topic', parseInt(topicId!)] })
+              }}
+              onReject={() => {
+                setSelectedVersion(null)
+                setCompareToVersion(null)
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }

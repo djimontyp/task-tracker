@@ -1,0 +1,32 @@
+[
+  {
+    "content": "Initialize orchestration session for knowledge system investigation",
+    "status": "completed",
+    "activeForm": "Initializing orchestration session"
+  },
+  {
+    "content": "Deep investigation: Topics/Atoms/Knowledge Extraction (backend + frontend + docs)",
+    "status": "pending",
+    "activeForm": "Investigating knowledge extraction system"
+  },
+  {
+    "content": "Analyze current implementation gaps vs documented concept",
+    "status": "pending",
+    "activeForm": "Analyzing implementation gaps"
+  },
+  {
+    "content": "Design proposal system with versioning and approvals for Topics/Atoms",
+    "status": "pending",
+    "activeForm": "Designing proposal system"
+  },
+  {
+    "content": "Create comprehensive implementation plan",
+    "status": "pending",
+    "activeForm": "Creating implementation plan"
+  },
+  {
+    "content": "Present findings and roadmap to user",
+    "status": "pending",
+    "activeForm": "Presenting findings"
+  }
+]

@@ -20,27 +20,51 @@
 
 ## System Overview
 
-The Analysis System is an AI-powered task classification and proposal generation engine. It ingests messages, analyzes them with LLMs, and generates structured task proposals based on configurable classification schemes.
+The Analysis System is a two-stage knowledge-to-tasks pipeline:
+
+1. **Knowledge Extraction Stage** - Converts raw messages into structured Topics and Atoms (approved by users)
+2. **Task Proposal Stage** - Analyzes accumulated knowledge to generate TaskProposals for bugs, features, and improvements
+
+This separation ensures decisions are based on consolidated, vetted knowledge rather than raw messages.
 
 ### High-Level Architecture
 
 ```
-Messages (raw, signal only)
+Messages (raw, all sources)
+    ↓
+Knowledge Extraction Service
+    ├─ Extract entities & patterns
+    ├─ Generate embeddings
+    ↓
+TopicProposals / AtomProposals (PENDING)
+    ├─ Suggested topics
+    ├─ Suggested atoms
+    ├─ Confidence scores
+    ↓
+[REVIEW] Human Approval
+    ├─ Approve/reject proposals
+    ├─ Mark approved items
+    ↓
+Topics / Atoms (CREATED)
+    ├─ Approved topics
+    ├─ Aggregated atoms
+    ├─ Structured knowledge
     ↓
 Analysis Run (PENDING)
     ├─ Configure LLM provider
-    ├─ Set classification scheme
+    ├─ Select topics/atoms for analysis
     ├─ Define time window
     ↓
-[RUNNING] Process Messages
-    ├─ Prefiltering (remove duplicates)
-    ├─ Create batches
+[RUNNING] Analyze Accumulated Knowledge
+    ├─ Process approved topics/atoms
     ├─ Generate embeddings (if RAG)
-    ├─ Build context (if RAG)
-    ├─ Call LLM for classification
+    ├─ Build context from topics
+    ├─ Call LLM for task proposals
     ↓
-[COMPLETED] Generate Proposals
-    ├─ Structured task proposals
+[COMPLETED] Generate TaskProposals
+    ├─ Task proposals from topics/atoms
+    ├─ Bug proposals from identified issues
+    ├─ Feature proposals from suggestions
     ├─ Confidence scores
     ├─ Reasoning chains
     ↓
@@ -79,7 +103,12 @@ pending → running → completed → review_required → approved → closed
 
 ### 2. Task Proposal
 
-AI-generated proposal from message analysis.
+AI-generated proposal derived from approved Topics and Atoms (NOT directly from Messages).
+
+**Sources of TaskProposals:**
+- Topics (accumulated knowledge analysis)
+- Atoms (identified issues and suggestions)
+- User feedback (improvement proposals)
 
 **Structure:**
 ```python
@@ -88,10 +117,11 @@ AI-generated proposal from message analysis.
     "task_type": "bug|feature|question|insight",
     "title": "iOS crash on login",
     "description": "App crashes when user tries to log in",
-    "source_message_ids": [101, 102, 103],
+    "source_topic_ids": [1, 2],         # ← From Topics/Atoms
+    "source_atom_ids": [101, 102, 103], # ← From Atoms, not Messages
     "confidence": 0.95,
     "recommendation": "APPROVE",  # AI recommendation
-    "reasoning": "Multiple reports of iOS login crash",
+    "reasoning": "Topic indicates multiple iOS login issues",
     "llm_metadata": {
         "model": "gpt-4",
         "tokens_used": 2000,
@@ -402,20 +432,23 @@ Response: 200
 
 **Trigger:** User calls `POST /api/v1/analysis/runs/{id}/start`
 
+**Important:** This job processes APPROVED Topics/Atoms, NOT raw Messages
+
 **Process:**
 ```python
 async def execute_analysis_run(run_id: UUID, use_rag: bool = False):
     # 1. Start run (status → RUNNING)
     await executor.start_run(run_id)
 
-    # 2. Fetch messages (with noise filter)
-    messages = await executor.fetch_messages(run_id)
+    # 2. Fetch approved topics and atoms (NOT messages!)
+    topics = await executor.fetch_topics(run_id)
+    atoms = await executor.fetch_atoms(run_id)
 
-    # 3. Prefilter (remove duplicates)
-    filtered = await executor.prefilter_messages(run_id, messages)
+    # 3. Prepare knowledge context
+    knowledge_context = await executor.prepare_context(topics, atoms)
 
-    # 4. Create batches
-    batches = await executor.create_batches(filtered)
+    # 4. Create batches from accumulated knowledge
+    batches = await executor.create_batches(knowledge_context)
 
     # 5. Process each batch
     for batch in batches:
@@ -423,16 +456,16 @@ async def execute_analysis_run(run_id: UUID, use_rag: bool = False):
         if use_rag:
             embeddings = await embedding_service.embed_batch(batch)
 
-        # 5b. Build context (if RAG)
+        # 5b. Build context (if RAG) - from previous proposals + topics
         if use_rag:
             context = await rag_builder.build_context(batch)
 
-        # 5c. Call LLM
-        proposals = await llm_service.generate_proposals(
+        # 5c. Call LLM to analyze knowledge
+        proposals = await llm_service.generate_task_proposals(
             batch, project_config, rag_context=context if use_rag else None
         )
 
-        # 5d. Save proposals
+        # 5d. Save proposals (TaskProposals from topics/atoms)
         await executor.save_proposals(run_id, proposals)
 
         # 5e. Broadcast progress

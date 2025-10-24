@@ -53,9 +53,36 @@ sequenceDiagram
         deactivate Worker
     end
 
-    %% Фаза 2: Створення Аналітичного Прогону
+    %% Фаза 2: Видобування Знань
     rect rgb(255, 250, 240)
-        Note over TG,Client: Фаза 2: Створення Аналітичного Прогону
+        Note over TG,Client: Фаза 2: Видобування Знань (Теми/Атоми)
+        Client->>API: POST /api/knowledge/extract (з повідомлень)
+        API->>NATS: knowledge_extraction.kiq()
+        API-->>Client: 202 Accepted (extraction_id)
+
+        activate Worker
+        NATS->>Worker: Доставка завдання видобування
+        Worker->>DB: SELECT messages у часовому вікні
+        Worker->>Worker: LLM Видобути теми/атоми (Pydantic-AI)
+        Worker->>DB: INSERT topic_proposals, atom_proposals (status=pending)
+        Worker->>WS: broadcast("knowledge_extraction", proposals_created)
+        WS-->>Client: WebSocket: proposals_created
+        deactivate Worker
+    end
+
+    %% Фаза 3: Затвердження тем/атомів
+    rect rgb(240, 255, 200)
+        Note over TG,Client: Фаза 3: Людський перегляд пропозицій
+        Client->>API: GET /api/knowledge/proposals (перегляд)
+        Client->>API: POST /api/knowledge/proposals/{id}/approve
+        API->>DB: INSERT topic/atom (з затвердженої пропозиції)
+        API->>WS: broadcast("topics", topic_created)
+        WS-->>Client: WebSocket: topic_created
+    end
+
+    %% Фаза 4: Створення Аналітичного Прогону
+    rect rgb(255, 250, 240)
+        Note over TG,Client: Фаза 4: Створення Аналітичного Прогону
         Client->>API: POST /api/runs (створити аналіз)
         API->>DB: Перевірка незакритих прогонів
         alt Незакритий прогон існує
@@ -66,9 +93,9 @@ sequenceDiagram
         end
     end
 
-    %% Фаза 3: Запуск Аналізу
+    %% Фаза 5: Запуск Аналізу
     rect rgb(240, 255, 240)
-        Note over TG,Client: Фаза 3: Фонове Виконання Аналізу
+        Note over TG,Client: Фаза 5: Фонова Обробка Аналізу Пропозицій Задач
         Client->>API: POST /api/runs/{id}/start
         API->>NATS: execute_analysis_run.kiq(run_id)
         API-->>Client: 202 Accepted
@@ -81,19 +108,19 @@ sequenceDiagram
         Worker->>WS: broadcast("analysis_runs", run_started)
         WS-->>Client: WebSocket: run_started
 
-        %% Крок 2: Отримання повідомлень
-        Worker->>DB: SELECT messages WHERE sent_at IN [window]
-        DB-->>Worker: messages[]
+        %% Крок 2: Отримання затверджених тем/атомів
+        Worker->>DB: SELECT topics, atoms WHERE approved=true
+        DB-->>Worker: topics[], atoms[]
 
-        %% Крок 3: Префільтрація
-        Note over Worker: Фільтр за ключовими словами, довжиною, згадками
+        %% Крок 3: Підготовка контексту знань
+        Note over Worker: Підготувати накопичені знання з тем/атомів
 
         %% Крок 4: Створення батчів
-        Note over Worker: Групування по 10хв вікнах, макс 50 повідомлень
+        Note over Worker: Групування по 10хв вікнах, макс 50 елементів
 
         %% Крок 5: Обробка кожного батчу
         loop Для кожного батчу
-            Worker->>Worker: LLM Аналіз (Pydantic-AI)
+            Worker->>Worker: LLM Аналіз Знань (Pydantic-AI)
             Worker->>DB: INSERT task_proposals (batch)
             Worker->>DB: UPDATE прогрес прогону
             Worker->>WS: broadcast("analysis_runs", proposals_created)
@@ -109,9 +136,9 @@ sequenceDiagram
         deactivate Worker
     end
 
-    %% Фаза 4: Перегляд Пропозицій
+    %% Фаза 6: Перегляд Пропозицій
     rect rgb(255, 240, 255)
-        Note over TG,Client: Фаза 4: Робочий Процес PM
+        Note over TG,Client: Фаза 6: Перегляд PM Пропозицій Задач
 
         %% Схвалення пропозиції
         Client->>API: PUT /api/proposals/{id}/approve
@@ -126,9 +153,9 @@ sequenceDiagram
         Note over Client: Повторити для reject/merge дій
     end
 
-    %% Фаза 5: Закриття Аналітичного Прогону
+    %% Фаза 7: Закриття Аналітичного Прогону
     rect rgb(255, 255, 240)
-        Note over TG,Client: Фаза 5: Закриття Аналітичного Прогону
+        Note over TG,Client: Фаза 7: Закриття Аналітичного Прогону
         Client->>API: PUT /api/runs/{id}/close
         API->>DB: SELECT run WHERE proposals_pending > 0
         alt Існують очікуючі пропозиції

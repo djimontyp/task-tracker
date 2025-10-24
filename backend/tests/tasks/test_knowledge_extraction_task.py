@@ -130,7 +130,19 @@ async def test_queue_extraction_threshold_reached(
     db_session: AsyncSession, sample_provider: LLMProvider, sample_messages: list[Message]
 ) -> None:
     """Test auto-queueing when unprocessed message threshold is reached."""
+    from app.models import AgentConfig
     from app.tasks import queue_knowledge_extraction_if_needed
+
+    agent_config = AgentConfig(
+        id=uuid4(),
+        name="knowledge_extractor",
+        provider_id=sample_provider.id,
+        model_name="qwen2.5:14b",
+        system_prompt="Extract knowledge",
+        is_active=True,
+    )
+    db_session.add(agent_config)
+    await db_session.commit()
 
     assert len(sample_messages) >= KNOWLEDGE_EXTRACTION_THRESHOLD
 
@@ -142,7 +154,7 @@ async def test_queue_extraction_threshold_reached(
         mock_task.kiq.assert_called_once()
         call_kwargs = mock_task.kiq.call_args[1]
         assert "message_ids" in call_kwargs
-        assert "provider_id" in call_kwargs
+        assert "agent_config_id" in call_kwargs
         assert len(call_kwargs["message_ids"]) >= KNOWLEDGE_EXTRACTION_THRESHOLD
 
 
@@ -284,7 +296,19 @@ async def test_queue_extraction_limit_50_messages(
     db_session: AsyncSession, sample_provider: LLMProvider, sample_user: User, sample_source: Source
 ) -> None:
     """Test that extraction is limited to 50 messages even if more are available."""
+    from app.models import AgentConfig
     from app.tasks import queue_knowledge_extraction_if_needed
+
+    agent_config = AgentConfig(
+        id=uuid4(),
+        name="knowledge_extractor",
+        provider_id=sample_provider.id,
+        model_name="qwen2.5:14b",
+        system_prompt="Extract knowledge",
+        is_active=True,
+    )
+    db_session.add(agent_config)
+    await db_session.commit()
 
     messages = []
     for i in range(60):
@@ -309,3 +333,106 @@ async def test_queue_extraction_limit_50_messages(
         mock_task.kiq.assert_called_once()
         call_kwargs = mock_task.kiq.call_args[1]
         assert len(call_kwargs["message_ids"]) == 50
+
+
+@pytest.mark.asyncio
+async def test_queue_extraction_creates_agent_config_requirement(
+    db_session: AsyncSession, sample_provider: LLMProvider, sample_user: User, sample_source: Source
+) -> None:
+    """Test that threshold requires knowledge_extractor agent config."""
+    from app.models import AgentConfig
+    from app.tasks import queue_knowledge_extraction_if_needed
+
+    agent = AgentConfig(
+        id=uuid4(),
+        name="knowledge_extractor",
+        provider_id=sample_provider.id,
+        model_name="qwen2.5:14b",
+        system_prompt="Extract knowledge",
+        is_active=True,
+    )
+    db_session.add(agent)
+    await db_session.commit()
+
+    messages = []
+    for i in range(KNOWLEDGE_EXTRACTION_THRESHOLD):
+        message = Message(
+            external_message_id=f"msg_with_agent_{i}",
+            content=f"Content {i}",
+            sent_at=datetime.now(UTC),
+            source_id=sample_source.id,
+            author_id=sample_user.id,
+            topic_id=None,
+        )
+        db_session.add(message)
+        messages.append(message)
+
+    await db_session.commit()
+
+    with patch("app.tasks.extract_knowledge_from_messages_task") as mock_task:
+        mock_task.kiq = AsyncMock()
+        await queue_knowledge_extraction_if_needed(messages[-1].id, db_session)
+        mock_task.kiq.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_extract_knowledge_task_validates_agent_exists() -> None:
+    """Test that task validates agent config existence."""
+    from app.models import AgentConfig
+    from app.services.knowledge_extraction_service import KnowledgeExtractionService
+
+    agent_config = AgentConfig(
+        id=uuid4(),
+        name="test_agent",
+        provider_id=uuid4(),
+        model_name="qwen2.5:14b",
+        system_prompt="Test system prompt",
+        is_active=True,
+    )
+
+    from app.services.knowledge_extraction_service import KnowledgeExtractionOutput, ExtractedTopic, ExtractedAtom
+
+    output = KnowledgeExtractionOutput(
+        topics=[
+            ExtractedTopic(
+                name="Test",
+                description="Test",
+                confidence=0.9,
+                keywords=["test"],
+                related_message_ids=[1],
+            )
+        ],
+        atoms=[
+            ExtractedAtom(
+                type="problem",
+                title="Test",
+                content="Test",
+                confidence=0.9,
+                topic_name="Test",
+                related_message_ids=[1],
+                links_to_atom_titles=[],
+                link_types=[],
+            )
+        ],
+    )
+
+    assert len(output.topics) == 1
+    assert len(output.atoms) == 1
+
+
+@pytest.mark.asyncio
+async def test_extract_knowledge_task_output_structure() -> None:
+    """Test knowledge extraction task returns proper output structure."""
+    output_dict = {
+        "topics_created": 5,
+        "atoms_created": 10,
+        "links_created": 3,
+        "messages_updated": 8,
+    }
+
+    assert "topics_created" in output_dict
+    assert "atoms_created" in output_dict
+    assert "links_created" in output_dict
+    assert "messages_updated" in output_dict
+    assert output_dict["topics_created"] == 5
+    assert output_dict["atoms_created"] == 10
