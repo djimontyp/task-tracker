@@ -9,7 +9,12 @@ import {
   Input,
   Label,
   Checkbox,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@/shared/ui'
+import { InformationCircleIcon } from '@heroicons/react/24/outline'
 import { TaskConfigCreate, TaskConfigUpdate, JsonSchema } from '@/features/agents/types'
 import SchemaEditor from './SchemaEditor'
 
@@ -94,13 +99,32 @@ const TaskForm = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Response Schema *</Label>
+          <fieldset className="space-y-2">
+            <legend className="sr-only">Response Fields Configuration</legend>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="response-fields">Response Fields *</Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <InformationCircleIcon
+                      className="h-4 w-4 text-muted-foreground cursor-help"
+                      aria-label="Response fields help"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Define the structure of data the AI will return</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Define what data the AI agent should return
+            </p>
             <SchemaEditor
               value={formData.response_schema || defaultSchema}
               onChange={handleSchemaChange}
             />
-          </div>
+          </fieldset>
 
           <div className="flex items-center space-x-2">
             <Checkbox

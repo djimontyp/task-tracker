@@ -1,5 +1,8 @@
-import React from 'react'
-import { Card } from '@/shared/ui'
+import React, { useState, useEffect } from 'react'
+import { Card, Badge, Button } from '@/shared/ui'
+import { ClockIcon } from '@heroicons/react/24/outline'
+import { versioningService } from '@/features/knowledge/api/versioningService'
+import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
 import type { Atom, AtomType } from '../types'
 
 interface AtomCardProps {
@@ -28,6 +31,37 @@ const atomTypeLabels: Record<AtomType, string> = {
 }
 
 const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
+  const [pendingVersionsCount, setPendingVersionsCount] = useState(0)
+
+  useEffect(() => {
+    loadPendingVersions()
+  }, [atom.id])
+
+  const loadPendingVersions = async () => {
+    try {
+      const versions = await versioningService.getAtomVersions(atom.id)
+      const pendingCount = versions.filter((v) => !v.approved).length
+      setPendingVersionsCount(pendingCount)
+    } catch (error) {
+      console.error('Failed to load atom versions:', error)
+    }
+  }
+
+  useWebSocket({
+    topics: ['knowledge'],
+    onMessage: (data: unknown) => {
+      const event = data as { type?: string; data?: { entity_type?: string; entity_id?: number } }
+
+      if (
+        event.type === 'knowledge.version_created' &&
+        event.data?.entity_type === 'atom' &&
+        event.data?.entity_id === atom.id
+      ) {
+        setPendingVersionsCount((prev) => prev + 1)
+      }
+    },
+  })
+
   return (
     <Card
       className={`p-4 hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`}
@@ -60,6 +94,26 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
               />
             </svg>
             <span className="text-xs font-medium">Approved</span>
+          </div>
+        )}
+
+        {pendingVersionsCount > 0 && (
+          <div className="flex items-center gap-2 pt-2 border-t border-border">
+            <Badge className="text-xs bg-amber-500 text-white hover:bg-amber-600">
+              {pendingVersionsCount} pending version{pendingVersionsCount > 1 ? 's' : ''}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={(e) => {
+                e.stopPropagation()
+              }}
+              aria-label="View version history"
+            >
+              <ClockIcon className="h-3 w-3 mr-1" />
+              View History
+            </Button>
           </div>
         )}
       </div>

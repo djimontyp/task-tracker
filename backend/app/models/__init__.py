@@ -34,6 +34,7 @@ from .atom import (
     TopicAtomCreate,
     TopicAtomPublic,
 )
+from .atom_version import AtomVersion, AtomVersionPublic
 from .base import IDMixin, TimestampMixin
 from .classification_experiment import (
     ClassificationExperiment,
@@ -121,6 +122,7 @@ from .topic import (
     convert_to_hex_if_needed,
     validate_hex_color,
 )
+from .topic_version import TopicVersion, TopicVersionPublic
 from .user import User
 
 __all__ = [
@@ -246,4 +248,9 @@ __all__ = [
     "TopicAtomPublic",
     "AtomType",
     "LinkType",
+    # Versioning
+    "TopicVersion",
+    "TopicVersionPublic",
+    "AtomVersion",
+    "AtomVersionPublic",
 ]

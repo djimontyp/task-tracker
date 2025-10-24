@@ -86,6 +86,10 @@ export const API_ENDPOINTS = {
     scoreBatch: buildApiPath('noise/score-batch'),
   },
 
+  // Knowledge Extraction & Versioning
+  knowledge: buildApiPath('knowledge'),
+  versions: buildApiPath('versions'),
+
   // WebSocket
   ws: '/ws',
 } as const

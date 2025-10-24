@@ -1,0 +1,32 @@
+[
+  {
+    "content": "Initialize orchestration session for task-form-redesign",
+    "status": "completed",
+    "activeForm": "Initializing orchestration session"
+  },
+  {
+    "content": "Agent 1: Refactor SchemaEditor.tsx (remove JSON preview, flatten Cards, column headers)",
+    "status": "pending",
+    "activeForm": "Refactoring SchemaEditor.tsx"
+  },
+  {
+    "content": "Agent 3: Add mobile responsive + TypeScript types validation",
+    "status": "pending",
+    "activeForm": "Adding mobile responsive + types"
+  },
+  {
+    "content": "Agent 2: Update TaskForm.tsx labels (Response Schema → Response Fields)",
+    "status": "pending",
+    "activeForm": "Updating TaskForm.tsx labels"
+  },
+  {
+    "content": "Aggregate agent reports into summary",
+    "status": "pending",
+    "activeForm": "Aggregating agent reports"
+  },
+  {
+    "content": "Present summary to user with next steps",
+    "status": "pending",
+    "activeForm": "Presenting summary to user"
+  }
+]

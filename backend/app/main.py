@@ -65,6 +65,10 @@ tags_metadata = [
         "name": "topics",
         "description": "Topic management for categorizing messages and tasks into organized groups.",
     },
+    {
+        "name": "versions",
+        "description": "Version history management for topics and atoms with diff, approval, and rejection capabilities.",
+    },
 ]
 
 

@@ -4,7 +4,7 @@ import re
 
 from pydantic import field_validator
 from sqlalchemy import Text
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 from .base import IDMixin, TimestampMixin
 
@@ -216,6 +216,9 @@ class Topic(IDMixin, TimestampMixin, SQLModel, table=True):
         max_length=7,
         description="Hex color code for UI (format: #RRGGBB)",
     )
+
+    # Versioning relationship
+    versions: list["TopicVersion"] = Relationship(back_populates="topic", sa_relationship_kwargs={"lazy": "select"})  # type: ignore[name-defined]
 
 
 class TopicPublic(SQLModel):

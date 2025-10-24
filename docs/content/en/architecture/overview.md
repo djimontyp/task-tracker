@@ -53,17 +53,24 @@ The Task Tracker follows a modern event-driven microservices pattern:
 - All messages stored with timestamps and source attribution
 - No filtering or processing delay at ingestion
 
-**2. Signal/Noise Filtering (Layer 2)**
+**2. Knowledge Extraction (Layer 2 - Structured Knowledge)**
+- AI-powered extraction of Topics and Atoms from messages
+- Creates TopicProposals and AtomProposals (pending approval)
+- Human review and approval of extracted knowledge
+- Approved Topics and Atoms form the knowledge base
+
+**3. Signal/Noise Filtering (Layer 3)**
 - Importance scoring pipeline (4-factor algorithm)
 - Automatic classification: signal, noise, weak_signal
 - Excludes noise from downstream processing
 
-**3. Structured Extracts (Layer 3 - Atoms)**
-- AI-powered entity extraction (problems, ideas, questions)
-- Multiple messages → single aggregated atom
+**4. Task Proposal Analysis (Layer 4 - Actionable Tasks)**
+- Analyzes approved Topics and Atoms to generate TaskProposals
+- Creates proposals for bugs, features, and improvements
+- Sources: Accumulated knowledge (Topics/Atoms), not raw messages
 - Confidence scoring and human approval workflow
 
-**4. Aggregated Insights (Layer 4 - Dashboard)**
+**5. Aggregated Insights (Layer 5 - Dashboard)**
 - High-level metrics and trending topics
 - Anomaly detection (sudden issue spikes)
 - No raw messages shown to user by default
@@ -326,14 +333,26 @@ The Task Tracker follows a modern event-driven microservices pattern:
 ### Data Model Relationships
 
 ```
-Messages (raw) ─────────┐
-                        ├─► Message Topics (many-to-many)
-Topics ◄────────────────┘
+Messages (raw)
+    ├─► Knowledge Extraction
+    │   ├─► TopicProposals/AtomProposals (pending)
+    │   │   └─► Human Approval
+    │   │       └─► Topics/Atoms (approved)
+    │
+    └─► Signal/Noise Filter
+        └─► Embeddings & Vector Index
 
-Messages ─────► (importance_score, noise_status)
-                ├─► Signal Filter ─────► Embeddings
-                ├─► Analysis Runs ─────► Proposals
-                └─► Dashboard ─────────► Atoms
+Topics/Atoms (approved knowledge)
+    ├─► Analysis Run Configuration
+    │   └─► LLM Analysis
+    │       └─► TaskProposals
+    │           └─► Human Review & Approval
+    │
+    └─► RAG Context Building
+        └─► Enhanced LLM Proposals
+
+Messages ─────► Signal Filter ─────► Indexed for Search
+Dashboard ────► Aggregated Metrics & Trends
 ```
 
 ---
