@@ -4,9 +4,10 @@ Generates Pydantic models dynamically from TaskConfig response_schema JSONB
 for use with PydanticAI structured outputs.
 """
 
+from datetime import date as DateType
 from typing import Any
 
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, EmailStr, HttpUrl, create_model
 
 
 class SchemaGenerator:
@@ -73,19 +74,22 @@ class SchemaGenerator:
                 base_type = SchemaGenerator._map_json_type(field_type_str)
 
                 # Optionality driven by top-level 'required' list
-                if field_name not in required_list:
-                    final_field_type: Any = base_type | None
-                else:
-                    final_field_type = base_type
-
+                is_required = field_name in required_list
                 description = field_schema.get("description", "")
-                if description:
-                    field_definitions[field_name] = (
-                        final_field_type,
-                        Field(description=description),
-                    )
+
+                if is_required:
+                    if description:
+                        field_definitions[field_name] = (base_type, Field(description=description))
+                    else:
+                        field_definitions[field_name] = (base_type, ...)
                 else:
-                    field_definitions[field_name] = (final_field_type, ...)
+                    if description:
+                        field_definitions[field_name] = (
+                            base_type | None,
+                            Field(default=None, description=description),
+                        )
+                    else:
+                        field_definitions[field_name] = (base_type | None, None)
 
             return create_model(model_name, **field_definitions)
 
@@ -100,20 +104,24 @@ class SchemaGenerator:
 
             base_type = SchemaGenerator._map_json_type(field_type_str)
 
-            required = field_config.get("required", True)
-            if not required:
-                legacy_field_type: Any = base_type | None
-            else:
-                legacy_field_type = base_type
-
+            is_required = field_config.get("required", True)
             description = field_config.get("description", "")
 
             from pydantic import Field
 
-            if description:
-                field_definitions[field_name] = (legacy_field_type, Field(description=description))
+            if is_required:
+                if description:
+                    field_definitions[field_name] = (base_type, Field(description=description))
+                else:
+                    field_definitions[field_name] = (base_type, ...)
             else:
-                field_definitions[field_name] = (legacy_field_type, ...)
+                if description:
+                    field_definitions[field_name] = (
+                        base_type | None,
+                        Field(default=None, description=description),
+                    )
+                else:
+                    field_definitions[field_name] = (base_type | None, None)
 
         return create_model(model_name, **field_definitions)
 
@@ -121,11 +129,22 @@ class SchemaGenerator:
     def _map_json_type(json_type: str) -> type:
         """Map JSON schema type to Python type.
 
+        Supported types:
+        - string: str
+        - number: float (decimal numbers)
+        - integer: int (whole numbers)
+        - boolean: bool
+        - array: list
+        - object: dict
+        - date: datetime.date (ISO 8601 date)
+        - email: EmailStr (validated email address)
+        - url: HttpUrl (validated HTTP/HTTPS URL)
+
         Args:
             json_type: JSON schema type string
 
         Returns:
-            Corresponding Python type
+            Corresponding Python/Pydantic type
 
         Raises:
             ValueError: If type is not supported
@@ -137,6 +156,9 @@ class SchemaGenerator:
             "boolean": bool,
             "array": list,
             "object": dict,
+            "date": DateType,
+            "email": EmailStr,
+            "url": HttpUrl,
         }
 
         if json_type not in type_mapping:
