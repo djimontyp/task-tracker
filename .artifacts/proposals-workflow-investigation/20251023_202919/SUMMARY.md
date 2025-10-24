@@ -115,12 +115,31 @@ Frontend re-fetches via query invalidation
 
 ### Analysis Run Workflow
 
+**⚠️ ARCHITECTURAL CLARIFICATION:** TaskProposals should be created from analyzing Topics/Atoms (accumulated knowledge), NOT from direct message analysis.
+
+**CORRECT Architecture:**
 ```
-User creates AnalysisRun → TaskIQ background job → 
+STAGE 1: Knowledge Extraction
+Messages → KnowledgeExtraction → TopicProposals/AtomProposals → Review → Topics/Atoms
+
+STAGE 2: Task Identification (from accumulated knowledge)
+Topics/Atoms → AnalysisRun → TaskProposals → Review → Tasks
+Bugs → TaskProposals → Review → Tasks
+User Suggestions → TaskProposals → Review → Tasks
+```
+
+**Current Implementation (needs architectural review):**
+```
+User creates AnalysisRun → TaskIQ background job →
 Fetch messages (time window) → Pre-filter → Batch →
 LLM (with optional RAG) → Create TaskProposals (pending) →
 PM reviews → Approve/Reject/Merge → Close run (metrics)
 ```
+
+**TaskProposal Sources:**
+1. Topics/Atoms (primary - analyzing accumulated knowledge)
+2. Bugs (direct reports)
+3. User Suggestions (explicit requests)
 
 ---
 

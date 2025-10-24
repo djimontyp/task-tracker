@@ -366,6 +366,87 @@ async def auto_review_high_confidence_proposals():
                                   └───────────────────────────────────┘
 ```
 
+### Current TaskProposal Flow (Reference Pattern)
+
+**Important Context:** The system already has a working proposal workflow for **TaskProposals**. This is the pattern we're copying for Topics/Atoms.
+
+**CORRECT Multi-Stage Knowledge Flow:**
+
+```
+STAGE 1: Knowledge Extraction (Foundation)
+──────────────────────────────────────────
+Messages → KnowledgeExtraction → TopicProposals/AtomProposals
+                                        ↓
+                                     Approve
+                                        ↓
+                                  Topics/Atoms
+                                  (Knowledge Base)
+
+STAGE 2: Task Identification (Analysis of Knowledge)
+──────────────────────────────────────────
+Topics/Atoms (accumulated knowledge)
+         ↓
+    AnalysisRun (analyze knowledge patterns, gaps, opportunities)
+         ↓
+   TaskProposals
+(suggested actions based on knowledge analysis)
+         ↓
+      Approve
+         ↓
+      Tasks
+```
+
+**TaskProposals Sources (CORRECT):**
+1. **Topics/Atoms Analysis** - Primary source: analyzing accumulated knowledge for actionable insights
+2. **Bugs** - Direct bug reports from users
+3. **User Suggestions** - Explicit feature requests
+
+**NOT from direct message analysis!**
+
+**Key Architectural Principles:**
+
+**Current Topics/Atoms Flow (PROBLEMATIC - Being Fixed):**
+```
+Messages → Auto-trigger → LLM → Direct Topic/Atom Creation (NO REVIEW)
+```
+
+**Proposed Topics/Atoms Flow (WHAT WE'RE BUILDING):**
+```
+Messages → KnowledgeExtraction → TopicProposals/AtomProposals (pending) → Review → Topics/Atoms
+```
+
+**TaskProposal Flow (CORRECT - Different Purpose):**
+```
+Topics/Atoms (knowledge) → AnalysisRun → TaskProposals (pending) → Review → Tasks
+Bugs → TaskProposals (pending) → Review → Tasks
+User Suggestions → TaskProposals (pending) → Review → Tasks
+```
+
+**What We're Building:** Apply the TaskProposal pattern (proven, working) to Topics and Atoms (currently lacking review workflow).
+
+**Four-Tier Architecture (CORRECTED):**
+- **Tier 1 (Raw Data):** Messages - Unstructured Telegram communication
+- **Tier 2 (Knowledge Base):** Topics/Atoms - Accumulated knowledge extracted from messages
+- **Tier 3 (Task Analysis):** AnalysisRun - Analyzes knowledge base to identify actionable tasks
+- **Tier 4 (Actions):** Tasks - Concrete work items derived from knowledge analysis
+
+**Data Flow (CORRECTED):**
+```
+Messages (Tier 1)
+    → KnowledgeExtraction
+    → TopicProposals/AtomProposals (review)
+    → Topics/Atoms (Tier 2 - Knowledge Base)
+    → AnalysisRun (Tier 3 - analyze accumulated knowledge)
+    → TaskProposals (review)
+    → Tasks (Tier 4 - actionable items)
+```
+
+**Important Distinction:**
+- **Knowledge Extraction:** Messages → Topics/Atoms (WHAT is being discussed)
+- **Task Identification:** Topics/Atoms → Tasks (WHAT needs to be done based on accumulated knowledge)
+
+---
+
 ### Data Flow: Extraction → Proposal → Review → Entity
 
 **Step 1: Message Arrives**

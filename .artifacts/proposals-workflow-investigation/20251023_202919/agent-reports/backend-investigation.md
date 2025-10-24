@@ -22,6 +22,32 @@ The task tracker backend implements a comprehensive **AI-powered task proposal w
 
 ## Architecture Overview
 
+### CRITICAL ARCHITECTURAL CLARIFICATION
+
+**TaskProposal Sources (CORRECTED):**
+
+TaskProposals are NOT created directly from Messages. They come from:
+
+1. **Topics/Atoms Analysis** (Primary Source)
+   - AnalysisRun analyzes accumulated knowledge in Topics/Atoms
+   - Identifies patterns, gaps, opportunities
+   - Generates TaskProposals for actionable items
+
+2. **Bugs** - Direct bug reports from users
+
+3. **User Suggestions** - Explicit feature requests
+
+**Correct Flow:**
+```
+STAGE 1: Knowledge Building
+Messages → KnowledgeExtraction → TopicProposals/AtomProposals → Approve → Topics/Atoms
+
+STAGE 2: Task Identification (from accumulated knowledge)
+Topics/Atoms → AnalysisRun → TaskProposals → Approve → Tasks
+```
+
+**NOT:** Messages → AnalysisRun → TaskProposals (INCORRECT)
+
 ### System Components
 
 ```
@@ -769,6 +795,15 @@ await websocket_manager.broadcast(
 ## Data Flow Diagrams
 
 ### TaskProposal Creation Flow
+
+**⚠️ IMPORTANT NOTE:** This diagram describes the current implementation mechanics, but architecturally, TaskProposals should be created from analyzing Topics/Atoms (accumulated knowledge), NOT from direct message analysis. The current implementation may need refactoring to align with the correct architectural pattern:
+
+```
+CORRECT: Topics/Atoms → AnalysisRun → TaskProposals
+CURRENT IMPL: Messages → AnalysisRun → TaskProposals (needs architectural review)
+```
+
+**Current Implementation Flow (as observed in code):**
 
 ```
 ┌─────────────┐
