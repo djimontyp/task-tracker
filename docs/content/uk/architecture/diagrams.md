@@ -212,59 +212,68 @@ sequenceDiagram
 
 ## Робочий процес системи аналізу
 
-Система аналізу обробляє атоми через кілька AI провайдерів для генерації пропозицій:
+Система аналізу є двостадійним конвеєром: Витяг знань створює Topics/Atoms, потім Аналітичний запуск генерує TaskProposals з цих знань:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Admin as Адміністратор
+    actor User
     participant API
-    participant DB as PostgreSQL
     participant NATS
     participant Worker
-    participant Agents as AI Агенти
-    participant Providers as LLM Провайдери<br/>(OpenAI, Anthropic, Ollama)
+    participant DB as PostgreSQL
+    participant LLM as LLM Сервіс
     participant WS as WebSocket
 
-    Admin->>API: Запустити сесію аналізу
-    API->>DB: Створити AnalysisRun
-    API->>NATS: Додати analyze_atoms jobs в чергу
-    API-->>Admin: Запуск розпочато (run_id)
+    rect rgb(240, 248, 255)
+        Note over User,WS: Стадія 1: Витяг знань
+        User->>API: POST /knowledge/extract (з повідомлень)
+        API->>NATS: Добавити knowledge_extraction job в чергу
 
-    loop Для кожного атома
-        NATS->>Worker: Доставити analyze job
-        Worker->>DB: Отримати вміст атома
-        Worker->>Agents: Відправити до AI агентів
-
-        par Мульти-провайдерний аналіз
-            Agents->>Providers: OpenAI запит
-            Agents->>Providers: Anthropic запит
-            Agents->>Providers: Ollama запит
-        end
-
-        Providers-->>Agents: Пропозиції
-        Agents-->>Worker: Агреговані пропозиції
-
-        Worker->>DB: Зберегти записи AnalysisProposal
-        Worker->>NATS: Опублікувати analysis_progress event
+        NATS->>Worker: Доставити extraction job
+        Worker->>DB: Отримати повідомлення
+        Worker->>LLM: Витягти topics/atoms
+        Worker->>DB: Створити TopicProposals/AtomProposals
+        Worker->>WS: Broadcast proposals_created
     end
 
-    NATS->>API: Оновлення прогресу
-    API->>WS: Broadcast прогресу
-    WS->>Admin: 🔄 Прогрес в реальному часі
+    rect rgb(255, 250, 240)
+        Note over User,WS: Людська рецензія і затвердження
+        User->>API: Рецензувати TopicProposals
+        User->>API: POST /proposals/{id}/approve
+        API->>DB: Створити Topic/Atom (з затвердженої пропозиції)
+        API->>WS: Broadcast topic_created
+    end
 
-    Worker->>DB: Оновити статус запуску (completed)
-    Worker->>NATS: Опублікувати analysis_completed event
-    API->>WS: Broadcast завершення
-    WS->>Admin: ✅ Аналіз завершено
+    rect rgb(240, 255, 240)
+        Note over User,WS: Стадія 2: Аналіз пропозицій завдань
+        User->>API: POST /analysis/runs (Аналітичний запуск)
+        API->>DB: Створити AnalysisRun (pending)
+        User->>API: POST /analysis/runs/{id}/start
+        API->>NATS: Добавити analyze_knowledge job в чергу
+
+        NATS->>Worker: Доставити analysis job
+        Worker->>DB: Отримати затвердженні Topics/Atoms
+        Worker->>LLM: Аналізувати накопичені знання
+        Worker->>DB: Створити TaskProposals (з topics/atoms)
+        Worker->>WS: Broadcast progress_updated
+    end
+
+    rect rgb(255, 240, 255)
+        Note over User,WS: Людська рецензія TaskProposals
+        User->>API: Рецензувати TaskProposals
+        User->>API: POST /proposals/{id}/approve
+        API->>DB: Оновити статус пропозиції
+        API->>WS: Broadcast proposal_approved
+    end
 ```
 
-**Можливості аналізу:**
+**Ключові пункти:**
 
-- Паралельне виконання з кількома провайдерами
-- Відстеження прогресу через WebSocket
-- Налаштовувані стратегії агентів
-- Валідація провайдерів перед виконанням
+- Стадія 1: Повідомлення → TopicProposals/AtomProposals → Затвердженні Topics/Atoms
+- Стадія 2: Затвердженні Topics/Atoms → Аналітичний запуск → TaskProposals
+- TaskProposals похідні від накопичених знань, а не напряму з повідомлень
+- Людська рецензія та затвердження на кожній стадії
 
 ## Архітектура потоку даних
 

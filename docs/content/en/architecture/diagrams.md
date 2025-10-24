@@ -212,59 +212,68 @@ sequenceDiagram
 
 ## Analysis System Workflow
 
-The Analysis System processes atoms through multiple AI providers to generate proposals:
+The Analysis System is a two-stage pipeline: Knowledge Extraction creates Topics/Atoms, then Analysis Run generates TaskProposals from that knowledge:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Admin
+    actor User
     participant API
-    participant DB as PostgreSQL
     participant NATS
     participant Worker
-    participant Agents as AI Agents
-    participant Providers as LLM Providers<br/>(OpenAI, Anthropic, Ollama)
+    participant DB as PostgreSQL
+    participant LLM as LLM Service
     participant WS as WebSocket
 
-    Admin->>API: Start analysis session
-    API->>DB: Create AnalysisRun
-    API->>NATS: Queue analyze_atoms jobs
-    API-->>Admin: Run started (run_id)
+    rect rgb(240, 248, 255)
+        Note over User,WS: Stage 1: Knowledge Extraction
+        User->>API: POST /knowledge/extract (from messages)
+        API->>NATS: Queue knowledge_extraction job
 
-    loop For each atom
-        NATS->>Worker: Deliver analyze job
-        Worker->>DB: Get atom content
-        Worker->>Agents: Dispatch to AI agents
-
-        par Multi-Provider Analysis
-            Agents->>Providers: OpenAI request
-            Agents->>Providers: Anthropic request
-            Agents->>Providers: Ollama request
-        end
-
-        Providers-->>Agents: Proposals
-        Agents-->>Worker: Aggregated proposals
-
-        Worker->>DB: Store AnalysisProposal records
-        Worker->>NATS: Publish analysis_progress event
+        NATS->>Worker: Deliver extraction job
+        Worker->>DB: Fetch messages
+        Worker->>LLM: Extract topics/atoms
+        Worker->>DB: Create TopicProposals/AtomProposals
+        Worker->>WS: Broadcast proposals_created
     end
 
-    NATS->>API: Progress updates
-    API->>WS: Broadcast progress
-    WS->>Admin: 🔄 Real-time progress
+    rect rgb(255, 250, 240)
+        Note over User,WS: Human Review & Approval
+        User->>API: Review TopicProposals
+        User->>API: POST /proposals/{id}/approve
+        API->>DB: Create Topic/Atom (from approved proposal)
+        API->>WS: Broadcast topic_created
+    end
 
-    Worker->>DB: Update run status (completed)
-    Worker->>NATS: Publish analysis_completed event
-    API->>WS: Broadcast completion
-    WS->>Admin: ✅ Analysis complete
+    rect rgb(240, 255, 240)
+        Note over User,WS: Stage 2: Task Proposal Analysis
+        User->>API: POST /analysis/runs (Analysis Run)
+        API->>DB: Create AnalysisRun (pending)
+        User->>API: POST /analysis/runs/{id}/start
+        API->>NATS: Queue analyze_knowledge job
+
+        NATS->>Worker: Deliver analysis job
+        Worker->>DB: Fetch approved Topics/Atoms
+        Worker->>LLM: Analyze accumulated knowledge
+        Worker->>DB: Create TaskProposals (from topics/atoms)
+        Worker->>WS: Broadcast progress_updated
+    end
+
+    rect rgb(255, 240, 255)
+        Note over User,WS: Human Review of TaskProposals
+        User->>API: Review TaskProposals
+        User->>API: POST /proposals/{id}/approve
+        API->>DB: Update proposal status
+        API->>WS: Broadcast proposal_approved
+    end
 ```
 
-**Analysis Features:**
+**Key Points:**
 
-- Multi-provider parallel execution
-- Progress tracking via WebSocket
-- Configurable agent strategies
-- Provider validation before execution
+- Stage 1: Messages → TopicProposals/AtomProposals → Approved Topics/Atoms
+- Stage 2: Approved Topics/Atoms → Analysis Run → TaskProposals
+- TaskProposals are derived from accumulated knowledge, not directly from messages
+- Human review and approval at each stage
 
 ## Data Flow Architecture
 
