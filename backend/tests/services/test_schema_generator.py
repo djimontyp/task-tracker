@@ -10,12 +10,10 @@ Tests cover all field types including:
 """
 
 from datetime import date
-from uuid import UUID
 
 import pytest
-from pydantic import BaseModel, EmailStr, HttpUrl, ValidationError
-
 from app.services.schema_generator import SchemaGenerator
+from pydantic import BaseModel, ValidationError
 
 
 class TestSchemaGeneratorBasicTypes:
@@ -802,9 +800,7 @@ class TestSchemaGeneratorFieldDescriptions:
         """Test field description is preserved."""
         schema = {
             "type": "object",
-            "properties": {
-                "email": {"type": "email", "description": "User email address"}
-            },
+            "properties": {"email": {"type": "email", "description": "User email address"}},
         }
 
         Model = SchemaGenerator.generate_response_model(schema)

@@ -293,11 +293,12 @@ async def test_save_topics_creates_new(db_session: AsyncSession) -> None:
     ]
 
     service = KnowledgeExtractionService(provider=MagicMock())
-    topic_map = await service.save_topics(extracted_topics, db_session, confidence_threshold=0.7)
+    topic_map, version_ids = await service.save_topics(extracted_topics, db_session, confidence_threshold=0.7)
 
     assert len(topic_map) == 2
     assert "Bug Fixes" in topic_map
     assert "Feature Planning" in topic_map
+    assert len(version_ids) == 0
 
     result = await db_session.execute(select(Topic))
     topics = result.scalars().all()
@@ -325,16 +326,19 @@ async def test_save_topics_filters_low_confidence(db_session: AsyncSession) -> N
     ]
 
     service = KnowledgeExtractionService(provider=MagicMock())
-    topic_map = await service.save_topics(extracted_topics, db_session, confidence_threshold=0.7)
+    topic_map, version_ids = await service.save_topics(extracted_topics, db_session, confidence_threshold=0.7)
 
     assert len(topic_map) == 1
     assert "High Confidence Topic" in topic_map
     assert "Low Confidence Topic" not in topic_map
+    assert len(version_ids) == 0
 
 
 @pytest.mark.asyncio
 async def test_save_topics_reuses_existing(db_session: AsyncSession) -> None:
-    """Test that existing topics are reused instead of creating duplicates."""
+    """Test that existing topics create versions instead of duplicates."""
+    from app.models.topic_version import TopicVersion
+
     existing_topic = Topic(
         name="Bug Fixes",
         description="Existing topic",
@@ -356,14 +360,23 @@ async def test_save_topics_reuses_existing(db_session: AsyncSession) -> None:
     ]
 
     service = KnowledgeExtractionService(provider=MagicMock())
-    topic_map = await service.save_topics(extracted_topics, db_session)
+    topic_map, version_ids = await service.save_topics(extracted_topics, db_session, created_by="test_user")
 
     assert len(topic_map) == 1
     assert topic_map["Bug Fixes"].id == existing_topic.id
+    assert len(version_ids) == 1
+    assert version_ids[0] == existing_topic.id
 
     result = await db_session.execute(select(Topic))
     topics = result.scalars().all()
     assert len(topics) == 1
+
+    version_result = await db_session.execute(select(TopicVersion).where(TopicVersion.topic_id == existing_topic.id))
+    versions = version_result.scalars().all()
+    assert len(versions) == 1
+    assert versions[0].data["description"] == "Critical bugs and issues"
+    assert versions[0].created_by == "test_user"
+    assert versions[0].approved is False
 
 
 @pytest.mark.asyncio
@@ -395,11 +408,12 @@ async def test_save_atoms_creates_with_topic_links(db_session: AsyncSession) -> 
     ]
 
     service = KnowledgeExtractionService(provider=MagicMock())
-    saved_atoms = await service.save_atoms(extracted_atoms, topic_map, db_session)
+    saved_atoms, version_ids = await service.save_atoms(extracted_atoms, topic_map, db_session)
 
     assert len(saved_atoms) == 1
     assert saved_atoms[0].type == "problem"
     assert saved_atoms[0].title == "Test Problem"
+    assert len(version_ids) == 0
 
     result = await db_session.execute(select(TopicAtom))
     topic_atoms = result.scalars().all()
@@ -442,10 +456,11 @@ async def test_save_atoms_filters_low_confidence(db_session: AsyncSession) -> No
     ]
 
     service = KnowledgeExtractionService(provider=MagicMock())
-    saved_atoms = await service.save_atoms(extracted_atoms, topic_map, db_session, confidence_threshold=0.7)
+    saved_atoms, version_ids = await service.save_atoms(extracted_atoms, topic_map, db_session, confidence_threshold=0.7)
 
     assert len(saved_atoms) == 1
     assert saved_atoms[0].title == "High Confidence Atom"
+    assert len(version_ids) == 0
 
 
 @pytest.mark.asyncio
@@ -467,9 +482,68 @@ async def test_save_atoms_skips_unknown_topics(db_session: AsyncSession) -> None
     ]
 
     service = KnowledgeExtractionService(provider=MagicMock())
-    saved_atoms = await service.save_atoms(extracted_atoms, topic_map, db_session)
+    saved_atoms, version_ids = await service.save_atoms(extracted_atoms, topic_map, db_session)
 
     assert len(saved_atoms) == 0
+    assert len(version_ids) == 0
+
+
+@pytest.mark.asyncio
+async def test_save_atoms_creates_version_for_existing(db_session: AsyncSession) -> None:
+    """Test that existing atoms create versions instead of direct updates."""
+    from app.models.atom_version import AtomVersion
+
+    topic = Topic(name="Test Topic", description="Test", icon="Icon", color="#000000")
+    db_session.add(topic)
+    await db_session.commit()
+    await db_session.refresh(topic)
+
+    existing_atom = Atom(
+        type="problem",
+        title="Existing Atom",
+        content="Original content",
+        confidence=0.8,
+        user_approved=False,
+    )
+    db_session.add(existing_atom)
+    await db_session.commit()
+    await db_session.refresh(existing_atom)
+
+    topic_map = {"Test Topic": topic}
+
+    extracted_atoms = [
+        ExtractedAtom(
+            type="solution",
+            title="Existing Atom",
+            content="Updated content with new solution",
+            confidence=0.9,
+            topic_name="Test Topic",
+            related_message_ids=[1],
+            links_to_atom_titles=[],
+            link_types=[],
+        )
+    ]
+
+    service = KnowledgeExtractionService(provider=MagicMock())
+    saved_atoms, version_ids = await service.save_atoms(
+        extracted_atoms, topic_map, db_session, created_by="test_user"
+    )
+
+    assert len(saved_atoms) == 1
+    assert saved_atoms[0].id == existing_atom.id
+    assert len(version_ids) == 1
+    assert version_ids[0] == existing_atom.id
+
+    await db_session.refresh(existing_atom)
+    assert existing_atom.content == "Original content"
+
+    version_result = await db_session.execute(select(AtomVersion).where(AtomVersion.atom_id == existing_atom.id))
+    versions = version_result.scalars().all()
+    assert len(versions) == 1
+    assert versions[0].data["content"] == "Updated content with new solution"
+    assert versions[0].data["type"] == "solution"
+    assert versions[0].created_by == "test_user"
+    assert versions[0].approved is False
 
 
 @pytest.mark.asyncio
@@ -741,3 +815,406 @@ async def test_build_model_instance_unsupported_provider() -> None:
 
     with pytest.raises(ValueError, match="Unsupported provider type"):
         service._build_model_instance()
+
+
+# Period selection helper tests
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_last_24h(
+    db_session: AsyncSession, sample_user: User, sample_source: Source
+) -> None:
+    """Test last 24 hours period selection."""
+    from datetime import timedelta
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    now = datetime.now(UTC)
+    recent_time = now - timedelta(hours=12)
+    old_time = now - timedelta(days=2)
+
+    messages_recent = [
+        Message(
+            external_message_id=f"msg_recent_{i}",
+            content=f"Recent message {i}",
+            sent_at=recent_time,
+            source_id=sample_source.id,
+            author_id=sample_user.id,
+        )
+        for i in range(3)
+    ]
+
+    messages_old = [
+        Message(
+            external_message_id=f"msg_old_{i}",
+            content=f"Old message {i}",
+            sent_at=old_time,
+            source_id=sample_source.id,
+            author_id=sample_user.id,
+        )
+        for i in range(2)
+    ]
+
+    for msg in messages_recent + messages_old:
+        db_session.add(msg)
+    await db_session.commit()
+
+    result = await get_messages_by_period(db_session, period_type="last_24h")
+
+    assert len(result) == 3
+    assert all(msg_id in [m.id for m in messages_recent] for msg_id in result)
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_last_7d(
+    db_session: AsyncSession, sample_user: User, sample_source: Source
+) -> None:
+    """Test last 7 days period selection."""
+    from datetime import timedelta
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    now = datetime.now(UTC)
+    recent_time = now - timedelta(days=3)
+    old_time = now - timedelta(days=15)
+
+    messages_recent = [
+        Message(
+            external_message_id=f"msg_recent_7d_{i}",
+            content=f"Recent message {i}",
+            sent_at=recent_time,
+            source_id=sample_source.id,
+            author_id=sample_user.id,
+        )
+        for i in range(3)
+    ]
+
+    messages_old = [
+        Message(
+            external_message_id=f"msg_old_7d_{i}",
+            content=f"Old message {i}",
+            sent_at=old_time,
+            source_id=sample_source.id,
+            author_id=sample_user.id,
+        )
+        for i in range(2)
+    ]
+
+    for msg in messages_recent + messages_old:
+        db_session.add(msg)
+    await db_session.commit()
+
+    result = await get_messages_by_period(db_session, period_type="last_7d")
+
+    assert len(result) == 3
+    assert all(msg_id in [m.id for m in messages_recent] for msg_id in result)
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_last_30d(
+    db_session: AsyncSession, sample_user: User, sample_source: Source
+) -> None:
+    """Test last 30 days period selection."""
+    from datetime import timedelta
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    now = datetime.now(UTC)
+    recent_time = now - timedelta(days=15)
+    old_time = now - timedelta(days=45)
+
+    messages_recent = [
+        Message(
+            external_message_id=f"msg_recent_30d_{i}",
+            content=f"Recent message {i}",
+            sent_at=recent_time,
+            source_id=sample_source.id,
+            author_id=sample_user.id,
+        )
+        for i in range(3)
+    ]
+
+    messages_old = [
+        Message(
+            external_message_id=f"msg_old_30d_{i}",
+            content=f"Old message {i}",
+            sent_at=old_time,
+            source_id=sample_source.id,
+            author_id=sample_user.id,
+        )
+        for i in range(2)
+    ]
+
+    for msg in messages_recent + messages_old:
+        db_session.add(msg)
+    await db_session.commit()
+
+    result = await get_messages_by_period(db_session, period_type="last_30d")
+
+    assert len(result) == 3
+    assert all(msg_id in [m.id for m in messages_recent] for msg_id in result)
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_custom_valid(
+    db_session: AsyncSession, sample_user: User, sample_source: Source
+) -> None:
+    """Test custom date range period selection."""
+    from datetime import timedelta
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    now = datetime.now(UTC)
+    start_date = now - timedelta(days=5)
+    end_date = now - timedelta(days=2)
+
+    messages_in_range = [
+        Message(
+            external_message_id=f"msg_in_range_{i}",
+            content=f"In range message {i}",
+            sent_at=now - timedelta(days=3),
+            source_id=sample_source.id,
+            author_id=sample_user.id,
+        )
+        for i in range(3)
+    ]
+
+    messages_before = [
+        Message(
+            external_message_id=f"msg_before_{i}",
+            content=f"Before message {i}",
+            sent_at=now - timedelta(days=10),
+            source_id=sample_source.id,
+            author_id=sample_user.id,
+        )
+        for i in range(2)
+    ]
+
+    messages_after = [
+        Message(
+            external_message_id=f"msg_after_{i}",
+            content=f"After message {i}",
+            sent_at=now - timedelta(hours=1),
+            source_id=sample_source.id,
+            author_id=sample_user.id,
+        )
+        for i in range(2)
+    ]
+
+    for msg in messages_in_range + messages_before + messages_after:
+        db_session.add(msg)
+    await db_session.commit()
+
+    result = await get_messages_by_period(
+        db_session, period_type="custom", start_date=start_date, end_date=end_date
+    )
+
+    assert len(result) == 3
+    assert all(msg_id in [m.id for m in messages_in_range] for msg_id in result)
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_with_topic_filter(
+    db_session: AsyncSession, sample_user: User, sample_source: Source
+) -> None:
+    """Test period selection with topic ID filter."""
+    from datetime import timedelta
+    from app.models import Topic
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    topic1 = Topic(name="Topic 1", description="Test", icon="Icon", color="#000")
+    topic2 = Topic(name="Topic 2", description="Test", icon="Icon", color="#000")
+    db_session.add(topic1)
+    db_session.add(topic2)
+    await db_session.commit()
+    await db_session.refresh(topic1)
+    await db_session.refresh(topic2)
+
+    now = datetime.now(UTC)
+    recent_time = now - timedelta(hours=12)
+
+    messages_topic1 = [
+        Message(
+            external_message_id=f"msg_topic1_{i}",
+            content=f"Topic 1 message {i}",
+            sent_at=recent_time,
+            source_id=sample_source.id,
+            author_id=sample_user.id,
+            topic_id=topic1.id,
+        )
+        for i in range(3)
+    ]
+
+    messages_topic2 = [
+        Message(
+            external_message_id=f"msg_topic2_{i}",
+            content=f"Topic 2 message {i}",
+            sent_at=recent_time,
+            source_id=sample_source.id,
+            author_id=sample_user.id,
+            topic_id=topic2.id,
+        )
+        for i in range(2)
+    ]
+
+    for msg in messages_topic1 + messages_topic2:
+        db_session.add(msg)
+    await db_session.commit()
+
+    result = await get_messages_by_period(db_session, period_type="last_24h", topic_id=topic1.id)
+
+    assert len(result) == 3
+    assert all(msg_id in [m.id for m in messages_topic1] for msg_id in result)
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_no_results(
+    db_session: AsyncSession, sample_user: User, sample_source: Source
+) -> None:
+    """Test period selection returning empty list when no messages match."""
+    from datetime import timedelta
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    now = datetime.now(UTC)
+    old_time = now - timedelta(days=100)
+
+    msg = Message(
+        external_message_id="msg_very_old",
+        content="Very old message",
+        sent_at=old_time,
+        source_id=sample_source.id,
+        author_id=sample_user.id,
+    )
+    db_session.add(msg)
+    await db_session.commit()
+
+    result = await get_messages_by_period(db_session, period_type="last_24h")
+
+    assert len(result) == 0
+    assert result == []
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_custom_missing_start_date(
+    db_session: AsyncSession,
+) -> None:
+    """Test custom period validation when start_date is missing."""
+    from datetime import timedelta
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    now = datetime.now(UTC)
+    end_date = now
+
+    with pytest.raises(ValueError, match="Custom period requires both start_date and end_date"):
+        await get_messages_by_period(
+            db_session, period_type="custom", start_date=None, end_date=end_date
+        )
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_custom_missing_end_date(
+    db_session: AsyncSession,
+) -> None:
+    """Test custom period validation when end_date is missing."""
+    from datetime import timedelta
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    now = datetime.now(UTC)
+    start_date = now - timedelta(days=5)
+
+    with pytest.raises(ValueError, match="Custom period requires both start_date and end_date"):
+        await get_messages_by_period(
+            db_session, period_type="custom", start_date=start_date, end_date=None
+        )
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_custom_start_after_end(
+    db_session: AsyncSession,
+) -> None:
+    """Test custom period validation when start_date is after end_date."""
+    from datetime import timedelta
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    now = datetime.now(UTC)
+    start_date = now - timedelta(days=2)
+    end_date = now - timedelta(days=5)
+
+    with pytest.raises(ValueError, match="start_date must be before end_date"):
+        await get_messages_by_period(
+            db_session, period_type="custom", start_date=start_date, end_date=end_date
+        )
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_custom_future_start_date(
+    db_session: AsyncSession,
+) -> None:
+    """Test custom period validation when start_date is in the future."""
+    from datetime import timedelta
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    now = datetime.now(UTC)
+    future = now + timedelta(days=5)
+    start_date = future
+    end_date = future + timedelta(days=1)
+
+    with pytest.raises(ValueError, match="dates cannot be in the future"):
+        await get_messages_by_period(
+            db_session, period_type="custom", start_date=start_date, end_date=end_date
+        )
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_custom_future_end_date(
+    db_session: AsyncSession,
+) -> None:
+    """Test custom period validation when end_date is in the future."""
+    from datetime import timedelta
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    now = datetime.now(UTC)
+    start_date = now - timedelta(days=5)
+    end_date = now + timedelta(days=5)
+
+    with pytest.raises(ValueError, match="dates cannot be in the future"):
+        await get_messages_by_period(
+            db_session, period_type="custom", start_date=start_date, end_date=end_date
+        )
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_invalid_period_type(
+    db_session: AsyncSession,
+) -> None:
+    """Test error handling for invalid period type."""
+    from datetime import timedelta
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    with pytest.raises(ValueError, match="Invalid period_type"):
+        await get_messages_by_period(db_session, period_type="invalid_type")  # type: ignore[arg-type]
+
+
+@pytest.mark.asyncio
+async def test_get_messages_by_period_naive_datetime_handling(
+    db_session: AsyncSession, sample_user: User, sample_source: Source
+) -> None:
+    """Test that naive datetimes are converted to UTC."""
+    from datetime import timedelta
+    from app.services.knowledge_extraction_service import get_messages_by_period
+
+    now = datetime.now(UTC)
+    start_date = now - timedelta(days=5)
+    end_date = now - timedelta(days=2)
+
+    msg = Message(
+        external_message_id="msg_naive_test",
+        content="Test message",
+        sent_at=now - timedelta(days=3),
+        source_id=sample_source.id,
+        author_id=sample_user.id,
+    )
+    db_session.add(msg)
+    await db_session.commit()
+
+    result = await get_messages_by_period(
+        db_session, period_type="custom", start_date=start_date, end_date=end_date
+    )
+
+    assert len(result) == 1
