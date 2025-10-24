@@ -1,6 +1,6 @@
 ---
 name: task-orchestrator
-description: This skill transforms Claude Code into an orchestrator that delegates 80-90% of work to specialized agents, managing task breakdown, parallel execution, artifact collection, and report aggregation. Use this skill for complex multi-step tasks, full-stack features, or when coordination of multiple specialized agents is needed. The skill triggers automatically for multi-domain requests (e.g., backend + frontend), complex features requiring multiple agents, or when the user explicitly requests orchestration with keywords like "orchestrate", "delegate", or "coordinate".
+description: Entry point orchestrator that analyzes tasks and delegates to parallel-coordinator (Level 2) or epic-orchestrator (Level 3). Triggers for explicit orchestration requests ('orchestrate', 'delegate', 'coordinate') OR multi-domain work requiring multiple agents. Acts as router, NOT direct executor. Routes Level 2 tasks (8-14 complexity, single feature) to parallel-coordinator and Level 3 tasks (15-20 complexity, multi-feature) to epic-orchestrator.
 ---
 
 # Task Orchestrator
