@@ -10,7 +10,7 @@ import {
   SelectItem,
 } from '@/shared/ui'
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
-import { JsonSchema, SchemaPropertyConfig, SchemaField } from '@/features/agents/types'
+import { JsonSchema, SchemaPropertyConfig, SchemaField, FieldType } from '@/features/agents/types'
 
 interface SchemaEditorProps {
   value: JsonSchema
@@ -57,7 +57,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
   })
 
   const handleAddField = () => {
-    const newFields = [...fields, { name: '', type: 'string', description: '' }]
+    const newFields: SchemaField[] = [...fields, { name: '', type: 'string' as FieldType, description: '' }]
     setFields(newFields)
     updateSchema(newFields)
 
