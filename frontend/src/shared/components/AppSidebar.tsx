@@ -20,6 +20,7 @@ import { useServiceStatus } from '@/features/websocket/hooks/useServiceStatus'
 import { NavUser } from './NavUser'
 import { statsService, type SidebarCounts } from '@/shared/api/statsService'
 import { NotificationBadge } from '@/shared/ui'
+import { GlobalKnowledgeExtractionDialog } from '@/features/knowledge'
 
 const navGroups = [
   {
@@ -38,6 +39,7 @@ const navGroups = [
       { path: '/proposals', label: 'Task Proposals', icon: ClipboardDocumentListIcon },
       { path: '/noise-filtering', label: 'Noise Filtering', icon: FunnelIcon },
     ],
+    action: true,
   },
   {
     label: 'AI Setup',
@@ -222,6 +224,11 @@ export function AppSidebar() {
                 })}
               </SidebarMenu>
             </SidebarGroupContent>
+            {group.action && (
+              <div className="px-2 mt-2 group-data-[collapsible=icon]:px-1">
+                <GlobalKnowledgeExtractionDialog />
+              </div>
+            )}
           </SidebarGroup>
         ))}
       </SidebarContent>
