@@ -82,7 +82,9 @@ async def queue_knowledge_extraction_if_needed(message_id: int, db: Any) -> None
         f"queueing knowledge extraction for {len(message_ids)} messages using agent '{agent_config.name}'"
     )
 
-    await extract_knowledge_from_messages_task.kiq(message_ids=message_ids, agent_config_id=str(agent_config.id))
+    await extract_knowledge_from_messages_task.kiq(
+        message_ids=message_ids, agent_config_id=str(agent_config.id), created_by="auto_threshold"
+    )
 
 
 @nats_broker.task
@@ -1004,7 +1006,9 @@ async def score_unscored_messages_task(limit: int = 100) -> dict[str, int]:
 
 
 @nats_broker.task
-async def extract_knowledge_from_messages_task(message_ids: list[int], agent_config_id: str) -> dict[str, int]:
+async def extract_knowledge_from_messages_task(
+    message_ids: list[int], agent_config_id: str, created_by: str | None = None
+) -> dict[str, int]:
     """Background task for extracting knowledge (topics and atoms) from message batches.
 
     Analyzes messages using LLM to identify discussion topics and atomic knowledge units
@@ -1014,6 +1018,7 @@ async def extract_knowledge_from_messages_task(message_ids: list[int], agent_con
     Args:
         message_ids: IDs of messages to analyze (10-50 recommended for best results)
         agent_config_id: AgentConfig UUID as string
+        created_by: User ID who triggered extraction (default: "system")
 
     Returns:
         Statistics dictionary with:
@@ -1081,15 +1086,21 @@ async def extract_knowledge_from_messages_task(message_ids: list[int], agent_con
             f"LLM extraction completed: {len(extraction_output.topics)} topics, {len(extraction_output.atoms)} atoms"
         )
 
-        topic_map = await service.save_topics(extraction_output.topics, db)
-        saved_atoms = await service.save_atoms(extraction_output.atoms, topic_map, db)
+        topic_map, version_created_topic_ids = await service.save_topics(
+            extraction_output.topics, db, created_by=created_by or "system"
+        )
+        saved_atoms, version_created_atom_ids = await service.save_atoms(
+            extraction_output.atoms, topic_map, db, created_by=created_by or "system"
+        )
         links_created = await service.link_atoms(extraction_output.atoms, saved_atoms, db)
         messages_updated = await service.update_messages(messages, topic_map, extraction_output.topics, db)
 
         logger.info(
-            f"Knowledge extraction completed: {len(topic_map)} topics created, "
-            f"{len(saved_atoms)} atoms created, {links_created} links created, "
-            f"{messages_updated} messages updated"
+            f"Knowledge extraction completed: {len(topic_map)} topics processed, "
+            f"{len(saved_atoms)} atoms processed, {links_created} links created, "
+            f"{messages_updated} messages updated, "
+            f"{len(version_created_topic_ids)} topic versions created, "
+            f"{len(version_created_atom_ids)} atom versions created"
         )
 
         await websocket_manager.broadcast(
@@ -1102,31 +1113,62 @@ async def extract_knowledge_from_messages_task(message_ids: list[int], agent_con
                     "atoms_created": len(saved_atoms),
                     "links_created": links_created,
                     "messages_updated": messages_updated,
+                    "topic_versions_created": len(version_created_topic_ids),
+                    "atom_versions_created": len(version_created_atom_ids),
                 },
             },
         )
 
         for topic_name in topic_map:
+            topic = topic_map[topic_name]
+            if topic.id not in version_created_topic_ids:
+                await websocket_manager.broadcast(
+                    "knowledge",
+                    {
+                        "type": "knowledge.topic_created",
+                        "data": {
+                            "topic_id": topic.id,
+                            "topic_name": topic_name,
+                        },
+                    },
+                )
+
+        for topic_id in version_created_topic_ids:
             await websocket_manager.broadcast(
                 "knowledge",
                 {
-                    "type": "knowledge.topic_created",
+                    "type": "knowledge.version_created",
                     "data": {
-                        "topic_id": topic_map[topic_name].id,
-                        "topic_name": topic_name,
+                        "entity_type": "topic",
+                        "entity_id": topic_id,
+                        "approved": False,
                     },
                 },
             )
 
         for atom in saved_atoms:
+            if atom.id is not None and atom.id not in version_created_atom_ids:
+                await websocket_manager.broadcast(
+                    "knowledge",
+                    {
+                        "type": "knowledge.atom_created",
+                        "data": {
+                            "atom_id": atom.id,
+                            "atom_title": atom.title,
+                            "atom_type": atom.type,
+                        },
+                    },
+                )
+
+        for atom_id in version_created_atom_ids:
             await websocket_manager.broadcast(
                 "knowledge",
                 {
-                    "type": "knowledge.atom_created",
+                    "type": "knowledge.version_created",
                     "data": {
-                        "atom_id": atom.id,
-                        "atom_title": atom.title,
-                        "atom_type": atom.type,
+                        "entity_type": "atom",
+                        "entity_id": atom_id,
+                        "approved": False,
                     },
                 },
             )
