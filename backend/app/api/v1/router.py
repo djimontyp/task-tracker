@@ -22,6 +22,7 @@ from . import (
     tasks,
     topics,
     users,
+    versions,
     webhooks,
 )
 
@@ -51,3 +52,4 @@ api_router.include_router(embeddings.router)
 api_router.include_router(semantic_search.router)
 api_router.include_router(noise.router)
 api_router.include_router(knowledge.router, prefix="/knowledge", tags=["knowledge"])
+api_router.include_router(versions.router)
