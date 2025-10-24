@@ -5,7 +5,7 @@ from enum import Enum
 from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
 from pydantic import field_validator
 from sqlalchemy import JSON, BigInteger, Column, Text
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 from .base import IDMixin, TimestampMixin
 
@@ -79,6 +79,9 @@ class Atom(IDMixin, TimestampMixin, SQLModel, table=True):
         sa_column=Column(Vector(1536)),
         description="Vector embedding for semantic search (must match settings.openai_embedding_dimensions)",
     )
+
+    # Versioning relationship
+    versions: list["AtomVersion"] = Relationship(back_populates="atom", sa_relationship_kwargs={"lazy": "select"})  # type: ignore[name-defined]
 
     @field_validator("type", mode="before")
     @classmethod
