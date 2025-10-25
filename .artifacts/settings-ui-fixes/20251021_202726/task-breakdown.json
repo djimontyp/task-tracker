@@ -1,0 +1,27 @@
+[
+  {
+    "content": "Initialize orchestration session",
+    "status": "completed",
+    "activeForm": "Initializing orchestration session"
+  },
+  {
+    "content": "UX audit: Badge readability + modal harmony",
+    "status": "pending",
+    "activeForm": "Running UX audit for badge and modal issues"
+  },
+  {
+    "content": "Frontend: Fix all UX issues from report",
+    "status": "pending",
+    "activeForm": "Fixing Settings UI based on UX report"
+  },
+  {
+    "content": "Aggregate agent reports",
+    "status": "pending",
+    "activeForm": "Aggregating agent reports"
+  },
+  {
+    "content": "Present summary to user",
+    "status": "pending",
+    "activeForm": "Presenting final summary"
+  }
+]
