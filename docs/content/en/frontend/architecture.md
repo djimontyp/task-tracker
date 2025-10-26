@@ -158,7 +158,7 @@ frontend/src/
 │   ├── App.tsx                    # Root component
 │   ├── routes.tsx                 # Route configuration
 │   └── providers.tsx              # Global providers (Query, Theme)
-├── features/                      # 15 feature modules
+├── features/                      # 14 feature modules
 │   ├── agents/                    # AI agent configuration
 │   │   ├── api/
 │   │   │   ├── agentService.ts    # API service class
@@ -227,6 +227,35 @@ frontend/src/
             └── client.ts          # Axios client instance
 ```
 
+### Feature Module Structure
+
+```
+frontend/src/
+├── features/
+│   ├── agents/           # AI agent configuration & testing
+│   ├── analysis/         # Analysis run management
+│   ├── atoms/            # Knowledge atom CRUD
+│   ├── experiments/      # ML topic classification
+│   ├── knowledge/        # Knowledge extraction & versioning
+│   ├── messages/         # Message feed with WebSocket
+│   ├── noise/            # Noise filtering
+│   ├── onboarding/       # User onboarding wizard
+│   ├── projects/         # Project management
+│   ├── proposals/        # Task proposal review
+│   ├── providers/        # LLM provider config
+│   ├── tasks/            # Task state (Zustand store)
+│   ├── topics/           # Topic management
+│   └── websocket/        # WebSocket connection
+├── pages/                # 14 page components (lazy loaded)
+├── shared/               # Shared infrastructure
+│   ├── ui/               # 33 shadcn/ui components
+│   ├── components/       # 15+ business components
+│   ├── hooks/            # 4 shared hooks
+│   ├── store/            # UI state (Zustand)
+│   └── lib/              # API client, utilities
+└── app/                  # Application core (routes, providers)
+```
+
 ### Feature Module Responsibilities
 
 Each feature module encapsulates:
@@ -249,7 +278,7 @@ Each feature module encapsulates:
 
 ## Feature Modules Catalog
 
-**Total**: 15 modules (87 files)
+**Total**: 14 modules (87 files)
 
 ### 1. agents (17 files)
 
@@ -493,23 +522,7 @@ Each feature module encapsulates:
 
 All pages use **React.lazy()** with **Suspense** fallback for code splitting.
 
-**Route Configuration** (`/app/routes.tsx`):
-
-```typescript
-const DashboardPage = lazy(() => import('@pages/DashboardPage'))
-const MessagesPage = lazy(() => import('@pages/MessagesPage'))
-// ... 12 more pages
-
-const AppRoutes = () => (
-  <Suspense fallback={<div className="flex items-center justify-center h-screen"><Spinner size="lg" /></div>}>
-    <Routes>
-      <Route element={<MainLayout><DashboardPage /></MainLayout>} path="/" />
-      <Route element={<MainLayout><MessagesPage /></MainLayout>} path="/messages" />
-      {/* ... */}
-    </Routes>
-  </Suspense>
-)
-```
+**Route Configuration** (`/app/routes.tsx`): Pages imported with React.lazy for code splitting. Routes wrapped in Suspense with centered Spinner fallback. Each route renders page inside MainLayout wrapper.
 
 **Benefits**:
 - Faster initial page load (smaller bundle)
@@ -519,6 +532,40 @@ const AppRoutes = () => (
 ---
 
 ## State Management Deep Dive
+
+### State Management Flow
+
+```mermaid
+flowchart TD
+    User[User Action] --> Component[React Component]
+
+    Component --> Decision{State Type?}
+
+    Decision -->|Client State| Zustand[Zustand Store]
+    Decision -->|Server State| TanStack[TanStack Query]
+
+    Zustand --> DirectUpdate[Direct State Update]
+    DirectUpdate --> Rerender1[Component Re-render]
+
+    TanStack --> APICall[API Call via Service]
+    APICall --> Cache[Query Cache]
+    Cache --> Rerender2[Component Re-render]
+
+    WS[WebSocket Event] --> Invalidate[queryClient.invalidateQueries]
+    Invalidate --> Refetch[Background Refetch]
+    Refetch --> Cache
+
+    style User fill:#e1f5ff
+    style Zustand fill:#fff4e6
+    style TanStack fill:#e7f5ff
+    style WS fill:#f0f0f0
+```
+
+**Philosophy**: Clear separation between client and server state.
+
+- **Zustand**: UI state, filters, selections (local, synchronous)
+- **TanStack Query**: API data, caching, background sync (remote, asynchronous)
+- **WebSocket**: Real-time updates trigger query invalidation
 
 ### Zustand Stores (Client State)
 
@@ -534,28 +581,9 @@ const AppRoutes = () => (
 - Filter status
 - Loading/error states
 
-**State Shape**:
+**State Shape**: TasksStore interface defines tasks array, selectedTask reference, loading/error flags, filterStatus. Actions include setTasks, addTask, updateTask (with partial updates), deleteTask, selectTask, setFilterStatus, setLoading, setError.
 
-```typescript
-interface TasksStore {
-  tasks: Task[]
-  selectedTask: Task | null
-  isLoading: boolean
-  error: string | null
-  filterStatus: TaskStatus | 'all' | null
-
-  setTasks: (tasks: Task[]) => void
-  addTask: (task: Task) => void
-  updateTask: (id: string, updates: Partial<Task>) => void
-  deleteTask: (id: string) => void
-  selectTask: (task: Task | null) => void
-  setFilterStatus: (status: TaskStatus | 'all' | null) => void
-  setLoading: (loading: boolean) => void
-  setError: (error: string | null) => void
-}
-```
-
-**Usage Pattern**: Immutable updates with spread syntax
+**Usage Pattern**: Immutable updates with spread syntax - addTask prepends to array, updateTask maps over tasks applying partial updates
 
 ---
 
@@ -578,17 +606,7 @@ interface TasksStore {
 - Sidebar open/closed state
 - Theme (light/dark mode)
 
-**State Shape**:
-
-```typescript
-interface UiStore {
-  sidebarOpen: boolean
-  theme: 'light' | 'dark'
-
-  toggleSidebar: () => void
-  setTheme: (theme: 'light' | 'dark') => void
-}
-```
+**State Shape**: UiStore interface defines sidebarOpen boolean flag, theme as light/dark string literal. Actions include toggleSidebar (flips boolean) and setTheme (sets theme value).
 
 ---
 
@@ -598,97 +616,72 @@ interface UiStore {
 
 #### Configuration
 
-**Provider Setup** (`/app/providers.tsx`):
-
-```typescript
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes - data considered fresh
-      refetchOnWindowFocus: false, // Don't refetch on window focus
-      retry: 1, // Retry failed requests once
-    },
-    mutations: {
-      retry: 1,
-    },
-  },
-})
-```
+**Provider Setup** (`/app/providers.tsx`): QueryClient configured with 5-minute staleTime (data considered fresh), refetchOnWindowFocus disabled, single retry attempt for both queries and mutations.
 
 #### Usage Patterns
 
-**Pattern 1: Inline queryFn** (used in pages):
+**Pattern 1: Inline queryFn** (used in pages): useQuery called with queryKey array and async queryFn that makes apiClient GET request, extracts data.items, and returns typed array. Returns data, isLoading, error states.
 
-```typescript
-const { data, isLoading, error } = useQuery<AnalysisRun[]>({
-  queryKey: ['analysis-runs'],
-  queryFn: async () => {
-    const response = await apiClient.get(API_ENDPOINTS.analysis.runs)
-    return response.data.items as AnalysisRun[]
-  },
-})
-```
+**Pattern 2: Custom hooks** (exported from service files): useExperiments returns useQuery with service method call. useStartExperiment returns useMutation with service method, invalidates experiments query on success using queryClient.
 
-**Pattern 2: Custom hooks** (exported from service files):
-
-```typescript
-export function useExperiments() {
-  return useQuery<ExperimentListResponse>({
-    queryKey: ['experiments'],
-    queryFn: () => experimentService.listExperiments(),
-  })
-}
-
-export function useStartExperiment() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (data: StartExperimentRequest) => experimentService.startExperiment(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['experiments'] })
-    },
-  })
-}
-```
-
-**Pattern 3: Mutations with optimistic updates**:
-
-```typescript
-const deleteMutation = useMutation({
-  mutationFn: (id: string) => agentService.delete(id),
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['agents'] })
-    toast.success('Agent deleted successfully')
-  },
-  onError: (error) => {
-    toast.error(`Failed to delete agent: ${error.message}`)
-  },
-})
-```
+**Pattern 3: Mutations with optimistic updates**: useMutation with service delete method. onSuccess invalidates agents query and shows success toast. onError shows error toast with message.
 
 #### Query Invalidation Strategy
 
-**WebSocket → Query Invalidation**:
-
-```typescript
-ws.onmessage = (event) => {
-  const message = JSON.parse(event.data)
-  if (message.topic === 'analysis') {
-    switch (message.event) {
-      case 'run_created':
-        queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
-        toast.success('New analysis run created')
-        break
-      case 'run_progress':
-        queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
-        break
-    }
-  }
-}
-```
+**WebSocket → Query Invalidation**: Message handler parses JSON event, checks topic field, switches on event type (run_created, run_progress, run_completed, run_failed) to invalidate analysis-runs query and show appropriate toast notification.
 
 ---
 
 ## Component Architecture
+
+### Component Hierarchy
+
+```
+App (Router)
+│
+└── Providers (QueryClient, Theme)
+    │
+    └── MainLayout
+        │
+        ├── AppSidebar
+        │   ├── NavUser
+        │   └── Navigation Groups
+        │
+        └── Content Area
+            │
+            └── Pages (lazy loaded with Suspense)
+                │
+                ├── DashboardPage
+                │   ├── MetricCard (shared)
+                │   ├── RecentTopics
+                │   └── ActivityHeatmap (shared)
+                │
+                ├── MessagesPage
+                │   ├── DataTable (shared)
+                │   ├── DataTableToolbar (shared)
+                │   └── MessagesErrorBoundary (feature)
+                │
+                ├── TopicsPage
+                │   └── Feature: topics
+                │       ├── TopicCard
+                │       ├── HexColorPicker
+                │       └── IconSelector
+                │
+                ├── TasksPage
+                │   └── Feature: tasks
+                │       ├── TaskList
+                │       ├── TaskCard
+                │       └── TaskForm
+                │
+                └── ... (10 more pages)
+```
+
+**Layout Pattern**:
+- Root providers wrap entire app (QueryClient, Theme)
+- MainLayout provides consistent sidebar + content structure
+- Pages lazy loaded for code splitting
+- Features provide domain-specific components
+- Shared components handle cross-cutting concerns
 
 ### Shared UI Components (shadcn/ui)
 
@@ -779,22 +772,215 @@ ws.onmessage = (event) => {
 
 ---
 
+## Component Patterns & Best Practices
+
+### 1. React Component Patterns
+
+**Functional Components Only**: All components use React function components with hooks - no class components in codebase.
+
+**Hooks Usage**:
+- `useState` for local component state
+- `useEffect` for side effects, subscriptions, cleanup
+- `useCallback` for memoized callbacks (used selectively in performance-critical hooks)
+- `useMemo` for memoized computed values (used selectively)
+- `useRef` for DOM references and mutable values (e.g., WebSocket instances, timeouts)
+- Custom hooks prefixed with `use` for reusable logic
+
+**Component Composition**:
+- Higher-order composition via props (children, render props)
+- Radix UI Slot pattern for polymorphic components (e.g., Button with `asChild`)
+- Compound components for complex UI (Dialog, Select, Dropdown)
+- Feature-specific components compose shared UI primitives
+
+**Props Typing**:
+- All component props defined via TypeScript interfaces
+- Interface naming convention: `{ComponentName}Props`
+- Props interfaces use `extends` for inheritance (e.g., `extends React.ButtonHTMLAttributes`)
+- Optional props marked with `?`, defaults handled in destructuring
+
+**Conditional Rendering**:
+- Loading states: `if (isLoading) return <Spinner />`
+- Error states: `if (error) return <ErrorMessage />`
+- Early returns for guard clauses
+- Ternary operators for inline conditionals
+- Logical AND (`&&`) for simple conditional rendering
+
+---
+
+### 2. shadcn/ui Integration Patterns
+
+**Installation Approach**:
+- Components copied to `src/shared/ui/` (not npm packages)
+- Installed via CLI: `npx shadcn add {component}`
+- Full source code ownership - modify freely without forking library
+
+**Customization Strategy**:
+- Tailwind CSS variants via `class-variance-authority` (CVA)
+- Base styles in component files
+- Variants defined in `buttonVariants`, `cardVariants`, etc.
+- Utility `cn()` function merges classes with `tailwind-merge`
+
+**Radix UI Primitives**:
+- All shadcn/ui components built on Radix UI headless primitives
+- Radix provides accessibility, keyboard navigation, ARIA attributes
+- Shadcn adds Tailwind styling layer on top
+- Primitives imported from `@radix-ui/react-*` packages
+
+**Component Composition**:
+- Compound components (Dialog = DialogTrigger + DialogContent + DialogHeader + DialogFooter)
+- Slot-based polymorphism (Button `asChild` prop renders as child component)
+- Composable primitives (Select, Popover, Dropdown)
+
+**Styling Overrides**:
+- Override via `className` prop (merged with base classes via `cn()`)
+- Extend variants via CVA definitions
+- Theme variables in `tailwind.config.js` (colors, spacing)
+
+---
+
+### 3. TypeScript Typing Patterns
+
+**Props Interfaces Naming**:
+- Convention: `{ComponentName}Props` (e.g., `AgentFormProps`, `ProjectFormProps`)
+- Located inline above component definition or in `types/index.ts`
+- Use `interface` for component props (supports `extends`)
+
+**Generics in Components**:
+- Custom hooks use generics for flexible types (e.g., `useAutoSave<T extends Record<string, any>>`)
+- Generic constraints for type safety
+- Type inference from hook usage
+
+**Type Inference with Hooks**:
+- TanStack Query: `useQuery<ResponseType>({ queryKey, queryFn })`
+- Zustand stores: Type inferred from store definition
+- Form hooks: Types inferred from Zod schema via `z.infer<typeof schema>`
+
+**API Response Typing**:
+- Response types defined in `features/{domain}/types/index.ts`
+- Service methods return strongly typed responses
+- Generic wrapper types: `{ items: T[] }` for list responses
+
+**Event Handler Typing**:
+- HTML events: `React.FormEvent`, `React.ChangeEvent<HTMLInputElement>`
+- Custom event types: `(data: CustomType) => void`
+- Callback props typed explicitly in interfaces
+
+---
+
+### 4. Custom Hooks Patterns
+
+| Hook Name | Location | Purpose | Returns |
+|-----------|----------|---------|---------|
+| **useWebSocket** | `features/websocket/hooks/` | Native WebSocket connection with reconnection, topic subscriptions | `{ isConnected, send, disconnect, reconnect, connectionState }` |
+| **useServiceStatus** | `features/websocket/hooks/` | Backend health monitoring with retry logic | `{ indicator, connectionState, isWebSocketConnected, healthState, lastHealthError }` |
+| **useMessagesFeed** | `features/messages/hooks/` | Message feed with WebSocket updates, period filtering | `{ messages, period, setPeriod, isLoading, error, refresh, connectionState, isConnected }` |
+| **useOllamaModels** | `features/providers/hooks/` | Fetch Ollama models from provider URL | `{ models, isLoading, error }` |
+| **useAutoSave** | `shared/hooks/` | Auto-save form data with debouncing, manual save, status tracking | `{ values, setValue, saveStatus, hasUnsavedChanges, lastSavedAt, autoSaveEnabled, setAutoSaveEnabled, manualSave, discardChanges, isSaving, reset }` |
+| **useDebounce** | `shared/hooks/` | Debounce value changes for performance | `debouncedValue` |
+| **use-mobile** | `shared/hooks/` | Detect mobile viewport via media query | `isMobile` |
+
+**Pattern**: Custom hooks encapsulate stateful logic, side effects, and data fetching. Return objects with named properties for clarity.
+
+---
+
+### 5. Form Handling Patterns
+
+**Form Library**: React Hook Form (uncontrolled components, minimal re-renders)
+
+**Validation**:
+- Zod schemas for runtime validation and TypeScript type generation
+- Schema defined inline or in separate file
+- Resolver integration: `useForm({ resolver: zodResolver(schema) })`
+
+**Form Submission**:
+- `handleSubmit` wraps onSubmit callback
+- Validation runs before submission
+- Async submission with loading states
+- Error handling via `formState.errors`
+
+**Error Handling**:
+- Field-level errors: `errors.fieldName?.message`
+- Form-level errors displayed via toast notifications
+- Validation errors shown inline below inputs
+
+**State Management**:
+- Controlled inputs via `useState` for complex forms (e.g., ProjectForm with dynamic arrays)
+- Uncontrolled inputs via React Hook Form `register` for simple forms
+- Mixed pattern: Controlled for UI elements (Select, Checkbox), uncontrolled for text inputs
+
+---
+
+### 6. Accessibility Patterns
+
+**Radix UI Accessibility**:
+- Built-in ARIA attributes (roles, labels, descriptions)
+- Keyboard navigation (Tab, Enter, Escape, Arrow keys)
+- Focus management (focus trap in dialogs, focus return on close)
+- Screen reader announcements for state changes
+
+**ARIA Attributes**:
+- `aria-label` for icon-only buttons
+- `aria-describedby` for error messages
+- `aria-required` for required form fields
+- `aria-invalid` for validation errors
+- `aria-pressed` for toggle buttons (ghost variant)
+
+**Semantic HTML**:
+- `<button>` for actions (not `<div onClick>`)
+- `<label>` paired with form inputs via `htmlFor`
+- `<form>` with `onSubmit` handler
+- Heading hierarchy (`<h1>`, `<h2>`, `<h3>`)
+
+**Keyboard Navigation**:
+- All interactive elements keyboard-accessible
+- Dialogs closable with Escape key
+- Enter key submits forms
+- Tab order follows visual layout
+
+**Screen Reader Support**:
+- Descriptive button text (not "Click here")
+- Status announcements via toast notifications
+- Loading states announced ("Loading...")
+- Error messages associated with form fields
+
+---
+
+### 7. Performance Optimization Patterns
+
+**Lazy Loading**:
+- All pages lazy-loaded via `React.lazy(() => import('@pages/PageName'))`
+- Suspense fallback: Centered Spinner component
+- Route-level code splitting reduces initial bundle size
+
+**Memoization**:
+- `useMemo` for expensive computations (used selectively in hooks like `useServiceStatus`)
+- `useCallback` for stable callback references (prevents child re-renders)
+- Not used prematurely - only after profiling shows performance issues
+
+**Query Key Design**:
+- TanStack Query cache keys structured: `['domain', filters]`
+- Fine-grained invalidation via specific query keys
+- Background refetching for stale data (5-minute stale time)
+
+**Bundle Splitting**:
+- Manual vendor chunks in Vite config:
+  - `react-vendor`: React, React DOM, React Router
+  - `ui-vendor`: All Radix UI packages
+  - `data-vendor`: TanStack Query, Axios
+- Per-page code splitting via lazy loading
+- Shared components bundled separately
+
+**React 18 Optimizations**:
+- Concurrent rendering enabled
+- Automatic batching for state updates
+- Suspense for async components
+- No manual optimization needed for most cases
+
+---
+
 ### Import Aliases
 
-**Configuration** (`tsconfig.json`, `vite.config.ts`):
-
-```typescript
-{
-  "baseUrl": "./src",
-  "paths": {
-    "@/*": ["./*"],
-    "@app/*": ["app/*"],
-    "@pages/*": ["pages/*"],
-    "@features/*": ["features/*"],
-    "@shared/*": ["shared/*"]
-  }
-}
-```
+**Configuration** (`tsconfig.json`, `vite.config.ts`): baseUrl set to ./src. Path mappings define @ aliases - @/* for root, @app/* for app directory, @pages/* for pages, @features/* for features, @shared/* for shared.
 
 **Benefits**:
 - Clean imports: `@/shared/ui` instead of `../../../shared/ui`
@@ -805,88 +991,59 @@ ws.onmessage = (event) => {
 
 ## Data Fetching Patterns
 
+### Data Fetching Flow
+
+```mermaid
+sequenceDiagram
+    participant C as Component
+    participant H as TanStack Query Hook
+    participant S as Service Class
+    participant API as Backend API
+    participant Cache as Query Cache
+    participant WS as WebSocket
+
+    C->>H: useQuery({ queryKey, queryFn })
+    H->>Cache: Check cache
+
+    alt Cache Hit (fresh)
+        Cache-->>H: Return cached data
+        H-->>C: Render with data
+    else Cache Miss or Stale
+        H->>S: Call service method
+        S->>API: HTTP Request (axios/fetch)
+        API-->>S: JSON Response
+        S-->>H: Typed data
+        H->>Cache: Store in cache
+        H-->>C: Render with data
+    end
+
+    WS->>C: Event received
+    C->>Cache: invalidateQueries({ queryKey })
+    Cache->>H: Mark stale
+    H->>S: Background refetch
+    S->>API: HTTP Request
+    API-->>S: Updated data
+    S-->>H: Fresh data
+    H->>Cache: Update cache
+    H-->>C: Re-render with fresh data
+```
+
+**Key Concepts**:
+1. **Query Hook**: Component uses `useQuery` or custom hook (e.g., `useAgents`)
+2. **Service Layer**: Service class handles HTTP calls with TypeScript types
+3. **Caching**: TanStack Query caches responses by `queryKey`
+4. **Invalidation**: WebSocket events trigger cache invalidation
+5. **Background Refetch**: Queries automatically refetch when invalidated
+
 ### API Service Classes
 
 **Pattern**: Service classes with typed methods, exported as singletons.
 
-**Axios Client** (`/shared/lib/api/client.ts`):
+**Axios Client** (`/shared/lib/api/client.ts`): baseURL resolved from VITE_API_BASE_URL or VITE_API_URL environment variables (defaults to empty string for relative URLs). JSON content-type header set. Response interceptor logs errors via logger utility.
 
-```typescript
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_API_URL ||
-  '' // Relative URL for Nginx proxy
+**Service Class Example** (`/features/analysis/api/analysisService.ts`): AnalysisService class defines async methods - listRuns (GET with optional filter params), createRun (POST with payload), getRunDetails (GET by ID), closeRun (PUT to close endpoint). All methods typed with TypeScript generics. Exported as singleton instance.
 
-export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-})
-
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    logger.error('API Error:', error)
-    return Promise.reject(error)
-  }
-)
-```
-
-**Service Class Example** (`/features/analysis/api/analysisService.ts`):
-
-```typescript
-class AnalysisService {
-  async listRuns(params?: AnalysisRunFilters): Promise<AnalysisRunListResponse> {
-    const { data } = await apiClient.get<AnalysisRunListResponse>(
-      API_ENDPOINTS.analysis.runs,
-      { params }
-    )
-    return data
-  }
-
-  async createRun(data: CreateAnalysisRun): Promise<AnalysisRun> {
-    const response = await apiClient.post<AnalysisRun>(
-      API_ENDPOINTS.analysis.runs,
-      data
-    )
-    return response.data
-  }
-
-  async getRunDetails(runId: string): Promise<AnalysisRun> {
-    const { data } = await apiClient.get<AnalysisRun>(
-      API_ENDPOINTS.analysis.run(runId)
-    )
-    return data
-  }
-
-  async closeRun(runId: string): Promise<AnalysisRun> {
-    const { data } = await apiClient.put<AnalysisRun>(
-      `${API_ENDPOINTS.analysis.run(runId)}/close`
-    )
-    return data
-  }
-}
-
-export const analysisService = new AnalysisService()
-```
-
-**Alternative: Fetch API** (used in `messageService.ts`):
-
-```typescript
-class MessageService {
-  async getMessagesByTopic(topicId: number): Promise<Message[]> {
-    const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/topics/${topicId}/messages`)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch messages: ${response.statusText}`)
-    }
-
-    const data: TopicMessagesResponse = await response.json()
-    return data.items || data
-  }
-}
-
-export const messageService = new MessageService()
-```
+**Alternative: Fetch API** (used in `messageService.ts`): MessageService uses native fetch with template string URL. Checks response.ok, throws error on failure. Parses JSON and returns items array or full data object.
 
 **Note**: Mixed pattern exists - axios preferred for interceptors, but some services use fetch.
 
@@ -896,68 +1053,7 @@ export const messageService = new MessageService()
 
 **Location**: `/shared/config/api.ts`
 
-**Structure**:
-
-```typescript
-export const API_VERSION = 'v1'
-export const API_BASE_PATH = `/api/${API_VERSION}`
-
-export const API_ENDPOINTS = {
-  // Health & Config
-  health: '/api/v1/health',
-  config: '/api/v1/config',
-
-  // Messages
-  messages: '/api/v1/messages',
-  updateAuthors: (chatId: string) => `/api/v1/messages/update-authors?chat_id=${chatId}`,
-
-  // Tasks
-  tasks: '/api/v1/tasks',
-  taskConfigs: '/api/v1/task-configs',
-
-  // Statistics
-  stats: '/api/v1/stats',
-  activity: '/api/v1/activity',
-  sidebarCounts: '/api/v1/sidebar-counts',
-
-  // Analysis
-  analysis: {
-    runs: '/api/v1/analysis/runs',
-    run: (runId: string) => `/api/v1/analysis/runs/${runId}`,
-  },
-
-  // Proposals
-  proposals: '/api/v1/analysis/proposals',
-  proposal: (proposalId: string) => `/api/v1/analysis/proposals/${proposalId}`,
-
-  // AI Configuration
-  agents: '/api/v1/agents',
-  providers: '/api/v1/providers',
-  ollamaModels: (host: string) => `/api/v1/providers/ollama/models?host=${encodeURIComponent(host)}`,
-  projects: '/api/v1/projects',
-  topics: '/api/v1/topics',
-
-  // Experiments
-  experiments: {
-    base: '/api/v1/experiments/topic-classification',
-    detail: (id: number) => `/api/v1/experiments/topic-classification/${id}`,
-  },
-
-  // Noise Filtering
-  noise: {
-    stats: '/api/v1/noise/stats',
-    scoreMessage: (messageId: number) => `/api/v1/noise/score/${messageId}`,
-    scoreBatch: '/api/v1/noise/score-batch',
-  },
-
-  // Knowledge Extraction
-  knowledge: '/api/v1/knowledge',
-  versions: '/api/v1/versions',
-
-  // WebSocket
-  ws: '/ws',
-}
-```
+**Structure**: API_VERSION constant set to 'v1', API_BASE_PATH constructed from version. Endpoints organized by domain - health/config, messages (with factory function for updateAuthors), tasks, statistics (stats/activity/sidebarCounts), analysis (nested object with runs and run factory), proposals, AI config (agents/providers/projects/topics with factory for ollamaModels), experiments (nested with base/detail), noise filtering (nested with stats/scoreMessage/scoreBatch), knowledge extraction, WebSocket endpoint.
 
 **Total**: 30+ endpoints
 
@@ -978,37 +1074,57 @@ export const API_ENDPOINTS = {
 
 **Component Variants**: **class-variance-authority** (CVA) for component variant management.
 
-**Example**:
-
-```typescript
-const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-md font-medium transition-colors",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input hover:bg-accent hover:text-accent-foreground",
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 px-3",
-        lg: "h-11 px-8",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-)
-```
+**Example**: buttonVariants defined with CVA - base classes (inline-flex, rounded-md, etc), variant options (default/destructive/outline with different colors), size options (default/sm/lg with different heights/padding), defaultVariants specifying default selections.
 
 **Class Merging**: **tailwind-merge** intelligently merges Tailwind classes, preventing conflicts.
 
 ---
 
 ## Real-time Communication
+
+### WebSocket Integration Flow
+
+```mermaid
+sequenceDiagram
+    participant App as App Component
+    participant WS as useWebSocket Hook
+    participant Server as WebSocket Server
+    participant Handler as Event Handler
+    participant QC as QueryClient
+    participant Query as TanStack Query
+    participant UI as UI Component
+
+    App->>WS: useWebSocket({ topics: ['analysis', 'proposals'] })
+    WS->>Server: Connect to /ws?topics=analysis,proposals
+    Server-->>WS: Connection established
+    WS->>App: isConnected = true
+
+    Server->>WS: Message: { topic: 'analysis', event: 'run_created', data: {...} }
+    WS->>Handler: onMessage(data)
+    Handler->>QC: invalidateQueries({ queryKey: ['analysis-runs'] })
+    QC->>Query: Mark ['analysis-runs'] as stale
+    Query->>Server: Background refetch (HTTP)
+    Server-->>Query: Updated data
+    Query->>UI: Re-render with fresh data
+
+    Note over WS,Server: On disconnect: exponential backoff reconnection
+    Server->>WS: Connection closed
+    WS->>WS: Reconnect attempt (delay: 1s, 2s, 4s, 8s...)
+```
+
+**Integration Pattern**:
+1. **App Init**: WebSocket connects with topic subscriptions
+2. **Event Received**: WebSocket receives real-time event
+3. **Handler Logic**: Parse event and determine affected queries
+4. **Query Invalidation**: Mark relevant query keys as stale
+5. **Background Refetch**: TanStack Query automatically refetches
+6. **UI Update**: Components re-render with fresh data
+
+**Benefits**:
+- Decoupled real-time events from UI components
+- TanStack Query handles data consistency
+- Automatic reconnection with exponential backoff
+- Toast notifications for connection status
 
 ### Native WebSocket (NOT Socket.IO)
 
@@ -1025,51 +1141,11 @@ const buttonVariants = cva(
 4. Toast notifications for connection events
 5. Automatic reconnection with backoff
 
-**Hook Interface**:
+**Hook Interface**: UseWebSocketOptions defines topics array, message/connect/disconnect callbacks, reconnect flag, reconnectInterval milliseconds, maxReconnectAttempts count. UseWebSocketReturn provides isConnected boolean, connectionState enum, send/disconnect/reconnect functions.
 
-```typescript
-interface UseWebSocketOptions {
-  topics?: string[]
-  onMessage?: (data: any) => void
-  onConnect?: () => void
-  onDisconnect?: () => void
-  reconnect?: boolean
-  reconnectInterval?: number
-  maxReconnectAttempts?: number
-}
+**URL Resolution**: Function determines WebSocket scheme (wss for https, ws for http), resolves host from VITE_WS_HOST env or window.location.hostname, uses VITE_WS_PATH or default /ws, includes port if present. Appends topics query param with comma-separated values if provided.
 
-interface UseWebSocketReturn {
-  isConnected: boolean
-  connectionState: WebSocketState
-  send: (data: any) => void
-  disconnect: () => void
-  reconnect: () => void
-}
-```
-
-**URL Resolution**:
-
-```typescript
-const resolveWebSocketUrl = (topics?: string[]) => {
-  const scheme = window.location.protocol === 'https:' ? 'wss' : 'ws'
-  const host = import.meta.env.VITE_WS_HOST?.trim() || window.location.hostname
-  const path = import.meta.env.VITE_WS_PATH || '/ws'
-  const port = window.location.port ? `:${window.location.port}` : ''
-
-  let url = `${scheme}://${host}${port}${path}`
-  if (topics && topics.length > 0) {
-    url += `?topics=${topics.join(',')}`
-  }
-  return url
-}
-```
-
-**Exponential Backoff**:
-
-```typescript
-const delay = Math.min(reconnectInterval * Math.pow(2, reconnectAttemptsRef.current), 30000)
-reconnectTimeoutRef.current = setTimeout(() => connect(), delay)
-```
+**Exponential Backoff**: Delay calculated as reconnectInterval multiplied by 2 raised to power of attempt count, capped at 30 seconds. setTimeout schedules reconnection after delay.
 
 ---
 
@@ -1077,40 +1153,7 @@ reconnectTimeoutRef.current = setTimeout(() => connect(), delay)
 
 **Pattern**: WebSocket messages trigger query invalidation for fresh data.
 
-**Example** (`/pages/AnalysisRunsPage/index.tsx`):
-
-```typescript
-useEffect(() => {
-  const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost/ws'
-  const ws = new WebSocket(`${wsUrl}?topics=analysis,proposals`)
-
-  ws.onmessage = (event) => {
-    const message = JSON.parse(event.data)
-
-    if (message.topic === 'analysis') {
-      switch (message.event) {
-        case 'run_created':
-          queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
-          toast.success('New analysis run created')
-          break
-        case 'run_progress':
-          queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
-          break
-        case 'run_completed':
-          queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
-          toast.success('Analysis run completed')
-          break
-        case 'run_failed':
-          queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
-          toast.error('Analysis run failed')
-          break
-      }
-    }
-  }
-
-  return () => ws.close()
-}, [queryClient])
-```
+**Example** (`/pages/AnalysisRunsPage/index.tsx`): useEffect creates WebSocket with VITE_WS_URL (or default localhost) plus topics query param. Message handler parses JSON, checks topic field, switches on event type to invalidate analysis-runs query and show toast (success for run_created/run_completed, error for run_failed, silent for run_progress). Cleanup closes WebSocket.
 
 **Benefits**:
 - Real-time UI updates without polling
@@ -1140,43 +1183,9 @@ useEffect(() => {
 
 **Location**: `/vite.config.ts`
 
-**Server Configuration** (Docker-compatible):
+**Server Configuration** (Docker-compatible): Port 3000, host set to true for binding to all addresses (0.0.0.0), strictPort enforces exact port, watch.usePolling enabled for Docker volume mount compatibility.
 
-```typescript
-server: {
-  port: 3000,
-  host: true, // Listen on all addresses (0.0.0.0)
-  strictPort: true,
-  watch: {
-    usePolling: true, // Required for Docker volume mounts
-  },
-}
-```
-
-**Build Optimization**:
-
-```typescript
-build: {
-  outDir: 'dist',
-  sourcemap: true,
-  chunkSizeWarningLimit: 1000,
-  rollupOptions: {
-    output: {
-      manualChunks: {
-        'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-        'ui-vendor': [
-          '@radix-ui/react-avatar',
-          '@radix-ui/react-checkbox',
-          '@radix-ui/react-dialog',
-          '@radix-ui/react-dropdown-menu',
-          // ... all Radix UI packages
-        ],
-        'data-vendor': ['@tanstack/react-query', '@tanstack/react-table', 'axios'],
-      },
-    },
-  },
-}
-```
+**Build Optimization**: Output directory dist, sourcemaps enabled, chunk size warning at 1000KB. Manual chunks defined - react-vendor (React core libraries), ui-vendor (all Radix UI packages), data-vendor (TanStack Query/Table, Axios).
 
 **Manual Code Splitting Benefits**:
 - Smaller initial bundle (React vendor chunk cached separately)
@@ -1189,29 +1198,7 @@ build: {
 
 **Location**: `/tsconfig.json`
 
-**Strict Mode Enabled**:
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "jsx": "react-jsx",
-
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-
-    "isolatedModules": true,
-    "noEmit": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true
-  }
-}
-```
+**Strict Mode Enabled**: Target ES2020 with DOM libraries, ESNext modules, node resolution, react-jsx transform. All strict checks enabled - strict mode, unused locals/parameters flagged, no fallthrough in switch. Isolated modules, no emit, JSON resolution, skip lib check.
 
 **Strict Checks**:
 - All strict TypeScript checks enabled
@@ -1242,16 +1229,7 @@ build: {
 
 ### Barrel Exports
 
-Each feature module exports via `index.ts`:
-
-```typescript
-// features/agents/api/index.ts
-export * from './agentService'
-export * from './taskService'
-
-// Usage
-import { agentService, taskService } from '@features/agents/api'
-```
+Each feature module exports via `index.ts`: Barrel export file re-exports all services (agentService, taskService) from same directory. Allows clean imports using @features path alias.
 
 ---
 
@@ -1259,7 +1237,7 @@ import { agentService, taskService } from '@features/agents/api'
 
 | Metric | Count |
 |--------|-------|
-| **Feature Modules** | 15 |
+| **Feature Modules** | 14 |
 | **Pages** | 14 |
 | **Total TypeScript Files** | 205 |
 | **Shared UI Components** | 33 |
@@ -1345,14 +1323,7 @@ import { agentService, taskService } from '@features/agents/api'
 
 **Issue**: No `.env.example` file documenting required VITE_* variables.
 
-**Resolution**: Create `.env.example` with:
-
-```bash
-VITE_API_BASE_URL=http://localhost/api/v1
-VITE_WS_URL=ws://localhost/ws
-VITE_WS_HOST=localhost
-VITE_WS_PATH=/ws
-```
+**Resolution**: Create `.env.example` documenting VITE_API_BASE_URL for API base URL, VITE_WS_URL for full WebSocket URL, VITE_WS_HOST for WebSocket host, VITE_WS_PATH for WebSocket path.
 
 ---
 
