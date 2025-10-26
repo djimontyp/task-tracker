@@ -10,7 +10,7 @@
 ```
 src/
 ├── app/                    # App configuration (routes, providers)
-├── features/              # 15 domain modules (agents, analysis, atoms...)
+├── features/              # 14 domain modules (agents, analysis, atoms...)
 │   └── {domain}/
 │       ├── api/           # Service class + TanStack Query hooks
 │       ├── components/    # Domain-specific components
@@ -104,7 +104,7 @@ src/
 | 13 | **topics** | Topic management (icons, colors) | HexColorPicker, renderIcon (6 files) |
 | 14 | **websocket** | WebSocket connection, service status | useWebSocket, useServiceStatus (2 files) |
 
-**Total**: 15 modules (87 files)
+**Total**: 14 modules (87 files)
 
 ---
 
@@ -146,21 +146,7 @@ src/
 | **messagesStore** | `/features/messages/store/` | Message feed | (feature-specific) |
 | **uiStore** | `/shared/store/` | UI state | `sidebarOpen`, `theme` (light/dark) |
 
-**Example Pattern**:
-```typescript
-export const useTasksStore = create<TasksStore>((set) => ({
-  tasks: [],
-  selectedTask: null,
-  isLoading: false,
-  error: null,
-
-  setTasks: (tasks) => set({ tasks }),
-  addTask: (task) => set((state) => ({ tasks: [task, ...state.tasks] })),
-  updateTask: (id, updates) => set((state) => ({
-    tasks: state.tasks.map((t) => t.id === id ? { ...t, ...updates } : t)
-  })),
-}))
-```
+**Pattern**: Store created with Zustand's create function, defining state properties (tasks array, selectedTask, loading/error flags) and actions (setTasks, addTask, updateTask) using immutable updates with spread syntax.
 
 ### TanStack Query (Server State)
 
@@ -174,15 +160,7 @@ export const useTasksStore = create<TasksStore>((set) => ({
 2. **Custom hooks** in service files (`useExperiments`, `useStartExperiment`)
 3. **Mutations** with `queryClient.invalidateQueries()`
 
-**WebSocket Integration**:
-```typescript
-ws.onmessage = (event) => {
-  const message = JSON.parse(event.data)
-  if (message.topic === 'analysis') {
-    queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
-  }
-}
-```
+**WebSocket Integration**: WebSocket message handler parses incoming events, checks message topic, and calls queryClient.invalidateQueries with appropriate queryKey to trigger background refetch.
 
 ---
 
@@ -216,22 +194,9 @@ Based on **Radix UI** primitives with **Tailwind CSS** styling.
 
 ### Import Aliases
 
-**Configuration** (`tsconfig.json`, `vite.config.ts`):
-```typescript
-"@/*": ["./*"]
-"@app/*": ["app/*"]
-"@pages/*": ["pages/*"]
-"@features/*": ["features/*"]
-"@shared/*": ["shared/*"]
-```
+**Configuration** (`tsconfig.json`, `vite.config.ts`): Path mappings configured with @ prefix for clean imports - @/* maps to src root, @app/* to app directory, @pages/* to pages, @features/* to features, @shared/* to shared.
 
-**Usage**:
-```typescript
-import { Button, Spinner } from '@/shared/ui'
-import { apiClient } from '@/shared/lib/api/client'
-import { API_ENDPOINTS } from '@/shared/config/api'
-import DashboardPage from '@pages/DashboardPage'
-```
+**Usage**: Import shared UI components, API client, config from @/shared paths. Import pages from @pages prefix. Cleaner than relative paths like ../../../shared/ui.
 
 ---
 
@@ -239,29 +204,9 @@ import DashboardPage from '@pages/DashboardPage'
 
 ### API Service Pattern
 
-**Axios Client** (`/shared/lib/api/client.ts`):
-```typescript
-export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '',
-  headers: { 'Content-Type': 'application/json' },
-})
-```
+**Axios Client** (`/shared/lib/api/client.ts`): Configured with baseURL from environment variable VITE_API_BASE_URL (defaults to empty for relative URLs) and JSON content-type header.
 
-**Service Class** (example: `analysisService.ts`):
-```typescript
-class AnalysisService {
-  async listRuns(params?: Filters): Promise<AnalysisRunListResponse> {
-    const { data } = await apiClient.get(API_ENDPOINTS.analysis.runs, { params })
-    return data
-  }
-
-  async createRun(data: CreateAnalysisRun): Promise<AnalysisRun> {
-    const response = await apiClient.post(API_ENDPOINTS.analysis.runs, data)
-    return response.data
-  }
-}
-export const analysisService = new AnalysisService()
-```
+**Service Class** (example: `analysisService.ts`): Service class defines async methods for API operations (listRuns, createRun, getRunDetails, closeRun). Methods use apiClient to make HTTP calls, extract data from response, and return typed results. Exported as singleton instance.
 
 **Alternative**: Some services use native **Fetch API** (e.g., `messageService.ts`)
 
@@ -269,26 +214,7 @@ export const analysisService = new AnalysisService()
 
 **Location**: `/shared/config/api.ts`
 
-**Structure**:
-```typescript
-export const API_ENDPOINTS = {
-  health: '/api/v1/health',
-  messages: '/api/v1/messages',
-  tasks: '/api/v1/tasks',
-
-  analysis: {
-    runs: '/api/v1/analysis/runs',
-    run: (runId: string) => `/api/v1/analysis/runs/${runId}`,
-  },
-
-  agents: '/api/v1/agents',
-  providers: '/api/v1/providers',
-  projects: '/api/v1/projects',
-  topics: '/api/v1/topics',
-
-  ws: '/ws',
-}
-```
+**Structure**: Object with endpoint paths organized by domain - health check, messages, tasks at root level. Nested objects for complex domains (analysis with runs and run detail). Factory functions for parameterized endpoints (run by runId). WebSocket endpoint at /ws.
 
 **Total**: 30+ endpoints
 
@@ -310,29 +236,7 @@ export const API_ENDPOINTS = {
 - Connection states: `connecting`, `connected`, `reconnecting`, `disconnected`
 - Integration with TanStack Query via `queryClient.invalidateQueries()`
 
-**Usage Pattern**:
-```typescript
-useEffect(() => {
-  const ws = new WebSocket(`${wsUrl}?topics=analysis,proposals`)
-
-  ws.onmessage = (event) => {
-    const message = JSON.parse(event.data)
-    if (message.topic === 'analysis') {
-      switch (message.event) {
-        case 'run_created':
-          queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
-          toast.success('New analysis run created')
-          break
-        case 'run_progress':
-          queryClient.invalidateQueries({ queryKey: ['analysis-runs'] })
-          break
-      }
-    }
-  }
-
-  return () => ws.close()
-}, [queryClient])
-```
+**Usage Pattern**: WebSocket created in useEffect with topic subscriptions via query params. Message handler parses events, checks topic, and uses switch statement on event type to invalidate specific queries and show toast notifications. Cleanup function closes WebSocket connection.
 
 **Environment Variables**:
 - `VITE_WS_URL`: Full WebSocket URL (e.g., `ws://localhost/ws`)
@@ -347,17 +251,7 @@ useEffect(() => {
 
 **Location**: `/vite.config.ts`
 
-**Server** (Docker-compatible):
-```typescript
-server: {
-  port: 3000,
-  host: true, // Listen on all addresses
-  strictPort: true,
-  watch: {
-    usePolling: true, // Required for Docker
-  },
-}
-```
+**Server** (Docker-compatible): Configured to listen on port 3000, bind to all addresses (host: true for Docker), enforce strict port, and use polling for file watching (required for Docker volume mounts).
 
 **Build Optimization**:
 - Manual code splitting (3 vendor chunks):
@@ -369,15 +263,7 @@ server: {
 
 ### TypeScript Configuration
 
-**Strict Mode**: ✅ Enabled
-```json
-{
-  "strict": true,
-  "noUnusedLocals": true,
-  "noUnusedParameters": true,
-  "noFallthroughCasesInSwitch": true
-}
-```
+**Strict Mode**: ✅ Enabled - All strict TypeScript checks active, flags unused locals and parameters, prevents fallthrough in switch statements.
 
 **Target**: ES2020, ESNext modules
 **JSX**: react-jsx (React 17+ transform)
@@ -465,7 +351,7 @@ SETTINGS
 
 | Metric | Count |
 |--------|-------|
-| Feature Modules | 15 |
+| Feature Modules | 14 |
 | Pages | 14 |
 | TypeScript Files | 205 |
 | Shared UI Components | 33 |
