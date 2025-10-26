@@ -10,6 +10,23 @@ Event-driven microservices: **Telegram Bot** → **FastAPI Backend** (REST + Web
 - **Frontend**: React 18 + TypeScript, WebSocket, Docker Compose Watch
 - **Infrastructure**: PostgreSQL (port 5555), NATS, Nginx
 
+## Backend Architecture
+
+The backend implements a layered hexagonal architecture for LLM integration with comprehensive data modeling. The system processes Telegram messages through an auto-triggered task chain: webhook ingestion → message scoring → knowledge extraction. All LLM operations follow ports-and-adapters pattern for framework independence, while the database uses a versioning system for Topics and Atoms to support approval workflows.
+
+**Architecture Documentation:**
+- [Database Models](docs/content/en/architecture/models.md) - 21 models across 5 domains with ER diagrams
+- [LLM Architecture](docs/content/en/architecture/llm-architecture.md) - Hexagonal (ports & adapters) design
+- [Backend Services](docs/content/en/architecture/backend-services.md) - 30 services organized by domain
+- [Background Tasks](docs/content/en/architecture/background-tasks.md) - TaskIQ + NATS async processing
+
+**Key Features:**
+- **Hexagonal Architecture**: Framework-agnostic LLM integration via protocols (swap Pydantic AI ↔ LangChain without domain changes)
+- **Versioning System**: Topic/Atom approval workflow with draft → approved state transitions
+- **Vector Database**: pgvector integration (1536 dimensions) for semantic search
+- **Auto-Task Chain**: `save_telegram_message` → `score_message_task` → `extract_knowledge_from_messages_task`
+- **Domain Organization**: 30 services across CRUD (10), LLM (4), Analysis (3), Vector DB (4), Knowledge (2), Infrastructure (4), Utilities (3)
+
 ## Commands
 
 ! Always give preference to **just** commands instead of executing directly. For example, instead of pytest -> just test {ARGS}
@@ -48,12 +65,26 @@ docs/content/
 │   ├── api/
 │   │   └── knowledge.md
 │   ├── architecture/
+│   │   ├── agent-system.md
+│   │   ├── analysis-run-state-machine.md
 │   │   ├── analysis-system.md
+│   │   ├── backend-services.md
+│   │   ├── background-tasks.md
+│   │   ├── classification-experiments.md
 │   │   ├── diagrams.md
 │   │   ├── knowledge-extraction.md
+│   │   ├── llm-architecture.md
+│   │   ├── models.md
 │   │   ├── noise-filtering.md
 │   │   ├── overview.md
-│   │   └── vector-database.md
+│   │   ├── vector-database.md
+│   │   └── versioning-system.md
+│   ├── frontend/
+│   │   └── architecture.md
+│   ├── operations/
+│   │   ├── configuration.md
+│   │   ├── deployment.md
+│   │   └── security-privacy.md
 │   ├── auto-save.md
 │   ├── event-flow.md
 │   ├── index.md
@@ -63,12 +94,26 @@ docs/content/
 │   ├── api/
 │   │   └── knowledge.md
 │   ├── architecture/
+│   │   ├── agent-system.md
+│   │   ├── analysis-run-state-machine.md
 │   │   ├── analysis-system.md
+│   │   ├── backend-services.md
+│   │   ├── background-tasks.md
+│   │   ├── classification-experiments.md
 │   │   ├── diagrams.md
 │   │   ├── knowledge-extraction.md
+│   │   ├── llm-architecture.md
+│   │   ├── models.md
 │   │   ├── noise-filtering.md
 │   │   ├── overview.md
-│   │   └── vector-database.md
+│   │   ├── vector-database.md
+│   │   └── versioning-system.md
+│   ├── frontend/
+│   │   └── architecture.md
+│   ├── operations/
+│   │   ├── configuration.md
+│   │   ├── deployment.md
+│   │   └── security-privacy.md
 │   ├── auto-save.md
 │   ├── event-flow.md
 │   ├── index.md
