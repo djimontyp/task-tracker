@@ -97,8 +97,11 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     try {
       isConnectingRef.current = true
       setConnectionState('connecting')
-      const wsUrl = import.meta.env.VITE_WS_URL || resolveWebSocketUrl(topics)
-      logger.debug('🔌 Connecting to WebSocket:', wsUrl)
+
+      // Always use resolveWebSocketUrl to append topics query param
+      // VITE_WS_URL is ignored to ensure topic subscriptions work correctly
+      const wsUrl = resolveWebSocketUrl(topics)
+      logger.debug('🔌 Connecting to WebSocket:', wsUrl, 'with topics:', topics)
       const ws = new WebSocket(wsUrl)
 
       ws.onopen = () => {
