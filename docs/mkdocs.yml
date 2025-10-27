@@ -49,6 +49,14 @@ nav:
     - Knowledge Extraction: knowledge-extraction.md
     - Event Flow & Sequencing: event-flow.md
     - Auto-Save Feature: auto-save.md
+  - User Guides:
+    - Topics Search & Pagination: guides/topics-search-pagination.md
+  - Automation Guides:
+    - Quickstart: guides/automation-quickstart.md
+    - Configuration Reference: guides/automation-configuration.md
+    - Troubleshooting: guides/automation-troubleshooting.md
+    - Best Practices: guides/automation-best-practices.md
+    - Video Tutorial Script: guides/automation-video-tutorial-script.md
   - Architecture:
     - Overview: architecture/overview.md
     - System Diagrams: architecture/diagrams.md
@@ -66,12 +74,20 @@ nav:
     - Vector Database: architecture/vector-database.md
   - Frontend:
     - Architecture: frontend/architecture.md
+  - Features:
+    - Automation-First Version Management: features/automation-version-management.md
+  - Admin Guides:
+    - Job Management: admin/job-management.md
+    - Audit Logs: admin/audit-logs.md
+    - Performance & Scaling: admin/performance-scaling.md
   - Operations:
     - Deployment: operations/deployment.md
     - Configuration: operations/configuration.md
     - Security & Privacy: operations/security-privacy.md
   - API Reference:
+    - Topics API: api/topics.md
     - Knowledge Extraction: api/knowledge.md
+    - Automation API: api/automation.md
 
 plugins:
   - search:
@@ -93,6 +109,14 @@ plugins:
             Knowledge Extraction: Knowledge Extraction
             Event Flow & Sequencing: Event Flow & Sequencing
             Auto-Save Feature: Auto-Save Feature
+            User Guides: User Guides
+            Topics Search & Pagination: Topics Search & Pagination
+            Automation Guides: Automation Guides
+            Quickstart: Quickstart
+            Configuration Reference: Configuration Reference
+            Troubleshooting: Troubleshooting
+            Best Practices: Best Practices
+            Video Tutorial Script: Video Tutorial Script
             Architecture: Architecture
             Overview: Overview
             System Diagrams: System Diagrams
@@ -108,11 +132,19 @@ plugins:
             Analysis System: Analysis System
             Vector Database: Vector Database
             Frontend: Frontend
+            Features: Features
+            Automation-First Version Management: Automation-First Version Management
+            Admin Guides: Admin Guides
+            Job Management: Job Management
+            Audit Logs: Audit Logs
+            Performance & Scaling: Performance & Scaling
             Operations: Operations
             Deployment: Deployment
             Configuration: Configuration
             Security & Privacy: Security & Privacy
             API Reference: API Reference
+            Topics API: Topics API
+            Automation API: Automation API
         - locale: uk
           name: Українська
           site_name: Документація Task Tracker
@@ -123,6 +155,14 @@ plugins:
             Knowledge Extraction: Витягування знань
             Event Flow & Sequencing: Потік подій та послідовність
             Auto-Save Feature: Функція автозбереження
+            User Guides: Посібники користувача
+            Topics Search & Pagination: Пошук та пагінація топіків
+            Automation Guides: Посібники автоматизації
+            Quickstart: Швидкий старт
+            Configuration Reference: Довідник конфігурації
+            Troubleshooting: Усування неполадок
+            Best Practices: Найкращі практики
+            Video Tutorial Script: Сценарій відео-навчання
             Architecture: Архітектура
             Overview: Огляд
             System Diagrams: Діаграми системи
@@ -138,11 +178,19 @@ plugins:
             Analysis System: Система аналізу
             Vector Database: Векторна база даних
             Frontend: Фронтенд
+            Features: Функції
+            Automation-First Version Management: Автоматизоване керування версіями
+            Admin Guides: Посібники адміністратора
+            Job Management: Управління завданнями
+            Audit Logs: Журнали аудиту
+            Performance & Scaling: Продуктивність та масштабування
             Operations: Операції
             Deployment: Розгортання
             Configuration: Конфігурація
             Security & Privacy: Безпека і конфіденційність
             API Reference: Довідник API
+            Topics API: API топіків
+            Automation API: API автоматизації
 
 markdown_extensions:
   # Python Markdown
