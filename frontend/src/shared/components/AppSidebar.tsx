@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react'
-import { Squares2X2Icon, CheckCircleIcon, ChartBarIcon, Cog6ToothIcon, SignalIcon, CpuChipIcon, LightBulbIcon, EnvelopeIcon, ChatBubbleLeftRightIcon, ListBulletIcon, ClipboardDocumentListIcon, ServerIcon, FolderIcon, FunnelIcon, ClockIcon, BellIcon, CalendarIcon, SparklesIcon } from '@heroicons/react/24/outline'
+import { Squares2X2Icon, CheckCircleIcon, ChartBarIcon, Cog6ToothIcon, SignalIcon, CpuChipIcon, LightBulbIcon, EnvelopeIcon, ChatBubbleLeftRightIcon, ListBulletIcon, ClipboardDocumentListIcon, ServerIcon, FolderIcon, FunnelIcon, ClockIcon, BellIcon, CalendarIcon, SparklesIcon, CircleStackIcon } from '@heroicons/react/24/outline'
 import { Link, useLocation } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -78,6 +78,7 @@ const navGroups: NavGroup[] = [
     label: 'Analytics & Reports',
     items: [
       { path: '/analytics', label: 'Analytics', icon: ChartBarIcon },
+      { path: '/monitoring', label: 'Task Monitoring', icon: CircleStackIcon },
     ],
   },
 ]
