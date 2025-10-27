@@ -4,6 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.v1.schemas.version import (
     ApproveVersionRequest,
     AtomVersionResponse,
+    BulkVersionRequest,
+    BulkVersionResponse,
+    PendingVersionsCountResponse,
     RejectVersionRequest,
     TopicVersionResponse,
     VersionDiffResponse,
@@ -174,3 +177,85 @@ async def reject_atom_version(
         return rejected_version
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post(
+    "/bulk-approve",
+    response_model=BulkVersionResponse,
+    summary="Bulk approve versions",
+)
+async def bulk_approve_versions(
+    request: BulkVersionRequest,
+    db: AsyncSession = Depends(get_session),
+) -> BulkVersionResponse:
+    """
+    Approve multiple versions in a single transaction-safe operation.
+
+    Validates entity_type and processes all versions atomically.
+    Returns success count and any failed IDs with error messages.
+    """
+    if request.entity_type not in ("topic", "atom"):
+        raise HTTPException(status_code=400, detail="entity_type must be 'topic' or 'atom'")
+
+    service = VersioningService()
+    success_count, failed_ids, errors = await service.bulk_approve_versions(
+        db,
+        request.entity_type,  # type: ignore[arg-type]
+        request.version_ids,
+    )
+
+    return BulkVersionResponse(
+        success_count=success_count,
+        failed_ids=failed_ids,
+        errors=errors,
+    )
+
+
+@router.post(
+    "/bulk-reject",
+    response_model=BulkVersionResponse,
+    summary="Bulk reject versions",
+)
+async def bulk_reject_versions(
+    request: BulkVersionRequest,
+    db: AsyncSession = Depends(get_session),
+) -> BulkVersionResponse:
+    """
+    Reject multiple versions in a single operation.
+
+    Marks versions as reviewed but not applied.
+    Returns success count and any failed IDs with error messages.
+    """
+    if request.entity_type not in ("topic", "atom"):
+        raise HTTPException(status_code=400, detail="entity_type must be 'topic' or 'atom'")
+
+    service = VersioningService()
+    success_count, failed_ids, errors = await service.bulk_reject_versions(
+        db,
+        request.entity_type,  # type: ignore[arg-type]
+        request.version_ids,
+    )
+
+    return BulkVersionResponse(
+        success_count=success_count,
+        failed_ids=failed_ids,
+        errors=errors,
+    )
+
+
+@router.get(
+    "/pending-count",
+    response_model=PendingVersionsCountResponse,
+    summary="Get pending versions count",
+)
+async def get_pending_count(
+    db: AsyncSession = Depends(get_session),
+) -> PendingVersionsCountResponse:
+    """
+    Get count of pending (unapproved) versions across all entities.
+
+    Returns total count and breakdown by entity type (topics/atoms).
+    """
+    service = VersioningService()
+    counts = await service.get_pending_count(db)
+    return PendingVersionsCountResponse(**counts)

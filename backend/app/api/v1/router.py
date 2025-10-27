@@ -6,6 +6,7 @@ from . import (
     analysis_runs,
     assignments,
     atoms,
+    automation,
     embeddings,
     experiments,
     health,
@@ -13,9 +14,11 @@ from . import (
     knowledge,
     messages,
     noise,
+    notifications,
     projects,
     proposals,
     providers,
+    scheduler,
     semantic_search,
     stats,
     task_configs,
@@ -52,4 +55,7 @@ api_router.include_router(embeddings.router)
 api_router.include_router(semantic_search.router)
 api_router.include_router(noise.router)
 api_router.include_router(knowledge.router, prefix="/knowledge", tags=["knowledge"])
-api_router.include_router(versions.router)
+api_router.include_router(versions.router, prefix="/versions", tags=["versions"])
+api_router.include_router(scheduler.router)
+api_router.include_router(automation.router)
+api_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])

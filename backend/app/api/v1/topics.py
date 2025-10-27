@@ -44,28 +44,40 @@ class TimePeriod(str, Enum):
     "",
     response_model=TopicListResponse,
     summary="List topics",
-    description="Get list of all topics with pagination.",
+    description="Get list of all topics with pagination, search, and sorting.",
 )
 async def list_topics(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    search: str | None = Query(None, description="Search by name or description"),
+    sort_by: str | None = Query(
+        "created_desc",
+        description="Sort criteria: name_asc, name_desc, created_desc, created_asc, updated_desc",
+    ),
     session: AsyncSession = Depends(get_session),
 ) -> TopicListResponse:
-    """List all topics with pagination.
+    """List all topics with pagination, search, and sorting.
 
-    Returns topics sorted by creation date (newest first).
+    Returns topics with optional search filtering and customizable sorting.
     Topics are used for categorizing messages and tasks.
 
     Args:
         skip: Number of records to skip (pagination)
         limit: Maximum number of records to return
+        search: Optional search query for name or description
+        sort_by: Sort order (default: created_desc)
         session: Database session
 
     Returns:
         List of topics with pagination metadata
     """
     crud = TopicCRUD(session)
-    topics, total = await crud.list(skip=skip, limit=limit)
+    topics, total = await crud.list(
+        skip=skip,
+        limit=limit,
+        search=search,
+        sort_by=sort_by,
+    )
     page = (skip // limit) + 1 if limit else 1
     return TopicListResponse(
         items=topics,
