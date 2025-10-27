@@ -66,30 +66,60 @@ class TopicCRUD:
         self,
         skip: int = 0,
         limit: int = 100,
+        search: str | None = None,
+        sort_by: str | None = "created_desc",
     ) -> tuple[list[TopicPublic], int]:
-        """List topics with pagination.
+        """List topics with pagination, search, and sorting.
 
         Args:
             skip: Number of records to skip
             limit: Maximum number of records to return
+            search: Search query to filter by name or description (case-insensitive)
+            sort_by: Sort criteria. Options:
+                - "name_asc": Sort by name ascending
+                - "name_desc": Sort by name descending
+                - "created_desc": Sort by created_at descending (default)
+                - "created_asc": Sort by created_at ascending
+                - "updated_desc": Sort by updated_at descending
 
         Returns:
             Tuple of (list of topics, total count)
         """
-        # Get total count
-        count_query = select(func.count()).select_from(Topic)
+        # Base query for filtering
+        base_query = select(Topic)
+
+        # Apply search filter
+        if search:
+            search_filter = search.strip()
+            base_query = base_query.where(
+                (Topic.name.ilike(f"%{search_filter}%")) | (Topic.description.ilike(f"%{search_filter}%"))  # type: ignore[attr-defined]
+            )
+
+        # Get total count with filters applied
+        count_query = select(func.count()).select_from(base_query.subquery())
         count_result = await self.session.execute(count_query)
         total = count_result.scalar_one()
 
-        # Get paginated topics
-        query = select(Topic).offset(skip).limit(limit).order_by(desc(Topic.created_at))  # type: ignore[arg-type]
+        # Apply sorting
+        if sort_by == "name_asc":
+            base_query = base_query.order_by(Topic.name)
+        elif sort_by == "name_desc":
+            base_query = base_query.order_by(desc(Topic.name))
+        elif sort_by == "created_asc":
+            base_query = base_query.order_by(Topic.created_at)  # type: ignore[arg-type]
+        elif sort_by == "updated_desc":
+            base_query = base_query.order_by(desc(Topic.updated_at))  # type: ignore[arg-type]
+        else:
+            base_query = base_query.order_by(desc(Topic.created_at))  # type: ignore[arg-type]
+
+        # Apply pagination
+        query = base_query.offset(skip).limit(limit)
         result = await self.session.execute(query)
         topics = result.scalars().all()
 
         # Convert to public schema
         public_topics = []
         for topic in topics:
-            # Ensure color is in hex format for backward compatibility
             color = convert_to_hex_if_needed(topic.color) if topic.color else None
             public_topics.append(
                 TopicPublic(
