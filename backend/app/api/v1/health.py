@@ -1,12 +1,20 @@
 from datetime import datetime
 
 from fastapi import APIRouter
+from pydantic import BaseModel, Field
 
 from app.dependencies import SettingsDep
+from app.tasks import score_message_task
 
 from .response_models import ConfigResponse, HealthResponse
 
 router = APIRouter(tags=["health"])
+
+
+class TestTaskRequest(BaseModel):
+    """Request model for triggering test task."""
+
+    message_id: int = Field(default=1, description="Message ID to score")
 
 
 @router.get(
@@ -38,3 +46,20 @@ async def get_client_config(settings: SettingsDep) -> ConfigResponse:
     """
     base_url = settings.app.api_base_url.replace("http://", "").replace("https://", "")
     return ConfigResponse(wsUrl=f"ws://{base_url}/ws", apiBaseUrl=f"http://{base_url}")
+
+
+@router.post(
+    "/test-task",
+    summary="Trigger test task for WebSocket monitoring",
+    response_description="Task trigger confirmation with task ID",
+)
+async def trigger_test_task(request: TestTaskRequest) -> dict[str, str]:
+    """
+    Trigger a test background task to verify WebSocket monitoring.
+
+    This endpoint kicks off a score_message_task for testing the real-time
+    monitoring dashboard. Watch for task_started, task_completed, or task_failed
+    events on the 'monitoring' WebSocket topic.
+    """
+    task = await score_message_task.kiq(message_id=request.message_id)
+    return {"status": "triggered", "task_id": task.task_id, "message": "Check monitoring dashboard for updates"}
