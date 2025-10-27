@@ -51,3 +51,27 @@ class ApproveVersionRequest(BaseModel):
 
 class RejectVersionRequest(BaseModel):
     pass
+
+
+class BulkVersionRequest(BaseModel):
+    """Request schema for bulk version operations."""
+
+    version_ids: list[int] = Field(..., description="List of version IDs to process", min_length=1)
+    entity_type: str = Field(..., description="Entity type: topic or atom")
+    reason: str | None = Field(None, description="Optional reason for the action")
+
+
+class BulkVersionResponse(BaseModel):
+    """Response schema for bulk version operations."""
+
+    success_count: int = Field(..., description="Number of successfully processed versions")
+    failed_ids: list[int] = Field(default_factory=list, description="IDs of versions that failed to process")
+    errors: dict[int, str] = Field(default_factory=dict, description="Error messages keyed by version ID")
+
+
+class PendingVersionsCountResponse(BaseModel):
+    """Response schema for pending versions count."""
+
+    count: int = Field(..., description="Total number of pending versions")
+    topics: int = Field(..., description="Number of pending topic versions")
+    atoms: int = Field(..., description="Number of pending atom versions")
