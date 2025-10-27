@@ -45,6 +45,7 @@ from .automation_rule import (
     RuleAction,
 )
 from .base import IDMixin, TimestampMixin
+from .task_execution_log import TaskExecutionLog, TaskStatus as TaskExecutionStatus
 from .classification_experiment import (
     ClassificationExperiment,
     ClassificationResultDetail,
@@ -289,4 +290,7 @@ __all__ = [
     "TopicVersionPublic",
     "AtomVersion",
     "AtomVersionPublic",
+    # Task Execution Logging
+    "TaskExecutionLog",
+    "TaskExecutionStatus",
 ]
