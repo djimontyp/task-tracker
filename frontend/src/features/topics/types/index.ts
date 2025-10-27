@@ -31,3 +31,17 @@ export interface TopicListResponse {
   page: number
   page_size: number
 }
+
+export type TopicSortBy =
+  | 'name_asc'
+  | 'name_desc'
+  | 'created_desc'
+  | 'created_asc'
+  | 'updated_desc'
+
+export interface ListTopicsParams {
+  page?: number
+  page_size?: number
+  search?: string
+  sort_by?: TopicSortBy
+}
