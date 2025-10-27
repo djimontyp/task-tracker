@@ -1196,6 +1196,142 @@ async def extract_knowledge_from_messages_task(
         raise
 
 
+@nats_broker.task
+async def scheduled_knowledge_extraction_task() -> dict[str, Any]:
+    """
+    Scheduled task for automatic knowledge extraction from unprocessed messages.
+
+    Finds all messages without topic_id in the last 24 hours and triggers
+    knowledge extraction using the active knowledge extractor agent.
+
+    This task is designed to be called by the scheduler service on a cron schedule
+    (e.g., daily at 9 AM).
+
+    Returns:
+        Dictionary with extraction results and statistics
+    """
+    from datetime import datetime, timedelta
+
+    from sqlalchemy import func, select
+
+    from .models import AgentConfig
+
+    logger.info("🔄 Scheduled knowledge extraction task started")
+
+    try:
+        async with AsyncSessionLocal() as db:
+            cutoff_time = datetime.utcnow() - timedelta(hours=KNOWLEDGE_EXTRACTION_LOOKBACK_HOURS)
+
+            count_stmt = (
+                select(func.count())
+                .select_from(Message)
+                .where(Message.topic_id.is_(None), Message.sent_at >= cutoff_time)  # type: ignore[union-attr]
+            )
+            result = await db.execute(count_stmt)
+            unprocessed_count = result.scalar() or 0
+
+            if unprocessed_count == 0:
+                logger.info("No unprocessed messages found, skipping extraction")
+                return {"status": "skipped", "reason": "no_messages", "count": 0}
+
+            agent_config_stmt = (
+                select(AgentConfig)
+                .where(AgentConfig.is_active == True, AgentConfig.name == "knowledge_extractor")  # noqa: E712
+                .limit(1)
+            )
+            agent_config_result = await db.execute(agent_config_stmt)
+            agent_config = agent_config_result.scalar_one_or_none()
+
+            if not agent_config:
+                logger.warning("No active agent config 'knowledge_extractor' found")
+                return {"status": "error", "reason": "no_agent", "count": 0}
+
+            messages_stmt = (
+                select(Message.id)
+                .where(Message.topic_id.is_(None), Message.sent_at >= cutoff_time)  # type: ignore[union-attr]
+                .order_by(Message.sent_at)
+                .limit(100)
+            )
+            messages_result = await db.execute(messages_stmt)
+            message_ids = [row[0] for row in messages_result.all()]
+
+            if len(message_ids) == 0:
+                return {"status": "skipped", "reason": "no_messages", "count": 0}
+
+            logger.info(f"🧠 Processing {len(message_ids)} unprocessed messages")
+
+            await extract_knowledge_from_messages_task.kiq(
+                message_ids=message_ids,
+                agent_config_id=str(agent_config.id),
+                created_by="scheduled_task",
+            )
+
+            return {
+                "status": "success",
+                "message_count": len(message_ids),
+                "agent_name": agent_config.name,
+                "created_by": "scheduled_task",
+            }
+
+    except Exception as e:
+        logger.error(f"Scheduled knowledge extraction failed: {e}", exc_info=True)
+        return {"status": "error", "reason": str(e), "count": 0}
+
+
+@nats_broker.task
+async def scheduled_auto_approval_task() -> dict[str, Any]:
+    """
+    Scheduled task for applying auto-approval rules to pending versions.
+
+    Currently a placeholder as TopicVersion/AtomVersion models don't yet have
+    confidence/similarity scores. This will be implemented when versioning
+    system adds LLM confidence scoring.
+
+    This task is designed to be called by the scheduler service on a cron schedule
+    (e.g., hourly).
+
+    Returns:
+        Dictionary with approval results and statistics
+    """
+    logger.info("🔄 Scheduled auto-approval task started")
+
+    logger.info("Auto-approval system pending - awaiting versioning confidence scores")
+
+    return {
+        "status": "pending",
+        "reason": "awaiting_confidence_scores",
+        "message": "TopicVersion/AtomVersion models need confidence/similarity fields",
+    }
+
+
+@nats_broker.task
+async def scheduled_notification_alert_task() -> dict[str, str]:
+    """Check thresholds and send alerts (run every hour)."""
+    from .services.notification_service import notification_service
+
+    async with AsyncSessionLocal() as session:
+        try:
+            await notification_service.check_and_send_alerts(session)
+            return {"status": "success", "message": "Notification alerts checked"}
+        except Exception as e:
+            logger.error(f"Notification alert task failed: {e}")
+            return {"status": "error", "message": str(e)}
+
+
+@nats_broker.task
+async def scheduled_daily_digest_task() -> dict[str, str]:
+    """Send daily digest (run once per day at configured time)."""
+    from .services.notification_service import notification_service
+
+    async with AsyncSessionLocal() as session:
+        try:
+            await notification_service.send_daily_digest(session)
+            return {"status": "success", "message": "Daily digest sent"}
+        except Exception as e:
+            logger.error(f"Daily digest task failed: {e}")
+            return {"status": "error", "message": str(e)}
+
+
 if __name__ == "__main__":
     import asyncio
 

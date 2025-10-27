@@ -6,6 +6,15 @@ from .agent_config import (
     AgentConfigPublic,
     AgentConfigUpdate,
 )
+from .automation_rule import (
+    AutomationRule,
+    AutomationRuleCreate,
+    AutomationRuleListResponse,
+    AutomationRulePublic,
+    AutomationRuleUpdate,
+    LogicOperator,
+    RuleAction,
+)
 from .agent_task_assignment import (
     AgentTaskAssignment,
     AgentTaskAssignmentCreate,
@@ -57,6 +66,14 @@ from .enums import (
     TaskPriority,
     TaskStatus,
 )
+from .scheduled_job import (
+    JobStatus,
+    ScheduledJob,
+    ScheduledJobCreate,
+    ScheduledJobListResponse,
+    ScheduledJobPublic,
+    ScheduledJobUpdate,
+)
 from .legacy import (
     MessageCreate,
     MessagePublic,
@@ -90,6 +107,7 @@ from .message_ingestion import (
     MessageIngestionJobCreate,
     MessageIngestionJobPublic,
 )
+from .notification_preference import DigestFrequency, NotificationPreference
 from .project_config import (
     ProjectConfig,
     ProjectConfigCreate,
@@ -129,6 +147,21 @@ __all__ = [
     # Base
     "IDMixin",
     "TimestampMixin",
+    # Automation Rules
+    "AutomationRule",
+    "AutomationRuleCreate",
+    "AutomationRuleUpdate",
+    "AutomationRulePublic",
+    "AutomationRuleListResponse",
+    "RuleAction",
+    "LogicOperator",
+    # Scheduled Jobs
+    "ScheduledJob",
+    "ScheduledJobCreate",
+    "ScheduledJobUpdate",
+    "ScheduledJobPublic",
+    "ScheduledJobListResponse",
+    "JobStatus",
     # Enums
     "TaskStatus",
     "TaskCategory",
@@ -180,6 +213,9 @@ __all__ = [
     "MessageIngestionJobCreate",
     "MessageIngestionJobPublic",
     "IngestionStatus",
+    # Notification Preferences
+    "NotificationPreference",
+    "DigestFrequency",
     # Agent Config
     "AgentConfig",
     "AgentConfigCreate",
