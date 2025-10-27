@@ -68,7 +68,6 @@ class AnalysisRunValidator:
             >>> if not can_start:
             >>>     raise HTTPException(409, error)
         """
-        # Query for unclosed runs
         unclosed_statuses = [
             AnalysisRunStatus.pending.value,
             AnalysisRunStatus.running.value,
@@ -294,10 +293,8 @@ class AnalysisRunCRUD:
         if not run:
             return None
 
-        # Get update dict excluding unset fields
         update_dict = update_data.model_dump(exclude_unset=True)
 
-        # Apply updates
         for field, value in update_dict.items():
             setattr(run, field, value)
 
@@ -418,7 +415,6 @@ class AnalysisExecutor:
         if not run:
             raise ValueError(f"Run with ID '{run_id}' not found")
 
-        # Convert aware datetime to naive for comparison (DB uses naive timestamps)
         start_naive = (
             run.time_window_start.replace(tzinfo=None) if run.time_window_start.tzinfo else run.time_window_start
         )
@@ -460,7 +456,6 @@ class AnalysisExecutor:
         if not run:
             raise ValueError(f"Run with ID '{run_id}' not found")
 
-        # Get project config if available
         project_config = None
         if run.project_config_id:
             project_result = await self.session.execute(
@@ -501,7 +496,6 @@ class AnalysisExecutor:
         if not messages:
             return []
 
-        # Sort messages by time
         sorted_messages = sorted(messages, key=lambda m: m.sent_at)
 
         batches = []
@@ -510,16 +504,12 @@ class AnalysisExecutor:
         for msg in sorted_messages[1:]:
             time_diff = (msg.sent_at - current_batch[-1].sent_at).total_seconds()
 
-            # Start new batch if:
-            # 1. Time gap > 10 minutes
-            # 2. Batch size >= 50
             if time_diff > 600 or len(current_batch) >= 50:
                 batches.append(current_batch)
                 current_batch = [msg]
             else:
                 current_batch.append(msg)
 
-        # Add last batch
         if current_batch:
             batches.append(current_batch)
 
@@ -547,7 +537,6 @@ class AnalysisExecutor:
         if not run:
             raise ValueError(f"Run with ID '{run_id}' not found")
 
-        # Get agent assignment
         assignment_result = await self.session.execute(
             select(AgentTaskAssignment).where(AgentTaskAssignment.id == run.agent_assignment_id)
         )
@@ -556,21 +545,18 @@ class AnalysisExecutor:
         if not assignment:
             raise ValueError(f"Agent assignment with ID '{run.agent_assignment_id}' not found")
 
-        # Get agent config
         agent_result = await self.session.execute(select(AgentConfig).where(AgentConfig.id == assignment.agent_id))
         agent = agent_result.scalar_one_or_none()
 
         if not agent:
             raise ValueError(f"Agent with ID '{assignment.agent_id}' not found")
 
-        # Get provider
         provider_result = await self.session.execute(select(LLMProvider).where(LLMProvider.id == agent.provider_id))
         provider = provider_result.scalar_one_or_none()
 
         if not provider:
             raise ValueError(f"Provider with ID '{agent.provider_id}' not found")
 
-        # Get project config if available
         project_config = None
         if run.project_config_id:
             project_result = await self.session.execute(
@@ -632,7 +618,6 @@ class AnalysisExecutor:
 
         await self.session.commit()
 
-        # Broadcast WebSocket event
         await websocket_manager.broadcast(
             "analysis_runs",
             {

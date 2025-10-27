@@ -9,15 +9,14 @@ Tests cover:
 - Migration compatibility and field validation
 - Concurrent access scenarios
 """
+
+from datetime import UTC, datetime
+
 import pytest
-from datetime import datetime, timezone
-from sqlalchemy import text
+from app.models import Settings, SettingsRequest, SettingsResponse
+from core.crypto import decrypt_sensitive_data, encrypt_sensitive_data
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlmodel import SQLModel, select
-
-from core.crypto import encrypt_sensitive_data, decrypt_sensitive_data
-from app.models import Settings, SettingsRequest, SettingsResponse
-
 
 # Test database URL - uses in-memory SQLite for tests
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -52,9 +51,7 @@ class TestSettingsModel:
         encrypted_token = encrypt_sensitive_data("1234567890:ABC-DEF1234ghIkl")
 
         settings = Settings(
-            id=1,
-            telegram_bot_token_encrypted=encrypted_token,
-            telegram_webhook_base_url="https://example.com"
+            id=1, telegram_bot_token_encrypted=encrypted_token, telegram_webhook_base_url="https://example.com"
         )
 
         test_session.add(settings)
@@ -75,9 +72,7 @@ class TestSettingsModel:
 
         # Save to database
         settings = Settings(
-            id=1,
-            telegram_bot_token_encrypted=encrypted_token,
-            telegram_webhook_base_url="https://myapp.com"
+            id=1, telegram_bot_token_encrypted=encrypted_token, telegram_webhook_base_url="https://myapp.com"
         )
 
         test_session.add(settings)
@@ -99,9 +94,7 @@ class TestSettingsModel:
         # Create initial settings
         initial_token = encrypt_sensitive_data("initial_token")
         settings = Settings(
-            id=1,
-            telegram_bot_token_encrypted=initial_token,
-            telegram_webhook_base_url="https://initial.com"
+            id=1, telegram_bot_token_encrypted=initial_token, telegram_webhook_base_url="https://initial.com"
         )
 
         test_session.add(settings)
@@ -128,7 +121,7 @@ class TestSettingsModel:
         settings1 = Settings(
             id=1,
             telegram_bot_token_encrypted=encrypt_sensitive_data("token1"),
-            telegram_webhook_base_url="https://first.com"
+            telegram_webhook_base_url="https://first.com",
         )
         test_session.add(settings1)
         await test_session.commit()
@@ -137,7 +130,7 @@ class TestSettingsModel:
         settings2 = Settings(
             id=1,
             telegram_bot_token_encrypted=encrypt_sensitive_data("token2"),
-            telegram_webhook_base_url="https://second.com"
+            telegram_webhook_base_url="https://second.com",
         )
         test_session.add(settings2)
 
@@ -148,11 +141,7 @@ class TestSettingsModel:
     @pytest.mark.asyncio
     async def test_settings_with_null_token(self, test_session):
         """Test settings creation with null encrypted token"""
-        settings = Settings(
-            id=1,
-            telegram_bot_token_encrypted=None,
-            telegram_webhook_base_url="https://example.com"
-        )
+        settings = Settings(id=1, telegram_bot_token_encrypted=None, telegram_webhook_base_url="https://example.com")
 
         test_session.add(settings)
         await test_session.commit()
@@ -167,7 +156,7 @@ class TestSettingsModel:
         settings = Settings(
             id=1,
             telegram_bot_token_encrypted="",  # Empty encrypted token
-            telegram_webhook_base_url="https://example.com"
+            telegram_webhook_base_url="https://example.com",
         )
 
         test_session.add(settings)
@@ -189,9 +178,7 @@ class TestSettingsModel:
         long_url = "https://" + "a" * 485 + ".com"  # Total 500 chars
 
         settings = Settings(
-            id=1,
-            telegram_bot_token_encrypted=encrypt_sensitive_data("test_token"),
-            telegram_webhook_base_url=long_url
+            id=1, telegram_bot_token_encrypted=encrypt_sensitive_data("test_token"), telegram_webhook_base_url=long_url
         )
 
         test_session.add(settings)
@@ -206,7 +193,7 @@ class TestSettingsModel:
         settings = Settings(
             id=1,
             telegram_bot_token_encrypted=encrypt_sensitive_data("test_token"),
-            telegram_webhook_base_url="https://example.com"
+            telegram_webhook_base_url="https://example.com",
         )
 
         test_session.add(settings)
@@ -233,7 +220,7 @@ class TestSettingsRequestResponseModels:
         valid_data = {
             "telegram": {
                 "bot_token": "1234567890:ABC-DEF1234ghIkl-zyx57W2v1u123ew11",
-                "webhook_base_url": "https://myapp.example.com"
+                "webhook_base_url": "https://myapp.example.com",
             }
         }
         request = SettingsRequest(**valid_data)
@@ -260,11 +247,8 @@ class TestSettingsRequestResponseModels:
     def test_settings_response_creation(self):
         """Test SettingsResponse model creation"""
         response = SettingsResponse(
-            telegram={
-                "bot_token": "1234567890:ABC-DEF...[truncated]",
-                "webhook_base_url": "https://example.com"
-            },
-            updated_at=datetime.now(timezone.utc)
+            telegram={"bot_token": "1234567890:ABC-DEF...[truncated]", "webhook_base_url": "https://example.com"},
+            updated_at=datetime.now(UTC),
         )
 
         assert response.telegram["bot_token"] == "1234567890:ABC-DEF...[truncated]"
@@ -274,11 +258,7 @@ class TestSettingsRequestResponseModels:
     def test_settings_response_with_none_updated_at(self):
         """Test SettingsResponse with None updated_at (no existing settings)"""
         response = SettingsResponse(
-            telegram={
-                "bot_token": "",
-                "webhook_base_url": "https://default.com"
-            },
-            updated_at=None
+            telegram={"bot_token": "", "webhook_base_url": "https://default.com"}, updated_at=None
         )
 
         assert response.updated_at is None
@@ -294,7 +274,7 @@ class TestSettingsDatabaseTransactions:
         settings = Settings(
             id=1,
             telegram_bot_token_encrypted=encrypt_sensitive_data("original_token"),
-            telegram_webhook_base_url="https://original.com"
+            telegram_webhook_base_url="https://original.com",
         )
         test_session.add(settings)
         await test_session.commit()
@@ -308,7 +288,7 @@ class TestSettingsDatabaseTransactions:
             duplicate_settings = Settings(
                 id=1,
                 telegram_bot_token_encrypted=encrypt_sensitive_data("duplicate"),
-                telegram_webhook_base_url="https://duplicate.com"
+                telegram_webhook_base_url="https://duplicate.com",
             )
             test_session.add(duplicate_settings)
             await test_session.commit()
@@ -328,7 +308,7 @@ class TestSettingsDatabaseTransactions:
             settings = Settings(
                 id=1,
                 telegram_bot_token_encrypted=encrypt_sensitive_data("initial_token"),
-                telegram_webhook_base_url="https://initial.com"
+                telegram_webhook_base_url="https://initial.com",
             )
             session1.add(settings)
             await session1.commit()
@@ -372,7 +352,7 @@ class TestSettingsDatabaseTransactions:
         settings = Settings(
             id=1,
             telegram_bot_token_encrypted=encrypt_sensitive_data("performance_test_token"),
-            telegram_webhook_base_url="https://performance.test.com"
+            telegram_webhook_base_url="https://performance.test.com",
         )
         test_session.add(settings)
         await test_session.commit()
@@ -397,9 +377,7 @@ class TestSettingsDatabaseTransactions:
         encrypted_long_token = encrypt_sensitive_data(long_token)
 
         settings = Settings(
-            id=1,
-            telegram_bot_token_encrypted=encrypted_long_token,
-            telegram_webhook_base_url="https://large-data.test"
+            id=1, telegram_bot_token_encrypted=encrypted_long_token, telegram_webhook_base_url="https://large-data.test"
         )
 
         test_session.add(settings)
@@ -431,7 +409,7 @@ class TestSettingsDatabaseSchema:
         settings = Settings(
             id=1,
             telegram_bot_token_encrypted=encrypt_sensitive_data("test_token"),
-            telegram_webhook_base_url="https://test-columns.com"
+            telegram_webhook_base_url="https://test-columns.com",
         )
 
         test_session.add(settings)
@@ -439,11 +417,11 @@ class TestSettingsDatabaseSchema:
         await test_session.refresh(settings)
 
         # Verify all expected fields are accessible
-        assert hasattr(settings, 'id')
-        assert hasattr(settings, 'telegram_bot_token_encrypted')
-        assert hasattr(settings, 'telegram_webhook_base_url')
-        assert hasattr(settings, 'created_at')
-        assert hasattr(settings, 'updated_at')
+        assert hasattr(settings, "id")
+        assert hasattr(settings, "telegram_bot_token_encrypted")
+        assert hasattr(settings, "telegram_webhook_base_url")
+        assert hasattr(settings, "created_at")
+        assert hasattr(settings, "updated_at")
 
         # Verify field values and types
         assert isinstance(settings.id, int)
@@ -456,11 +434,7 @@ class TestSettingsDatabaseSchema:
     async def test_settings_field_constraints(self, test_session):
         """Test field constraints and validations"""
         # Test with None values where allowed
-        settings = Settings(
-            id=1,
-            telegram_bot_token_encrypted=None,
-            telegram_webhook_base_url=None
-        )
+        settings = Settings(id=1, telegram_bot_token_encrypted=None, telegram_webhook_base_url=None)
 
         test_session.add(settings)
         await test_session.commit()

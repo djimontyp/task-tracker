@@ -58,25 +58,20 @@ class ProviderCRUD:
         Raises:
             ValueError: If provider name already exists
         """
-        # Check name uniqueness
         existing = await self.get_by_name(provider_data.name)
         if existing:
             raise ValueError(f"Provider with name '{provider_data.name}' already exists")
 
-        # Encrypt API key if provided
         api_key_encrypted = None
         if provider_data.api_key:
             api_key_encrypted = self.encryptor.encrypt(provider_data.api_key)
 
-        # Create provider record
         provider = LLMProvider(
             name=provider_data.name,
             type=provider_data.type,
             base_url=provider_data.base_url,
             api_key_encrypted=api_key_encrypted,
             is_active=provider_data.is_active,
-            # If validation is scheduled, immediately mark as 'validating' for API response
-            # and persisted state. Otherwise keep as 'pending'.
             validation_status=(ValidationStatus.validating if schedule_validation else ValidationStatus.pending),
         )
 
@@ -84,7 +79,6 @@ class ProviderCRUD:
         await self.session.commit()
         await self.session.refresh(provider)
 
-        # Schedule background validation
         if schedule_validation:
             self.validator.schedule_validation(str(provider.id))
 
@@ -171,10 +165,8 @@ class ProviderCRUD:
         if not provider:
             return None
 
-        # Update fields if provided
         update_dict = update_data.model_dump(exclude_unset=True)
 
-        # Handle API key encryption
         if "api_key" in update_dict:
             api_key = update_dict.pop("api_key")
             if api_key:
@@ -182,11 +174,9 @@ class ProviderCRUD:
             else:
                 update_dict["api_key_encrypted"] = None
 
-        # Apply updates
         for field, value in update_dict.items():
             setattr(provider, field, value)
 
-        # Reset validation status if connection details changed
         connection_changed = any(k in update_dict for k in ["base_url", "api_key_encrypted"])
         if connection_changed:
             provider.validation_status = (
@@ -198,7 +188,6 @@ class ProviderCRUD:
         await self.session.commit()
         await self.session.refresh(provider)
 
-        # Schedule validation if connection details changed
         if schedule_validation and connection_changed:
             self.validator.schedule_validation(str(provider.id))
 
@@ -224,19 +213,16 @@ class ProviderCRUD:
         if not provider:
             return False
 
-        # Check for agent references
         ref_result = await self.session.execute(
             select(AgentConfig.id).where(AgentConfig.provider_id == provider_id).limit(1)
         )
         has_references = ref_result.first() is not None
 
         if has_references:
-            # Soft delete: mark as inactive but keep record for FK integrity
             provider.is_active = False
             await self.session.commit()
             return True
 
-        # No references: safe to hard delete
         await self.session.delete(provider)
         await self.session.commit()
         return True

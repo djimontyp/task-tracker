@@ -8,12 +8,12 @@ Tests cover:
 - Edge cases and security considerations
 - Performance characteristics
 """
-import os
-import pytest
-from unittest.mock import patch
-from cryptography.exceptions import InvalidTag
 
-from core.crypto import SettingsCrypto, encrypt_sensitive_data, decrypt_sensitive_data
+import os
+from unittest.mock import patch
+
+import pytest
+from core.crypto import SettingsCrypto, decrypt_sensitive_data, encrypt_sensitive_data
 
 
 class TestSettingsCrypto:
@@ -151,12 +151,13 @@ class TestSettingsCrypto:
 
         # Manually tamper with encrypted data
         import base64
-        encrypted_bytes = base64.b64decode(encrypted.encode('utf-8'))
+
+        encrypted_bytes = base64.b64decode(encrypted.encode("utf-8"))
 
         # Flip a bit in the ciphertext portion (after IV, before auth tag)
         tampered_bytes = bytearray(encrypted_bytes)
         tampered_bytes[15] ^= 1  # Flip one bit
-        tampered_encrypted = base64.b64encode(tampered_bytes).decode('utf-8')
+        tampered_encrypted = base64.b64encode(tampered_bytes).decode("utf-8")
 
         # Should fail due to authentication tag mismatch
         with pytest.raises(ValueError, match="Failed to decrypt data"):
@@ -171,13 +172,14 @@ class TestSettingsCrypto:
 
         # Should be base64 encoded
         import base64
+
         try:
-            encrypted_bytes = base64.b64decode(encrypted.encode('utf-8'))
+            encrypted_bytes = base64.b64decode(encrypted.encode("utf-8"))
         except Exception:
             pytest.fail("Encrypted data is not valid base64")
 
         # Should have minimum size: 12 bytes IV + some ciphertext + 16 bytes auth tag
-        min_expected_size = 12 + len(text.encode('utf-8')) + 16
+        min_expected_size = 12 + len(text.encode("utf-8")) + 16
         assert len(encrypted_bytes) >= min_expected_size
 
     def test_performance_large_data(self):

@@ -10,20 +10,20 @@ Tests cover:
 - Security validation across the entire system
 - Real-world scenario simulation
 """
-import pytest
-import os
+
 import asyncio
+import os
 import time
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from app.main import app
+from app.models import Settings
+from core.crypto import SettingsCrypto, decrypt_sensitive_data, encrypt_sensitive_data
+from core.telegram import TelegramWebhookManager
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlmodel import SQLModel, select
-
-from app.main import app
-from app.models import Settings
-from core.crypto import encrypt_sensitive_data, decrypt_sensitive_data, SettingsCrypto
-from core.telegram import TelegramWebhookManager
-
 
 # Test database URL
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -63,18 +63,14 @@ class TestTelegramSettingsFullIntegration:
                     "is_bot": True,
                     "first_name": "IntegrationTestBot",
                     "username": "integration_test_bot",
-                    "can_join_groups": True
-                }
+                    "can_join_groups": True,
+                },
             }
             validation_response.raise_for_status.return_value = None
 
             # Mock webhook setup response
             webhook_response = AsyncMock()
-            webhook_response.json.return_value = {
-                "ok": True,
-                "result": True,
-                "description": "Webhook was set"
-            }
+            webhook_response.json.return_value = {"ok": True, "result": True, "description": "Webhook was set"}
             webhook_response.raise_for_status.return_value = None
 
             # Configure mock client to return appropriate responses
@@ -106,7 +102,7 @@ class TestTelegramSettingsFullIntegration:
                         request_data = {
                             "telegram": {
                                 "bot_token": "1234567890:ABC-DEF1234ghIkl-zyx57W2v1u123ew11",
-                                "webhook_base_url": "https://integration-test.com"
+                                "webhook_base_url": "https://integration-test.com",
                             }
                         }
 
@@ -141,7 +137,7 @@ class TestTelegramSettingsFullIntegration:
         initial_settings = Settings(
             id=1,
             telegram_bot_token_encrypted=encrypted_initial,
-            telegram_webhook_base_url="https://initial-webhook.com"
+            telegram_webhook_base_url="https://initial-webhook.com",
         )
         test_session.add(initial_settings)
         await test_session.commit()
@@ -152,12 +148,7 @@ class TestTelegramSettingsFullIntegration:
             validation_response = AsyncMock()
             validation_response.json.return_value = {
                 "ok": True,
-                "result": {
-                    "id": 987654321,
-                    "is_bot": True,
-                    "first_name": "UpdatedBot",
-                    "username": "updated_bot"
-                }
+                "result": {"id": 987654321, "is_bot": True, "first_name": "UpdatedBot", "username": "updated_bot"},
             }
             validation_response.raise_for_status.return_value = None
 
@@ -179,7 +170,7 @@ class TestTelegramSettingsFullIntegration:
                         update_data = {
                             "telegram": {
                                 "bot_token": "updated_9876543210:XYZ-NEW-TOKEN",
-                                "webhook_base_url": "https://updated-webhook.com"
+                                "webhook_base_url": "https://updated-webhook.com",
                             }
                         }
 
@@ -206,12 +197,7 @@ class TestTelegramSettingsFullIntegration:
             with patch("app.routers.get_settings", return_value=mock_settings):
                 with patch("app.routers.get_db_session", return_value=test_session):
                     async with AsyncClient(app=app, base_url="http://test") as client:
-                        request_data = {
-                            "telegram": {
-                                "bot_token": "test_token",
-                                "webhook_base_url": "https://test.com"
-                            }
-                        }
+                        request_data = {"telegram": {"bot_token": "test_token", "webhook_base_url": "https://test.com"}}
 
                         response = await client.post("/api/settings", json=request_data)
 
@@ -224,7 +210,7 @@ class TestTelegramSettingsFullIntegration:
             validation_response = AsyncMock()
             validation_response.json.return_value = {
                 "ok": True,
-                "result": {"id": 123, "is_bot": True, "first_name": "TestBot"}
+                "result": {"id": 123, "is_bot": True, "first_name": "TestBot"},
             }
             validation_response.raise_for_status.return_value = None
 
@@ -244,10 +230,7 @@ class TestTelegramSettingsFullIntegration:
                 with patch("app.routers.get_db_session", return_value=test_session):
                     async with AsyncClient(app=app, base_url="http://test") as client:
                         request_data = {
-                            "telegram": {
-                                "bot_token": "valid_token_123:ABC",
-                                "webhook_base_url": "https://test.com"
-                            }
+                            "telegram": {"bot_token": "valid_token_123:ABC", "webhook_base_url": "https://test.com"}
                         }
 
                         response = await client.post("/api/settings", json=request_data)
@@ -258,11 +241,14 @@ class TestTelegramSettingsFullIntegration:
                         statement = select(Settings).where(Settings.id == 1)
                         result = await test_session.execute(statement)
                         saved_settings = result.scalar_one()
-                        assert decrypt_sensitive_data(saved_settings.telegram_bot_token_encrypted) == "valid_token_123:ABC"
+                        assert (
+                            decrypt_sensitive_data(saved_settings.telegram_bot_token_encrypted) == "valid_token_123:ABC"
+                        )
 
     @pytest.mark.asyncio
     async def test_concurrent_settings_operations(self, test_engine):
         """Test concurrent access to settings doesn't cause data corruption"""
+
         async def create_settings_operation(session_id: int, token_suffix: str):
             """Simulate concurrent settings creation/update"""
             async with AsyncSession(test_engine) as session:
@@ -282,7 +268,7 @@ class TestTelegramSettingsFullIntegration:
                         new_settings = Settings(
                             id=1,
                             telegram_bot_token_encrypted=encrypted_token,
-                            telegram_webhook_base_url=f"https://concurrent-{session_id}.com"
+                            telegram_webhook_base_url=f"https://concurrent-{session_id}.com",
                         )
                         session.add(new_settings)
 
@@ -293,10 +279,7 @@ class TestTelegramSettingsFullIntegration:
                     return f"session_{session_id}_failed: {e}"
 
         # Run concurrent operations
-        tasks = [
-            create_settings_operation(i, f"TOKEN{i:03d}")
-            for i in range(5)
-        ]
+        tasks = [create_settings_operation(i, f"TOKEN{i:03d}") for i in range(5)]
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -324,7 +307,7 @@ class TestTelegramSettingsFullIntegration:
             fast_response = AsyncMock()
             fast_response.json.return_value = {
                 "ok": True,
-                "result": {"id": 123, "is_bot": True, "first_name": "FastBot"}
+                "result": {"id": 123, "is_bot": True, "first_name": "FastBot"},
             }
             fast_response.raise_for_status.return_value = None
 
@@ -345,7 +328,7 @@ class TestTelegramSettingsFullIntegration:
                             request_data = {
                                 "telegram": {
                                     "bot_token": f"perf_test_{i}:TOKEN",
-                                    "webhook_base_url": "https://performance-test.com"
+                                    "webhook_base_url": "https://performance-test.com",
                                 }
                             }
 
@@ -366,7 +349,7 @@ class TestTelegramSettingsFullIntegration:
             validation_response = AsyncMock()
             validation_response.json.return_value = {
                 "ok": True,
-                "result": {"id": 123, "is_bot": True, "first_name": "SecurityBot"}
+                "result": {"id": 123, "is_bot": True, "first_name": "SecurityBot"},
             }
             validation_response.raise_for_status.return_value = None
 
@@ -387,10 +370,7 @@ class TestTelegramSettingsFullIntegration:
                 with patch("app.routers.get_db_session", return_value=test_session):
                     async with AsyncClient(app=app, base_url="http://test") as client:
                         request_data = {
-                            "telegram": {
-                                "bot_token": sensitive_token,
-                                "webhook_base_url": "https://security-test.com"
-                            }
+                            "telegram": {"bot_token": sensitive_token, "webhook_base_url": "https://security-test.com"}
                         }
 
                         response = await client.post("/api/settings", json=request_data)
@@ -425,7 +405,7 @@ class TestTelegramSettingsFullIntegration:
         custom_env = {
             "TELEGRAM_BOT_TOKEN": "env_1234567890:ENV-FALLBACK-TOKEN",
             "WEBHOOK_BASE_URL": "https://env-fallback-webhook.com",
-            "SETTINGS_ENCRYPTION_KEY": "custom-encryption-key-for-testing"
+            "SETTINGS_ENCRYPTION_KEY": "custom-encryption-key-for-testing",
         }
 
         with patch.dict(os.environ, custom_env):
@@ -485,7 +465,7 @@ class TestTelegramSettingsFullIntegration:
             success_response = AsyncMock()
             success_response.json.return_value = {
                 "ok": True,
-                "result": {"id": 123, "is_bot": True, "first_name": "IntegrationBot"}
+                "result": {"id": 123, "is_bot": True, "first_name": "IntegrationBot"},
             }
             success_response.raise_for_status.return_value = None
 
@@ -508,9 +488,7 @@ class TestTelegramSettingsRealWorldScenarios:
         encrypted_token = encrypt_sensitive_data(original_token)
 
         settings = Settings(
-            id=1,
-            telegram_bot_token_encrypted=encrypted_token,
-            telegram_webhook_base_url="https://restart-test.com"
+            id=1, telegram_bot_token_encrypted=encrypted_token, telegram_webhook_base_url="https://restart-test.com"
         )
         test_session.add(settings)
         await test_session.commit()
@@ -535,16 +513,13 @@ class TestTelegramSettingsRealWorldScenarios:
             validation_response = AsyncMock()
             validation_response.json.return_value = {
                 "ok": True,
-                "result": {"id": 123, "is_bot": True, "first_name": "RecoveryBot"}
+                "result": {"id": 123, "is_bot": True, "first_name": "RecoveryBot"},
             }
             validation_response.raise_for_status.return_value = None
 
             # Mock webhook failure
             webhook_response = AsyncMock()
-            webhook_response.json.return_value = {
-                "ok": False,
-                "description": "Bad Request: invalid webhook URL"
-            }
+            webhook_response.json.return_value = {"ok": False, "description": "Bad Request: invalid webhook URL"}
             webhook_response.raise_for_status.return_value = None
 
             mock_async_client = mock_client.return_value.__aenter__.return_value
@@ -560,7 +535,7 @@ class TestTelegramSettingsRealWorldScenarios:
                         request_data = {
                             "telegram": {
                                 "bot_token": "recovery_test_token",
-                                "webhook_base_url": "https://invalid-webhook-url"
+                                "webhook_base_url": "https://invalid-webhook-url",
                             }
                         }
 
@@ -580,17 +555,14 @@ class TestTelegramSettingsRealWorldScenarios:
     @pytest.mark.asyncio
     async def test_large_scale_token_rotation(self, test_session):
         """Test token rotation scenario with multiple updates"""
-        tokens = [
-            f"rotation_test_{i}:TOKEN-{i:03d}-ABCDEFGHIJKLMNOP"
-            for i in range(20)
-        ]
+        tokens = [f"rotation_test_{i}:TOKEN-{i:03d}-ABCDEFGHIJKLMNOP" for i in range(20)]
 
         with patch("core.telegram.httpx.AsyncClient") as mock_client:
             # Mock successful responses for all operations
             success_response = AsyncMock()
             success_response.json.return_value = {
                 "ok": True,
-                "result": {"id": 123, "is_bot": True, "first_name": "RotationBot"}
+                "result": {"id": 123, "is_bot": True, "first_name": "RotationBot"},
             }
             success_response.raise_for_status.return_value = None
 
@@ -607,10 +579,7 @@ class TestTelegramSettingsRealWorldScenarios:
                     async with AsyncClient(app=app, base_url="http://test") as client:
                         for i, token in enumerate(tokens):
                             request_data = {
-                                "telegram": {
-                                    "bot_token": token,
-                                    "webhook_base_url": f"https://rotation-test-{i}.com"
-                                }
+                                "telegram": {"bot_token": token, "webhook_base_url": f"https://rotation-test-{i}.com"}
                             }
 
                             response = await client.post("/api/settings", json=request_data)

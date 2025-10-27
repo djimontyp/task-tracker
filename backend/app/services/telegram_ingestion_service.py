@@ -107,7 +107,6 @@ class TelegramIngestionService:
             if not message_id:
                 return False, "error"
 
-            # Check for duplicate by external_message_id
             existing_stmt = select(Message).where(Message.external_message_id == message_id)
             result = await db.execute(existing_stmt)
             existing = result.scalar_one_or_none()
@@ -116,7 +115,6 @@ class TelegramIngestionService:
                 logger.debug(f"Message {message_id} already exists, skipping")
                 return False, "duplicate"
 
-            # Extract message data
             text = message_data.get("text", "")
             from_user = message_data.get("from", {})
             telegram_user_id = from_user.get("id")
@@ -125,20 +123,17 @@ class TelegramIngestionService:
                 logger.warning(f"Message {message_id} has no sender, skipping")
                 return False, "error"
 
-            # Extract user data
             first_name = from_user.get("first_name", "")
             last_name = from_user.get("last_name")
             language_code = from_user.get("language_code")
             is_bot = from_user.get("is_bot", False)
 
-            # Get timestamp
             timestamp = message_data.get("date")
             if timestamp:
                 sent_at = datetime.fromtimestamp(timestamp)
             else:
                 sent_at = datetime.utcnow()
 
-            # Identify or create User + TelegramProfile
             user, tg_profile = await identify_or_create_user(
                 db=db,
                 telegram_user_id=telegram_user_id,
@@ -148,19 +143,16 @@ class TelegramIngestionService:
                 is_bot=is_bot,
             )
 
-            # Fetch avatar if not set
             avatar_url = user.avatar_url
             if not avatar_url:
                 try:
                     avatar_url = await self.telegram_service.get_user_avatar_url(telegram_user_id)
                     if avatar_url:
-                        # Update user avatar
                         user.avatar_url = avatar_url
                         await db.flush()
                 except Exception as e:
                     logger.warning(f"Failed to fetch avatar for user {telegram_user_id}: {e}")
 
-            # Create message
             db_message = Message(
                 external_message_id=message_id,
                 content=text or "[No text content]",

@@ -10,16 +10,15 @@ Tests cover:
 - Environment variable integration
 - Error handling for various scenarios
 """
-import pytest
-import os
-from unittest.mock import patch, AsyncMock, MagicMock
-from httpx import AsyncClient
-from fastapi import FastAPI
 
+import os
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from app.main import app
 from app.models import Settings
 from core.crypto import encrypt_sensitive_data
-from core.config import Settings as AppSettings
+from httpx import AsyncClient
 
 
 class TestSettingsAPIEndpoints:
@@ -68,9 +67,7 @@ class TestSettingsAPIEndpoints:
         encrypted_token = encrypt_sensitive_data(original_token)
 
         mock_db_settings = Settings(
-            id=1,
-            telegram_bot_token_encrypted=encrypted_token,
-            telegram_webhook_base_url="https://db-webhook.com"
+            id=1, telegram_bot_token_encrypted=encrypted_token, telegram_webhook_base_url="https://db-webhook.com"
         )
         mock_db_settings.updated_at = "2023-01-15T10:30:00"
 
@@ -96,9 +93,7 @@ class TestSettingsAPIEndpoints:
         """Test GET /api/settings handles decryption errors gracefully"""
         # Mock DB settings with corrupted encrypted token
         mock_db_settings = Settings(
-            id=1,
-            telegram_bot_token_encrypted="corrupted_encrypted_data",
-            telegram_webhook_base_url="https://test.com"
+            id=1, telegram_bot_token_encrypted="corrupted_encrypted_data", telegram_webhook_base_url="https://test.com"
         )
         mock_db_settings.updated_at = "2023-01-15T10:30:00"
 
@@ -125,12 +120,12 @@ class TestSettingsAPIEndpoints:
         with patch("app.routers.telegram_webhook_manager") as mock_webhook_manager:
             mock_webhook_manager.validate_bot_token.return_value = {
                 "valid": True,
-                "bot_info": {"id": 123456789, "username": "test_bot", "first_name": "TestBot"}
+                "bot_info": {"id": 123456789, "username": "test_bot", "first_name": "TestBot"},
             }
             mock_webhook_manager.setup_webhook.return_value = {
                 "success": True,
                 "webhook_url": "https://example.com/webhook/telegram",
-                "message": "Webhook configured successfully"
+                "message": "Webhook configured successfully",
             }
 
             # Mock database operations
@@ -144,7 +139,7 @@ class TestSettingsAPIEndpoints:
             saved_settings = Settings(
                 id=1,
                 telegram_bot_token_encrypted=encrypt_sensitive_data("1234567890:ABC-DEF1234ghIkl"),
-                telegram_webhook_base_url="https://example.com"
+                telegram_webhook_base_url="https://example.com",
             )
             saved_settings.updated_at = "2023-01-15T10:30:00"
 
@@ -155,7 +150,7 @@ class TestSettingsAPIEndpoints:
                             request_data = {
                                 "telegram": {
                                     "bot_token": "1234567890:ABC-DEF1234ghIkl",
-                                    "webhook_base_url": "https://example.com"
+                                    "webhook_base_url": "https://example.com",
                                 }
                             }
 
@@ -175,17 +170,14 @@ class TestSettingsAPIEndpoints:
         with patch("app.routers.telegram_webhook_manager") as mock_webhook_manager:
             mock_webhook_manager.validate_bot_token.return_value = {
                 "valid": False,
-                "error": "Unauthorized: bot token is invalid"
+                "error": "Unauthorized: bot token is invalid",
             }
 
             with patch("app.routers.get_settings", return_value=mock_settings):
                 with patch("app.routers.get_db_session", return_value=mock_db_session):
                     async with AsyncClient(app=app, base_url="http://test") as client:
                         request_data = {
-                            "telegram": {
-                                "bot_token": "invalid_token",
-                                "webhook_base_url": "https://example.com"
-                            }
+                            "telegram": {"bot_token": "invalid_token", "webhook_base_url": "https://example.com"}
                         }
 
                         response = await client.post("/api/settings", json=request_data)
@@ -205,9 +197,7 @@ class TestSettingsAPIEndpoints:
         mock_db_session.refresh.return_value = None
 
         saved_settings = Settings(
-            id=1,
-            telegram_bot_token_encrypted=None,
-            telegram_webhook_base_url="https://example.com"
+            id=1, telegram_bot_token_encrypted=None, telegram_webhook_base_url="https://example.com"
         )
         saved_settings.updated_at = "2023-01-15T10:30:00"
 
@@ -215,12 +205,7 @@ class TestSettingsAPIEndpoints:
             with patch("app.routers.get_settings", return_value=mock_settings):
                 with patch("app.routers.get_db_session", return_value=mock_db_session):
                     async with AsyncClient(app=app, base_url="http://test") as client:
-                        request_data = {
-                            "telegram": {
-                                "bot_token": "",
-                                "webhook_base_url": "https://example.com"
-                            }
-                        }
+                        request_data = {"telegram": {"bot_token": "", "webhook_base_url": "https://example.com"}}
 
                         response = await client.post("/api/settings", json=request_data)
 
@@ -235,11 +220,11 @@ class TestSettingsAPIEndpoints:
         with patch("app.routers.telegram_webhook_manager") as mock_webhook_manager:
             mock_webhook_manager.validate_bot_token.return_value = {
                 "valid": True,
-                "bot_info": {"id": 123456789, "username": "test_bot"}
+                "bot_info": {"id": 123456789, "username": "test_bot"},
             }
             mock_webhook_manager.setup_webhook.return_value = {
                 "success": True,
-                "webhook_url": "https://env-default.com/webhook/telegram"
+                "webhook_url": "https://env-default.com/webhook/telegram",
             }
 
             # Mock database operations
@@ -251,7 +236,7 @@ class TestSettingsAPIEndpoints:
             saved_settings = Settings(
                 id=1,
                 telegram_bot_token_encrypted=encrypt_sensitive_data("test_token"),
-                telegram_webhook_base_url="https://env-default.com"  # Should use fallback
+                telegram_webhook_base_url="https://env-default.com",  # Should use fallback
             )
             saved_settings.updated_at = "2023-01-15T10:30:00"
 
@@ -262,7 +247,7 @@ class TestSettingsAPIEndpoints:
                             request_data = {
                                 "telegram": {
                                     "bot_token": "test_token",
-                                    "webhook_base_url": ""  # Empty, should use fallback
+                                    "webhook_base_url": "",  # Empty, should use fallback
                                 }
                             }
 
@@ -278,13 +263,13 @@ class TestSettingsAPIEndpoints:
         with patch("app.routers.telegram_webhook_manager") as mock_webhook_manager:
             mock_webhook_manager.validate_bot_token.return_value = {
                 "valid": True,
-                "bot_info": {"id": 123456789, "username": "test_bot"}
+                "bot_info": {"id": 123456789, "username": "test_bot"},
             }
             # Webhook setup fails
             mock_webhook_manager.setup_webhook.return_value = {
                 "success": False,
                 "error": "Network timeout",
-                "webhook_url": "https://example.com/webhook/telegram"
+                "webhook_url": "https://example.com/webhook/telegram",
             }
 
             # Mock database operations
@@ -296,7 +281,7 @@ class TestSettingsAPIEndpoints:
             saved_settings = Settings(
                 id=1,
                 telegram_bot_token_encrypted=encrypt_sensitive_data("test_token"),
-                telegram_webhook_base_url="https://example.com"
+                telegram_webhook_base_url="https://example.com",
             )
             saved_settings.updated_at = "2023-01-15T10:30:00"
 
@@ -305,10 +290,7 @@ class TestSettingsAPIEndpoints:
                     with patch("app.routers.get_db_session", return_value=mock_db_session):
                         async with AsyncClient(app=app, base_url="http://test") as client:
                             request_data = {
-                                "telegram": {
-                                    "bot_token": "test_token",
-                                    "webhook_base_url": "https://example.com"
-                                }
+                                "telegram": {"bot_token": "test_token", "webhook_base_url": "https://example.com"}
                             }
 
                             response = await client.post("/api/settings", json=request_data)
@@ -325,7 +307,7 @@ class TestSettingsAPIEndpoints:
         existing_settings = Settings(
             id=1,
             telegram_bot_token_encrypted=encrypt_sensitive_data("old_token"),
-            telegram_webhook_base_url="https://old-webhook.com"
+            telegram_webhook_base_url="https://old-webhook.com",
         )
 
         mock_result = AsyncMock()
@@ -337,11 +319,11 @@ class TestSettingsAPIEndpoints:
         with patch("app.routers.telegram_webhook_manager") as mock_webhook_manager:
             mock_webhook_manager.validate_bot_token.return_value = {
                 "valid": True,
-                "bot_info": {"id": 123456789, "username": "updated_bot"}
+                "bot_info": {"id": 123456789, "username": "updated_bot"},
             }
             mock_webhook_manager.setup_webhook.return_value = {
                 "success": True,
-                "webhook_url": "https://new-webhook.com/webhook/telegram"
+                "webhook_url": "https://new-webhook.com/webhook/telegram",
             }
 
             with patch("app.routers.get_settings", return_value=mock_settings):
@@ -350,7 +332,7 @@ class TestSettingsAPIEndpoints:
                         request_data = {
                             "telegram": {
                                 "bot_token": "new_token_1234567890:ABC-DEF",
-                                "webhook_base_url": "https://new-webhook.com"
+                                "webhook_base_url": "https://new-webhook.com",
                             }
                         }
 
@@ -392,7 +374,7 @@ class TestSettingsAPIEndpoints:
             mock_db_settings = Settings(
                 id=1,
                 telegram_bot_token_encrypted=encrypt_sensitive_data(test_token),
-                telegram_webhook_base_url="https://test.com"
+                telegram_webhook_base_url="https://test.com",
             )
             mock_db_settings.updated_at = "2023-01-15T10:30:00"
 
@@ -440,9 +422,7 @@ class TestSettingsAPIEndpoints:
         async with AsyncClient(app=app, base_url="http://test") as client:
             # Test with invalid content type
             response = await client.post(
-                "/api/settings",
-                content="invalid json data",
-                headers={"Content-Type": "text/plain"}
+                "/api/settings", content="invalid json data", headers={"Content-Type": "text/plain"}
             )
 
             # Should return 422 or 415 error
@@ -457,7 +437,7 @@ class TestSettingsAPIEndpoints:
         with patch("app.routers.telegram_webhook_manager") as mock_webhook_manager:
             mock_webhook_manager.validate_bot_token.return_value = {
                 "valid": True,
-                "bot_info": {"id": 123456789, "username": "test_bot"}
+                "bot_info": {"id": 123456789, "username": "test_bot"},
             }
 
             mock_result = AsyncMock()
@@ -467,12 +447,7 @@ class TestSettingsAPIEndpoints:
             with patch("app.routers.get_settings", return_value=mock_settings):
                 with patch("app.routers.get_db_session", return_value=mock_db_session):
                     async with AsyncClient(app=app, base_url="http://test") as client:
-                        request_data = {
-                            "telegram": {
-                                "bot_token": "test_token",
-                                "webhook_base_url": large_url
-                            }
-                        }
+                        request_data = {"telegram": {"bot_token": "test_token", "webhook_base_url": large_url}}
 
                         response = await client.post("/api/settings", json=request_data)
 
@@ -489,7 +464,7 @@ class TestSettingsAPIEnvironmentIntegration:
         """Test Settings API behavior with custom environment variables"""
         custom_env = {
             "TELEGRAM_BOT_TOKEN": "custom_env_1234567890:CUSTOM-TOKEN",
-            "WEBHOOK_BASE_URL": "https://custom-env-webhook.com"
+            "WEBHOOK_BASE_URL": "https://custom-env-webhook.com",
         }
 
         with patch.dict(os.environ, custom_env):

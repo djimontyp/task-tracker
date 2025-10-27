@@ -8,10 +8,11 @@ Tests cover:
 - Timeout handling and network error scenarios
 - HTTP error codes and malformed responses
 """
-import pytest
-import httpx
-from unittest.mock import AsyncMock, patch, MagicMock
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import httpx
+import pytest
 from core.telegram import TelegramWebhookManager
 
 
@@ -43,8 +44,8 @@ class TestTelegramWebhookManagerFixed:
                 "username": "test_bot",
                 "can_join_groups": True,
                 "can_read_all_group_messages": False,
-                "supports_inline_queries": False
-            }
+                "supports_inline_queries": False,
+            },
         }
 
         with patch("httpx.AsyncClient") as mock_client_class:
@@ -108,11 +109,7 @@ class TestTelegramWebhookManagerFixed:
     @pytest.mark.asyncio
     async def test_validate_bot_token_api_error_response(self, webhook_manager):
         """Test bot token validation when API returns error in response body"""
-        mock_response_data = {
-            "ok": False,
-            "error_code": 401,
-            "description": "Unauthorized: bot token is invalid"
-        }
+        mock_response_data = {"ok": False, "error_code": 401, "description": "Unauthorized: bot token is invalid"}
 
         with patch("httpx.AsyncClient") as mock_client_class:
             mock_client = AsyncMock()
@@ -132,11 +129,7 @@ class TestTelegramWebhookManagerFixed:
     @pytest.mark.asyncio
     async def test_setup_webhook_success(self, webhook_manager):
         """Test successful webhook setup"""
-        mock_response_data = {
-            "ok": True,
-            "result": True,
-            "description": "Webhook was set"
-        }
+        mock_response_data = {"ok": True, "result": True, "description": "Webhook was set"}
 
         with patch("httpx.AsyncClient") as mock_client_class:
             mock_client = AsyncMock()
@@ -148,10 +141,7 @@ class TestTelegramWebhookManagerFixed:
             mock_response.raise_for_status.return_value = None
             mock_client.post.return_value = mock_response
 
-            result = await webhook_manager.setup_webhook(
-                "1234567890:ABC-DEF1234ghIkl",
-                "https://example.com"
-            )
+            result = await webhook_manager.setup_webhook("1234567890:ABC-DEF1234ghIkl", "https://example.com")
 
             assert result["success"] is True
             assert result["webhook_url"] == "https://example.com/webhook/telegram"
@@ -192,10 +182,7 @@ class TestTelegramWebhookManagerFixed:
             # Mock timeout exception
             mock_client.post.side_effect = httpx.TimeoutException("Timeout")
 
-            result = await webhook_manager.setup_webhook(
-                "1234567890:ABC-DEF",
-                "https://example.com"
-            )
+            result = await webhook_manager.setup_webhook("1234567890:ABC-DEF", "https://example.com")
 
             assert result["success"] is False
             assert "Timeout connecting to Telegram API" in result["error"]
@@ -216,10 +203,7 @@ class TestTelegramWebhookManagerFixed:
             http_error = httpx.HTTPStatusError("Forbidden", request=MagicMock(), response=mock_response)
             mock_client.post.side_effect = http_error
 
-            result = await webhook_manager.setup_webhook(
-                "1234567890:ABC-DEF",
-                "https://example.com"
-            )
+            result = await webhook_manager.setup_webhook("1234567890:ABC-DEF", "https://example.com")
 
             assert result["success"] is False
             assert "HTTP 403: Forbidden" in result["error"]
@@ -233,8 +217,8 @@ class TestTelegramWebhookManagerFixed:
                 "url": "https://example.com/webhook/telegram",
                 "has_custom_certificate": False,
                 "pending_update_count": 0,
-                "max_connections": 40
-            }
+                "max_connections": 40,
+            },
         }
 
         with patch("httpx.AsyncClient") as mock_client_class:
@@ -262,11 +246,7 @@ class TestTelegramWebhookManagerFixed:
     @pytest.mark.asyncio
     async def test_delete_webhook_success(self, webhook_manager):
         """Test successful webhook deletion"""
-        mock_response_data = {
-            "ok": True,
-            "result": True,
-            "description": "Webhook was deleted"
-        }
+        mock_response_data = {"ok": True, "result": True, "description": "Webhook was deleted"}
 
         with patch("httpx.AsyncClient") as mock_client_class:
             mock_client = AsyncMock()
@@ -305,13 +285,10 @@ class TestTelegramWebhookManagerFixed:
         # Mock responses for each step
         validate_response = {
             "ok": True,
-            "result": {"id": 123456789, "is_bot": True, "first_name": "MyBot", "username": "my_bot"}
+            "result": {"id": 123456789, "is_bot": True, "first_name": "MyBot", "username": "my_bot"},
         }
         setup_response = {"ok": True, "result": True}
-        info_response = {
-            "ok": True,
-            "result": {"url": f"{webhook_url}/webhook/telegram", "pending_update_count": 0}
-        }
+        info_response = {"ok": True, "result": {"url": f"{webhook_url}/webhook/telegram", "pending_update_count": 0}}
         delete_response = {"ok": True, "result": True}
 
         with patch("httpx.AsyncClient") as mock_client_class:

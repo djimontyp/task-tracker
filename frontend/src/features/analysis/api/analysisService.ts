@@ -1,7 +1,3 @@
-/**
- * Analysis API Service
- */
-
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 import type {
@@ -12,9 +8,6 @@ import type {
 } from '../types'
 
 class AnalysisService {
-  /**
-   * List all analysis runs with optional filters
-   */
   async listRuns(
     params?: AnalysisRunFilters
   ): Promise<AnalysisRunListResponse> {
@@ -25,9 +18,6 @@ class AnalysisService {
     return data
   }
 
-  /**
-   * Create new analysis run
-   */
   async createRun(data: CreateAnalysisRun): Promise<AnalysisRun> {
     const response = await apiClient.post<AnalysisRun>(
       API_ENDPOINTS.analysis.runs,
@@ -36,9 +26,6 @@ class AnalysisService {
     return response.data
   }
 
-  /**
-   * Get run details by ID
-   */
   async getRunDetails(runId: string): Promise<AnalysisRun> {
     const { data } = await apiClient.get<AnalysisRun>(
       API_ENDPOINTS.analysis.run(runId)
@@ -46,9 +33,6 @@ class AnalysisService {
     return data
   }
 
-  /**
-   * Close analysis run
-   */
   async closeRun(runId: string): Promise<AnalysisRun> {
     const { data } = await apiClient.put<AnalysisRun>(
       `${API_ENDPOINTS.analysis.run(runId)}/close`
@@ -56,9 +40,6 @@ class AnalysisService {
     return data
   }
 
-  /**
-   * Start analysis run
-   */
   async startRun(runId: string): Promise<void> {
     await apiClient.post(`${API_ENDPOINTS.analysis.run(runId)}/start`)
   }
