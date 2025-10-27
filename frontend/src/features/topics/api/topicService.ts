@@ -1,16 +1,9 @@
-/**
- * Topic API Service
- */
-
 import { API_ENDPOINTS } from '@/shared/config/api'
 import type { ListTopicsParams, Topic, TopicListResponse, UpdateTopic } from '../types'
 
 const API_BASE_URL = ''
 
 class TopicService {
-  /**
-   * List all topics with optional filtering, sorting, and pagination
-   */
   async listTopics(params?: ListTopicsParams): Promise<TopicListResponse> {
     const queryParams = new URLSearchParams()
 
@@ -40,9 +33,6 @@ class TopicService {
     return response.json()
   }
 
-  /**
-   * Get topic by ID
-   */
   async getTopicById(id: number): Promise<Topic> {
     const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/${id}`)
 
@@ -53,9 +43,6 @@ class TopicService {
     return response.json()
   }
 
-  /**
-   * Get available colors for topics
-   */
   async getAvailableColors(): Promise<{ colors: string[] }> {
     const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/colors`)
 
@@ -66,9 +53,6 @@ class TopicService {
     return response.json()
   }
 
-  /**
-   * Update topic
-   */
   async updateTopic(id: number, data: UpdateTopic): Promise<Topic> {
     const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/${id}`, {
       method: 'PATCH',
@@ -85,9 +69,6 @@ class TopicService {
     return response.json()
   }
 
-  /**
-   * Get suggested color for topic
-   */
   async suggestColor(topicId: number): Promise<{ topic_id: number; suggested_color: string; icon: string }> {
     const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/${topicId}/suggest-color`)
 

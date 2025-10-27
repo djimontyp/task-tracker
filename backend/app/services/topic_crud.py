@@ -85,22 +85,18 @@ class TopicCRUD:
         Returns:
             Tuple of (list of topics, total count)
         """
-        # Base query for filtering
         base_query = select(Topic)
 
-        # Apply search filter
         if search:
             search_filter = search.strip()
             base_query = base_query.where(
                 (Topic.name.ilike(f"%{search_filter}%")) | (Topic.description.ilike(f"%{search_filter}%"))  # type: ignore[attr-defined]
             )
 
-        # Get total count with filters applied
         count_query = select(func.count()).select_from(base_query.subquery())
         count_result = await self.session.execute(count_query)
         total = count_result.scalar_one()
 
-        # Apply sorting
         if sort_by == "name_asc":
             base_query = base_query.order_by(Topic.name)
         elif sort_by == "name_desc":
@@ -112,12 +108,10 @@ class TopicCRUD:
         else:
             base_query = base_query.order_by(desc(Topic.created_at))  # type: ignore[arg-type]
 
-        # Apply pagination
         query = base_query.offset(skip).limit(limit)
         result = await self.session.execute(query)
         topics = result.scalars().all()
 
-        # Convert to public schema
         public_topics = []
         for topic in topics:
             color = convert_to_hex_if_needed(topic.color) if topic.color else None
@@ -150,7 +144,6 @@ class TopicCRUD:
         if not topic_data.color and topic_data.icon:
             topic_data.color = auto_select_color(topic_data.icon)
 
-        # Ensure color is in hex format
         color = convert_to_hex_if_needed(topic_data.color) if topic_data.color else None
 
         topic = Topic(
@@ -164,7 +157,6 @@ class TopicCRUD:
         await self.session.commit()
         await self.session.refresh(topic)
 
-        # Ensure color is in hex format for response
         color = convert_to_hex_if_needed(topic.color) if topic.color else None
 
         return TopicPublic(
@@ -206,7 +198,6 @@ class TopicCRUD:
         await self.session.commit()
         await self.session.refresh(topic)
 
-        # Ensure color is in hex format for response
         color = convert_to_hex_if_needed(topic.color) if topic.color else None
 
         return TopicPublic(
@@ -268,7 +259,6 @@ class TopicCRUD:
             filter_start = start_date
             filter_end = end_date or now
 
-        # Build query with joins to get message count and last message timestamp
         query = (
             select(  # type: ignore[call-overload]
                 Topic.id,
@@ -284,7 +274,6 @@ class TopicCRUD:
             .outerjoin(TopicAtom, TopicAtom.topic_id == Topic.id)
         )
 
-        # Apply time filters
         if filter_start:
             query = query.where(Message.sent_at >= filter_start)
         if filter_end:

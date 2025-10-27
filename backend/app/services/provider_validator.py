@@ -44,18 +44,15 @@ class ProviderValidator:
         """
         async with AsyncSessionLocal() as session:
             try:
-                # Load provider from database
                 result = await session.execute(select(LLMProvider).where(LLMProvider.id == provider_id))
                 provider = result.scalar_one_or_none()
 
                 if not provider:
                     return
 
-                # Update status to validating
                 provider.validation_status = ValidationStatus.validating
                 await session.commit()
 
-                # Perform actual validation
                 try:
                     if provider.type == ProviderType.ollama:
                         await self._validate_ollama(provider)
@@ -64,20 +61,16 @@ class ProviderValidator:
                     else:
                         raise ValueError(f"Unknown provider type: {provider.type}")
 
-                    # Validation succeeded
                     provider.validation_status = ValidationStatus.connected
                     provider.validation_error = None
 
                 except Exception as e:
-                    # Validation failed
                     provider.validation_status = ValidationStatus.error
                     provider.validation_error = str(e)
 
-                # Update validated timestamp
                 provider.validated_at = datetime.utcnow()
                 await session.commit()
 
-                # Broadcast provider validation status update
                 try:
                     await websocket_manager.broadcast(
                         "providers",
@@ -90,11 +83,9 @@ class ProviderValidator:
                         },
                     )
                 except Exception:
-                    # Avoid breaking validation flow on WS errors
                     pass
 
             except Exception:
-                # Database error, skip validation
                 await session.rollback()
                 raise
 
@@ -113,27 +104,21 @@ class ProviderValidator:
 
         base_url = provider.base_url.rstrip("/")
 
-        # If base_url already contains /v1, use OpenAI-compatible endpoint
-        # Otherwise use native Ollama API
         if base_url.endswith("/v1"):
-            # Test OpenAI-compatible endpoint (used by pydantic-ai)
             url = f"{base_url}/models"
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.get(url)
             response.raise_for_status()
 
-            # Verify response has expected structure
             data = response.json()
             if "data" not in data:
                 raise ValueError("Invalid response from Ollama OpenAI API")
         else:
-            # Test native Ollama API endpoint
             url = f"{base_url}/api/tags"
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.get(url)
             response.raise_for_status()
 
-            # Verify response has expected structure
             data = response.json()
             if "models" not in data:
                 raise ValueError("Invalid response from Ollama API")
