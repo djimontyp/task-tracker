@@ -51,15 +51,11 @@ class FrameworkRegistry:
         framework_name = name or cls._default
 
         if framework_name is None:
-            raise FrameworkNotSupportedError(
-                "No frameworks registered. Register at least one framework."
-            )
+            raise FrameworkNotSupportedError("No frameworks registered. Register at least one framework.")
 
         if framework_name not in cls._frameworks:
             available = list(cls._frameworks.keys())
-            raise FrameworkNotSupportedError(
-                f"Framework '{framework_name}' not found. Available: {available}"
-            )
+            raise FrameworkNotSupportedError(f"Framework '{framework_name}' not found. Available: {available}")
 
         return cls._frameworks[framework_name]
 
@@ -74,9 +70,7 @@ class FrameworkRegistry:
             FrameworkNotSupportedError: If framework not registered
         """
         if name not in cls._frameworks:
-            raise FrameworkNotSupportedError(
-                f"Cannot set default: framework '{name}' not registered"
-            )
+            raise FrameworkNotSupportedError(f"Cannot set default: framework '{name}' not registered")
         cls._default = name
 
     @classmethod

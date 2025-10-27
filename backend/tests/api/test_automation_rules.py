@@ -3,9 +3,8 @@
 import json
 
 import pytest
-from httpx import AsyncClient
-
 from app.models.automation_rule import AutomationRule, LogicOperator, RuleAction
+from httpx import AsyncClient
 
 
 @pytest.fixture
@@ -112,7 +111,9 @@ class TestAutomationRulesAPI:
         assert data["description"] == sample_rule.description
         assert data["enabled"] == sample_rule.enabled
         assert data["priority"] == sample_rule.priority
-        assert data["action"] == (sample_rule.action.value if hasattr(sample_rule.action, 'value') else sample_rule.action)
+        assert data["action"] == (
+            sample_rule.action.value if hasattr(sample_rule.action, "value") else sample_rule.action
+        )
 
     @pytest.mark.asyncio
     async def test_get_rule_not_found(self, client: AsyncClient):
@@ -150,9 +151,7 @@ class TestAutomationRulesAPI:
         assert data["success_count"] == 0
 
     @pytest.mark.asyncio
-    async def test_create_rule_duplicate_name(
-        self, client: AsyncClient, sample_rule: AutomationRule
-    ):
+    async def test_create_rule_duplicate_name(self, client: AsyncClient, sample_rule: AutomationRule):
         """Test POST /api/v1/automation/rules with duplicate name."""
         rule_data = {
             "name": sample_rule.name,
@@ -192,9 +191,7 @@ class TestAutomationRulesAPI:
             "description": "Updated description",
         }
 
-        response = await client.put(
-            f"/api/v1/automation/rules/{sample_rule.id}", json=update_data
-        )
+        response = await client.put(f"/api/v1/automation/rules/{sample_rule.id}", json=update_data)
         assert response.status_code == 200
 
         data = response.json()
@@ -211,9 +208,7 @@ class TestAutomationRulesAPI:
         assert response.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_update_rule_duplicate_name(
-        self, client: AsyncClient, db_session, sample_rule: AutomationRule
-    ):
+    async def test_update_rule_duplicate_name(self, client: AsyncClient, db_session, sample_rule: AutomationRule):
         """Test PUT /api/v1/automation/rules/{id} with duplicate name."""
         other_rule = AutomationRule(
             name="Other Rule",

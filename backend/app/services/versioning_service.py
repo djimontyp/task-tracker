@@ -619,31 +619,21 @@ class VersioningService:
             .where(AtomVersion.approved_at >= twenty_four_hours_ago)  # type: ignore[arg-type, operator]
         )
 
-        approved_count = (await db.scalar(topic_approved) or 0) + (
-            await db.scalar(atom_approved) or 0
-        )
+        approved_count = (await db.scalar(topic_approved) or 0) + (await db.scalar(atom_approved) or 0)
 
         topic_total = (
-            select(func.count())
-            .select_from(TopicVersion)
-            .where(TopicVersion.created_at >= twenty_four_hours_ago)  # type: ignore[arg-type, operator]
+            select(func.count()).select_from(TopicVersion).where(TopicVersion.created_at >= twenty_four_hours_ago)  # type: ignore[arg-type, operator]
         )
         atom_total = (
-            select(func.count())
-            .select_from(AtomVersion)
-            .where(AtomVersion.created_at >= twenty_four_hours_ago)  # type: ignore[arg-type, operator]
+            select(func.count()).select_from(AtomVersion).where(AtomVersion.created_at >= twenty_four_hours_ago)  # type: ignore[arg-type, operator]
         )
 
-        total_count = (await db.scalar(topic_total) or 0) + (
-            await db.scalar(atom_total) or 0
-        )
+        total_count = (await db.scalar(topic_total) or 0) + (await db.scalar(atom_total) or 0)
 
         rejected_count = total_count - approved_count
         pending_count = await self.get_pending_versions_count(db)
 
-        auto_approval_rate = (
-            int((approved_count / total_count) * 100) if total_count > 0 else 0
-        )
+        auto_approval_rate = int((approved_count / total_count) * 100) if total_count > 0 else 0
 
         return {
             "approved": approved_count,

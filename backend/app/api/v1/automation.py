@@ -11,7 +11,6 @@ from app.api.v1.schemas.automation import (
     AutomationStatsResponse,
     AutomationTrendPoint,
     AutomationTrendsResponse,
-    RuleCondition,
     RulePreviewRequest,
     RulePreviewResponse,
 )
@@ -69,30 +68,20 @@ async def get_automation_stats(
     pending_versions_count = pending_count_data["count"]
 
     topic_approved_stmt = (
-        select(func.count())
-        .select_from(TopicVersion)
-        .where(TopicVersion.approved == True)  # noqa: E712  # type: ignore[arg-type]
+        select(func.count()).select_from(TopicVersion).where(TopicVersion.approved == True)  # noqa: E712  # type: ignore[arg-type]
     )
     atom_approved_stmt = (
-        select(func.count())
-        .select_from(AtomVersion)
-        .where(AtomVersion.approved == True)  # noqa: E712  # type: ignore[arg-type]
+        select(func.count()).select_from(AtomVersion).where(AtomVersion.approved == True)  # noqa: E712  # type: ignore[arg-type]
     )
 
-    approved_count = (await session.scalar(topic_approved_stmt) or 0) + (
-        await session.scalar(atom_approved_stmt) or 0
-    )
+    approved_count = (await session.scalar(topic_approved_stmt) or 0) + (await session.scalar(atom_approved_stmt) or 0)
 
     topic_total_stmt = select(func.count()).select_from(TopicVersion)
     atom_total_stmt = select(func.count()).select_from(AtomVersion)
 
-    total_versions = (await session.scalar(topic_total_stmt) or 0) + (
-        await session.scalar(atom_total_stmt) or 0
-    )
+    total_versions = (await session.scalar(topic_total_stmt) or 0) + (await session.scalar(atom_total_stmt) or 0)
 
-    auto_approval_rate = (
-        (approved_count / total_versions * 100) if total_versions > 0 else 0.0
-    )
+    auto_approval_rate = (approved_count / total_versions * 100) if total_versions > 0 else 0.0
 
     return AutomationStatsResponse(
         auto_approval_rate=round(auto_approval_rate, 2),
@@ -314,9 +303,7 @@ async def create_rule(
             detail="Invalid conditions JSON format",
         )
 
-    existing = await session.execute(
-        select(AutomationRule).where(AutomationRule.name == rule_data.name)
-    )
+    existing = await session.execute(select(AutomationRule).where(AutomationRule.name == rule_data.name))
     if existing.scalar_one_or_none():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -380,9 +367,7 @@ async def update_rule(
             )
 
     if rule_data.name is not None and rule_data.name != rule.name:
-        existing = await session.execute(
-            select(AutomationRule).where(AutomationRule.name == rule_data.name)
-        )
+        existing = await session.execute(select(AutomationRule).where(AutomationRule.name == rule_data.name))
         if existing.scalar_one_or_none():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -580,11 +565,7 @@ async def get_rule_stats(
             detail=f"Automation rule with ID {rule_id} not found",
         )
 
-    success_rate = (
-        (rule.success_count / rule.triggered_count * 100)
-        if rule.triggered_count > 0
-        else 0.0
-    )
+    success_rate = (rule.success_count / rule.triggered_count * 100) if rule.triggered_count > 0 else 0.0
 
     return {
         "rule_id": rule.id,

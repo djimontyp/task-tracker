@@ -81,9 +81,7 @@ class RuleEngineService:
         if not conditions:
             return False
 
-        results = [
-            self._evaluate_condition(condition, version_data) for condition in conditions
-        ]
+        results = [self._evaluate_condition(condition, version_data) for condition in conditions]
 
         if rule.logic_operator == LogicOperator.AND:
             return all(results)

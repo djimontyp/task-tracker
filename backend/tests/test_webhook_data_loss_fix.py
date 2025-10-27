@@ -9,9 +9,8 @@ Fix: Preserve existing groups when groups parameter is None.
 """
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.webhook_service import WebhookSettingsService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.mark.asyncio

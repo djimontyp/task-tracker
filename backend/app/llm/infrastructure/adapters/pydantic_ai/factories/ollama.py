@@ -54,9 +54,7 @@ class OllamaModelFactory(BasePydanticAIFactory):
                 provider=ollama_provider,
             )
         except Exception as e:
-            raise ModelCreationError(
-                f"Failed to create Ollama model '{model_name}': {str(e)}"
-            ) from e
+            raise ModelCreationError(f"Failed to create Ollama model '{model_name}': {str(e)}") from e
 
     def supports_provider(self, provider_type: str) -> bool:
         """Check if factory supports a provider type.

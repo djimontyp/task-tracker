@@ -1,10 +1,9 @@
 """Tests for AutoApprovalService decision logic."""
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models.approval_rule import ApprovalRule, AutoAction
 from app.services.auto_approval_service import AutoApprovalService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.mark.asyncio
@@ -22,9 +21,7 @@ async def test_evaluate_version_high_confidence_high_similarity_approve(
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 95.0, "similarity": 85.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 95.0, "similarity": 85.0})
 
     assert decision == "approve"
 
@@ -44,9 +41,7 @@ async def test_evaluate_version_high_confidence_high_similarity_reject(
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 95.0, "similarity": 85.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 95.0, "similarity": 85.0})
 
     assert decision == "reject"
 
@@ -66,9 +61,7 @@ async def test_evaluate_version_low_confidence_low_similarity_manual(
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 25.0, "similarity": 20.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 25.0, "similarity": 20.0})
 
     assert decision == "manual_review"
 
@@ -88,9 +81,7 @@ async def test_evaluate_version_medium_confidence_manual_review(
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 60.0, "similarity": 50.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 60.0, "similarity": 50.0})
 
     assert decision == "manual_review"
 
@@ -101,9 +92,7 @@ async def test_evaluate_version_no_active_rule_manual_review(
 ) -> None:
     """Test manual review when no active rule exists"""
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 95.0, "similarity": 90.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 95.0, "similarity": 90.0})
 
     assert decision == "manual_review"
 
@@ -123,9 +112,7 @@ async def test_evaluate_version_inactive_rule_manual_review(
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 95.0, "similarity": 90.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 95.0, "similarity": 90.0})
 
     assert decision == "manual_review"
 
@@ -145,9 +132,7 @@ async def test_evaluate_version_boundary_confidence_equals_threshold(
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 90.0, "similarity": 85.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 90.0, "similarity": 85.0})
 
     assert decision == "approve"
 
@@ -167,9 +152,7 @@ async def test_evaluate_version_boundary_similarity_equals_threshold(
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 95.0, "similarity": 80.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 95.0, "similarity": 80.0})
 
     assert decision == "approve"
 
@@ -189,9 +172,7 @@ async def test_evaluate_version_boundary_both_equal_threshold(
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 90.0, "similarity": 80.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 90.0, "similarity": 80.0})
 
     assert decision == "approve"
 
@@ -211,9 +192,7 @@ async def test_evaluate_version_confidence_below_threshold(
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 89.9, "similarity": 85.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 89.9, "similarity": 85.0})
 
     assert decision == "manual_review"
 
@@ -233,9 +212,7 @@ async def test_evaluate_version_similarity_below_threshold(
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 95.0, "similarity": 79.9}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 95.0, "similarity": 79.9})
 
     assert decision == "manual_review"
 
@@ -293,9 +270,7 @@ async def test_evaluate_version_auto_action_manual(db_session: AsyncSession) -> 
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 95.0, "similarity": 85.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 95.0, "similarity": 85.0})
 
     assert decision == "manual_review"
 
@@ -322,9 +297,7 @@ async def test_evaluate_version_multiple_rules_uses_active(
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 95.0, "similarity": 85.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 95.0, "similarity": 85.0})
 
     assert decision == "approve"
 
@@ -342,9 +315,7 @@ async def test_evaluate_version_zero_thresholds(db_session: AsyncSession) -> Non
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 1.0, "similarity": 1.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 1.0, "similarity": 1.0})
 
     assert decision == "approve"
 
@@ -362,9 +333,7 @@ async def test_evaluate_version_max_thresholds(db_session: AsyncSession) -> None
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 99.9, "similarity": 99.9}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 99.9, "similarity": 99.9})
 
     assert decision == "manual_review"
 
@@ -384,8 +353,6 @@ async def test_evaluate_version_max_thresholds_exact_match(
     await db_session.commit()
 
     service = AutoApprovalService()
-    decision = await service.evaluate_version(
-        db_session, {"confidence": 100.0, "similarity": 100.0}
-    )
+    decision = await service.evaluate_version(db_session, {"confidence": 100.0, "similarity": 100.0})
 
     assert decision == "approve"

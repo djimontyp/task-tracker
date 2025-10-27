@@ -379,7 +379,6 @@ async def test_queue_extraction_creates_agent_config_requirement(
 async def test_extract_knowledge_task_validates_agent_exists() -> None:
     """Test that task validates agent config existence."""
     from app.models import AgentConfig
-    from app.services.knowledge_extraction_service import KnowledgeExtractionService
 
     agent_config = AgentConfig(
         id=uuid4(),
@@ -390,7 +389,7 @@ async def test_extract_knowledge_task_validates_agent_exists() -> None:
         is_active=True,
     )
 
-    from app.services.knowledge_extraction_service import KnowledgeExtractionOutput, ExtractedTopic, ExtractedAtom
+    from app.services.knowledge_extraction_service import ExtractedAtom, ExtractedTopic, KnowledgeExtractionOutput
 
     output = KnowledgeExtractionOutput(
         topics=[

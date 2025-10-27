@@ -230,11 +230,7 @@ class TopicsAPITester:
                 page = result.get("page", 0)
 
                 expected_page = (skip // limit) + 1
-                is_correct = (
-                    len(items) <= limit
-                    and result["total"] == total
-                    and page == expected_page
-                )
+                is_correct = len(items) <= limit and result["total"] == total and page == expected_page
 
                 status = "✅ PASS" if is_correct else "❌ FAIL"
                 self.add_result(
@@ -243,9 +239,7 @@ class TopicsAPITester:
                     f"Page {page}, got {len(items)} items, total={result['total']}",
                     status,
                 )
-                console.print(
-                    f"  {status} {description}: page={page}, items={len(items)}, total={result['total']}"
-                )
+                console.print(f"  {status} {description}: page={page}, items={len(items)}, total={result['total']}")
         except Exception as e:
             self.add_result(
                 "Pagination tests",
@@ -280,9 +274,7 @@ class TopicsAPITester:
                 items = result.get("items", [])
 
                 is_valid = (
-                    isinstance(items, list)
-                    and result["total"] >= 0
-                    and len(items) <= test["params"].get("limit", 100)
+                    isinstance(items, list) and result["total"] >= 0 and len(items) <= test["params"].get("limit", 100)
                 )
 
                 status = "✅ PASS" if is_valid else "❌ FAIL"
@@ -293,9 +285,7 @@ class TopicsAPITester:
                     status,
                     json.dumps(test["params"], indent=2),
                 )
-                console.print(
-                    f"  {status} {test['desc']}: {len(items)} items, total={result['total']}"
-                )
+                console.print(f"  {status} {test['desc']}: {len(items)} items, total={result['total']}")
             except Exception as e:
                 self.add_result(
                     test["desc"],

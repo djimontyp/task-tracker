@@ -18,9 +18,7 @@ class EmailService:
         template_dir = Path(__file__).parent.parent / "templates" / "email"
         self.jinja_env = Environment(loader=FileSystemLoader(str(template_dir)))
 
-    async def send_email(
-        self, to: str, subject: str, body_html: str, body_text: str | None = None
-    ) -> None:
+    async def send_email(self, to: str, subject: str, body_html: str, body_text: str | None = None) -> None:
         """Send email via SMTP."""
         if not self.smtp_user or not self.smtp_password:
             raise ValueError("SMTP credentials not configured")

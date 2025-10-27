@@ -1,8 +1,6 @@
 """Unit tests for LLM domain models."""
 
 import pytest
-from pydantic import ValidationError
-
 from app.llm.domain.models import (
     AgentConfig,
     AgentResult,
@@ -12,6 +10,7 @@ from app.llm.domain.models import (
     ToolDefinition,
     UsageInfo,
 )
+from pydantic import ValidationError
 
 
 class TestAgentConfig:

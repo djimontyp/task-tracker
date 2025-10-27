@@ -2,6 +2,7 @@
 """Quick script to create test topics with unique names."""
 
 import asyncio
+
 import httpx
 
 API_URL = "http://localhost:8000/api/v1/topics"

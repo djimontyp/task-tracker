@@ -42,8 +42,7 @@ class OpenAIModelFactory(BasePydanticAIFactory):
 
         if not provider_config.api_key:
             raise InvalidConfigurationError(
-                "OpenAI provider missing API key. "
-                "Please provide api_key for authentication."
+                "OpenAI provider missing API key. Please provide api_key for authentication."
             )
 
         try:
@@ -53,9 +52,7 @@ class OpenAIModelFactory(BasePydanticAIFactory):
                 provider=openai_provider,
             )
         except Exception as e:
-            raise ModelCreationError(
-                f"Failed to create OpenAI model '{model_name}': {str(e)}"
-            ) from e
+            raise ModelCreationError(f"Failed to create OpenAI model '{model_name}': {str(e)}") from e
 
     def supports_provider(self, provider_type: str) -> bool:
         """Check if factory supports a provider type.

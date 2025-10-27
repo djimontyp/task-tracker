@@ -1,18 +1,17 @@
 """Seed automation data: scheduler jobs, automation rules, notification preferences."""
 
-import asyncio
 import argparse
-from datetime import datetime, UTC
-from sqlalchemy import select, delete
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+import asyncio
 
+from app.core.config import settings
 from app.models import (
-    ScheduledJob,
     AutomationRule,
     NotificationPreference,
+    ScheduledJob,
 )
-from app.core.config import settings
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 async_engine = create_async_engine(str(settings.SQLALCHEMY_DATABASE_URI), echo=False)
 async_session_maker = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)

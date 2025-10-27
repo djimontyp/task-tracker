@@ -9,6 +9,7 @@ Migration from legacy:
          result = await agent.run(text)
 """
 
+from core.config import settings
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.llm.application.llm_service import LLMService
@@ -16,7 +17,6 @@ from app.llm.domain.models import AgentConfig
 from app.llm.domain.ports import LLMAgent
 from app.llm.startup import create_llm_service
 from app.schemas import EntityExtraction, EntityStructured, TextClassification
-from core.config import settings
 
 
 async def create_classification_agent(
@@ -131,6 +131,7 @@ async def create_analysis_agent(
 
 if __name__ == "__main__":
     import asyncio
+
     from rich.pretty import pprint
 
     from app.database import AsyncSessionLocal

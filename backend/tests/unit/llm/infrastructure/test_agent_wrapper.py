@@ -3,9 +3,8 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
-from app.llm.domain.exceptions import AgentExecutionError, StreamingNotSupportedError
-from app.llm.domain.models import AgentConfig, StreamEvent
+from app.llm.domain.exceptions import AgentExecutionError
+from app.llm.domain.models import AgentConfig
 from app.llm.infrastructure.adapters.pydantic_ai.agent_wrapper import PydanticAIAgentWrapper
 
 

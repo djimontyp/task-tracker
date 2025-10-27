@@ -9,7 +9,6 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database import get_session
 from app.models.scheduled_job import (
-    ScheduledJob,
     ScheduledJobCreate,
     ScheduledJobListResponse,
     ScheduledJobPublic,

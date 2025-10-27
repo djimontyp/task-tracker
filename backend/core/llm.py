@@ -40,16 +40,9 @@ def get_legacy_model() -> OpenAIChatModel:
     Raises:
         ValueError: If provider configuration is invalid
     """
-    logger.warning(
-        "Using legacy get_legacy_model() - DEPRECATED. "
-        "Migrate to app.llm.application.LLMService"
-    )
+    logger.warning("Using legacy get_legacy_model() - DEPRECATED. Migrate to app.llm.application.LLMService")
 
-    ollama_url = (
-        settings.llm.ollama_base_url_docker
-        if settings.llm.running_in_docker
-        else settings.llm.ollama_base_url
-    )
+    ollama_url = settings.llm.ollama_base_url_docker if settings.llm.running_in_docker else settings.llm.ollama_base_url
 
     ollama_provider = OllamaProvider(base_url=ollama_url)
 

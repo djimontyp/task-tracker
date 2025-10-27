@@ -1,10 +1,9 @@
 """Tests for SchedulerService job management."""
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models.scheduled_job import JobStatus, ScheduledJobCreate, ScheduledJobUpdate
 from app.services.scheduler_service import SchedulerService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.fixture

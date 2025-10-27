@@ -25,21 +25,15 @@ class NotificationService:
         )
         prefs = result.scalars().all()
 
-        pending_count = await self.versioning_service.get_pending_versions_count(
-            session
-        )
+        pending_count = await self.versioning_service.get_pending_versions_count(session)
 
         for pref in prefs:
             if pending_count > pref.pending_threshold:
                 if pref.email_enabled and pref.email_address:
-                    await email_service.send_pending_alert(
-                        pref.email_address, pending_count
-                    )
+                    await email_service.send_pending_alert(pref.email_address, pending_count)
 
                 if pref.telegram_enabled and pref.telegram_chat_id:
-                    await telegram_service.send_pending_alert(
-                        pref.telegram_chat_id, pending_count
-                    )
+                    await telegram_service.send_pending_alert(pref.telegram_chat_id, pending_count)
 
                 pref.last_notification_sent = datetime.utcnow()
                 session.add(pref)

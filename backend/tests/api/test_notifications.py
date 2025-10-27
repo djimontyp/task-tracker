@@ -1,8 +1,8 @@
-import pytest
 from unittest.mock import AsyncMock, patch
-from httpx import AsyncClient
 
+import pytest
 from app.models.notification_preference import DigestFrequency
+from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
@@ -34,9 +34,7 @@ class TestNotificationPreferencesAPI:
             "digest_time": "08:00",
         }
 
-        response = await client.put(
-            "/api/v1/notifications/preferences", json=update_data
-        )
+        response = await client.put("/api/v1/notifications/preferences", json=update_data)
         assert response.status_code == 200
         data = response.json()
 
@@ -53,9 +51,7 @@ class TestNotificationPreferencesAPI:
         """Test PUT /api/v1/notifications/preferences with partial data."""
         update_data = {"email_enabled": True, "pending_threshold": 20}
 
-        response = await client.put(
-            "/api/v1/notifications/preferences", json=update_data
-        )
+        response = await client.put("/api/v1/notifications/preferences", json=update_data)
         assert response.status_code == 200
         data = response.json()
 
@@ -84,9 +80,7 @@ class TestTestNotificationsAPI:
 
     async def test_send_test_email_success(self, client: AsyncClient):
         """Test POST /api/v1/notifications/test-email sends test email."""
-        with patch(
-            "app.api.v1.notifications.notification_service"
-        ) as mock_service:
+        with patch("app.api.v1.notifications.notification_service") as mock_service:
             mock_service.send_test_email = AsyncMock()
 
             response = await client.post(
@@ -109,12 +103,8 @@ class TestTestNotificationsAPI:
 
     async def test_send_test_email_service_error(self, client: AsyncClient):
         """Test POST /api/v1/notifications/test-email handles service errors."""
-        with patch(
-            "app.api.v1.notifications.notification_service"
-        ) as mock_service:
-            mock_service.send_test_email = AsyncMock(
-                side_effect=ValueError("SMTP not configured")
-            )
+        with patch("app.api.v1.notifications.notification_service") as mock_service:
+            mock_service.send_test_email = AsyncMock(side_effect=ValueError("SMTP not configured"))
 
             response = await client.post(
                 "/api/v1/notifications/test-email",
@@ -125,9 +115,7 @@ class TestTestNotificationsAPI:
 
     async def test_send_test_telegram_success(self, client: AsyncClient):
         """Test POST /api/v1/notifications/test-telegram sends test notification."""
-        with patch(
-            "app.api.v1.notifications.notification_service"
-        ) as mock_service:
+        with patch("app.api.v1.notifications.notification_service") as mock_service:
             mock_service.send_test_telegram = AsyncMock()
 
             response = await client.post(
@@ -150,12 +138,8 @@ class TestTestNotificationsAPI:
 
     async def test_send_test_telegram_service_error(self, client: AsyncClient):
         """Test POST /api/v1/notifications/test-telegram handles service errors."""
-        with patch(
-            "app.api.v1.notifications.notification_service"
-        ) as mock_service:
-            mock_service.send_test_telegram = AsyncMock(
-                side_effect=ValueError("TELEGRAM_BOT_TOKEN not configured")
-            )
+        with patch("app.api.v1.notifications.notification_service") as mock_service:
+            mock_service.send_test_telegram = AsyncMock(side_effect=ValueError("TELEGRAM_BOT_TOKEN not configured"))
 
             response = await client.post(
                 "/api/v1/notifications/test-telegram",

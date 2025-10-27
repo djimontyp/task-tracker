@@ -3,14 +3,13 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.llm.application.framework_registry import FrameworkRegistry
 from app.llm.application.llm_service import LLMService
 from app.llm.application.provider_resolver import ProviderResolver
 from app.llm.domain.models import AgentConfig
 from app.llm.infrastructure.adapters.pydantic_ai.adapter import PydanticAIFramework
 from app.models import LLMProvider
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class MockAlternativeFramework:

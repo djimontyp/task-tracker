@@ -16,7 +16,6 @@ from typing import Any, Protocol, TypeVar
 
 from app.llm.domain.models import AgentConfig, AgentResult, ModelInfo, ProviderConfig, StreamEvent
 
-
 T = TypeVar("T")
 
 

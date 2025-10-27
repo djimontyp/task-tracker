@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_db_session
 from app.api.v1.schemas.notification import (
     NotificationPreferencePublic,
     NotificationPreferenceUpdate,
     TestEmailRequest,
     TestTelegramRequest,
 )
+from app.dependencies import get_db_session
 from app.models.notification_preference import NotificationPreference
 from app.services.notification_service import notification_service
 

@@ -1,7 +1,6 @@
 """Functional tests for LLM startup initialization."""
 
 import pytest
-
 from app.llm.application.framework_registry import FrameworkRegistry
 from app.llm.startup import create_llm_service, initialize_llm_system
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -85,12 +84,9 @@ class TestAppIntegration:
 
     @pytest.mark.asyncio
     async def test_app_lifespan_initialization(self):
-        from app.main import app
-
         frameworks_before = len(FrameworkRegistry.list_frameworks())
 
         assert frameworks_before >= 0
-
 
 
 class TestServiceFactory:
@@ -110,7 +106,8 @@ class TestServiceFactory:
         db_session: AsyncSession,
         db_ollama_provider,
     ):
-        from unittest.mock import patch, MagicMock
+        from unittest.mock import MagicMock, patch
+
         from app.llm.domain.models import AgentConfig
 
         initialize_llm_system()

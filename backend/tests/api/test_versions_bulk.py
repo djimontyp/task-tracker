@@ -1,18 +1,15 @@
 """Tests for bulk version approval/rejection endpoints."""
 
 import pytest
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models.atom import Atom
 from app.models.topic import Topic
 from app.services.versioning_service import VersioningService
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.mark.asyncio
-async def test_bulk_approve_topic_versions_success(
-    client: AsyncClient, db_session: AsyncSession
-) -> None:
+async def test_bulk_approve_topic_versions_success(client: AsyncClient, db_session: AsyncSession) -> None:
     """Test bulk approve multiple topic versions successfully"""
     topic = Topic(name="Test Topic", description="Test description")
     db_session.add(topic)
@@ -20,15 +17,9 @@ async def test_bulk_approve_topic_versions_success(
     await db_session.refresh(topic)
 
     service = VersioningService()
-    version1 = await service.create_topic_version(
-        db_session, topic.id, {"name": "Version 1", "description": "Desc 1"}
-    )
-    version2 = await service.create_topic_version(
-        db_session, topic.id, {"name": "Version 2", "description": "Desc 2"}
-    )
-    version3 = await service.create_topic_version(
-        db_session, topic.id, {"name": "Version 3", "description": "Desc 3"}
-    )
+    version1 = await service.create_topic_version(db_session, topic.id, {"name": "Version 1", "description": "Desc 1"})
+    version2 = await service.create_topic_version(db_session, topic.id, {"name": "Version 2", "description": "Desc 2"})
+    version3 = await service.create_topic_version(db_session, topic.id, {"name": "Version 3", "description": "Desc 3"})
 
     response = await client.post(
         "/api/v1/bulk-approve",
@@ -50,9 +41,7 @@ async def test_bulk_approve_topic_versions_success(
 
 
 @pytest.mark.asyncio
-async def test_bulk_approve_atom_versions_success(
-    client: AsyncClient, db_session: AsyncSession
-) -> None:
+async def test_bulk_approve_atom_versions_success(client: AsyncClient, db_session: AsyncSession) -> None:
     """Test bulk approve multiple atom versions successfully"""
     topic = Topic(name="Test Topic", description="Test description")
     db_session.add(topic)
@@ -71,12 +60,8 @@ async def test_bulk_approve_atom_versions_success(
     await db_session.refresh(atom)
 
     service = VersioningService()
-    version1 = await service.create_atom_version(
-        db_session, atom.id, {"content": "Content 1", "confidence": 0.85}
-    )
-    version2 = await service.create_atom_version(
-        db_session, atom.id, {"content": "Content 2", "confidence": 0.90}
-    )
+    version1 = await service.create_atom_version(db_session, atom.id, {"content": "Content 1", "confidence": 0.85})
+    version2 = await service.create_atom_version(db_session, atom.id, {"content": "Content 2", "confidence": 0.90})
 
     response = await client.post(
         "/api/v1/bulk-approve",
@@ -97,9 +82,7 @@ async def test_bulk_approve_atom_versions_success(
 
 
 @pytest.mark.asyncio
-async def test_bulk_approve_partial_failure(
-    client: AsyncClient, db_session: AsyncSession
-) -> None:
+async def test_bulk_approve_partial_failure(client: AsyncClient, db_session: AsyncSession) -> None:
     """Test bulk approve with some versions failing (non-existent IDs)"""
     topic = Topic(name="Test Topic", description="Test description")
     db_session.add(topic)
@@ -130,9 +113,7 @@ async def test_bulk_approve_partial_failure(
 
 
 @pytest.mark.asyncio
-async def test_bulk_approve_already_approved(
-    client: AsyncClient, db_session: AsyncSession
-) -> None:
+async def test_bulk_approve_already_approved(client: AsyncClient, db_session: AsyncSession) -> None:
     """Test bulk approve fails for already approved versions"""
     topic = Topic(name="Test Topic", description="Test description")
     db_session.add(topic)
@@ -140,9 +121,7 @@ async def test_bulk_approve_already_approved(
     await db_session.refresh(topic)
 
     service = VersioningService()
-    version = await service.create_topic_version(
-        db_session, topic.id, {"name": "Test", "description": "Test"}
-    )
+    version = await service.create_topic_version(db_session, topic.id, {"name": "Test", "description": "Test"})
 
     await service.approve_version(db_session, "topic", topic.id, version.version)
 
@@ -177,9 +156,7 @@ async def test_bulk_approve_empty_list(client: AsyncClient, db_session: AsyncSes
 
 
 @pytest.mark.asyncio
-async def test_bulk_approve_invalid_entity_type(
-    client: AsyncClient, db_session: AsyncSession
-) -> None:
+async def test_bulk_approve_invalid_entity_type(client: AsyncClient, db_session: AsyncSession) -> None:
     """Test bulk approve with invalid entity_type"""
     response = await client.post(
         "/api/v1/bulk-approve",
@@ -194,9 +171,7 @@ async def test_bulk_approve_invalid_entity_type(
 
 
 @pytest.mark.asyncio
-async def test_bulk_reject_topic_versions_success(
-    client: AsyncClient, db_session: AsyncSession
-) -> None:
+async def test_bulk_reject_topic_versions_success(client: AsyncClient, db_session: AsyncSession) -> None:
     """Test bulk reject multiple topic versions successfully"""
     topic = Topic(name="Original", description="Original description")
     db_session.add(topic)
@@ -230,9 +205,7 @@ async def test_bulk_reject_topic_versions_success(
 
 
 @pytest.mark.asyncio
-async def test_bulk_reject_atom_versions_success(
-    client: AsyncClient, db_session: AsyncSession
-) -> None:
+async def test_bulk_reject_atom_versions_success(client: AsyncClient, db_session: AsyncSession) -> None:
     """Test bulk reject multiple atom versions successfully"""
     topic = Topic(name="Test Topic", description="Test description")
     db_session.add(topic)
@@ -251,12 +224,8 @@ async def test_bulk_reject_atom_versions_success(
     await db_session.refresh(atom)
 
     service = VersioningService()
-    version1 = await service.create_atom_version(
-        db_session, atom.id, {"content": "Rejected 1"}
-    )
-    version2 = await service.create_atom_version(
-        db_session, atom.id, {"content": "Rejected 2"}
-    )
+    version1 = await service.create_atom_version(db_session, atom.id, {"content": "Rejected 1"})
+    version2 = await service.create_atom_version(db_session, atom.id, {"content": "Rejected 2"})
 
     response = await client.post(
         "/api/v1/bulk-reject",
@@ -276,9 +245,7 @@ async def test_bulk_reject_atom_versions_success(
 
 
 @pytest.mark.asyncio
-async def test_bulk_reject_partial_failure(
-    client: AsyncClient, db_session: AsyncSession
-) -> None:
+async def test_bulk_reject_partial_failure(client: AsyncClient, db_session: AsyncSession) -> None:
     """Test bulk reject with some non-existent version IDs"""
     topic = Topic(name="Test Topic", description="Test description")
     db_session.add(topic)
@@ -286,9 +253,7 @@ async def test_bulk_reject_partial_failure(
     await db_session.refresh(topic)
 
     service = VersioningService()
-    version = await service.create_topic_version(
-        db_session, topic.id, {"name": "Valid Version"}
-    )
+    version = await service.create_topic_version(db_session, topic.id, {"name": "Valid Version"})
 
     response = await client.post(
         "/api/v1/bulk-reject",
@@ -321,9 +286,7 @@ async def test_bulk_reject_empty_list(client: AsyncClient, db_session: AsyncSess
 
 
 @pytest.mark.asyncio
-async def test_bulk_reject_invalid_entity_type(
-    client: AsyncClient, db_session: AsyncSession
-) -> None:
+async def test_bulk_reject_invalid_entity_type(client: AsyncClient, db_session: AsyncSession) -> None:
     """Test bulk reject with invalid entity_type"""
     response = await client.post(
         "/api/v1/bulk-reject",
@@ -338,9 +301,7 @@ async def test_bulk_reject_invalid_entity_type(
 
 
 @pytest.mark.asyncio
-async def test_bulk_approve_mixed_topics_and_atoms(
-    client: AsyncClient, db_session: AsyncSession
-) -> None:
+async def test_bulk_approve_mixed_topics_and_atoms(client: AsyncClient, db_session: AsyncSession) -> None:
     """Test that bulk operations are scoped to entity_type correctly"""
     topic = Topic(name="Test Topic", description="Test description")
     db_session.add(topic)
@@ -359,12 +320,8 @@ async def test_bulk_approve_mixed_topics_and_atoms(
     await db_session.refresh(atom)
 
     service = VersioningService()
-    topic_version = await service.create_topic_version(
-        db_session, topic.id, {"name": "Topic Version"}
-    )
-    atom_version = await service.create_atom_version(
-        db_session, atom.id, {"content": "Atom Version"}
-    )
+    topic_version = await service.create_topic_version(db_session, topic.id, {"name": "Topic Version"})
+    atom_version = await service.create_atom_version(db_session, atom.id, {"content": "Atom Version"})
 
     response = await client.post(
         "/api/v1/bulk-approve",

@@ -1,10 +1,9 @@
 """Unit tests for FrameworkRegistry."""
 
 import pytest
-
+from app.llm.application.framework_registry import FrameworkRegistry
 from app.llm.domain.exceptions import FrameworkNotSupportedError
 from app.llm.infrastructure.adapters.pydantic_ai.adapter import PydanticAIFramework
-from app.llm.application.framework_registry import FrameworkRegistry
 
 
 class MockFramework:

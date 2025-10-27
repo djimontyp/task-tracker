@@ -1,7 +1,6 @@
 """Unit tests for LLM domain exceptions."""
 
 import pytest
-
 from app.llm.domain.exceptions import (
     AgentExecutionError,
     FrameworkNotSupportedError,

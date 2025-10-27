@@ -6,13 +6,13 @@ from typing import Any
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from core.config import settings
 from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.scheduled_job import JobStatus, ScheduledJob, ScheduledJobCreate, ScheduledJobUpdate
 from app.services.websocket_manager import websocket_manager
-from core.config import settings
 
 
 class SchedulerService:
