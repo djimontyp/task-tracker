@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Automation Digest{% endblock %}
+
+{% block content %}
+<h2>Your Automation Summary</h2>
+<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+    <tr style="border-bottom: 2px solid #e5e7eb;">
+        <td style="padding: 12px; font-weight: bold;">Auto-Approved</td>
+        <td style="padding: 12px; text-align: right; color: #10b981; font-size: 20px;">{{ stats.approved }}</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #e5e7eb;">
+        <td style="padding: 12px; font-weight: bold;">Rejected</td>
+        <td style="padding: 12px; text-align: right; color: #ef4444; font-size: 20px;">{{ stats.rejected }}</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #e5e7eb;">
+        <td style="padding: 12px; font-weight: bold;">Pending Review</td>
+        <td style="padding: 12px; text-align: right; color: #f59e0b; font-size: 20px;">{{ stats.pending }}</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; font-weight: bold;">Auto-Approval Rate</td>
+        <td style="padding: 12px; text-align: right; color: #667eea; font-size: 20px;">{{ stats.auto_approval_rate }}%</td>
+    </tr>
+</table>
+<a href="{{ dashboard_url }}/automation/dashboard" class="button">View Full Dashboard</a>
+{% endblock %}
