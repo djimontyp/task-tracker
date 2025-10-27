@@ -3,16 +3,35 @@
  */
 
 import { API_ENDPOINTS } from '@/shared/config/api'
-import type { Topic, TopicListResponse, UpdateTopic } from '../types'
+import type { ListTopicsParams, Topic, TopicListResponse, UpdateTopic } from '../types'
 
 const API_BASE_URL = ''
 
 class TopicService {
   /**
-   * List all topics
+   * List all topics with optional filtering, sorting, and pagination
    */
-  async listTopics(): Promise<TopicListResponse> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}`)
+  async listTopics(params?: ListTopicsParams): Promise<TopicListResponse> {
+    const queryParams = new URLSearchParams()
+
+    if (params?.page && params?.page_size) {
+      const skip = (params.page - 1) * params.page_size
+      queryParams.append('skip', skip.toString())
+      queryParams.append('limit', params.page_size.toString())
+    }
+
+    if (params?.search) {
+      queryParams.append('search', params.search)
+    }
+
+    if (params?.sort_by) {
+      queryParams.append('sort_by', params.sort_by)
+    }
+
+    const queryString = queryParams.toString()
+    const url = `${API_BASE_URL}${API_ENDPOINTS.topics}${queryString ? '?' + queryString : ''}`
+
+    const response = await fetch(url)
 
     if (!response.ok) {
       throw new Error(`Failed to fetch topics: ${response.statusText}`)
