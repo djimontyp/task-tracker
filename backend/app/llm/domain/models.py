@@ -5,10 +5,9 @@ They are completely independent of any specific LLM framework (Pydantic AI, Lang
 and serve as the contract between domain logic and infrastructure adapters.
 """
 
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field
-
 
 T = TypeVar("T")
 
@@ -55,7 +54,7 @@ class UsageInfo(BaseModel):
     total_tokens: int = Field(ge=0, description="Total tokens consumed")
 
 
-class AgentResult(BaseModel, Generic[T]):
+class AgentResult[T](BaseModel):
     """Result from agent execution.
 
     Generic container for agent output with metadata about execution.

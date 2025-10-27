@@ -456,7 +456,9 @@ async def test_save_atoms_filters_low_confidence(db_session: AsyncSession) -> No
     ]
 
     service = KnowledgeExtractionService(provider=MagicMock())
-    saved_atoms, version_ids = await service.save_atoms(extracted_atoms, topic_map, db_session, confidence_threshold=0.7)
+    saved_atoms, version_ids = await service.save_atoms(
+        extracted_atoms, topic_map, db_session, confidence_threshold=0.7
+    )
 
     assert len(saved_atoms) == 1
     assert saved_atoms[0].title == "High Confidence Atom"
@@ -525,9 +527,7 @@ async def test_save_atoms_creates_version_for_existing(db_session: AsyncSession)
     ]
 
     service = KnowledgeExtractionService(provider=MagicMock())
-    saved_atoms, version_ids = await service.save_atoms(
-        extracted_atoms, topic_map, db_session, created_by="test_user"
-    )
+    saved_atoms, version_ids = await service.save_atoms(extracted_atoms, topic_map, db_session, created_by="test_user")
 
     assert len(saved_atoms) == 1
     assert saved_atoms[0].id == existing_atom.id
@@ -826,6 +826,7 @@ async def test_get_messages_by_period_last_24h(
 ) -> None:
     """Test last 24 hours period selection."""
     from datetime import timedelta
+
     from app.services.knowledge_extraction_service import get_messages_by_period
 
     now = datetime.now(UTC)
@@ -870,6 +871,7 @@ async def test_get_messages_by_period_last_7d(
 ) -> None:
     """Test last 7 days period selection."""
     from datetime import timedelta
+
     from app.services.knowledge_extraction_service import get_messages_by_period
 
     now = datetime.now(UTC)
@@ -914,6 +916,7 @@ async def test_get_messages_by_period_last_30d(
 ) -> None:
     """Test last 30 days period selection."""
     from datetime import timedelta
+
     from app.services.knowledge_extraction_service import get_messages_by_period
 
     now = datetime.now(UTC)
@@ -958,6 +961,7 @@ async def test_get_messages_by_period_custom_valid(
 ) -> None:
     """Test custom date range period selection."""
     from datetime import timedelta
+
     from app.services.knowledge_extraction_service import get_messages_by_period
 
     now = datetime.now(UTC)
@@ -1001,9 +1005,7 @@ async def test_get_messages_by_period_custom_valid(
         db_session.add(msg)
     await db_session.commit()
 
-    result = await get_messages_by_period(
-        db_session, period_type="custom", start_date=start_date, end_date=end_date
-    )
+    result = await get_messages_by_period(db_session, period_type="custom", start_date=start_date, end_date=end_date)
 
     assert len(result) == 3
     assert all(msg_id in [m.id for m in messages_in_range] for msg_id in result)
@@ -1015,6 +1017,7 @@ async def test_get_messages_by_period_with_topic_filter(
 ) -> None:
     """Test period selection with topic ID filter."""
     from datetime import timedelta
+
     from app.models import Topic
     from app.services.knowledge_extraction_service import get_messages_by_period
 
@@ -1069,6 +1072,7 @@ async def test_get_messages_by_period_no_results(
 ) -> None:
     """Test period selection returning empty list when no messages match."""
     from datetime import timedelta
+
     from app.services.knowledge_extraction_service import get_messages_by_period
 
     now = datetime.now(UTC)
@@ -1095,16 +1099,13 @@ async def test_get_messages_by_period_custom_missing_start_date(
     db_session: AsyncSession,
 ) -> None:
     """Test custom period validation when start_date is missing."""
-    from datetime import timedelta
     from app.services.knowledge_extraction_service import get_messages_by_period
 
     now = datetime.now(UTC)
     end_date = now
 
     with pytest.raises(ValueError, match="Custom period requires both start_date and end_date"):
-        await get_messages_by_period(
-            db_session, period_type="custom", start_date=None, end_date=end_date
-        )
+        await get_messages_by_period(db_session, period_type="custom", start_date=None, end_date=end_date)
 
 
 @pytest.mark.asyncio
@@ -1113,15 +1114,14 @@ async def test_get_messages_by_period_custom_missing_end_date(
 ) -> None:
     """Test custom period validation when end_date is missing."""
     from datetime import timedelta
+
     from app.services.knowledge_extraction_service import get_messages_by_period
 
     now = datetime.now(UTC)
     start_date = now - timedelta(days=5)
 
     with pytest.raises(ValueError, match="Custom period requires both start_date and end_date"):
-        await get_messages_by_period(
-            db_session, period_type="custom", start_date=start_date, end_date=None
-        )
+        await get_messages_by_period(db_session, period_type="custom", start_date=start_date, end_date=None)
 
 
 @pytest.mark.asyncio
@@ -1130,6 +1130,7 @@ async def test_get_messages_by_period_custom_start_after_end(
 ) -> None:
     """Test custom period validation when start_date is after end_date."""
     from datetime import timedelta
+
     from app.services.knowledge_extraction_service import get_messages_by_period
 
     now = datetime.now(UTC)
@@ -1137,9 +1138,7 @@ async def test_get_messages_by_period_custom_start_after_end(
     end_date = now - timedelta(days=5)
 
     with pytest.raises(ValueError, match="start_date must be before end_date"):
-        await get_messages_by_period(
-            db_session, period_type="custom", start_date=start_date, end_date=end_date
-        )
+        await get_messages_by_period(db_session, period_type="custom", start_date=start_date, end_date=end_date)
 
 
 @pytest.mark.asyncio
@@ -1148,6 +1147,7 @@ async def test_get_messages_by_period_custom_future_start_date(
 ) -> None:
     """Test custom period validation when start_date is in the future."""
     from datetime import timedelta
+
     from app.services.knowledge_extraction_service import get_messages_by_period
 
     now = datetime.now(UTC)
@@ -1156,9 +1156,7 @@ async def test_get_messages_by_period_custom_future_start_date(
     end_date = future + timedelta(days=1)
 
     with pytest.raises(ValueError, match="dates cannot be in the future"):
-        await get_messages_by_period(
-            db_session, period_type="custom", start_date=start_date, end_date=end_date
-        )
+        await get_messages_by_period(db_session, period_type="custom", start_date=start_date, end_date=end_date)
 
 
 @pytest.mark.asyncio
@@ -1167,6 +1165,7 @@ async def test_get_messages_by_period_custom_future_end_date(
 ) -> None:
     """Test custom period validation when end_date is in the future."""
     from datetime import timedelta
+
     from app.services.knowledge_extraction_service import get_messages_by_period
 
     now = datetime.now(UTC)
@@ -1174,9 +1173,7 @@ async def test_get_messages_by_period_custom_future_end_date(
     end_date = now + timedelta(days=5)
 
     with pytest.raises(ValueError, match="dates cannot be in the future"):
-        await get_messages_by_period(
-            db_session, period_type="custom", start_date=start_date, end_date=end_date
-        )
+        await get_messages_by_period(db_session, period_type="custom", start_date=start_date, end_date=end_date)
 
 
 @pytest.mark.asyncio
@@ -1184,7 +1181,6 @@ async def test_get_messages_by_period_invalid_period_type(
     db_session: AsyncSession,
 ) -> None:
     """Test error handling for invalid period type."""
-    from datetime import timedelta
     from app.services.knowledge_extraction_service import get_messages_by_period
 
     with pytest.raises(ValueError, match="Invalid period_type"):
@@ -1197,6 +1193,7 @@ async def test_get_messages_by_period_naive_datetime_handling(
 ) -> None:
     """Test that naive datetimes are converted to UTC."""
     from datetime import timedelta
+
     from app.services.knowledge_extraction_service import get_messages_by_period
 
     now = datetime.now(UTC)
@@ -1213,8 +1210,6 @@ async def test_get_messages_by_period_naive_datetime_handling(
     db_session.add(msg)
     await db_session.commit()
 
-    result = await get_messages_by_period(
-        db_session, period_type="custom", start_date=start_date, end_date=end_date
-    )
+    result = await get_messages_by_period(db_session, period_type="custom", start_date=start_date, end_date=end_date)
 
     assert len(result) == 1

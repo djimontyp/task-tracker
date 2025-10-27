@@ -1,7 +1,6 @@
 """Unit tests for OllamaModelFactory."""
 
 import pytest
-
 from app.llm.domain.exceptions import InvalidConfigurationError, ModelCreationError
 from app.llm.domain.models import ProviderConfig
 from app.llm.infrastructure.adapters.pydantic_ai.factories.ollama import OllamaModelFactory
@@ -71,7 +70,6 @@ class TestOllamaModelFactory:
         is_valid, error = await factory.validate_provider(provider_config)
         assert is_valid is True
         assert error is None
-
 
     @pytest.mark.asyncio
     async def test_create_model_with_custom_base_url(self):

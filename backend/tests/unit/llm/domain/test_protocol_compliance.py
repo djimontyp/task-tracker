@@ -1,10 +1,9 @@
 """Unit tests for Protocol compliance and structural subtyping."""
 
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 import pytest
-
 from app.llm.domain.models import AgentConfig, AgentResult, ModelInfo, ProviderConfig, StreamEvent, UsageInfo
 from app.llm.domain.ports import LLMAgent, LLMFramework, ModelFactory
 

@@ -1,13 +1,12 @@
 """Integration tests for agent creation with database and mocked LLM."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.llm.application.llm_service import LLMService
 from app.llm.domain.models import AgentConfig
 from app.models import LLMProvider
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class TestAgentCreationIntegration:
@@ -54,7 +53,6 @@ class TestAgentCreationIntegration:
             )
 
             assert agent is not None
-
 
     @pytest.mark.asyncio
     async def test_create_multiple_agents_same_session(
@@ -150,7 +148,5 @@ class TestAgentCreationIntegration:
                 assert agent is not None
 
 
-
 class TestAgentStreamingIntegration:
     """Integration tests for streaming agent execution."""
-

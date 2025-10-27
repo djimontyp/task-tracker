@@ -117,8 +117,7 @@ class LLMService:
         )
 
         logger.info(
-            f"Creating agent '{config.name}' with provider '{provider.name}' "
-            f"using framework '{self.framework_name}'"
+            f"Creating agent '{config.name}' with provider '{provider.name}' using framework '{self.framework_name}'"
         )
 
         provider_config = provider_to_config(provider, self.provider_resolver.crud)

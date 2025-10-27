@@ -1,15 +1,13 @@
 """Agent wrapper implementing domain LLMAgent protocol using Pydantic AI."""
 
 from collections.abc import AsyncIterator
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from pydantic_ai import Agent as PydanticAgent
-from pydantic_ai.result import StreamedRunResult
 from pydantic_ai.run import AgentRunResult
 
 from app.llm.domain.exceptions import AgentExecutionError, StreamingNotSupportedError
 from app.llm.domain.models import AgentConfig, AgentResult, StreamEvent
-from app.llm.domain.ports import LLMAgent
 from app.llm.infrastructure.adapters.pydantic_ai.converters import (
     extract_messages_from_result,
     pydantic_usage_to_domain,
@@ -18,7 +16,7 @@ from app.llm.infrastructure.adapters.pydantic_ai.converters import (
 T = TypeVar("T")
 
 
-class PydanticAIAgentWrapper(Generic[T]):
+class PydanticAIAgentWrapper[T]:
     """Wraps Pydantic AI Agent to implement domain LLMAgent protocol.
 
     This wrapper translates domain-level agent operations into Pydantic AI
@@ -76,9 +74,7 @@ class PydanticAIAgentWrapper(Generic[T]):
             )
 
         except Exception as e:
-            raise AgentExecutionError(
-                f"Agent execution failed for '{self._config.name}': {str(e)}"
-            ) from e
+            raise AgentExecutionError(f"Agent execution failed for '{self._config.name}': {str(e)}") from e
 
     async def stream(
         self,
@@ -107,9 +103,7 @@ class PydanticAIAgentWrapper(Generic[T]):
             ...         print(event.delta, end="", flush=True)
         """
         if not self.supports_streaming():
-            raise StreamingNotSupportedError(
-                f"Agent '{self._config.name}' does not support streaming operations"
-            )
+            raise StreamingNotSupportedError(f"Agent '{self._config.name}' does not support streaming operations")
 
         try:
             async with self._agent.run_stream(prompt, deps=dependencies) as streamed:
@@ -127,9 +121,7 @@ class PydanticAIAgentWrapper(Generic[T]):
                 )
 
         except Exception as e:
-            raise AgentExecutionError(
-                f"Agent streaming failed for '{self._config.name}': {str(e)}"
-            ) from e
+            raise AgentExecutionError(f"Agent streaming failed for '{self._config.name}': {str(e)}") from e
 
     def supports_streaming(self) -> bool:
         """Check if agent supports streaming operations.

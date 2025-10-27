@@ -1,9 +1,5 @@
 """Unit tests for Pydantic AI converters."""
 
-from unittest.mock import MagicMock
-
-import pytest
-
 from app.llm.domain.models import AgentConfig
 from app.llm.infrastructure.adapters.pydantic_ai.converters import (
     agent_config_to_model_settings,

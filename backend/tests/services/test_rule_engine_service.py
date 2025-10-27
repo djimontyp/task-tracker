@@ -1,14 +1,12 @@
 """Tests for RuleEngineService automation rule evaluation."""
 
 import json
-from datetime import UTC, datetime
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models.automation_rule import AutomationRule, LogicOperator, RuleAction
 from app.services.rule_engine_service import RuleEngineService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.fixture
@@ -73,9 +71,7 @@ class TestRuleEvaluation:
         """Test single condition with gte operator."""
         version_data = {"confidence": 95}
 
-        action, rule_id = await rule_engine_service.evaluate_version(
-            db_session, version_data, "topic", 1, 1
-        )
+        action, rule_id = await rule_engine_service.evaluate_version(db_session, version_data, "topic", 1, 1)
 
         assert action == RuleAction.approve
         assert rule_id == sample_rule_approve.id
@@ -90,9 +86,7 @@ class TestRuleEvaluation:
         """Test single condition with lt operator."""
         version_data = {"confidence": 45}
 
-        action, rule_id = await rule_engine_service.evaluate_version(
-            db_session, version_data, "topic", 1, 1
-        )
+        action, rule_id = await rule_engine_service.evaluate_version(db_session, version_data, "topic", 1, 1)
 
         assert action == RuleAction.reject
         assert rule_id == sample_rule_reject.id
@@ -121,9 +115,7 @@ class TestRuleEvaluation:
 
         version_data = {"confidence": 92, "similarity": 87}
 
-        action, rule_id = await rule_engine_service.evaluate_version(
-            db_session, version_data, "topic", 1, 1
-        )
+        action, rule_id = await rule_engine_service.evaluate_version(db_session, version_data, "topic", 1, 1)
 
         assert action == RuleAction.approve
         assert rule_id == rule.id
@@ -152,9 +144,7 @@ class TestRuleEvaluation:
 
         version_data = {"confidence": 45, "similarity": 96}
 
-        action, rule_id = await rule_engine_service.evaluate_version(
-            db_session, version_data, "topic", 1, 1
-        )
+        action, rule_id = await rule_engine_service.evaluate_version(db_session, version_data, "topic", 1, 1)
 
         assert action == RuleAction.approve
         assert rule_id == rule.id
@@ -182,9 +172,7 @@ class TestRuleEvaluation:
 
         version_data = {"confidence": 92, "similarity": 80}
 
-        action, rule_id = await rule_engine_service.evaluate_version(
-            db_session, version_data, "topic", 1, 1
-        )
+        action, rule_id = await rule_engine_service.evaluate_version(db_session, version_data, "topic", 1, 1)
 
         assert action is None
         assert rule_id is None
@@ -212,9 +200,7 @@ class TestRuleEvaluation:
 
         version_data = {"confidence": 40, "similarity": 96}
 
-        action, rule_id = await rule_engine_service.evaluate_version(
-            db_session, version_data, "topic", 1, 1
-        )
+        action, rule_id = await rule_engine_service.evaluate_version(db_session, version_data, "topic", 1, 1)
 
         assert action == RuleAction.approve
 
@@ -241,9 +227,7 @@ class TestRuleEvaluation:
 
         version_data = {"topic": {"name": "Urgent Issue"}}
 
-        action, rule_id = await rule_engine_service.evaluate_version(
-            db_session, version_data, "topic", 1, 1
-        )
+        action, rule_id = await rule_engine_service.evaluate_version(db_session, version_data, "topic", 1, 1)
 
         assert action == RuleAction.approve
         assert rule_id == rule.id
@@ -270,9 +254,7 @@ class TestRuleEvaluation:
 
         version_data = {"name": "This is urgent"}
 
-        action, rule_id = await rule_engine_service.evaluate_version(
-            db_session, version_data, "topic", 1, 1
-        )
+        action, rule_id = await rule_engine_service.evaluate_version(db_session, version_data, "topic", 1, 1)
 
         assert action == RuleAction.approve
 
@@ -298,9 +280,7 @@ class TestRuleEvaluation:
 
         version_data = {"name": "Urgent: Fix bug"}
 
-        action, rule_id = await rule_engine_service.evaluate_version(
-            db_session, version_data, "topic", 1, 1
-        )
+        action, rule_id = await rule_engine_service.evaluate_version(db_session, version_data, "topic", 1, 1)
 
         assert action == RuleAction.approve
 
@@ -342,9 +322,7 @@ class TestRuleEvaluation:
 
         version_data = {"confidence": 85}
 
-        action, rule_id = await rule_engine_service.evaluate_version(
-            db_session, version_data, "topic", 1, 1
-        )
+        action, rule_id = await rule_engine_service.evaluate_version(db_session, version_data, "topic", 1, 1)
 
         assert action == RuleAction.approve
         assert rule_id == rule_high.id
@@ -359,9 +337,7 @@ class TestRuleEvaluation:
         """Test that no rule match returns None action."""
         version_data = {"confidence": 50}
 
-        action, rule_id = await rule_engine_service.evaluate_version(
-            db_session, version_data, "topic", 1, 1
-        )
+        action, rule_id = await rule_engine_service.evaluate_version(db_session, version_data, "topic", 1, 1)
 
         assert action is None
         assert rule_id is None
@@ -386,9 +362,7 @@ class TestRuleEvaluation:
 
         version_data = {"confidence": 95}
 
-        action, rule_id = await rule_engine_service.evaluate_version(
-            db_session, version_data, "topic", 1, 1
-        )
+        action, rule_id = await rule_engine_service.evaluate_version(db_session, version_data, "topic", 1, 1)
 
         assert action is None
         assert rule_id is None
@@ -425,9 +399,7 @@ class TestFieldExtraction:
         """Test deeply nested field extraction."""
         version_data = {"level1": {"level2": {"level3": "deep"}}}
 
-        result = rule_engine_service._extract_field_value(
-            version_data, "level1.level2.level3"
-        )
+        result = rule_engine_service._extract_field_value(version_data, "level1.level2.level3")
 
         assert result == "deep"
 
@@ -474,34 +446,20 @@ class TestOperators:
     def test_operator_contains(self, rule_engine_service: RuleEngineService):
         """Test contains operator."""
         assert rule_engine_service._apply_operator("contains", "This is urgent", "urgent") is True
-        assert (
-            rule_engine_service._apply_operator("contains", "This is URGENT", "urgent") is True
-        )
+        assert rule_engine_service._apply_operator("contains", "This is URGENT", "urgent") is True
         assert rule_engine_service._apply_operator("contains", "This is normal", "urgent") is False
 
     def test_operator_starts_with(self, rule_engine_service: RuleEngineService):
         """Test starts_with operator."""
-        assert (
-            rule_engine_service._apply_operator("starts_with", "Urgent: Fix bug", "Urgent") is True
-        )
-        assert (
-            rule_engine_service._apply_operator("starts_with", "urgent: Fix bug", "Urgent") is True
-        )
-        assert (
-            rule_engine_service._apply_operator("starts_with", "Fix urgent bug", "Urgent") is False
-        )
+        assert rule_engine_service._apply_operator("starts_with", "Urgent: Fix bug", "Urgent") is True
+        assert rule_engine_service._apply_operator("starts_with", "urgent: Fix bug", "Urgent") is True
+        assert rule_engine_service._apply_operator("starts_with", "Fix urgent bug", "Urgent") is False
 
     def test_operator_ends_with(self, rule_engine_service: RuleEngineService):
         """Test ends_with operator."""
-        assert (
-            rule_engine_service._apply_operator("ends_with", "Issue is urgent", "urgent") is True
-        )
-        assert (
-            rule_engine_service._apply_operator("ends_with", "Issue is URGENT", "urgent") is True
-        )
-        assert (
-            rule_engine_service._apply_operator("ends_with", "Urgent issue", "urgent") is False
-        )
+        assert rule_engine_service._apply_operator("ends_with", "Issue is urgent", "urgent") is True
+        assert rule_engine_service._apply_operator("ends_with", "Issue is URGENT", "urgent") is True
+        assert rule_engine_service._apply_operator("ends_with", "Urgent issue", "urgent") is False
 
 
 class TestRuleTriggerRecording:

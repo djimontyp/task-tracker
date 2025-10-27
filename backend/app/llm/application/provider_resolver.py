@@ -3,12 +3,12 @@
 import logging
 from uuid import UUID
 
+from core.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.llm.domain.exceptions import ProviderNotFoundError
 from app.models import LLMProvider, ProviderType
 from app.services.provider_crud import ProviderCRUD
-from core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -132,9 +132,7 @@ class ProviderResolver:
             base_url = settings.llm.ollama_base_url
 
         if not base_url:
-            raise ProviderNotFoundError(
-                "No providers in database and settings don't have ollama_base_url configured"
-            )
+            raise ProviderNotFoundError("No providers in database and settings don't have ollama_base_url configured")
 
         provider = LLMProvider(
             name="Settings Fallback (Ollama)",

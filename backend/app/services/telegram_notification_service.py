@@ -32,9 +32,7 @@ class TelegramNotificationService:
         )
         return await self.send_message(chat_id, text)
 
-    async def send_pending_alert(
-        self, chat_id: str, pending_count: int
-    ) -> dict[str, object]:
+    async def send_pending_alert(self, chat_id: str, pending_count: int) -> dict[str, object]:
         """Send pending alert."""
         dashboard_url = os.getenv("DASHBOARD_URL", "http://localhost")
         text = (
@@ -44,9 +42,7 @@ class TelegramNotificationService:
         )
         return await self.send_message(chat_id, text)
 
-    async def send_daily_digest(
-        self, chat_id: str, stats: dict[str, int]
-    ) -> dict[str, object]:
+    async def send_daily_digest(self, chat_id: str, stats: dict[str, int]) -> dict[str, object]:
         """Send daily digest."""
         dashboard_url = os.getenv("DASHBOARD_URL", "http://localhost")
         text = (

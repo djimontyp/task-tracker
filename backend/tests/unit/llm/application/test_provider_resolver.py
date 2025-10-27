@@ -4,7 +4,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
-
 from app.llm.application.provider_resolver import ProviderResolver
 from app.llm.domain.exceptions import ProviderNotFoundError
 from app.models import LLMProvider, ProviderType

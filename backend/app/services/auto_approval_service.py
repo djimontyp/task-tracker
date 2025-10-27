@@ -49,10 +49,7 @@ class AutoApprovalService:
         confidence = version_data.get("confidence", 0.0)
         similarity = version_data.get("similarity", 0.0)
 
-        if (
-            confidence >= active_rule.confidence_threshold
-            and similarity >= active_rule.similarity_threshold
-        ):
+        if confidence >= active_rule.confidence_threshold and similarity >= active_rule.similarity_threshold:
             if active_rule.auto_action == AutoAction.approve:
                 return "approve"
             elif active_rule.auto_action == AutoAction.reject:

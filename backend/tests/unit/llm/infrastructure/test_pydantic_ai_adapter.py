@@ -1,8 +1,8 @@
 """Unit tests for PydanticAIFramework adapter."""
 
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
+import pytest
 from app.llm.domain.exceptions import FrameworkNotSupportedError
 from app.llm.domain.models import AgentConfig, ProviderConfig
 from app.llm.infrastructure.adapters.pydantic_ai.adapter import PydanticAIFramework
@@ -96,7 +96,6 @@ class TestPydanticAIFramework:
             agent = await framework.create_agent(config, provider_config)
 
             assert agent is not None
-
 
     @pytest.mark.asyncio
     async def test_create_agent_with_deps_type(self):

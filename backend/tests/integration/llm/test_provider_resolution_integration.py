@@ -3,12 +3,11 @@
 from unittest.mock import patch
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.llm.application.provider_resolver import ProviderResolver
 from app.llm.domain.exceptions import ProviderNotFoundError
 from app.models import LLMProvider, ProviderType
 from app.services.provider_crud import ProviderCRUD
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class TestProviderResolutionIntegration:

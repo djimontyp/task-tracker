@@ -350,11 +350,16 @@ async def test_trigger_extraction_task_queueing_failure(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_with_period_last_24h(
-    client: AsyncClient, sample_provider: LLMProvider, sample_user: User, sample_source: Source, db_session: AsyncSession
+    client: AsyncClient,
+    sample_provider: LLMProvider,
+    sample_user: User,
+    sample_source: Source,
+    db_session: AsyncSession,
 ) -> None:
     """Test extraction with last_24h period."""
     from datetime import UTC, datetime, timedelta
     from uuid import uuid4
+
     from app.models import AgentConfig
 
     agent_config = AgentConfig(
@@ -403,11 +408,16 @@ async def test_trigger_extraction_with_period_last_24h(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_with_period_last_7d(
-    client: AsyncClient, sample_provider: LLMProvider, sample_user: User, sample_source: Source, db_session: AsyncSession
+    client: AsyncClient,
+    sample_provider: LLMProvider,
+    sample_user: User,
+    sample_source: Source,
+    db_session: AsyncSession,
 ) -> None:
     """Test extraction with last_7d period."""
     from datetime import UTC, datetime, timedelta
     from uuid import uuid4
+
     from app.models import AgentConfig
 
     agent_config = AgentConfig(
@@ -421,7 +431,6 @@ async def test_trigger_extraction_with_period_last_7d(
     db_session.add(agent_config)
     await db_session.commit()
     await db_session.refresh(agent_config)
-
 
     now = datetime.now(UTC)
     recent_time = now - timedelta(days=3)
@@ -457,11 +466,16 @@ async def test_trigger_extraction_with_period_last_7d(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_with_period_custom(
-    client: AsyncClient, sample_provider: LLMProvider, sample_user: User, sample_source: Source, db_session: AsyncSession
+    client: AsyncClient,
+    sample_provider: LLMProvider,
+    sample_user: User,
+    sample_source: Source,
+    db_session: AsyncSession,
 ) -> None:
     """Test extraction with custom period."""
     from datetime import UTC, datetime, timedelta
     from uuid import uuid4
+
     from app.models import AgentConfig
 
     agent_config = AgentConfig(
@@ -475,7 +489,6 @@ async def test_trigger_extraction_with_period_custom(
     db_session.add(agent_config)
     await db_session.commit()
     await db_session.refresh(agent_config)
-
 
     now = datetime.now(UTC)
     start_date = now - timedelta(days=5)
@@ -517,11 +530,16 @@ async def test_trigger_extraction_with_period_custom(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_with_period_and_topic_filter(
-    client: AsyncClient, sample_provider: LLMProvider, sample_user: User, sample_source: Source, db_session: AsyncSession
+    client: AsyncClient,
+    sample_provider: LLMProvider,
+    sample_user: User,
+    sample_source: Source,
+    db_session: AsyncSession,
 ) -> None:
     """Test extraction with period and topic filter."""
-    from app.models import Topic
     from datetime import UTC, datetime, timedelta
+
+    from app.models import Topic
 
     topic = Topic(name="Test Topic", description="Test", icon="Icon", color="#000")
     db_session.add(topic)
@@ -579,7 +597,7 @@ async def test_trigger_extraction_with_both_message_ids_and_period_fails(
     client: AsyncClient, sample_provider: LLMProvider, sample_messages: list[Message]
 ) -> None:
     """Test validation fails when both message_ids and period provided."""
-    from datetime import UTC, datetime, timedelta
+    from datetime import UTC, datetime
 
     now = datetime.now(UTC)
 
@@ -610,11 +628,16 @@ async def test_trigger_extraction_with_neither_message_ids_nor_period_fails(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_period_no_messages_found(
-    client: AsyncClient, sample_provider: LLMProvider, sample_user: User, sample_source: Source, db_session: AsyncSession
+    client: AsyncClient,
+    sample_provider: LLMProvider,
+    sample_user: User,
+    sample_source: Source,
+    db_session: AsyncSession,
 ) -> None:
     """Test 400 response when period has no messages."""
     from datetime import UTC, datetime, timedelta
     from uuid import uuid4
+
     from app.models import AgentConfig
 
     agent_config = AgentConfig(
@@ -628,7 +651,6 @@ async def test_trigger_extraction_period_no_messages_found(
     db_session.add(agent_config)
     await db_session.commit()
     await db_session.refresh(agent_config)
-
 
     now = datetime.now(UTC)
     old_time = now - timedelta(days=100)
@@ -656,9 +678,7 @@ async def test_trigger_extraction_period_no_messages_found(
 
 
 @pytest.mark.asyncio
-async def test_trigger_extraction_invalid_period_type(
-    client: AsyncClient, sample_provider: LLMProvider
-) -> None:
+async def test_trigger_extraction_invalid_period_type(client: AsyncClient, sample_provider: LLMProvider) -> None:
     """Test validation error for invalid period_type."""
     payload = {
         "period": {"period_type": "invalid_period"},
@@ -677,6 +697,7 @@ async def test_trigger_extraction_custom_period_missing_start_date(
     """Test validation error for custom period without start_date."""
     from datetime import UTC, datetime, timedelta
     from uuid import uuid4
+
     from app.models import AgentConfig
 
     agent_config = AgentConfig(
@@ -690,7 +711,6 @@ async def test_trigger_extraction_custom_period_missing_start_date(
     db_session.add(agent_config)
     await db_session.commit()
     await db_session.refresh(agent_config)
-
 
     now = datetime.now(UTC)
     end_date = now - timedelta(days=2)
@@ -717,6 +737,7 @@ async def test_trigger_extraction_custom_period_missing_end_date(
     """Test validation error for custom period without end_date."""
     from datetime import UTC, datetime, timedelta
     from uuid import uuid4
+
     from app.models import AgentConfig
 
     agent_config = AgentConfig(
@@ -730,7 +751,6 @@ async def test_trigger_extraction_custom_period_missing_end_date(
     db_session.add(agent_config)
     await db_session.commit()
     await db_session.refresh(agent_config)
-
 
     now = datetime.now(UTC)
     start_date = now - timedelta(days=5)
@@ -757,6 +777,7 @@ async def test_trigger_extraction_custom_period_start_after_end(
     """Test validation error for custom period with start_date after end_date."""
     from datetime import UTC, datetime, timedelta
     from uuid import uuid4
+
     from app.models import AgentConfig
 
     agent_config = AgentConfig(
@@ -770,7 +791,6 @@ async def test_trigger_extraction_custom_period_start_after_end(
     db_session.add(agent_config)
     await db_session.commit()
     await db_session.refresh(agent_config)
-
 
     now = datetime.now(UTC)
     start_date = now - timedelta(days=2)
@@ -799,6 +819,7 @@ async def test_trigger_extraction_custom_period_future_dates(
     """Test validation error for custom period with future dates."""
     from datetime import UTC, datetime, timedelta
     from uuid import uuid4
+
     from app.models import AgentConfig
 
     agent_config = AgentConfig(
@@ -812,7 +833,6 @@ async def test_trigger_extraction_custom_period_future_dates(
     db_session.add(agent_config)
     await db_session.commit()
     await db_session.refresh(agent_config)
-
 
     now = datetime.now(UTC)
     future = now + timedelta(days=5)

@@ -1,15 +1,14 @@
 """Tests for ApprovalRule model and validation."""
 
 import pytest
-from pydantic import ValidationError
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models.approval_rule import (
     ApprovalRule,
     ApprovalRuleCreate,
     ApprovalRuleUpdate,
     AutoAction,
 )
+from pydantic import ValidationError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.mark.asyncio
