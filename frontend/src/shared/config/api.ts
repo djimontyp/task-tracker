@@ -90,6 +90,28 @@ export const API_ENDPOINTS = {
   knowledge: buildApiPath('knowledge'),
   versions: buildApiPath('versions'),
 
+  // Automation & Scheduler
+  automation: {
+    stats: buildApiPath('automation/stats'),
+    trends: (period: string) => buildApiPath(`automation/trends?period=${period}`),
+    rules: buildApiPath('automation/rules'),
+    rule: (ruleId: string) => buildApiPath(`automation/rules/${ruleId}`),
+    ruleTemplates: buildApiPath('automation/rules/templates'),
+    ruleEvaluate: buildApiPath('automation/rules/evaluate'),
+    rulePreview: (conditions: string, action: string) => buildApiPath(`automation/rules/preview?conditions=${encodeURIComponent(conditions)}&action=${action}`),
+  },
+  scheduler: {
+    jobs: buildApiPath('scheduler/jobs'),
+    job: (jobId: string) => buildApiPath(`scheduler/jobs/${jobId}`),
+    jobTrigger: (jobId: string) => buildApiPath(`scheduler/jobs/${jobId}/trigger`),
+    jobToggle: (jobId: string) => buildApiPath(`scheduler/jobs/${jobId}/toggle`),
+  },
+  notifications: {
+    preferences: buildApiPath('notifications/preferences'),
+    testEmail: buildApiPath('notifications/test-email'),
+    testTelegram: buildApiPath('notifications/test-telegram'),
+  },
+
   // WebSocket
   ws: '/ws',
 } as const

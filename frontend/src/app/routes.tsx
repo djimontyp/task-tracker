@@ -17,6 +17,12 @@ const AnalysisRunsPage = lazy(() => import('@pages/AnalysisRunsPage'))
 const ProposalsPage = lazy(() => import('@pages/ProposalsPage'))
 const NoiseFilteringDashboard = lazy(() => import('@pages/NoiseFilteringDashboard'))
 const SettingsPage = lazy(() => import('@pages/SettingsPage'))
+const AutomationOnboardingPage = lazy(() => import('@pages/AutomationOnboardingPage'))
+const AutomationDashboardPage = lazy(() => import('@pages/AutomationDashboardPage'))
+const AutomationRulesPage = lazy(() => import('@pages/AutomationRulesPage'))
+const SchedulerPage = lazy(() => import('@pages/SchedulerPage'))
+const NotificationSettingsPage = lazy(() => import('@pages/NotificationSettingsPage'))
+const VersionsPage = lazy(() => import('@pages/VersionsPage'))
 
 const AppRoutes = () => {
   return (
@@ -42,6 +48,12 @@ const AppRoutes = () => {
         <Route element={<MainLayout><NoiseFilteringDashboard /></MainLayout>} path="/noise-filtering" />
         <Route element={<MainLayout><AnalyticsPage /></MainLayout>} path="/analytics" />
         <Route element={<MainLayout><SettingsPage /></MainLayout>} path="/settings" />
+        <Route element={<MainLayout><AutomationOnboardingPage /></MainLayout>} path="/onboarding/automation" />
+        <Route element={<MainLayout><AutomationDashboardPage /></MainLayout>} path="/automation/dashboard" />
+        <Route element={<MainLayout><AutomationRulesPage /></MainLayout>} path="/automation/rules" />
+        <Route element={<MainLayout><SchedulerPage /></MainLayout>} path="/automation/scheduler" />
+        <Route element={<MainLayout><NotificationSettingsPage /></MainLayout>} path="/automation/notifications" />
+        <Route element={<MainLayout><VersionsPage /></MainLayout>} path="/versions" />
       </Routes>
     </Suspense>
   )

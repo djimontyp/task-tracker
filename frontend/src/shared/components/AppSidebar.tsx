@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react'
-import { Squares2X2Icon, CheckCircleIcon, ChartBarIcon, Cog6ToothIcon, SignalIcon, CpuChipIcon, LightBulbIcon, EnvelopeIcon, ChatBubbleLeftRightIcon, ListBulletIcon, ClipboardDocumentListIcon, ServerIcon, FolderIcon, FunnelIcon } from '@heroicons/react/24/outline'
+import { Squares2X2Icon, CheckCircleIcon, ChartBarIcon, Cog6ToothIcon, SignalIcon, CpuChipIcon, LightBulbIcon, EnvelopeIcon, ChatBubbleLeftRightIcon, ListBulletIcon, ClipboardDocumentListIcon, ServerIcon, FolderIcon, FunnelIcon, ClockIcon, BellIcon, CalendarIcon, SparklesIcon } from '@heroicons/react/24/outline'
 import { Link, useLocation } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -21,8 +21,22 @@ import { NavUser } from './NavUser'
 import { statsService, type SidebarCounts } from '@/shared/api/statsService'
 import { NotificationBadge } from '@/shared/ui'
 import { GlobalKnowledgeExtractionDialog } from '@/features/knowledge'
+import { PendingVersionsBadge } from '@/features/knowledge/components/PendingVersionsBadge'
 
-const navGroups = [
+interface NavItem {
+  path: string;
+  label: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  customBadge?: boolean;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+  action?: boolean;
+}
+
+const navGroups: NavGroup[] = [
   {
     label: 'Data Management',
     items: [
@@ -38,6 +52,7 @@ const navGroups = [
       { path: '/analysis', label: 'Analysis Runs', icon: LightBulbIcon },
       { path: '/proposals', label: 'Task Proposals', icon: ClipboardDocumentListIcon },
       { path: '/noise-filtering', label: 'Noise Filtering', icon: FunnelIcon },
+      { path: '/versions', label: 'Versions', icon: ClockIcon, customBadge: true },
     ],
     action: true,
   },
@@ -48,6 +63,15 @@ const navGroups = [
       { path: '/agent-tasks', label: 'Task Templates', icon: ListBulletIcon },
       { path: '/providers', label: 'Providers', icon: ServerIcon },
       { path: '/projects', label: 'Projects', icon: FolderIcon },
+    ],
+  },
+  {
+    label: 'Automation',
+    items: [
+      { path: '/automation/dashboard', label: 'Dashboard', icon: SparklesIcon },
+      { path: '/automation/rules', label: 'Rules', icon: Cog6ToothIcon },
+      { path: '/automation/scheduler', label: 'Scheduler', icon: CalendarIcon },
+      { path: '/automation/notifications', label: 'Notifications', icon: BellIcon },
     ],
   },
   {
@@ -210,14 +234,20 @@ export function AppSidebar() {
                             <span>{item.label}</span>
                           </Link>
                         </SidebarMenuButton>
-                        <NotificationBadge
-                          count={badgeCount || 0}
-                          tooltip={badgeTooltip}
-                          className={cn(
-                            "absolute right-2",
-                            isActive && "bg-primary text-white dark:bg-primary dark:text-white border-primary"
-                          )}
-                        />
+                        {item.customBadge && item.path === '/versions' ? (
+                          <div className="absolute right-2">
+                            <PendingVersionsBadge />
+                          </div>
+                        ) : (
+                          <NotificationBadge
+                            count={badgeCount || 0}
+                            tooltip={badgeTooltip}
+                            className={cn(
+                              "absolute right-2",
+                              isActive && "bg-primary text-white dark:bg-primary dark:text-white border-primary"
+                            )}
+                          />
+                        )}
                       </div>
                     </SidebarMenuItem>
                   )
