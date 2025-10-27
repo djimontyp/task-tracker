@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReactDiffViewer from 'react-diff-viewer-continued';
 import { Button, Card, CardContent, CardHeader, CardTitle, Badge, Spinner } from '@/shared/ui';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';

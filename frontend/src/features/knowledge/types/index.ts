@@ -74,3 +74,28 @@ export interface ExtractionProgress {
   versions_created: number;
   error?: string;
 }
+
+export interface BulkVersionActionRequest {
+  version_ids: number[];
+  entity_type: 'topic' | 'atom';
+}
+
+export interface BulkVersionActionResponse {
+  success_count: number;
+  failed_ids: number[];
+  errors: Record<number, string>;
+}
+
+export interface AutoApprovalRule {
+  id?: number;
+  enabled: boolean;
+  confidence_threshold: number;
+  similarity_threshold: number;
+  action: 'approve' | 'reject' | 'manual';
+}
+
+export interface PendingVersionsCount {
+  count: number;
+  topics: number;
+  atoms: number;
+}
