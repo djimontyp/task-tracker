@@ -1,0 +1,245 @@
+openapi: 3.0.3
+info:
+  title: Task Monitoring History API
+  description: Searchable task execution history with filtering and pagination
+  version: 1.0.0
+
+paths:
+  /api/v1/monitoring/history:
+    get:
+      summary: Get task execution history
+      description: |
+        Returns paginated task execution logs with optional filters for task type,
+        status, and date range. Supports debugging failed tasks with error details.
+
+        Corresponds to FR-004 (searchable history), FR-009 (filtering), FR-010 (duration),
+        FR-011 (parameters), FR-012 (pagination).
+      operationId: getTaskHistory
+      tags:
+        - monitoring
+      parameters:
+        - name: task_name
+          in: query
+          description: Filter by task function name
+          required: false
+          schema:
+            type: string
+            example: "extract_knowledge_from_messages_task"
+        - name: status
+          in: query
+          description: Filter by execution status
+          required: false
+          schema:
+            type: string
+            enum: [pending, running, success, failed]
+            example: "failed"
+        - name: start_date
+          in: query
+          description: Filter logs created after this timestamp (ISO 8601 UTC)
+          required: false
+          schema:
+            type: string
+            format: date-time
+            example: "2025-10-20T00:00:00Z"
+        - name: end_date
+          in: query
+          description: Filter logs created before this timestamp (ISO 8601 UTC)
+          required: false
+          schema:
+            type: string
+            format: date-time
+            example: "2025-10-27T23:59:59Z"
+        - name: page
+          in: query
+          description: Page number (1-indexed)
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+            example: 1
+        - name: page_size
+          in: query
+          description: Number of records per page
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 10
+            maximum: 100
+            example: 50
+      responses:
+        '200':
+          description: Successfully retrieved task history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskHistoryResponse'
+              examples:
+                with_errors:
+                  value:
+                    total_count: 247
+                    page: 1
+                    page_size: 50
+                    total_pages: 5
+                    items:
+                      - id: 1234
+                        task_name: "extract_knowledge_from_messages_task"
+                        status: "failed"
+                        task_id: "abc123"
+                        params:
+                          message_ids: [101, 102, 103]
+                          provider_id: "openai-gpt4"
+                        started_at: "2025-10-27T10:30:00Z"
+                        completed_at: "2025-10-27T10:30:05Z"
+                        duration_ms: 5000
+                        error_message: "OpenAI API rate limit exceeded"
+                        error_traceback: "Traceback (most recent call last):\n  File..."
+                        created_at: "2025-10-27T10:29:59Z"
+                      - id: 1233
+                        task_name: "score_message_task"
+                        status: "success"
+                        task_id: "def456"
+                        params:
+                          message_id: 500
+                        started_at: "2025-10-27T10:25:00Z"
+                        completed_at: "2025-10-27T10:25:00.320Z"
+                        duration_ms: 320
+                        error_message: null
+                        error_traceback: null
+                        created_at: "2025-10-27T10:24:59Z"
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_date:
+                  value:
+                    error: "Invalid date format: start_date must be ISO 8601"
+                invalid_status:
+                  value:
+                    error: "Invalid status: must be one of [pending, running, success, failed]"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    TaskHistoryResponse:
+      type: object
+      required:
+        - total_count
+        - page
+        - page_size
+        - total_pages
+        - items
+      properties:
+        total_count:
+          type: integer
+          description: Total number of records matching filters
+          minimum: 0
+          example: 247
+        page:
+          type: integer
+          description: Current page number (1-indexed)
+          minimum: 1
+          example: 1
+        page_size:
+          type: integer
+          description: Number of records per page
+          minimum: 10
+          maximum: 100
+          example: 50
+        total_pages:
+          type: integer
+          description: Total number of pages
+          minimum: 0
+          example: 5
+        items:
+          type: array
+          description: Task execution log records
+          items:
+            $ref: '#/components/schemas/TaskExecutionLog'
+
+    TaskExecutionLog:
+      type: object
+      required:
+        - id
+        - task_name
+        - status
+        - created_at
+      properties:
+        id:
+          type: integer
+          description: Unique log record ID
+          example: 1234
+        task_name:
+          type: string
+          description: Task function name
+          example: "extract_knowledge_from_messages_task"
+        status:
+          type: string
+          enum: [pending, running, success, failed]
+          description: Task execution status
+          example: "failed"
+        task_id:
+          type: string
+          nullable: true
+          description: TaskIQ internal task ID
+          example: "abc123"
+        params:
+          type: object
+          nullable: true
+          description: Task input parameters (JSON)
+          additionalProperties: true
+          example:
+            message_ids: [101, 102, 103]
+            provider_id: "openai-gpt4"
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Task start timestamp (ISO 8601 UTC)
+          example: "2025-10-27T10:30:00Z"
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Task completion timestamp (ISO 8601 UTC)
+          example: "2025-10-27T10:30:05Z"
+        duration_ms:
+          type: integer
+          nullable: true
+          description: Execution duration in milliseconds
+          minimum: 0
+          example: 5000
+        error_message:
+          type: string
+          nullable: true
+          description: Error message if status=failed
+          example: "OpenAI API rate limit exceeded"
+        error_traceback:
+          type: string
+          nullable: true
+          description: Full stack trace if status=failed
+          example: "Traceback (most recent call last):\n  File \"/app/tasks.py\", line 1025..."
+        created_at:
+          type: string
+          format: date-time
+          description: Log record creation timestamp (ISO 8601 UTC)
+          example: "2025-10-27T10:29:59Z"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+          example: "Invalid date format"
