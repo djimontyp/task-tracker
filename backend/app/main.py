@@ -128,17 +128,23 @@ app = create_app()
 
 @app.on_event("startup")
 async def startup() -> None:
-    """Initialize database, LLM system, and TaskIQ broker on startup"""
+    """Initialize database, LLM system, TaskIQ broker, and WebSocketManager on startup"""
+    from app.services.websocket_manager import websocket_manager
+
     initialize_llm_system()
     await create_db_and_tables()
     if not nats_broker.is_worker_process:
         await nats_broker.startup()
+        await websocket_manager.startup(settings.taskiq.taskiq_nats_servers)
 
 
 @app.on_event("shutdown")
 async def shutdown() -> None:
-    """Shutdown TaskIQ broker on application shutdown"""
+    """Shutdown TaskIQ broker and WebSocketManager on application shutdown"""
+    from app.services.websocket_manager import websocket_manager
+
     if not nats_broker.is_worker_process:
+        await websocket_manager.shutdown()
         await nats_broker.shutdown()
 
 
