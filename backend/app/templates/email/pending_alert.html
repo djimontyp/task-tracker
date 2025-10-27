@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Pending Versions Alert{% endblock %}
+
+{% block content %}
+<h2>Action Required</h2>
+<p>You have <strong style="font-size: 24px; color: #ef4444;">{{ pending_count }}</strong> pending versions awaiting review.</p>
+<p>These versions need manual approval before they can be published.</p>
+<a href="{{ dashboard_url }}/versions" class="button">Review Pending Versions</a>
+{% endblock %}
