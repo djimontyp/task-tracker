@@ -1181,7 +1181,7 @@ async def extract_knowledge_from_messages_task(
         }
 
     except Exception as e:
-        logger.error(f"Knowledge extraction task failed: {e}", exc_info=True)
+        logger.error(f"Knowledge extraction task failed: {e!r}", exc_info=True)
 
         await websocket_manager.broadcast(
             "knowledge",
