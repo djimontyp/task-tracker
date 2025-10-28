@@ -8,6 +8,7 @@ import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.exc import IntegrityError
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.schemas.agent import AgentTestRequest, AgentTestResponse
@@ -184,6 +185,17 @@ async def update_agent(
 
         logger.info(f"Updated agent '{agent.name}' (ID: {agent.id})")
         return agent
+    except IntegrityError as e:
+        # Handle duplicate name constraint violation
+        if "unique constraint" in str(e).lower() or "duplicate" in str(e).lower():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Agent with name '{update_data.name}' already exists",
+            )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Database integrity error",
+        )
     except ValueError as e:
         if "not found" in str(e):
             raise HTTPException(
