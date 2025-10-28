@@ -1,17 +1,16 @@
 import { useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import toast from 'react-hot-toast'
+import { useQuery } from '@tanstack/react-query'
 import { HealthCards } from './HealthCards'
 import { LiveActivityFeed } from './LiveActivityFeed'
 import { TaskHistoryTable } from './TaskHistoryTable'
+import { ScoringAccuracyCard } from './ScoringAccuracyCard'
 import { useTaskEventsWebSocket } from '../hooks/useTaskEventsWebSocket'
 import { monitoringService } from '../api/monitoringService'
 import type { HistoryFilters } from '../types'
 
 export const MonitoringDashboard = () => {
-  const queryClient = useQueryClient()
   const [historyFilters, setHistoryFilters] = useState<HistoryFilters>({ page: 1, page_size: 50 })
-  const [timeWindow, setTimeWindow] = useState(24)
+  const [timeWindow] = useState(24)
 
   const { data: metricsData, isLoading: metricsLoading, error: metricsError } = useQuery({
     queryKey: ['monitoring', 'metrics', timeWindow],
@@ -22,7 +21,7 @@ export const MonitoringDashboard = () => {
   const { data: historyData, isLoading: historyLoading, error: historyError } = useQuery({
     queryKey: ['monitoring', 'history', historyFilters],
     queryFn: () => monitoringService.fetchHistory(historyFilters),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   })
 
   const { events, isConnected, connectionState } = useTaskEventsWebSocket({
@@ -90,7 +89,8 @@ export const MonitoringDashboard = () => {
           )}
         </div>
 
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-6">
+          <ScoringAccuracyCard />
           <LiveActivityFeed events={events} />
         </div>
       </div>
@@ -107,15 +107,15 @@ export const MonitoringDashboard = () => {
             onPageChange={handlePageChange}
             availableTaskNames={availableTaskNames}
           />
-        ) : null}
+        ) : (
+          <TaskHistoryTable
+            history={{ total_count: 0, page: 1, page_size: 50, total_pages: 0, items: [] }}
+            onFilterChange={handleFilterChange}
+            onPageChange={handlePageChange}
+            availableTaskNames={availableTaskNames}
+          />
+        )}
       </div>
     </div>
   )
-}
-
-function formatTaskName(taskName: string): string {
-  return taskName
-    .replace(/_task$/, '')
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase())
 }

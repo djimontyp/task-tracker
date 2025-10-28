@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeftIcon, CheckCircleIcon, CloudArrowUpIcon, ExclamationCircleIcon, PlusIcon, ClockIcon, SparklesIcon } from '@heroicons/react/24/outline'
@@ -63,7 +63,7 @@ const TopicDetailPage = () => {
     enabled: !!topicId,
   })
 
-  const { isConnected } = useWebSocket({
+  useWebSocket({
     topics: ['knowledge'],
     onMessage: (data: unknown) => {
       const event = data as { type?: string; data?: { entity_type?: string; entity_id?: number } }
@@ -153,7 +153,7 @@ const TopicDetailPage = () => {
         setSaveStatus('idle')
       }, 2000)
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       if (context?.previousTopic) {
         queryClient.setQueryData(['topic', parseInt(topicId!)], context.previousTopic)
       }

@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/shared/ui/select'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
-import type { TaskHistoryResponse, HistoryFilters, TaskExecutionLog, TaskStatus } from '../types'
+import type { TaskHistoryResponse, HistoryFilters, TaskStatus } from '../types'
 
 interface TaskHistoryTableProps {
   history: TaskHistoryResponse

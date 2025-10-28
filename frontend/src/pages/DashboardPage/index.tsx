@@ -32,7 +32,7 @@ const DashboardPage = () => {
     },
   })
 
-  const { data: sidebarCounts, isLoading: sidebarLoading } = useQuery<SidebarCounts>({
+  const { data: sidebarCounts } = useQuery<SidebarCounts>({
     queryKey: ['sidebar-counts'],
     queryFn: async () => {
       const response = await apiClient.get(API_ENDPOINTS.sidebarCounts)

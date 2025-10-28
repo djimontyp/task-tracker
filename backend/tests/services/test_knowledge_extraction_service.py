@@ -28,27 +28,55 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.fixture
-def ollama_provider() -> LLMProvider:
+async def ollama_provider(db_session: AsyncSession) -> LLMProvider:
     """Create mock Ollama provider."""
-    return LLMProvider(
+    provider = LLMProvider(
         id=uuid4(),
         name="Ollama Test",
         type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
+    db_session.add(provider)
+    await db_session.commit()
+    await db_session.refresh(provider)
+    return provider
 
 
 @pytest.fixture
-def openai_provider() -> LLMProvider:
+async def openai_provider(db_session: AsyncSession) -> LLMProvider:
     """Create mock OpenAI provider."""
-    return LLMProvider(
+    provider = LLMProvider(
         id=uuid4(),
         name="OpenAI Test",
         type=ProviderType.openai,
         api_key_encrypted=b"encrypted_key_12345",
         is_active=True,
     )
+    db_session.add(provider)
+    await db_session.commit()
+    await db_session.refresh(provider)
+    return provider
+
+
+@pytest.fixture
+async def agent_config(db_session: AsyncSession, ollama_provider: LLMProvider):
+    """Create test agent configuration."""
+    from app.models import AgentConfig
+
+    agent = AgentConfig(
+        id=uuid4(),
+        name="Test Knowledge Extractor",
+        provider_id=ollama_provider.id,
+        model_name="llama3.2:latest",
+        system_prompt="Extract topics and atoms from messages.",
+        temperature=0.7,
+        is_active=True,
+    )
+    db_session.add(agent)
+    await db_session.commit()
+    await db_session.refresh(agent)
+    return agent
 
 
 @pytest.fixture
@@ -178,9 +206,9 @@ def mock_extraction_output() -> KnowledgeExtractionOutput:
 
 
 @pytest.mark.asyncio
-async def test_extract_knowledge_empty_messages(ollama_provider: LLMProvider) -> None:
+async def test_extract_knowledge_empty_messages(agent_config, ollama_provider: LLMProvider) -> None:
     """Test extraction with empty message list."""
-    service = KnowledgeExtractionService(provider=ollama_provider)
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=ollama_provider)
 
     result = await service.extract_knowledge([])
 
@@ -190,7 +218,10 @@ async def test_extract_knowledge_empty_messages(ollama_provider: LLMProvider) ->
 
 @pytest.mark.asyncio
 async def test_extract_knowledge_success_ollama(
-    ollama_provider: LLMProvider, sample_messages: list[Message], mock_extraction_output: KnowledgeExtractionOutput
+    agent_config,
+    ollama_provider: LLMProvider,
+    sample_messages: list[Message],
+    mock_extraction_output: KnowledgeExtractionOutput,
 ) -> None:
     """Test successful knowledge extraction with Ollama."""
     with patch("app.services.knowledge_extraction_service.PydanticAgent") as mock_agent_class:
@@ -200,7 +231,7 @@ async def test_extract_knowledge_success_ollama(
         mock_agent.run = AsyncMock(return_value=mock_result)
         mock_agent_class.return_value = mock_agent
 
-        service = KnowledgeExtractionService(provider=ollama_provider)
+        service = KnowledgeExtractionService(agent_config=agent_config, provider=ollama_provider)
         result = await service.extract_knowledge(sample_messages)
 
         assert len(result.topics) == 2
@@ -215,7 +246,10 @@ async def test_extract_knowledge_success_ollama(
 
 @pytest.mark.asyncio
 async def test_extract_knowledge_success_openai(
-    openai_provider: LLMProvider, sample_messages: list[Message], mock_extraction_output: KnowledgeExtractionOutput
+    agent_config,
+    openai_provider: LLMProvider,
+    sample_messages: list[Message],
+    mock_extraction_output: KnowledgeExtractionOutput,
 ) -> None:
     """Test successful knowledge extraction with OpenAI."""
     with (
@@ -232,7 +266,7 @@ async def test_extract_knowledge_success_openai(
         mock_agent.run = AsyncMock(return_value=mock_result)
         mock_agent_class.return_value = mock_agent
 
-        service = KnowledgeExtractionService(provider=openai_provider)
+        service = KnowledgeExtractionService(agent_config=agent_config, provider=openai_provider)
         result = await service.extract_knowledge(sample_messages)
 
         assert len(result.topics) == 2
@@ -243,14 +277,16 @@ async def test_extract_knowledge_success_openai(
 
 
 @pytest.mark.asyncio
-async def test_extract_knowledge_llm_failure(ollama_provider: LLMProvider, sample_messages: list[Message]) -> None:
+async def test_extract_knowledge_llm_failure(
+    agent_config, ollama_provider: LLMProvider, sample_messages: list[Message]
+) -> None:
     """Test error handling when LLM extraction fails."""
     with patch("app.services.knowledge_extraction_service.PydanticAgent") as mock_agent_class:
         mock_agent = MagicMock()
         mock_agent.run = AsyncMock(side_effect=Exception("LLM timeout"))
         mock_agent_class.return_value = mock_agent
 
-        service = KnowledgeExtractionService(provider=ollama_provider)
+        service = KnowledgeExtractionService(agent_config=agent_config, provider=ollama_provider)
 
         with pytest.raises(Exception, match="Knowledge extraction failed"):
             await service.extract_knowledge(sample_messages)
@@ -258,7 +294,7 @@ async def test_extract_knowledge_llm_failure(ollama_provider: LLMProvider, sampl
 
 @pytest.mark.asyncio
 async def test_extract_knowledge_invalid_api_key_decryption(
-    openai_provider: LLMProvider, sample_messages: list[Message]
+    agent_config, openai_provider: LLMProvider, sample_messages: list[Message]
 ) -> None:
     """Test error handling for API key decryption failure."""
     with patch("app.services.knowledge_extraction_service.CredentialEncryption") as mock_encryptor_class:
@@ -266,14 +302,14 @@ async def test_extract_knowledge_invalid_api_key_decryption(
         mock_encryptor.decrypt.side_effect = Exception("Decryption failed")
         mock_encryptor_class.return_value = mock_encryptor
 
-        service = KnowledgeExtractionService(provider=openai_provider)
+        service = KnowledgeExtractionService(agent_config=agent_config, provider=openai_provider)
 
         with pytest.raises(ValueError, match="Failed to decrypt API key"):
             await service.extract_knowledge(sample_messages)
 
 
 @pytest.mark.asyncio
-async def test_save_topics_creates_new(db_session: AsyncSession) -> None:
+async def test_save_topics_creates_new(agent_config, db_session: AsyncSession) -> None:
     """Test creating new topics from extraction."""
     extracted_topics = [
         ExtractedTopic(
@@ -292,7 +328,7 @@ async def test_save_topics_creates_new(db_session: AsyncSession) -> None:
         ),
     ]
 
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     topic_map, version_ids = await service.save_topics(extracted_topics, db_session, confidence_threshold=0.7)
 
     assert len(topic_map) == 2
@@ -306,7 +342,7 @@ async def test_save_topics_creates_new(db_session: AsyncSession) -> None:
 
 
 @pytest.mark.asyncio
-async def test_save_topics_filters_low_confidence(db_session: AsyncSession) -> None:
+async def test_save_topics_filters_low_confidence(agent_config, db_session: AsyncSession) -> None:
     """Test that topics below confidence threshold are not created."""
     extracted_topics = [
         ExtractedTopic(
@@ -325,7 +361,7 @@ async def test_save_topics_filters_low_confidence(db_session: AsyncSession) -> N
         ),
     ]
 
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     topic_map, version_ids = await service.save_topics(extracted_topics, db_session, confidence_threshold=0.7)
 
     assert len(topic_map) == 1
@@ -335,7 +371,7 @@ async def test_save_topics_filters_low_confidence(db_session: AsyncSession) -> N
 
 
 @pytest.mark.asyncio
-async def test_save_topics_reuses_existing(db_session: AsyncSession) -> None:
+async def test_save_topics_reuses_existing(agent_config, db_session: AsyncSession) -> None:
     """Test that existing topics create versions instead of duplicates."""
     from app.models.topic_version import TopicVersion
 
@@ -359,7 +395,7 @@ async def test_save_topics_reuses_existing(db_session: AsyncSession) -> None:
         )
     ]
 
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     topic_map, version_ids = await service.save_topics(extracted_topics, db_session, created_by="test_user")
 
     assert len(topic_map) == 1
@@ -380,7 +416,7 @@ async def test_save_topics_reuses_existing(db_session: AsyncSession) -> None:
 
 
 @pytest.mark.asyncio
-async def test_save_atoms_creates_with_topic_links(db_session: AsyncSession) -> None:
+async def test_save_atoms_creates_with_topic_links(agent_config, db_session: AsyncSession) -> None:
     """Test creating atoms and linking them to topics."""
     topic = Topic(
         name="Bug Fixes",
@@ -407,7 +443,7 @@ async def test_save_atoms_creates_with_topic_links(db_session: AsyncSession) -> 
         )
     ]
 
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     saved_atoms, version_ids = await service.save_atoms(extracted_atoms, topic_map, db_session)
 
     assert len(saved_atoms) == 1
@@ -423,7 +459,7 @@ async def test_save_atoms_creates_with_topic_links(db_session: AsyncSession) -> 
 
 
 @pytest.mark.asyncio
-async def test_save_atoms_filters_low_confidence(db_session: AsyncSession) -> None:
+async def test_save_atoms_filters_low_confidence(agent_config, db_session: AsyncSession) -> None:
     """Test that atoms below confidence threshold are not created."""
     topic = Topic(name="Test Topic", description="Test", icon="Icon", color="#000000")
     db_session.add(topic)
@@ -455,7 +491,7 @@ async def test_save_atoms_filters_low_confidence(db_session: AsyncSession) -> No
         ),
     ]
 
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     saved_atoms, version_ids = await service.save_atoms(
         extracted_atoms, topic_map, db_session, confidence_threshold=0.7
     )
@@ -466,7 +502,7 @@ async def test_save_atoms_filters_low_confidence(db_session: AsyncSession) -> No
 
 
 @pytest.mark.asyncio
-async def test_save_atoms_skips_unknown_topics(db_session: AsyncSession) -> None:
+async def test_save_atoms_skips_unknown_topics(agent_config, db_session: AsyncSession) -> None:
     """Test that atoms referencing unknown topics are skipped."""
     topic_map: dict[str, Topic] = {}
 
@@ -483,7 +519,7 @@ async def test_save_atoms_skips_unknown_topics(db_session: AsyncSession) -> None
         )
     ]
 
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     saved_atoms, version_ids = await service.save_atoms(extracted_atoms, topic_map, db_session)
 
     assert len(saved_atoms) == 0
@@ -491,7 +527,7 @@ async def test_save_atoms_skips_unknown_topics(db_session: AsyncSession) -> None
 
 
 @pytest.mark.asyncio
-async def test_save_atoms_creates_version_for_existing(db_session: AsyncSession) -> None:
+async def test_save_atoms_creates_version_for_existing(agent_config, db_session: AsyncSession) -> None:
     """Test that existing atoms create versions instead of direct updates."""
     from app.models.atom_version import AtomVersion
 
@@ -526,7 +562,7 @@ async def test_save_atoms_creates_version_for_existing(db_session: AsyncSession)
         )
     ]
 
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     saved_atoms, version_ids = await service.save_atoms(extracted_atoms, topic_map, db_session, created_by="test_user")
 
     assert len(saved_atoms) == 1
@@ -547,7 +583,7 @@ async def test_save_atoms_creates_version_for_existing(db_session: AsyncSession)
 
 
 @pytest.mark.asyncio
-async def test_link_atoms_creates_relationships(db_session: AsyncSession) -> None:
+async def test_link_atoms_creates_relationships(agent_config, db_session: AsyncSession) -> None:
     """Test creating atom link relationships."""
     atom1 = Atom(type="problem", title="Problem Atom", content="Test problem", confidence=0.9)
     atom2 = Atom(type="solution", title="Solution Atom", content="Test solution", confidence=0.9)
@@ -580,7 +616,7 @@ async def test_link_atoms_creates_relationships(db_session: AsyncSession) -> Non
         ),
     ]
 
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     links_created = await service.link_atoms(extracted_atoms, [atom1, atom2], db_session)
 
     assert links_created == 1
@@ -594,7 +630,7 @@ async def test_link_atoms_creates_relationships(db_session: AsyncSession) -> Non
 
 
 @pytest.mark.asyncio
-async def test_link_atoms_skips_self_referential(db_session: AsyncSession) -> None:
+async def test_link_atoms_skips_self_referential(agent_config, db_session: AsyncSession) -> None:
     """Test that self-referential links are skipped."""
     atom = Atom(type="problem", title="Self Ref Atom", content="Test", confidence=0.9)
     db_session.add(atom)
@@ -614,14 +650,14 @@ async def test_link_atoms_skips_self_referential(db_session: AsyncSession) -> No
         )
     ]
 
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     links_created = await service.link_atoms(extracted_atoms, [atom], db_session)
 
     assert links_created == 0
 
 
 @pytest.mark.asyncio
-async def test_link_atoms_skips_duplicates(db_session: AsyncSession) -> None:
+async def test_link_atoms_skips_duplicates(agent_config, db_session: AsyncSession) -> None:
     """Test that duplicate links are not created."""
     atom1 = Atom(type="problem", title="Atom 1", content="Test", confidence=0.9)
     atom2 = Atom(type="solution", title="Atom 2", content="Test", confidence=0.9)
@@ -648,14 +684,16 @@ async def test_link_atoms_skips_duplicates(db_session: AsyncSession) -> None:
         )
     ]
 
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     links_created = await service.link_atoms(extracted_atoms, [atom1, atom2], db_session)
 
     assert links_created == 0
 
 
 @pytest.mark.asyncio
-async def test_update_messages_assigns_topics(db_session: AsyncSession, sample_messages: list[Message]) -> None:
+async def test_update_messages_assigns_topics(
+    agent_config, db_session: AsyncSession, sample_messages: list[Message]
+) -> None:
     """Test updating Message.topic_id based on extraction results."""
     topic1 = Topic(name="Topic 1", description="Test", icon="Icon", color="#000000")
     topic2 = Topic(name="Topic 2", description="Test", icon="Icon", color="#000000")
@@ -684,7 +722,7 @@ async def test_update_messages_assigns_topics(db_session: AsyncSession, sample_m
         ),
     ]
 
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     updated_count = await service.update_messages(sample_messages, topic_map, extracted_topics, db_session)
 
     assert updated_count == 3
@@ -695,7 +733,7 @@ async def test_update_messages_assigns_topics(db_session: AsyncSession, sample_m
 
 @pytest.mark.asyncio
 async def test_update_messages_skips_multiple_assignments(
-    db_session: AsyncSession, sample_messages: list[Message]
+    agent_config, db_session: AsyncSession, sample_messages: list[Message]
 ) -> None:
     """Test that messages with multiple topic assignments keep the first one."""
     topic1 = Topic(name="Topic 1", description="Test", icon="Icon", color="#000000")
@@ -725,7 +763,7 @@ async def test_update_messages_skips_multiple_assignments(
         ),
     ]
 
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     updated_count = await service.update_messages(sample_messages, topic_map, extracted_topics, db_session)
 
     assert updated_count == 1
@@ -733,9 +771,9 @@ async def test_update_messages_skips_multiple_assignments(
 
 
 @pytest.mark.asyncio
-async def test_build_prompt_formats_correctly(sample_messages: list[Message]) -> None:
+async def test_build_prompt_formats_correctly(agent_config, sample_messages: list[Message]) -> None:
     """Test that prompt is formatted correctly."""
-    service = KnowledgeExtractionService(provider=MagicMock())
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     prompt = service._build_prompt(sample_messages)
 
     assert "Message 1 (ID: 1" in prompt
@@ -746,32 +784,34 @@ async def test_build_prompt_formats_correctly(sample_messages: list[Message]) ->
 
 
 @pytest.mark.asyncio
-async def test_build_model_instance_ollama(ollama_provider: LLMProvider) -> None:
+async def test_build_model_instance_ollama(agent_config, ollama_provider: LLMProvider) -> None:
     """Test building Ollama model instance."""
-    service = KnowledgeExtractionService(provider=ollama_provider)
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=ollama_provider)
     model = service._build_model_instance()
 
     assert model is not None
-    assert model.model_name == "qwen2.5:14b"
+    assert model.model_name == "llama3.2:latest"
 
 
 @pytest.mark.asyncio
-async def test_build_model_instance_openai(openai_provider: LLMProvider) -> None:
+async def test_build_model_instance_openai(agent_config, openai_provider: LLMProvider) -> None:
     """Test building OpenAI model instance."""
     with patch("app.services.knowledge_extraction_service.CredentialEncryption") as mock_encryptor_class:
         mock_encryptor = MagicMock()
         mock_encryptor.decrypt.return_value = "sk-test-key"
         mock_encryptor_class.return_value = mock_encryptor
 
-        service = KnowledgeExtractionService(provider=openai_provider)
+        service = KnowledgeExtractionService(agent_config=agent_config, provider=openai_provider)
         model = service._build_model_instance("sk-test-key")
 
         assert model is not None
-        assert model.model_name == "qwen2.5:14b"
+        assert model.model_name == "llama3.2:latest"
 
 
 @pytest.mark.asyncio
-async def test_build_model_instance_ollama_missing_base_url() -> None:
+async def test_build_model_instance_ollama_missing_base_url(
+    agent_config,
+) -> None:
     """Test error when Ollama provider is missing base_url."""
     provider = LLMProvider(
         id=uuid4(),
@@ -781,7 +821,7 @@ async def test_build_model_instance_ollama_missing_base_url() -> None:
         is_active=True,
     )
 
-    service = KnowledgeExtractionService(provider=provider)
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=provider)
 
     with pytest.raises(ValueError, match="missing base_url"):
         service._build_model_instance()
@@ -798,20 +838,22 @@ async def test_build_model_instance_openai_missing_api_key() -> None:
         is_active=True,
     )
 
-    service = KnowledgeExtractionService(provider=provider)
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=provider)
 
     with pytest.raises(ValueError, match="requires an API key"):
         service._build_model_instance(None)
 
 
 @pytest.mark.asyncio
-async def test_build_model_instance_unsupported_provider() -> None:
+async def test_build_model_instance_unsupported_provider(
+    agent_config,
+) -> None:
     """Test error for unsupported provider type."""
     provider = MagicMock()
     provider.type = "unsupported_type"
     provider.name = "Unsupported"
 
-    service = KnowledgeExtractionService(provider=provider)
+    service = KnowledgeExtractionService(agent_config=agent_config, provider=provider)
 
     with pytest.raises(ValueError, match="Unsupported provider type"):
         service._build_model_instance()

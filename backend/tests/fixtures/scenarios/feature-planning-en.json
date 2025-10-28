@@ -1,0 +1,130 @@
+{
+  "scenario": "feature_planning",
+  "language": "en",
+  "description": "Feature discussion from idea to technical plan. Mostly signal messages with technical details and decisions.",
+  "messages": [
+    {
+      "order": 1,
+      "text": "I think we should add batch processing for embeddings. Currently generating them one-by-one is too slow",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "feature_request",
+        "content_categories": ["performance_improvement", "feature_proposal"]
+      }
+    },
+    {
+      "order": 2,
+      "text": "How slow are we talking?",
+      "language": "en",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "clarifying_question",
+        "content_categories": ["performance_metrics"]
+      }
+    },
+    {
+      "order": 3,
+      "text": "Processing 100 messages takes ~45 seconds. That's 450ms per message with network latency. OpenAI supports batching up to 2048 inputs",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "performance_analysis",
+        "content_categories": ["metrics", "bottleneck_identification"]
+      }
+    },
+    {
+      "order": 4,
+      "text": "Yeah that's painful",
+      "language": "en",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "acknowledgment",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 5,
+      "text": "So we batch messages in groups of 100, send to OpenAI embeddings API, then insert all results together?",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "solution_proposal",
+        "content_categories": ["architecture_design", "implementation_approach"]
+      }
+    },
+    {
+      "order": 6,
+      "text": "Exactly. We can use asyncio.gather to parallelize batches. Process 500 messages in 3-4 API calls instead of 500",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "technical_specification",
+        "content_categories": ["implementation_details", "optimization"]
+      }
+    },
+    {
+      "order": 7,
+      "text": "What about error handling? If one batch fails?",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "reliability_concern",
+        "content_categories": ["error_handling", "edge_cases"]
+      }
+    },
+    {
+      "order": 8,
+      "text": "Good point. We should:\n1. Retry failed batches with exponential backoff\n2. Track processed message IDs to avoid duplicates\n3. Fall back to single-message processing if batch keeps failing",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "error_handling_design",
+        "content_categories": ["reliability", "implementation_plan"]
+      }
+    },
+    {
+      "order": 9,
+      "text": "Also need to handle rate limits. OpenAI has 3000 RPM limit",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "constraint_identification",
+        "content_categories": ["rate_limiting", "api_constraints"]
+      }
+    },
+    {
+      "order": 10,
+      "text": "We can use asyncio.Semaphore to limit concurrent batches. Set max_concurrent_batches = 5, that's ~500 msgs/min, well under limit",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "solution",
+        "content_categories": ["rate_limiting_implementation", "concurrency_control"]
+      }
+    },
+    {
+      "order": 11,
+      "text": "Perfect! I'll create the task",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "ownership_commitment",
+        "content_categories": ["task_assignment"]
+      }
+    }
+  ],
+  "expected_extraction": {
+    "topics": [
+      {
+        "title": "Batch Processing for Embeddings",
+        "atoms": [
+          "Current: 450ms per message, need batching for performance",
+          "Batch size 100, use asyncio.gather for parallel processing",
+          "Error handling: retry with backoff, track IDs, fallback to single-message",
+          "Rate limiting: asyncio.Semaphore with max 5 concurrent batches"
+        ]
+      }
+    ]
+  }
+}
