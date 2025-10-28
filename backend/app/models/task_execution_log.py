@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 from sqlalchemy import JSON, Column, Index, Text
 from sqlalchemy import Enum as SQLEnum
@@ -23,19 +22,19 @@ class TaskExecutionLog(SQLModel, table=True):
 
     __tablename__ = "task_execution_logs"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     task_name: str = Field(max_length=255, nullable=False)
     status: TaskStatus = Field(
         default=TaskStatus.PENDING,
         sa_column=Column(SQLEnum(TaskStatus, native_enum=False), nullable=False),
     )
-    task_id: Optional[str] = Field(default=None, max_length=255)
-    params: Optional[dict] = Field(default=None, sa_column=Column(JSON))
-    started_at: Optional[datetime] = Field(default=None)
-    completed_at: Optional[datetime] = Field(default=None)
-    duration_ms: Optional[int] = Field(default=None)
-    error_message: Optional[str] = Field(default=None, sa_column=Column(Text))
-    error_traceback: Optional[str] = Field(default=None, sa_column=Column(Text))
+    task_id: str | None = Field(default=None, max_length=255)
+    params: dict | None = Field(default=None, sa_column=Column(JSON))
+    started_at: datetime | None = Field(default=None)
+    completed_at: datetime | None = Field(default=None)
+    duration_ms: int | None = Field(default=None)
+    error_message: str | None = Field(default=None, sa_column=Column(Text))
+    error_traceback: str | None = Field(default=None, sa_column=Column(Text))
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 

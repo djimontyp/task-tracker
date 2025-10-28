@@ -6,7 +6,6 @@ from typing import Any
 
 from loguru import logger
 from sqlalchemy import select, update
-from sqlalchemy.ext.asyncio import AsyncSession
 from taskiq import TaskiqMessage, TaskiqMiddleware, TaskiqResult
 
 from app.database import AsyncSessionLocal
@@ -64,9 +63,7 @@ class TaskLoggingMiddleware(TaskiqMiddleware):
 
         return message
 
-    async def post_execute(
-        self, message: TaskiqMessage, result: TaskiqResult[Any]
-    ) -> None:
+    async def post_execute(self, message: TaskiqMessage, result: TaskiqResult[Any]) -> None:
         """Log task completion or failure after execution.
 
         Updates the TaskExecutionLog record with final status, duration, and error details.
@@ -100,11 +97,7 @@ class TaskLoggingMiddleware(TaskiqMiddleware):
                 status = TaskStatus.FAILED
                 error_message = str(result.error) if result.error else "Unknown error"
                 error_traceback = (
-                    "".join(
-                        traceback.format_exception(
-                            type(result.error), result.error, result.error.__traceback__
-                        )
-                    )
+                    "".join(traceback.format_exception(type(result.error), result.error, result.error.__traceback__))
                     if result.error
                     else None
                 )

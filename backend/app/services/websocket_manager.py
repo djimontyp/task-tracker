@@ -35,7 +35,9 @@ class WebSocketManager:
         self._nats_subscriptions: list[Subscription] = []
         self._is_worker = self._detect_worker_process()
         self._startup_complete = False
-        logger.info(f"🔧 WebSocketManager initialized: is_worker={self._is_worker}, TASKIQ_WORKER={os.getenv('TASKIQ_WORKER')}")
+        logger.info(
+            f"🔧 WebSocketManager initialized: is_worker={self._is_worker}, TASKIQ_WORKER={os.getenv('TASKIQ_WORKER')}"
+        )
 
     async def connect(self, websocket: WebSocket, topics: list[str] | None = None, accept: bool = True) -> None:
         """Accept WebSocket connection and subscribe to topics.

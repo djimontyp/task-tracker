@@ -11,6 +11,7 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config.ai_config import ai_config
 from app.models.atom import Atom
 from app.models.message import Message
 from app.services.embedding_service import EmbeddingService
@@ -41,7 +42,7 @@ class SemanticSearchService:
         session: AsyncSession,
         query: str,
         limit: int = 10,
-        threshold: float = 0.7,
+        threshold: float | None = None,
     ) -> list[tuple[Message, float]]:
         """Search messages by semantic similarity to query text.
 
@@ -49,7 +50,7 @@ class SemanticSearchService:
             session: Database session
             query: Search query text
             limit: Maximum number of results to return
-            threshold: Minimum similarity score (0.0-1.0)
+            threshold: Minimum similarity score (default: from config)
 
         Returns:
             List of (message, similarity_score) tuples, ordered by similarity
@@ -64,6 +65,9 @@ class SemanticSearchService:
             >>> for msg, score in results:
             ...     print(f"{score:.3f}: {msg.content[:50]}")
         """
+        if threshold is None:
+            threshold = ai_config.vector_search.semantic_search_threshold
+
         if not self.embedding_service:
             raise ValueError("EmbeddingService is required for text-based search")
 
@@ -113,7 +117,7 @@ class SemanticSearchService:
         session: AsyncSession,
         message_id: int,
         limit: int = 10,
-        threshold: float = 0.7,
+        threshold: float | None = None,
     ) -> list[tuple[Message, float]]:
         """Find messages similar to a given message using its embedding.
 
@@ -121,7 +125,7 @@ class SemanticSearchService:
             session: Database session
             message_id: ID of the source message
             limit: Maximum number of results to return
-            threshold: Minimum similarity score (0.0-1.0)
+            threshold: Minimum similarity score (default: from config)
 
         Returns:
             List of (message, similarity_score) tuples, ordered by similarity
@@ -134,6 +138,9 @@ class SemanticSearchService:
             >>> results = await service.find_similar_messages(session, message_id=123, limit=5)
             >>> print(f"Found {len(results)} similar messages")
         """
+        if threshold is None:
+            threshold = ai_config.vector_search.semantic_search_threshold
+
         source_message = await session.get(Message, message_id)
         if not source_message:
             raise ValueError(f"Message {message_id} not found")
@@ -186,17 +193,17 @@ class SemanticSearchService:
         self,
         session: AsyncSession,
         message_id: int,
-        threshold: float = 0.95,
+        threshold: float | None = None,
     ) -> list[tuple[Message, float]]:
         """Find potential duplicate messages with very high similarity.
 
-        Uses a high similarity threshold (default 0.95) to detect near-duplicate
-        content. Useful for deduplication and spam detection.
+        Uses a high similarity threshold to detect near-duplicate content.
+        Useful for deduplication and spam detection.
 
         Args:
             session: Database session
             message_id: ID of the message to find duplicates for
-            threshold: High similarity threshold (default 0.95)
+            threshold: High similarity threshold (default: from config)
 
         Returns:
             List of (message, similarity_score) tuples, ordered by similarity
@@ -210,6 +217,9 @@ class SemanticSearchService:
             >>> if duplicates:
             ...     print(f"Warning: Found {len(duplicates)} potential duplicates")
         """
+        if threshold is None:
+            threshold = ai_config.vector_search.duplicate_detection_threshold
+
         return await self.find_similar_messages(
             session,
             message_id,
@@ -222,7 +232,7 @@ class SemanticSearchService:
         session: AsyncSession,
         query: str,
         limit: int = 10,
-        threshold: float = 0.7,
+        threshold: float | None = None,
     ) -> list[tuple[Atom, float]]:
         """Search atoms by semantic similarity to query text.
 
@@ -230,7 +240,7 @@ class SemanticSearchService:
             session: Database session
             query: Search query text
             limit: Maximum number of results to return
-            threshold: Minimum similarity score (0.0-1.0)
+            threshold: Minimum similarity score (default: from config)
 
         Returns:
             List of (atom, similarity_score) tuples, ordered by similarity
@@ -245,6 +255,9 @@ class SemanticSearchService:
             >>> for atom, score in results:
             ...     print(f"{score:.3f}: {atom.title}")
         """
+        if threshold is None:
+            threshold = ai_config.vector_search.semantic_search_threshold
+
         if not self.embedding_service:
             raise ValueError("EmbeddingService is required for text-based search")
 
@@ -294,7 +307,7 @@ class SemanticSearchService:
         session: AsyncSession,
         atom_id: int,
         limit: int = 10,
-        threshold: float = 0.7,
+        threshold: float | None = None,
     ) -> list[tuple[Atom, float]]:
         """Find atoms similar to a given atom using its embedding.
 
@@ -302,7 +315,7 @@ class SemanticSearchService:
             session: Database session
             atom_id: ID of the source atom
             limit: Maximum number of results to return
-            threshold: Minimum similarity score (0.0-1.0)
+            threshold: Minimum similarity score (default: from config)
 
         Returns:
             List of (atom, similarity_score) tuples, ordered by similarity
@@ -315,6 +328,9 @@ class SemanticSearchService:
             >>> results = await service.find_similar_atoms(session, atom_id=42, limit=5)
             >>> print(f"Found {len(results)} similar atoms")
         """
+        if threshold is None:
+            threshold = ai_config.vector_search.semantic_search_threshold
+
         source_atom = await session.get(Atom, atom_id)
         if not source_atom:
             raise ValueError(f"Atom {atom_id} not found")

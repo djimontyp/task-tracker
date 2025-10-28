@@ -1,4 +1,5 @@
 """Test script to trigger background tasks and monitor WebSocket events."""
+
 import asyncio
 import sys
 from pathlib import Path

@@ -45,7 +45,6 @@ from .automation_rule import (
     RuleAction,
 )
 from .base import IDMixin, TimestampMixin
-from .task_execution_log import TaskExecutionLog, TaskStatus as TaskExecutionStatus
 from .classification_experiment import (
     ClassificationExperiment,
     ClassificationResultDetail,
@@ -59,6 +58,7 @@ from .classification_experiment import (
 from .enums import (
     AnalysisRunStatus,
     AnalysisStatus,
+    FailedTaskStatus,
     LLMRecommendation,
     ProposalStatus,
     SimilarityType,
@@ -67,6 +67,7 @@ from .enums import (
     TaskPriority,
     TaskStatus,
 )
+from .failed_task import FailedTask
 from .legacy import (
     MessageCreate,
     MessagePublic,
@@ -118,6 +119,8 @@ from .scheduled_job import (
 )
 from .task_config import TaskConfig, TaskConfigCreate, TaskConfigPublic, TaskConfigUpdate
 from .task_entity import TaskEntity, TaskEntityPublic
+from .task_execution_log import TaskExecutionLog
+from .task_execution_log import TaskStatus as TaskExecutionStatus
 from .task_proposal import (
     TaskProposal,
     TaskProposalCreate,
@@ -176,6 +179,7 @@ __all__ = [
     "ProviderType",
     "ValidationStatus",
     "IngestionStatus",
+    "FailedTaskStatus",
     # Legacy
     "Source",
     "SourceCreate",
@@ -293,4 +297,6 @@ __all__ = [
     # Task Execution Logging
     "TaskExecutionLog",
     "TaskExecutionStatus",
+    # Failed Task (Dead Letter Queue)
+    "FailedTask",
 ]

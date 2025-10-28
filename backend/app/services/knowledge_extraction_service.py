@@ -19,6 +19,7 @@ from pydantic_ai.settings import ModelSettings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config.ai_config import ai_config
 from app.models import AgentConfig, Atom, AtomLink, LLMProvider, Message, ProviderType, Topic, TopicAtom
 from app.models.topic import auto_select_color, auto_select_icon
 from app.services.credential_encryption import CredentialEncryption
@@ -228,7 +229,7 @@ class KnowledgeExtractionService:
         self,
         extracted_topics: list[ExtractedTopic],
         session: AsyncSession,
-        confidence_threshold: float = 0.7,
+        confidence_threshold: float | None = None,
         created_by: str | None = None,
     ) -> tuple[dict[str, Topic], list[int]]:
         """Create or update topics in database.
@@ -239,7 +240,7 @@ class KnowledgeExtractionService:
         Args:
             extracted_topics: Topics extracted from LLM
             session: Database session
-            confidence_threshold: Minimum confidence to auto-create (default: 0.7)
+            confidence_threshold: Minimum confidence to auto-create (default: from config)
             created_by: User ID who triggered extraction (default: "knowledge_extraction")
 
         Returns:
@@ -247,6 +248,9 @@ class KnowledgeExtractionService:
                 - topic_map: Mapping of topic name -> Topic entity
                 - version_created_topic_ids: List of topic IDs that had versions created
         """
+        if confidence_threshold is None:
+            confidence_threshold = ai_config.knowledge_extraction.confidence_threshold
+
         versioning_service = VersioningService()
         topic_map: dict[str, Topic] = {}
         version_created_topic_ids: list[int] = []
@@ -319,7 +323,7 @@ class KnowledgeExtractionService:
         extracted_atoms: list[ExtractedAtom],
         topic_map: dict[str, Topic],
         session: AsyncSession,
-        confidence_threshold: float = 0.7,
+        confidence_threshold: float | None = None,
         created_by: str | None = None,
     ) -> tuple[list[Atom], list[int]]:
         """Create atoms and link them to topics.
@@ -331,7 +335,7 @@ class KnowledgeExtractionService:
             extracted_atoms: Atoms extracted from LLM
             topic_map: Mapping of topic names to Topic entities
             session: Database session
-            confidence_threshold: Minimum confidence to auto-create (default: 0.7)
+            confidence_threshold: Minimum confidence to auto-create (default: from config)
             created_by: User ID who triggered extraction (default: "knowledge_extraction")
 
         Returns:
@@ -339,6 +343,9 @@ class KnowledgeExtractionService:
                 - saved_atoms: List of created or matched Atom entities
                 - version_created_atom_ids: List of atom IDs that had versions created
         """
+        if confidence_threshold is None:
+            confidence_threshold = ai_config.knowledge_extraction.confidence_threshold
+
         versioning_service = VersioningService()
         saved_atoms: list[Atom] = []
         version_created_atom_ids: list[int] = []
