@@ -17,6 +17,7 @@ from app.models import (
     TaskProposalPublic,
     TaskProposalUpdate,
 )
+from app.services.base_crud import BaseCRUD
 
 
 class TaskProposalCRUD:
@@ -29,6 +30,7 @@ class TaskProposalCRUD:
             session: Async database session
         """
         self.session = session
+        self._base_crud = BaseCRUD(TaskProposal, session)
 
     async def create(self, proposal_data: TaskProposalCreate) -> TaskProposalPublic:
         """Create new task proposal.
@@ -68,8 +70,7 @@ class TaskProposalCRUD:
         Returns:
             Task proposal if found, None otherwise
         """
-        result = await self.session.execute(select(TaskProposal).where(TaskProposal.id == proposal_id))
-        proposal = result.scalar_one_or_none()
+        proposal = await self._base_crud.get(proposal_id)
 
         if proposal:
             return TaskProposalPublic.model_validate(proposal)
@@ -140,23 +141,15 @@ class TaskProposalCRUD:
         Returns:
             Updated task proposal if found, None otherwise
         """
-        result = await self.session.execute(select(TaskProposal).where(TaskProposal.id == proposal_id))
-        proposal = result.scalar_one_or_none()
+        proposal = await self._base_crud.get(proposal_id)
 
         if not proposal:
             return None
 
-        # Get update dict excluding unset fields
         update_dict = update_data.model_dump(exclude_unset=True)
+        updated_proposal = await self._base_crud.update(proposal, update_dict)
 
-        # Apply updates
-        for field, value in update_dict.items():
-            setattr(proposal, field, value)
-
-        await self.session.commit()
-        await self.session.refresh(proposal)
-
-        return TaskProposalPublic.model_validate(proposal)
+        return TaskProposalPublic.model_validate(updated_proposal)
 
     async def approve(
         self,
@@ -172,8 +165,7 @@ class TaskProposalCRUD:
         Returns:
             Updated task proposal if found, None otherwise
         """
-        result = await self.session.execute(select(TaskProposal).where(TaskProposal.id == proposal_id))
-        proposal = result.scalar_one_or_none()
+        proposal = await self._base_crud.get(proposal_id)
 
         if not proposal:
             return None
@@ -212,8 +204,7 @@ class TaskProposalCRUD:
         Returns:
             Updated task proposal if found, None otherwise
         """
-        result = await self.session.execute(select(TaskProposal).where(TaskProposal.id == proposal_id))
-        proposal = result.scalar_one_or_none()
+        proposal = await self._base_crud.get(proposal_id)
 
         if not proposal:
             return None
@@ -253,8 +244,7 @@ class TaskProposalCRUD:
         Returns:
             Updated task proposal if found, None otherwise
         """
-        result = await self.session.execute(select(TaskProposal).where(TaskProposal.id == proposal_id))
-        proposal = result.scalar_one_or_none()
+        proposal = await self._base_crud.get(proposal_id)
 
         if not proposal:
             return None

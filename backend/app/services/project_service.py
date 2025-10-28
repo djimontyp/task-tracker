@@ -17,6 +17,7 @@ from app.models import (
     ProjectConfigPublic,
     ProjectConfigUpdate,
 )
+from app.services.base_crud import BaseCRUD
 
 
 class ProjectConfigCRUD:
@@ -29,6 +30,7 @@ class ProjectConfigCRUD:
             session: Async database session
         """
         self.session = session
+        self._base_crud = BaseCRUD(ProjectConfig, session)
 
     async def create(self, project_data: ProjectConfigCreate) -> ProjectConfigPublic:
         """Create new project configuration.
@@ -69,8 +71,7 @@ class ProjectConfigCRUD:
         Returns:
             Project configuration if found, None otherwise
         """
-        result = await self.session.execute(select(ProjectConfig).where(ProjectConfig.id == project_id))
-        project = result.scalar_one_or_none()
+        project = await self._base_crud.get(project_id)
 
         if project:
             return ProjectConfigPublic.model_validate(project)
@@ -142,8 +143,7 @@ class ProjectConfigCRUD:
         Returns:
             Updated project configuration if found, None otherwise
         """
-        result = await self.session.execute(select(ProjectConfig).where(ProjectConfig.id == project_id))
-        project = result.scalar_one_or_none()
+        project = await self._base_crud.get(project_id)
 
         if not project:
             return None
@@ -179,12 +179,4 @@ class ProjectConfigCRUD:
         Returns:
             True if deleted, False if not found
         """
-        result = await self.session.execute(select(ProjectConfig).where(ProjectConfig.id == project_id))
-        project = result.scalar_one_or_none()
-
-        if not project:
-            return False
-
-        await self.session.delete(project)
-        await self.session.commit()
-        return True
+        return await self._base_crud.delete(project_id)

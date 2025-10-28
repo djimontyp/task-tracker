@@ -16,6 +16,7 @@ from app.models import (
     AgentConfigUpdate,
     LLMProvider,
 )
+from app.services.base_crud import BaseCRUD
 
 
 class AgentCRUD:
@@ -28,6 +29,7 @@ class AgentCRUD:
             session: Async database session
         """
         self.session = session
+        self._base_crud = BaseCRUD(AgentConfig, session)
 
     async def create(self, agent_data: AgentConfigCreate) -> AgentConfigPublic:
         """Create new agent configuration.
@@ -81,8 +83,7 @@ class AgentCRUD:
         Returns:
             Agent if found, None otherwise
         """
-        result = await self.session.execute(select(AgentConfig).where(AgentConfig.id == agent_id))
-        agent = result.scalar_one_or_none()
+        agent = await self._base_crud.get(agent_id)
 
         if agent:
             return AgentConfigPublic.model_validate(agent)
@@ -194,12 +195,4 @@ class AgentCRUD:
             Running agent instances continue until task completion.
             Will cascade delete agent_task_assignments due to FK constraint.
         """
-        result = await self.session.execute(select(AgentConfig).where(AgentConfig.id == agent_id))
-        agent = result.scalar_one_or_none()
-
-        if not agent:
-            return False
-
-        await self.session.delete(agent)
-        await self.session.commit()
-        return True
+        return await self._base_crud.delete(agent_id)

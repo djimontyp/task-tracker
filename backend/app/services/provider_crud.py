@@ -17,6 +17,7 @@ from app.models import (
     LLMProviderUpdate,
     ValidationStatus,
 )
+from app.services.base_crud import BaseCRUD
 from app.services.credential_encryption import CredentialEncryption
 from app.services.provider_validator import ProviderValidator
 
@@ -38,6 +39,7 @@ class ProviderCRUD:
             validator: Provider validation service (created if not provided)
         """
         self.session = session
+        self._base_crud = BaseCRUD(LLMProvider, session)
         self.encryptor = encryptor or CredentialEncryption()
         self.validator = validator or ProviderValidator()
 
@@ -93,8 +95,7 @@ class ProviderCRUD:
         Returns:
             Provider if found, None otherwise
         """
-        result = await self.session.execute(select(LLMProvider).where(LLMProvider.id == provider_id))
-        provider = result.scalar_one_or_none()
+        provider = await self._base_crud.get(provider_id)
 
         if provider:
             return LLMProviderPublic.model_validate(provider)
@@ -207,8 +208,7 @@ class ProviderCRUD:
               setting is_active=False and return True.
             - Otherwise, perform hard delete.
         """
-        result = await self.session.execute(select(LLMProvider).where(LLMProvider.id == provider_id))
-        provider = result.scalar_one_or_none()
+        provider = await self._base_crud.get(provider_id)
 
         if not provider:
             return False
@@ -223,9 +223,7 @@ class ProviderCRUD:
             await self.session.commit()
             return True
 
-        await self.session.delete(provider)
-        await self.session.commit()
-        return True
+        return await self._base_crud.delete(provider_id)
 
     async def get_decrypted_api_key(self, provider_id: UUID) -> str | None:
         """Get decrypted API key for provider.
@@ -241,8 +239,7 @@ class ProviderCRUD:
             that need the actual API key (e.g., PydanticAI agent initialization).
             Never expose decrypted keys via API endpoints.
         """
-        result = await self.session.execute(select(LLMProvider).where(LLMProvider.id == provider_id))
-        provider = result.scalar_one_or_none()
+        provider = await self._base_crud.get(provider_id)
 
         if not provider or not provider.api_key_encrypted:
             return None
