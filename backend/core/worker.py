@@ -24,7 +24,9 @@ from .taskiq_config import nats_broker
 async def on_worker_startup(state: TaskiqState) -> None:
     """Initialize WebSocketManager for worker process."""
     logger.info("🚀 WORKER_STARTUP event triggered!")
-    logger.info(f"🚀 Initializing WebSocketManager for worker process, NATS servers: {settings.taskiq.taskiq_nats_servers}")
+    logger.info(
+        f"🚀 Initializing WebSocketManager for worker process, NATS servers: {settings.taskiq.taskiq_nats_servers}"
+    )
     try:
         await websocket_manager.startup(settings.taskiq.taskiq_nats_servers)
         logger.info("✅ WebSocketManager startup completed")

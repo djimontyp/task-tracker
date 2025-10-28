@@ -10,6 +10,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.api.v1.schemas.agent import TestAgentRequest, TestAgentResponse
 from app.database import get_session
 from app.models import (
     AgentConfigCreate,
@@ -19,11 +20,7 @@ from app.models import (
     AgentTaskAssignmentPublic,
 )
 from app.services import AgentCRUD, AssignmentCRUD
-from app.services.agent_service import (
-    AgentTestService,
-    TestAgentRequest,
-    TestAgentResponse,
-)
+from app.services.agent_service import AgentTestService
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/agents", tags=["agents"])
