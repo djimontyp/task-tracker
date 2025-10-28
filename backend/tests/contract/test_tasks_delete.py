@@ -1,4 +1,4 @@
-"""Contract tests for DELETE /api/tasks/{id} endpoint."""
+"""Contract tests for DELETE /api/v1/task-configs/{id} endpoint."""
 
 import pytest
 from httpx import AsyncClient
@@ -9,7 +9,7 @@ async def test_delete_task_success(client: AsyncClient):
     """Test successful task deletion."""
     # Create task
     create_response = await client.post(
-        "/api/tasks",
+        "/api/v1/task-configs",
         json={
             "name": "Delete Test Task",
             "response_schema": {"type": "object", "properties": {}},
@@ -18,11 +18,11 @@ async def test_delete_task_success(client: AsyncClient):
     task_id = create_response.json()["id"]
 
     # Delete task
-    response = await client.delete(f"/api/tasks/{task_id}")
+    response = await client.delete(f"/api/v1/task-configs/{task_id}")
     assert response.status_code == 204
 
     # Verify deleted
-    get_response = await client.get(f"/api/tasks/{task_id}")
+    get_response = await client.get(f"/api/v1/task-configs/{task_id}")
     assert get_response.status_code == 404
 
 
@@ -31,13 +31,13 @@ async def test_delete_task_with_agent_assignments(client: AsyncClient):
     """Test deleting task when assigned to agents."""
     # Create provider, agent, and task
     provider_response = await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={"name": "Delete Task Provider", "type": "ollama", "base_url": "http://localhost:11434"},
     )
     provider_id = provider_response.json()["id"]
 
     agent_response = await client.post(
-        "/api/agents",
+        "/api/v1/agents",
         json={
             "name": "Delete Task Agent",
             "provider_id": provider_id,
@@ -48,7 +48,7 @@ async def test_delete_task_with_agent_assignments(client: AsyncClient):
     agent_id = agent_response.json()["id"]
 
     task_response = await client.post(
-        "/api/tasks",
+        "/api/v1/task-configs",
         json={
             "name": "Assigned Task",
             "response_schema": {"type": "object", "properties": {}},
@@ -57,8 +57,8 @@ async def test_delete_task_with_agent_assignments(client: AsyncClient):
     task_id = task_response.json()["id"]
 
     # Assign task to agent
-    await client.post(f"/api/agents/{agent_id}/tasks", json={"task_id": task_id})
+    await client.post(f"/api/v1/agents/{agent_id}/tasks", json={"task_id": task_id})
 
     # Delete task (should handle assignments gracefully)
-    response = await client.delete(f"/api/tasks/{task_id}")
+    response = await client.delete(f"/api/v1/task-configs/{task_id}")
     assert response.status_code == 204

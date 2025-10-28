@@ -10,7 +10,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.api.v1.schemas.agent import TestAgentRequest, TestAgentResponse
+from app.api.v1.schemas.agent import AgentTestRequest, AgentTestResponse
 from app.database import get_session
 from app.models import (
     AgentConfigCreate,
@@ -356,15 +356,15 @@ async def unassign_task(
 
 @router.post(
     "/{agent_id}/test",
-    response_model=TestAgentResponse,
+    response_model=AgentTestResponse,
     summary="Test agent with custom prompt",
     response_description="Agent test response with LLM output",
 )
 async def test_agent(
     agent_id: UUID,
-    request: TestAgentRequest,
+    request: AgentTestRequest,
     session: AsyncSession = Depends(get_session),
-) -> TestAgentResponse:
+) -> AgentTestResponse:
     """Test an agent configuration with a custom prompt.
 
     Sends the provided prompt to the LLM using the agent's configuration

@@ -199,8 +199,11 @@ async def test_semantic_search_performance_small_dataset(
     """Benchmark: Semantic search on small dataset (<100 messages).
 
     Target: <100ms for searches on small datasets.
-    Note: This uses in-memory SQLite, so times may differ from production PostgreSQL.
+    Note: Requires PostgreSQL with pgvector. Skipped on SQLite.
     """
+    dialect = db_session.bind.dialect.name
+    if dialect == "sqlite":
+        pytest.skip("Vector similarity operations require PostgreSQL with pgvector")
     for i in range(50):
         msg = Message(
             external_message_id=f"search-perf-{i}",
@@ -363,7 +366,11 @@ async def test_find_similar_messages_performance(
     """Benchmark: Finding similar messages by embedding.
 
     Target: <100ms for similarity search on moderate dataset (100 messages).
+    Note: Requires PostgreSQL with pgvector. Skipped on SQLite.
     """
+    dialect = db_session.bind.dialect.name
+    if dialect == "sqlite":
+        pytest.skip("Vector similarity operations require PostgreSQL with pgvector")
     messages = []
     for i in range(100):
         msg = Message(
@@ -402,7 +409,11 @@ async def test_atom_search_performance(
 
     Atoms are typically smaller in number but searched frequently.
     Target: <50ms for atom searches.
+    Note: Requires PostgreSQL with pgvector. Skipped on SQLite.
     """
+    dialect = db_session.bind.dialect.name
+    if dialect == "sqlite":
+        pytest.skip("Vector similarity operations require PostgreSQL with pgvector")
     for i in range(50):
         atom = Atom(
             type="pattern",

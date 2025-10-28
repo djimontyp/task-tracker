@@ -13,7 +13,7 @@ from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.settings import ModelSettings
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.api.v1.schemas.agent import TestAgentResponse
+from app.api.v1.schemas.agent import AgentTestResponse
 from app.models import AgentConfig, LLMProvider, ProviderType, ValidationStatus
 from app.services.credential_encryption import CredentialEncryption
 
@@ -32,7 +32,7 @@ class AgentTestService:
         self.session = session
         self.encryptor = CredentialEncryption()
 
-    async def test_agent(self, agent_id: UUID, test_prompt: str) -> TestAgentResponse:
+    async def test_agent(self, agent_id: UUID, test_prompt: str) -> AgentTestResponse:
         """Test an agent configuration with a custom prompt.
 
         Args:
@@ -109,7 +109,7 @@ class AgentTestService:
 
             logger.info(f"Successfully tested agent '{agent.name}' (elapsed: {elapsed_time:.2f}s)")
 
-            return TestAgentResponse(
+            return AgentTestResponse(
                 agent_id=agent.id,
                 agent_name=agent.name,
                 prompt=test_prompt,
