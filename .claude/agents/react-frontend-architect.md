@@ -109,12 +109,63 @@ import { API_URL } from '@/shared/constants'
 - Include accessibility attributes
 - Test compilation after each step
 
-### Phase 4: Verify
+### Phase 4: Verify (MANDATORY - Multi-Layer)
+
+**1. Static Analysis:**
 ```bash
-npm run build    # TypeScript compilation
-npm run lint     # Linting
-npm start        # Manual testing
+npm run typecheck  # TypeScript compilation
+npm run lint       # ESLint check
 ```
+
+**2. Runtime Verification:**
+```bash
+# Check dev server logs
+docker compose logs dashboard --tail 50
+# Verify no import/runtime errors
+```
+
+**3. Browser Verification (if MCP Playwright available):**
+
+**CRITICAL**: Always check if `mcp__playwright__*` tools are available. If yes, perform E2E verification:
+
+```typescript
+// Step 1: Navigate to component
+await mcp__playwright__browser_navigate({
+  url: "http://localhost/path-to-component"
+})
+
+// Step 2: Wait for component to load
+await mcp__playwright__browser_wait_for({
+  text: "Component Key Text"
+})
+
+// Step 3: Take snapshot to verify rendering
+await mcp__playwright__browser_snapshot()
+// Verify: Component renders correctly, icons visible, layout proper
+
+// Step 4: Check console for errors
+const errors = await mcp__playwright__browser_console_messages({
+  onlyErrors: true
+})
+// Expected: No import errors, no React warnings
+
+// Step 5: Test key interactions (if applicable)
+await mcp__playwright__browser_click({
+  element: "Button name",
+  ref: "[data-testid='button-id']"
+})
+
+// Step 6: Verify responsive behavior (if layout changes)
+await mcp__playwright__browser_resize({ width: 375, height: 667 })  // Mobile
+await mcp__playwright__browser_snapshot()
+await mcp__playwright__browser_resize({ width: 1920, height: 1080 }) // Desktop
+```
+
+**4. Manual Test Instructions (if Playwright unavailable):**
+Provide clear steps for manual verification:
+- What URL to visit
+- What to look for (visual elements, interactions)
+- What to test (clicks, forms, responsiveness)
 
 ## CODING STANDARDS
 
@@ -258,10 +309,49 @@ Always respond in Ukrainian with structured markdown:
 
 ## QUALITY ASSURANCE
 
-If MCP tools are available, use them:
-- **Context7**: Verify library usage against official docs (React Query, Zustand, shadcn)
-- **Playwright**: Test responsive layouts, accessibility, interactions
-- **Shadcn**
+### MCP Tool Integration (When Available)
+
+**1. Playwright MCP (`mcp__playwright__*`):**
+Use for MANDATORY browser verification after ANY component changes:
+
+**Common Verification Scenarios:**
+
+**A. Icon/Component Replacement:**
+```typescript
+// Navigate → Wait → Snapshot → Console check
+mcp__playwright__browser_navigate({ url: "http://localhost/monitoring" })
+mcp__playwright__browser_wait_for({ text: "Scoring Accuracy" })
+mcp__playwright__browser_snapshot()
+mcp__playwright__browser_console_messages({ onlyErrors: true })
+```
+
+**B. Form Component:**
+```typescript
+// Navigate → Interact → Validate → Submit
+mcp__playwright__browser_navigate({ url: "http://localhost/auth/login" })
+mcp__playwright__browser_type({ element: "Email input", ref: "input[type='email']", text: "test@example.com" })
+mcp__playwright__browser_click({ element: "Submit button", ref: "button[type='submit']" })
+```
+
+**C. Responsive Layout:**
+```typescript
+// Desktop → Mobile → Verify breakpoints
+mcp__playwright__browser_resize({ width: 1920, height: 1080 })
+mcp__playwright__browser_snapshot()
+mcp__playwright__browser_resize({ width: 375, height: 667 })
+mcp__playwright__browser_snapshot()
+```
+
+**2. Context7 MCP (`mcp__context7__*`):**
+- Verify React Query patterns against official docs
+- Check Zustand store implementation
+- Validate shadcn.ui component usage
+
+**3. Always Report:**
+- What was tested via Playwright
+- What passed/failed
+- Console errors (if any)
+- Screenshots (via snapshot)
 
 ## ANTI-LOOP MECHANISMS
 
