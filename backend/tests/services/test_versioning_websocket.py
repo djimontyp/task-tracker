@@ -25,7 +25,7 @@ async def test_approve_version_broadcasts_pending_count_update(
         db_session, topic.id, {"name": "New Version", "description": "Updated"}
     )
 
-    with patch("app.services.versioning_service.websocket_manager") as mock_manager:
+    with patch("app.services.versioning.versioning_base.websocket_manager") as mock_manager:
         mock_manager.broadcast = AsyncMock()
 
         await service.approve_version(db_session, "topic", topic.id, version.version)
@@ -54,7 +54,7 @@ async def test_reject_version_broadcasts_pending_count_update(
     service = VersioningService()
     version = await service.create_topic_version(db_session, topic.id, {"name": "Rejected Version"})
 
-    with patch("app.services.versioning_service.websocket_manager") as mock_manager:
+    with patch("app.services.versioning.versioning_base.websocket_manager") as mock_manager:
         mock_manager.broadcast = AsyncMock()
 
         await service.reject_version(db_session, "topic", topic.id, version.version)
@@ -81,7 +81,7 @@ async def test_bulk_approve_broadcasts_pending_count_update(
     version1 = await service.create_topic_version(db_session, topic.id, {"name": "Version 1"})
     version2 = await service.create_topic_version(db_session, topic.id, {"name": "Version 2"})
 
-    with patch("app.services.versioning_service.websocket_manager") as mock_manager:
+    with patch("app.services.versioning.versioning_base.websocket_manager") as mock_manager:
         mock_manager.broadcast = AsyncMock()
 
         await service.bulk_approve_versions(db_session, "topic", [version1.id, version2.id])
@@ -105,7 +105,7 @@ async def test_bulk_reject_broadcasts_pending_count_update(
     version1 = await service.create_topic_version(db_session, topic.id, {"name": "Version 1"})
     version2 = await service.create_topic_version(db_session, topic.id, {"name": "Version 2"})
 
-    with patch("app.services.versioning_service.websocket_manager") as mock_manager:
+    with patch("app.services.versioning.versioning_base.websocket_manager") as mock_manager:
         mock_manager.broadcast = AsyncMock()
 
         await service.bulk_reject_versions(db_session, "topic", [version1.id, version2.id])
@@ -124,7 +124,7 @@ async def test_websocket_event_payload_structure(db_session: AsyncSession) -> No
     service = VersioningService()
     version = await service.create_topic_version(db_session, topic.id, {"name": "Version"})
 
-    with patch("app.services.versioning_service.websocket_manager") as mock_manager:
+    with patch("app.services.versioning.versioning_base.websocket_manager") as mock_manager:
         mock_manager.broadcast = AsyncMock()
 
         await service.approve_version(db_session, "topic", topic.id, version.version)
@@ -156,7 +156,7 @@ async def test_pending_count_decreases_after_approval(db_session: AsyncSession) 
     initial_count = await service.get_pending_versions_count(db_session)
     assert initial_count == 2
 
-    with patch("app.services.versioning_service.websocket_manager") as mock_manager:
+    with patch("app.services.versioning.versioning_base.websocket_manager") as mock_manager:
         mock_manager.broadcast = AsyncMock()
 
         await service.approve_version(db_session, "topic", topic.id, version1.version)
@@ -209,7 +209,7 @@ async def test_websocket_broadcast_called_once_per_operation(
     service = VersioningService()
     version = await service.create_topic_version(db_session, topic.id, {"name": "Version"})
 
-    with patch("app.services.versioning_service.websocket_manager") as mock_manager:
+    with patch("app.services.versioning.versioning_base.websocket_manager") as mock_manager:
         mock_manager.broadcast = AsyncMock()
 
         await service.approve_version(db_session, "topic", topic.id, version.version)
@@ -230,7 +230,7 @@ async def test_bulk_operations_single_broadcast(db_session: AsyncSession) -> Non
     version2 = await service.create_topic_version(db_session, topic.id, {"name": "Version 2"})
     version3 = await service.create_topic_version(db_session, topic.id, {"name": "Version 3"})
 
-    with patch("app.services.versioning_service.websocket_manager") as mock_manager:
+    with patch("app.services.versioning.versioning_base.websocket_manager") as mock_manager:
         mock_manager.broadcast = AsyncMock()
 
         await service.bulk_approve_versions(db_session, "topic", [version1.id, version2.id, version3.id])
@@ -262,7 +262,7 @@ async def test_websocket_broadcast_on_atom_version_approval(
     service = VersioningService()
     version = await service.create_atom_version(db_session, atom.id, {"content": "Updated"})
 
-    with patch("app.services.versioning_service.websocket_manager") as mock_manager:
+    with patch("app.services.versioning.versioning_base.websocket_manager") as mock_manager:
         mock_manager.broadcast = AsyncMock()
 
         await service.approve_version(db_session, "atom", atom.id, version.version)
