@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.notification_preference import NotificationPreference
 from app.services.email_service import email_service
 from app.services.telegram_notification_service import telegram_service
-from app.services.versioning_service import VersioningService
+from app.services.versioning import VersioningService
 
 
 class NotificationService:

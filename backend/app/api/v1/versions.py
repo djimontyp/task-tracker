@@ -12,7 +12,7 @@ from app.api.v1.schemas.version import (
     VersionDiffResponse,
 )
 from app.database import get_session
-from app.services.versioning_service import VersioningService
+from app.services.versioning import VersioningService
 
 router = APIRouter(tags=["versions"])
 
