@@ -57,6 +57,98 @@ class BatchEmbedResponse(BaseModel):
     provider_id: UUID = Field(description="Provider ID used for embedding")
 
 
+# Batch endpoints must come BEFORE single-item endpoints to avoid path parameter conflicts
+# (FastAPI would match "/messages/batch" as "/messages/{message_id}" with message_id="batch")
+
+
+@router.post("/messages/batch", response_model=BatchEmbedResponse)
+async def generate_batch_embeddings(
+    request: BatchEmbedRequest, session: AsyncSession = Depends(get_session)
+) -> BatchEmbedResponse:
+    """Generate embeddings for multiple messages in background.
+
+    Queues background task to process messages in batches. Returns immediately
+    with task_id for tracking progress. Task handles errors gracefully and
+    tracks success/failed/skipped counts.
+
+    Args:
+        request: Request containing message_ids and provider_id
+        session: Database session (injected)
+
+    Returns:
+        BatchEmbedResponse with task_id and message count
+
+    Raises:
+        404: Provider not found
+        400: Invalid request (empty message_ids list)
+
+    Example:
+        ```
+        POST / api / v1 / embeddings / messages / batch
+        {"message_ids": [1, 2, 3, 4, 5], "provider_id": "550e8400-e29b-41d4-a716-446655440000"}
+        ```
+
+        Response:
+        ```
+        {"task_id": "abc123...", "count": 5, "provider_id": "550e8400-e29b-41d4-a716-446655440000"}
+        ```
+    """
+    if not request.message_ids:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="message_ids list cannot be empty")
+
+    provider = await session.get(LLMProvider, request.provider_id)
+    if not provider:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Provider {request.provider_id} not found")
+
+    task = await embed_messages_batch_task.kiq(message_ids=request.message_ids, provider_id=str(request.provider_id))
+
+    return BatchEmbedResponse(task_id=task.task_id, count=len(request.message_ids), provider_id=request.provider_id)
+
+
+@router.post("/atoms/batch", response_model=BatchEmbedResponse)
+async def generate_batch_atom_embeddings(
+    request: BatchEmbedAtomsRequest, session: AsyncSession = Depends(get_session)
+) -> BatchEmbedResponse:
+    """Generate embeddings for multiple atoms in background.
+
+    Queues background task to process atoms in batches. Returns immediately
+    with task_id for tracking progress. Task handles errors gracefully and
+    tracks success/failed/skipped counts.
+
+    Args:
+        request: Request containing atom_ids and provider_id
+        session: Database session (injected)
+
+    Returns:
+        BatchEmbedResponse with task_id and atom count
+
+    Raises:
+        404: Provider not found
+        400: Invalid request (empty atom_ids list)
+
+    Example:
+        ```
+        POST / api / v1 / embeddings / atoms / batch
+        {"atom_ids": [1, 2, 3, 4, 5], "provider_id": "550e8400-e29b-41d4-a716-446655440000"}
+        ```
+
+        Response:
+        ```
+        {"task_id": "def456...", "count": 5, "provider_id": "550e8400-e29b-41d4-a716-446655440000"}
+        ```
+    """
+    if not request.atom_ids:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="atom_ids list cannot be empty")
+
+    provider = await session.get(LLMProvider, request.provider_id)
+    if not provider:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Provider {request.provider_id} not found")
+
+    task = await embed_atoms_batch_task.kiq(atom_ids=request.atom_ids, provider_id=str(request.provider_id))
+
+    return BatchEmbedResponse(task_id=task.task_id, count=len(request.atom_ids), provider_id=request.provider_id)
+
+
 @router.post("/messages/{message_id}", response_model=EmbedResponse)
 async def generate_message_embedding(
     message_id: int, request: EmbedRequest, session: AsyncSession = Depends(get_session)
@@ -113,50 +205,6 @@ async def generate_message_embedding(
         )
 
 
-@router.post("/messages/batch", response_model=BatchEmbedResponse)
-async def generate_batch_embeddings(
-    request: BatchEmbedRequest, session: AsyncSession = Depends(get_session)
-) -> BatchEmbedResponse:
-    """Generate embeddings for multiple messages in background.
-
-    Queues background task to process messages in batches. Returns immediately
-    with task_id for tracking progress. Task handles errors gracefully and
-    tracks success/failed/skipped counts.
-
-    Args:
-        request: Request containing message_ids and provider_id
-        session: Database session (injected)
-
-    Returns:
-        BatchEmbedResponse with task_id and message count
-
-    Raises:
-        404: Provider not found
-        400: Invalid request (empty message_ids list)
-
-    Example:
-        ```
-        POST / api / v1 / embeddings / messages / batch
-        {"message_ids": [1, 2, 3, 4, 5], "provider_id": "550e8400-e29b-41d4-a716-446655440000"}
-        ```
-
-        Response:
-        ```
-        {"task_id": "abc123...", "count": 5, "provider_id": "550e8400-e29b-41d4-a716-446655440000"}
-        ```
-    """
-    if not request.message_ids:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="message_ids list cannot be empty")
-
-    provider = await session.get(LLMProvider, request.provider_id)
-    if not provider:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Provider {request.provider_id} not found")
-
-    task = await embed_messages_batch_task.kiq(message_ids=request.message_ids, provider_id=str(request.provider_id))
-
-    return BatchEmbedResponse(task_id=task.task_id, count=len(request.message_ids), provider_id=request.provider_id)
-
-
 @router.post("/atoms/{atom_id}", response_model=EmbedResponse)
 async def generate_atom_embedding(
     atom_id: int, request: EmbedRequest, session: AsyncSession = Depends(get_session)
@@ -211,47 +259,3 @@ async def generate_atom_embedding(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Embedding generation failed: {str(e)}"
         )
-
-
-@router.post("/atoms/batch", response_model=BatchEmbedResponse)
-async def generate_batch_atom_embeddings(
-    request: BatchEmbedAtomsRequest, session: AsyncSession = Depends(get_session)
-) -> BatchEmbedResponse:
-    """Generate embeddings for multiple atoms in background.
-
-    Queues background task to process atoms in batches. Returns immediately
-    with task_id for tracking progress. Task handles errors gracefully and
-    tracks success/failed/skipped counts.
-
-    Args:
-        request: Request containing atom_ids and provider_id
-        session: Database session (injected)
-
-    Returns:
-        BatchEmbedResponse with task_id and atom count
-
-    Raises:
-        404: Provider not found
-        400: Invalid request (empty atom_ids list)
-
-    Example:
-        ```
-        POST / api / v1 / embeddings / atoms / batch
-        {"atom_ids": [1, 2, 3, 4, 5], "provider_id": "550e8400-e29b-41d4-a716-446655440000"}
-        ```
-
-        Response:
-        ```
-        {"task_id": "def456...", "count": 5, "provider_id": "550e8400-e29b-41d4-a716-446655440000"}
-        ```
-    """
-    if not request.atom_ids:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="atom_ids list cannot be empty")
-
-    provider = await session.get(LLMProvider, request.provider_id)
-    if not provider:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Provider {request.provider_id} not found")
-
-    task = await embed_atoms_batch_task.kiq(atom_ids=request.atom_ids, provider_id=str(request.provider_id))
-
-    return BatchEmbedResponse(task_id=task.task_id, count=len(request.atom_ids), provider_id=request.provider_id)

@@ -56,7 +56,7 @@ class AgentTaskAssignment(SQLModel, table=True):
 class AgentTaskAssignmentCreate(SQLModel):
     """Schema for creating new agent-task assignment."""
 
-    agent_id: UUID
+    agent_id: UUID | None = None  # Optional: will be set from URL path in /agents/{agent_id}/tasks endpoint
     task_id: UUID
     is_active: bool = True
 
