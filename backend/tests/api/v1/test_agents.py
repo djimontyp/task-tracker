@@ -501,7 +501,7 @@ async def test_create_agent_nonexistent_provider(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_create_agent_invalid_temperature_below_zero(client: AsyncClient, test_provider: LLMProvider):
-    """Test 400 error for temperature below 0.0."""
+    """Test 422 error for temperature below 0.0 (Pydantic validation)."""
     payload = {
         "name": "Invalid Temp Agent",
         "provider_id": str(test_provider.id),
@@ -512,14 +512,14 @@ async def test_create_agent_invalid_temperature_below_zero(client: AsyncClient, 
 
     response = await client.post("/api/v1/agents", json=payload)
 
-    assert response.status_code == 400
+    assert response.status_code == 422
     data = response.json()
-    assert "temperature" in data["detail"].lower()
+    assert "temperature" in str(data["detail"]).lower()
 
 
 @pytest.mark.asyncio
 async def test_create_agent_invalid_temperature_above_one(client: AsyncClient, test_provider: LLMProvider):
-    """Test 400 error for temperature above 1.0."""
+    """Test 422 error for temperature above 1.0 (Pydantic validation)."""
     payload = {
         "name": "Invalid Temp Agent",
         "provider_id": str(test_provider.id),
@@ -530,9 +530,9 @@ async def test_create_agent_invalid_temperature_above_one(client: AsyncClient, t
 
     response = await client.post("/api/v1/agents", json=payload)
 
-    assert response.status_code == 400
+    assert response.status_code == 422
     data = response.json()
-    assert "temperature" in data["detail"].lower()
+    assert "temperature" in str(data["detail"]).lower()
 
 
 @pytest.mark.asyncio
@@ -671,12 +671,12 @@ async def test_update_agent_invalid_provider_id(client: AsyncClient, test_agent:
 
 @pytest.mark.asyncio
 async def test_update_agent_invalid_temperature(client: AsyncClient, test_agent: AgentConfig):
-    """Test 400 error for invalid temperature during update."""
+    """Test 422 error for invalid temperature during update (Pydantic validation)."""
     payload = {"temperature": 1.5}
 
     response = await client.put(f"/api/v1/agents/{test_agent.id}", json=payload)
 
-    assert response.status_code == 400
+    assert response.status_code == 422
 
 
 @pytest.mark.asyncio
@@ -712,7 +712,8 @@ async def test_delete_agent_success(client: AsyncClient, test_agent: AgentConfig
 
     assert response.status_code == 204
 
-    # Verify agent is deleted from database
+    # Verify agent is deleted from database (expire cache to force DB query)
+    db_session.expire_all()
     deleted_agent = await db_session.get(AgentConfig, agent_id)
     assert deleted_agent is None
 

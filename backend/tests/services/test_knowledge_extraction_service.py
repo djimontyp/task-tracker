@@ -23,6 +23,7 @@ from app.services.knowledge_extraction_service import (
     KnowledgeExtractionOutput,
     KnowledgeExtractionService,
 )
+from app.services.knowledge.llm_agents import build_model_instance
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -224,7 +225,7 @@ async def test_extract_knowledge_success_ollama(
     mock_extraction_output: KnowledgeExtractionOutput,
 ) -> None:
     """Test successful knowledge extraction with Ollama."""
-    with patch("app.services.knowledge_extraction_service.PydanticAgent") as mock_agent_class:
+    with patch("app.services.knowledge.knowledge_orchestrator.PydanticAgent") as mock_agent_class:
         mock_agent = MagicMock()
         mock_result = AsyncMock()
         mock_result.output = mock_extraction_output
@@ -253,8 +254,8 @@ async def test_extract_knowledge_success_openai(
 ) -> None:
     """Test successful knowledge extraction with OpenAI."""
     with (
-        patch("app.services.knowledge_extraction_service.PydanticAgent") as mock_agent_class,
-        patch("app.services.knowledge_extraction_service.CredentialEncryption") as mock_encryptor_class,
+        patch("app.services.knowledge.knowledge_orchestrator.PydanticAgent") as mock_agent_class,
+        patch("app.services.knowledge.knowledge_orchestrator.CredentialEncryption") as mock_encryptor_class,
     ):
         mock_encryptor = MagicMock()
         mock_encryptor.decrypt.return_value = "sk-test-key-12345"
@@ -281,7 +282,7 @@ async def test_extract_knowledge_llm_failure(
     agent_config, ollama_provider: LLMProvider, sample_messages: list[Message]
 ) -> None:
     """Test error handling when LLM extraction fails."""
-    with patch("app.services.knowledge_extraction_service.PydanticAgent") as mock_agent_class:
+    with patch("app.services.knowledge.knowledge_orchestrator.PydanticAgent") as mock_agent_class:
         mock_agent = MagicMock()
         mock_agent.run = AsyncMock(side_effect=Exception("LLM timeout"))
         mock_agent_class.return_value = mock_agent
@@ -297,7 +298,7 @@ async def test_extract_knowledge_invalid_api_key_decryption(
     agent_config, openai_provider: LLMProvider, sample_messages: list[Message]
 ) -> None:
     """Test error handling for API key decryption failure."""
-    with patch("app.services.knowledge_extraction_service.CredentialEncryption") as mock_encryptor_class:
+    with patch("app.services.knowledge.knowledge_orchestrator.CredentialEncryption") as mock_encryptor_class:
         mock_encryptor = MagicMock()
         mock_encryptor.decrypt.side_effect = Exception("Decryption failed")
         mock_encryptor_class.return_value = mock_encryptor
@@ -786,8 +787,7 @@ async def test_build_prompt_formats_correctly(agent_config, sample_messages: lis
 @pytest.mark.asyncio
 async def test_build_model_instance_ollama(agent_config, ollama_provider: LLMProvider) -> None:
     """Test building Ollama model instance."""
-    service = KnowledgeExtractionService(agent_config=agent_config, provider=ollama_provider)
-    model = service._build_model_instance()
+    model = build_model_instance(agent_config, ollama_provider)
 
     assert model is not None
     assert model.model_name == "llama3.2:latest"
@@ -796,16 +796,10 @@ async def test_build_model_instance_ollama(agent_config, ollama_provider: LLMPro
 @pytest.mark.asyncio
 async def test_build_model_instance_openai(agent_config, openai_provider: LLMProvider) -> None:
     """Test building OpenAI model instance."""
-    with patch("app.services.knowledge_extraction_service.CredentialEncryption") as mock_encryptor_class:
-        mock_encryptor = MagicMock()
-        mock_encryptor.decrypt.return_value = "sk-test-key"
-        mock_encryptor_class.return_value = mock_encryptor
+    model = build_model_instance(agent_config, openai_provider, api_key="sk-test-key")
 
-        service = KnowledgeExtractionService(agent_config=agent_config, provider=openai_provider)
-        model = service._build_model_instance("sk-test-key")
-
-        assert model is not None
-        assert model.model_name == "llama3.2:latest"
+    assert model is not None
+    assert model.model_name == "llama3.2:latest"
 
 
 @pytest.mark.asyncio
@@ -821,14 +815,12 @@ async def test_build_model_instance_ollama_missing_base_url(
         is_active=True,
     )
 
-    service = KnowledgeExtractionService(agent_config=agent_config, provider=provider)
-
     with pytest.raises(ValueError, match="missing base_url"):
-        service._build_model_instance()
+        build_model_instance(agent_config, provider)
 
 
 @pytest.mark.asyncio
-async def test_build_model_instance_openai_missing_api_key() -> None:
+async def test_build_model_instance_openai_missing_api_key(agent_config) -> None:
     """Test error when OpenAI provider is missing API key."""
     provider = LLMProvider(
         id=uuid4(),
@@ -838,10 +830,8 @@ async def test_build_model_instance_openai_missing_api_key() -> None:
         is_active=True,
     )
 
-    service = KnowledgeExtractionService(agent_config=agent_config, provider=provider)
-
     with pytest.raises(ValueError, match="requires an API key"):
-        service._build_model_instance(None)
+        build_model_instance(agent_config, provider, api_key=None)
 
 
 @pytest.mark.asyncio
@@ -853,10 +843,8 @@ async def test_build_model_instance_unsupported_provider(
     provider.type = "unsupported_type"
     provider.name = "Unsupported"
 
-    service = KnowledgeExtractionService(agent_config=agent_config, provider=provider)
-
     with pytest.raises(ValueError, match="Unsupported provider type"):
-        service._build_model_instance()
+        build_model_instance(agent_config, provider)
 
 
 # Period selection helper tests

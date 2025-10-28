@@ -44,7 +44,10 @@ async def test_list_projects(client, db_session):
     response = await client.get("/api/v1/projects")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 5
+    assert "items" in data
+    assert "total" in data
+    assert len(data["items"]) == 5
+    assert data["total"] == 5
 
 
 @pytest.mark.asyncio
@@ -351,15 +354,15 @@ async def test_filter_by_active_status(client, db_session):
     response = await client.get("/api/v1/projects?is_active=true")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
-    assert data[0]["name"] == "Active Project"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["name"] == "Active Project"
 
     # Filter by inactive
     response = await client.get("/api/v1/projects?is_active=false")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
-    assert data[0]["name"] == "Inactive Project"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["name"] == "Inactive Project"
 
 
 @pytest.mark.asyncio
@@ -392,13 +395,17 @@ async def test_pagination(client, db_session):
     response = await client.get("/api/v1/projects?skip=0&limit=5")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 5
+    assert len(data["items"]) == 5
+    assert data["total"] == 10
+    assert data["page"] == 1
 
     # Get next 5
     response = await client.get("/api/v1/projects?skip=5&limit=5")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 5
+    assert len(data["items"]) == 5
+    assert data["total"] == 10
+    assert data["page"] == 2
 
 
 @pytest.mark.asyncio

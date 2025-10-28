@@ -20,7 +20,7 @@ async def test_update_task_configuration(client: AsyncClient):
 
     # Update task
     response = await client.put(
-        f"/api/v1/tasks/{task_id}",
+        f"/api/v1/task-configs/{task_id}",
         json={"description": "Updated description"},
     )
     assert response.status_code == 200
@@ -43,7 +43,7 @@ async def test_update_task_schema_validation(client: AsyncClient):
 
     # Update with valid schema
     response = await client.put(
-        f"/api/v1/tasks/{task_id}",
+        f"/api/v1/task-configs/{task_id}",
         json={
             "response_schema": {
                 "type": "object",
@@ -55,7 +55,7 @@ async def test_update_task_schema_validation(client: AsyncClient):
 
     # Update with invalid schema should fail
     response = await client.put(
-        f"/api/v1/tasks/{task_id}",
+        f"/api/v1/task-configs/{task_id}",
         json={"response_schema": {"type": "invalid_type"}},
     )
     assert response.status_code == 400
@@ -66,7 +66,7 @@ async def test_update_task_not_found(client: AsyncClient):
     """Test 404 for updating non-existent task."""
     fake_uuid = "00000000-0000-0000-0000-000000000000"
     response = await client.put(
-        f"/api/v1/tasks/{fake_uuid}",
+        f"/api/v1/task-configs/{fake_uuid}",
         json={"description": "New description"},
     )
     assert response.status_code == 404

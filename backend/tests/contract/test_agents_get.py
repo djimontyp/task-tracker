@@ -9,7 +9,7 @@ async def test_list_all_agents_with_pagination(client: AsyncClient):
     """Test listing all agents with pagination support."""
     # Create provider
     provider_response = await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={"name": "List Test Provider", "type": "ollama", "base_url": "http://localhost:11434"},
     )
     provider_id = provider_response.json()["id"]
@@ -17,7 +17,7 @@ async def test_list_all_agents_with_pagination(client: AsyncClient):
     # Create multiple agents
     for i in range(3):
         await client.post(
-            "/api/agents",
+            "/api/v1/agents",
             json={
                 "name": f"Agent {i}",
                 "provider_id": provider_id,
@@ -27,11 +27,11 @@ async def test_list_all_agents_with_pagination(client: AsyncClient):
         )
 
     # List agents
-    response = await client.get("/api/agents")
+    response = await client.get("/api/v1/agents")
     assert response.status_code == 200
     data = response.json()
-    assert "agents" in data
-    assert len(data["agents"]) >= 3
+    assert isinstance(data, list)
+    assert len(data) >= 3
 
 
 @pytest.mark.asyncio
@@ -39,14 +39,14 @@ async def test_get_agent_by_id_with_provider_details(client: AsyncClient):
     """Test getting agent by ID includes provider details."""
     # Create provider
     provider_response = await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={"name": "Detail Provider", "type": "ollama", "base_url": "http://localhost:11434"},
     )
     provider_id = provider_response.json()["id"]
 
     # Create agent
     create_response = await client.post(
-        "/api/agents",
+        "/api/v1/agents",
         json={
             "name": "Detail Agent",
             "provider_id": provider_id,
@@ -57,7 +57,7 @@ async def test_get_agent_by_id_with_provider_details(client: AsyncClient):
     agent_id = create_response.json()["id"]
 
     # Get agent
-    response = await client.get(f"/api/agents/{agent_id}")
+    response = await client.get(f"/api/v1/agents/{agent_id}")
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == agent_id
@@ -68,5 +68,5 @@ async def test_get_agent_by_id_with_provider_details(client: AsyncClient):
 async def test_get_agent_not_found(client: AsyncClient):
     """Test 404 for non-existent agent."""
     fake_uuid = "00000000-0000-0000-0000-000000000000"
-    response = await client.get(f"/api/agents/{fake_uuid}")
+    response = await client.get(f"/api/v1/agents/{fake_uuid}")
     assert response.status_code == 404

@@ -1,7 +1,7 @@
 """Tests for retry mechanism with exponential backoff and Dead Letter Queue."""
 
 from datetime import datetime
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from app.models.failed_task import FailedTask, FailedTaskStatus
@@ -60,12 +60,19 @@ async def test_get_failed_tasks_with_filters() -> None:
         updated_at=datetime.utcnow(),
     )
 
-    mock_result = AsyncMock()
-    mock_result.scalars.return_value.all.return_value = [mock_failed_task]
-    mock_session.execute.return_value = mock_result
-
-    mock_count_result = AsyncMock()
+    # Mock the count query result (use MagicMock for result.scalar() since it's synchronous)
+    mock_count_result = MagicMock()
     mock_count_result.scalar.return_value = 1
+
+    # Mock the scalars result with proper chaining (use MagicMock for sync methods)
+    mock_scalars = MagicMock()
+    mock_scalars.all.return_value = [mock_failed_task]
+
+    # Use MagicMock for result.scalars() since it's a synchronous method
+    mock_result = MagicMock()
+    mock_result.scalars.return_value = mock_scalars
+
+    # First call returns count, second call returns data
     mock_session.execute.side_effect = [mock_count_result, mock_result]
 
     tasks, count = await service.get_failed_tasks(

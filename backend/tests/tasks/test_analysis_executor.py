@@ -97,7 +97,7 @@ async def test_start_run(db_session):
     await db_session.refresh(run)
 
     # Mock WebSocket manager
-    with patch("app.services.analysis_service.websocket_manager", AsyncMock()):
+    with patch("app.services.analysis.analysis_executor.websocket_manager", AsyncMock()):
         # Start run
         executor = AnalysisExecutor(db_session)
         await executor.start_run(run.id)
@@ -405,7 +405,7 @@ async def test_save_proposals(db_session):
     ]
 
     # Mock WebSocket manager
-    with patch("app.services.analysis_service.websocket_manager", AsyncMock()):
+    with patch("app.services.analysis.analysis_executor.websocket_manager", AsyncMock()):
         # Save proposals
         executor = AnalysisExecutor(db_session)
         saved_count = await executor.save_proposals(run.id, proposals)
@@ -482,7 +482,7 @@ async def test_update_progress(db_session):
     await db_session.refresh(run)
 
     # Mock WebSocket manager
-    with patch("app.services.analysis_service.websocket_manager", AsyncMock()):
+    with patch("app.services.analysis.analysis_executor.websocket_manager", AsyncMock()):
         # Update progress
         executor = AnalysisExecutor(db_session)
         await executor.update_progress(run.id, current=3, total=10)
@@ -557,7 +557,7 @@ async def test_complete_run(db_session):
     await db_session.refresh(run)
 
     # Mock WebSocket manager
-    with patch("app.services.analysis_service.websocket_manager", AsyncMock()):
+    with patch("app.services.analysis.analysis_executor.websocket_manager", AsyncMock()):
         # Complete run
         executor = AnalysisExecutor(db_session)
         summary = await executor.complete_run(run.id)
@@ -634,7 +634,7 @@ async def test_fail_run(db_session):
     await db_session.refresh(run)
 
     # Mock WebSocket manager
-    with patch("app.services.analysis_service.websocket_manager", AsyncMock()):
+    with patch("app.services.analysis.analysis_executor.websocket_manager", AsyncMock()):
         # Fail run
         executor = AnalysisExecutor(db_session)
         await executor.fail_run(run.id, "LLM connection timeout")

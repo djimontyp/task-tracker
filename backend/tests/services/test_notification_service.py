@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from app.models.notification_preference import DigestFrequency, NotificationPreference
 from app.services.notification_service import notification_service
-from app.services.versioning_service import VersioningService
+from app.services.versioning import VersioningService
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
