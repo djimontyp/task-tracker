@@ -10,6 +10,8 @@ Tests cover:
 4. Basic vector operations (not available in SQLite)
 """
 
+import os
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -205,7 +207,10 @@ class TestPgvectorSetup:
             assert len(msg.embedding) == 1536
 
 
-@pytest.mark.skipif(True, reason="Requires PostgreSQL with pgvector extension")
+@pytest.mark.skipif(
+    os.getenv("TEST_DATABASE_URL", "sqlite").startswith("sqlite"),
+    reason="Requires PostgreSQL with pgvector extension"
+)
 @pytest.mark.asyncio
 class TestPgvectorOperations:
     """Test suite for pgvector-specific operations.

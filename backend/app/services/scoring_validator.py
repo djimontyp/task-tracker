@@ -114,7 +114,7 @@ class ScoringValidator:
     def load_validation_dataset(self, path: str | Path) -> list[ValidationMessage]:
         """Load validation dataset from JSON file.
 
-        Expected JSON format:
+        Expected JSON format (Option 1 - flat array):
         [
             {
                 "content": "message text",
@@ -124,6 +124,19 @@ class ScoringValidator:
             },
             ...
         ]
+
+        Expected JSON format (Option 2 - nested with metadata):
+        {
+            "messages": [
+                {
+                    "text": "message text",
+                    "label": "noise|weak_signal|signal",
+                    "id": "msg_123"
+                },
+                ...
+            ],
+            "metadata": {...}
+        }
 
         Args:
             path: Path to validation JSON file
@@ -146,28 +159,54 @@ class ScoringValidator:
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON format in {path}: {e}") from e
 
-        if not isinstance(data, list):
-            raise ValueError(f"Expected JSON array, got {type(data).__name__}")
+        # Handle both flat array and nested object formats
+        if isinstance(data, dict) and "messages" in data:
+            # Format 2: {"messages": [...], "metadata": {...}}
+            items = data["messages"]
+            field_mapping = {
+                "content": "text",
+                "ground_truth": "label",
+                "message_id": "id",
+            }
+        elif isinstance(data, list):
+            # Format 1: [{...}, {...}, ...]
+            items = data
+            field_mapping = {
+                "content": "content",
+                "ground_truth": "ground_truth",
+                "message_id": "message_id",
+            }
+        else:
+            raise ValueError(f"Expected JSON array or object with 'messages' key, got {type(data).__name__}")
 
         messages: list[ValidationMessage] = []
-        for idx, item in enumerate(data):
+        for idx, item in enumerate(items):
             if not isinstance(item, dict):
                 raise ValueError(f"Item {idx} is not a dict: {type(item).__name__}")
 
-            if "content" not in item or "ground_truth" not in item:
-                raise ValueError(f"Item {idx} missing required fields: content, ground_truth")
+            # Get content and ground truth using field mapping
+            content = item.get(field_mapping["content"])
+            ground_truth = item.get(field_mapping["ground_truth"])
 
-            if item["ground_truth"] not in self.categories:
+            if not content:
+                raise ValueError(f"Item {idx} missing required field: {field_mapping['content']}")
+            if not ground_truth:
+                raise ValueError(f"Item {idx} missing required field: {field_mapping['ground_truth']}")
+
+            if ground_truth not in self.categories:
                 raise ValueError(
-                    f"Item {idx} has invalid ground_truth '{item['ground_truth']}'. Expected one of: {self.categories}"
+                    f"Item {idx} has invalid ground_truth '{ground_truth}'. Expected one of: {self.categories}"
                 )
+
+            message_id_field = field_mapping["message_id"]
+            message_id_value = item.get(message_id_field)
 
             messages.append(
                 ValidationMessage(
-                    content=item["content"],
-                    ground_truth=item["ground_truth"],
+                    content=content,
+                    ground_truth=ground_truth,
                     author_id=item.get("author_id", 1),
-                    message_id=item.get("message_id"),
+                    message_id=message_id_value if isinstance(message_id_value, int) else None,
                 )
             )
 
