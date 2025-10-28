@@ -3,6 +3,8 @@
 from datetime import datetime
 from enum import Enum
 
+from pydantic import BaseModel
+from pydantic import Field as PydanticField
 from sqlalchemy import Boolean, Column, Integer, String, Text
 from sqlmodel import Field, SQLModel
 
@@ -23,6 +25,40 @@ class LogicOperator(str, Enum):
 
     AND = "AND"
     OR = "OR"
+
+
+class ConditionOperator(str, Enum):
+    """Available comparison operators for rule conditions."""
+
+    gte = "gte"
+    lte = "lte"
+    gt = "gt"
+    lt = "lt"
+    eq = "eq"
+    neq = "neq"
+    contains = "contains"
+    starts_with = "starts_with"
+    ends_with = "ends_with"
+
+
+class RuleCondition(BaseModel):
+    """
+    Single condition in an automation rule.
+
+    Evaluates a field from version data against an expected value
+    using a comparison operator.
+    """
+
+    field: str = PydanticField(
+        description="Field path to evaluate (e.g., 'confidence', 'topic.name')",
+        min_length=1,
+    )
+    operator: ConditionOperator = PydanticField(
+        description="Comparison operator to apply",
+    )
+    value: str | int | float = PydanticField(
+        description="Expected value to compare against",
+    )
 
 
 class AutomationRule(IDMixin, TimestampMixin, SQLModel, table=True):

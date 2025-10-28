@@ -7,8 +7,7 @@ from typing import Any
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.schemas.automation import ConditionOperator, RuleCondition
-from app.models.automation_rule import AutomationRule, LogicOperator, RuleAction
+from app.models.automation_rule import AutomationRule, ConditionOperator, LogicOperator, RuleAction, RuleCondition
 from app.services.versioning_service import VersioningService
 from app.services.websocket_manager import websocket_manager
 

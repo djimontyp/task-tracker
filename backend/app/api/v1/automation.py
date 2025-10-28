@@ -484,7 +484,7 @@ async def get_rule_templates() -> list[dict]:
     return RULE_TEMPLATES
 
 
-@router.post(
+@rules_router.post(
     "/preview",
     response_model=RulePreviewResponse,
     summary="Preview rule impact",

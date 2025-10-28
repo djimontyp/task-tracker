@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.llm.startup import initialize_llm_system
+from app.middleware import ErrorHandlerMiddleware
 
 from .api.v1.router import api_router
 from .database import create_db_and_tables
@@ -84,6 +85,8 @@ def create_app() -> FastAPI:
     # Default allows localhost development, override with CORS_ORIGINS env var for production
     cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost,http://localhost:80").split(",")
 
+    app.add_middleware(ErrorHandlerMiddleware)
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins,
@@ -129,13 +132,26 @@ app = create_app()
 @app.on_event("startup")
 async def startup() -> None:
     """Initialize database, LLM system, TaskIQ broker, and WebSocketManager on startup"""
+    from tenacity import retry, stop_after_attempt, wait_exponential
+
     from app.services.websocket_manager import websocket_manager
 
     initialize_llm_system()
-    await create_db_and_tables()
+
+    @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=10))
+    async def connect_db() -> None:
+        await create_db_and_tables()
+
+    await connect_db()
+
     if not nats_broker.is_worker_process:
-        await nats_broker.startup()
-        await websocket_manager.startup(settings.taskiq.taskiq_nats_servers)
+
+        @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=1, max=10))
+        async def connect_nats() -> None:
+            await nats_broker.startup()
+            await websocket_manager.startup(settings.taskiq.taskiq_nats_servers)
+
+        await connect_nats()
 
 
 @app.on_event("shutdown")
