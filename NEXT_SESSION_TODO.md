@@ -1,6 +1,6 @@
 # Technical Debt TODO
 
-**Updated:** 2025-10-27
+**Updated:** 2025-10-28
 **Focus:** Critical Refactorings & Code Quality
 
 ---
@@ -18,9 +18,79 @@
 - Result: Fully functional monitoring dashboard with polling updates
 - Phases: UX Design → Specification → Backend Implementation → Frontend Dashboard
 
+✅ **Feature 3: Business Logic Consistency Completed (2025-10-28):**
+- **Duration:** 18 hours (4 agents: 2x llm-ml-engineer, documentation-expert, fastapi-backend-expert)
+- **Deliverables:**
+  1. AI Infrastructure Analysis (15000+ words, 2 comprehensive reports)
+     - Knowledge Extraction + Embeddings + Topics/Atoms (15 problems found)
+     - Message Scoring + Analysis System + Auto-Task Chain (5 critical issues)
+  2. Unified AI Documentation (`docs/content/uk/architecture/ai-infrastructure.md`, 1284 lines, українською)
+  3. Config Refactoring (`backend/app/config/ai_config.py`, 23 magic numbers → typed config)
+- **Key Findings:**
+  - 🔴 3 Critical: LLM timeout fallback, validation framework, retry mechanism
+  - ⚠️ 6 High: Cost tracking, noise filtering, checkpointing
+  - 💰 ROI: **$1200/month savings** (80% LLM cost reduction potential)
+  - Production Readiness Score: **6/10**
+- **Location:** `.artifacts/ai-infrastructure-analysis.md`, `.artifacts/product-ready-epic/batch-1.2-ai-infrastructure-analysis.md`
+
 ---
 
-## 🔴 CRITICAL PRIORITY (Week 2 - 7 hours)
+---
+
+## 🚨 IMMEDIATE NEXT SESSION (Feature 3 Critical Fixes - 5-6h)
+
+**Context:** Feature 3 AI аналіз виявив критичні production blockers
+
+### 0. Validation Framework for Message Scoring - ROI: 100/100
+**Problem:** Scoring accuracy unknown (no ground truth, no metrics)
+**Location:** `/backend/app/services/importance_scorer.py`
+**Effort:** 3-4 hours | **Impact:** CRITICAL (prevent false negatives)
+
+**Actions:**
+- [ ] Create ground truth dataset: 100 messages manually labeled (noise/weak_signal/signal)
+- [ ] Implement `ScoringValidator` class:
+  ```python
+  # backend/app/services/scoring_validator.py
+  class ScoringValidator:
+      async def validate(self, ground_truth_dataset):
+          # Calculate precision, recall, F1-score
+          # Return metrics + confusion matrix
+  ```
+- [ ] Run validation → tune thresholds (0.3/0.7) based on F1-score
+- [ ] Add monitoring dashboard for false positive/negative rate
+
+**Win:** Data-driven thresholds, measure actual accuracy (target: 85% F1-score)
+
+---
+
+### 0.1 Retry Mechanism with Exponential Backoff - ROI: 100/100
+**Problem:** Tasks fail permanently on transient errors (no retry, no DLQ)
+**Location:** `/backend/app/tasks.py`
+**Effort:** 2 hours | **Impact:** CRITICAL (prevent message loss)
+
+**Actions:**
+- [ ] Add `tenacity` dependency: `uv add tenacity`
+- [ ] Wrap critical tasks with retry decorator:
+  ```python
+  from tenacity import retry, stop_after_attempt, wait_exponential
+
+  @retry(
+      stop=stop_after_attempt(3),
+      wait=wait_exponential(multiplier=2, min=4, max=60),
+      retry=retry_if_exception_type((NetworkError, TimeoutError))
+  )
+  @nats_broker.task
+  async def score_message_task(message_id: int):
+      ...
+  ```
+- [ ] Add DLQ for permanent failures
+- [ ] Test with simulated NATS failure
+
+**Win:** Resilience, prevent 1% failure rate = 300 lost messages/month
+
+---
+
+## 🔴 CRITICAL PRIORITY (Week 2 - 7 hours remaining)
 
 ### 1. God File: tasks.py (1,348 LOC) - ROI: 95/100
 **Problem:** Monolithic file with all background tasks
@@ -207,7 +277,23 @@
 
 ## 🗓️ Recommended Sequence
 
-### **Week 2: Critical Refactorings** (7 hours remaining)
+### **IMMEDIATE (Feature 3 Critical Fixes)** (5-6 hours)
+**Priority:** 🚨 URGENT - Production Blockers
+
+**Next Session Start Here:**
+- [ ] Validation framework for scoring (3-4h) - Task 0
+- [ ] Retry mechanism + exponential backoff (2h) - Task 0.1
+
+**Why First:**
+- Prevent critical bugs from being missed (false negatives)
+- Prevent permanent message loss (transient errors)
+- Data from Feature 3 analysis shows 6/10 production readiness
+
+**Result:** Production-ready AI infrastructure, validated thresholds
+
+---
+
+### **Week 2: Critical Refactorings** (7 hours remaining after Feature 3 fixes)
 **Priority:** 🔴 High
 
 **Day 1-2:**
@@ -219,8 +305,10 @@
 **Completed:**
 - [x] Background Task Monitoring System (6 hours) ✅
   - UX design → specification → backend → frontend
+- [x] Feature 3: Business Logic Consistency (18 hours) ✅
+  - AI infrastructure analysis + documentation + config refactoring
 
-**Result:** Architectural integrity + operational visibility
+**Result:** Architectural integrity + operational visibility + validated AI system
 
 ---
 
@@ -261,5 +349,28 @@
 
 ---
 
-**Total Estimated Time:** 33 hours remaining (spread over 2-3 weeks)
-**Next Session Priority:** Week 2 Critical Refactorings (tasks.py split + circular deps fix)
+## 📋 Session Restore Context
+
+**Якщо втратив context, почни тут:**
+
+1. **Прочитай Feature 3 результати:**
+   - Executive Summary: `.artifacts/product-ready-epic/ANALYSIS-SUMMARY.md`
+   - Повний звіт 1: `.artifacts/ai-infrastructure-analysis.md` (Knowledge Extraction + Embeddings)
+   - Повний звіт 2: `.artifacts/product-ready-epic/batch-1.2-ai-infrastructure-analysis.md` (Scoring + Analysis)
+   - Unified docs: `docs/content/uk/architecture/ai-infrastructure.md`
+
+2. **Критичні проблеми (need immediate fix):**
+   - NO validation dataset → can't measure scoring accuracy
+   - NO retry mechanism → transient errors = permanent failures
+   - Cost waste: $1500/month (можна $300/month з filtering)
+
+3. **Config вже готово:**
+   - `backend/app/config/ai_config.py` (23 magic numbers extracted)
+   - All services updated to use typed config
+
+4. **Наступний крок:** Implement Task 0 + Task 0.1 (validation + retry)
+
+---
+
+**Total Estimated Time:** 38-39 hours remaining (5-6h urgent + 33h planned)
+**Next Session Priority:** 🚨 Feature 3 Critical Fixes (validation + retry) THEN Week 2 Refactorings

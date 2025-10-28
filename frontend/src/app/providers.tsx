@@ -23,7 +23,7 @@ interface ProvidersProps {
 const Providers = ({ children }: ProvidersProps) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename="/dashboard">
+      <BrowserRouter>
         <ThemeProvider>
           {children}
         </ThemeProvider>

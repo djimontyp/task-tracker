@@ -13,6 +13,7 @@ from sqlalchemy import func
 from sqlmodel import desc, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.config.ai_config import ai_config
 from app.models import (
     AgentConfig,
     AgentTaskAssignment,
@@ -485,7 +486,7 @@ class AnalysisExecutor:
     async def create_batches(self, messages: list[Message]) -> list[list[Message]]:
         """Group messages into batches for LLM processing.
 
-        Groups messages by time proximity (5-10min windows) with max 50 messages per batch.
+        Groups messages by time proximity with configurable gap and max batch size.
 
         Args:
             messages: List of filtered messages
@@ -504,7 +505,10 @@ class AnalysisExecutor:
         for msg in sorted_messages[1:]:
             time_diff = (msg.sent_at - current_batch[-1].sent_at).total_seconds()
 
-            if time_diff > 600 or len(current_batch) >= 50:
+            if (
+                time_diff > ai_config.analysis.time_gap_seconds
+                or len(current_batch) >= ai_config.analysis.max_batch_size
+            ):
                 batches.append(current_batch)
                 current_batch = [msg]
             else:

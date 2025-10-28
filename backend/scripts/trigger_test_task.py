@@ -1,6 +1,6 @@
 """Trigger test task via HTTP API to generate monitoring events."""
+
 import asyncio
-import json
 
 import httpx
 

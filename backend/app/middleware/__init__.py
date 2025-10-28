@@ -1,5 +1,3 @@
-"""Middleware modules for the application."""
+from app.middleware.error_handler import ErrorHandlerMiddleware
 
-from app.middleware.taskiq_logging_middleware import TaskLoggingMiddleware
-
-__all__ = ["TaskLoggingMiddleware"]
+__all__ = ["ErrorHandlerMiddleware"]
