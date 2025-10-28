@@ -1,8 +1,16 @@
 """Tests for stats API endpoints."""
 
+from datetime import datetime
+from uuid import UUID
+
 import pytest
+
 from app.models import AnalysisRun, TaskProposal
-from app.models.enums import AnalysisRunStatus, ProposalStatus
+from app.models.agent_config import AgentConfig
+from app.models.agent_task_assignment import AgentTaskAssignment
+from app.models.enums import AnalysisRunStatus, ProposalStatus, ProviderType
+from app.models.llm_provider import LLMProvider
+from app.models.task_config import TaskConfig
 from httpx import AsyncClient
 
 
@@ -22,27 +30,63 @@ async def test_sidebar_counts_empty(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_sidebar_counts_with_data(client: AsyncClient, db_session):
     """Test sidebar counts with unclosed runs and pending proposals."""
+    # Create FK dependencies: provider -> agent, task -> assignment
+    test_assignment_id = UUID("123e4567-e89b-12d3-a456-426614174000")
+
+    provider = LLMProvider(
+        name="Test Provider",
+        type=ProviderType.ollama,
+        base_url="http://localhost:11434",
+    )
+    db_session.add(provider)
+    await db_session.flush()
+
+    agent = AgentConfig(
+        name="Test Agent",
+        provider_id=provider.id,
+        model_name="llama3.2:latest",
+        system_prompt="Test prompt",
+    )
+    db_session.add(agent)
+    await db_session.flush()
+
+    task = TaskConfig(
+        name="Test Task",
+        agent_task_name="test_task",
+        schedule_expression="0 0 * * *",
+    )
+    db_session.add(task)
+    await db_session.flush()
+
+    assignment = AgentTaskAssignment(
+        id=test_assignment_id,
+        agent_id=agent.id,
+        task_id=task.id,
+    )
+    db_session.add(assignment)
+    await db_session.flush()
+
     # Create analysis runs with different statuses
     run_pending = AnalysisRun(
-        time_window_start="2025-10-11T00:00:00Z",
-        time_window_end="2025-10-11T23:59:59Z",
-        agent_assignment_id="123e4567-e89b-12d3-a456-426614174000",
+        time_window_start=datetime(2025, 10, 11, 0, 0, 0),
+        time_window_end=datetime(2025, 10, 11, 23, 59, 59),
+        agent_assignment_id=test_assignment_id,
         config_snapshot={},
         status=AnalysisRunStatus.pending.value,
         trigger_type="manual",
     )
     run_running = AnalysisRun(
-        time_window_start="2025-10-10T00:00:00Z",
-        time_window_end="2025-10-10T23:59:59Z",
-        agent_assignment_id="123e4567-e89b-12d3-a456-426614174000",
+        time_window_start=datetime(2025, 10, 10, 0, 0, 0),
+        time_window_end=datetime(2025, 10, 10, 23, 59, 59),
+        agent_assignment_id=test_assignment_id,
         config_snapshot={},
         status=AnalysisRunStatus.running.value,
         trigger_type="manual",
     )
     run_closed = AnalysisRun(
-        time_window_start="2025-10-09T00:00:00Z",
-        time_window_end="2025-10-09T23:59:59Z",
-        agent_assignment_id="123e4567-e89b-12d3-a456-426614174000",
+        time_window_start=datetime(2025, 10, 9, 0, 0, 0),
+        time_window_end=datetime(2025, 10, 9, 23, 59, 59),
+        agent_assignment_id=test_assignment_id,
         config_snapshot={},
         status=AnalysisRunStatus.closed.value,
         trigger_type="manual",
@@ -110,10 +154,46 @@ async def test_sidebar_counts_with_data(client: AsyncClient, db_session):
 @pytest.mark.asyncio
 async def test_sidebar_counts_only_closed_runs(client: AsyncClient, db_session):
     """Test that closed runs are not counted."""
+    # Create FK dependencies: provider -> agent, task -> assignment
+    test_assignment_id = UUID("123e4567-e89b-12d3-a456-426614174000")
+
+    provider = LLMProvider(
+        name="Test Provider",
+        type=ProviderType.ollama,
+        base_url="http://localhost:11434",
+    )
+    db_session.add(provider)
+    await db_session.flush()
+
+    agent = AgentConfig(
+        name="Test Agent",
+        provider_id=provider.id,
+        model_name="llama3.2:latest",
+        system_prompt="Test prompt",
+    )
+    db_session.add(agent)
+    await db_session.flush()
+
+    task = TaskConfig(
+        name="Test Task",
+        agent_task_name="test_task",
+        schedule_expression="0 0 * * *",
+    )
+    db_session.add(task)
+    await db_session.flush()
+
+    assignment = AgentTaskAssignment(
+        id=test_assignment_id,
+        agent_id=agent.id,
+        task_id=task.id,
+    )
+    db_session.add(assignment)
+    await db_session.flush()
+
     run_closed = AnalysisRun(
-        time_window_start="2025-10-11T00:00:00Z",
-        time_window_end="2025-10-11T23:59:59Z",
-        agent_assignment_id="123e4567-e89b-12d3-a456-426614174000",
+        time_window_start=datetime(2025, 10, 11, 0, 0, 0),
+        time_window_end=datetime(2025, 10, 11, 23, 59, 59),
+        agent_assignment_id=test_assignment_id,
         config_snapshot={},
         status=AnalysisRunStatus.closed.value,
         trigger_type="manual",

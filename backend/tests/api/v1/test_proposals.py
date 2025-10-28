@@ -113,7 +113,10 @@ async def test_list_proposals(client, db_session):
     response = await client.get("/api/v1/analysis/proposals")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 5
+    assert "items" in data
+    assert "total" in data
+    assert len(data["items"]) == 5
+    assert data["total"] == 5
 
 
 @pytest.mark.asyncio
@@ -227,8 +230,8 @@ async def test_filter_by_run_id(client, db_session):
     response = await client.get(f"/api/v1/analysis/proposals?run_id={run1.id}")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 3
-    for item in data:
+    assert len(data["items"]) == 3
+    for item in data["items"]:
         assert item["analysis_run_id"] == str(run1.id)
 
 
@@ -804,8 +807,8 @@ async def test_filter_by_confidence(client, db_session):
     response = await client.get("/api/v1/analysis/proposals?confidence_min=0.85")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 3  # 0.85, 0.90, 0.95
-    for item in data:
+    assert len(data["items"]) == 3  # 0.85, 0.90, 0.95
+    for item in data["items"]:
         assert item["confidence"] >= 0.85
 
 

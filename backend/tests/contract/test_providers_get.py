@@ -20,8 +20,8 @@ async def test_list_all_providers(client: AsyncClient):
     response = await client.get("/api/v1/providers")
     assert response.status_code == 200
     data = response.json()
-    assert "providers" in data
-    assert len(data["providers"]) >= 2
+    assert isinstance(data, list)
+    assert len(data) >= 2
 
 
 @pytest.mark.asyncio

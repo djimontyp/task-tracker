@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from app.models.atom import Atom
 from app.models.topic import Topic
-from app.services.versioning_service import VersioningService
+from app.services.versioning import VersioningService
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

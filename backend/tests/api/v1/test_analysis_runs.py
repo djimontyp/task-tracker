@@ -94,7 +94,12 @@ async def test_list_runs(client, db_session):
         response = await client.get("/api/v1/analysis/runs")
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 5
+        assert "items" in data
+        assert "total" in data
+        assert "page" in data
+        assert "page_size" in data
+        assert len(data["items"]) == 5
+        assert data["total"] == 5
 
 
 @pytest.mark.asyncio
@@ -563,15 +568,15 @@ async def test_filters_work(client, db_session):
     response = await client.get(f"/api/v1/analysis/runs?status={AnalysisRunStatus.pending.value}")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
-    assert data[0]["status"] == AnalysisRunStatus.pending.value
+    assert len(data["items"]) == 1
+    assert data["items"][0]["status"] == AnalysisRunStatus.pending.value
 
     # Test trigger_type filter
     response = await client.get("/api/v1/analysis/runs?trigger_type=scheduled")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
-    assert data[0]["trigger_type"] == "scheduled"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["trigger_type"] == "scheduled"
 
 
 @pytest.mark.asyncio
@@ -638,12 +643,17 @@ async def test_start_run_endpoint(client, db_session):
     await db_session.commit()
     await db_session.refresh(run)
 
-    # Start run
-    response = await client.post(f"/api/v1/analysis/runs/{run.id}/start")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["status"] == "started"
-    assert "run_id" in data
+    # Mock TaskIQ background task (imported inside function, so patch at source)
+    with patch("app.tasks.execute_analysis_run") as mock_task:
+        mock_task.kiq = AsyncMock()
+        # Start run
+        response = await client.post(f"/api/v1/analysis/runs/{run.id}/start")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "started"
+        assert "run_id" in data
+        # Verify background task was triggered
+        mock_task.kiq.assert_called_once()
 
 
 @pytest.mark.asyncio
