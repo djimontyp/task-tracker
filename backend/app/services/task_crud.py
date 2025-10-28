@@ -6,10 +6,17 @@ with schema validation support.
 
 from uuid import UUID
 
-from sqlmodel import select
+from sqlmodel import delete, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models import TaskConfig, TaskConfigCreate, TaskConfigPublic, TaskConfigUpdate
+from app.models import (
+    AgentTaskAssignment,
+    TaskConfig,
+    TaskConfigCreate,
+    TaskConfigPublic,
+    TaskConfigUpdate,
+)
+from app.services.base_crud import BaseCRUD
 from app.services.schema_generator import SchemaGenerator
 
 
@@ -23,6 +30,7 @@ class TaskCRUD:
             session: Async database session
         """
         self.session = session
+        self._base_crud = BaseCRUD(TaskConfig, session)
         self.schema_generator = SchemaGenerator()
 
     async def create(self, task_data: TaskConfigCreate) -> TaskConfigPublic:
@@ -71,8 +79,7 @@ class TaskCRUD:
         Returns:
             Task if found, None otherwise
         """
-        result = await self.session.execute(select(TaskConfig).where(TaskConfig.id == task_id))
-        task = result.scalar_one_or_none()
+        task = await self._base_crud.get(task_id)
 
         if task:
             return TaskConfigPublic.model_validate(task)
@@ -173,14 +180,11 @@ class TaskCRUD:
             True if deleted, False if not found
 
         Note:
-            Will cascade delete agent_task_assignments due to FK constraint.
+            Manually deletes agent_task_assignments before deleting task.
         """
-        result = await self.session.execute(select(TaskConfig).where(TaskConfig.id == task_id))
-        task = result.scalar_one_or_none()
-
-        if not task:
-            return False
-
-        await self.session.delete(task)
-        await self.session.commit()
-        return True
+        # First, delete all agent task assignments
+        await self.session.execute(
+            delete(AgentTaskAssignment).where(AgentTaskAssignment.task_id == task_id)
+        )
+        # Then delete the task itself
+        return await self._base_crud.delete(task_id)
