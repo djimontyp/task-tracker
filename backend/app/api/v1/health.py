@@ -1,9 +1,8 @@
 from datetime import datetime
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
-from app.dependencies import SettingsDep
 from app.tasks import score_message_task
 
 from .response_models import ConfigResponse, HealthResponse
@@ -38,14 +37,22 @@ async def health_check() -> HealthResponse:
     summary="Get client configuration",
     response_description="WebSocket and API base URLs for client connection",
 )
-async def get_client_config(settings: SettingsDep) -> ConfigResponse:
+async def get_client_config(request: Request) -> ConfigResponse:
     """
     Get client-side configuration for WebSocket and API connections.
 
-    Returns properly formatted URLs based on current API base URL setting.
+    Detects nginx proxy via X-Forwarded-* headers and returns appropriate URLs.
+    Falls back to localhost for local development without nginx.
     """
-    base_url = settings.app.api_base_url.replace("http://", "").replace("https://", "")
-    return ConfigResponse(wsUrl=f"ws://{base_url}/ws", apiBaseUrl=f"http://{base_url}")
+    forwarded_host = request.headers.get("x-forwarded-host")
+    forwarded_proto = request.headers.get("x-forwarded-proto", "http")
+    host = forwarded_host or request.headers.get("host", "localhost")
+
+    ws_scheme = "wss" if forwarded_proto == "https" else "ws"
+    ws_url = f"{ws_scheme}://{host}/ws"
+    api_base_url = f"{forwarded_proto}://{host}"
+
+    return ConfigResponse(wsUrl=ws_url, apiBaseUrl=api_base_url)
 
 
 @router.post(
