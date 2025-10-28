@@ -22,9 +22,9 @@ const AnalyticsPage = () => {
     )
   }
 
-  const completionRate = stats && stats.total > 0
-    ? ((stats.completed / stats.total) * 100).toFixed(1)
-    : '0.0'
+  const total = stats?.total_tasks || 0
+  const completed = stats?.by_status.completed || 0
+  const completionRate = total > 0 ? ((completed / total) * 100).toFixed(1) : '0.0'
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
@@ -54,19 +54,19 @@ const AnalyticsPage = () => {
 
                 <div className="grid grid-cols-2 gap-4 pt-4">
                   <div className="text-center p-4 bg-primary/10 rounded-lg border border-primary/20">
-                    <div className="text-2xl font-bold text-primary">{stats?.total || 0}</div>
+                    <div className="text-2xl font-bold text-primary">{stats?.total_tasks || 0}</div>
                     <div className="text-sm text-muted-foreground mt-1">Total Tasks</div>
                   </div>
                   <div className="text-center p-4 bg-primary/10 rounded-lg border border-primary/20">
-                    <div className="text-2xl font-bold text-primary-400">{stats?.pending || 0}</div>
-                    <div className="text-sm text-muted-foreground mt-1">Pending</div>
+                    <div className="text-2xl font-bold text-primary-400">{stats?.by_status.open || 0}</div>
+                    <div className="text-sm text-muted-foreground mt-1">Open</div>
                   </div>
                   <div className="text-center p-4 bg-secondary/10 rounded-lg border border-secondary/30">
-                    <div className="text-2xl font-bold text-secondary-foreground">{stats?.in_progress || 0}</div>
+                    <div className="text-2xl font-bold text-secondary-foreground">{stats?.by_status.in_progress || 0}</div>
                     <div className="text-sm text-muted-foreground mt-1">In Progress</div>
                   </div>
                   <div className="text-center p-4 bg-accent/10 rounded-lg border border-accent/30">
-                    <div className="text-2xl font-bold text-accent">{stats?.completed || 0}</div>
+                    <div className="text-2xl font-bold text-accent">{stats?.by_status.completed || 0}</div>
                     <div className="text-sm text-muted-foreground mt-1">Completed</div>
                   </div>
                 </div>
@@ -78,21 +78,21 @@ const AnalyticsPage = () => {
               <div className="space-y-3">
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm text-muted-foreground">Pending</span>
-                    <span className="text-sm font-medium text-foreground">{stats?.pending || 0}</span>
+                    <span className="text-sm text-muted-foreground">Open</span>
+                    <span className="text-sm font-medium text-foreground">{stats?.by_status.open || 0}</span>
                   </div>
                   <div
                     className="w-full bg-muted rounded-full h-2"
                     role="progressbar"
                     aria-valuemin={0}
                     aria-valuemax={100}
-                    aria-label={`Pending tasks: ${stats?.pending || 0} out of ${stats?.total || 0}`}
+                    aria-label={`Open tasks: ${stats?.by_status.open || 0} out of ${stats?.total_tasks || 0}`}
                   >
                     <div
                       className="bg-primary h-2 rounded-full transition-all duration-300"
                       style={{
-                        width: stats && stats.total > 0
-                          ? `${(stats.pending / stats.total) * 100}%`
+                        width: stats && stats.total_tasks > 0
+                          ? `${(stats.by_status.open / stats.total_tasks) * 100}%`
                           : '0%'
                       }}
                     />
@@ -102,20 +102,20 @@ const AnalyticsPage = () => {
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm text-muted-foreground">In Progress</span>
-                    <span className="text-sm font-medium text-foreground">{stats?.in_progress || 0}</span>
+                    <span className="text-sm font-medium text-foreground">{stats?.by_status.in_progress || 0}</span>
                   </div>
                   <div
                     className="w-full bg-muted rounded-full h-2"
                     role="progressbar"
                     aria-valuemin={0}
                     aria-valuemax={100}
-                    aria-label={`In progress tasks: ${stats?.in_progress || 0} out of ${stats?.total || 0}`}
+                    aria-label={`In progress tasks: ${stats?.by_status.in_progress || 0} out of ${stats?.total_tasks || 0}`}
                   >
                     <div
                       className="bg-secondary h-2 rounded-full transition-all duration-300"
                       style={{
-                        width: stats && stats.total > 0
-                          ? `${(stats.in_progress / stats.total) * 100}%`
+                        width: stats && stats.total_tasks > 0
+                          ? `${(stats.by_status.in_progress / stats.total_tasks) * 100}%`
                           : '0%'
                       }}
                     />
@@ -125,20 +125,20 @@ const AnalyticsPage = () => {
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm text-muted-foreground">Completed</span>
-                    <span className="text-sm font-medium text-foreground">{stats?.completed || 0}</span>
+                    <span className="text-sm font-medium text-foreground">{stats?.by_status.completed || 0}</span>
                   </div>
                   <div
                     className="w-full bg-muted rounded-full h-2"
                     role="progressbar"
                     aria-valuemin={0}
                     aria-valuemax={100}
-                    aria-label={`Completed tasks: ${stats?.completed || 0} out of ${stats?.total || 0}`}
+                    aria-label={`Completed tasks: ${stats?.by_status.completed || 0} out of ${stats?.total_tasks || 0}`}
                   >
                     <div
                       className="bg-accent h-2 rounded-full transition-all duration-300"
                       style={{
-                        width: stats && stats.total > 0
-                          ? `${(stats.completed / stats.total) * 100}%`
+                        width: stats && stats.total_tasks > 0
+                          ? `${(stats.by_status.completed / stats.total_tasks) * 100}%`
                           : '0%'
                       }}
                     />
@@ -147,20 +147,20 @@ const AnalyticsPage = () => {
 
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm text-muted-foreground">Cancelled</span>
-                    <span className="text-sm font-medium text-foreground">{stats?.cancelled || 0}</span>
+                    <span className="text-sm text-muted-foreground">Closed</span>
+                    <span className="text-sm font-medium text-foreground">{stats?.by_status.closed || 0}</span>
                   </div>
                   <div
                     className="w-full bg-muted rounded-full h-2"
                     role="progressbar"
                     aria-valuemin={0}
-                    aria-label={`Cancelled tasks: ${stats?.cancelled || 0} out of ${stats?.total || 0}`}
+                    aria-label={`Closed tasks: ${stats?.by_status.closed || 0} out of ${stats?.total_tasks || 0}`}
                   >
                     <div
                       className="bg-destructive h-2 rounded-full transition-all duration-300"
                       style={{
-                        width: stats && stats.total > 0
-                          ? `${(stats.cancelled / stats.total) * 100}%`
+                        width: stats && stats.total_tasks > 0
+                          ? `${(stats.by_status.closed / stats.total_tasks) * 100}%`
                           : '0%'
                       }}
                     />

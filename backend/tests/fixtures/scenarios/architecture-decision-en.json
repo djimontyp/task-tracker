@@ -1,0 +1,172 @@
+{
+  "scenario": "architecture_decision_discussion",
+  "language": "en",
+  "description": "In-depth architecture decision discussion with trade-offs, alternatives, and final decision. High signal-to-noise ratio with links to documentation.",
+  "messages": [
+    {
+      "order": 1,
+      "text": "We need to decide on a caching strategy for embeddings. Currently regenerating on every search is expensive",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "problem_statement",
+        "content_categories": ["architecture_decision", "performance"]
+      }
+    },
+    {
+      "order": 2,
+      "text": "What are the options?",
+      "language": "en",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "clarifying_question",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 3,
+      "text": "Three main approaches:\n1. Redis cache - fast, but requires invalidation logic\n2. Database cache table - simpler, leverages existing infra\n3. Application memory - fastest, but doesn't scale across instances",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "architecture_alternatives",
+        "content_categories": ["solution_options", "architecture"]
+      }
+    },
+    {
+      "order": 4,
+      "text": "Let's break down each option",
+      "language": "en",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "discussion_direction",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 5,
+      "text": "Option 1 - Redis:\nPros: Very fast (sub-ms), shared across instances, TTL built-in\nCons: Extra dependency, cache invalidation complexity, memory overhead\nCost: ~$50/mo for managed Redis",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "tradeoff_analysis",
+        "content_categories": ["architecture_evaluation", "cost_analysis"]
+      }
+    },
+    {
+      "order": 6,
+      "text": "Option 2 - DB cache table:\nPros: No new dependencies, simple invalidation (CASCADE), already have pg connection pooling\nCons: Slightly slower (~5ms), adds DB load\nCost: Free (existing Postgres)",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "tradeoff_analysis",
+        "content_categories": ["architecture_evaluation", "cost_analysis"]
+      }
+    },
+    {
+      "order": 7,
+      "text": "Option 3 - App memory:\nPros: Fastest possible (<1ms), no network calls\nCons: Doesn't scale horizontally, lost on restart, memory limits per instance\nCost: Free",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "tradeoff_analysis",
+        "content_categories": ["architecture_evaluation", "scalability"]
+      }
+    },
+    {
+      "order": 8,
+      "text": "What's our scale? How many embeddings per day?",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "requirements_question",
+        "content_categories": ["scalability", "metrics"]
+      }
+    },
+    {
+      "order": 9,
+      "text": "Currently ~500/day, but expecting 5-10k/day within 3 months. We'll need multi-instance deployment for availability",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "requirements_clarification",
+        "content_categories": ["scale_requirements", "growth_projection"]
+      }
+    },
+    {
+      "order": 10,
+      "text": "That rules out option 3. Between Redis and DB, I'd lean towards DB for simplicity",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "recommendation",
+        "content_categories": ["decision_rationale"]
+      }
+    },
+    {
+      "order": 11,
+      "text": "Agree. Redis adds operational complexity. The 4ms difference won't matter for our use case",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "decision_agreement",
+        "content_categories": ["decision_rationale", "performance_tradeoff"]
+      }
+    },
+    {
+      "order": 12,
+      "text": "What about cache hit rate? How do we measure if it's effective?",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "observability_question",
+        "content_categories": ["monitoring", "metrics"]
+      }
+    },
+    {
+      "order": 13,
+      "text": "Good point. We should track:\n1. Cache hit rate (target >80%)\n2. Average response time with/without cache\n3. Cache size growth\n4. Invalidation frequency\n\nCan log these to Prometheus via FastAPI middleware",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "observability_plan",
+        "content_categories": ["monitoring", "metrics", "implementation_details"]
+      }
+    },
+    {
+      "order": 14,
+      "text": "Let's document the decision. I'll create an ADR",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "documentation_commitment",
+        "content_categories": ["documentation", "task_assignment"]
+      }
+    },
+    {
+      "order": 15,
+      "text": "Perfect. Summary:\n- Decision: PostgreSQL cache table\n- Rationale: Simplicity, no new dependencies, sufficient performance\n- Trade-off: 4ms slower than Redis, acceptable for our scale\n- Metrics: Cache hit rate, response times, size growth\n- Next: Create migration for cache table + add monitoring",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "decision_summary",
+        "content_categories": ["decision_record", "action_items"]
+      }
+    }
+  ],
+  "expected_extraction": {
+    "topics": [
+      {
+        "title": "Embedding Cache Architecture Decision",
+        "atoms": [
+          "Problem: Regenerating embeddings on every search is expensive",
+          "Evaluated 3 options: Redis cache, DB cache table, Application memory",
+          "Decision: PostgreSQL cache table for simplicity and sufficient performance",
+          "Rationale: No new dependencies, 4ms slower than Redis acceptable for scale (500→10k/day)",
+          "Metrics to track: cache hit rate (>80%), response times, size growth, invalidation frequency",
+          "Implementation: Create migration for cache table + Prometheus monitoring via FastAPI middleware"
+        ]
+      }
+    ]
+  }
+}

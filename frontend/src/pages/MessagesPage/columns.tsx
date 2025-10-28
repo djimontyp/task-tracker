@@ -201,7 +201,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       const meta = classificationLabels[classification]
       return <Badge variant={meta.variant}>{meta.label}</Badge>
     },
-    filterFn: (row, id, filterValues: NoiseClassification[]) => {
+    filterFn: (row, _id, filterValues: NoiseClassification[]) => {
       if (!filterValues || filterValues.length === 0) return true
       const score = row.getValue<number>('importance_score')
       const classification = row.original.noise_classification ?? (score !== undefined ? getClassification(score) : null)

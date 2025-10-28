@@ -4,15 +4,13 @@ These tests verify the middleware correctly logs task execution lifecycle events
 They follow TDD: written before implementation, should fail initially.
 """
 
-from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from app.models.task_execution_log import TaskExecutionLog, TaskStatus
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from taskiq import TaskiqMessage, TaskiqResult
-
-from app.models.task_execution_log import TaskExecutionLog, TaskStatus
 
 
 @pytest.mark.asyncio
@@ -38,9 +36,7 @@ async def test_middleware_logs_task_start(db_session: AsyncSession):
 
         await middleware.pre_execute(message)
 
-    result = await db_session.execute(
-        select(TaskExecutionLog).where(TaskExecutionLog.task_name == "test_task")
-    )
+    result = await db_session.execute(select(TaskExecutionLog).where(TaskExecutionLog.task_name == "test_task"))
     log = result.scalar_one_or_none()
 
     assert log is not None
@@ -83,9 +79,7 @@ async def test_middleware_logs_successful_completion(db_session: AsyncSession):
 
         await middleware.post_execute(message, result_obj)
 
-    result = await db_session.execute(
-        select(TaskExecutionLog).where(TaskExecutionLog.task_name == "success_task")
-    )
+    result = await db_session.execute(select(TaskExecutionLog).where(TaskExecutionLog.task_name == "success_task"))
     log = result.scalar_one_or_none()
 
     assert log is not None
@@ -131,9 +125,7 @@ async def test_middleware_logs_task_failure_with_traceback(db_session: AsyncSess
 
         await middleware.post_execute(message, result_obj)
 
-    result = await db_session.execute(
-        select(TaskExecutionLog).where(TaskExecutionLog.task_name == "failed_task")
-    )
+    result = await db_session.execute(select(TaskExecutionLog).where(TaskExecutionLog.task_name == "failed_task"))
     log = result.scalar_one_or_none()
 
     assert log is not None

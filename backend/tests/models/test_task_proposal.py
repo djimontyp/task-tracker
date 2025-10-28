@@ -1,7 +1,6 @@
 """Tests for TaskProposal model."""
 
 from datetime import datetime
-from uuid import uuid4
 
 import pytest
 from app.models import (
@@ -12,6 +11,7 @@ from app.models import (
     LLMProvider,
     LLMRecommendation,
     ProposalStatus,
+    ProviderType,
     SimilarityType,
     TaskCategory,
     TaskConfig,
@@ -32,7 +32,7 @@ async def test_create_proposal(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
@@ -126,7 +126,7 @@ async def test_source_message_ids_jsonb(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
@@ -212,7 +212,7 @@ async def test_duplicate_detection_fields(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
@@ -263,8 +263,21 @@ async def test_duplicate_detection_fields(db_session):
     await db_session.commit()
     await db_session.refresh(run)
 
+    # Create a similar task for duplicate detection
+    from app.models import TaskEntity
+
+    similar_task = TaskEntity(
+        title="User Authentication",
+        description="Implement user authentication",
+        priority=TaskPriority.medium.value,
+        category=TaskCategory.feature.value,
+    )
+    db_session.add(similar_task)
+    await db_session.commit()
+    await db_session.refresh(similar_task)
+
     # Create proposal with duplicate detection info
-    similar_task_id = uuid4()
+    similar_task_id = similar_task.id
     diff_summary = {
         "title_diff": "Minor wording changes",
         "description_diff": "Added mention of OAuth2 provider",
@@ -310,7 +323,7 @@ async def test_proposed_tags_jsonb(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
@@ -396,7 +409,7 @@ async def test_proposed_sub_tasks_jsonb(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
@@ -487,7 +500,7 @@ async def test_project_classification_fields(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
@@ -574,7 +587,7 @@ async def test_review_workflow(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )

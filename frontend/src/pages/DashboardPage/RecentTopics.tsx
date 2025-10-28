@@ -7,39 +7,10 @@ import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Button } from '@/shared/ui/button'
 import { apiClient } from '@/shared/lib/api/client'
-import { TopicListResponse, TimePeriod } from '@/shared/types'
+import { TopicListResponse } from '@/shared/types'
 import { TopicCard } from './TopicCard'
 
-const getDateRange = (period: TimePeriod): { start: Date; end: Date } => {
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-
-  switch (period) {
-    case 'today':
-      return { start: today, end: now }
-
-    case 'yesterday': {
-      const yesterday = new Date(today)
-      yesterday.setDate(yesterday.getDate() - 1)
-      return { start: yesterday, end: today }
-    }
-
-    case 'week': {
-      const weekAgo = new Date(today)
-      weekAgo.setDate(weekAgo.getDate() - 7)
-      return { start: weekAgo, end: now }
-    }
-
-    case 'month': {
-      const monthAgo = new Date(today)
-      monthAgo.setMonth(monthAgo.getMonth() - 1)
-      return { start: monthAgo, end: now }
-    }
-
-    default:
-      return { start: today, end: now }
-  }
-}
+type TimePeriod = 'today' | 'yesterday' | 'week' | 'month' | 'custom'
 
 export const RecentTopics = () => {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('today')

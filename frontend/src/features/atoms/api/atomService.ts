@@ -7,7 +7,6 @@ import type {
   AtomLink,
   CreateAtomLink,
   TopicAtom,
-  CreateTopicAtom,
 } from '../types'
 
 const API_BASE_URL = ''

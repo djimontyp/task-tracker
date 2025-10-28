@@ -28,7 +28,9 @@ async def test_user(db_session: AsyncSession) -> User:
 @pytest.fixture
 async def test_source(db_session: AsyncSession) -> Source:
     """Create test source."""
-    source = Source(name="test_source")
+    from app.models.enums import SourceType
+
+    source = Source(name="test_source", type=SourceType.telegram)
     db_session.add(source)
     await db_session.commit()
     await db_session.refresh(source)
@@ -68,7 +70,7 @@ class TestScoreMessageTask:
         test_message: Message,
     ) -> None:
         """Test successful message scoring."""
-        with patch("app.tasks.get_db_session_context") as mock_db_context:
+        with patch("app.tasks.scoring.get_db_session_context") as mock_db_context:
             mock_context = AsyncMock()
             mock_context.__anext__.return_value = db_session
             mock_db_context.return_value = mock_context
@@ -93,7 +95,7 @@ class TestScoreMessageTask:
         db_session: AsyncSession,
     ) -> None:
         """Test scoring non-existent message raises ValueError."""
-        with patch("app.tasks.get_db_session_context") as mock_db_context:
+        with patch("app.tasks.scoring.get_db_session_context") as mock_db_context:
             mock_context = AsyncMock()
             mock_context.__anext__.return_value = db_session
             mock_db_context.return_value = mock_context
@@ -108,7 +110,7 @@ class TestScoreMessageTask:
         test_message: Message,
     ) -> None:
         """Test that scoring updates all required fields."""
-        with patch("app.tasks.get_db_session_context") as mock_db_context:
+        with patch("app.tasks.scoring.get_db_session_context") as mock_db_context:
             mock_context = AsyncMock()
             mock_context.__anext__.return_value = db_session
             mock_db_context.return_value = mock_context
@@ -153,7 +155,7 @@ class TestScoreUnscoredMessagesTask:
 
         await db_session.commit()
 
-        with patch("app.tasks.get_db_session_context") as mock_db_context:
+        with patch("app.tasks.scoring.get_db_session_context") as mock_db_context:
             mock_context = AsyncMock()
             mock_context.__anext__.return_value = db_session
             mock_db_context.return_value = mock_context
@@ -190,7 +192,7 @@ class TestScoreUnscoredMessagesTask:
 
         await db_session.commit()
 
-        with patch("app.tasks.get_db_session_context") as mock_db_context:
+        with patch("app.tasks.scoring.get_db_session_context") as mock_db_context:
             mock_context = AsyncMock()
             mock_context.__anext__.return_value = db_session
             mock_db_context.return_value = mock_context
@@ -206,7 +208,7 @@ class TestScoreUnscoredMessagesTask:
         db_session: AsyncSession,
     ) -> None:
         """Test batch scoring with no unscored messages."""
-        with patch("app.tasks.get_db_session_context") as mock_db_context:
+        with patch("app.tasks.scoring.get_db_session_context") as mock_db_context:
             mock_context = AsyncMock()
             mock_context.__anext__.return_value = db_session
             mock_db_context.return_value = mock_context
@@ -248,7 +250,7 @@ class TestScoreUnscoredMessagesTask:
 
         await db_session.commit()
 
-        with patch("app.tasks.get_db_session_context") as mock_db_context:
+        with patch("app.tasks.scoring.get_db_session_context") as mock_db_context:
             mock_context = AsyncMock()
             mock_context.__anext__.return_value = db_session
             mock_db_context.return_value = mock_context
