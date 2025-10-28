@@ -33,6 +33,20 @@
   - Production Readiness Score: **6/10**
 - **Location:** `.artifacts/ai-infrastructure-analysis.md`, `.artifacts/product-ready-epic/batch-1.2-ai-infrastructure-analysis.md`
 
+✅ **Test Fix Session Completed (2025-10-28):**
+- **Duration:** 3 hours (coordinated via agents)
+- **Result:** 62 tests fixed (134→72 failing, -46% failures)
+- **Pass Rate:** 85.8% → 92.3% (+6.5 pp)
+- **Commits:** 3 atomic commits (`e0061e2`, `08e156f`, `f34b81f`)
+- **Agents Used:** pytest-test-master, database-reliability-engineer, fastapi-backend-expert, react-frontend-architect
+- **Achievements:**
+  - Fixed contract tests (API path corrections)
+  - Fixed model fixtures (LLMProvider field migration)
+  - Fixed database tests (pgvector async, SQLite skip logic)
+  - Fixed integration tests (RAG fixtures, workflow paths)
+  - Fixed frontend lucide-react → heroicons
+  - Enhanced react-frontend-architect with Playwright MCP verification
+
 ---
 
 ## 🎉 Product Ready v0.1 Session COMPLETED (2025-10-28)
@@ -190,91 +204,111 @@
 
 ## 🚨 NEXT SESSION PRIORITIES
 
-**Production Readiness:** 6/10 → Target: 8/10
-**Focus:** Complete remaining test fixes + Implement E2E tests + Production deployment
+**Production Readiness:** 6/10 → Target: 7.5/10
+**Focus:** Backend Refactoring + Complete Testing + E2E Implementation
+**Estimated Effort:** 34-38 hours (2-3 days with parallel delegation)
+
+**📋 Detailed Plan:** See `.artifacts/next-session-plan/tasks.md`
 
 ---
 
-### 🔴 HIGH PRIORITY: Complete Backend Testing (8-10h)
+### 🔴 PHASE 1: Backend Refactoring (20 hours)
 
-**Current State:**
-- ✅ 97 tests fixed (222 failing → 134 remaining)
-- ❌ 134 tests still failing (121 failures + 13 errors)
-- ✅ Test infrastructure ready (scenarios, fixtures, helpers)
+**1.1 Create BaseCRUD Class (8 hours)**
+- Design generic BaseCRUD[T] interface
+- Implement core async CRUD operations
+- Refactor 9 services: agent_crud, task_crud, provider_crud, atom_crud, topic_crud, assignment_crud, proposal_service, analysis_service, project_service
+- **Target:** -700 to -800 LOC reduction
+- **Agent:** fastapi-backend-expert + architecture-guardian
 
-**Remaining Work:**
+**1.2 Split Large Services (12 hours)**
+- Split analysis_service.py (780 LOC → 3 modules)
+- Split knowledge_extraction_service.py (675 LOC → 3 modules)
+- Split versioning_service.py (653 LOC → 4 modules)
+- **Agent:** fastapi-backend-expert
 
-**□ Fix Contract Tests (~50 tests, 2-3h)**
-- [ ] Update API paths in contract tests: `/api/` → `/api/v1/`
-- [ ] Files: `test_agents_contract.py`, `test_providers_contract.py`, `test_tasks_contract.py`
-- [ ] Apply same pattern as Task 3 (bulk replacements)
-
-**□ Fix Analysis/Versioning Tests (~80 tests, 4-5h)**
-- [ ] Fix response structure mismatches in analysis tests
-- [ ] Update version API tests (already passing, but need integration)
-- [ ] Fix state machine tests in `AnalysisRun` model
-- [ ] Update embedding tests
-
-**□ Fix Integration Tests (~4 tests, 1-2h)**
-- [ ] Fix full workflow tests (webhook → scoring → extraction → topic)
-- [ ] Fix RAG pipeline tests (4 errors)
-- [ ] Fix WebSocket tests
-
-**Goal:** 0 failing tests (or <10 documented known issues), coverage ≥75%
+**Success Criteria:**
+- ✅ Type checking passes
+- ✅ All tests pass
+- ✅ -700+ LOC eliminated
 
 ---
 
-### 🟡 MEDIUM PRIORITY: Playwright E2E Tests (6-8h)
+### 🟡 PHASE 2: Complete Backend Testing (8-10 hours)
 
-**Current State:**
-- ✅ Playwright configured and ready
-- ✅ 3 stub tests with detailed scenarios
-- ❌ Tests not implemented (marked with `test.skip`)
+**Current State:** 72 failing tests (from 134 after our session)
 
-**Implementation Plan:**
+**2.1 Fix Contract Tests (~20 tests, 2 hours)**
+- Agent contract tests (API paths, response structures)
+- Monitoring API tests
+- Provider/task contract tests
 
-**□ Test 1: Telegram → Topic Knowledge Extraction (2-3h)**
-- [ ] Implement webhook simulation with realistic message
-- [ ] Verify scoring task execution and importance classification
-- [ ] Verify knowledge extraction task execution
-- [ ] Verify Topic/Atom creation with embeddings
-- [ ] Assert final state: Topic visible in dashboard
-- [ ] Test both Ukrainian and English messages
+**2.2 Fix API Tests (~30 tests, 3-4 hours)**
+- Knowledge extraction (16 tests - NameError fixes)
+- Embeddings API (6 tests - validation)
+- Projects/proposals/stats (8 tests - count assertions, DateTime)
 
-**□ Test 2: Analysis Run Lifecycle (2-3h)**
-- [ ] Create analysis run via API
-- [ ] Monitor state transitions (pending → running → completed)
-- [ ] Verify WebSocket updates received
-- [ ] Verify proposal generation
-- [ ] Test error states (cancelled, failed)
+**2.3 Fix Background Task Tests (~7 tests, 2 hours)**
+- Embedding background tasks (TaskIQ mocking)
+- Retry mechanism (DLQ filtering)
 
-**□ Test 3: Accessibility Compliance (2h)**
-- [ ] Keyboard navigation tests (Tab, Enter, Escape)
-- [ ] Screen reader tests (ARIA labels, roles)
-- [ ] Color contrast tests (WCAG AA)
-- [ ] Focus management tests
-- [ ] Form validation with assistive tech
+**2.4 Verification & Coverage (1-2 hours)**
+- Full test suite run
+- Coverage report (target: ≥75%)
+- Document remaining issues (<5)
 
-**Goal:** 3 E2E tests passing, WCAG AA compliance verified
+**Success Criteria:**
+- ✅ Test pass rate: 92.3% → 98%+
+- ✅ Failing tests: 72 → <5
+- ✅ Coverage: ≥75% overall, ≥85% critical paths
+
+**Agent:** pytest-test-master + fastapi-backend-expert
 
 ---
 
-### 🟢 LOW PRIORITY: Production Deployment Preparation (4-6h)
+### 🟢 PHASE 3: E2E Playwright Tests (6-8 hours)
 
-**□ CI/CD Pipeline Setup (3-4h)**
-- [ ] GitHub Actions workflow for tests
-- [ ] Docker build optimization (multi-stage, caching)
-- [ ] Automated deployment to staging
-- [ ] Health check monitoring
+**Current State:** Playwright configured, 3 stub tests ready
 
-**□ Hostinger Deployment (2h)**
-- [ ] Follow guide: `.v01-production/З_ЧОГО_ПОЧАТИ.md`
-- [ ] Setup: VPS (KVM 2), Docker, PostgreSQL, NATS
-- [ ] Configure: Domain, SSL, nginx reverse proxy
-- [ ] Deploy: Backend + Worker + Dashboard + Bot webhook
-- [ ] Capacity: 200-300 messages/day, $16-30/month
+**3.1 Telegram → Topic E2E Test (2-3 hours)**
+- Webhook simulation
+- Scoring + knowledge extraction flow
+- Verify Topic/Atom creation in UI
+- Visual regression checks
 
-**Goal:** Production environment ready, automated deployments
+**3.2 Analysis Run Lifecycle Test (2-3 hours)**
+- Create run via API/UI
+- Monitor state transitions (WebSocket)
+- Verify proposal generation
+- Test error states (cancelled, failed)
+
+**3.3 Accessibility Compliance Test (2 hours)**
+- Keyboard navigation (Tab, Enter, Escape)
+- ARIA and semantic HTML audit
+- Color contrast verification (WCAG 2.1 AA)
+
+**Success Criteria:**
+- ✅ 3 E2E tests passing
+- ✅ WCAG AA compliance verified
+- ✅ No console errors
+
+**Agent:** Playwright specialist + ux-ui-design-expert
+
+---
+
+### Execution Strategy
+
+**Parallel Execution:**
+- Day 1: Phase 1.1 (BaseCRUD) → Phase 1.2 (split services in parallel)
+- Day 2: Phase 2 (backend tests in parallel tracks)
+- Day 3: Phase 3 (E2E tests in parallel)
+
+**Agent Coordination:** Use parallel-coordinator for multi-agent tasks
+
+**Risk Mitigation:**
+- Prioritize Phase 1+2 over Phase 3 (E2E nice-to-have)
+- Incremental BaseCRUD rollout (one service at a time)
+- Backward-compatible imports during service splits
 
 ---
 
@@ -431,29 +465,30 @@
 
 ## 🗓️ Recommended Sequence
 
-### **NEXT SESSION (Testing Completion)** (18-24 hours)
-**Priority:** 🔴 HIGH - Complete test infrastructure for production readiness
+### **NEXT SESSION (Refactoring + Testing)** (34-38 hours)
+**Priority:** 🔴 HIGH - Backend refactoring + Complete testing infrastructure
 
-**Phase 1: Backend Tests (8-10h)**
-- [ ] Day 1: Fix contract tests (2-3h)
-- [ ] Day 2-3: Fix analysis/versioning tests (4-5h)
-- [ ] Day 4: Fix integration tests (1-2h)
+**Phase 1: Backend Refactoring (20h)**
+- [ ] Day 1: Create BaseCRUD class (8h)
+- [ ] Day 2-3: Split large services in parallel (12h)
 
-**Phase 2: E2E Tests (6-8h)**
-- [ ] Day 5: Implement Telegram → Topic test (2-3h)
-- [ ] Day 6: Implement Analysis Run test (2-3h)
-- [ ] Day 7: Implement Accessibility test (2h)
+**Phase 2: Backend Testing (8-10h)**
+- [ ] Day 4: Fix contract tests (2h)
+- [ ] Day 5: Fix API tests (3-4h)
+- [ ] Day 6: Fix background task tests (2h)
+- [ ] Day 7: Coverage verification (1-2h)
 
-**Phase 3: Production Prep (4-6h)**
-- [ ] Day 8: Setup CI/CD pipeline (3-4h)
-- [ ] Day 9: Deploy to Hostinger (2h)
+**Phase 3: E2E Tests (6-8h)**
+- [ ] Day 8: Implement Telegram → Topic test (2-3h)
+- [ ] Day 9: Implement Analysis Run test (2-3h)
+- [ ] Day 10: Implement Accessibility test (2h)
 
 **Why This Order:**
-1. **Backend tests first** - Foundation for confidence in all changes
-2. **E2E tests second** - Validate user-facing workflows work end-to-end
-3. **Production last** - Deploy only when everything is tested
+1. **Refactoring first** - Cleaner codebase makes testing easier
+2. **Backend tests second** - Foundation for confidence in all changes
+3. **E2E tests last** - Validate user-facing workflows work end-to-end
 
-**Result:** Production-ready system with comprehensive test coverage and automated deployment
+**Result:** Clean architecture + comprehensive test coverage → Production readiness 7.5/10
 
 ---
 
@@ -479,16 +514,35 @@
 
 ---
 
-### **Weeks 3-4: Large Refactorings** (20 hours)
+### **COMPLETED SESSION (Test Fix Session)** ✅
+**Priority:** ✅ COMPLETED - 62 tests fixed
+
+**Completed Work:**
+- [x] Fixed contract tests (API path corrections) ✅
+- [x] Fixed model fixtures (LLMProvider field migration) ✅
+- [x] Fixed database tests (pgvector async, SQLite skip logic) ✅
+- [x] Fixed integration tests (RAG fixtures, workflow paths) ✅
+- [x] Fixed frontend lucide-react → heroicons ✅
+- [x] Enhanced react-frontend-architect with Playwright MCP ✅
+
+**Result:**
+- ✅ Test pass rate: 85.8% → 92.3% (+6.5 pp)
+- ✅ Failing tests: 134 → 72 (-46% failures)
+- ✅ 3 atomic commits, clean git history
+
+---
+
+### **Weeks 3-4: Remaining Refactorings** (5 hours)
 **Priority:** 🟡 Medium
 
-**Week 3:**
-- [ ] Create BaseCRUD class (8 hours)
+**Remaining Tasks:**
+- [ ] Replace print → logger (1 hour)
+- [ ] Consolidate toast libraries (30min)
+- [ ] Organize models by domains (4 hours)
 
-**Week 4:**
-- [ ] Split 3 large services (12 hours)
+**Note:** BaseCRUD and large service splits moved to NEXT SESSION (Phase 1)
 
-**Result:** -800 LOC duplication, better testability
+**Result:** Code quality improvements after major refactoring is complete
 
 ---
 
@@ -543,7 +597,7 @@
 
 ## 📈 Session Metrics & Progress
 
-### This Session (2025-10-28)
+### Product Ready v0.1 Session (2025-10-28)
 
 **Time Spent:** 4-5 hours (via parallel agent delegation)
 **Work Completed:** 27 hours worth of value (5.4x efficiency multiplier)
@@ -565,26 +619,40 @@
 - ✅ Hexagonal architecture enforced
 - ✅ Circular dependencies: 2 fixed
 - ✅ God files split: tasks.py → 5 modules
-- ✅ Production readiness: 6/10 (target: 8/10)
+- ✅ Production readiness: 6/10 (target: 7.5/10)
+
+### Test Fix Session (2025-10-28)
+
+**Time Spent:** 3 hours (coordinated via agents)
+**Work Completed:** 62 tests fixed
+
+**Code Changes:**
+- ✅ 3 atomic commits
+- ✅ Multiple test files updated
+- ✅ Frontend icon migration completed
+- ✅ Agent capability enhancements
+
+**Quality Metrics:**
+- ✅ Test pass rate: 85.8% → 92.3% (+6.5 pp)
+- ✅ Tests fixed: 62 (134 → 72 failing, -46% failures)
+- ✅ Production readiness: 6/10 (maintained, testing infrastructure improved)
 
 ### Total Remaining Work
 
 **High Priority (Next Session):**
-- 🔴 Backend testing: 8-10h (fix 134 remaining tests)
-- 🟡 E2E testing: 6-8h (implement 3 Playwright tests)
-- 🟢 Production prep: 4-6h (CI/CD + Hostinger deployment)
+- 🔴 Backend refactoring: 20h (BaseCRUD + split services)
+- 🟡 Backend testing: 8-10h (fix 72 remaining tests)
+- 🟢 E2E testing: 6-8h (implement 3 Playwright tests)
 
-**Subtotal Next Session:** 18-24 hours
+**Subtotal Next Session:** 34-38 hours
 
 **Medium Priority (Weeks 3-4):**
-- BaseCRUD class: 8h
-- Split large services: 12h
-- Other refactorings: 5h
+- Other refactorings: 5h (print→logger, toast consolidation, model organization)
 
-**Subtotal Medium:** 25 hours
+**Subtotal Medium:** 5 hours
 
 **Low Priority (Backlog):**
 - Code quality improvements: 7.5h
 
-**Total Remaining:** ~50-56 hours (was 38-39h before this session, added E2E scope)
-**Next Session Priority:** 🔴 Complete Testing Infrastructure (18-24h) → Production Deployment
+**Total Remaining:** ~46-50 hours
+**Next Session Priority:** 🔴 Backend Refactoring + Complete Testing → 7.5/10 Production Readiness
