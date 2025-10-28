@@ -130,7 +130,7 @@ class TestLoadValidationDataset:
             json.dump([{"content": "test"}], f)  # Missing ground_truth
             temp_path = Path(f.name)
 
-        with pytest.raises(ValueError, match="missing required fields"):
+        with pytest.raises(ValueError, match="missing required field"):
             validator.load_validation_dataset(temp_path)
 
     def test_load_invalid_ground_truth(self, validator: ScoringValidator) -> None:
