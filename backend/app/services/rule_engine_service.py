@@ -8,7 +8,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.automation_rule import AutomationRule, ConditionOperator, LogicOperator, RuleAction, RuleCondition
-from app.services.versioning_service import VersioningService
+from app.services.versioning import VersioningService
 from app.services.websocket_manager import websocket_manager
 
 
