@@ -1,17 +1,22 @@
 """Service for task execution monitoring metrics and history."""
 
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.task_execution_log import TaskExecutionLog, TaskStatus
 from app.schemas.monitoring import (
+    CategoryAccuracyMetrics,
     MonitoringMetricsResponse,
+    ScoringAccuracyResponse,
     TaskExecutionLogResponse,
     TaskHistoryResponse,
     TaskMetrics,
 )
+from app.services.importance_scorer import ImportanceScorer
+from app.services.scoring_validator import ScoringValidator
 
 
 class MonitoringService:
@@ -165,4 +170,56 @@ class MonitoringService:
             page_size=page_size,
             total_pages=total_pages,
             items=items,
+        )
+
+    async def get_scoring_accuracy(self) -> ScoringAccuracyResponse:
+        """Get scoring accuracy metrics by validating ImportanceScorer against labeled dataset.
+
+        Loads validation dataset from JSON file, runs ScoringValidator to calculate
+        precision/recall/F1 metrics per category, and returns overall accuracy.
+
+        Returns:
+            ScoringAccuracyResponse with accuracy metrics and alert status
+
+        Raises:
+            FileNotFoundError: If validation dataset file doesn't exist
+            ValueError: If validation dataset is invalid or empty
+        """
+        dataset_path = Path(__file__).parent.parent.parent / "tests" / "fixtures" / "scoring_validation.json"
+
+        if not dataset_path.exists():
+            raise FileNotFoundError(
+                f"Validation dataset not found at {dataset_path}. "
+                "Please ensure scoring_validation.json exists in backend/tests/fixtures/"
+            )
+
+        scorer = ImportanceScorer()
+        validator = ScoringValidator(importance_scorer=scorer)
+
+        validator.load_validation_dataset(dataset_path)
+
+        if not validator.validation_messages:
+            raise ValueError("Validation dataset is empty")
+
+        report = validator.run_validation()
+
+        category_metrics = [
+            CategoryAccuracyMetrics(
+                category=metric.category,
+                precision=metric.precision,
+                recall=metric.recall,
+                f1_score=metric.f1_score,
+                support=metric.support,
+            )
+            for metric in report.category_metrics
+        ]
+
+        alert_threshold_met = report.overall_accuracy < 0.8
+
+        return ScoringAccuracyResponse(
+            overall_accuracy=report.overall_accuracy,
+            category_metrics=category_metrics,
+            total_samples=report.total_samples,
+            generated_at=datetime.now(UTC).replace(tzinfo=None),
+            alert_threshold_met=alert_threshold_met,
         )

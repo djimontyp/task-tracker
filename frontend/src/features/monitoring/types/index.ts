@@ -69,3 +69,19 @@ export interface HistoryFilters {
 export interface ErrorResponse {
   error: string
 }
+
+export interface CategoryAccuracyMetrics {
+  category: string
+  precision: number
+  recall: number
+  f1_score: number
+  support: number
+}
+
+export interface ScoringAccuracyResponse {
+  overall_accuracy: number
+  category_metrics: CategoryAccuracyMetrics[]
+  total_samples: number
+  generated_at: string
+  alert_threshold_met: boolean
+}
