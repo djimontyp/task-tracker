@@ -11,7 +11,7 @@ This test module provides complete coverage for the AgentTestService including:
 
 from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from app.models import (
@@ -20,7 +20,7 @@ from app.models import (
     ProviderType,
     ValidationStatus,
 )
-from app.services.agent_service import AgentTestService, TestAgentResponse
+from app.services.agent_service import AgentTestService, AgentTestResponse
 from app.services.credential_encryption import CredentialEncryption
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -203,7 +203,7 @@ async def test_agent_with_ollama_success(
         result = await service.test_agent(ollama_agent.id, "Test prompt")
 
         # Verify response structure
-        assert isinstance(result, TestAgentResponse)
+        assert isinstance(result, AgentTestResponse)
         assert result.agent_id == ollama_agent.id
         assert result.agent_name == ollama_agent.name
         assert result.prompt == "Test prompt"
@@ -235,7 +235,7 @@ async def test_agent_with_openai_success(
         result = await service.test_agent(openai_agent.id, "Hello GPT-4")
 
         # Verify response structure
-        assert isinstance(result, TestAgentResponse)
+        assert isinstance(result, AgentTestResponse)
         assert result.agent_id == openai_agent.id
         assert result.agent_name == openai_agent.name
         assert result.prompt == "Hello GPT-4"
@@ -352,8 +352,10 @@ async def test_agent_not_found(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_provider_not_found(db_session: AsyncSession, ollama_provider: LLMProvider):
-    """Test ValueError raised when provider is deleted after agent creation."""
-    # Create agent
+    """Test ValueError raised when provider not found (simulated by using wrong UUID in query)."""
+    from uuid import uuid4
+
+    # Create agent with valid provider
     agent = AgentConfig(
         name="Orphaned Agent",
         provider_id=ollama_provider.id,
@@ -364,17 +366,20 @@ async def test_provider_not_found(db_session: AsyncSession, ollama_provider: LLM
     await db_session.commit()
     await db_session.refresh(agent)
 
-    # Delete the provider
-    await db_session.delete(ollama_provider)
-    await db_session.commit()
+    # Manually set provider_id to non-existent UUID (bypassing FK constraint check)
+    # This simulates the case where provider was deleted or doesn't exist
+    # We need to disable autoflush to prevent FK validation
+    non_existent_id = uuid4()
+    with db_session.no_autoflush:
+        agent.provider_id = non_existent_id
 
-    service = AgentTestService(db_session)
+        service = AgentTestService(db_session)
 
-    with pytest.raises(ValueError) as exc_info:
-        await service.test_agent(agent.id, "Test")
+        with pytest.raises(ValueError) as exc_info:
+            await service.test_agent(agent.id, "Test")
 
-    assert "provider" in str(exc_info.value).lower()
-    assert "not found" in str(exc_info.value).lower()
+        assert "provider" in str(exc_info.value).lower()
+        assert "not found" in str(exc_info.value).lower()
 
 
 @pytest.mark.asyncio
@@ -561,7 +566,7 @@ async def test_build_model_openai_without_api_key(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_response_structure_contains_all_fields(db_session: AsyncSession, ollama_agent: AgentConfig):
-    """Test that TestAgentResponse contains all expected fields."""
+    """Test that AgentTestResponse contains all expected fields."""
     with patch("app.services.agent_service.PydanticAgent") as mock_agent_class:
         mock_agent = AsyncMock()
         mock_result = Mock()
@@ -635,7 +640,7 @@ async def test_api_key_encryption_decryption_cycle(
 
     with (
         patch("app.services.agent_service.PydanticAgent") as mock_agent_class,
-        patch("app.services.agent_service.OpenAIProvider") as mock_provider_class,
+        patch("pydantic_ai.providers.openai.OpenAIProvider") as mock_provider_class,
     ):
         mock_agent = AsyncMock()
         mock_result = Mock()

@@ -5,13 +5,13 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-class TestAgentRequest(BaseModel):
+class AgentTestRequest(BaseModel):
     """Request schema for testing an agent."""
 
     prompt: str = Field(min_length=1, max_length=5000, description="Test prompt to send to the agent")
 
 
-class TestAgentResponse(BaseModel):
+class AgentTestResponse(BaseModel):
     """Response schema for agent test results."""
 
     agent_id: UUID = Field(description="UUID of the tested agent")

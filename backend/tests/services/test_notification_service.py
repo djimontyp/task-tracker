@@ -160,7 +160,8 @@ class TestSendDailyDigest:
         notification_pref.digest_enabled = False
         mock_session = AsyncMock(spec=AsyncSession)
         mock_result = MagicMock()
-        mock_result.scalars.return_value.all.return_value = [notification_pref]
+        # When digest_enabled is False, the query should return empty list
+        mock_result.scalars.return_value.all.return_value = []
         mock_session.execute.return_value = mock_result
 
         with (

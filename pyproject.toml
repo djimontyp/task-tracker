@@ -59,6 +59,8 @@ python_functions = "test_*"
 addopts = "-v --tb=short"
 markers = [
     "asyncio: mark test as asyncio",
+    "performance: mark test as performance/benchmark test",
+    "requires_postgres: mark test as requiring PostgreSQL (skip on SQLite)",
 ]
 pythonpath = ["backend"]
 

@@ -1,4 +1,4 @@
-"""Contract tests for PUT /api/providers/{id} endpoint."""
+"""Contract tests for PUT /api/v1/providers/{id} endpoint."""
 
 import pytest
 from httpx import AsyncClient
@@ -9,14 +9,14 @@ async def test_update_provider_configuration(client: AsyncClient):
     """Test updating provider configuration."""
     # Create provider
     create_response = await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={"name": "Update Test", "type": "ollama", "base_url": "http://localhost:11434"},
     )
     provider_id = create_response.json()["id"]
 
     # Update provider
     response = await client.put(
-        f"/api/providers/{provider_id}",
+        f"/api/v1/providers/{provider_id}",
         json={"base_url": "http://localhost:11435"},
     )
     assert response.status_code == 200
@@ -29,14 +29,14 @@ async def test_update_triggers_revalidation(client: AsyncClient):
     """Test that update triggers async re-validation."""
     # Create provider
     create_response = await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={"name": "Revalidation Test", "type": "ollama", "base_url": "http://localhost:11434"},
     )
     provider_id = create_response.json()["id"]
 
     # Update provider
     response = await client.put(
-        f"/api/providers/{provider_id}",
+        f"/api/v1/providers/{provider_id}",
         json={"base_url": "http://localhost:11435"},
     )
     assert response.status_code == 200
@@ -50,7 +50,7 @@ async def test_update_provider_not_found(client: AsyncClient):
     """Test 404 for updating non-existent provider."""
     fake_uuid = "00000000-0000-0000-0000-000000000000"
     response = await client.put(
-        f"/api/providers/{fake_uuid}",
+        f"/api/v1/providers/{fake_uuid}",
         json={"base_url": "http://localhost:11435"},
     )
     assert response.status_code == 404
