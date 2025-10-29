@@ -1,4 +1,5 @@
 import logging
+import uuid
 from datetime import date, datetime
 
 from fastapi import APIRouter, HTTPException, Query
@@ -109,7 +110,7 @@ async def get_messages(
     page_size: int = Query(50, ge=1, le=1000, description="Number of items per page"),
     author: str | None = Query(None, description="Filter by author name"),
     source: str | None = Query(None, description="Filter by source name"),
-    topic_id: int | None = Query(None, description="Filter by topic ID"),
+    topic_id: uuid.UUID | None = Query(None, description="Filter by topic ID"),
     date_from: date | None = Query(None, description="Filter messages from this date"),
     date_to: date | None = Query(None, description="Filter messages until this date"),
     importance_min: float | None = Query(None, ge=0.0, le=1.0, description="Filter by importance score >= min"),

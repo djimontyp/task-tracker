@@ -1,12 +1,14 @@
 """Topic model for organizing messages and tasks into categories."""
 
 import re
+import uuid
 
 from pydantic import field_validator
-from sqlalchemy import Text
+from sqlalchemy import Column, Text
+from sqlalchemy.dialects.postgresql import UUID
 from sqlmodel import Field, Relationship, SQLModel
 
-from .base import IDMixin, TimestampMixin
+from .base import TimestampMixin
 
 TOPIC_ICONS = {
     "shopping": "ShoppingCartIcon",
@@ -191,11 +193,16 @@ def auto_select_color(icon: str) -> str:
     return ICON_COLORS.get(icon, "#64748B")
 
 
-class Topic(IDMixin, TimestampMixin, SQLModel, table=True):
+class Topic(TimestampMixin, SQLModel, table=True):
     """Topic model for categorizing messages and tasks."""
 
     __tablename__ = "topics"
 
+    id: uuid.UUID = Field(
+        default_factory=uuid.uuid4,
+        sa_column=Column(UUID(as_uuid=True), primary_key=True, index=True),
+        description="Unique identifier for the topic",
+    )
     name: str = Field(
         unique=True,
         index=True,
@@ -224,7 +231,7 @@ class Topic(IDMixin, TimestampMixin, SQLModel, table=True):
 class TopicPublic(SQLModel):
     """Public schema for topic responses."""
 
-    id: int
+    id: uuid.UUID
     name: str
     description: str
     icon: str | None
@@ -311,7 +318,7 @@ class TopicListResponse(SQLModel):
 class RecentTopicItem(SQLModel):
     """Schema for a recent topic with activity metrics."""
 
-    id: int
+    id: uuid.UUID
     name: str
     description: str
     icon: str | None

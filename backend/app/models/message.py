@@ -1,17 +1,18 @@
 """Message model for storing messages from various sources."""
 
+import uuid
 from datetime import datetime
 
 from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
-from sqlalchemy import Column, Text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, ForeignKey, Text
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlmodel import Field, SQLModel
 
-from .base import IDMixin, TimestampMixin
+from .base import TimestampMixin
 from .enums import AnalysisStatus
 
 
-class Message(IDMixin, TimestampMixin, SQLModel, table=True):
+class Message(TimestampMixin, SQLModel, table=True):
     """Message table - stores incoming messages from various sources.
 
     Each message MUST have:
@@ -21,6 +22,11 @@ class Message(IDMixin, TimestampMixin, SQLModel, table=True):
 
     __tablename__ = "messages"
 
+    id: uuid.UUID = Field(
+        default_factory=uuid.uuid4,
+        sa_column=Column(UUID(as_uuid=True), primary_key=True, index=True),
+        description="Unique identifier for the message",
+    )
     external_message_id: str = Field(index=True, max_length=100, description="ID from external system")
     content: str = Field(sa_type=Text, description="Message content")
     sent_at: datetime = Field(description="When message was sent")
@@ -51,10 +57,9 @@ class Message(IDMixin, TimestampMixin, SQLModel, table=True):
         description="UUIDs of AnalysisRuns that processed this message",
     )
 
-    topic_id: int | None = Field(
+    topic_id: uuid.UUID | None = Field(
         default=None,
-        foreign_key="topics.id",
-        index=True,
+        sa_column=Column(UUID(as_uuid=True), ForeignKey("topics.id"), index=True, nullable=True),
         description="Ground truth topic ID for classification experiments",
     )
 

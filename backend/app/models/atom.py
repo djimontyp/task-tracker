@@ -1,13 +1,15 @@
 """Atom model for Zettelkasten knowledge graph system."""
 
+import uuid
 from enum import Enum
 
 from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
 from pydantic import field_validator
-from sqlalchemy import JSON, BigInteger, Column, Text
+from sqlalchemy import JSON, BigInteger, Column, ForeignKey, Text
+from sqlalchemy.dialects.postgresql import UUID
 from sqlmodel import Field, Relationship, SQLModel
 
-from .base import IDMixin, TimestampMixin
+from .base import TimestampMixin
 
 
 class AtomType(str, Enum):
@@ -34,7 +36,7 @@ class LinkType(str, Enum):
     depends_on = "depends_on"
 
 
-class Atom(IDMixin, TimestampMixin, SQLModel, table=True):
+class Atom(TimestampMixin, SQLModel, table=True):
     """
     Atomic unit of knowledge - self-contained idea.
 
@@ -45,6 +47,11 @@ class Atom(IDMixin, TimestampMixin, SQLModel, table=True):
 
     __tablename__ = "atoms"
 
+    id: uuid.UUID = Field(
+        default_factory=uuid.uuid4,
+        sa_column=Column(UUID(as_uuid=True), primary_key=True, index=True),
+        description="Unique identifier for the atom",
+    )
     type: str = Field(
         max_length=20,
         description="Type of atom (problem, solution, decision, etc.)",
@@ -104,16 +111,12 @@ class AtomLink(TimestampMixin, SQLModel, table=True):
 
     __tablename__ = "atom_links"
 
-    from_atom_id: int = Field(
-        sa_type=BigInteger,
-        foreign_key="atoms.id",
-        primary_key=True,
+    from_atom_id: uuid.UUID = Field(
+        sa_column=Column(UUID(as_uuid=True), ForeignKey("atoms.id"), primary_key=True),
         description="Source atom ID",
     )
-    to_atom_id: int = Field(
-        sa_type=BigInteger,
-        foreign_key="atoms.id",
-        primary_key=True,
+    to_atom_id: uuid.UUID = Field(
+        sa_column=Column(UUID(as_uuid=True), ForeignKey("atoms.id"), primary_key=True),
         description="Target atom ID",
     )
     link_type: str = Field(
@@ -148,16 +151,12 @@ class TopicAtom(TimestampMixin, SQLModel, table=True):
 
     __tablename__ = "topic_atoms"
 
-    topic_id: int = Field(
-        sa_type=BigInteger,
-        foreign_key="topics.id",
-        primary_key=True,
+    topic_id: uuid.UUID = Field(
+        sa_column=Column(UUID(as_uuid=True), ForeignKey("topics.id"), primary_key=True),
         description="Topic ID",
     )
-    atom_id: int = Field(
-        sa_type=BigInteger,
-        foreign_key="atoms.id",
-        primary_key=True,
+    atom_id: uuid.UUID = Field(
+        sa_column=Column(UUID(as_uuid=True), ForeignKey("atoms.id"), primary_key=True),
         description="Atom ID",
     )
     position: int | None = Field(
@@ -174,7 +173,7 @@ class TopicAtom(TimestampMixin, SQLModel, table=True):
 class AtomPublic(SQLModel):
     """Public schema for atom responses."""
 
-    id: int
+    id: uuid.UUID
     type: str
     title: str
     content: str
@@ -279,8 +278,8 @@ class AtomUpdate(SQLModel):
 class AtomLinkPublic(SQLModel):
     """Public schema for atom link responses."""
 
-    from_atom_id: int
-    to_atom_id: int
+    from_atom_id: uuid.UUID
+    to_atom_id: uuid.UUID
     link_type: str
     strength: float | None
     created_at: str
@@ -290,10 +289,10 @@ class AtomLinkPublic(SQLModel):
 class AtomLinkCreate(SQLModel):
     """Schema for creating a new atom link."""
 
-    from_atom_id: int = Field(
+    from_atom_id: uuid.UUID = Field(
         description="Source atom ID",
     )
-    to_atom_id: int = Field(
+    to_atom_id: uuid.UUID = Field(
         description="Target atom ID",
     )
     link_type: str = Field(
@@ -321,8 +320,8 @@ class AtomLinkCreate(SQLModel):
 class TopicAtomPublic(SQLModel):
     """Public schema for topic-atom relationship responses."""
 
-    topic_id: int
-    atom_id: int
+    topic_id: uuid.UUID
+    atom_id: uuid.UUID
     position: int | None
     note: str | None
     created_at: str
@@ -332,10 +331,10 @@ class TopicAtomPublic(SQLModel):
 class TopicAtomCreate(SQLModel):
     """Schema for creating a new topic-atom relationship."""
 
-    topic_id: int = Field(
+    topic_id: uuid.UUID = Field(
         description="Topic ID",
     )
-    atom_id: int = Field(
+    atom_id: uuid.UUID = Field(
         description="Atom ID",
     )
     position: int | None = Field(

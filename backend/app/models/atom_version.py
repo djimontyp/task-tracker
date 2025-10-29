@@ -1,9 +1,11 @@
 """Atom versioning model for tracking changes and approval workflow."""
 
+import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import JSON, BigInteger, Boolean, Column, DateTime, ForeignKey, Integer, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlmodel import Field, Relationship, SQLModel
 
 from .base import IDMixin
@@ -22,7 +24,7 @@ class AtomVersion(IDMixin, SQLModel, table=True):
 
     __tablename__ = "atom_versions"
 
-    atom_id: int = Field(sa_column=Column(BigInteger, ForeignKey("atoms.id"), nullable=False, index=True))
+    atom_id: uuid.UUID = Field(sa_column=Column(UUID(as_uuid=True), ForeignKey("atoms.id"), nullable=False, index=True))
     version: int = Field(sa_column=Column(Integer, nullable=False))
     data: dict = Field(sa_column=Column(JSON, nullable=False))
     created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
@@ -37,7 +39,7 @@ class AtomVersionPublic(SQLModel):
     """Public schema for atom version responses."""
 
     id: int
-    atom_id: int
+    atom_id: uuid.UUID
     version: int
     data: dict
     created_at: datetime

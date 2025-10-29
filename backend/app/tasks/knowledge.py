@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 from typing import Any
 from uuid import UUID
@@ -16,7 +17,7 @@ from app.utils.retry_utils import task_retry_with_dlq
 
 
 @nats_broker.task
-async def embed_messages_batch_task(message_ids: list[int], provider_id: str) -> dict[str, int]:
+async def embed_messages_batch_task(message_ids: list[uuid.UUID], provider_id: str) -> dict[str, int]:
     """Background task for batch embedding messages.
 
     Processes messages in batches and generates embeddings using specified LLM provider.
@@ -60,7 +61,7 @@ async def embed_messages_batch_task(message_ids: list[int], provider_id: str) ->
 
 
 @nats_broker.task
-async def embed_atoms_batch_task(atom_ids: list[int], provider_id: str) -> dict[str, int]:
+async def embed_atoms_batch_task(atom_ids: list[uuid.UUID], provider_id: str) -> dict[str, int]:
     """Background task for batch embedding atoms.
 
     Processes atoms in batches and generates embeddings using specified LLM provider.
@@ -106,7 +107,7 @@ async def embed_atoms_batch_task(atom_ids: list[int], provider_id: str) -> dict[
 @task_retry_with_dlq(max_attempts=3, task_name="extract_knowledge")
 @nats_broker.task
 async def extract_knowledge_from_messages_task(
-    message_ids: list[int], agent_config_id: str, created_by: str | None = None
+    message_ids: list[uuid.UUID], agent_config_id: str, created_by: str | None = None
 ) -> dict[str, int]:
     """Background task for extracting knowledge (topics and atoms) from message batches.
 
@@ -194,14 +195,12 @@ async def extract_knowledge_from_messages_task(
         )
 
         if version_created_atom_ids:
-            atom_ids_for_embedding = [int(atom_id) for atom_id in version_created_atom_ids]
-            logger.info(f"Queueing embedding generation for {len(atom_ids_for_embedding)} atoms")
-            await embed_atoms_batch_task.kiq(atom_ids=atom_ids_for_embedding, provider_id=str(provider.id))
+            logger.info(f"Queueing embedding generation for {len(version_created_atom_ids)} atoms")
+            await embed_atoms_batch_task.kiq(atom_ids=version_created_atom_ids, provider_id=str(provider.id))
 
         if message_ids:
-            message_ids_int = [int(msg_id) for msg_id in message_ids]
-            logger.info(f"Queueing embedding generation for {len(message_ids_int)} messages")
-            await embed_messages_batch_task.kiq(message_ids=message_ids_int, provider_id=str(provider.id))
+            logger.info(f"Queueing embedding generation for {len(message_ids)} messages")
+            await embed_messages_batch_task.kiq(message_ids=message_ids, provider_id=str(provider.id))
 
         await websocket_manager.broadcast(
             "knowledge",
