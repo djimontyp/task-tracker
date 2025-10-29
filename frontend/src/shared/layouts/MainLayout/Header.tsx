@@ -23,67 +23,56 @@ interface BreadcrumbSegment {
 const breadcrumbMap: Record<string, BreadcrumbSegment[]> = {
   '/': [
     { label: 'Home', href: '/' },
-    { label: 'Overview' },
+    { label: 'Dashboard' },
   ],
   '/messages': [
     { label: 'Home', href: '/' },
-    { label: 'Data Management', href: '/' },
     { label: 'Messages' },
   ],
   '/topics': [
     { label: 'Home', href: '/' },
-    { label: 'Data Management', href: '/' },
     { label: 'Topics' },
   ],
   '/tasks': [
     { label: 'Home', href: '/' },
-    { label: 'Data Management', href: '/' },
     { label: 'Tasks' },
   ],
   '/analysis': [
     { label: 'Home', href: '/' },
-    { label: 'AI Operations', href: '/analysis' },
     { label: 'Analysis Runs' },
   ],
   '/proposals': [
     { label: 'Home', href: '/' },
-    { label: 'AI Operations', href: '/analysis' },
     { label: 'Task Proposals' },
   ],
   '/noise-filtering': [
     { label: 'Home', href: '/' },
-    { label: 'AI Operations', href: '/analysis' },
     { label: 'Noise Filtering' },
   ],
   '/versions': [
     { label: 'Home', href: '/' },
-    { label: 'AI Operations', href: '/analysis' },
     { label: 'Versions' },
   ],
   '/agents': [
     { label: 'Home', href: '/' },
-    { label: 'AI Setup', href: '/agents' },
     { label: 'Agents' },
   ],
   '/agent-tasks': [
     { label: 'Home', href: '/' },
-    { label: 'AI Setup', href: '/agents' },
     { label: 'Task Templates' },
   ],
   '/providers': [
     { label: 'Home', href: '/' },
-    { label: 'AI Setup', href: '/agents' },
     { label: 'Providers' },
   ],
   '/projects': [
     { label: 'Home', href: '/' },
-    { label: 'AI Setup', href: '/agents' },
     { label: 'Projects' },
   ],
   '/automation/dashboard': [
     { label: 'Home', href: '/' },
     { label: 'Automation', href: '/automation/dashboard' },
-    { label: 'Dashboard' },
+    { label: 'Overview' },
   ],
   '/automation/rules': [
     { label: 'Home', href: '/' },
@@ -102,12 +91,10 @@ const breadcrumbMap: Record<string, BreadcrumbSegment[]> = {
   ],
   '/analytics': [
     { label: 'Home', href: '/' },
-    { label: 'Analytics & Reports', href: '/analytics' },
     { label: 'Analytics' },
   ],
   '/monitoring': [
     { label: 'Home', href: '/' },
-    { label: 'Analytics & Reports', href: '/analytics' },
     { label: 'Task Monitoring' },
   ],
   '/settings': [
