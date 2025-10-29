@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import uuid
+
 from sqlalchemy import desc
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -25,14 +27,14 @@ class MessageCRUD:
 
     async def list_by_topic(
         self,
-        topic_id: int,
+        topic_id: uuid.UUID,
         skip: int = 0,
         limit: int = 100,
     ) -> list[MessageResponse]:
         """Get all messages belonging to a specific topic.
 
         Args:
-            topic_id: Topic ID to filter by
+            topic_id: Topic UUID to filter by
             skip: Number of records to skip (pagination)
             limit: Maximum number of records to return
 
@@ -54,7 +56,7 @@ class MessageCRUD:
 
         return [
             MessageResponse(
-                id=msg.id or 0,
+                id=msg.id,
                 external_message_id=msg.external_message_id,
                 content=msg.content,
                 sent_at=msg.sent_at,

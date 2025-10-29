@@ -1,5 +1,6 @@
 """Message request/response schemas"""
 
+import uuid
 from datetime import datetime
 
 from pydantic import BaseModel
@@ -20,7 +21,7 @@ class MessageCreateRequest(BaseModel):
 class MessageResponse(BaseModel):
     """Response schema for message"""
 
-    id: int
+    id: uuid.UUID
     external_message_id: str
     content: str
     sent_at: datetime
@@ -33,7 +34,7 @@ class MessageResponse(BaseModel):
     avatar_url: str | None = None
 
     telegram_profile_id: int | None = None
-    topic_id: int | None = None
+    topic_id: uuid.UUID | None = None
     topic_name: str | None = None  # Joined from Topic
 
     classification: str | None = None

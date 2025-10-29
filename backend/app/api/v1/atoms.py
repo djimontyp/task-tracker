@@ -5,6 +5,7 @@ including CRUD operations and topic associations.
 """
 
 import logging
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -66,7 +67,7 @@ async def list_atoms(
     description="Retrieve a specific atom by its ID.",
 )
 async def get_atom(
-    atom_id: int,
+    atom_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
 ) -> AtomPublic:
     """Get a specific atom by ID.
@@ -127,7 +128,7 @@ async def create_atom(
     description="Update an existing atom by ID.",
 )
 async def update_atom(
-    atom_id: int,
+    atom_id: uuid.UUID,
     atom_data: AtomUpdate,
     session: AsyncSession = Depends(get_session),
 ) -> AtomPublic:
@@ -166,7 +167,7 @@ async def update_atom(
     description="Delete an atom by ID. Use with caution.",
 )
 async def delete_atom(
-    atom_id: int,
+    atom_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
 ) -> None:
     """Delete an atom.
@@ -198,8 +199,8 @@ async def delete_atom(
     description="Create a relationship between an atom and a topic.",
 )
 async def link_atom_to_topic(
-    atom_id: int,
-    topic_id: int,
+    atom_id: uuid.UUID,
+    topic_id: uuid.UUID,
     position: int | None = Query(None, description="Display order within topic"),
     note: str | None = Query(None, description="Contextual note about the relationship"),
     session: AsyncSession = Depends(get_session),
@@ -248,6 +249,6 @@ async def link_atom_to_topic(
 
     return {
         "message": "Atom linked to topic successfully",
-        "atom_id": atom_id,
-        "topic_id": topic_id,
+        "atom_id": str(atom_id),
+        "topic_id": str(topic_id),
     }

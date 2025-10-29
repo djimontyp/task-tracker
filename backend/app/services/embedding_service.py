@@ -5,6 +5,7 @@ OpenAI and Ollama providers. Supports both single and batch embedding operations
 """
 
 import logging
+import uuid
 from typing import Protocol
 
 import httpx
@@ -250,7 +251,7 @@ class EmbeddingService:
             raise
 
     async def embed_messages_batch(
-        self, session: AsyncSession, message_ids: list[int], batch_size: int | None = None
+        self, session: AsyncSession, message_ids: list[uuid.UUID], batch_size: int | None = None
     ) -> dict[str, int]:
         """Batch embed multiple messages with progress tracking.
 
@@ -322,7 +323,7 @@ class EmbeddingService:
         return stats
 
     async def embed_atoms_batch(
-        self, session: AsyncSession, atom_ids: list[int], batch_size: int | None = None
+        self, session: AsyncSession, atom_ids: list[uuid.UUID], batch_size: int | None = None
     ) -> dict[str, int]:
         """Batch embed multiple atoms with progress tracking.
 

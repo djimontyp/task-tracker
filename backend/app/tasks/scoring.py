@@ -1,3 +1,4 @@
+import uuid
 from typing import Any
 
 from core.taskiq_config import nats_broker
@@ -14,7 +15,7 @@ from app.utils.retry_utils import task_retry_with_dlq
 
 @task_retry_with_dlq(max_attempts=3, task_name="score_message")
 @nats_broker.task
-async def score_message_task(message_id: int) -> dict[str, Any]:
+async def score_message_task(message_id: uuid.UUID) -> dict[str, Any]:
     """Background task to score a single message using ImportanceScorer.
 
     Calculates importance score based on content, author, temporal, and topic factors.

@@ -1,3 +1,4 @@
+import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -14,7 +15,7 @@ from app.services.websocket_manager import websocket_manager
 from app.webhook_service import telegram_webhook_service
 
 
-async def queue_knowledge_extraction_if_needed(message_id: int, db: Any) -> None:
+async def queue_knowledge_extraction_if_needed(message_id: uuid.UUID, db: Any) -> None:
     """Queue knowledge extraction task if unprocessed message threshold is reached.
 
     Checks if there are enough recent unprocessed messages to trigger automatic

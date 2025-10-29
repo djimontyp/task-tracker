@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import uuid
+
 from sqlalchemy import desc
 from sqlmodel import func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -13,6 +15,7 @@ from app.models.atom import (
     AtomUpdate,
     TopicAtom,
 )
+from app.services.base_crud import BaseCRUD
 
 
 class AtomCRUD:
@@ -25,19 +28,18 @@ class AtomCRUD:
             session: Async database session
         """
         self.session = session
+        self._base_crud = BaseCRUD(Atom, session)
 
-    async def get(self, atom_id: int) -> AtomPublic | None:
+    async def get(self, atom_id: uuid.UUID) -> AtomPublic | None:
         """Get atom by ID.
 
         Args:
-            atom_id: Atom ID to retrieve
+            atom_id: Atom UUID to retrieve
 
         Returns:
             Atom or None if not found
         """
-        query = select(Atom).where(Atom.id == atom_id)
-        result = await self.session.execute(query)
-        atom = result.scalar_one_or_none()
+        atom = await self._base_crud.get(atom_id)
 
         if not atom:
             return None
@@ -102,18 +104,7 @@ class AtomCRUD:
         Returns:
             Created atom
         """
-        atom = Atom(
-            type=atom_data.type,
-            title=atom_data.title,
-            content=atom_data.content,
-            confidence=atom_data.confidence,
-            user_approved=atom_data.user_approved,
-            meta=atom_data.meta,
-        )
-
-        self.session.add(atom)
-        await self.session.commit()
-        await self.session.refresh(atom)
+        atom = await self._base_crud.create(atom_data.model_dump())
 
         return AtomPublic(
             id=atom.id,
@@ -127,38 +118,23 @@ class AtomCRUD:
             updated_at=atom.updated_at.isoformat() if atom.updated_at else "",
         )
 
-    async def update(self, atom_id: int, atom_data: AtomUpdate) -> AtomPublic | None:
+    async def update(self, atom_id: uuid.UUID, atom_data: AtomUpdate) -> AtomPublic | None:
         """Update an existing atom.
 
         Args:
-            atom_id: Atom ID to update
+            atom_id: Atom UUID to update
             atom_data: Atom update data
 
         Returns:
             Updated atom or None if not found
         """
-        query = select(Atom).where(Atom.id == atom_id)
-        result = await self.session.execute(query)
-        atom = result.scalar_one_or_none()
+        atom = await self._base_crud.get(atom_id)
 
         if not atom:
             return None
 
-        if atom_data.type is not None:
-            atom.type = atom_data.type
-        if atom_data.title is not None:
-            atom.title = atom_data.title
-        if atom_data.content is not None:
-            atom.content = atom_data.content
-        if atom_data.confidence is not None:
-            atom.confidence = atom_data.confidence
-        if atom_data.user_approved is not None:
-            atom.user_approved = atom_data.user_approved
-        if atom_data.meta is not None:
-            atom.meta = atom_data.meta
-
-        await self.session.commit()
-        await self.session.refresh(atom)
+        update_data = atom_data.model_dump(exclude_unset=True)
+        atom = await self._base_crud.update(atom, update_data)
 
         return AtomPublic(
             id=atom.id,
@@ -172,35 +148,25 @@ class AtomCRUD:
             updated_at=atom.updated_at.isoformat() if atom.updated_at else "",
         )
 
-    async def delete(self, atom_id: int) -> bool:
+    async def delete(self, atom_id: uuid.UUID) -> bool:
         """Delete an atom.
 
         Args:
-            atom_id: Atom ID to delete
+            atom_id: Atom UUID to delete
 
         Returns:
             True if deleted, False if not found
         """
-        query = select(Atom).where(Atom.id == atom_id)
-        result = await self.session.execute(query)
-        atom = result.scalar_one_or_none()
-
-        if not atom:
-            return False
-
-        await self.session.delete(atom)
-        await self.session.commit()
-
-        return True
+        return await self._base_crud.delete(atom_id)
 
     async def link_to_topic(
-        self, atom_id: int, topic_id: int, position: int | None = None, note: str | None = None
+        self, atom_id: uuid.UUID, topic_id: uuid.UUID, position: int | None = None, note: str | None = None
     ) -> bool:
         """Link an atom to a topic.
 
         Args:
-            atom_id: Atom ID
-            topic_id: Topic ID
+            atom_id: Atom UUID
+            topic_id: Topic UUID
             position: Optional display order
             note: Optional contextual note
 
@@ -229,11 +195,11 @@ class AtomCRUD:
 
         return True
 
-    async def list_by_topic(self, topic_id: int) -> list[AtomPublic]:
+    async def list_by_topic(self, topic_id: uuid.UUID) -> list[AtomPublic]:
         """Get all atoms for a specific topic.
 
         Args:
-            topic_id: Topic ID
+            topic_id: Topic UUID
 
         Returns:
             List of atoms belonging to the topic
