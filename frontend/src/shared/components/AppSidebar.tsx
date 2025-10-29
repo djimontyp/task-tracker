@@ -1,5 +1,5 @@
-import { useMemo, useEffect } from 'react'
-import { Squares2X2Icon, CheckCircleIcon, ChartBarIcon, Cog6ToothIcon, SignalIcon, CpuChipIcon, LightBulbIcon, EnvelopeIcon, ChatBubbleLeftRightIcon, ListBulletIcon, ClipboardDocumentListIcon, ServerIcon, FolderIcon, FunnelIcon, ClockIcon, BellIcon, CalendarIcon, SparklesIcon, CircleStackIcon } from '@heroicons/react/24/outline'
+import { useMemo, useEffect, useState } from 'react'
+import { Squares2X2Icon, CheckCircleIcon, ChartBarIcon, Cog6ToothIcon, SignalIcon, CpuChipIcon, LightBulbIcon, EnvelopeIcon, ChatBubbleLeftRightIcon, ListBulletIcon, ClipboardDocumentListIcon, ServerIcon, FolderIcon, FunnelIcon, ClockIcon, BellIcon, CalendarIcon, SparklesIcon, CircleStackIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import { Link, useLocation } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -15,6 +15,11 @@ import {
   SidebarFooter,
   SidebarSeparator,
 } from '@/shared/ui/sidebar'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/shared/ui/collapsible'
 import { cn } from '@/shared/lib/utils'
 import { useServiceStatus } from '@/features/websocket/hooks/useServiceStatus'
 import { NavUser } from './NavUser'
@@ -40,7 +45,7 @@ const navGroups: NavGroup[] = [
   {
     label: 'Data Management',
     items: [
-      { path: '/', label: 'Overview', icon: Squares2X2Icon },
+      { path: '/', label: 'Dashboard', icon: Squares2X2Icon },
       { path: '/messages', label: 'Messages', icon: EnvelopeIcon },
       { path: '/topics', label: 'Topics', icon: ChatBubbleLeftRightIcon },
       { path: '/tasks', label: 'Tasks', icon: CheckCircleIcon },
@@ -68,7 +73,7 @@ const navGroups: NavGroup[] = [
   {
     label: 'Automation',
     items: [
-      { path: '/automation/dashboard', label: 'Dashboard', icon: SparklesIcon },
+      { path: '/automation/dashboard', label: 'Overview', icon: SparklesIcon },
       { path: '/automation/rules', label: 'Rules', icon: Cog6ToothIcon },
       { path: '/automation/scheduler', label: 'Scheduler', icon: CalendarIcon },
       { path: '/automation/notifications', label: 'Notifications', icon: BellIcon },
@@ -92,6 +97,17 @@ export function AppSidebar() {
   const location = useLocation()
   const { indicator } = useServiceStatus()
   const queryClient = useQueryClient()
+
+  // Auto-expand Automation section if on automation page
+  const isAutomationPage = location.pathname.startsWith('/automation')
+  const [automationOpen, setAutomationOpen] = useState(isAutomationPage)
+
+  // Auto-expand when navigating to automation pages
+  useEffect(() => {
+    if (isAutomationPage) {
+      setAutomationOpen(true)
+    }
+  }, [isAutomationPage])
 
   // Fetch sidebar counts
   const { data: counts } = useQuery<SidebarCounts>({
@@ -190,12 +206,69 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        {groups.map((group) => (
-          <SidebarGroup key={group.label}>
-            <SidebarGroupLabel className="px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70">
-              {group.label}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
+        {groups.map((group) => {
+          // Special handling for Automation - make it collapsible
+          if (group.label === 'Automation') {
+            return (
+              <Collapsible
+                key={group.label}
+                open={automationOpen}
+                onOpenChange={setAutomationOpen}
+                className="group/collapsible"
+              >
+                <SidebarGroup>
+                  <SidebarGroupLabel asChild className="px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between hover:bg-accent/50 rounded-md transition-colors">
+                      <span>{group.label}</span>
+                      <ChevronRightIcon
+                        className={cn(
+                          "h-4 w-4 transition-transform duration-200",
+                          automationOpen && "rotate-90"
+                        )}
+                      />
+                    </CollapsibleTrigger>
+                  </SidebarGroupLabel>
+                  <CollapsibleContent>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {group.items.map((item) => {
+                          const isActive = item.path === '/'
+                            ? location.pathname === '/'
+                            : location.pathname.startsWith(item.path)
+
+                          return (
+                            <SidebarMenuItem key={item.path}>
+                              <SidebarMenuButton
+                                asChild
+                                isActive={isActive}
+                                tooltip={item.label}
+                                className={cn(
+                                  "data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold"
+                                )}
+                              >
+                                <Link to={item.path}>
+                                  <item.icon />
+                                  <span>{item.label}</span>
+                                </Link>
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          )
+                        })}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </CollapsibleContent>
+                </SidebarGroup>
+              </Collapsible>
+            )
+          }
+
+          // Regular group rendering for non-Automation groups
+          return (
+            <SidebarGroup key={group.label}>
+              <SidebarGroupLabel className="px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70">
+                {group.label}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
                   const isActive = item.path === '/'
@@ -261,7 +334,8 @@ export function AppSidebar() {
               </div>
             )}
           </SidebarGroup>
-        ))}
+          )
+        })}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
