@@ -4,8 +4,8 @@ import uuid
 from datetime import datetime
 
 from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
-from sqlalchemy import Column, ForeignKey, Text
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import Column, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
 from .base import TimestampMixin
@@ -24,7 +24,8 @@ class Message(TimestampMixin, SQLModel, table=True):
 
     id: uuid.UUID = Field(
         default_factory=uuid.uuid4,
-        sa_column=Column(UUID(as_uuid=True), primary_key=True, index=True),
+        primary_key=True,
+        index=True,
         description="Unique identifier for the message",
     )
     external_message_id: str = Field(index=True, max_length=100, description="ID from external system")
@@ -59,7 +60,8 @@ class Message(TimestampMixin, SQLModel, table=True):
 
     topic_id: uuid.UUID | None = Field(
         default=None,
-        sa_column=Column(UUID(as_uuid=True), ForeignKey("topics.id"), index=True, nullable=True),
+        foreign_key="topics.id",
+        index=True,
         description="Ground truth topic ID for classification experiments",
     )
 

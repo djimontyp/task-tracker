@@ -4,8 +4,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, BigInteger, Boolean, Column, DateTime, ForeignKey, Integer, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, func
 from sqlmodel import Field, Relationship, SQLModel
 
 from .base import IDMixin
@@ -24,7 +23,7 @@ class TopicVersion(IDMixin, SQLModel, table=True):
 
     __tablename__ = "topic_versions"
 
-    topic_id: uuid.UUID = Field(sa_column=Column(UUID(as_uuid=True), ForeignKey("topics.id"), nullable=False, index=True))
+    topic_id: uuid.UUID = Field(foreign_key="topics.id", index=True)
     version: int = Field(sa_column=Column(Integer, nullable=False))
     data: dict = Field(sa_column=Column(JSON, nullable=False))
     created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
