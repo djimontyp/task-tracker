@@ -18,8 +18,12 @@ from app.models.atom import (
 from app.services.base_crud import BaseCRUD
 
 
-class AtomCRUD:
-    """CRUD service for Atom operations."""
+class AtomCRUD(BaseCRUD[Atom]):
+    """CRUD service for Atom operations.
+
+    Inherits standard CRUD operations from BaseCRUD and adds
+    atom-specific business logic for topic relationships.
+    """
 
     def __init__(self, session: AsyncSession):
         """Initialize CRUD service.
@@ -27,23 +31,17 @@ class AtomCRUD:
         Args:
             session: Async database session
         """
-        self.session = session
-        self._base_crud = BaseCRUD(Atom, session)
+        super().__init__(Atom, session)
 
-    async def get(self, atom_id: uuid.UUID) -> AtomPublic | None:
-        """Get atom by ID.
+    def _to_public(self, atom: Atom) -> AtomPublic:
+        """Convert Atom model to AtomPublic schema.
 
         Args:
-            atom_id: Atom UUID to retrieve
+            atom: Database atom instance
 
         Returns:
-            Atom or None if not found
+            Public atom schema
         """
-        atom = await self._base_crud.get(atom_id)
-
-        if not atom:
-            return None
-
         return AtomPublic(
             id=atom.id,
             type=atom.type,
@@ -52,9 +50,23 @@ class AtomCRUD:
             confidence=atom.confidence,
             user_approved=atom.user_approved,
             meta=atom.meta,
-            created_at=atom.created_at.isoformat(),
-            updated_at=atom.updated_at.isoformat(),
+            embedding=atom.embedding,
+            has_embedding=atom.embedding is not None,
+            created_at=atom.created_at.isoformat() if atom.created_at else "",
+            updated_at=atom.updated_at.isoformat() if atom.updated_at else "",
         )
+
+    async def get_atom(self, atom_id: uuid.UUID) -> AtomPublic | None:
+        """Get atom by ID.
+
+        Args:
+            atom_id: Atom UUID to retrieve
+
+        Returns:
+            AtomPublic or None if not found
+        """
+        atom = await self.get(atom_id)
+        return self._to_public(atom) if atom else None
 
     async def list_atoms(
         self,
@@ -78,24 +90,9 @@ class AtomCRUD:
         result = await self.session.execute(query)
         atoms = result.scalars().all()
 
-        public_atoms = [
-            AtomPublic(
-                id=atom.id,
-                type=atom.type,
-                title=atom.title,
-                content=atom.content,
-                confidence=atom.confidence,
-                user_approved=atom.user_approved,
-                meta=atom.meta,
-                created_at=atom.created_at.isoformat() if atom.created_at else "",
-                updated_at=atom.updated_at.isoformat() if atom.updated_at else "",
-            )
-            for atom in atoms
-        ]
+        return [self._to_public(atom) for atom in atoms], total
 
-        return public_atoms, total
-
-    async def create(self, atom_data: AtomCreate) -> AtomPublic:
+    async def create_atom(self, atom_data: AtomCreate) -> AtomPublic:
         """Create a new atom.
 
         Args:
@@ -104,21 +101,10 @@ class AtomCRUD:
         Returns:
             Created atom
         """
-        atom = await self._base_crud.create(atom_data.model_dump())
+        atom = await self.create(atom_data.model_dump())
+        return self._to_public(atom)
 
-        return AtomPublic(
-            id=atom.id,
-            type=atom.type,
-            title=atom.title,
-            content=atom.content,
-            confidence=atom.confidence,
-            user_approved=atom.user_approved,
-            meta=atom.meta,
-            created_at=atom.created_at.isoformat() if atom.created_at else "",
-            updated_at=atom.updated_at.isoformat() if atom.updated_at else "",
-        )
-
-    async def update(self, atom_id: uuid.UUID, atom_data: AtomUpdate) -> AtomPublic | None:
+    async def update_atom(self, atom_id: uuid.UUID, atom_data: AtomUpdate) -> AtomPublic | None:
         """Update an existing atom.
 
         Args:
@@ -128,36 +114,13 @@ class AtomCRUD:
         Returns:
             Updated atom or None if not found
         """
-        atom = await self._base_crud.get(atom_id)
-
+        atom = await self.get(atom_id)
         if not atom:
             return None
 
         update_data = atom_data.model_dump(exclude_unset=True)
-        atom = await self._base_crud.update(atom, update_data)
-
-        return AtomPublic(
-            id=atom.id,
-            type=atom.type,
-            title=atom.title,
-            content=atom.content,
-            confidence=atom.confidence,
-            user_approved=atom.user_approved,
-            meta=atom.meta,
-            created_at=atom.created_at.isoformat() if atom.created_at else "",
-            updated_at=atom.updated_at.isoformat() if atom.updated_at else "",
-        )
-
-    async def delete(self, atom_id: uuid.UUID) -> bool:
-        """Delete an atom.
-
-        Args:
-            atom_id: Atom UUID to delete
-
-        Returns:
-            True if deleted, False if not found
-        """
-        return await self._base_crud.delete(atom_id)
+        updated_atom = await self.update(atom, update_data)
+        return self._to_public(updated_atom)
 
     async def link_to_topic(
         self, atom_id: uuid.UUID, topic_id: uuid.UUID, position: int | None = None, note: str | None = None
@@ -214,17 +177,4 @@ class AtomCRUD:
         result = await self.session.execute(query)
         atoms = result.scalars().all()
 
-        return [
-            AtomPublic(
-                id=atom.id,
-                type=atom.type,
-                title=atom.title,
-                content=atom.content,
-                confidence=atom.confidence,
-                user_approved=atom.user_approved,
-                meta=atom.meta,
-                created_at=atom.created_at.isoformat() if atom.created_at else "",
-                updated_at=atom.updated_at.isoformat() if atom.updated_at else "",
-            )
-            for atom in atoms
-        ]
+        return [self._to_public(atom) for atom in atoms]
