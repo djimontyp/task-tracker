@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from . import (
+from app.api.v1 import (
     agents,
     analysis,
     analysis_runs,

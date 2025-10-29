@@ -61,7 +61,7 @@ def count_by_status(tasks: list[Task]) -> TaskStatusCounts:
     Returns:
         TaskStatusCounts with counts for each status
     """
-    from ...models.enums import TaskStatus
+    from app.models.enums import TaskStatus
 
     return TaskStatusCounts(
         open=len([t for t in tasks if t.status == TaskStatus.open]),

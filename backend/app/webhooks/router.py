@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from . import telegram
+from app.webhooks import telegram
 
 webhook_router = APIRouter()
 
