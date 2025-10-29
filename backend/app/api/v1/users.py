@@ -12,8 +12,7 @@ from app.schemas.users import (
     UserCreateRequest,
     UserResponse,
 )
-
-from ..deps import DatabaseDep
+from app.api.deps import DatabaseDep
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/users", tags=["users"])
