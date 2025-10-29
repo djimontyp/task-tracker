@@ -19,8 +19,12 @@ from app.models import (
 from app.services.base_crud import BaseCRUD
 
 
-class AgentCRUD:
-    """CRUD service for Agent Configuration operations."""
+class AgentCRUD(BaseCRUD[AgentConfig]):
+    """CRUD service for Agent Configuration operations.
+
+    Inherits standard CRUD operations from BaseCRUD and adds
+    agent-specific business logic for name uniqueness and provider validation.
+    """
 
     def __init__(self, session: AsyncSession):
         """Initialize CRUD service.
@@ -28,10 +32,20 @@ class AgentCRUD:
         Args:
             session: Async database session
         """
-        self.session = session
-        self._base_crud = BaseCRUD(AgentConfig, session)
+        super().__init__(AgentConfig, session)
 
-    async def create(self, agent_data: AgentConfigCreate) -> AgentConfigPublic:
+    def _to_public(self, agent: AgentConfig) -> AgentConfigPublic:
+        """Convert AgentConfig model to AgentConfigPublic schema.
+
+        Args:
+            agent: Database agent configuration instance
+
+        Returns:
+            Public agent configuration schema
+        """
+        return AgentConfigPublic.model_validate(agent)
+
+    async def create_agent(self, agent_data: AgentConfigCreate) -> AgentConfigPublic:
         """Create new agent configuration.
 
         Args:
@@ -43,12 +57,10 @@ class AgentCRUD:
         Raises:
             ValueError: If agent name already exists or provider not found
         """
-        # Check name uniqueness
         existing = await self.get_by_name(agent_data.name)
         if existing:
             raise ValueError(f"Agent with name '{agent_data.name}' already exists")
 
-        # Verify provider exists
         provider_result = await self.session.execute(
             select(LLMProvider).where(LLMProvider.id == agent_data.provider_id)
         )
@@ -56,25 +68,10 @@ class AgentCRUD:
         if not provider:
             raise ValueError(f"Provider with ID '{agent_data.provider_id}' not found")
 
-        # Create agent record
-        agent = AgentConfig(
-            name=agent_data.name,
-            description=agent_data.description,
-            provider_id=agent_data.provider_id,
-            model_name=agent_data.model_name,
-            system_prompt=agent_data.system_prompt,
-            temperature=agent_data.temperature,
-            max_tokens=agent_data.max_tokens,
-            is_active=agent_data.is_active,
-        )
+        agent = await self.create(agent_data.model_dump())
+        return self._to_public(agent)
 
-        self.session.add(agent)
-        await self.session.commit()
-        await self.session.refresh(agent)
-
-        return AgentConfigPublic.model_validate(agent)
-
-    async def get(self, agent_id: UUID) -> AgentConfigPublic | None:
+    async def get_agent(self, agent_id: UUID) -> AgentConfigPublic | None:
         """Get agent by ID.
 
         Args:
@@ -83,11 +80,8 @@ class AgentCRUD:
         Returns:
             Agent if found, None otherwise
         """
-        agent = await self._base_crud.get(agent_id)
-
-        if agent:
-            return AgentConfigPublic.model_validate(agent)
-        return None
+        agent = await self.get(agent_id)
+        return self._to_public(agent) if agent else None
 
     async def get_by_name(self, name: str) -> AgentConfigPublic | None:
         """Get agent by name.
@@ -100,12 +94,9 @@ class AgentCRUD:
         """
         result = await self.session.execute(select(AgentConfig).where(AgentConfig.name == name))
         agent = result.scalar_one_or_none()
+        return self._to_public(agent) if agent else None
 
-        if agent:
-            return AgentConfigPublic.model_validate(agent)
-        return None
-
-    async def list(
+    async def list_agents(
         self,
         skip: int = 0,
         limit: int = 100,
@@ -135,9 +126,9 @@ class AgentCRUD:
         result = await self.session.execute(query)
         agents = result.scalars().all()
 
-        return [AgentConfigPublic.model_validate(a) for a in agents]
+        return [self._to_public(a) for a in agents]
 
-    async def update(
+    async def update_agent(
         self,
         agent_id: UUID,
         update_data: AgentConfigUpdate,
@@ -154,16 +145,12 @@ class AgentCRUD:
         Raises:
             ValueError: If provider_id provided but not found
         """
-        result = await self.session.execute(select(AgentConfig).where(AgentConfig.id == agent_id))
-        agent = result.scalar_one_or_none()
-
+        agent = await self.get(agent_id)
         if not agent:
             return None
 
-        # Get update dict excluding unset fields
         update_dict = update_data.model_dump(exclude_unset=True)
 
-        # Verify new provider exists if changing provider
         if "provider_id" in update_dict:
             provider_result = await self.session.execute(
                 select(LLMProvider).where(LLMProvider.id == update_dict["provider_id"])
@@ -172,16 +159,10 @@ class AgentCRUD:
             if not provider:
                 raise ValueError(f"Provider with ID '{update_dict['provider_id']}' not found")
 
-        # Apply updates
-        for field, value in update_dict.items():
-            setattr(agent, field, value)
+        updated_agent = await self.update(agent, update_dict)
+        return self._to_public(updated_agent)
 
-        await self.session.commit()
-        await self.session.refresh(agent)
-
-        return AgentConfigPublic.model_validate(agent)
-
-    async def delete(self, agent_id: UUID) -> bool:
+    async def delete_agent(self, agent_id: UUID) -> bool:
         """Delete agent configuration.
 
         Args:
@@ -195,4 +176,4 @@ class AgentCRUD:
             Running agent instances continue until task completion.
             Will cascade delete agent_task_assignments due to FK constraint.
         """
-        return await self._base_crud.delete(agent_id)
+        return await self.delete(agent_id)

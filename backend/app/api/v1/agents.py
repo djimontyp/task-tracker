@@ -59,7 +59,7 @@ async def create_agent(
     """
     try:
         crud = AgentCRUD(session)
-        agent = await crud.create(agent_data)
+        agent = await crud.create_agent(agent_data)
         logger.info(f"Created agent '{agent.name}' with ID {agent.id}")
         return agent
     except ValueError as e:
@@ -105,7 +105,7 @@ async def list_agents(
         List of agent configurations
     """
     crud = AgentCRUD(session)
-    agents = await crud.list(
+    agents = await crud.list_agents(
         skip=skip,
         limit=limit,
         active_only=active_only,
@@ -137,7 +137,7 @@ async def get_agent(
         HTTPException 404: Agent not found
     """
     crud = AgentCRUD(session)
-    agent = await crud.get(agent_id)
+    agent = await crud.get_agent(agent_id)
 
     if not agent:
         raise HTTPException(
@@ -175,7 +175,7 @@ async def update_agent(
     """
     try:
         crud = AgentCRUD(session)
-        agent = await crud.update(agent_id, update_data)
+        agent = await crud.update_agent(agent_id, update_data)
 
         if not agent:
             raise HTTPException(
@@ -231,7 +231,7 @@ async def delete_agent(
         HTTPException 404: Agent not found
     """
     crud = AgentCRUD(session)
-    deleted = await crud.delete(agent_id)
+    deleted = await crud.delete_agent(agent_id)
 
     if not deleted:
         raise HTTPException(
