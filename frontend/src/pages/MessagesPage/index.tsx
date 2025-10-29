@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  Spinner,
   Button,
   Card,
+  Skeleton,
 } from '@/shared/ui'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
@@ -277,8 +277,43 @@ const MessagesPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Spinner size="lg" />
+      <div className="space-y-4 animate-fade-in" role="status" aria-label="Loading messages" aria-live="polite">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-32" />
+          <div className="flex gap-2">
+            <Skeleton className="h-9 w-24" />
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-9 w-36" />
+          </div>
+        </div>
+        <Card className="overflow-hidden">
+          <div className="p-4 space-y-4">
+            <div className="flex gap-2 mb-4">
+              <Skeleton className="h-10 flex-1 max-w-xs" />
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-24" />
+            </div>
+            <div className="border rounded-md">
+              <div className="border-b">
+                <Skeleton className="h-12 w-full" />
+              </div>
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="border-b last:border-b-0 p-4 flex gap-4">
+                  <Skeleton className="h-5 w-5 rounded" />
+                  <Skeleton className="h-5 w-16" />
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-5 flex-1" />
+                  <Skeleton className="h-5 w-20" />
+                  <Skeleton className="h-5 w-20" />
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-between pt-2">
+              <Skeleton className="h-9 w-48" />
+              <Skeleton className="h-9 w-64" />
+            </div>
+          </div>
+        </Card>
       </div>
     )
   }

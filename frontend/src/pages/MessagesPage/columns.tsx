@@ -130,9 +130,13 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     ),
     cell: ({ row }) => {
       const analyzed = row.getValue<boolean>('analyzed')
+      const statusText = analyzed ? 'Analyzed' : 'Pending'
       return (
-        <Badge variant={analyzed ? 'default' : 'outline'}>
-          {analyzed ? 'Analyzed' : 'Pending'}
+        <Badge
+          variant={analyzed ? 'default' : 'outline'}
+          aria-label={`Message status: ${statusText}`}
+        >
+          {statusText}
         </Badge>
       )
     },
@@ -155,14 +159,20 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       const colorClass = getImportanceColor(score)
       const percentage = Math.round(score * 100)
 
+      const importanceLabel = percentage >= 70 ? 'High' : percentage >= 40 ? 'Medium' : 'Low'
+
       return (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Badge variant="outline" className={`inline-flex items-center gap-1 ${colorClass}`}>
+              <Badge
+                variant="outline"
+                className={`inline-flex items-center gap-1 ${colorClass}`}
+                aria-label={`Importance: ${importanceLabel} (${percentage}%)`}
+              >
                 {percentage}%
                 {row.original.noise_factors && (
-                  <InformationCircleIcon className="h-3 w-3" />
+                  <InformationCircleIcon className="h-3 w-3" aria-hidden="true" />
                 )}
               </Badge>
             </TooltipTrigger>
@@ -199,7 +209,14 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       if (!classification) return <div className="text-muted-foreground text-xs">-</div>
 
       const meta = classificationLabels[classification]
-      return <Badge variant={meta.variant}>{meta.label}</Badge>
+      return (
+        <Badge
+          variant={meta.variant}
+          aria-label={`Classification: ${meta.label}`}
+        >
+          {meta.label}
+        </Badge>
+      )
     },
     filterFn: (row, _id, filterValues: NoiseClassification[]) => {
       if (!filterValues || filterValues.length === 0) return true
