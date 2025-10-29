@@ -1,3 +1,4 @@
+import logging
 import os
 
 from core.config import settings
@@ -7,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.llm.startup import initialize_llm_system
 from app.middleware import ErrorHandlerMiddleware
+
+logger = logging.getLogger(__name__)
 
 from .api.v1.router import api_router
 from .database import create_db_and_tables
@@ -114,13 +117,13 @@ def create_app() -> FastAPI:
     async def root_post(request: Request) -> dict[str, str]:
         try:
             body = await request.body()
-            print(f"⚠️ Unexpected POST to root endpoint. Body: {body.decode()[:200]}...")
+            logger.warning("Unexpected POST to root endpoint. Body: %s...", body.decode()[:200])
             return {
                 "status": "redirect",
                 "message": "Use /webhook/telegram for Telegram webhooks",
             }
         except Exception as e:
-            print(f"⚠️ Error handling POST to root: {e}")
+            logger.warning("Error handling POST to root: %s", e)
             return {"status": "error", "message": "Invalid request to root endpoint"}
 
     return app
