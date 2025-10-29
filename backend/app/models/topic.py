@@ -4,8 +4,7 @@ import re
 import uuid
 
 from pydantic import field_validator
-from sqlalchemy import Column, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Text
 from sqlmodel import Field, Relationship, SQLModel
 
 from .base import TimestampMixin
@@ -200,7 +199,8 @@ class Topic(TimestampMixin, SQLModel, table=True):
 
     id: uuid.UUID = Field(
         default_factory=uuid.uuid4,
-        sa_column=Column(UUID(as_uuid=True), primary_key=True, index=True),
+        primary_key=True,
+        index=True,
         description="Unique identifier for the topic",
     )
     name: str = Field(

@@ -3,8 +3,8 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, ForeignKey, Text
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
 from .base import IDMixin, TimestampMixin
@@ -112,7 +112,7 @@ class Task(IDMixin, TimestampMixin, TaskBase, table=True):
     source_id: int = Field(foreign_key="sources.id", description="Source of the task")
     source_message_id: uuid.UUID | None = Field(
         default=None,
-        sa_column=Column(UUID(as_uuid=True), ForeignKey("messages.id"), nullable=True),
+        foreign_key="messages.id",
         description="Original message if task was extracted from one",
     )
 

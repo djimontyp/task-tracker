@@ -5,8 +5,7 @@ from enum import Enum
 
 from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
 from pydantic import field_validator
-from sqlalchemy import JSON, BigInteger, Column, ForeignKey, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import JSON, Column, Text
 from sqlmodel import Field, Relationship, SQLModel
 
 from .base import TimestampMixin
@@ -49,7 +48,8 @@ class Atom(TimestampMixin, SQLModel, table=True):
 
     id: uuid.UUID = Field(
         default_factory=uuid.uuid4,
-        sa_column=Column(UUID(as_uuid=True), primary_key=True, index=True),
+        primary_key=True,
+        index=True,
         description="Unique identifier for the atom",
     )
     type: str = Field(
@@ -112,11 +112,13 @@ class AtomLink(TimestampMixin, SQLModel, table=True):
     __tablename__ = "atom_links"
 
     from_atom_id: uuid.UUID = Field(
-        sa_column=Column(UUID(as_uuid=True), ForeignKey("atoms.id"), primary_key=True),
+        foreign_key="atoms.id",
+        primary_key=True,
         description="Source atom ID",
     )
     to_atom_id: uuid.UUID = Field(
-        sa_column=Column(UUID(as_uuid=True), ForeignKey("atoms.id"), primary_key=True),
+        foreign_key="atoms.id",
+        primary_key=True,
         description="Target atom ID",
     )
     link_type: str = Field(
@@ -152,11 +154,13 @@ class TopicAtom(TimestampMixin, SQLModel, table=True):
     __tablename__ = "topic_atoms"
 
     topic_id: uuid.UUID = Field(
-        sa_column=Column(UUID(as_uuid=True), ForeignKey("topics.id"), primary_key=True),
+        foreign_key="topics.id",
+        primary_key=True,
         description="Topic ID",
     )
     atom_id: uuid.UUID = Field(
-        sa_column=Column(UUID(as_uuid=True), ForeignKey("atoms.id"), primary_key=True),
+        foreign_key="atoms.id",
+        primary_key=True,
         description="Atom ID",
     )
     position: int | None = Field(
