@@ -2,9 +2,9 @@ from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, Request
 
-from ..services.websocket_manager import websocket_manager
-from ..tasks import save_telegram_message
-from ..webhook_service import telegram_webhook_service
+from app.services.websocket_manager import websocket_manager
+from app.tasks import save_telegram_message
+from app.webhook_service import telegram_webhook_service
 
 router = APIRouter(prefix="/webhook", tags=["webhooks"])
 
