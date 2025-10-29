@@ -165,8 +165,9 @@ const DashboardPage = () => {
               trend={metrics.total.trend}
               icon={ListBulletIcon}
               iconColor="text-primary"
-              onClick={() => handleMetricClick('all')}
-              emptyMessage="Import messages to start tracking"
+              onClick={() => metrics.total.value === 0 ? navigate('/messages') : handleMetricClick('all')}
+              emptyMessage="Click to import messages and start tracking →"
+              aria-label={metrics.total.value === 0 ? "Import messages to start tracking tasks" : `View all ${metrics.total.value} tasks`}
             />
             <MetricCard
               title="Open Tasks"
