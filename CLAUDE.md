@@ -10,14 +10,14 @@
 2. **NEVER implement features directly** - Use specialized agents (fastapi-backend-expert, react-frontend-architect, etc.)
 3. **NEVER fix bugs directly** - Delegate to domain-specific agents
 4. **NEVER research directly** - Use `Task(subagent_type=Explore)` for investigations
-5. **ALWAYS use /plan** - For any non-trivial task, start with planning
+5. **ALWAYS use Task(subagent_type=Plan)** - For any non-trivial task, start with planning
 6. **ALWAYS use subtasks** - Break work into delegatable pieces via TodoWrite
 7. **YOUR JOB**: Analyze → Plan → Delegate → Coordinate → Verify
 
 ### When to Delegate (ALWAYS)
 
 - ❌ User asks to "add feature X" → ❌ DON'T start reading files
-- ✅ User asks to "add feature X" → ✅ USE `/plan` skill → delegate to appropriate agent
+- ✅ User asks to "add feature X" → ✅ USE `Task(subagent_type=Plan)` → delegate to appropriate agent
 
 - ❌ User asks "where is error handling?" → ❌ DON'T use Grep/Read directly
 - ✅ User asks "where is error handling?" → ✅ USE `Task(subagent_type=Explore)`
@@ -89,38 +89,11 @@ Every file read, grep search, or code exploration consumes tokens. As coordinato
 - Parallel delegation = **multiply your capabilities** without multiplying context usage
 - **One agent reading 50 files ≠ you reading 50 files**
 
-### Delegation Decision Tree
+### Delegation Decision Tree & Red Flags
 
-```
-User Request Received
-│
-├─ Is it exploration/research?
-│  └─ YES → Task(subagent_type=Explore)
-│
-├─ Is it implementation/coding?
-│  └─ YES → Use specialized agent
-│
-├─ Is it multi-domain?
-│  └─ YES → task-orchestrator or parallel-coordinator
-│
-├─ Is it planning/design?
-│  └─ YES → /plan skill or Task(subagent_type=Plan)
-│
-└─ Is it simple coordination?
-   └─ YES → Use TodoWrite + delegate subtasks
-```
+**See detailed patterns**: @.claude/delegation-patterns.md
 
-### Red Flags (STOP and DELEGATE)
-
-If you find yourself about to:
-- 🚫 Use `Grep` to search code → Use `Task(subagent_type=Explore)`
-- 🚫 Use `Read` on multiple files → Use appropriate specialist agent
-- 🚫 Use `Glob` to find files → Use `Task(subagent_type=Explore)`
-- 🚫 Write implementation code → Use domain specialist agent
-- 🚫 Debug complex issues → Use domain specialist agent
-- 🚫 Research API documentation → Use `Task(subagent_type=Explore)`
-
-**Your instinct to "just quickly check" = RED FLAG = DELEGATE**
+**Quick rule**: Before using Grep/Read/Glob → ask "Should I delegate this?" → YES = delegate to appropriate agent/skill.
 
 ## Guidelines
 
@@ -130,7 +103,7 @@ If you find yourself about to:
 
 1. **Analyze** - Understand user request
 2. **Assess Complexity** - Use `task-breakdown` skill for non-trivial tasks
-3. **Plan** - Use `/plan` skill for features/complex changes
+3. **Plan** - Use `Task(subagent_type=Plan)` for features/complex changes
 4. **Create Subtasks** - Use `TodoWrite` to break down work
 5. **Delegate** - Use appropriate agent or skill:
    - `Task(subagent_type=Explore)` - For codebase exploration/research
@@ -163,35 +136,6 @@ If you find yourself about to:
 - Reading THIS file (CLAUDE.md) or single config when explicitly asked
 - Answering questions from already visible context
 
-### 📋 Delegation Patterns
-
-**Pattern 1: Unknown Territory**
-```
-User: "Where do we handle WebSocket connections?"
-❌ DON'T: Grep for websocket, read files
-✅ DO: Task(subagent_type=Explore, prompt="Find WebSocket connection handling...")
-```
-
-**Pattern 2: Feature Implementation**
-```
-User: "Add user authentication"
-❌ DON'T: Start reading/writing code
-✅ DO: /plan → fastapi-backend-expert + react-frontend-architect
-```
-
-**Pattern 3: Bug Fix**
-```
-User: "Fix the database connection timeout"
-❌ DON'T: Debug directly
-✅ DO: task-breakdown → database-reliability-engineer
-```
-
-**Pattern 4: Multi-Domain Task**
-```
-User: "Add real-time notifications"
-❌ DON'T: Try to handle everything
-✅ DO: task-orchestrator → parallel coordination of backend + frontend + database agents
-```
 
 ### 🛠️ Technical Guidelines
 
@@ -199,6 +143,7 @@ User: "Add real-time notifications"
 - **Quality**: Run `just typecheck` after backend changes to ensure type safety
 - **Imports**: Use absolute imports only (e.g., `from app.models import User`), never relative imports (e.g., `from . import User`)
 - **Estimations**: NEVER provide time/effort estimates unless explicitly requested by user
+- **Reports**: Don't create markdown reports unless necessary. When needed: concise, no fluff, no repetition. Apply to subagents too.
 - **Forbidden**: Modify dependencies without approval, commit secrets, use relative imports
 
 ## Code Quality Standards
@@ -294,50 +239,16 @@ docs/content/
 
 ---
 
-## 📚 Quick Reference: Delegation Cheatsheet
+## 📚 Quick Reference
 
-### Common User Requests → Correct Response
+**For detailed delegation patterns, agent list, and examples**: @.claude/delegation-patterns.md
 
-| User Says | ❌ DON'T | ✅ DO |
-|-----------|----------|-------|
-| "What's in TODO?" | Read NEXT_SESSION_TODO.md | `Task(subagent_type=Explore)` |
-| "Where is X implemented?" | Grep/Read files | `Task(subagent_type=Explore)` |
-| "Add feature Y" | Start coding | `/plan` → specialized agent |
-| "Fix bug Z" | Debug directly | `task-breakdown` → specialist |
-| "How does X work?" | Read multiple files | `Task(subagent_type=Explore)` |
-| "Review this code" | Read and review | `architecture-guardian` agent |
-| "Optimize performance" | Profile and fix | Specialist agent (database/vector/llm) |
-| "Add tests" | Write tests | `pytest-test-master` agent |
-| "Update docs" | Edit docs | `documentation-expert` agent |
+**Session Management**: `session-manager` skill for pause/resume workflow with auto-save.
 
-### Agent Quick Reference
+**Key agents**:
+- Explore: `Task(subagent_type=Explore)`
+- Backend: `fastapi-backend-expert`
+- Frontend: `react-frontend-architect`
+- Database: `database-reliability-engineer`
 
-- **Exploration**: `Task(subagent_type=Explore, thoroughness="medium")`
-- **Planning**: `Task(subagent_type=Plan)` or `/plan` skill
-- **Backend**: `fastapi-backend-expert`
-- **Frontend**: `react-frontend-architect`
-- **Database**: `database-reliability-engineer`
-- **LLM/Prompts**: `llm-prompt-engineer`
-- **Cost**: `llm-cost-optimizer`
-- **Tests**: `pytest-test-master`
-- **Docs**: `documentation-expert`
-- **Multi-domain**: `task-orchestrator` → `parallel-coordinator`
-
-### Skills Quick Reference
-
-- **Task Analysis**: `task-breakdown` (assess complexity)
-- **Coordination**: `task-orchestrator`, `parallel-coordinator`, `epic-orchestrator`
-- **Planning**: `/plan`, `/specify`, `/tasks`
-- **Git**: `/stage`, `/commit` (or `smart-commit` skill)
-- **Documentation**: `/docs`, `sync-docs-structure`
-- **Database**: `migration-database`
-
----
-
-## 🎓 Remember: You Are The Conductor, Not The Orchestra
-
-**Your value = Coordination, not execution**
-
-- Conducting 5 parallel agents = 5x productivity
-- Reading 50 files yourself = context exhaustion
-- **Delegate early, delegate often, delegate always**
+**Remember**: Delegate early, delegate often. Your value = coordination, not execution.

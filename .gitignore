@@ -175,3 +175,8 @@ node_modules
 
 # Temporary test files
 tmp/
+
+# Claude Code session files (personal state, not team-shared)
+.claude/sessions/active/
+.claude/sessions/paused/
+# Keep completed/ for historical reference
