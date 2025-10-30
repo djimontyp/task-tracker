@@ -1,5 +1,6 @@
 """Pydantic schemas for knowledge extraction domain."""
 
+import uuid
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -16,7 +17,7 @@ class ExtractedTopic(BaseModel):
         default=0.7, ge=0.0, le=1.0, description="Extraction confidence (0.7+ recommended for auto-creation)"
     )
     keywords: list[str] = Field(default_factory=list, description="Key terms associated with this topic")
-    related_message_ids: list[int] = Field(
+    related_message_ids: list[uuid.UUID] = Field(
         default_factory=list, description="Source message IDs that contributed to this topic"
     )
 
@@ -33,7 +34,7 @@ class ExtractedAtom(BaseModel):
         default=0.7, ge=0.0, le=1.0, description="Extraction confidence (0.7+ recommended for auto-creation)"
     )
     topic_name: str = Field(default="", description="Parent topic name this atom belongs to")
-    related_message_ids: list[int] = Field(
+    related_message_ids: list[uuid.UUID] = Field(
         default_factory=list, description="Source message IDs that contributed to this atom"
     )
     links_to_atom_titles: list[str] = Field(default_factory=list, description="Titles of related atoms to link with")

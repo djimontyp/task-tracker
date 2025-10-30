@@ -204,7 +204,7 @@ async def create_topic(
         Created topic with auto-selected or provided icon
     """
     crud = TopicCRUD(session)
-    return await crud.create(topic_data)
+    return await crud.create(topic_data.model_dump(exclude_unset=True))
 
 
 @router.patch(

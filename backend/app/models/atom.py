@@ -1,6 +1,7 @@
 """Atom model for Zettelkasten knowledge graph system."""
 
 import uuid
+from datetime import datetime
 from enum import Enum
 
 from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
@@ -186,8 +187,8 @@ class AtomPublic(SQLModel):
     meta: dict | None
     embedding: list[float] | None = None
     has_embedding: bool = False
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
 
 
 class AtomCreate(SQLModel):
@@ -286,8 +287,8 @@ class AtomLinkPublic(SQLModel):
     to_atom_id: uuid.UUID
     link_type: str
     strength: float | None
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
 
 
 class AtomLinkCreate(SQLModel):
@@ -328,8 +329,8 @@ class TopicAtomPublic(SQLModel):
     atom_id: uuid.UUID
     position: int | None
     note: str | None
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
 
 
 class TopicAtomCreate(SQLModel):

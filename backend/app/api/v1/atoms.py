@@ -118,7 +118,7 @@ async def create_atom(
         Created atom with generated ID and timestamps
     """
     crud = AtomCRUD(session)
-    return await crud.create(atom_data)
+    return await crud.create(atom_data.model_dump(exclude_unset=True))
 
 
 @router.patch(
