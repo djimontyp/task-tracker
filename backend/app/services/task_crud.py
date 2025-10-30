@@ -20,8 +20,12 @@ from app.services.base_crud import BaseCRUD
 from app.services.schema_generator import SchemaGenerator
 
 
-class TaskCRUD:
-    """CRUD service for Task Configuration operations."""
+class TaskCRUD(BaseCRUD[TaskConfig]):
+    """CRUD service for Task Configuration operations.
+
+    Inherits standard CRUD operations from BaseCRUD and adds
+    task-specific business logic for schema validation and cascade deletes.
+    """
 
     def __init__(self, session: AsyncSession):
         """Initialize CRUD service.
@@ -29,11 +33,21 @@ class TaskCRUD:
         Args:
             session: Async database session
         """
-        self.session = session
-        self._base_crud = BaseCRUD(TaskConfig, session)
+        super().__init__(TaskConfig, session)
         self.schema_generator = SchemaGenerator()
 
-    async def create(self, task_data: TaskConfigCreate) -> TaskConfigPublic:
+    def _to_public(self, task: TaskConfig) -> TaskConfigPublic:
+        """Convert TaskConfig model to TaskConfigPublic schema.
+
+        Args:
+            task: Database task config instance
+
+        Returns:
+            Public task config schema
+        """
+        return TaskConfigPublic.model_validate(task)
+
+    async def create_task(self, task_data: TaskConfigCreate) -> TaskConfigPublic:
         """Create new task configuration.
 
         Args:
@@ -45,32 +59,19 @@ class TaskCRUD:
         Raises:
             ValueError: If task name already exists or schema is invalid
         """
-        # Check name uniqueness
-        existing = await self.get_by_name(task_data.name)
+        existing = await self.get_task_by_name(task_data.name)
         if existing:
             raise ValueError(f"Task with name '{task_data.name}' already exists")
 
-        # Validate response schema
         try:
             self.schema_generator.validate_schema(task_data.response_schema)
         except ValueError as e:
             raise ValueError(f"Invalid response schema: {e}") from e
 
-        # Create task record
-        task = TaskConfig(
-            name=task_data.name,
-            description=task_data.description,
-            response_schema=task_data.response_schema,
-            is_active=task_data.is_active,
-        )
+        task = await super().create(task_data.model_dump())
+        return self._to_public(task)
 
-        self.session.add(task)
-        await self.session.commit()
-        await self.session.refresh(task)
-
-        return TaskConfigPublic.model_validate(task)
-
-    async def get(self, task_id: UUID) -> TaskConfigPublic | None:
+    async def get_task(self, task_id: UUID) -> TaskConfigPublic | None:
         """Get task by ID.
 
         Args:
@@ -79,13 +80,10 @@ class TaskCRUD:
         Returns:
             Task if found, None otherwise
         """
-        task = await self._base_crud.get(task_id)
+        task = await super().get(task_id)
+        return self._to_public(task) if task else None
 
-        if task:
-            return TaskConfigPublic.model_validate(task)
-        return None
-
-    async def get_by_name(self, name: str) -> TaskConfigPublic | None:
+    async def get_task_by_name(self, name: str) -> TaskConfigPublic | None:
         """Get task by name.
 
         Args:
@@ -96,12 +94,9 @@ class TaskCRUD:
         """
         result = await self.session.execute(select(TaskConfig).where(TaskConfig.name == name))
         task = result.scalar_one_or_none()
+        return self._to_public(task) if task else None
 
-        if task:
-            return TaskConfigPublic.model_validate(task)
-        return None
-
-    async def list(
+    async def list_tasks(
         self,
         skip: int = 0,
         limit: int = 100,
@@ -126,9 +121,9 @@ class TaskCRUD:
         result = await self.session.execute(query)
         tasks = result.scalars().all()
 
-        return [TaskConfigPublic.model_validate(t) for t in tasks]
+        return [self._to_public(task) for task in tasks]
 
-    async def update(
+    async def update_task(
         self,
         task_id: UUID,
         update_data: TaskConfigUpdate,
@@ -145,32 +140,22 @@ class TaskCRUD:
         Raises:
             ValueError: If new response_schema is invalid
         """
-        result = await self.session.execute(select(TaskConfig).where(TaskConfig.id == task_id))
-        task = result.scalar_one_or_none()
-
+        task = await super().get(task_id)
         if not task:
             return None
 
-        # Get update dict excluding unset fields
         update_dict = update_data.model_dump(exclude_unset=True)
 
-        # Validate new response schema if provided
         if "response_schema" in update_dict:
             try:
                 self.schema_generator.validate_schema(update_dict["response_schema"])
             except ValueError as e:
                 raise ValueError(f"Invalid response schema: {e}") from e
 
-        # Apply updates
-        for field, value in update_dict.items():
-            setattr(task, field, value)
+        updated_task = await super().update(task, update_dict)
+        return self._to_public(updated_task)
 
-        await self.session.commit()
-        await self.session.refresh(task)
-
-        return TaskConfigPublic.model_validate(task)
-
-    async def delete(self, task_id: UUID) -> bool:
+    async def delete_task(self, task_id: UUID) -> bool:
         """Delete task configuration.
 
         Args:
@@ -180,11 +165,9 @@ class TaskCRUD:
             True if deleted, False if not found
 
         Note:
-            Manually deletes agent_task_assignments before deleting task.
+            Cascade deletes agent_task_assignments before deleting task.
         """
-        # First, delete all agent task assignments
         await self.session.execute(
-            delete(AgentTaskAssignment).where(AgentTaskAssignment.task_id == task_id)
+            delete(AgentTaskAssignment).where(AgentTaskAssignment.task_id == task_id)  # type: ignore[arg-type]
         )
-        # Then delete the task itself
-        return await self._base_crud.delete(task_id)
+        return await super().delete(task_id)
