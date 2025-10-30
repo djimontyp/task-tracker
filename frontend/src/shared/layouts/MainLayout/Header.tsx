@@ -22,7 +22,6 @@ interface BreadcrumbSegment {
 
 const breadcrumbMap: Record<string, BreadcrumbSegment[]> = {
   '/': [
-    { label: 'Home', href: '/' },
     { label: 'Dashboard' },
   ],
   '/messages': [
