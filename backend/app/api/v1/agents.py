@@ -279,7 +279,7 @@ async def assign_task(
 
     try:
         crud = AssignmentCRUD(session)
-        assignment = await crud.create(assignment_data)
+        assignment = await crud.create_assignment(assignment_data)
         logger.info(f"Assigned task '{assignment.task_id}' to agent '{agent_id}' (assignment ID: {assignment.id})")
         return assignment
     except ValueError as e:

@@ -12,10 +12,15 @@ from app.models.legacy import Source
 from app.models.message import Message
 from app.models.user import User
 from app.schemas.messages import MessageResponse
+from app.services.base_crud import BaseCRUD
 
 
-class MessageCRUD:
-    """CRUD service for Message operations."""
+class MessageCRUD(BaseCRUD[Message]):
+    """CRUD service for Message operations.
+
+    Inherits standard CRUD operations from BaseCRUD and adds
+    message-specific query methods for topic filtering.
+    """
 
     def __init__(self, session: AsyncSession):
         """Initialize CRUD service.
@@ -23,7 +28,7 @@ class MessageCRUD:
         Args:
             session: Async database session
         """
-        self.session = session
+        super().__init__(Message, session)
 
     async def list_by_topic(
         self,

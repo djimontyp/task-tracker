@@ -22,8 +22,12 @@ from app.services.credential_encryption import CredentialEncryption
 from app.services.provider_validator import ProviderValidator
 
 
-class ProviderCRUD:
-    """CRUD service for LLM Provider operations."""
+class ProviderCRUD(BaseCRUD[LLMProvider]):
+    """CRUD service for LLM Provider operations.
+
+    Inherits standard CRUD operations from BaseCRUD and adds
+    provider-specific business logic for encryption and validation.
+    """
 
     def __init__(
         self,
@@ -38,12 +42,11 @@ class ProviderCRUD:
             encryptor: Credential encryption service (created if not provided)
             validator: Provider validation service (created if not provided)
         """
-        self.session = session
-        self._base_crud = BaseCRUD(LLMProvider, session)
+        super().__init__(LLMProvider, session)
         self.encryptor = encryptor or CredentialEncryption()
         self.validator = validator or ProviderValidator()
 
-    async def create(
+    async def create_provider(
         self,
         provider_data: LLMProviderCreate,
         schedule_validation: bool = True,
@@ -86,7 +89,7 @@ class ProviderCRUD:
 
         return LLMProviderPublic.model_validate(provider)
 
-    async def get(self, provider_id: UUID) -> LLMProviderPublic | None:
+    async def get(self, provider_id: UUID) -> LLMProviderPublic | None:  # type: ignore[override]
         """Get provider by ID.
 
         Args:
@@ -95,7 +98,7 @@ class ProviderCRUD:
         Returns:
             Provider if found, None otherwise
         """
-        provider = await self._base_crud.get(provider_id)
+        provider = await super().get(provider_id)
 
         if provider:
             return LLMProviderPublic.model_validate(provider)
@@ -144,7 +147,7 @@ class ProviderCRUD:
 
         return [LLMProviderPublic.model_validate(p) for p in providers]
 
-    async def update(
+    async def update_provider(
         self,
         provider_id: UUID,
         update_data: LLMProviderUpdate,
@@ -194,7 +197,7 @@ class ProviderCRUD:
 
         return LLMProviderPublic.model_validate(provider)
 
-    async def delete(self, provider_id: UUID) -> bool:
+    async def delete(self, provider_id: UUID) -> bool:  # type: ignore[override]
         """Delete provider.
 
         Args:
@@ -208,7 +211,7 @@ class ProviderCRUD:
               setting is_active=False and return True.
             - Otherwise, perform hard delete.
         """
-        provider = await self._base_crud.get(provider_id)
+        provider = await super().get(provider_id)
 
         if not provider:
             return False
@@ -223,7 +226,7 @@ class ProviderCRUD:
             await self.session.commit()
             return True
 
-        return await self._base_crud.delete(provider_id)
+        return await super().delete(provider_id)
 
     async def get_decrypted_api_key(self, provider_id: UUID) -> str | None:
         """Get decrypted API key for provider.
@@ -239,7 +242,7 @@ class ProviderCRUD:
             that need the actual API key (e.g., PydanticAI agent initialization).
             Never expose decrypted keys via API endpoints.
         """
-        provider = await self._base_crud.get(provider_id)
+        provider = await super().get(provider_id)
 
         if not provider or not provider.api_key_encrypted:
             return None
