@@ -18,7 +18,8 @@ import {
   getFacetedUniqueValues,
   useReactTable,
 } from '@tanstack/react-table'
-import { createColumns, statusConfig, triggerTypeLabels } from './columns'
+import { createColumns, statusIconConfig, triggerTypeLabels } from './columns'
+import { getAnalysisRunBadge } from '@/shared/utils/statusBadges'
 import { DataTableFacetedFilter } from './faceted-filter'
 import { PlusIcon } from '@heroicons/react/24/outline'
 import { CreateRunModal } from '@/features/analysis/components'
@@ -230,11 +231,14 @@ const AnalysisRunsPage = () => {
           columnKey="status"
           table={table}
           title="Status"
-          options={Object.entries(statusConfig).map(([value, config]) => ({
-            value,
-            label: config.label,
-            icon: config.icon,
-          }))}
+          options={Object.entries(statusIconConfig).map(([value, iconConfig]) => {
+            const badgeConfig = getAnalysisRunBadge(value as any)
+            return {
+              value,
+              label: badgeConfig.label || value,
+              icon: iconConfig.icon,
+            }
+          })}
         />
         <DataTableFacetedFilter
           columnKey="trigger_type"

@@ -4,16 +4,17 @@ import { ClockIcon, PlayCircleIcon, CheckCircleIcon, XCircleIcon, ExclamationCir
 import { Button, Badge, Checkbox } from '@/shared/ui'
 import { formatFullDate } from '@/shared/utils/date'
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
-import type { AnalysisRun, AnalysisRunStatus, AnalysisRunTriggerType } from '@/features/analysis/types'
+import type { AnalysisRun, AnalysisRunTriggerType } from '@/features/analysis/types'
+import { getAnalysisRunBadge, type AnalysisRunStatus } from '@/shared/utils/statusBadges'
 
-export const statusConfig: Record<AnalysisRunStatus, { label: string; icon: React.ComponentType<{ className?: string }>; className: string }> = {
-  pending: { label: 'Pending', icon: ClockIcon, className: 'badge-neutral' },
-  running: { label: 'Running', icon: PlayCircleIcon, className: 'badge-info' },
-  completed: { label: 'Waiting Review', icon: ExclamationCircleIcon, className: 'badge-warning' },
-  reviewed: { label: 'Reviewed', icon: CheckCircleIcon, className: 'badge-success' },
-  closed: { label: 'Closed', icon: CheckCircleIcon, className: 'badge-complete' },
-  failed: { label: 'Failed', icon: XCircleIcon, className: 'badge-error' },
-  cancelled: { label: 'Cancelled', icon: XCircleIcon, className: 'badge-neutral' },
+export const statusIconConfig: Record<AnalysisRunStatus, { icon: React.ComponentType<{ className?: string }> }> = {
+  pending: { icon: ClockIcon },
+  running: { icon: PlayCircleIcon },
+  completed: { icon: ExclamationCircleIcon },
+  reviewed: { icon: CheckCircleIcon },
+  closed: { icon: CheckCircleIcon },
+  failed: { icon: XCircleIcon },
+  cancelled: { icon: XCircleIcon },
 }
 
 export const triggerTypeLabels: Record<AnalysisRunTriggerType, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -73,13 +74,14 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<AnalysisR
     ),
     cell: ({ row }) => {
       const status = row.getValue<AnalysisRunStatus>('status')
-      const config = statusConfig[status] ?? statusConfig.pending
-      const Icon = config?.icon
+      const badgeConfig = getAnalysisRunBadge(status)
+      const iconConfig = statusIconConfig[status] ?? statusIconConfig.pending
+      const Icon = iconConfig.icon
 
       return (
-        <Badge variant="outline" className={config?.className || 'badge-neutral'}>
+        <Badge variant={badgeConfig.variant} className={badgeConfig.className}>
           {Icon && <Icon className="mr-1 h-3 w-3" />}
-          {config?.label || status}
+          {badgeConfig.label}
         </Badge>
       )
     },
