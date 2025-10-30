@@ -42,20 +42,30 @@ This hook is **already configured** in `.claude/settings.local.json`:
 
 ### Change Size Thresholds
 
-**Small changes** (ignored):
+**Small changes** (accumulated, no immediate reminder):
 - 1-2 files
-- Bug fixes, style changes
+- Bug fixes (`fix:`), style changes (`style:`)
 - Utility/helper functions
+- **Behavior**: Added to `.pending-doc-updates.json` for later summary
 
-**Medium changes** (reminder):
+**Medium changes** (immediate reminder):
 - 3-5 files
-- Refactoring
+- Refactoring (`refactor:`)
 - Service layer or component changes
 
-**Large changes** (strong reminder):
+**Large changes** (immediate strong reminder):
 - 6+ files
-- New features or breaking changes
+- New features (`feat:`), breaking changes (`feat!:`)
 - API routes, database models, pages
+
+### Small Changes Accumulation
+
+Small changes don't show immediate reminders but are **never lost**:
+- Stored in `.claude/hooks/.pending-doc-updates.json`
+- Summary shown at **SessionEnd** when:
+  - 3+ small changes accumulated, OR
+  - 24+ hours since last reminder
+- Ensures complete documentation coverage without disrupting workflow
 
 ### Documentation Mapping
 
@@ -71,7 +81,7 @@ This hook is **already configured** in `.claude/settings.local.json`:
 
 ### Example Output
 
-When you commit medium/large changes, you'll see:
+**Immediate reminder (medium/large changes):**
 
 ```
 📚 Documentation Update Reminder:
@@ -86,6 +96,24 @@ Suggested documentation to review/update:
 💡 Consider creating missing documentation files using /docs command
 
 Adding to TODO: 'Update documentation for recent changes'
+```
+
+**SessionEnd summary (accumulated small changes):**
+
+```
+📚 Pending Documentation Updates Summary:
+
+Accumulated 5 small changes that need documentation:
+
+  Backend: 3 files (utilities, services)
+  Frontend: 2 files (components)
+
+Suggested documentation to review/update:
+  • docs/content/{en,uk}/architecture/backend-services.md
+  • docs/content/{en,uk}/frontend/architecture.md
+
+💡 These are small changes accumulated over time.
+   Consider updating documentation when convenient using /docs command
 ```
 
 ### Disabling the Hook

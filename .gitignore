@@ -184,3 +184,4 @@ tmp/
 # Claude Code hook cooldown files (temporary state tracking)
 .claude/hooks/.last-commit-check
 .claude/hooks/.commit-series-start
+.claude/hooks/.pending-doc-updates.json
