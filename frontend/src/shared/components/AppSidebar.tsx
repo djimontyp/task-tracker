@@ -45,7 +45,7 @@ const navGroups: NavGroup[] = [
   {
     label: 'Data Management',
     items: [
-      { path: '/', label: 'Dashboard', icon: Squares2X2Icon },
+      { path: '/', label: 'Overview', icon: Squares2X2Icon },
       { path: '/messages', label: 'Messages', icon: EnvelopeIcon },
       { path: '/topics', label: 'Topics', icon: ChatBubbleLeftRightIcon },
       { path: '/tasks', label: 'Tasks', icon: CheckCircleIcon },
