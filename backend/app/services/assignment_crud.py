@@ -22,8 +22,12 @@ from app.models.agent_task_assignment import AgentTaskAssignmentWithDetails
 from app.services.base_crud import BaseCRUD
 
 
-class AssignmentCRUD:
-    """CRUD service for Agent-Task Assignment operations."""
+class AssignmentCRUD(BaseCRUD[AgentTaskAssignment]):
+    """CRUD service for Agent-Task Assignment operations.
+
+    Inherits standard CRUD operations from BaseCRUD and adds
+    assignment-specific business logic for agent-task relationships.
+    """
 
     def __init__(self, session: AsyncSession):
         """Initialize CRUD service.
@@ -31,10 +35,9 @@ class AssignmentCRUD:
         Args:
             session: Async database session
         """
-        self.session = session
-        self._base_crud = BaseCRUD(AgentTaskAssignment, session)
+        super().__init__(AgentTaskAssignment, session)
 
-    async def create(self, assignment_data: AgentTaskAssignmentCreate) -> AgentTaskAssignmentPublic:
+    async def create_assignment(self, assignment_data: AgentTaskAssignmentCreate) -> AgentTaskAssignmentPublic:
         """Create new agent-task assignment.
 
         Args:
@@ -57,7 +60,7 @@ class AssignmentCRUD:
             raise ValueError(f"Task with ID '{assignment_data.task_id}' not found")
 
         try:
-            assignment = await self._base_crud.create(assignment_data.model_dump())
+            assignment = await super().create(assignment_data.model_dump())
         except IntegrityError as e:
             await self.session.rollback()
             error_str = str(e)
@@ -71,7 +74,7 @@ class AssignmentCRUD:
 
         return AgentTaskAssignmentPublic.model_validate(assignment)
 
-    async def get(self, assignment_id: UUID) -> AgentTaskAssignmentPublic | None:
+    async def get(self, assignment_id: UUID) -> AgentTaskAssignmentPublic | None:  # type: ignore[override]
         """Get assignment by ID.
 
         Args:
@@ -80,7 +83,7 @@ class AssignmentCRUD:
         Returns:
             Assignment if found, None otherwise
         """
-        assignment = await self._base_crud.get(assignment_id)
+        assignment = await super().get(assignment_id)
 
         if assignment:
             return AgentTaskAssignmentPublic.model_validate(assignment)
@@ -177,7 +180,7 @@ class AssignmentCRUD:
             result = await self.session.execute(query)
             assignments = list(result.scalars().all())
         else:
-            assignments = await self._base_crud.get_multi(skip=skip, limit=limit)
+            assignments = await super().get_multi(skip=skip, limit=limit)
 
         return [AgentTaskAssignmentPublic.model_validate(a) for a in assignments]
 
@@ -207,7 +210,7 @@ class AssignmentCRUD:
 
         return AgentTaskAssignmentPublic.model_validate(assignment)
 
-    async def delete(self, assignment_id: UUID) -> bool:
+    async def delete(self, assignment_id: UUID) -> bool:  # type: ignore[override]
         """Delete assignment.
 
         Args:
@@ -216,7 +219,7 @@ class AssignmentCRUD:
         Returns:
             True if deleted, False if not found
         """
-        return await self._base_crud.delete(assignment_id)
+        return await super().delete(assignment_id)
 
     async def list_with_details(
         self,
