@@ -11,7 +11,7 @@ import { Badge, Skeleton, Button } from '@/shared/ui'
 import MetricCard from '@/shared/components/MetricCard'
 import { noiseService } from '@/features/noise/api/noiseService'
 import type { NoiseStats } from '@/features/noise/types'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import {
   LineChart,
   Line,

@@ -15,7 +15,7 @@ import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
 import type { Topic } from '@/features/topics/types'
 import type { Atom } from '@/features/atoms/types'
 import type { Message } from '@/shared/types'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
