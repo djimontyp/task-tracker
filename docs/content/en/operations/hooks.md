@@ -23,20 +23,30 @@ Project uses Claude Code hooks for automation and quality checks.
 
 #### Change Categories
 
-**Small changes** (no reminder):
+**Small changes** (accumulated, no immediate reminder):
 - 1-2 files
 - Bug fixes (`fix:`), style changes (`style:`)
 - Utility/helper functions
+- **Accumulated** in `.pending-doc-updates.json` for SessionEnd summary
 
-**Medium changes** (gentle reminder):
+**Medium changes** (immediate gentle reminder):
 - 3-5 files
 - Refactoring (`refactor:`), performance (`perf:`)
 - Service layer, components
 
-**Large changes** (strong reminder):
+**Large changes** (immediate strong reminder):
 - 6+ files
 - New features (`feat:`), breaking changes (`feat!:`)
 - API routes, database models, pages
+
+#### Small Changes Never Lost
+
+Small changes are **accumulated**, not ignored:
+- Stored in `.claude/hooks/.pending-doc-updates.json`
+- Summary shown at **SessionEnd** when:
+  - 3+ small changes accumulated, OR
+  - 24+ hours since last reminder
+- Ensures complete documentation coverage without workflow disruption
 
 #### Documentation Mapping
 

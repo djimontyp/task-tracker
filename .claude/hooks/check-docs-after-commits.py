@@ -19,6 +19,7 @@ COOLDOWN_SECONDS = 60
 HOOKS_DIR = Path(__file__).parent
 COOLDOWN_FILE = HOOKS_DIR / ".last-commit-check"
 SERIES_START_FILE = HOOKS_DIR / ".commit-series-start"
+PENDING_UPDATES_FILE = HOOKS_DIR / ".pending-doc-updates.json"
 
 
 def read_hook_input() -> Dict:
@@ -310,6 +311,48 @@ def cleanup_cooldown_files():
     SERIES_START_FILE.unlink(missing_ok=True)
 
 
+def load_pending_updates() -> Dict:
+    """Load pending documentation updates from file."""
+    if not PENDING_UPDATES_FILE.exists():
+        return {"small_changes": [], "last_reminder": None}
+
+    try:
+        with open(PENDING_UPDATES_FILE, "r") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, IOError):
+        return {"small_changes": [], "last_reminder": None}
+
+
+def save_pending_updates(data: Dict):
+    """Save pending documentation updates to file."""
+    try:
+        with open(PENDING_UPDATES_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    except IOError:
+        pass
+
+
+def add_to_pending_updates(
+    backend_files: List[str],
+    frontend_files: List[str],
+    doc_suggestions: List[str],
+    commit_messages: List[str]
+):
+    """Add small changes to pending updates accumulator."""
+    pending = load_pending_updates()
+
+    change_entry = {
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "backend_files": backend_files,
+        "frontend_files": frontend_files,
+        "docs_suggested": doc_suggestions,
+        "commits": commit_messages[-1] if commit_messages else "unknown"
+    }
+
+    pending["small_changes"].append(change_entry)
+    save_pending_updates(pending)
+
+
 def main():
     data = read_hook_input()
 
@@ -348,11 +391,17 @@ def main():
 
     change_size = determine_change_size(all_relevant_files, commit_messages)
 
+    doc_suggestions = map_files_to_docs(backend_files, frontend_files)
+
     if change_size == "small":
+        add_to_pending_updates(
+            backend_files,
+            frontend_files,
+            doc_suggestions,
+            commit_messages
+        )
         cleanup_cooldown_files()
         sys.exit(0)
-
-    doc_suggestions = map_files_to_docs(backend_files, frontend_files)
     existing_docs, missing_docs = check_docs_exist(doc_suggestions)
 
     system_message = create_system_message(
