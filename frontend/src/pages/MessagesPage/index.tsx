@@ -21,7 +21,8 @@ import {
   getFacetedUniqueValues,
   useReactTable,
 } from '@tanstack/react-table'
-import { createColumns, sourceLabels, statusLabels, classificationLabels } from './columns'
+import { createColumns, sourceLabels } from './columns'
+import { getMessageAnalysisBadge, getNoiseClassificationBadge } from '@/shared/utils/statusBadges'
 import { Message, NoiseClassification } from '@/shared/types'
 import { DataTable } from '@/shared/components/DataTable'
 import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
@@ -358,19 +359,22 @@ const MessagesPage = () => {
           columnKey="analyzed"
           table={table}
           title="Status"
-          options={Object.entries(statusLabels).map(([value, meta]) => ({
-            value,
-            label: meta.label
-          }))}
+          options={[
+            { value: 'analyzed', label: getMessageAnalysisBadge(true).label || 'Analyzed' },
+            { value: 'pending', label: getMessageAnalysisBadge(false).label || 'Pending' },
+          ]}
         />
         <DataTableFacetedFilter
           columnKey="noise_classification"
           table={table}
           title="Classification"
-          options={Object.entries(classificationLabels).map(([value, meta]) => ({
-            value: value as NoiseClassification,
-            label: meta.label
-          }))}
+          options={(['signal', 'weak_signal', 'noise'] as NoiseClassification[]).map((value) => {
+            const config = getNoiseClassificationBadge(value)
+            return {
+              value,
+              label: config.label || value,
+            }
+          })}
         />
         <ImportanceScoreFilter
           column={table.getColumn('importance_score')}

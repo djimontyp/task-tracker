@@ -5,7 +5,12 @@ import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMen
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
 import { Message, NoiseClassification } from '@/shared/types'
 import { formatFullDate } from '@/shared/utils/date'
-import { getStatusClasses } from '@/shared/config/statusColors'
+import {
+  getMessageAnalysisBadge,
+  getNoiseClassificationBadge,
+  getImportanceBadge,
+  getClassificationFromScore,
+} from '@/shared/utils/statusBadges'
 
 export interface ColumnsCallbacks {
   onReset?: () => void
@@ -18,28 +23,6 @@ export const sourceLabels: Record<string, { label: string; icon: React.Component
   slack: { label: 'Slack', icon: EnvelopeIcon },
 }
 
-export const statusLabels: Record<string, { label: string }> = {
-  analyzed: { label: 'Analyzed' },
-  pending: { label: 'Pending' },
-}
-
-export const classificationLabels: Record<NoiseClassification, { label: string; statusType: 'success' | 'warning' | 'error' }> = {
-  signal: { label: 'Signal', statusType: 'success' },
-  weak_signal: { label: 'Needs Review', statusType: 'warning' },
-  noise: { label: 'Noise', statusType: 'error' },
-}
-
-const getImportanceConfig = (score: number): { variant: 'default' | 'destructive' | 'outline' | 'secondary'; label: string; color: string } => {
-  if (score >= 0.7) return { variant: 'default', label: 'High', color: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/50' }
-  if (score >= 0.4) return { variant: 'outline', label: 'Medium', color: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/50' }
-  return { variant: 'destructive', label: 'Low', color: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/50' }
-}
-
-const getClassification = (score: number): NoiseClassification => {
-  if (score < 0.3) return 'noise'
-  if (score < 0.7) return 'weak_signal'
-  return 'signal'
-}
 
 export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[] => [
   {
@@ -143,15 +126,14 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     ),
     cell: ({ row }) => {
       const analyzed = row.getValue<boolean>('analyzed')
-      const statusText = analyzed ? 'Analyzed' : 'Pending'
-      const statusClasses = analyzed ? getStatusClasses('success') : getStatusClasses('info')
+      const config = getMessageAnalysisBadge(analyzed)
       return (
         <Badge
-          variant="outline"
-          className={statusClasses}
-          aria-label={`Message status: ${statusText}`}
+          variant={config.variant}
+          className={config.className}
+          aria-label={`Message status: ${config.label}`}
         >
-          {statusText}
+          {config.label}
         </Badge>
       )
     },
@@ -171,7 +153,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       const score = row.getValue<number>('importance_score')
       if (score === undefined || score === null) return <div className="text-muted-foreground text-xs">-</div>
 
-      const config = getImportanceConfig(score)
+      const config = getImportanceBadge(score)
       const percentage = Math.round(score * 100)
 
       return (
@@ -180,8 +162,8 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
             <TooltipTrigger asChild>
               <div className="flex flex-col gap-1">
                 <Badge
-                  variant="outline"
-                  className={`inline-flex items-center gap-1 ${config.color}`}
+                  variant={config.variant}
+                  className={`inline-flex items-center gap-1 ${config.className}`}
                   aria-label={`Importance: ${config.label} (${percentage}%)`}
                 >
                   {config.label}
@@ -221,25 +203,25 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     ),
     cell: ({ row }) => {
       const score = row.getValue<number>('importance_score')
-      const classification = row.original.noise_classification ?? (score !== undefined ? getClassification(score) : null)
+      const classification = row.original.noise_classification ?? (score !== undefined ? getClassificationFromScore(score) : null)
 
       if (!classification) return <div className="text-muted-foreground text-xs">-</div>
 
-      const meta = classificationLabels[classification]
+      const config = getNoiseClassificationBadge(classification)
       return (
         <Badge
-          variant="outline"
-          className={getStatusClasses(meta.statusType)}
-          aria-label={`Classification: ${meta.label}`}
+          variant={config.variant}
+          className={config.className}
+          aria-label={`Classification: ${config.label}`}
         >
-          {meta.label}
+          {config.label}
         </Badge>
       )
     },
     filterFn: (row, _id, filterValues: NoiseClassification[]) => {
       if (!filterValues || filterValues.length === 0) return true
       const score = row.getValue<number>('importance_score')
-      const classification = row.original.noise_classification ?? (score !== undefined ? getClassification(score) : null)
+      const classification = row.original.noise_classification ?? (score !== undefined ? getClassificationFromScore(score) : null)
       if (!classification) return false
       return filterValues.includes(classification)
     },
