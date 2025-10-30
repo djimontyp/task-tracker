@@ -98,16 +98,30 @@ export function AppSidebar() {
   const { indicator } = useServiceStatus()
   const queryClient = useQueryClient()
 
-  // Auto-expand Automation section if on automation page
-  const isAutomationPage = location.pathname.startsWith('/automation')
-  const [automationOpen, setAutomationOpen] = useState(isAutomationPage)
+  // Track which groups should be expanded based on active routes
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {}
+    groups.forEach((group) => {
+      // Check if any item in the group is active
+      const hasActiveItem = group.items.some((item) =>
+        item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
+      )
+      initial[group.label] = hasActiveItem
+    })
+    return initial
+  })
 
-  // Auto-expand when navigating to automation pages
+  // Auto-expand groups when navigating to their pages
   useEffect(() => {
-    if (isAutomationPage) {
-      setAutomationOpen(true)
-    }
-  }, [isAutomationPage])
+    const newExpandedState: Record<string, boolean> = {}
+    groups.forEach((group) => {
+      const hasActiveItem = group.items.some((item) =>
+        item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
+      )
+      newExpandedState[group.label] = hasActiveItem
+    })
+    setExpandedGroups(newExpandedState)
+  }, [location.pathname, groups])
 
   // Fetch sidebar counts
   const { data: counts } = useQuery<SidebarCounts>({
@@ -207,23 +221,33 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         {groups.map((group) => {
-          // Special handling for Automation - make it collapsible
-          if (group.label === 'Automation') {
+          // Check if group has nested routes (multiple items or items with paths starting from same base)
+          const hasNestedRoutes = group.items.length > 1 && group.items.some(item => item.path !== '/')
+          const isGroupExpanded = expandedGroups[group.label] ?? false
+          const hasActiveItem = group.items.some((item) =>
+            item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
+          )
+
+          // Make collapsible if it has nested routes
+          if (hasNestedRoutes) {
             return (
               <Collapsible
                 key={group.label}
-                open={automationOpen}
-                onOpenChange={setAutomationOpen}
+                open={isGroupExpanded}
+                onOpenChange={(open) => setExpandedGroups(prev => ({ ...prev, [group.label]: open }))}
                 className="group/collapsible"
               >
                 <SidebarGroup>
                   <SidebarGroupLabel asChild className="px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between hover:bg-accent/50 rounded-md transition-colors">
+                    <CollapsibleTrigger className={cn(
+                      "flex w-full items-center justify-between hover:bg-accent/50 rounded-md transition-colors",
+                      hasActiveItem && "text-primary font-semibold"
+                    )}>
                       <span>{group.label}</span>
                       <ChevronRightIcon
                         className={cn(
                           "h-4 w-4 transition-transform duration-200",
-                          automationOpen && "rotate-90"
+                          isGroupExpanded && "rotate-90"
                         )}
                       />
                     </CollapsibleTrigger>
@@ -262,10 +286,13 @@ export function AppSidebar() {
             )
           }
 
-          // Regular group rendering for non-Automation groups
+          // Regular group rendering for non-collapsible groups
           return (
             <SidebarGroup key={group.label}>
-              <SidebarGroupLabel className="px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70">
+              <SidebarGroupLabel className={cn(
+                "px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70",
+                hasActiveItem && "text-primary"
+              )}>
                 {group.label}
               </SidebarGroupLabel>
               <SidebarGroupContent>
