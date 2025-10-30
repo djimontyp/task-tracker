@@ -5,6 +5,7 @@ import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMen
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
 import { Message, NoiseClassification } from '@/shared/types'
 import { formatFullDate } from '@/shared/utils/date'
+import { getStatusClasses } from '@/shared/config/statusColors'
 
 export interface ColumnsCallbacks {
   onReset?: () => void
@@ -22,16 +23,16 @@ export const statusLabels: Record<string, { label: string }> = {
   pending: { label: 'Pending' },
 }
 
-export const classificationLabels: Record<NoiseClassification, { label: string; variant: 'default' | 'destructive' | 'outline' | 'secondary' }> = {
-  signal: { label: 'Signal', variant: 'default' },
-  weak_signal: { label: 'Needs Review', variant: 'secondary' },
-  noise: { label: 'Noise', variant: 'destructive' },
+export const classificationLabels: Record<NoiseClassification, { label: string; statusType: 'success' | 'warning' | 'error' }> = {
+  signal: { label: 'Signal', statusType: 'success' },
+  weak_signal: { label: 'Needs Review', statusType: 'warning' },
+  noise: { label: 'Noise', statusType: 'error' },
 }
 
-const getImportanceColor = (score: number): string => {
-  if (score < 0.3) return 'badge-error'
-  if (score < 0.7) return 'badge-warning'
-  return 'badge-success'
+const getImportanceConfig = (score: number): { variant: 'default' | 'destructive' | 'outline' | 'secondary'; label: string; color: string } => {
+  if (score >= 0.7) return { variant: 'default', label: 'High', color: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/50' }
+  if (score >= 0.4) return { variant: 'outline', label: 'Medium', color: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/50' }
+  return { variant: 'destructive', label: 'Low', color: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/50' }
 }
 
 const getClassification = (score: number): NoiseClassification => {
@@ -94,10 +95,22 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     header: 'Content',
     cell: ({ row }) => {
       const content = row.getValue<string>('content')
+      const isLong = content && content.length > 100
       return (
-        <div className="max-w-[400px] truncate" title={content}>
-          {content}
-        </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="max-w-[400px] truncate" aria-label={isLong ? `Message content: ${content}` : undefined}>
+                {content}
+              </div>
+            </TooltipTrigger>
+            {isLong && (
+              <TooltipContent className="max-w-md">
+                <p className="text-sm whitespace-pre-wrap">{content}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       )
     },
   },
@@ -131,9 +144,11 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     cell: ({ row }) => {
       const analyzed = row.getValue<boolean>('analyzed')
       const statusText = analyzed ? 'Analyzed' : 'Pending'
+      const statusClasses = analyzed ? getStatusClasses('success') : getStatusClasses('info')
       return (
         <Badge
-          variant={analyzed ? 'default' : 'outline'}
+          variant="outline"
+          className={statusClasses}
           aria-label={`Message status: ${statusText}`}
         >
           {statusText}
@@ -156,29 +171,31 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       const score = row.getValue<number>('importance_score')
       if (score === undefined || score === null) return <div className="text-muted-foreground text-xs">-</div>
 
-      const colorClass = getImportanceColor(score)
+      const config = getImportanceConfig(score)
       const percentage = Math.round(score * 100)
-
-      const importanceLabel = percentage >= 70 ? 'High' : percentage >= 40 ? 'Medium' : 'Low'
 
       return (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Badge
-                variant="outline"
-                className={`inline-flex items-center gap-1 ${colorClass}`}
-                aria-label={`Importance: ${importanceLabel} (${percentage}%)`}
-              >
-                {percentage}%
-                {row.original.noise_factors && (
-                  <InformationCircleIcon className="h-3 w-3" aria-hidden="true" />
-                )}
-              </Badge>
+              <div className="flex flex-col gap-1">
+                <Badge
+                  variant="outline"
+                  className={`inline-flex items-center gap-1 ${config.color}`}
+                  aria-label={`Importance: ${config.label} (${percentage}%)`}
+                >
+                  {config.label}
+                  {row.original.noise_factors && (
+                    <InformationCircleIcon className="h-3 w-3" aria-hidden="true" />
+                  )}
+                </Badge>
+                <span className="text-xs text-muted-foreground">{percentage}%</span>
+              </div>
             </TooltipTrigger>
             {row.original.noise_factors && (
               <TooltipContent>
                 <div className="space-y-1 text-xs">
+                  <div><strong>Factors breakdown:</strong></div>
                   <div>Content: {Math.round(row.original.noise_factors.content * 100)}%</div>
                   <div>Author: {Math.round(row.original.noise_factors.author * 100)}%</div>
                   <div>Temporal: {Math.round(row.original.noise_factors.temporal * 100)}%</div>
@@ -211,7 +228,8 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       const meta = classificationLabels[classification]
       return (
         <Badge
-          variant={meta.variant}
+          variant="outline"
+          className={getStatusClasses(meta.statusType)}
           aria-label={`Classification: ${meta.label}`}
         >
           {meta.label}
@@ -271,9 +289,9 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" className="h-8 w-8 p-0" aria-label={`Actions for message ${message.id}`}>
               <span className="sr-only">Open menu</span>
-              <EllipsisHorizontalIcon className="h-4 w-4" />
+              <EllipsisHorizontalIcon className="h-4 w-4" aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
