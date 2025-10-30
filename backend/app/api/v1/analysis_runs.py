@@ -124,7 +124,7 @@ async def create_run(
     # Create run
     try:
         crud = AnalysisRunCRUD(session)
-        run = await crud.create(run_data)
+        run = await crud.create(run_data.model_dump(exclude_unset=True))
         logger.info(
             f"Created analysis run {run.id} for time window {run_data.time_window_start} to {run_data.time_window_end}"
         )

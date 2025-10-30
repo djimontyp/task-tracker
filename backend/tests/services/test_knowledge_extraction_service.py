@@ -112,9 +112,13 @@ async def sample_source(db_session: AsyncSession) -> Source:
 @pytest.fixture
 async def sample_messages(db_session: AsyncSession, sample_user: User, sample_source: Source) -> list[Message]:
     """Create test messages for extraction."""
+    msg1_id = uuid4()
+    msg2_id = uuid4()
+    msg3_id = uuid4()
+
     messages = [
         Message(
-            id=1,
+            id=msg1_id,
             external_message_id="msg_1",
             content="We have a critical bug in the authentication system. Users cannot log in.",
             sent_at=datetime.now(UTC),
@@ -123,7 +127,7 @@ async def sample_messages(db_session: AsyncSession, sample_user: User, sample_so
             analyzed=False,
         ),
         Message(
-            id=2,
+            id=msg2_id,
             external_message_id="msg_2",
             content="I fixed it by resetting the session store. Should work now.",
             sent_at=datetime.now(UTC),
@@ -132,7 +136,7 @@ async def sample_messages(db_session: AsyncSession, sample_user: User, sample_so
             analyzed=False,
         ),
         Message(
-            id=3,
+            id=msg3_id,
             external_message_id="msg_3",
             content="Let's discuss the new feature roadmap for Q1 next week.",
             sent_at=datetime.now(UTC),
@@ -152,7 +156,7 @@ async def sample_messages(db_session: AsyncSession, sample_user: User, sample_so
 
 
 @pytest.fixture
-def mock_extraction_output() -> KnowledgeExtractionOutput:
+def mock_extraction_output(sample_messages: list[Message]) -> KnowledgeExtractionOutput:
     """Create mock extraction output from LLM."""
     return KnowledgeExtractionOutput(
         topics=[
@@ -161,14 +165,14 @@ def mock_extraction_output() -> KnowledgeExtractionOutput:
                 description="Critical bugs and issues requiring immediate attention",
                 confidence=0.95,
                 keywords=["bug", "error", "critical", "fix"],
-                related_message_ids=[1, 2],
+                related_message_ids=[sample_messages[0].id, sample_messages[1].id],
             ),
             ExtractedTopic(
                 name="Feature Planning",
                 description="Discussion about upcoming features and roadmap",
                 confidence=0.85,
                 keywords=["feature", "roadmap", "planning"],
-                related_message_ids=[3],
+                related_message_ids=[sample_messages[2].id],
             ),
         ],
         atoms=[
@@ -178,7 +182,7 @@ def mock_extraction_output() -> KnowledgeExtractionOutput:
                 content="Users cannot log in due to authentication system bug",
                 confidence=0.92,
                 topic_name="Bug Fixes",
-                related_message_ids=[1],
+                related_message_ids=[sample_messages[0].id],
                 links_to_atom_titles=["Session store reset fix"],
                 link_types=["solves"],
             ),
@@ -188,7 +192,7 @@ def mock_extraction_output() -> KnowledgeExtractionOutput:
                 content="Fixed authentication issue by resetting the session store",
                 confidence=0.88,
                 topic_name="Bug Fixes",
-                related_message_ids=[2],
+                related_message_ids=[sample_messages[1].id],
                 links_to_atom_titles=[],
                 link_types=[],
             ),
@@ -198,7 +202,7 @@ def mock_extraction_output() -> KnowledgeExtractionOutput:
                 content="Need to discuss and plan Q1 feature roadmap",
                 confidence=0.75,
                 topic_name="Feature Planning",
-                related_message_ids=[3],
+                related_message_ids=[sample_messages[2].id],
                 links_to_atom_titles=[],
                 link_types=[],
             ),
@@ -318,14 +322,14 @@ async def test_save_topics_creates_new(agent_config, db_session: AsyncSession) -
             description="Critical bugs and issues",
             confidence=0.95,
             keywords=["bug", "error"],
-            related_message_ids=[1, 2],
+            related_message_ids=[],
         ),
         ExtractedTopic(
             name="Feature Planning",
             description="Upcoming features",
             confidence=0.85,
             keywords=["feature", "roadmap"],
-            related_message_ids=[3],
+            related_message_ids=[],
         ),
     ]
 
@@ -351,14 +355,14 @@ async def test_save_topics_filters_low_confidence(agent_config, db_session: Asyn
             description="This should be created",
             confidence=0.85,
             keywords=["test"],
-            related_message_ids=[1],
+            related_message_ids=[],
         ),
         ExtractedTopic(
             name="Low Confidence Topic",
             description="This should be filtered",
             confidence=0.5,
             keywords=["test"],
-            related_message_ids=[2],
+            related_message_ids=[],
         ),
     ]
 
@@ -392,7 +396,7 @@ async def test_save_topics_reuses_existing(agent_config, db_session: AsyncSessio
             description="Critical bugs and issues",
             confidence=0.95,
             keywords=["bug", "error"],
-            related_message_ids=[1, 2],
+            related_message_ids=[],
         )
     ]
 
@@ -438,7 +442,7 @@ async def test_save_atoms_creates_with_topic_links(agent_config, db_session: Asy
             content="This is a test problem",
             confidence=0.9,
             topic_name="Bug Fixes",
-            related_message_ids=[1],
+            related_message_ids=[],
             links_to_atom_titles=[],
             link_types=[],
         )
@@ -476,7 +480,7 @@ async def test_save_atoms_filters_low_confidence(agent_config, db_session: Async
             content="Should be created",
             confidence=0.85,
             topic_name="Test Topic",
-            related_message_ids=[1],
+            related_message_ids=[],
             links_to_atom_titles=[],
             link_types=[],
         ),
@@ -486,7 +490,7 @@ async def test_save_atoms_filters_low_confidence(agent_config, db_session: Async
             content="Should be filtered",
             confidence=0.5,
             topic_name="Test Topic",
-            related_message_ids=[2],
+            related_message_ids=[],
             links_to_atom_titles=[],
             link_types=[],
         ),
@@ -514,7 +518,7 @@ async def test_save_atoms_skips_unknown_topics(agent_config, db_session: AsyncSe
             content="References non-existent topic",
             confidence=0.9,
             topic_name="Unknown Topic",
-            related_message_ids=[1],
+            related_message_ids=[],
             links_to_atom_titles=[],
             link_types=[],
         )
@@ -557,7 +561,7 @@ async def test_save_atoms_creates_version_for_existing(agent_config, db_session:
             content="Updated content with new solution",
             confidence=0.9,
             topic_name="Test Topic",
-            related_message_ids=[1],
+            related_message_ids=[],
             links_to_atom_titles=[],
             link_types=[],
         )
@@ -601,7 +605,7 @@ async def test_link_atoms_creates_relationships(agent_config, db_session: AsyncS
             content="Test problem",
             confidence=0.9,
             topic_name="Test",
-            related_message_ids=[1],
+            related_message_ids=[],
             links_to_atom_titles=["Solution Atom"],
             link_types=["solves"],
         ),
@@ -611,7 +615,7 @@ async def test_link_atoms_creates_relationships(agent_config, db_session: AsyncS
             content="Test solution",
             confidence=0.9,
             topic_name="Test",
-            related_message_ids=[2],
+            related_message_ids=[],
             links_to_atom_titles=[],
             link_types=[],
         ),
@@ -645,7 +649,7 @@ async def test_link_atoms_skips_self_referential(agent_config, db_session: Async
             content="Test",
             confidence=0.9,
             topic_name="Test",
-            related_message_ids=[1],
+            related_message_ids=[],
             links_to_atom_titles=["Self Ref Atom"],
             link_types=["relates_to"],
         )
@@ -679,7 +683,7 @@ async def test_link_atoms_skips_duplicates(agent_config, db_session: AsyncSessio
             content="Test",
             confidence=0.9,
             topic_name="Test",
-            related_message_ids=[1],
+            related_message_ids=[],
             links_to_atom_titles=["Atom 2"],
             link_types=["solves"],
         )
@@ -712,14 +716,14 @@ async def test_update_messages_assigns_topics(
             description="Test",
             confidence=0.9,
             keywords=["test"],
-            related_message_ids=[1, 2],
+            related_message_ids=[sample_messages[0].id, sample_messages[1].id],
         ),
         ExtractedTopic(
             name="Topic 2",
             description="Test",
             confidence=0.9,
             keywords=["test"],
-            related_message_ids=[3],
+            related_message_ids=[sample_messages[2].id],
         ),
     ]
 
@@ -753,14 +757,14 @@ async def test_update_messages_skips_multiple_assignments(
             description="Test",
             confidence=0.9,
             keywords=["test"],
-            related_message_ids=[1],
+            related_message_ids=[sample_messages[0].id],
         ),
         ExtractedTopic(
             name="Topic 2",
             description="Test",
             confidence=0.9,
             keywords=["test"],
-            related_message_ids=[1],
+            related_message_ids=[sample_messages[0].id],
         ),
     ]
 
@@ -777,9 +781,9 @@ async def test_build_prompt_formats_correctly(agent_config, sample_messages: lis
     service = KnowledgeExtractionService(agent_config=agent_config, provider=MagicMock())
     prompt = service._build_prompt(sample_messages)
 
-    assert "Message 1 (ID: 1" in prompt
-    assert "Message 2 (ID: 2" in prompt
-    assert "Message 3 (ID: 3" in prompt
+    assert "Message 1 (ID:" in prompt
+    assert "Message 2 (ID:" in prompt
+    assert "Message 3 (ID:" in prompt
     assert "authentication system" in prompt
     assert "feature roadmap" in prompt
 

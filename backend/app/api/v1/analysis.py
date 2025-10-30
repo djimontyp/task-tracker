@@ -47,7 +47,7 @@ async def create_analysis_run(
     # Create run
     crud = AnalysisRunCRUD(db)
     try:
-        run = await crud.create(run_data)
+        run = await crud.create(run_data.model_dump(exclude_unset=True))
         return run
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

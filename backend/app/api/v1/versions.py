@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,7 +25,7 @@ router = APIRouter(tags=["versions"])
     summary="Get all versions for a topic",
 )
 async def get_topic_versions(
-    topic_id: int,
+    topic_id: uuid.UUID,
     db: AsyncSession = Depends(get_session),
 ) -> list[TopicVersionResponse]:
     """Retrieve all versions for a specific topic, ordered newest first"""
@@ -38,7 +40,7 @@ async def get_topic_versions(
     summary="Get diff between topic versions",
 )
 async def get_topic_version_diff(
-    topic_id: int,
+    topic_id: uuid.UUID,
     version: int,
     compare_to: int,
     db: AsyncSession = Depends(get_session),
@@ -63,7 +65,7 @@ async def get_topic_version_diff(
     summary="Approve topic version",
 )
 async def approve_topic_version(
-    topic_id: int,
+    topic_id: uuid.UUID,
     version: int,
     request: ApproveVersionRequest,
     db: AsyncSession = Depends(get_session),
@@ -90,7 +92,7 @@ async def approve_topic_version(
     summary="Reject topic version",
 )
 async def reject_topic_version(
-    topic_id: int,
+    topic_id: uuid.UUID,
     version: int,
     request: RejectVersionRequest,
     db: AsyncSession = Depends(get_session),
@@ -110,7 +112,7 @@ async def reject_topic_version(
     summary="Get all versions for an atom",
 )
 async def get_atom_versions(
-    atom_id: int,
+    atom_id: uuid.UUID,
     db: AsyncSession = Depends(get_session),
 ) -> list[AtomVersionResponse]:
     """Retrieve all versions for a specific atom, ordered newest first"""
@@ -125,7 +127,7 @@ async def get_atom_versions(
     summary="Get diff between atom versions",
 )
 async def get_atom_version_diff(
-    atom_id: int,
+    atom_id: uuid.UUID,
     version: int,
     compare_to: int,
     db: AsyncSession = Depends(get_session),
@@ -145,7 +147,7 @@ async def get_atom_version_diff(
     summary="Approve atom version",
 )
 async def approve_atom_version(
-    atom_id: int,
+    atom_id: uuid.UUID,
     version: int,
     request: ApproveVersionRequest,
     db: AsyncSession = Depends(get_session),
@@ -165,7 +167,7 @@ async def approve_atom_version(
     summary="Reject atom version",
 )
 async def reject_atom_version(
-    atom_id: int,
+    atom_id: uuid.UUID,
     version: int,
     request: RejectVersionRequest,
     db: AsyncSession = Depends(get_session),
