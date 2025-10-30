@@ -4,7 +4,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { versioningService } from '../api/versioningService';
 import type { TopicVersion, AtomVersion } from '../types';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface BulkVersionActionsProps {
   selectedVersions: (TopicVersion | AtomVersion)[];

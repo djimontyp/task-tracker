@@ -17,7 +17,7 @@ import {
 import { proposalService } from '@/features/proposals/api/proposalService'
 import { ProposalCard, RejectProposalDialog } from '@/features/proposals/components'
 import type { ProposalFilters, ProposalListResponse } from '@/features/proposals/types'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { FunnelIcon } from '@heroicons/react/24/outline'
 
 const ProposalsPage = () => {

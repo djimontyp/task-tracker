@@ -31,7 +31,7 @@ import { InformationCircleIcon } from '@heroicons/react/24/outline'
 import { analysisService } from '../api/analysisService'
 import { agentService } from '@/features/agents/api/agentService'
 import type { CreateAnalysisRun } from '../types'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { TimeWindowSelector } from './TimeWindowSelector'
 
 interface CreateRunModalProps {

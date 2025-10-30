@@ -8,7 +8,7 @@ import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { EnvelopeIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline'
 import { useTestEmail, useTestTelegram } from '../api/automationService'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 export function NotificationsConfigStep() {
   const { formData, updateNotifications } = useWizardStore()

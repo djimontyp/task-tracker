@@ -8,7 +8,7 @@ import { Spinner, Button, Card, Input } from '@/shared/ui'
 import { projectService } from '@/features/projects/api/projectService'
 import { ProjectCard, ProjectForm } from '@/features/projects/components'
 import type { ProjectConfig, ProjectListResponse } from '@/features/projects/types'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
 const ProjectsPage = () => {
