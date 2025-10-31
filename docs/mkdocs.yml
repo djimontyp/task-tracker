@@ -51,6 +51,7 @@ nav:
     - Auto-Save Feature: auto-save.md
   - User Guides:
     - Topics Search & Pagination: guides/topics-search-pagination.md
+    - Keyboard Navigation: guides/keyboard-navigation.md
   - Automation Guides:
     - Quickstart: guides/automation-quickstart.md
     - Configuration Reference: guides/automation-configuration.md
@@ -111,6 +112,7 @@ plugins:
             Auto-Save Feature: Auto-Save Feature
             User Guides: User Guides
             Topics Search & Pagination: Topics Search & Pagination
+            Keyboard Navigation: Keyboard Navigation
             Automation Guides: Automation Guides
             Quickstart: Quickstart
             Configuration Reference: Configuration Reference
@@ -157,6 +159,7 @@ plugins:
             Auto-Save Feature: Функція автозбереження
             User Guides: Посібники користувача
             Topics Search & Pagination: Пошук та пагінація топіків
+            Keyboard Navigation: Навігація клавіатурою
             Automation Guides: Посібники автоматизації
             Quickstart: Швидкий старт
             Configuration Reference: Довідник конфігурації
