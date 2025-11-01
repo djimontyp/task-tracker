@@ -7,6 +7,7 @@ import {
   Badge,
   Checkbox,
 } from '@/shared/ui'
+import { PageHeader } from '@/shared/components/PageHeader'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 import { toast } from 'sonner'
@@ -333,23 +334,26 @@ const MessagesPage = () => {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">Messages</h2>
-        <div className="flex gap-2">
-          <Button onClick={handleRefreshMessages} size="sm" variant="outline">
-            <ArrowPathIcon className="mr-2 h-4 w-4" />
-            Refresh
-          </Button>
-          <Button onClick={handleUpdateAuthors} size="sm" variant="outline">
-            <UserIcon className="mr-2 h-4 w-4" />
-            Update Authors
-          </Button>
-          <Button onClick={handleIngestMessages} size="sm">
-            <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
-            Ingest Messages
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Messages"
+        description="View and manage all incoming messages with importance scores, noise filtering, and real-time updates from Telegram"
+        actions={
+          <>
+            <Button onClick={handleRefreshMessages} size="sm" variant="outline">
+              <ArrowPathIcon className="mr-2 h-4 w-4" />
+              Refresh
+            </Button>
+            <Button onClick={handleUpdateAuthors} size="sm" variant="outline">
+              <UserIcon className="mr-2 h-4 w-4" />
+              Update Authors
+            </Button>
+            <Button onClick={handleIngestMessages} size="sm">
+              <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
+              Ingest Messages
+            </Button>
+          </>
+        }
+      />
 
       <DataTableToolbar
         table={table}

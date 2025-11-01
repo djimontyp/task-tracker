@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui'
+import { PageHeader } from '@/shared/components/PageHeader'
 import { proposalService } from '@/features/proposals/api/proposalService'
 import { ProposalCard, RejectProposalDialog } from '@/features/proposals/components'
 import type { ProposalFilters, ProposalListResponse } from '@/features/proposals/types'
@@ -136,14 +137,10 @@ const ProposalsPage = () => {
 
   return (
     <div className="flex flex-col gap-4 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Task Proposals</h1>
-          <p className="text-muted-foreground">
-            Review and approve AI-generated task proposals from analysis runs
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Task Proposals"
+        description="Review and approve AI-generated task proposals with batch approval workflow and detailed reasoning from analysis runs"
+      />
 
       {/* Filters */}
       <Card className="p-4">

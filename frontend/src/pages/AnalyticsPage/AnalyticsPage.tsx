@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Card, Spinner, Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui'
+import { PageHeader } from '@/shared/components/PageHeader'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 import { TaskStats } from '@/shared/types'
@@ -28,6 +29,10 @@ const AnalyticsPage = () => {
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
+      <PageHeader
+        title="Analytics"
+        description="Insights and trends from task classification system performance, user engagement, and knowledge extraction patterns"
+      />
       <Tabs defaultValue="overview" className="w-full">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>

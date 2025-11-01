@@ -14,6 +14,7 @@ import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { ProviderForm } from '@/features/agents/components'
 import { ValidationStatus } from '@/features/providers/components'
 import { formatFullDate } from '@/shared/utils/date'
+import { PageHeader } from '@/shared/components'
 
 const POLLING_INTERVAL_MS = 1000
 const MAX_POLLING_ATTEMPTS = 15
@@ -134,18 +135,16 @@ const ProvidersPage = () => {
 
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">LLM Providers</h1>
-          <p className="text-muted-foreground">
-            Configure and manage AI model providers (OpenAI, Ollama, etc.)
-          </p>
-        </div>
-        <Button onClick={handleCreate}>
-          <PlusIcon className="mr-2 h-4 w-4" />
-          Add Provider
-        </Button>
-      </div>
+      <PageHeader
+        title="Providers"
+        description="Configure LLM providers including OpenAI, Anthropic, and Ollama instances"
+        actions={
+          <Button onClick={handleCreate} size="sm">
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Add Provider
+          </Button>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {providers?.length === 0 ? (

@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Badge, Skeleton, Button } from '@/shared/ui'
 import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar'
 import { TelegramIcon } from '@/shared/components/TelegramIcon'
+import { PageHeader } from '@/shared/components/PageHeader'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 import { TaskStats, SidebarCounts } from '@/shared/types'
@@ -111,6 +112,10 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
+      <PageHeader
+        title="Dashboard"
+        description="Quick overview of recent activity, key metrics, and system status across tasks, messages, and analysis runs"
+      />
       <OnboardingWizard open={showOnboarding} onClose={() => setShowOnboarding(false)} />
 
       {hasNoData && !statsLoading && (

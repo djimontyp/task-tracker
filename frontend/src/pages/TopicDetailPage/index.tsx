@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeftIcon, CheckCircleIcon, CloudArrowUpIcon, ExclamationCircleIcon, PlusIcon, ClockIcon, SparklesIcon } from '@heroicons/react/24/outline'
 import { Card, Input, Textarea, Button, Skeleton, Switch, Label, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Badge } from '@/shared/ui'
-import { ColorPickerPopover } from '@/shared/components'
+import { ColorPickerPopover, PageHeader } from '@/shared/components'
 import { topicService } from '@/features/topics/api/topicService'
 import { atomService } from '@/features/atoms/api/atomService'
 import { messageService } from '@/features/messages/api/messageService'
@@ -331,6 +331,70 @@ const TopicDetailPage = () => {
         </div>
       </div>
 
+      <PageHeader
+        title={topic.name}
+        description="Detailed view of topic messages, atoms, knowledge insights, and related content with full context and version history"
+        actions={
+          <>
+            <Sheet open={showVersionHistory} onOpenChange={setShowVersionHistory}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" aria-label="View version history">
+                  <ClockIcon className="h-4 w-4 mr-2" />
+                  Version History
+                  {pendingVersionsCount > 0 && (
+                    <Badge className="ml-2 bg-amber-500 text-white hover:bg-amber-600">
+                      {pendingVersionsCount} pending
+                    </Badge>
+                  )}
+                </Button>
+              </SheetTrigger>
+
+              <SheetContent side="right" className="w-[500px] sm:w-[600px] overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>Version History - {topic.name}</SheetTitle>
+                </SheetHeader>
+
+                <div className="mt-6">
+                  <VersionHistoryList
+                    entityType="topic"
+                    entityId={topic.id}
+                    onSelectVersion={(version) => {
+                      setSelectedVersion(version)
+                      setCompareToVersion(version - 1)
+                    }}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            <Dialog open={showExtractionPanel} onOpenChange={setShowExtractionPanel}>
+              <DialogTrigger asChild>
+                <Button variant="default" size="sm" aria-label="Extract knowledge from messages">
+                  <SparklesIcon className="h-4 w-4 mr-2" />
+                  Extract Knowledge
+                </Button>
+              </DialogTrigger>
+
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Extract Knowledge from Messages</DialogTitle>
+                </DialogHeader>
+
+                <KnowledgeExtractionPanel
+                  messageIds={messages.filter(m => typeof m.id === 'number').map((m) => m.id as number)}
+                  topicId={parseInt(topicId!)}
+                  onComplete={() => {
+                    setShowExtractionPanel(false)
+                    queryClient.invalidateQueries({ queryKey: ['topic', parseInt(topicId!)] })
+                    queryClient.invalidateQueries({ queryKey: ['atoms', 'topic', parseInt(topicId!)] })
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
+          </>
+        }
+      />
+
       {!autoSaveEnabled && hasUnsavedChanges && (
         <div className="flex items-center justify-end gap-3 pb-2">
           <Button
@@ -380,64 +444,6 @@ const TopicDetailPage = () => {
                       hasUnsavedChanges ? 'border-amber-300 dark:border-amber-700' : ''
                     }`}
                   />
-                </div>
-
-                <div className="flex items-center gap-2 pt-7">
-                  <Sheet open={showVersionHistory} onOpenChange={setShowVersionHistory}>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" size="sm" aria-label="View version history">
-                        <ClockIcon className="h-4 w-4 mr-2" />
-                        Version History
-                        {pendingVersionsCount > 0 && (
-                          <Badge className="ml-2 bg-amber-500 text-white hover:bg-amber-600">
-                            {pendingVersionsCount} pending
-                          </Badge>
-                        )}
-                      </Button>
-                    </SheetTrigger>
-
-                    <SheetContent side="right" className="w-[500px] sm:w-[600px] overflow-y-auto">
-                      <SheetHeader>
-                        <SheetTitle>Version History - {topic.name}</SheetTitle>
-                      </SheetHeader>
-
-                      <div className="mt-6">
-                        <VersionHistoryList
-                          entityType="topic"
-                          entityId={topic.id}
-                          onSelectVersion={(version) => {
-                            setSelectedVersion(version)
-                            setCompareToVersion(version - 1)
-                          }}
-                        />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-
-                  <Dialog open={showExtractionPanel} onOpenChange={setShowExtractionPanel}>
-                    <DialogTrigger asChild>
-                      <Button variant="default" size="sm" aria-label="Extract knowledge from messages">
-                        <SparklesIcon className="h-4 w-4 mr-2" />
-                        Extract Knowledge
-                      </Button>
-                    </DialogTrigger>
-
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle>Extract Knowledge from Messages</DialogTitle>
-                      </DialogHeader>
-
-                      <KnowledgeExtractionPanel
-                        messageIds={messages.filter(m => typeof m.id === 'number').map((m) => m.id as number)}
-                        topicId={parseInt(topicId!)}
-                        onComplete={() => {
-                          setShowExtractionPanel(false)
-                          queryClient.invalidateQueries({ queryKey: ['topic', parseInt(topicId!)] })
-                          queryClient.invalidateQueries({ queryKey: ['atoms', 'topic', parseInt(topicId!)] })
-                        }}
-                      />
-                    </DialogContent>
-                  </Dialog>
                 </div>
               </div>
 

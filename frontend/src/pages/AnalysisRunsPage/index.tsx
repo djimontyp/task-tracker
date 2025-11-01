@@ -4,6 +4,7 @@ import {
   Spinner,
   Button,
 } from '@/shared/ui'
+import { PageHeader } from '@/shared/components/PageHeader'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 import {
@@ -193,7 +194,10 @@ const AnalysisRunsPage = () => {
   if (error) {
     return (
       <div className="space-y-4 animate-fade-in">
-        <h2 className="text-2xl font-bold tracking-tight">Analysis Runs</h2>
+        <PageHeader
+          title="Analysis Runs"
+          description="Monitor AI analysis runs with real-time WebSocket updates, status tracking, and performance metrics"
+        />
         <div className="p-6 border border-destructive rounded-md">
           <div className="flex items-start gap-3">
             <div className="text-destructive text-lg">⚠️</div>
@@ -211,15 +215,16 @@ const AnalysisRunsPage = () => {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">Analysis Runs</h2>
-        <div className="flex gap-2">
+      <PageHeader
+        title="Analysis Runs"
+        description="Monitor AI analysis runs with real-time WebSocket updates, status tracking, and performance metrics"
+        actions={
           <Button onClick={() => setCreateModalOpen(true)} size="sm">
             <PlusIcon className="h-4 w-4 mr-2" />
             Create Run
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       <DataTableToolbar
         table={table}
