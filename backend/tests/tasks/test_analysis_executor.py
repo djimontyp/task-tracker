@@ -182,9 +182,27 @@ async def test_fetch_messages(db_session):
     await db_session.refresh(run)
 
     # Create messages (some in window, some outside)
-    msg1 = Message(external_message_id="test-msg-1", content="In window", sent_at=start + timedelta(minutes=30), source_id=source.id, author_id=user.id)
-    msg2 = Message(external_message_id="test-msg-2", content="Also in window", sent_at=start + timedelta(minutes=45), source_id=source.id, author_id=user.id)
-    msg3 = Message(external_message_id="test-msg-3", content="Outside window", sent_at=end + timedelta(hours=1), source_id=source.id, author_id=user.id)
+    msg1 = Message(
+        external_message_id="test-msg-1",
+        content="In window",
+        sent_at=start + timedelta(minutes=30),
+        source_id=source.id,
+        author_id=user.id,
+    )
+    msg2 = Message(
+        external_message_id="test-msg-2",
+        content="Also in window",
+        sent_at=start + timedelta(minutes=45),
+        source_id=source.id,
+        author_id=user.id,
+    )
+    msg3 = Message(
+        external_message_id="test-msg-3",
+        content="Outside window",
+        sent_at=end + timedelta(hours=1),
+        source_id=source.id,
+        author_id=user.id,
+    )
     db_session.add(msg1)
     db_session.add(msg2)
     db_session.add(msg3)
@@ -289,10 +307,34 @@ async def test_prefilter_messages(db_session):
 
     # Create messages with different characteristics
     messages = [
-        Message(external_message_id="prefilter-msg-1", content="Fix backend API bug", sent_at=datetime.utcnow(), source_id=source.id, author_id=user.id),  # Has keyword
-        Message(external_message_id="prefilter-msg-2", content="short", sent_at=datetime.utcnow(), source_id=source.id, author_id=user.id),  # Too short
-        Message(external_message_id="prefilter-msg-3", content="Some random long message here", sent_at=datetime.utcnow(), source_id=source.id, author_id=user.id),  # No keyword, no @
-        Message(external_message_id="prefilter-msg-4", content="@john please check backend", sent_at=datetime.utcnow(), source_id=source.id, author_id=user.id),  # Has @ mention
+        Message(
+            external_message_id="prefilter-msg-1",
+            content="Fix backend API bug",
+            sent_at=datetime.utcnow(),
+            source_id=source.id,
+            author_id=user.id,
+        ),  # Has keyword
+        Message(
+            external_message_id="prefilter-msg-2",
+            content="short",
+            sent_at=datetime.utcnow(),
+            source_id=source.id,
+            author_id=user.id,
+        ),  # Too short
+        Message(
+            external_message_id="prefilter-msg-3",
+            content="Some random long message here",
+            sent_at=datetime.utcnow(),
+            source_id=source.id,
+            author_id=user.id,
+        ),  # No keyword, no @
+        Message(
+            external_message_id="prefilter-msg-4",
+            content="@john please check backend",
+            sent_at=datetime.utcnow(),
+            source_id=source.id,
+            author_id=user.id,
+        ),  # Has @ mention
     ]
     for msg in messages:
         db_session.add(msg)

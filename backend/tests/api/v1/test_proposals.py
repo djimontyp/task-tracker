@@ -611,7 +611,9 @@ async def test_merge_proposal(client, db_session):
     # Mock WebSocket manager
     with patch("app.api.v1.proposals.websocket_manager", AsyncMock()):
         # Merge proposal
-        response = await client.put(f"/api/v1/analysis/proposals/{proposal.id}/merge", json={"target_task_id": str(target_task_id)})
+        response = await client.put(
+            f"/api/v1/analysis/proposals/{proposal.id}/merge", json={"target_task_id": str(target_task_id)}
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == ProposalStatus.merged.value

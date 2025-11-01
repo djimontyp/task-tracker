@@ -168,6 +168,7 @@ async def test_get_topic_messages_with_pagination(
 async def test_get_topic_messages_not_found(client: AsyncClient) -> None:
     """Test 404 error for non-existent topic."""
     from uuid import uuid4
+
     fake_topic_id = uuid4()
     response = await client.get(f"/api/v1/topics/{fake_topic_id}/messages")
 
@@ -218,6 +219,7 @@ async def test_filter_messages_by_topic_id_empty(
 ) -> None:
     """Test filtering messages by non-existent topic_id returns empty list."""
     from uuid import uuid4
+
     fake_topic_id = uuid4()
     response = await client.get(
         "/api/v1/messages",

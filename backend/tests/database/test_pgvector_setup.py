@@ -26,7 +26,7 @@ class TestPgvectorSetup:
 
     async def test_messages_table_has_embedding_column(self, db_session: AsyncSession) -> None:
         """Verify messages table has embedding column in schema."""
-        from sqlalchemy import inspect, text
+        from sqlalchemy import inspect
 
         def check_column(connection):
             inspector = inspect(connection)
@@ -34,9 +34,7 @@ class TestPgvectorSetup:
             column_names = [col["name"] for col in columns]
             return "embedding" in column_names
 
-        has_embedding = await db_session.connection(
-            execution_options={"synchronize_session": False}
-        )
+        has_embedding = await db_session.connection(execution_options={"synchronize_session": False})
         result = await has_embedding.run_sync(check_column)
 
         assert result, "messages table should have embedding column"
@@ -51,9 +49,7 @@ class TestPgvectorSetup:
             column_names = [col["name"] for col in columns]
             return "embedding" in column_names
 
-        has_embedding = await db_session.connection(
-            execution_options={"synchronize_session": False}
-        )
+        has_embedding = await db_session.connection(execution_options={"synchronize_session": False})
         result = await has_embedding.run_sync(check_column)
 
         assert result, "atoms table should have embedding column"
@@ -208,8 +204,7 @@ class TestPgvectorSetup:
 
 
 @pytest.mark.skipif(
-    os.getenv("TEST_DATABASE_URL", "sqlite").startswith("sqlite"),
-    reason="Requires PostgreSQL with pgvector extension"
+    os.getenv("TEST_DATABASE_URL", "sqlite").startswith("sqlite"), reason="Requires PostgreSQL with pgvector extension"
 )
 @pytest.mark.asyncio
 class TestPgvectorOperations:
