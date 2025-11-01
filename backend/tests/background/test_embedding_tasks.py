@@ -8,8 +8,8 @@ Tests cover:
 5. Skipping already embedded items
 """
 
+from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
-from typing import AsyncGenerator
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 

@@ -17,13 +17,13 @@ from uuid import uuid4
 
 import pytest
 from app.models import Atom, AtomLink, LLMProvider, Message, ProviderType, Source, SourceType, Topic, TopicAtom, User
+from app.services.knowledge.llm_agents import build_model_instance
 from app.services.knowledge_extraction_service import (
     ExtractedAtom,
     ExtractedTopic,
     KnowledgeExtractionOutput,
     KnowledgeExtractionService,
 )
-from app.services.knowledge.llm_agents import build_model_instance
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 

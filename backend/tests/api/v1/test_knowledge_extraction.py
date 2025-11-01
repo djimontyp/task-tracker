@@ -150,7 +150,6 @@ async def test_trigger_extraction_success(
     client: AsyncClient, agent_config: "AgentConfig", sample_messages: list[Message]
 ) -> None:
     """Test successfully triggering knowledge extraction."""
-    from app.models import AgentConfig
 
     message_ids = [msg.id for msg in sample_messages[:5]]
 
@@ -742,8 +741,7 @@ async def test_trigger_extraction_invalid_period_type(client: AsyncClient, agent
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_custom_period_missing_start_date(
-    client: AsyncClient, agent_config: "AgentConfig",
-    sample_provider: LLMProvider, db_session: AsyncSession
+    client: AsyncClient, agent_config: "AgentConfig", sample_provider: LLMProvider, db_session: AsyncSession
 ) -> None:
     """Test validation error for custom period without start_date."""
     from datetime import UTC, datetime, timedelta
@@ -783,8 +781,7 @@ async def test_trigger_extraction_custom_period_missing_start_date(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_custom_period_missing_end_date(
-    client: AsyncClient, agent_config: "AgentConfig",
-    sample_provider: LLMProvider, db_session: AsyncSession
+    client: AsyncClient, agent_config: "AgentConfig", sample_provider: LLMProvider, db_session: AsyncSession
 ) -> None:
     """Test validation error for custom period without end_date."""
     from datetime import UTC, datetime, timedelta
@@ -824,8 +821,7 @@ async def test_trigger_extraction_custom_period_missing_end_date(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_custom_period_start_after_end(
-    client: AsyncClient, agent_config: "AgentConfig",
-    sample_provider: LLMProvider, db_session: AsyncSession
+    client: AsyncClient, agent_config: "AgentConfig", sample_provider: LLMProvider, db_session: AsyncSession
 ) -> None:
     """Test validation error for custom period with start_date after end_date."""
     from datetime import UTC, datetime, timedelta
@@ -867,8 +863,7 @@ async def test_trigger_extraction_custom_period_start_after_end(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_custom_period_future_dates(
-    client: AsyncClient, agent_config: "AgentConfig",
-    sample_provider: LLMProvider, db_session: AsyncSession
+    client: AsyncClient, agent_config: "AgentConfig", sample_provider: LLMProvider, db_session: AsyncSession
 ) -> None:
     """Test validation error for custom period with future dates."""
     from datetime import UTC, datetime, timedelta

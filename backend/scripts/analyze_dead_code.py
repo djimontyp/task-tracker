@@ -14,7 +14,6 @@ import os
 import subprocess
 import sys
 from collections import defaultdict
-from pathlib import Path
 
 
 def analyze_unused_imports(base_path: str = "app") -> list[dict]:
@@ -31,6 +30,7 @@ def analyze_unused_imports(base_path: str = "app") -> list[dict]:
             return []
 
         import json
+
         findings = json.loads(result.stdout) if result.stdout else []
         return findings
     except Exception as e:
@@ -52,7 +52,7 @@ def analyze_commented_code(base_path: str = "app") -> list[dict]:
 
             filepath = os.path.join(root, file)
             try:
-                with open(filepath, "r", encoding="utf-8") as f:
+                with open(filepath, encoding="utf-8") as f:
                     lines = f.readlines()
 
                 comment_lines = []
@@ -71,7 +71,7 @@ def analyze_commented_code(base_path: str = "app") -> list[dict]:
                         "comment_count": len(comment_lines),
                         "total_lines": len(lines),
                         "percentage": (len(comment_lines) / len(lines)) * 100,
-                        "samples": comment_lines[:5]  # First 5 examples
+                        "samples": comment_lines[:5],  # First 5 examples
                     })
             except Exception as e:
                 print(f"Error reading {filepath}: {e}", file=sys.stderr)
@@ -113,7 +113,7 @@ def analyze_function_usage(base_path: str = "app") -> dict:
 
             filepath = os.path.join(root, file)
             try:
-                with open(filepath, "r", encoding="utf-8") as f:
+                with open(filepath, encoding="utf-8") as f:
                     tree = ast.parse(f.read(), filepath)
                     visitor = FunctionVisitor(filepath)
                     visitor.visit(tree)
@@ -122,27 +122,35 @@ def analyze_function_usage(base_path: str = "app") -> dict:
 
     # Find potentially unused functions
     exclude_patterns = {
-        "main", "__init__", "setUp", "tearDown", "lifespan",
-        "get_db_session", "get_session", "create_db_and_tables"
+        "main",
+        "__init__",
+        "setUp",
+        "tearDown",
+        "lifespan",
+        "get_db_session",
+        "get_session",
+        "create_db_and_tables",
     }
 
     unused = []
     for func_name, locations in functions_defined.items():
         if func_name not in functions_called:
             # Skip special methods, tests, and common patterns
-            if (not func_name.startswith("_") and
-                not func_name.startswith("test_") and
-                func_name not in exclude_patterns):
+            if (
+                not func_name.startswith("_")
+                and not func_name.startswith("test_")
+                and func_name not in exclude_patterns
+            ):
                 unused.append({
                     "function": func_name,
                     "locations": locations,
-                    "confidence": "medium"  # Could be called via reflection
+                    "confidence": "medium",  # Could be called via reflection
                 })
 
     return {
         "total_defined": len(functions_defined),
         "total_called": len(functions_called),
-        "potentially_unused": unused[:50]  # Top 50
+        "potentially_unused": unused[:50],  # Top 50
     }
 
 
@@ -177,7 +185,7 @@ def main():
             print(f"  {item['file']}")
             print(f"    {item['comment_count']} comment lines ({item['percentage']:.1f}% of file)")
             print(f"    Sample:")
-            for line_no, line in item['samples'][:2]:
+            for line_no, line in item["samples"][:2]:
                 print(f"      L{line_no}: {line[:60]}")
             print()
     else:

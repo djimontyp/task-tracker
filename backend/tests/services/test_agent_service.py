@@ -20,7 +20,7 @@ from app.models import (
     ProviderType,
     ValidationStatus,
 )
-from app.services.agent_service import AgentTestService, AgentTestResponse
+from app.services.agent_service import AgentTestResponse, AgentTestService
 from app.services.credential_encryption import CredentialEncryption
 from sqlalchemy.ext.asyncio import AsyncSession
 

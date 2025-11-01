@@ -4,7 +4,6 @@ from datetime import datetime
 from uuid import UUID
 
 import pytest
-
 from app.models import AnalysisRun, TaskProposal
 from app.models.agent_config import AgentConfig
 from app.models.agent_task_assignment import AgentTaskAssignment
