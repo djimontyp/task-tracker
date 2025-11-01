@@ -243,6 +243,14 @@ docs/content/
 
 **For detailed delegation patterns, agent list, and examples**: @.claude/delegation-patterns.md
 
+### Project Documentation
+
+**Quick access to key documents** (lazy-loaded when needed):
+- @INDEX.md - Complete project structure and file organization
+- @DOCUMENTATION_MAINTENANCE.md - Documentation maintenance guidelines
+- @TOPICS_API_INTEGRATION_GUIDE.md - Topics API integration guide
+- @justfile - All available commands and aliases
+
 ### Session Management
 
 `session-manager` skill manages all project work via natural language (EN/UA):
