@@ -83,7 +83,7 @@ async def get_atom(
         HTTPException: 404 if atom not found
     """
     crud = AtomCRUD(session)
-    atom = await crud.get(atom_id)
+    atom = await crud.get_atom(atom_id)
 
     if not atom:
         raise HTTPException(
@@ -118,7 +118,7 @@ async def create_atom(
         Created atom with generated ID and timestamps
     """
     crud = AtomCRUD(session)
-    return await crud.create(atom_data.model_dump(exclude_unset=True))
+    return await crud.create_atom(atom_data)
 
 
 @router.patch(
@@ -149,7 +149,7 @@ async def update_atom(
         HTTPException: 404 if atom not found
     """
     crud = AtomCRUD(session)
-    atom = await crud.update(atom_id, atom_data)
+    atom = await crud.update_atom(atom_id, atom_data)
 
     if not atom:
         raise HTTPException(

@@ -43,7 +43,7 @@ class AtomCRUD(BaseCRUD[Atom]):
             Public atom schema
         """
         return AtomPublic(
-            id=atom.id,
+            id=str(atom.id),
             type=atom.type,
             title=atom.title,
             content=atom.content,
@@ -52,8 +52,8 @@ class AtomCRUD(BaseCRUD[Atom]):
             meta=atom.meta,
             embedding=atom.embedding,
             has_embedding=atom.embedding is not None,
-            created_at=atom.created_at.isoformat() if atom.created_at else "",
-            updated_at=atom.updated_at.isoformat() if atom.updated_at else "",
+            created_at=atom.created_at,
+            updated_at=atom.updated_at,
         )
 
     async def get_atom(self, atom_id: uuid.UUID) -> AtomPublic | None:

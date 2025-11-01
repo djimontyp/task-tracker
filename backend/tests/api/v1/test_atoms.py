@@ -225,7 +225,7 @@ async def test_get_atom(client: AsyncClient, sample_atom: Atom):
 
     assert response.status_code == 200
     data = response.json()
-    assert data["id"] == sample_atom.id
+    assert data["id"] == str(sample_atom.id)
     assert data["type"] == sample_atom.type
     assert data["title"] == sample_atom.title
     assert data["content"] == sample_atom.content
@@ -237,12 +237,13 @@ async def test_get_atom(client: AsyncClient, sample_atom: Atom):
 @pytest.mark.asyncio
 async def test_get_atom_not_found(client: AsyncClient):
     """Test 404 error when atom doesn't exist."""
-    response = await client.get("/api/v1/atoms/99999")
+    nonexistent_id = "00000000-0000-0000-0000-000000000000"
+    response = await client.get(f"/api/v1/atoms/{nonexistent_id}")
 
     assert response.status_code == 404
     data = response.json()
     assert "detail" in data
-    assert "99999" in data["detail"]
+    assert nonexistent_id in data["detail"]
 
 
 @pytest.mark.asyncio
@@ -416,7 +417,7 @@ async def test_update_atom(client: AsyncClient, sample_atom: Atom):
 
     assert response.status_code == 200
     data = response.json()
-    assert data["id"] == sample_atom.id
+    assert data["id"] == str(sample_atom.id)
     assert data["title"] == payload["title"]
     assert data["content"] == payload["content"]
     assert data["confidence"] == payload["confidence"]
@@ -455,9 +456,10 @@ async def test_update_atom_change_type(client: AsyncClient, sample_atom: Atom):
 @pytest.mark.asyncio
 async def test_update_atom_not_found(client: AsyncClient):
     """Test 404 error when updating non-existent atom."""
+    nonexistent_id = "00000000-0000-0000-0000-000000000000"
     payload = {"title": "New Title"}
 
-    response = await client.patch("/api/v1/atoms/99999", json=payload)
+    response = await client.patch(f"/api/v1/atoms/{nonexistent_id}", json=payload)
 
     assert response.status_code == 404
     data = response.json()
@@ -489,7 +491,8 @@ async def test_delete_atom(client: AsyncClient, sample_atom: Atom, db_session: A
 @pytest.mark.asyncio
 async def test_delete_atom_not_found(client: AsyncClient):
     """Test 404 error when deleting non-existent atom."""
-    response = await client.delete("/api/v1/atoms/99999")
+    nonexistent_id = "00000000-0000-0000-0000-000000000000"
+    response = await client.delete(f"/api/v1/atoms/{nonexistent_id}")
 
     assert response.status_code == 404
     data = response.json()
@@ -504,8 +507,8 @@ async def test_link_atom_to_topic(client: AsyncClient, sample_atom: Atom, sample
     assert response.status_code == 201
     data = response.json()
     assert data["message"] == "Atom linked to topic successfully"
-    assert data["atom_id"] == sample_atom.id
-    assert data["topic_id"] == sample_topic.id
+    assert data["atom_id"] == str(sample_atom.id)
+    assert data["topic_id"] == str(sample_topic.id)
 
 
 @pytest.mark.asyncio
@@ -517,14 +520,15 @@ async def test_link_atom_to_topic_with_position_and_note(client: AsyncClient, sa
 
     assert response.status_code == 201
     data = response.json()
-    assert data["atom_id"] == sample_atom.id
-    assert data["topic_id"] == sample_topic.id
+    assert data["atom_id"] == str(sample_atom.id)
+    assert data["topic_id"] == str(sample_topic.id)
 
 
 @pytest.mark.asyncio
 async def test_link_atom_to_topic_atom_not_found(client: AsyncClient, sample_topic: Topic):
     """Test 404 error when atom doesn't exist."""
-    response = await client.post(f"/api/v1/atoms/99999/topics/{sample_topic.id}")
+    nonexistent_id = "00000000-0000-0000-0000-000000000000"
+    response = await client.post(f"/api/v1/atoms/{nonexistent_id}/topics/{sample_topic.id}")
 
     assert response.status_code == 404
     data = response.json()
@@ -534,7 +538,8 @@ async def test_link_atom_to_topic_atom_not_found(client: AsyncClient, sample_top
 @pytest.mark.asyncio
 async def test_link_atom_to_topic_topic_not_found(client: AsyncClient, sample_atom: Atom):
     """Test 404 error when topic doesn't exist."""
-    response = await client.post(f"/api/v1/atoms/{sample_atom.id}/topics/99999")
+    nonexistent_id = "00000000-0000-0000-0000-000000000000"
+    response = await client.post(f"/api/v1/atoms/{sample_atom.id}/topics/{nonexistent_id}")
 
     assert response.status_code == 404
     data = response.json()
@@ -599,7 +604,8 @@ async def test_get_topic_atoms(
 @pytest.mark.asyncio
 async def test_get_topic_atoms_topic_not_found(client: AsyncClient):
     """Test 404 error when topic doesn't exist."""
-    response = await client.get("/api/v1/topics/99999/atoms")
+    nonexistent_id = "00000000-0000-0000-0000-000000000000"
+    response = await client.get(f"/api/v1/topics/{nonexistent_id}/atoms")
 
     assert response.status_code == 404
     data = response.json()
@@ -628,7 +634,7 @@ async def test_get_topic_messages(client: AsyncClient, sample_message: Message):
     data = response.json()
     assert len(data) == 1
     message = data[0]
-    assert message["id"] == sample_message.id
+    assert message["id"] == str(sample_message.id)
     assert message["content"] == sample_message.content
     assert "author_name" in message
     assert "source_name" in message
@@ -661,7 +667,8 @@ async def test_get_topic_messages_multiple(
 @pytest.mark.asyncio
 async def test_get_topic_messages_topic_not_found(client: AsyncClient):
     """Test 404 error when topic doesn't exist."""
-    response = await client.get("/api/v1/topics/99999/messages")
+    nonexistent_id = "00000000-0000-0000-0000-000000000000"
+    response = await client.get(f"/api/v1/topics/{nonexistent_id}/messages")
 
     assert response.status_code == 404
     data = response.json()
