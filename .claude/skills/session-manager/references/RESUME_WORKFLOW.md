@@ -51,14 +51,45 @@ Parse markdown sections:
 - Next Actions
 - Artifacts list
 
-### 3. Restore TodoWrite State
+### 3. Check for Pending Agent Outputs
+
+Before restoring TodoWrite state, check if there are orphaned agent artifacts that should be merged:
+
+**Check project root:**
+```bash
+orphaned=$(find . -maxdepth 1 \
+  -name "*REPORT*.md" \
+  -o -name "*VERIFICATION*.md" \
+  -o -name "*SUMMARY*.md" \
+  -o -name "*ANALYSIS*.md" \
+  2>/dev/null)
+```
+
+**If found:**
+- List found artifacts: `echo "Found pending agent outputs: $(echo $orphaned | wc -w) files"`
+- Ask user: "Merge these into session before resuming? [y/n]"
+- If yes: Append to session file (same logic as PAUSE_WORKFLOW step 6)
+- If no: Warn that context may be incomplete
+
+**Why this step:**
+- Agents may have completed work after session was paused
+- Ensures session has latest findings before resuming
+- Prevents context loss from orphaned artifacts
+
+**Common scenario:**
+1. Session paused without orphaned artifacts
+2. Agent completes work later (creates standalone artifact)
+3. User resumes session
+4. This step merges agent work into session
+
+### 4. Restore TodoWrite State
 
 From Todo section:
 - Recreate todo list with exact statuses
 - Verify counts match (completed vs pending)
 - Mark first pending task as in_progress
 
-### 4. Reconstruct Context
+### 5. Reconstruct Context
 
 Output to user:
 ```
@@ -72,14 +103,14 @@ Blockers: {list or "None"}
 Next up: {next task description}
 ```
 
-### 5. Verify Artifacts
+### 6. Verify Artifacts
 
 Check that files listed in session still exist:
 - Read critical files to confirm state
 - Warn user if files missing/modified
 - Update session context if needed
 
-### 6. Move Session File
+### 7. Move Session File
 
 Move from `paused/` to `active/`:
 ```
@@ -89,7 +120,7 @@ Move from `paused/` to `active/`:
 
 Update "Last Updated" timestamp in file.
 
-### 7. Confirm Ready to Continue
+### 8. Confirm Ready to Continue
 
 Output:
 ```

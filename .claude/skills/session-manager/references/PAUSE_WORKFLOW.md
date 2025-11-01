@@ -75,11 +75,62 @@ List all files created/modified:
 - Brief description of changes
 - Git commits (if any)
 
-### 6. Generate Session File
+### 6. Ingest Orphaned Agent Artifacts
+
+Before finalizing session, check for orphaned agent reports:
+
+**Check for orphaned files:**
+```bash
+# Find potential orphaned agent artifacts
+orphaned=$(find . -maxdepth 1 \
+  -name "*REPORT*.md" \
+  -o -name "*VERIFICATION*.md" \
+  -o -name "*SUMMARY*.md" \
+  -o -name "*ANALYSIS*.md" \
+  -o -name "*AUDIT*.md" \
+  2>/dev/null)
+```
+
+**If found, append to session file:**
+```bash
+for artifact in $orphaned; do
+  echo -e "\n---\n" >> "$session_file"
+  echo "## Orphaned Artifact: $(basename $artifact)" >> "$session_file"
+  echo "" >> "$session_file"
+  echo "*Source: Project root (should have been in session)*" >> "$session_file"
+  echo "" >> "$session_file"
+  cat "$artifact" >> "$session_file"
+done
+```
+
+**Clean up after merge:**
+```bash
+# Only delete after successful append
+if [ $? -eq 0 ]; then
+  for artifact in $orphaned; do
+    rm "$artifact"
+    echo "✓ Merged and deleted: $(basename $artifact)"
+  done
+fi
+```
+
+**Why this step:**
+- Agents may have created standalone reports before session integration was implemented
+- Ensures all work is captured in session file
+- Prevents orphaned artifacts cluttering project root
+- Session becomes single source of truth
+
+**Common orphaned patterns:**
+- `SPRINT1_TEST_FIX_VERIFICATION.md`
+- `UX_AUDIT_REPORT.md`
+- `DATABASE_ANALYSIS_SUMMARY.md`
+- `test_results.txt` (if markdown)
+
+### 7. Generate Session File
 
 Create `.claude/sessions/paused/YYYY-MM-DD-{slug}.md` with all above data using SUMMARY_TEMPLATES.md format.
 
-### 7. Confirm with User
+### 8. Confirm with User
 
 Output resume instruction:
 ```
