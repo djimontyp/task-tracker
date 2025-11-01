@@ -4,7 +4,7 @@ Provides type-safe generic CRUD operations for SQLModel entities,
 reducing code duplication across service layer.
 """
 
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,7 +13,7 @@ from sqlmodel import SQLModel, select
 T = TypeVar("T", bound=SQLModel)
 
 
-class BaseCRUD(Generic[T]):
+class BaseCRUD[T: SQLModel]:
     """Generic CRUD operations for SQLModel entities.
 
     Provides standard create, read, update, delete operations with type safety.

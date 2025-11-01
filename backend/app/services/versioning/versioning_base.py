@@ -23,8 +23,8 @@ class BaseVersioningService:
         Returns:
             Total count of pending versions
         """
-        topic_stmt = select(func.count()).select_from(TopicVersion).where(TopicVersion.approved == False)  # noqa: E712
-        atom_stmt = select(func.count()).select_from(AtomVersion).where(AtomVersion.approved == False)  # noqa: E712
+        topic_stmt = select(func.count()).select_from(TopicVersion).where(TopicVersion.approved == False)  # type: ignore[arg-type]  # noqa: E712
+        atom_stmt = select(func.count()).select_from(AtomVersion).where(AtomVersion.approved == False)  # type: ignore[arg-type]  # noqa: E712
 
         topic_count = await db.scalar(topic_stmt) or 0
         atom_count = await db.scalar(atom_stmt) or 0
@@ -41,8 +41,8 @@ class BaseVersioningService:
         Returns:
             Dictionary with count, topics, atoms counts
         """
-        topic_stmt = select(func.count()).select_from(TopicVersion).where(TopicVersion.approved == False)  # noqa: E712
-        atom_stmt = select(func.count()).select_from(AtomVersion).where(AtomVersion.approved == False)  # noqa: E712
+        topic_stmt = select(func.count()).select_from(TopicVersion).where(TopicVersion.approved == False)  # type: ignore[arg-type]  # noqa: E712
+        atom_stmt = select(func.count()).select_from(AtomVersion).where(AtomVersion.approved == False)  # type: ignore[arg-type]  # noqa: E712
 
         topic_count = await db.scalar(topic_stmt) or 0
         atom_count = await db.scalar(atom_stmt) or 0

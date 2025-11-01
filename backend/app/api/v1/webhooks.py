@@ -2,6 +2,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
+from app.api.deps import DatabaseDep
 from app.schemas import (
     AddTelegramGroupRequest,
     SetWebhookRequest,
@@ -11,7 +12,6 @@ from app.schemas import (
     WebhookConfigResponse,
 )
 from app.webhook_service import telegram_webhook_service, webhook_settings_service
-from app.api.deps import DatabaseDep
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/webhook-settings", tags=["webhook-settings"])
