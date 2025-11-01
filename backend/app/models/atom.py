@@ -178,7 +178,7 @@ class TopicAtom(TimestampMixin, SQLModel, table=True):
 class AtomPublic(SQLModel):
     """Public schema for atom responses."""
 
-    id: uuid.UUID
+    id: str
     type: str
     title: str
     content: str
