@@ -1,7 +1,7 @@
 ---
 name: session-manager
-description: Auto-saves session state after task completion. Use when user says "pause", "stop", "save progress", "пауза", "зупинись", "зберегти" or needs to continue work later with "resume", "continue", "продовжити". Generates bilingual summaries with todos, context, agent states, next actions. Enables seamless pause/resume workflow across conversations. Integrates with TodoWrite for progress tracking.
-allowed-tools: Read, Write, TodoWrite, Bash(git:*)
+description: Manages work sessions with pause/resume workflow. Triggers on "покажи сесії", "show sessions", "список сесій", "list sessions", "що далі", "what's next", "які плани", "what are the plans", "що по планам", "які цілі", "what are the goals", "що робимо", "what should we do", "де ми", "where are we", "продовжити", "continue", "resume", "давай", "let's go", "пауза", "pause", "зупинись", "stop", "статус", "status", "що зроблено", "what's done", "прогрес", "progress", "перемкнутись", "switch", "заархівувати", "archive". Replaces NEXT_SESSION_TODO.md with structured session files in planned/active/paused/completed dirs. Auto-saves progress, bilingual EN/UA.
+allowed-tools: Read, Write, Glob, TodoWrite, Bash(git:*)
 ---
 
 # Session Manager
@@ -45,26 +45,109 @@ Mark complete → move to completed/
 
 ## When to Use This Skill
 
+Session Manager автоматично активується на природній мові (EN/UA). Використовує `.claude/sessions/{planned|active|paused|completed}/` для управління сесіями.
+
+### Trigger Phrases
+
+#### 1. Show Sessions (Показати сесії)
+**EN**: "show sessions", "list sessions", "what sessions do we have", "available sessions", "all sessions", "what can we work on"
+**UA**: "покажи сесії", "список сесій", "які сесії є", "доступні сесії", "всі сесії", "над чим можна працювати", "що по сесіям"
+
+**Behavior**: List all sessions by status (planned/active/paused/completed) with progress bars
+
+---
+
+#### 2. What's Next / Plans (Що далі / Плани)
+**EN**: "what's next", "what should we do", "what are the plans", "what's the plan", "next steps", "what to work on", "what are we doing", "what are the goals", "what's on the agenda", "what needs to be done", "what's pending", "what are our priorities"
+**UA**: "що далі", "що робимо", "які плани", "що по планам", "наступні кроки", "над чим працювати", "який план", "що робити", "які цілі", "що в планах", "що треба зробити", "що залишилось", "що у черзі", "які пріоритети"
+
+**Behavior**:
+- If active session exists → show status
+- If no active session → show planned sessions menu
+
+---
+
+#### 3. Session Status (Статус сесії)
+**EN**: "session status", "where are we", "what's the progress", "current status", "how far are we", "show progress", "what have we done", "what's completed", "what's left"
+**UA**: "статус сесії", "де ми", "який прогрес", "поточний статус", "що зроблено", "як справи", "покажи прогрес", "що виконано", "що готово", "що залишилось"
+
+**Behavior**: Show detailed status of active session with progress bars, completed/remaining tasks
+
+---
+
+#### 4. Continue/Resume (Продовжити)
+**EN**: "continue", "resume", "let's continue", "pick up where we left off", "resume session", "continue work", "let's go", "let's work", "start working", "pick up", "carry on"
+**UA**: "продовжити", "продовж", "давай продовжимо", "продовжуємо", "відновити роботу", "поїхали", "давай працювати", "починаємо", "давай далі", "давай"
+
+**Behavior**:
+- If paused sessions exist → prompt to select
+- If no paused → show planned sessions
+- Auto-resume last active if only one
+
+---
+
+#### 5. Continue Specific Session (Продовжити конкретну)
+**EN**: "continue [name]", "resume [name]", "work on [name]", "let's do [name]", "start [name]", "do [name]"
+**UA**: "продовжити [назва]", "давай [назва]", "працювати над [назва]", "почати [назва]", "робити [назва]"
+
+**Examples**:
+- "давай спринт 1" → Load sprint-1-ux-fixes
+- "continue backend" → Load backend-code-quality
+- "work on testing" → Load testing-infrastructure
+
+**Behavior**: Fuzzy match session name, confirm if ambiguous
+
+---
+
+#### 6. Pause (Пауза)
+**EN**: "pause", "stop", "that's it for now", "save progress", "stop for today", "break", "done for now", "that's all", "enough for now", "let's stop", "take a break", "that's it"
+**UA**: "пауза", "зупинись", "все на сьогодні", "зберегти прогрес", "перерва", "готово на сьогодні", "все", "достатньо", "хватит", "зупинимось", "зробимо перерву"
+
+**Behavior**: Save active session to paused/, show resume instructions
+
+---
+
+#### 7. Switch Session (Перемкнутись)
+**EN**: "switch to [name]", "work on [name] instead", "let's do something else", "change session", "do something different"
+**UA**: "перемкнутись на [назва]", "краще попрацюємо над [назва]", "давай інше", "змінити сесію", "щось інше", "давай по-іншому"
+
+**Behavior**: Pause current session, resume target session
+
+---
+
+#### 8. Archive (Архівувати)
+**EN**: "archive this session", "this is done", "mark as complete", "finish this session", "complete session", "we're done", "session complete"
+**UA**: "заархівувати сесію", "це готово", "позначити завершеним", "закінчити сесію", "завершити сесію", "ми закінчили", "сесія готова"
+
+**Behavior**: Move session to completed/, mark status ✅
+
+---
+
+#### 9. Overview (Огляд)
+**EN**: "overview", "big picture", "overall status", "where do we stand", "summary", "what's the situation"
+**UA**: "огляд", "загальна картина", "загальний статус", "де ми стоїмо", "підсумок", "яка ситуація", "що по-загалом"
+
+**Behavior**: Show high-level summary across all sessions
+
+---
+
 ### Auto-Trigger Scenarios
 
 **After TodoWrite updates** (automatic):
 - When task marked as completed
 - When new tasks added
-- When task status changes
-- Every 3-5 task completions (checkpoint)
+- Every 5-7 task completions (checkpoint)
 
-**User signals pause** (explicit):
-- EN: "pause", "stop", "stop for now", "stop for today", "save progress", "checkpoint", "break", "take a break"
-- UA: "пауза", "зупинись", "зупини", "зберегти прогрес", "зберегти", "чекпоінт", "перерва", "зроби перерву"
+**On conversation end** (automatic):
+- User says goodbye: "bye", "пока", "до побачення", "все"
+- Long inactivity (if detectable)
+- SessionEnd hook triggers
 
-**User signals resume** (explicit):
-- EN: "resume", "continue", "continue work", "pick up where we left off", "load session"
-- UA: "продовжити", "продовж", "відновити", "продовжити роботу", "завантажити сесію"
+**On context switch** (automatic):
+- User mentions different session name → offer to switch
+- Example: working on Sprint 1, user says "давай backend" → auto-switch prompt
 
-**Conversation ending** (automatic):
-- User says goodbye: "bye", "пока", "до побачення"
-- Long inactivity (>5 min without response)
-- Natural conversation conclusion
+---
 
 ### Do NOT Use This Skill For
 
@@ -74,81 +157,109 @@ Mark complete → move to completed/
 
 ---
 
-## Commands
+## Session Name Matching
 
-### `/pause`
+**Smart fuzzy keyword matching** allows users to reference sessions naturally:
 
-**Purpose**: Explicitly checkpoint current work and generate resumable summary.
+| User says | Matches |
+|-----------|---------|
+| "спринт" / "sprint" | All sprint-* sessions |
+| "спринт 1" / "sprint 1" | sprint-1-ux-fixes |
+| "спринт 2" / "sprint 2" | sprint-2-ux-improvements |
+| "бекенд" / "backend" | backend-code-quality |
+| "тести" / "testing" | testing-infrastructure |
+| "ux" | sprint-1, sprint-2, sprint-3 |
 
-**Workflow**:
-1. Check TodoWrite state (should have 0 in_progress tasks)
-2. Generate session metadata (goal, approach, blockers, last action)
-3. Capture todo list with progress stats
-4. Document agents used with artifact links
-5. Identify next 1-2 actions
-6. Link all created/modified files
-7. Save to `.claude/sessions/paused/YYYY-MM-DD-{slug}.md`
-8. Output bilingual resume instruction
-
-**Output**:
+**Ambiguity resolution**:
+When multiple matches found, prompt user to select:
 ```
-Session paused and saved to .claude/sessions/paused/2025-10-30-feature-name.md
+Found 3 sessions matching "sprint":
+1. Sprint 1: UX Fixes [10/14 done, 71%, 11.5h left]
+2. Sprint 2: UX Improvements [0/7 done, 18h]
+3. Sprint 3: UX Polish [0/4 done, 7h]
 
-To resume: `claude --continue` or say "resume" / "продовжити"
-
-Progress: 5/12 tasks (42%) • 3h spent / 8h estimated
-Next up: Implement authentication middleware
+Which one? (type number or more specific name)
 ```
-
-**Detailed workflow**: See `references/PAUSE_WORKFLOW.md`
 
 ---
 
-### `/resume`
+## Response Templates
 
-**Purpose**: Restore session context from saved state and continue work.
-
-**Workflow**:
-1. Locate session file (explicit path, latest paused/, NEXT_SESSION_TODO.md, or latest active/)
-2. Parse markdown sections (Context, Todo, Agents, Next Actions, Artifacts)
-3. Restore TodoWrite state with exact statuses
-4. Verify artifact files still exist
-5. Move session from paused/ to active/
-6. Output context summary and readiness confirmation
-
-**Output**:
+### List Sessions Response
 ```
-Resuming session: OAuth2 Migration
+📊 Доступні сесії:
 
-Goal: User authentication
-Progress: 5/12 tasks (42%)
-Last action: Completed token refresh logic
-Blockers: None
+🔴 АКТИВНІ (1):
+  → Sprint 1: UX Fixes [10/14, 71%, 11.5h left]
 
-Next up: Implement JWT validation middleware
+📅 ЗАПЛАНОВАНІ (4):
+  1. Sprint 2: UX Improvements [0/7, 18h]
+  2. Sprint 3: UX Polish [0/4, 7h]
+  3. Backend Code Quality [0/10, 25h]
+  4. Testing Infrastructure [0/4, 20h]
 
-Context restored. Ready to continue?
-Say "готовий" / "ready" to proceed.
+⏸️ ПРИЗУПИНЕНІ (2):
+  • Sprint1 Audit (Oct 31)
+  • Old Sprint1 Work (Oct 30)
+
+✅ ЗАВЕРШЕНІ (0)
+
+Щоб продовжити: "давай спринт 1" або "продовжити backend"
 ```
 
-**Detailed workflow**: See `references/RESUME_WORKFLOW.md`
-
----
-
-### `/session`
-
-**Purpose**: Show current session status without pausing.
-
-**Output**:
+### Session Status Response
 ```
-Current Session: OAuth2 Migration
-Status: 🔄 In Progress
-Progress: 5/12 tasks (42%)
-Active file: .claude/sessions/active/2025-10-30-oauth2-migration.md
+📊 Sprint 1: UX Fixes
 
-Last updated: 2025-10-30 14:30
-Last action: Completed token refresh logic
-Next: Implement JWT validation middleware
+Ціль: Критичні UX виправлення
+Прогрес: 10/14 tasks (71%) ━━━━━━━━━⚊⚊⚊⚊
+Час: 6h витрачено / 11.5h залишилось
+
+✅ Зроблено (10):
+  ✓ Dashboard duplication (7d395e2)
+  ✓ Sidebar auto-expansion (c777c9e)
+  ✓ Status badge system (4348208)
+  ✓ Keyboard navigation docs (6bd9c99)
+  ...
+
+🔲 Залишилось (4):
+  1. Badge tooltips (0.5h)
+  2. ARIA labels (3h)
+  3. Color contrast (0.5h)
+  4. Empty states (4h)
+
+Наступне: Add tooltips to notification badges
+
+Готовий продовжити? Скажи "давай" або "продовжити"
+```
+
+### Resume Prompt
+```
+✅ Відновлюю сесію: Sprint 2 UX Improvements
+
+Ціль: Оптимізація таблиць та мобільна версія
+Прогрес: 0/7 tasks (0%)
+Заплановано: 18h
+
+Задачі:
+  1. Messages Table optimization (2h)
+  2. Mobile sidebar (4h)
+  3. Mobile tables (3h)
+  ...
+
+Почнемо з: Messages Table column widths
+
+Готовий? Скажи "готовий" або "поїхали"
+```
+
+### Pause Confirmation
+```
+💾 Сесію збережено: .claude/sessions/paused/sprint-1-ux-fixes.md
+
+Прогрес: 10/14 tasks (71%) • 6h витрачено / 11.5h залишилось
+Наступне: Badge tooltips
+
+Щоб продовжити: "продовжити спринт 1" або "resume sprint 1"
 ```
 
 ---

@@ -244,7 +244,7 @@ Rule Builder:
 
 **Component Library:** shadcn/ui (Radix UI primitives)
 **Styling:** Tailwind CSS
-**Icons:** Lucide React (20+ icons)
+**Icons:** Heroicons React (20+ icons)
 **Charts:** Recharts
 
 #### Typography (Inter Font Family)
@@ -674,7 +674,7 @@ Mobile Cards:
   "framework": "React 18 + TypeScript",
   "ui": "shadcn/ui (Radix UI)",
   "styling": "Tailwind CSS",
-  "icons": "Lucide React",
+  "icons": "Heroicons React",
   "charts": "Recharts",
   "forms": "React Hook Form + Zod",
   "state": "Zustand or React Query",

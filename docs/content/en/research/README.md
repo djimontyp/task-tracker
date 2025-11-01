@@ -163,7 +163,7 @@ This directory contains comprehensive UX research for the Automation Version Man
 - React 18 + TypeScript
 - shadcn/ui (Radix UI primitives)
 - Tailwind CSS
-- Lucide React (icons)
+- Heroicons React (icons)
 - Recharts (charts)
 - React Hook Form + Zod (forms)
 
