@@ -760,6 +760,236 @@ Load when: Generating session summaries or validating format.
 
 ---
 
+## Agent Output Integration
+
+### Purpose
+
+When agents complete delegated work, they should integrate their findings directly into the active session instead of creating orphaned artifact files in the project root.
+
+**Problem this solves:**
+- ❌ **Before**: Agents create `SPRINT1_TEST_FIX_VERIFICATION.md`, `ANALYSIS_REPORT.md` etc.
+- ✅ **After**: Agent findings automatically appended to `.claude/sessions/active/{slug}.md`
+
+---
+
+### For Agents (Subagents)
+
+When you complete work as a delegated agent, follow this workflow:
+
+#### Step 1: Check for Active Session
+
+```bash
+# Find active session file
+active_session=$(ls .claude/sessions/active/*.md 2>/dev/null | head -1)
+```
+
+#### Step 2: Append Your Report
+
+**If session exists:**
+
+```bash
+if [ -n "$active_session" ]; then
+  # Add separator and timestamp header
+  echo -e "\n---\n" >> "$active_session"
+  echo "## Agent Report: $(date +'%Y-%m-%d %H:%M') - [Your Agent Name]" >> "$active_session"
+  echo "" >> "$active_session"
+
+  # Append your findings
+  cat your_report.md >> "$active_session"
+
+  echo "✅ Findings appended to: $active_session"
+else
+  echo "⚠️  No active session - creating standalone artifact"
+  # Save to project root or .artifacts/
+fi
+```
+
+**Alternative (using helper script):**
+
+```bash
+# Use the helper script (if available)
+.claude/scripts/update-active-session.sh "your-agent-name" your_report.md
+```
+
+#### Step 3: Update TodoWrite (if needed)
+
+If you discovered new tasks during your work:
+
+```markdown
+Use TodoWrite tool to add:
+- [ ] New task discovered by agent
+- [ ] Another follow-up action
+
+This triggers auto-save automatically.
+```
+
+#### Step 4: Report Back
+
+Include session update status in your final output:
+
+```markdown
+✅ Verification complete. Findings appended to active session.
+📄 Session file: .claude/sessions/active/2025-11-01-sprint1-consolidated.md
+```
+
+---
+
+### For Coordinator
+
+When delegating to agents, provide session context:
+
+**Good delegation:**
+```markdown
+Task: Verify test fixes from Sprint 1
+
+**Context:** Active session: sprint-1-ux-fixes
+**Session file:** .claude/sessions/active/2025-11-01-sprint1-consolidated.md
+
+Please append your verification report to the active session.
+```
+
+**Agent will automatically:**
+1. Check for active session
+2. Append findings to session file
+3. Update TodoWrite if new tasks found
+4. Trigger auto-save
+
+**Coordinator doesn't need to:**
+- Manually merge agent outputs
+- Link artifact files
+- Update session manually
+
+---
+
+### Auto-Save Behavior
+
+Agent session updates trigger auto-save:
+
+| Event | Auto-Save Type | Location |
+|-------|---------------|----------|
+| Agent appends to session | Lightweight checkpoint | `active/` |
+| TodoWrite update | Lightweight checkpoint | `active/` |
+| Explicit `/pause` | Comprehensive save | `paused/` |
+
+**Rationale**: Auto-save is lightweight (don't interrupt flow), explicit pause is comprehensive (user expects full checkpoint).
+
+---
+
+### Session Update Template
+
+**Recommended format for agent reports:**
+
+```markdown
+---
+
+## Agent Report: 2025-11-01 14:30 - pytest-test-master
+
+### Summary
+Brief 1-2 sentence summary of findings.
+
+### Verification Results
+- ✅ Test X passed
+- ❌ Test Y failed (reason)
+- ⚠️  Test Z requires attention
+
+### Recommendations
+1. Action item 1
+2. Action item 2
+
+### Files Analyzed
+- `backend/tests/test_foo.py`
+- `backend/app/service.py`
+
+---
+```
+
+---
+
+### Handling Orphaned Artifacts
+
+**If you find orphaned artifact files:**
+
+Use the cleanup script during pause workflow:
+
+```bash
+# In PAUSE_WORKFLOW.md, step 6.5:
+# Find orphaned agent artifacts
+orphaned=$(find . -maxdepth 1 -name "*REPORT*.md" -o -name "*VERIFICATION*.md" -o -name "*SUMMARY*.md")
+
+# Append to session before pausing
+for artifact in $orphaned; do
+  echo -e "\n## Orphaned Artifact: $(basename $artifact)\n" >> "$session_file"
+  cat "$artifact" >> "$session_file"
+  rm "$artifact"  # Clean up
+done
+```
+
+---
+
+### Examples
+
+#### Example 1: pytest-test-master Integration
+
+**Before (creates orphaned file):**
+```bash
+# Agent creates: SPRINT1_TEST_FIX_VERIFICATION.md
+# Coordinator must manually merge into session
+```
+
+**After (automatic integration):**
+```bash
+# Agent checks: ls .claude/sessions/active/
+# Finds: 2025-11-01-sprint1-consolidated.md
+# Appends verification report to session
+# Updates TodoWrite with new tasks
+# Auto-save triggered
+# Result: Zero orphaned files
+```
+
+#### Example 2: react-frontend-architect Integration
+
+**Agent completes UX audit:**
+
+```bash
+active_session=$(ls .claude/sessions/active/*.md | head -1)
+
+if [ -n "$active_session" ]; then
+  echo -e "\n---\n" >> "$active_session"
+  echo "## Agent Report: $(date +'%Y-%m-%d %H:%M') - react-frontend-architect" >> "$active_session"
+  echo "" >> "$active_session"
+  echo "### UX Audit Results" >> "$active_session"
+  echo "" >> "$active_session"
+  echo "- ✅ Keyboard navigation: Fully accessible" >> "$active_session"
+  echo "- ✅ WCAG 2.1 AA: All checks passed" >> "$active_session"
+  echo "- ⚠️  Mobile sidebar: Needs improvement" >> "$active_session"
+  echo "" >> "$active_session"
+  echo "**Recommendation:** Implement hamburger menu for mobile (4h)" >> "$active_session"
+fi
+```
+
+**Result:** Audit findings in session, TodoWrite updated with mobile task, auto-save triggered.
+
+---
+
+### Benefits
+
+**For Agents:**
+- ✅ Clear instructions on where to save outputs
+- ✅ Automatic integration (no manual steps)
+- ✅ Context preservation guaranteed
+
+**For Coordinator:**
+- ✅ Zero manual artifact merging
+- ✅ All findings in one place (session file)
+- ✅ Seamless pause/resume workflow
+
+**For Project:**
+- ✅ Zero orphaned files in project root
+- ✅ Clean git status
+- ✅ Easy to find historical work (session files)
+
+---
+
 ## Comparison with Old Orchestration Skills
 
 ### What session-manager Replaces
