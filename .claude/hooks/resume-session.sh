@@ -1,43 +1,60 @@
 #!/bin/bash
 
-# SessionStart Hook: Auto-resume paused sessions
-# Triggered when: Starting new conversation or resuming existing
-# Purpose: Check for paused sessions and prompt user to resume
+# SessionStart Hook: Auto-resume paused/planned sessions
+# Triggered when: Starting new conversation
+# Purpose: Check for paused sessions and show available work
 
 set -euo pipefail
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 PAUSED_DIR="$PROJECT_DIR/.claude/sessions/paused"
+ACTIVE_DIR="$PROJECT_DIR/.claude/sessions/active"
+PLANNED_DIR="$PROJECT_DIR/.claude/sessions/planned"
 
-# Check if paused sessions directory exists
-if [ ! -d "$PAUSED_DIR" ]; then
-    exit 0  # No paused sessions directory, nothing to do
+# Check if session directories exist
+if [ ! -d "$PAUSED_DIR" ] && [ ! -d "$ACTIVE_DIR" ] && [ ! -d "$PLANNED_DIR" ]; then
+    exit 0  # No session directories
 fi
 
-# Count paused sessions
-PAUSED_COUNT=$(find "$PAUSED_DIR" -maxdepth 1 -name "*.md" -type f | wc -l | tr -d ' ')
+# Count sessions
+ACTIVE_COUNT=0
+PAUSED_COUNT=0
+PLANNED_COUNT=0
 
-if [ "$PAUSED_COUNT" -eq 0 ]; then
-    exit 0  # No paused sessions
+[ -d "$ACTIVE_DIR" ] && ACTIVE_COUNT=$(find "$ACTIVE_DIR" -maxdepth 1 -name "*.md" -type f | wc -l | tr -d ' ')
+[ -d "$PAUSED_DIR" ] && PAUSED_COUNT=$(find "$PAUSED_DIR" -maxdepth 1 -name "*.md" -type f | wc -l | tr -d ' ')
+[ -d "$PLANNED_DIR" ] && PLANNED_COUNT=$(find "$PLANNED_DIR" -maxdepth 1 -name "*.md" -type f | wc -l | tr -d ' ')
+
+# If active session exists, suggest continuing it
+if [ "$ACTIVE_COUNT" -gt 0 ]; then
+    LATEST_ACTIVE=$(find "$ACTIVE_DIR" -maxdepth 1 -name "*.md" -type f -print0 | \
+        xargs -0 ls -t | head -n 1)
+    SESSION_NAME=$(basename "$LATEST_ACTIVE" .md)
+
+    echo "🟢 Active session: $SESSION_NAME"
+    echo ""
+    echo "Continue? Say 'continue' / 'продовжити' or 'show sessions' / 'покажи сесії'"
+    exit 0
 fi
 
-# Get latest paused session
-LATEST_SESSION=$(find "$PAUSED_DIR" -maxdepth 1 -name "*.md" -type f -print0 | \
-    xargs -0 ls -t | head -n 1)
+# If paused sessions exist, suggest resuming
+if [ "$PAUSED_COUNT" -gt 0 ]; then
+    LATEST_PAUSED=$(find "$PAUSED_DIR" -maxdepth 1 -name "*.md" -type f -print0 | \
+        xargs -0 ls -t | head -n 1)
+    SESSION_NAME=$(basename "$LATEST_PAUSED" .md)
 
-if [ -z "$LATEST_SESSION" ]; then
-    exit 0  # No session found
+    echo "⏸️ Paused session: $SESSION_NAME"
+    echo ""
+    echo "Resume? Say 'resume' / 'продовжити' or 'show sessions' / 'покажи сесії'"
+    exit 0
 fi
 
-# Extract session name from filename
-SESSION_NAME=$(basename "$LATEST_SESSION" .md)
-
-# Output message for Claude to see
-echo "📋 Found paused session: $SESSION_NAME"
-echo ""
-echo "Would you like to resume this session?"
-echo "Say 'resume' / 'продовжити' to continue, or 'skip' to start fresh."
-echo ""
-echo "Session file: $LATEST_SESSION"
+# If only planned sessions exist, show them
+if [ "$PLANNED_COUNT" -gt 0 ]; then
+    echo "📅 $PLANNED_COUNT planned sessions available"
+    echo ""
+    echo "Ready to start? Say 'show sessions' / 'покажи сесії' or 'what's next' / 'що далі'"
+    exit 0
+fi
 
 exit 0

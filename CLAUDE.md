@@ -34,7 +34,7 @@ You may work directly ONLY for:
 - Updating this CLAUDE.md file
 - Running git commands (commit, push, PR creation)
 - Executing just commands
-- **NEVER read NEXT_SESSION_TODO.md yourself** - Use `Task(subagent_type=Explore)` to summarize it
+- **Session management** - Use `session-manager` skill with natural language (e.g., "покажи сесії", "що далі", "продовжити спринт 1")
 - Answering simple questions about already visible context
 
 **Everything else = DELEGATE**
@@ -243,7 +243,17 @@ docs/content/
 
 **For detailed delegation patterns, agent list, and examples**: @.claude/delegation-patterns.md
 
-**Session Management**: `session-manager` skill for pause/resume workflow with auto-save.
+### Session Management
+
+`session-manager` skill manages all project work via natural language (EN/UA):
+
+**Show sessions**: "покажи сесії", "show sessions", "what can we work on"
+**Status**: "що далі", "what's next", "де ми", "where are we"
+**Continue**: "продовжити", "continue", "давай спринт 1", "work on backend"
+**Pause**: "пауза", "pause", "все на сьогодні", "that's it for now"
+
+**Session structure**: `.claude/sessions/{planned|active|paused|completed}/`
+**Auto-triggers**: After TodoWrite completions, on conversation end, on context switch
 
 **Key agents**:
 - Explore: `Task(subagent_type=Explore)`
