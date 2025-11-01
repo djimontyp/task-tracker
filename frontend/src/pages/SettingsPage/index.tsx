@@ -1,16 +1,15 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import GeneralTab from './components/GeneralTab'
 import SourcesTab from './components/SourcesTab'
+import { PageHeader } from '@/shared/components'
 
 const SettingsPage = () => {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Manage your application preferences and integrations
-        </p>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Configure application preferences and integrations"
+      />
 
       <Tabs defaultValue="general" className="w-full">
         <TabsList>

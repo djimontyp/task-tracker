@@ -1,18 +1,17 @@
 import { useNavigate } from 'react-router-dom'
 import { Card, Button } from '@/shared/ui'
 import { CheckCircleIcon, PlayIcon } from '@heroicons/react/24/outline'
+import { PageHeader } from '@/shared/components'
 
 const TasksPage = () => {
   const navigate = useNavigate()
 
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold">Tasks</h1>
-        <p className="text-muted-foreground">
-          View and manage tasks created from analysis runs
-        </p>
-      </div>
+      <PageHeader
+        title="Tasks"
+        description="AI-generated actionable tasks extracted from analyzed messages"
+      />
 
       <Card className="p-12 border-dashed border-2">
         <div className="flex flex-col items-center justify-center text-center">
