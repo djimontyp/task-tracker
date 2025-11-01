@@ -69,7 +69,7 @@ export const getAnalysisRunBadge = (status: AnalysisRunStatus): BadgeConfig => {
     },
     cancelled: {
       variant: 'outline',
-      className: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/50',
+      className: 'bg-gray-500/10 text-gray-800 dark:text-gray-300 border-gray-500/50 font-semibold',
       label: 'Cancelled',
     },
   }
@@ -206,7 +206,7 @@ export const getTaskStatusBadge = (status: TaskStatus): BadgeConfig => {
     },
     closed: {
       variant: 'outline',
-      className: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/50',
+      className: 'bg-gray-500/10 text-gray-800 dark:text-gray-300 border-gray-500/50 font-semibold',
       label: 'Canceled',
     },
   }
@@ -229,7 +229,7 @@ export const getTaskPriorityBadge = (priority: TaskPriority): BadgeConfig => {
   const configs: Record<TaskPriority, BadgeConfig> = {
     low: {
       variant: 'outline',
-      className: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/50',
+      className: 'bg-gray-500/10 text-gray-800 dark:text-gray-300 border-gray-500/50 font-semibold',
       label: 'Low',
     },
     medium: {
