@@ -46,10 +46,11 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     header: 'ID',
     cell: ({ row }) => {
       const id = row.getValue<number | string>('id')
-      return <div className="w-[60px] text-xs font-medium text-muted-foreground">MSG-{String(id).padStart(4, '0')}</div>
+      return <div className="w-[50px] text-xs font-mono text-muted-foreground">{String(id).padStart(4, '0')}</div>
     },
     enableSorting: false,
-    enableHiding: false,
+    enableHiding: true,
+    size: 50,
   },
   {
     accessorKey: 'author_name',
@@ -78,12 +79,23 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     header: 'Content',
     cell: ({ row }) => {
       const content = row.getValue<string>('content')
+      const isEmpty = !content || content.trim() === ''
       const isLong = content && content.length > 100
+
+      if (isEmpty) {
+        return (
+          <div className="flex items-center gap-2 text-muted-foreground/50 italic text-sm">
+            <EnvelopeIcon className="h-4 w-4" />
+            <span>(Empty message)</span>
+          </div>
+        )
+      }
+
       return (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="max-w-[400px] truncate" aria-label={isLong ? `Message content: ${content}` : undefined}>
+              <div className="min-w-0 flex-1 truncate" aria-label={isLong ? `Message content: ${content}` : undefined}>
                 {content}
               </div>
             </TooltipTrigger>
@@ -96,6 +108,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
         </TooltipProvider>
       )
     },
+    size: 999,
   },
   {
     accessorKey: 'source_name',
@@ -246,6 +259,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       const d = row.getValue<string>('sent_at')
       return <div className="text-muted-foreground text-xs">{d ? formatFullDate(d) : '-'}</div>
     },
+    enableHiding: true,
   },
   {
     id: 'actions',

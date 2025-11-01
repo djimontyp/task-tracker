@@ -4,6 +4,8 @@ import {
   Button,
   Card,
   Skeleton,
+  Badge,
+  Checkbox,
 } from '@/shared/ui'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
@@ -22,15 +24,17 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { createColumns, sourceLabels } from './columns'
-import { getMessageAnalysisBadge, getNoiseClassificationBadge } from '@/shared/utils/statusBadges'
+import { getMessageAnalysisBadge, getNoiseClassificationBadge, getImportanceBadge } from '@/shared/utils/statusBadges'
 import { Message, NoiseClassification } from '@/shared/types'
 import { DataTable } from '@/shared/components/DataTable'
 import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
 import { DataTablePagination } from '@/shared/components/DataTablePagination'
 import { DataTableFacetedFilter } from './faceted-filter'
 import { ImportanceScoreFilter } from './importance-score-filter'
-import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { DataTableMobileCard } from '@/shared/components/DataTableMobileCard'
+import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon, TrashIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
 import { IngestionModal } from './IngestionModal'
+import { formatFullDate } from '@/shared/utils/date'
 
 interface MessageQueryParams {
   page: number
@@ -58,7 +62,10 @@ const MessagesPage = () => {
     { id: 'sent_at', desc: true }
   ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
+    id: false,
+    sent_at: false,
+  })
   const [rowSelection, setRowSelection] = React.useState({})
   const [globalFilter, setGlobalFilter] = React.useState('')
 
@@ -67,12 +74,17 @@ const MessagesPage = () => {
       const isMobile = window.innerWidth < 768
       if (isMobile) {
         setColumnVisibility({
-          source: false,
+          id: false,
+          sent_at: false,
+          source_name: false,
           importance_score: false,
-          classification: false,
+          noise_classification: false,
         })
       } else {
-        setColumnVisibility({})
+        setColumnVisibility({
+          id: false,
+          sent_at: false,
+        })
       }
     }
 
@@ -382,7 +394,84 @@ const MessagesPage = () => {
         />
       </DataTableToolbar>
 
-      <DataTable table={table} columns={columns} emptyMessage="No messages found." />
+      <DataTable
+        table={table}
+        columns={columns}
+        emptyMessage="No messages found."
+        renderMobileCard={(message: Message) => {
+          const statusBadge = getMessageAnalysisBadge(message.analyzed || false)
+          const importanceBadge = message.importance_score !== null && message.importance_score !== undefined
+            ? getImportanceBadge(message.importance_score)
+            : null
+          const content = message.content || ''
+          const isEmpty = !content || content.trim() === ''
+
+          return (
+            <DataTableMobileCard
+              isSelected={table.getRow(String(message.id))?.getIsSelected() || false}
+              onClick={() => table.getRow(String(message.id))?.toggleSelected()}
+            >
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <Checkbox
+                      checked={table.getRow(String(message.id))?.getIsSelected() || false}
+                      onCheckedChange={(checked) => {
+                        table.getRow(String(message.id))?.toggleSelected(!!checked)
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <div className="flex items-center gap-2 min-w-0">
+                      {message.avatar_url ? (
+                        <img
+                          src={message.avatar_url}
+                          alt={message.author_name || message.author}
+                          className="h-8 w-8 rounded-full flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          <UserIcon className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <span className="font-medium truncate">
+                        {message.author_name || message.author}
+                      </span>
+                    </div>
+                  </div>
+                  <Badge variant={statusBadge.variant} className={statusBadge.className}>
+                    {statusBadge.label}
+                  </Badge>
+                </div>
+
+                <div>
+                  {isEmpty ? (
+                    <div className="flex items-center gap-2 text-muted-foreground/50 italic text-sm">
+                      <EnvelopeIcon className="h-4 w-4" />
+                      <span>(Empty message)</span>
+                    </div>
+                  ) : (
+                    <p className="text-sm line-clamp-3">{content}</p>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {importanceBadge && (
+                    <Badge variant={importanceBadge.variant} className={importanceBadge.className}>
+                      {importanceBadge.label}
+                    </Badge>
+                  )}
+                  {message.topic_name && (
+                    <Badge variant="outline">{message.topic_name}</Badge>
+                  )}
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {message.sent_at ? formatFullDate(message.sent_at) : '-'}
+                  </span>
+                </div>
+              </div>
+            </DataTableMobileCard>
+          )
+        }}
+      />
 
       <DataTablePagination table={table} />
 
