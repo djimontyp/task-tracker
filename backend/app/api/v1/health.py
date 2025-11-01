@@ -3,9 +3,8 @@ from datetime import datetime
 from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
+from app.api.v1.response_models import ConfigResponse, HealthResponse
 from app.tasks import score_message_task
-
-from .response_models import ConfigResponse, HealthResponse
 
 router = APIRouter(tags=["health"])
 

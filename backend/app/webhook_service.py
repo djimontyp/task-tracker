@@ -7,8 +7,8 @@ from core.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-from .models import WebhookSettings
-from .schemas import TelegramWebhookConfig
+from app.models import WebhookSettings
+from app.schemas import TelegramWebhookConfig
 
 logger = logging.getLogger(__name__)
 
@@ -228,7 +228,7 @@ class WebhookSettingsService:
     @staticmethod
     def _dict_to_telegram_config(data: dict[str, Any]) -> TelegramWebhookConfig:
         """Convert dict to TelegramWebhookConfig, handling type conversions"""
-        from .schemas import TelegramGroupInfo
+        from app.schemas import TelegramGroupInfo
 
         last_set_at_str = data.get("last_set_at")
         last_set_at = datetime.fromisoformat(last_set_at_str) if last_set_at_str else None

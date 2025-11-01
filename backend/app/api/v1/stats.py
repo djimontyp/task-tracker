@@ -4,11 +4,8 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import and_, func, select
 
-from app.models import AnalysisRun, Message, Source, Task, TaskProposal
-from app.models.enums import AnalysisRunStatus, ProposalStatus
-from app.services.websocket_manager import websocket_manager
 from app.api.deps import DatabaseDep
-from .response_models import (
+from app.api.v1.response_models import (
     ActivityDataResponse,
     AnalyzeDayResponse,
     SidebarCountsResponse,
@@ -16,6 +13,9 @@ from .response_models import (
     TaskStatusCounts,
     TrendData,
 )
+from app.models import AnalysisRun, Message, Source, Task, TaskProposal
+from app.models.enums import AnalysisRunStatus, ProposalStatus
+from app.services.websocket_manager import websocket_manager
 
 router = APIRouter(tags=["statistics"])
 

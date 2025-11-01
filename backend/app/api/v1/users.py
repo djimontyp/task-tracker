@@ -5,6 +5,7 @@ import logging
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
+from app.api.deps import DatabaseDep
 from app.models import TelegramProfile, User
 from app.schemas.users import (
     LinkTelegramProfileRequest,
@@ -12,7 +13,6 @@ from app.schemas.users import (
     UserCreateRequest,
     UserResponse,
 )
-from app.api.deps import DatabaseDep
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/users", tags=["users"])

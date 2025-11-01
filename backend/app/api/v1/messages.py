@@ -5,6 +5,7 @@ from datetime import date, datetime
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import and_, func, select
 
+from app.api.v1.response_models import PaginatedMessagesResponse
 from app.dependencies import DatabaseDep
 from app.models import Message, Source, Topic, User
 from app.schemas.messages import (
@@ -13,8 +14,6 @@ from app.schemas.messages import (
     MessageResponse,
 )
 from app.services.websocket_manager import websocket_manager
-
-from .response_models import PaginatedMessagesResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/messages", tags=["messages"])

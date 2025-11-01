@@ -73,8 +73,7 @@ def build_model_instance(
     if provider.type == ProviderType.ollama:
         if not provider.base_url:
             raise ValueError(
-                f"Provider '{provider.name}' is missing base_url. "
-                "Ollama providers require a base_url configuration."
+                f"Provider '{provider.name}' is missing base_url. Ollama providers require a base_url configuration."
             )
 
         ollama_provider = OllamaProvider(base_url=provider.base_url)
@@ -86,7 +85,7 @@ def build_model_instance(
     elif provider.type == ProviderType.openai:
         if not api_key:
             raise ValueError(
-                f"Provider '{provider.name}' requires an API key. " "OpenAI providers must have an API key configured."
+                f"Provider '{provider.name}' requires an API key. OpenAI providers must have an API key configured."
             )
 
         openai_provider = OpenAIProvider(api_key=api_key)

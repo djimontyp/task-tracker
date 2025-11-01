@@ -6,15 +6,14 @@ from core.taskiq_config import nats_broker
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.router import api_router
+from app.database import create_db_and_tables
 from app.llm.startup import initialize_llm_system
 from app.middleware import ErrorHandlerMiddleware
+from app.webhooks.router import webhook_router
+from app.ws.router import router as ws_router
 
 logger = logging.getLogger(__name__)
-
-from .api.v1.router import api_router
-from .database import create_db_and_tables
-from .webhooks.router import webhook_router
-from .ws.router import router as ws_router
 
 tags_metadata = [
     {
