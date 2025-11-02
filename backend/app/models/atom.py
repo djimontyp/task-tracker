@@ -76,6 +76,14 @@ class Atom(TimestampMixin, SQLModel, table=True):
         default=False,
         description="Whether user has explicitly approved this atom",
     )
+    archived: bool = Field(
+        default=False,
+        description="Whether this atom has been archived",
+    )
+    archived_at: datetime | None = Field(
+        default=None,
+        description="Timestamp when the atom was archived",
+    )
     meta: dict | None = Field(
         default=None,
         sa_type=JSON,
@@ -184,6 +192,8 @@ class AtomPublic(SQLModel):
     content: str
     confidence: float | None
     user_approved: bool
+    archived: bool
+    archived_at: datetime | None
     meta: dict | None
     embedding: list[float] | None = None
     has_embedding: bool = False
@@ -261,6 +271,14 @@ class AtomUpdate(SQLModel):
     user_approved: bool | None = Field(
         default=None,
         description="User approval status",
+    )
+    archived: bool | None = Field(
+        default=None,
+        description="Archive status",
+    )
+    archived_at: datetime | None = Field(
+        default=None,
+        description="Archive timestamp",
     )
     meta: dict | None = Field(
         default=None,
@@ -359,3 +377,78 @@ class AtomListResponse(SQLModel):
     total: int
     page: int
     page_size: int
+
+
+class BulkApproveRequest(SQLModel):
+    """Request schema for bulk approving atoms."""
+
+    atom_ids: list[str] = Field(
+        min_length=1,
+        description="List of atom IDs to approve (UUID strings)",
+    )
+
+
+class BulkApproveResponse(SQLModel):
+    """Response schema for bulk approve operation."""
+
+    approved_count: int = Field(
+        description="Number of atoms successfully approved",
+    )
+    failed_ids: list[str] = Field(
+        default_factory=list,
+        description="List of atom IDs that failed to approve",
+    )
+    errors: list[str] = Field(
+        default_factory=list,
+        description="Error messages for failed approvals",
+    )
+
+
+class BulkArchiveRequest(SQLModel):
+    """Request schema for bulk archiving atoms."""
+
+    atom_ids: list[str] = Field(
+        min_length=1,
+        description="List of atom IDs to archive (UUID strings)",
+    )
+
+
+class BulkArchiveResponse(SQLModel):
+    """Response schema for bulk archive operation."""
+
+    archived_count: int = Field(
+        description="Number of atoms successfully archived",
+    )
+    failed_ids: list[str] = Field(
+        default_factory=list,
+        description="List of atom IDs that failed to archive",
+    )
+    errors: list[str] = Field(
+        default_factory=list,
+        description="Error messages for failed archives",
+    )
+
+
+class BulkDeleteRequest(SQLModel):
+    """Request schema for bulk deleting atoms."""
+
+    atom_ids: list[str] = Field(
+        min_length=1,
+        description="List of atom IDs to delete (UUID strings)",
+    )
+
+
+class BulkDeleteResponse(SQLModel):
+    """Response schema for bulk delete operation."""
+
+    deleted_count: int = Field(
+        description="Number of atoms successfully deleted",
+    )
+    failed_ids: list[str] = Field(
+        default_factory=list,
+        description="List of atom IDs that failed to delete",
+    )
+    errors: list[str] = Field(
+        default_factory=list,
+        description="Error messages for failed deletions",
+    )

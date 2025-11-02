@@ -29,6 +29,8 @@ from .atom import (
     AtomPublic,
     AtomType,
     AtomUpdate,
+    BulkApproveRequest,
+    BulkApproveResponse,
     LinkType,
     TopicAtom,
     TopicAtomCreate,
@@ -289,6 +291,8 @@ __all__ = [
     "TopicAtomPublic",
     "AtomType",
     "LinkType",
+    "BulkApproveRequest",
+    "BulkApproveResponse",
     # Versioning
     "TopicVersion",
     "TopicVersionPublic",
