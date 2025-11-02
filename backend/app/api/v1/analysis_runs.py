@@ -15,6 +15,7 @@ from app.database import get_session
 from app.models import AnalysisRunCreate, AnalysisRunListResponse, AnalysisRunPublic
 from app.services import AnalysisRunCRUD, AnalysisRunValidator, websocket_manager
 from app.services.websocket_manager import WebSocketManager
+from app.services.metrics_broadcaster import metrics_broadcaster
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/runs", tags=["analysis"])
@@ -145,6 +146,9 @@ async def create_run(
             },
         )
 
+        # Broadcast metrics update
+        await metrics_broadcaster.broadcast_on_analysis_run_change(session)
+
         return run
     except ValueError as e:
         if "not found" in str(e):
@@ -268,6 +272,9 @@ async def close_run(
             },
         },
     )
+
+    # Broadcast metrics update
+    await metrics_broadcaster.broadcast_on_analysis_run_change(session)
 
     return run
 

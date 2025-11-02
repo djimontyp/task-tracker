@@ -27,6 +27,7 @@ from app.models import (
 from app.models.atom import AtomPublic
 from app.schemas.messages import MessageResponse
 from app.services import AtomCRUD, MessageCRUD, TopicCRUD
+from app.services.metrics_broadcaster import metrics_broadcaster
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/topics", tags=["topics"])
@@ -204,7 +205,12 @@ async def create_topic(
         Created topic with auto-selected or provided icon
     """
     crud = TopicCRUD(session)
-    return await crud.create(topic_data.model_dump(exclude_unset=True))
+    topic = await crud.create(topic_data.model_dump(exclude_unset=True))
+
+    # Broadcast metrics update to WebSocket clients
+    await metrics_broadcaster.broadcast_on_topic_change(session)
+
+    return topic
 
 
 @router.patch(
@@ -236,6 +242,9 @@ async def update_topic(
 
     if not topic:
         raise HTTPException(status_code=404, detail=f"Topic with id {topic_id} not found")
+
+    # Broadcast metrics update to WebSocket clients
+    await metrics_broadcaster.broadcast_on_topic_change(session)
 
     return topic
 

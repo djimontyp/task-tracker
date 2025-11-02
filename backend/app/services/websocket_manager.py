@@ -55,7 +55,7 @@ class WebSocketManager:
 
         # Default to all topics if none specified
         if topics is None:
-            topics = ["agents", "tasks", "providers"]
+            topics = ["agents", "tasks", "providers", "metrics"]
 
         async with self._lock:
             for topic in topics:
@@ -137,7 +137,7 @@ class WebSocketManager:
         if not self._nats_client or self._is_worker:
             return
 
-        topics = ["agents", "tasks", "providers", "knowledge", "messages", "monitoring"]
+        topics = ["agents", "tasks", "providers", "knowledge", "messages", "monitoring", "metrics"]
 
         for topic in topics:
             subject = f"websocket.{topic}"
