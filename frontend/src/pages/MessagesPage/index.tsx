@@ -33,7 +33,9 @@ import { DataTablePagination } from '@/shared/components/DataTablePagination'
 import { DataTableFacetedFilter } from './faceted-filter'
 import { ImportanceScoreFilter } from './importance-score-filter'
 import { DataTableMobileCard } from '@/shared/components/DataTableMobileCard'
-import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon, TrashIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
+import { BulkActionsToolbar } from '@/shared/components/AdminPanel/BulkActionsToolbar'
+import { useMultiSelect } from '@/shared/hooks'
+import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
 import { IngestionModal } from './IngestionModal'
 import { formatFullDate } from '@/shared/utils/date'
 
@@ -175,9 +177,18 @@ const MessagesPage = () => {
     setSorting([{ id: 'sent_at', desc: true }])
   }, [])
 
+  const [checkboxClickHandler, setCheckboxClickHandler] = React.useState<
+    ((rowId: string, event: React.MouseEvent) => void) | undefined
+  >(undefined)
+
   const columns = React.useMemo(
-    () => createColumns({ onReset: handleReset, hasActiveFilters }),
-    [hasActiveFilters, handleReset]
+    () =>
+      createColumns({
+        onReset: handleReset,
+        hasActiveFilters,
+        onCheckboxClick: checkboxClickHandler,
+      }),
+    [hasActiveFilters, handleReset, checkboxClickHandler]
   )
 
   const table = useReactTable({
@@ -230,6 +241,17 @@ const MessagesPage = () => {
     },
   })
 
+  const multiSelect = useMultiSelect({
+    table,
+    onSelectionChange: (selectedIds) => {
+      logger.debug('Selection changed:', selectedIds)
+    },
+  })
+
+  React.useEffect(() => {
+    setCheckboxClickHandler(() => multiSelect.handleCheckboxClick)
+  }, [multiSelect.handleCheckboxClick])
+
   const handleIngestMessages = () => {
     logger.debug('Opening ingestion modal')
     setModalOpen(true)
@@ -280,13 +302,8 @@ const MessagesPage = () => {
     const confirmed = window.confirm(`Delete ${selectedRowsCount} selected messages?`)
     if (confirmed) {
       toast.success(`${selectedRowsCount} messages deleted (demo)`)
-      setRowSelection({})
+      multiSelect.handleClearSelection()
     }
-  }
-
-  const handleBulkExport = () => {
-    if (selectedRowsCount === 0) return
-    toast.success(`Exporting ${selectedRowsCount} messages (demo)`)
   }
 
   if (isLoading) {
@@ -354,6 +371,16 @@ const MessagesPage = () => {
           </>
         }
       />
+
+      {selectedRowsCount > 0 && (
+        <BulkActionsToolbar
+          selectedCount={selectedRowsCount}
+          totalCount={paginatedData?.total || 0}
+          onSelectAll={multiSelect.handleSelectAll}
+          onClearSelection={multiSelect.handleClearSelection}
+          onDelete={handleBulkDelete}
+        />
+      )}
 
       <DataTableToolbar
         table={table}
@@ -478,32 +505,6 @@ const MessagesPage = () => {
       />
 
       <DataTablePagination table={table} />
-
-      {selectedRowsCount > 0 && (
-        <Card className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 shadow-lg border-2">
-          <div className="flex items-center gap-4 px-6 py-3 bg-primary text-primary-foreground rounded-lg">
-            <span className="font-medium">{selectedRowsCount} selected</span>
-            <div className="flex gap-2">
-              <Button size="sm" variant="secondary" onClick={handleBulkExport}>
-                <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
-                Export
-              </Button>
-              <Button size="sm" variant="destructive" onClick={handleBulkDelete}>
-                <TrashIcon className="h-4 w-4 mr-1" />
-                Delete
-              </Button>
-            </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setRowSelection({})}
-              className="text-primary-foreground hover:bg-primary-foreground/20"
-            >
-              Clear
-            </Button>
-          </div>
-        </Card>
-      )}
 
       <IngestionModal
         open={modalOpen}
