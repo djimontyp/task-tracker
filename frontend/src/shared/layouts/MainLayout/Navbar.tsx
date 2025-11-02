@@ -22,12 +22,14 @@ import { useTheme } from '@/shared/components/ThemeProvider'
 import { useServiceStatus } from '@/features/websocket/hooks/useServiceStatus'
 import { cn } from '@/shared/lib/utils'
 import { NavUser } from '@/shared/components/NavUser'
-import { UniversalThemeIcon } from '@/shared/components'
+import { UniversalThemeIcon, AdminBadge } from '@/shared/components'
 import { useBreadcrumbs } from './useBreadcrumbs'
+import { useAdminMode } from '@/shared/hooks'
 
 const Navbar = () => {
   const { setTheme, theme } = useTheme()
   const { indicator } = useServiceStatus()
+  const { isAdminMode } = useAdminMode()
   const location = useLocation()
   const crumbs = useBreadcrumbs(location.pathname)
 
@@ -123,6 +125,8 @@ const Navbar = () => {
               {statusText}
             </span>
           </div>
+
+          <AdminBadge isAdminMode={isAdminMode} className="hidden sm:flex" />
 
           <TooltipProvider>
             <Tooltip>
