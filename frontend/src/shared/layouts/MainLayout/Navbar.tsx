@@ -1,9 +1,9 @@
 import React from 'react'
-import {
-  Cog6ToothIcon,
-} from '@heroicons/react/24/outline'
+import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline'
+import { SignalIcon } from '@heroicons/react/24/solid'
 import { Link, useLocation } from 'react-router-dom'
 import { SidebarTrigger } from '@/shared/ui/sidebar'
+import { Button } from '@/shared/ui/button'
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -32,6 +32,7 @@ const Navbar = () => {
   const { isAdminMode } = useAdminMode()
   const location = useLocation()
   const crumbs = useBreadcrumbs(location.pathname)
+  const appName = import.meta.env.VITE_APP_NAME || 'Pulse Radar'
 
   const cycleTheme = () => {
     const themeOrder: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system']
@@ -78,10 +79,23 @@ const Navbar = () => {
     <header className="fixed top-0 left-0 right-0 z-50 w-full bg-card border-b border-border/80">
       <div className="flex min-h-[56px] items-center justify-between gap-2 px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8">
         <div className="flex items-center gap-3 min-w-0 flex-1">
+          <Link
+            to="/"
+            className="flex h-11 shrink-0 items-center gap-2 rounded-lg px-2 text-foreground transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={`${appName} home`}
+          >
+            <span className="flex size-9 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary shadow-sm">
+              <SignalIcon className="size-5" />
+            </span>
+            <span className="hidden text-base font-semibold tracking-tight text-foreground sm:inline-block">
+              {appName}
+            </span>
+          </Link>
+
           <SidebarTrigger
             variant="ghost"
             size="icon"
-            className="h-11 w-11 shrink-0 border-0 bg-transparent text-muted-foreground hover:bg-accent/20 hover:text-foreground"
+            className="h-11 w-11 shrink-0 rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Toggle sidebar"
           />
 
@@ -131,13 +145,15 @@ const Navbar = () => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="aspect-square border border-border/60 bg-card/60 text-muted-foreground hover:bg-accent/15 hover:text-foreground shrink-0"
                   onClick={cycleTheme}
-                  className="h-11 w-11 flex items-center justify-center rounded-lg hover:bg-accent/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
                   aria-label="Change theme"
                 >
                   <UniversalThemeIcon theme={theme} />
-                </button>
+                </Button>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{getThemeLabel()}</p>
@@ -145,14 +161,23 @@ const Navbar = () => {
             </Tooltip>
           </TooltipProvider>
 
-          <Link
-            to="/settings"
-            className="h-11 w-11 flex items-center justify-center rounded-lg hover:bg-accent/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label="Settings"
-            title="Settings"
-          >
-            <Cog6ToothIcon className="w-6 h-6 text-foreground" />
-          </Link>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  to="/settings"
+                  aria-label="Settings"
+                  title="Settings"
+                  className="inline-flex h-11 w-11 aspect-square items-center justify-center rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+                >
+                  <AdjustmentsHorizontalIcon className="w-5 h-5" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Settings</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
           <NavUser
             user={{
