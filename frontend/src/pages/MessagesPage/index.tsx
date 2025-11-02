@@ -494,17 +494,19 @@ const MessagesPage = () => {
         }
       />
 
-      {selectedRowsCount > 0 && (
-        <BulkActionsToolbar
-          selectedCount={selectedRowsCount}
-          totalCount={paginatedData?.total || 0}
-          onSelectAll={multiSelect.handleSelectAll}
-          onClearSelection={multiSelect.handleClearSelection}
-          onApprove={handleBulkApprove}
-          onArchive={handleBulkArchive}
-          onDelete={handleBulkDelete}
-        />
-      )}
+      <div className="min-h-[60px]">
+        {selectedRowsCount > 0 && (
+          <BulkActionsToolbar
+            selectedCount={selectedRowsCount}
+            totalCount={paginatedData?.total || 0}
+            onSelectAll={multiSelect.handleSelectAll}
+            onClearSelection={multiSelect.handleClearSelection}
+            onApprove={handleBulkApprove}
+            onArchive={handleBulkArchive}
+            onDelete={handleBulkDelete}
+          />
+        )}
+      </div>
 
       <DataTableToolbar
         table={table}
