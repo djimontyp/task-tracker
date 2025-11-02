@@ -18,6 +18,7 @@ from app.api.v1 import (
     noise,
     notifications,
     projects,
+    prompts,
     proposals,
     providers,
     scheduler,
@@ -63,3 +64,4 @@ api_router.include_router(automation.router)
 api_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
 api_router.include_router(monitoring.router, prefix="/monitoring", tags=["monitoring"])
 api_router.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
+api_router.include_router(prompts.router)
