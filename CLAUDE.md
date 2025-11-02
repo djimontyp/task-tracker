@@ -1,4 +1,4 @@
-# Task Tracker - AI-powered Task Classification System
+# Pulse Radar - AI-powered Knowledge Collection System
 
 ## 🚨 **CRITICAL: COORDINATION FIRST, EXECUTION NEVER**
 
