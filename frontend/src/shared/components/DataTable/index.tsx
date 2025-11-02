@@ -18,6 +18,7 @@ interface DataTableProps<TData> {
   columns: ColumnDef<TData>[]
   emptyMessage?: string
   renderMobileCard?: (row: TData, index: number) => React.ReactNode
+  onRowClick?: (row: TData) => void
 }
 
 export function DataTable<TData>({
@@ -25,6 +26,7 @@ export function DataTable<TData>({
   columns,
   emptyMessage = 'No results.',
   renderMobileCard,
+  onRowClick,
 }: DataTableProps<TData>) {
   const isMobile = useIsMobile()
 
@@ -33,7 +35,11 @@ export function DataTable<TData>({
       <div className="space-y-3">
         {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row, index) => (
-            <div key={row.id}>
+            <div
+              key={row.id}
+              onClick={() => onRowClick?.(row.original)}
+              className={onRowClick ? 'cursor-pointer' : undefined}
+            >
               {renderMobileCard(row.original, index)}
             </div>
           ))
@@ -71,7 +77,12 @@ export function DataTable<TData>({
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && 'selected'}
+                onClick={() => onRowClick?.(row.original)}
+                className={onRowClick ? 'cursor-pointer' : undefined}
+              >
                 {row.getVisibleCells().map((cell) => {
                   const isContentColumn = cell.column.id === 'content'
                   return (

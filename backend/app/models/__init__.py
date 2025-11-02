@@ -47,6 +47,7 @@ from .automation_rule import (
     RuleAction,
 )
 from .base import IDMixin, TimestampMixin
+from .classification_feedback import ClassificationFeedback, ClassificationFeedbackPublic
 from .classification_experiment import (
     ClassificationExperiment,
     ClassificationResultDetail,
@@ -97,6 +98,7 @@ from .llm_provider import (
     ValidationStatus,
 )
 from .message import Message
+from .message_history import MessageHistory, MessageHistoryPublic
 from .message_ingestion import (
     IngestionStatus,
     MessageIngestionJob,
@@ -153,6 +155,11 @@ __all__ = [
     # Base
     "IDMixin",
     "TimestampMixin",
+    # Message History & Feedback
+    "MessageHistory",
+    "MessageHistoryPublic",
+    "ClassificationFeedback",
+    "ClassificationFeedbackPublic",
     # Automation Rules
     "AutomationRule",
     "AutomationRuleCreate",

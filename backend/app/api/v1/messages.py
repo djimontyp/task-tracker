@@ -1,9 +1,11 @@
 import logging
 import uuid
 from datetime import date, datetime
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import and_, func, select
+from pydantic import BaseModel
 
 from app.api.v1.response_models import PaginatedMessagesResponse
 from app.dependencies import DatabaseDep
@@ -13,10 +15,28 @@ from app.schemas.messages import (
     MessageFiltersResponse,
     MessageResponse,
 )
+from app.services.message_inspect_service import (
+    MessageInspectResponse,
+    MessageInspectService,
+)
 from app.services.websocket_manager import websocket_manager
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/messages", tags=["messages"])
+
+
+class ReassignRequest(BaseModel):
+    """Request schema for topic reassignment."""
+
+    new_topic_id: str
+    reason: str | None = None
+
+
+class RejectRequest(BaseModel):
+    """Request schema for message rejection."""
+
+    reason: Literal["wrong_topic", "noise", "duplicate", "other"]
+    comment: str | None = None
 
 
 @router.post(
@@ -304,3 +324,218 @@ async def get_message_filters(db: DatabaseDep) -> MessageFiltersResponse:
         sources=sources,
         date_range=date_range,
     )
+
+
+@router.get(
+    "/{message_id}/inspect",
+    response_model=MessageInspectResponse,
+    summary="Get full message inspection details",
+    response_description="Complete message inspection data for MessageInspectModal",
+)
+async def inspect_message(
+    message_id: uuid.UUID,
+    db: DatabaseDep,
+) -> MessageInspectResponse:
+    """
+    Get full inspection details for a message.
+
+    Returns comprehensive data for MessageInspectModal:
+    - Message metadata (content, source, timestamp)
+    - Classification details (confidence, reasoning, topic)
+    - Extracted atoms (entities, keywords, embeddings)
+    - Classification history (reassignments, approvals)
+    """
+    message = await db.get(Message, message_id)
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    service = MessageInspectService(db)
+
+    message_detail = await service.get_message_detail(message)
+    classification = await service.get_classification_detail(message)
+    atoms = await service.get_atoms_detail(message_id)
+    history = await service.get_message_history(message_id)
+
+    return MessageInspectResponse(
+        message=message_detail,
+        classification=classification,
+        atoms=atoms,
+        history=history,
+    )
+
+
+@router.put(
+    "/{message_id}/reassign",
+    summary="Reassign message to different topic",
+    response_description="Success confirmation with updated message",
+)
+async def reassign_message_topic(
+    message_id: uuid.UUID,
+    data: ReassignRequest,
+    db: DatabaseDep,
+) -> dict[str, bool | str]:
+    """
+    Reassign message to a different topic.
+
+    Steps:
+    1. Validate message exists
+    2. Validate new topic exists
+    3. Update message.topic_id
+    4. Log history event (reassignment)
+    5. Broadcast WebSocket update
+    6. Return updated message
+    """
+    message = await db.get(Message, message_id)
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    try:
+        new_topic_uuid = uuid.UUID(data.new_topic_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid topic ID format")
+
+    topic = await db.get(Topic, new_topic_uuid)
+    if not topic:
+        raise HTTPException(status_code=404, detail="Topic not found")
+
+    old_topic_id = message.topic_id
+
+    message.topic_id = new_topic_uuid
+    db.add(message)
+
+    service = MessageInspectService(db)
+    await service.create_history_event(
+        message_id=message_id,
+        action="reassigned",
+        from_topic=old_topic_id,
+        to_topic=new_topic_uuid,
+        reason=data.reason,
+    )
+
+    await db.commit()
+    await db.refresh(message)
+
+    await websocket_manager.broadcast(
+        "messages",
+        {
+            "type": "message.reassigned",
+            "data": {
+                "id": str(message_id),
+                "old_topic": str(old_topic_id) if old_topic_id else None,
+                "new_topic": str(new_topic_uuid),
+            },
+        },
+    )
+
+    return {"success": True, "message_id": str(message_id)}
+
+
+@router.post(
+    "/{message_id}/approve",
+    summary="Approve message classification",
+    response_description="Success confirmation with approval status",
+)
+async def approve_message_classification(
+    message_id: uuid.UUID,
+    db: DatabaseDep,
+) -> dict[str, bool | str]:
+    """
+    Approve message classification as correct.
+
+    Steps:
+    1. Update message.status = "approved"
+    2. Log history event
+    3. Store feedback for model retraining
+    4. Broadcast WebSocket update
+    """
+    message = await db.get(Message, message_id)
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    message.status = "approved"
+    message.approved_at = datetime.utcnow()
+    db.add(message)
+
+    service = MessageInspectService(db)
+    await service.create_history_event(
+        message_id=message_id,
+        action="approved",
+    )
+
+    await service.store_classification_feedback(
+        message_id=message_id,
+        is_correct=True,
+        confidence=message.confidence,
+        topic_id=message.topic_id,
+    )
+
+    await db.commit()
+
+    await websocket_manager.broadcast(
+        "messages",
+        {
+            "type": "message.approved",
+            "data": {"id": str(message_id), "status": "approved"},
+        },
+    )
+
+    return {"success": True, "status": "approved"}
+
+
+@router.post(
+    "/{message_id}/reject",
+    summary="Reject message classification",
+    response_description="Success confirmation with rejection status",
+)
+async def reject_message_classification(
+    message_id: uuid.UUID,
+    data: RejectRequest,
+    db: DatabaseDep,
+) -> dict[str, bool | str]:
+    """
+    Reject message classification as incorrect.
+
+    Steps:
+    1. Update message.status = "rejected"
+    2. Store rejection reason
+    3. Log history event
+    4. Store feedback for model retraining (negative sample)
+    5. Broadcast WebSocket update
+    """
+    message = await db.get(Message, message_id)
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    message.status = "rejected"
+    message.rejected_at = datetime.utcnow()
+    message.rejection_reason = data.reason
+    message.rejection_comment = data.comment
+    db.add(message)
+
+    service = MessageInspectService(db)
+    await service.create_history_event(
+        message_id=message_id,
+        action="rejected",
+        reason=data.reason,
+    )
+
+    await service.store_classification_feedback(
+        message_id=message_id,
+        is_correct=False,
+        reason=data.reason,
+        comment=data.comment,
+        confidence=message.confidence,
+        topic_id=message.topic_id,
+    )
+
+    await db.commit()
+
+    await websocket_manager.broadcast(
+        "messages",
+        {
+            "type": "message.rejected",
+            "data": {"id": str(message_id), "status": "rejected", "reason": data.reason},
+        },
+    )
+
+    return {"success": True, "status": "rejected"}
