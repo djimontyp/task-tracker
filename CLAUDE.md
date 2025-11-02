@@ -49,6 +49,15 @@ Event-driven microservices: **Telegram Bot** → **FastAPI Backend** (REST + Web
 - **Frontend**: React 18 + TypeScript, WebSocket, Docker Compose Watch
 - **Infrastructure**: PostgreSQL (port 5555), NATS, Nginx
 
+## UX/Product Decisions
+
+### Information Architecture (ADR-0001)
+**Decision:** Unified Admin Approach - Consumer UI (default) + Admin Panel (toggle via Cmd+Shift+A)
+**Rationale:** Evolution-proof design для двох фаз: Calibration (власний інструмент) → Production (consumer tool). Zero rework при переході.
+**Impact:** Admin tools (diagnostics, bulk ops, metrics) готові для Фази 1, Consumer UI (browse, search, export) готовий для Фази 2.
+**Details:** See `docs/architecture/adr/001-unified-admin-approach.md` (повний контекст, alternatives, consequences)
+**Research:** `.artifacts/product-designer-research/ia-restructuring-proposal.md` (1800+ рядків аналізу)
+
 ## Backend Architecture
 
 The backend implements a layered hexagonal architecture for LLM integration with comprehensive data modeling. The system processes Telegram messages through an auto-triggered task chain: webhook ingestion → message scoring → knowledge extraction. All LLM operations follow ports-and-adapters pattern for framework independence, while the database uses a versioning system for Topics and Atoms to support approval workflows.
