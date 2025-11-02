@@ -1,7 +1,10 @@
 import { ReactNode } from 'react'
 import { SidebarProvider, SidebarInset } from '@/shared/ui/sidebar'
 import { AppSidebar } from '@/shared/components/AppSidebar'
+import { AdminPanel } from '@/shared/components/AdminPanel'
 import { useUiStore } from '@/shared/store/uiStore'
+import { useAdminMode, useKeyboardShortcut } from '@/shared/hooks'
+import { toast } from 'sonner'
 import Navbar from './Navbar'
 
 interface MainLayoutProps {
@@ -10,6 +13,20 @@ interface MainLayoutProps {
 
 const MainLayout = ({ children }: MainLayoutProps) => {
   const { sidebarOpen, setSidebarOpen } = useUiStore()
+  const { isAdminMode, toggleAdminMode } = useAdminMode()
+
+  useKeyboardShortcut({
+    key: 'a',
+    metaKey: true,
+    shiftKey: true,
+    callback: () => {
+      toggleAdminMode()
+      toast.success(
+        isAdminMode ? 'Admin Mode Disabled' : 'Admin Mode Enabled',
+        { duration: 2000 }
+      )
+    },
+  })
 
   return (
     <SidebarProvider
@@ -26,13 +43,21 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
       <Navbar />
 
-      <div className="flex min-h-screen pt-[56px]">
-        <AppSidebar />
-        <SidebarInset>
-          <main id="main-content" className="flex flex-1 flex-col gap-4 p-4">
-            {children}
-          </main>
-        </SidebarInset>
+      <div className="flex flex-col min-h-screen pt-[56px]">
+        <div className="flex flex-1">
+          <AppSidebar />
+          <SidebarInset>
+            <main id="main-content" className="flex flex-1 flex-col gap-4 p-4">
+              {children}
+            </main>
+          </SidebarInset>
+        </div>
+
+        <AdminPanel visible={isAdminMode}>
+          <div className="text-sm text-gray-500">
+            Admin tools will be added in Phase 2-6
+          </div>
+        </AdminPanel>
       </div>
     </SidebarProvider>
   )
