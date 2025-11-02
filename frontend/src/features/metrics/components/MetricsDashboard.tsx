@@ -14,6 +14,7 @@ import { Button } from '@/shared/ui/button'
 import { Badge } from '@/shared/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/shared/ui/alert'
 import MetricCard from '@/shared/components/MetricCard'
+import { AdminFeatureBadge } from '@/shared/components'
 import { metricsService } from '../api/metricsService'
 import { QualityScoreDisplay } from './QualityScoreDisplay'
 import { NoiseStatsDisplay } from './NoiseStatsDisplay'
@@ -287,7 +288,10 @@ export const MetricsDashboard = () => {
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">System Metrics</h2>
+        <div className="flex items-center">
+          <h2 className="text-xl font-semibold">System Metrics</h2>
+          <AdminFeatureBadge variant="inline" size="sm" />
+        </div>
         <div className="flex items-center gap-3">
           {isWsConnected ? (
             <>
