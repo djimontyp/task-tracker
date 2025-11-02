@@ -1,9 +1,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import GeneralTab from './components/GeneralTab'
 import SourcesTab from './components/SourcesTab'
+import PromptTuningTab from './components/PromptTuningTab'
 import { PageHeader } from '@/shared/components'
+import { useAdminMode } from '@/shared/hooks'
 
 const SettingsPage = () => {
+  const { isAdminMode } = useAdminMode()
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -15,6 +19,7 @@ const SettingsPage = () => {
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="sources">Sources</TabsTrigger>
+          {isAdminMode && <TabsTrigger value="prompts">Prompt Tuning</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="general" className="space-y-4">
@@ -24,6 +29,12 @@ const SettingsPage = () => {
         <TabsContent value="sources" className="space-y-4">
           <SourcesTab />
         </TabsContent>
+
+        {isAdminMode && (
+          <TabsContent value="prompts" className="space-y-4">
+            <PromptTuningTab />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   )
