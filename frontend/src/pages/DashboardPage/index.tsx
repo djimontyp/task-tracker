@@ -18,6 +18,7 @@ import { useTasksStore } from '@/features/tasks/store/tasksStore'
 import { useMessagesFeed } from '@/features/messages/hooks/useMessagesFeed'
 import { MessagesErrorBoundary } from '@/features/messages/components'
 import { formatMessageDate } from '@/shared/utils/date'
+import { MetricsDashboard } from '@/features/metrics'
 import { RecentTopics } from './RecentTopics'
 
 const DashboardPage = () => {
@@ -140,6 +141,9 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Admin Metrics Dashboard */}
+      <MetricsDashboard />
 
       {/* Metric Cards */}
       <div
