@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { cn } from '@/shared/lib/utils'
+import { AdminFeatureBadge } from '@/shared/components/AdminFeatureBadge'
 
 export interface AdminPanelProps {
   visible: boolean
@@ -44,6 +45,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       >
         <span className="flex items-center gap-2">
           <span className="text-amber-700">Admin Panel</span>
+          <AdminFeatureBadge variant="inline" size="sm" className="ml-0" />
           <span className="text-xs text-gray-500">(Cmd+Shift+A to toggle)</span>
         </span>
         {isExpanded ? (

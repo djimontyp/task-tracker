@@ -1,6 +1,7 @@
 import { Button } from '@/shared/ui/button'
 import { Checkbox } from '@/shared/ui/checkbox'
 import { cn } from '@/shared/lib/utils'
+import { AdminFeatureBadge } from '@/shared/components'
 import {
   CheckIcon,
   ArchiveBoxIcon,
@@ -57,6 +58,7 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
         >
           {selectedCount} selected
         </label>
+        <AdminFeatureBadge variant="inline" size="sm" />
       </div>
 
       {/* Action Buttons */}
