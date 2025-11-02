@@ -11,28 +11,22 @@ export const AdminBadge: React.FC<AdminBadgeProps> = ({
   isAdminMode,
   className,
 }) => {
+  const Icon = isAdminMode ? ShieldCheckIcon : UserIcon
+  const label = isAdminMode ? 'Admin' : 'User'
+
   return (
     <Badge
-      variant={isAdminMode ? 'default' : 'secondary'}
       className={cn(
-        'flex items-center gap-1',
-        isAdminMode && 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500',
+        'flex items-center gap-2 whitespace-nowrap px-3 py-1.5 text-xs font-semibold border border-border/60 bg-card/80 text-foreground transition-colors',
+        'hover:bg-accent/15 hover:text-foreground',
+        isAdminMode && 'bg-amber-500/15 text-amber-400 border-amber-400 hover:bg-amber-500/25',
         className
       )}
       role="status"
-      aria-label={isAdminMode ? 'Admin Mode' : 'Consumer Mode'}
+      aria-label={isAdminMode ? 'Admin Mode' : 'User Mode'}
     >
-      {isAdminMode ? (
-        <>
-          <ShieldCheckIcon className="h-3 w-3" aria-hidden="true" />
-          <span>Admin Mode</span>
-        </>
-      ) : (
-        <>
-          <UserIcon className="h-3 w-3" aria-hidden="true" />
-          <span>Consumer Mode</span>
-        </>
-      )}
+      <Icon className="h-4 w-4" aria-hidden="true" />
+      <span>{label}</span>
     </Badge>
   )
 }
