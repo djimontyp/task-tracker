@@ -36,8 +36,8 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
   return (
     <div
       className={cn(
-        'flex items-center gap-4 p-3 border-b bg-amber-50',
-        'dark:bg-amber-950 dark:border-amber-900',
+        'flex items-center gap-4 px-4 py-3 border-b bg-muted/50',
+        'animate-in slide-in-from-top-2 fade-in duration-200',
         className
       )}
     >
@@ -55,7 +55,7 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
           htmlFor="select-all"
           className="text-sm font-medium cursor-pointer select-none"
         >
-          {hasSelection ? `${selectedCount} selected` : 'Select all'}
+          {selectedCount} selected
         </label>
       </div>
 
@@ -63,15 +63,15 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
       {hasSelection && (
         <div className="flex items-center gap-2 ml-auto">
           {onApprove && (
-            <Button size="sm" variant="default" onClick={onApprove} className="gap-1">
-              <CheckIcon className="h-4 w-4" />
+            <Button size="sm" variant="default" onClick={onApprove}>
+              <CheckIcon className="mr-2 h-4 w-4" />
               Approve
             </Button>
           )}
 
           {onArchive && (
-            <Button size="sm" variant="outline" onClick={onArchive} className="gap-1">
-              <ArchiveBoxIcon className="h-4 w-4" />
+            <Button size="sm" variant="outline" onClick={onArchive}>
+              <ArchiveBoxIcon className="mr-2 h-4 w-4" />
               Archive
             </Button>
           )}
@@ -81,9 +81,8 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
               size="sm"
               variant="destructive"
               onClick={onDelete}
-              className="gap-1"
             >
-              <TrashIcon className="h-4 w-4" />
+              <TrashIcon className="mr-2 h-4 w-4" />
               Delete
             </Button>
           )}
@@ -92,9 +91,8 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
             size="sm"
             variant="ghost"
             onClick={onClearSelection}
-            className="gap-1"
           >
-            <XMarkIcon className="h-4 w-4" />
+            <XMarkIcon className="mr-2 h-4 w-4" />
             Clear
           </Button>
         </div>
