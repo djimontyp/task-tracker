@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Button,
@@ -9,7 +9,7 @@ import {
 } from '@/shared/ui'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { apiClient } from '@/shared/lib/api/client'
-import { API_ENDPOINTS } from '@/shared/config/api'
+import { API_ENDPOINTS, API_BASE_PATH } from '@/shared/config/api'
 import { toast } from 'sonner'
 import { logger } from '@/shared/utils/logger'
 import {
@@ -172,23 +172,27 @@ const MessagesPage = () => {
     return sort.id !== 'sent_at' || sort.desc !== true
   }, [columnFilters, sorting])
 
-  const handleReset = React.useCallback(() => {
+  const handleReset = useCallback(() => {
     setColumnFilters([])
     setSorting([{ id: 'sent_at', desc: true }])
   }, [])
 
-  const [checkboxClickHandler, setCheckboxClickHandler] = React.useState<
-    ((rowId: string, event: React.MouseEvent) => void) | undefined
-  >(undefined)
+  // Use ref to store checkbox click handler to avoid columns recreation
+  const checkboxClickHandlerRef = React.useRef<((rowId: string, event: React.MouseEvent) => void) | undefined>(undefined)
 
-  const columns = React.useMemo(
+  // Stable callback that delegates to ref
+  const handleCheckboxClick = useCallback((rowId: string, event: React.MouseEvent) => {
+    checkboxClickHandlerRef.current?.(rowId, event)
+  }, [])
+
+  const columns = useMemo(
     () =>
       createColumns({
         onReset: handleReset,
         hasActiveFilters,
-        onCheckboxClick: checkboxClickHandler,
+        onCheckboxClick: handleCheckboxClick,
       }),
-    [hasActiveFilters, handleReset, checkboxClickHandler]
+    [hasActiveFilters, handleReset, handleCheckboxClick]
   )
 
   const table = useReactTable({
@@ -248,8 +252,9 @@ const MessagesPage = () => {
     },
   })
 
+  // Update ref when multiSelect.handleCheckboxClick changes
   React.useEffect(() => {
-    setCheckboxClickHandler(() => multiSelect.handleCheckboxClick)
+    checkboxClickHandlerRef.current = multiSelect.handleCheckboxClick
   }, [multiSelect.handleCheckboxClick])
 
   const handleIngestMessages = () => {
@@ -297,14 +302,131 @@ const MessagesPage = () => {
 
   const selectedRowsCount = Object.keys(rowSelection).length
 
-  const handleBulkDelete = () => {
-    if (selectedRowsCount === 0) return
-    const confirmed = window.confirm(`Delete ${selectedRowsCount} selected messages?`)
-    if (confirmed) {
-      toast.success(`${selectedRowsCount} messages deleted (demo)`)
+  const handleBulkApprove = useCallback(async () => {
+    const count = Object.keys(table.getState().rowSelection).length
+    if (count === 0) return
+
+    const selectedIds = table.getSelectedRowModel().rows.map(row => row.original.id)
+    const toastId = toast.loading(`Approving ${count} messages...`)
+
+    try {
+      const response = await fetch(`${API_BASE_PATH}/atoms/bulk-approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ atom_ids: selectedIds }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to approve messages: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      const { approved_count, failed_ids = [], errors = [] } = data
+
+      if (failed_ids.length > 0) {
+        toast.warning(
+          `Approved ${approved_count}/${count} messages. ${failed_ids.length} failed.`,
+          { id: toastId }
+        )
+        logger.warn('Bulk approve partial failure:', { failed_ids, errors })
+      } else {
+        toast.success(`Approved ${approved_count} messages`, { id: toastId })
+      }
+
       multiSelect.handleClearSelection()
+      await refetch()
+    } catch (error) {
+      logger.error('Bulk approve error:', error)
+      toast.error('Failed to approve messages', { id: toastId })
     }
-  }
+  }, [table, multiSelect, refetch])
+
+  const handleBulkArchive = useCallback(async () => {
+    const count = Object.keys(table.getState().rowSelection).length
+    if (count === 0) return
+
+    const selectedIds = table.getSelectedRowModel().rows.map(row => row.original.id)
+    const toastId = toast.loading(`Archiving ${count} messages...`)
+
+    try {
+      const response = await fetch(`${API_BASE_PATH}/atoms/bulk-archive`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ atom_ids: selectedIds }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to archive messages: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      const { archived_count, failed_ids = [], errors = [] } = data
+
+      if (failed_ids.length > 0) {
+        toast.warning(
+          `Archived ${archived_count}/${count} messages. ${failed_ids.length} failed.`,
+          { id: toastId }
+        )
+        logger.warn('Bulk archive partial failure:', { failed_ids, errors })
+      } else {
+        toast.success(`Archived ${archived_count} messages`, { id: toastId })
+      }
+
+      multiSelect.handleClearSelection()
+      await refetch()
+    } catch (error) {
+      logger.error('Bulk archive error:', error)
+      toast.error('Failed to archive messages', { id: toastId })
+    }
+  }, [table, multiSelect, refetch])
+
+  const handleBulkDelete = useCallback(async () => {
+    const count = Object.keys(table.getState().rowSelection).length
+    if (count === 0) return
+
+    const confirmed = window.confirm(`Delete ${count} selected messages?`)
+    if (!confirmed) return
+
+    const selectedIds = table.getSelectedRowModel().rows.map(row => row.original.id)
+    const toastId = toast.loading(`Deleting ${count} messages...`)
+
+    try {
+      const response = await fetch(`${API_BASE_PATH}/atoms/bulk-delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ atom_ids: selectedIds }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete messages: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      const { deleted_count, failed_ids = [], errors = [] } = data
+
+      if (failed_ids.length > 0) {
+        toast.warning(
+          `Deleted ${deleted_count}/${count} messages. ${failed_ids.length} failed.`,
+          { id: toastId }
+        )
+        logger.warn('Bulk delete partial failure:', { failed_ids, errors })
+      } else {
+        toast.success(`Deleted ${deleted_count} messages`, { id: toastId })
+      }
+
+      multiSelect.handleClearSelection()
+      await refetch()
+    } catch (error) {
+      logger.error('Bulk delete error:', error)
+      toast.error('Failed to delete messages', { id: toastId })
+    }
+  }, [table, multiSelect, refetch])
 
   if (isLoading) {
     return (
@@ -378,6 +500,8 @@ const MessagesPage = () => {
           totalCount={paginatedData?.total || 0}
           onSelectAll={multiSelect.handleSelectAll}
           onClearSelection={multiSelect.handleClearSelection}
+          onApprove={handleBulkApprove}
+          onArchive={handleBulkArchive}
           onDelete={handleBulkDelete}
         />
       )}
