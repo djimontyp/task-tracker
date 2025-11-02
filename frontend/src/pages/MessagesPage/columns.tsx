@@ -15,6 +15,7 @@ import {
 export interface ColumnsCallbacks {
   onReset?: () => void
   hasActiveFilters?: boolean
+  onCheckboxClick?: (rowId: string, event: React.MouseEvent) => void
 }
 
 export const sourceLabels: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -35,7 +36,16 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       />
     ),
     cell: ({ row }) => (
-      <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        onClick={(event) => {
+          if (callbacks?.onCheckboxClick) {
+            callbacks.onCheckboxClick(row.id, event)
+          }
+        }}
+        aria-label="Select row"
+      />
     ),
     enableSorting: false,
     enableHiding: false,
