@@ -87,3 +87,27 @@ class Message(TimestampMixin, SQLModel, table=True):
         sa_type=JSONB,
         description="Contributing factors for noise score (JSONB: {factor_name: weight})",
     )
+
+    status: str | None = Field(
+        default="pending",
+        max_length=20,
+        description="Message status: pending, approved, rejected",
+    )
+    approved_at: datetime | None = Field(
+        default=None,
+        description="Timestamp when message was approved",
+    )
+    rejected_at: datetime | None = Field(
+        default=None,
+        description="Timestamp when message was rejected",
+    )
+    rejection_reason: str | None = Field(
+        default=None,
+        max_length=50,
+        description="Reason for rejection: wrong_topic, noise, duplicate, other",
+    )
+    rejection_comment: str | None = Field(
+        default=None,
+        sa_type=Text,
+        description="Additional comment for rejection",
+    )

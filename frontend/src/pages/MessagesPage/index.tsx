@@ -35,8 +35,10 @@ import { ImportanceScoreFilter } from './importance-score-filter'
 import { DataTableMobileCard } from '@/shared/components/DataTableMobileCard'
 import { BulkActionsToolbar } from '@/shared/components/AdminPanel/BulkActionsToolbar'
 import { useMultiSelect } from '@/shared/hooks'
+import { useAdminMode } from '@/shared/hooks/useAdminMode'
 import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
 import { IngestionModal } from './IngestionModal'
+import { MessageInspectModal } from '@/features/messages/components/MessageInspectModal'
 import { formatFullDate } from '@/shared/utils/date'
 
 interface MessageQueryParams {
@@ -57,6 +59,8 @@ interface PaginatedResponse {
 const MessagesPage = () => {
   const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
+  const [inspectingMessageId, setInspectingMessageId] = useState<string | null>(null)
+  const { isAdminMode } = useAdminMode()
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
 
@@ -555,6 +559,11 @@ const MessagesPage = () => {
         table={table}
         columns={columns}
         emptyMessage="No messages found."
+        onRowClick={(message: Message) => {
+          if (isAdminMode) {
+            setInspectingMessageId(String(message.id))
+          }
+        }}
         renderMobileCard={(message: Message) => {
           const statusBadge = getMessageAnalysisBadge(message.analyzed || false)
           const importanceBadge = message.importance_score !== null && message.importance_score !== undefined
@@ -562,19 +571,27 @@ const MessagesPage = () => {
             : null
           const content = message.content || ''
           const isEmpty = !content || content.trim() === ''
+          const isSelected = rowSelection[String(message.id)] || false
 
           return (
             <DataTableMobileCard
-              isSelected={table.getRow(String(message.id))?.getIsSelected() || false}
-              onClick={() => table.getRow(String(message.id))?.toggleSelected()}
+              isSelected={isSelected}
+              onClick={() => {
+                if (isAdminMode) {
+                  setInspectingMessageId(String(message.id))
+                }
+              }}
             >
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <Checkbox
-                      checked={table.getRow(String(message.id))?.getIsSelected() || false}
+                      checked={isSelected}
                       onCheckedChange={(checked) => {
-                        table.getRow(String(message.id))?.toggleSelected(!!checked)
+                        setRowSelection(prev => ({
+                          ...prev,
+                          [String(message.id)]: !!checked
+                        }))
                       }}
                       onClick={(e) => e.stopPropagation()}
                     />
@@ -637,6 +654,13 @@ const MessagesPage = () => {
         onClose={() => setModalOpen(false)}
         onSuccess={handleIngestionSuccess}
       />
+
+      {inspectingMessageId && (
+        <MessageInspectModal
+          messageId={inspectingMessageId}
+          onClose={() => setInspectingMessageId(null)}
+        />
+      )}
     </div>
   )
 }
