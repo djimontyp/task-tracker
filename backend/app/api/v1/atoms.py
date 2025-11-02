@@ -7,7 +7,7 @@ including CRUD operations and topic associations.
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database import get_session
@@ -17,6 +17,12 @@ from app.models.atom import (
     AtomListResponse,
     AtomPublic,
     AtomUpdate,
+    BulkApproveRequest,
+    BulkApproveResponse,
+    BulkArchiveRequest,
+    BulkArchiveResponse,
+    BulkDeleteRequest,
+    BulkDeleteResponse,
 )
 from app.models.topic import Topic
 from app.services import AtomCRUD
@@ -190,6 +196,172 @@ async def delete_atom(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Atom with ID {atom_id} not found",
         )
+
+
+@router.post(
+    "/bulk-approve",
+    response_model=BulkApproveResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Bulk approve atoms",
+    description="Approve multiple atoms in a single transaction with partial success support.",
+)
+async def bulk_approve_atoms(
+    request: BulkApproveRequest,
+    session: AsyncSession = Depends(get_session),
+) -> BulkApproveResponse:
+    """Bulk approve multiple atoms in a single operation.
+
+    This endpoint enables efficient approval of multiple atoms at once,
+    useful for admin workflows and batch operations. Uses partial success
+    strategy: successfully processes valid atoms while reporting failures.
+
+    Args:
+        request: Request containing list of atom IDs to approve
+        session: Database session
+
+    Returns:
+        Response with approved count, failed IDs, and error messages
+
+    Raises:
+        HTTPException: 400 if atom_ids list is empty
+        HTTPException: 500 on database transaction errors
+
+    Notes:
+        - Idempotent: re-approving already approved atoms is safe
+        - Atomic transaction: either all succeed or failures are reported
+        - Invalid UUIDs and non-existent atoms are reported in failed_ids
+    """
+    if not request.atom_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="atom_ids list cannot be empty",
+        )
+
+    crud = AtomCRUD(session)
+
+    try:
+        result = await crud.bulk_approve_atoms(request.atom_ids)
+    except Exception as e:
+        logger.error(f"Unexpected error in bulk approve: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during bulk approve operation",
+        )
+
+    return result
+
+
+@router.post(
+    "/bulk-archive",
+    response_model=BulkArchiveResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Bulk archive atoms",
+    description="Archive multiple atoms in a single transaction with partial success support.",
+)
+async def bulk_archive_atoms(
+    request: BulkArchiveRequest,
+    session: AsyncSession = Depends(get_session),
+) -> BulkArchiveResponse:
+    """Bulk archive multiple atoms in a single operation.
+
+    This endpoint enables efficient archiving of multiple atoms at once,
+    useful for admin workflows and batch operations. Uses partial success
+    strategy: successfully processes valid atoms while reporting failures.
+
+    Args:
+        request: Request containing list of atom IDs to archive
+        session: Database session
+
+    Returns:
+        Response with archived count, failed IDs, and error messages
+
+    Raises:
+        HTTPException: 400 if atom_ids list is empty
+        HTTPException: 500 on database transaction errors
+
+    Notes:
+        - Idempotent: re-archiving already archived atoms is safe
+        - Atomic transaction: either all succeed or failures are reported
+        - Invalid UUIDs and non-existent atoms are reported in failed_ids
+    """
+    if not request.atom_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="atom_ids list cannot be empty",
+        )
+
+    crud = AtomCRUD(session)
+
+    try:
+        result = await crud.bulk_archive_atoms(request.atom_ids)
+    except Exception as e:
+        logger.error(f"Unexpected error in bulk archive: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during bulk archive operation",
+        )
+
+    return result
+
+
+@router.post(
+    "/bulk-delete",
+    response_model=BulkDeleteResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Bulk delete atoms",
+    description="Delete multiple atoms permanently in a single transaction with partial success support.",
+)
+async def bulk_delete_atoms(
+    request: BulkDeleteRequest,
+    session: AsyncSession = Depends(get_session),
+) -> BulkDeleteResponse:
+    """Bulk delete multiple atoms in a single operation.
+
+    This endpoint enables efficient deletion of multiple atoms at once,
+    useful for admin workflows and batch operations. Uses partial success
+    strategy: successfully deletes valid atoms while reporting failures.
+
+    Cascade delete logic:
+    - Deletes all atom_links (bidirectional)
+    - Deletes all atom_versions
+    - Deletes all topic_atoms relationships
+    - Then deletes the atom itself
+
+    Args:
+        request: Request containing list of atom IDs to delete
+        session: Database session
+
+    Returns:
+        Response with deleted count, failed IDs, and error messages
+
+    Raises:
+        HTTPException: 400 if atom_ids list is empty
+        HTTPException: 500 on database transaction errors
+
+    Notes:
+        - NOT idempotent: re-deleting deleted atoms will report failures
+        - Atomic transaction: either all succeed or failures are reported
+        - Invalid UUIDs and non-existent atoms are reported in failed_ids
+        - Cascade deletes all related records to prevent orphans
+    """
+    if not request.atom_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="atom_ids list cannot be empty",
+        )
+
+    crud = AtomCRUD(session)
+
+    try:
+        result = await crud.bulk_delete_atoms(request.atom_ids)
+    except Exception as e:
+        logger.error(f"Unexpected error in bulk delete: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during bulk delete operation",
+        )
+
+    return result
 
 
 @router.post(
