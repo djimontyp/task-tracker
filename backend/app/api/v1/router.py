@@ -13,6 +13,7 @@ from app.api.v1 import (
     ingestion,
     knowledge,
     messages,
+    metrics,
     monitoring,
     noise,
     notifications,
@@ -61,3 +62,4 @@ api_router.include_router(scheduler.router)
 api_router.include_router(automation.router)
 api_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
 api_router.include_router(monitoring.router, prefix="/monitoring", tags=["monitoring"])
+api_router.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
