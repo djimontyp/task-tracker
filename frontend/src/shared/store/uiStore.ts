@@ -9,6 +9,10 @@ interface UiStore {
   theme: 'light' | 'dark' | 'system'
   toggleTheme: () => void
   setTheme: (theme: 'light' | 'dark' | 'system') => void
+
+  isAdminMode: boolean
+  toggleAdminMode: () => void
+  setAdminMode: (enabled: boolean) => void
 }
 
 export const useUiStore = create<UiStore>()(
@@ -25,12 +29,17 @@ export const useUiStore = create<UiStore>()(
         return { theme: 'light' }
       }),
       setTheme: (theme) => set({ theme }),
+
+      isAdminMode: false,
+      toggleAdminMode: () => set((state) => ({ isAdminMode: !state.isAdminMode })),
+      setAdminMode: (enabled) => set({ isAdminMode: enabled }),
     }),
     {
       name: 'ui-settings',
       partialize: (state) => ({
         theme: state.theme,
         sidebarOpen: state.sidebarOpen,
+        isAdminMode: state.isAdminMode,
       }),
     }
   )
