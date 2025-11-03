@@ -71,7 +71,7 @@ const TopicsPage = () => {
   }, [topics, debouncedSearch])
 
   const updateColorMutation = useMutation({
-    mutationFn: ({ topicId, color }: { topicId: number; color: string }) =>
+    mutationFn: ({ topicId, color }: { topicId: string; color: string }) =>
       topicService.updateTopicColor(topicId, color),
     onMutate: async ({ topicId, color }) => {
       const queryKey = ['topics', { page: currentPage, search: debouncedSearch, sort_by: sortBy }]
@@ -110,11 +110,11 @@ const TopicsPage = () => {
     },
   })
 
-  const handleColorChange = (topicId: number, color: string) => {
+  const handleColorChange = (topicId: string, color: string) => {
     updateColorMutation.mutate({ topicId, color })
   }
 
-  const handleAutoPickColor = async (topicId: number) => {
+  const handleAutoPickColor = async (topicId: string) => {
     try {
       const result = await topicService.suggestColor(topicId)
       updateColorMutation.mutate({ topicId, color: result.suggested_color })

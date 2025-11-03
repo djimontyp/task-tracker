@@ -39,6 +39,7 @@ import { useAdminMode } from '@/shared/hooks/useAdminMode'
 import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
 import { IngestionModal } from './IngestionModal'
 import { MessageInspectModal } from '@/features/messages/components/MessageInspectModal'
+import { ConsumerMessageModal } from '@/features/messages/components/ConsumerMessageModal'
 import { formatFullDate } from '@/shared/utils/date'
 
 interface MessageQueryParams {
@@ -60,6 +61,7 @@ const MessagesPage = () => {
   const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [inspectingMessageId, setInspectingMessageId] = useState<string | null>(null)
+  const [viewingMessageId, setViewingMessageId] = useState<string | null>(null)
   const { isAdminMode } = useAdminMode()
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
@@ -562,6 +564,8 @@ const MessagesPage = () => {
         onRowClick={(message: Message) => {
           if (isAdminMode) {
             setInspectingMessageId(String(message.id))
+          } else {
+            setViewingMessageId(String(message.id))
           }
         }}
         renderMobileCard={(message: Message) => {
@@ -571,7 +575,7 @@ const MessagesPage = () => {
             : null
           const content = message.content || ''
           const isEmpty = !content || content.trim() === ''
-          const isSelected = rowSelection[String(message.id)] || false
+          const isSelected = (rowSelection as Record<string, boolean>)[String(message.id)] || false
 
           return (
             <DataTableMobileCard
@@ -579,6 +583,8 @@ const MessagesPage = () => {
               onClick={() => {
                 if (isAdminMode) {
                   setInspectingMessageId(String(message.id))
+                } else {
+                  setViewingMessageId(String(message.id))
                 }
               }}
             >
@@ -659,6 +665,13 @@ const MessagesPage = () => {
         <MessageInspectModal
           messageId={inspectingMessageId}
           onClose={() => setInspectingMessageId(null)}
+        />
+      )}
+
+      {viewingMessageId && (
+        <ConsumerMessageModal
+          messageId={viewingMessageId}
+          onClose={() => setViewingMessageId(null)}
         />
       )}
     </div>
