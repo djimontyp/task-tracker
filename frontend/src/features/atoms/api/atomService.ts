@@ -79,7 +79,7 @@ class AtomService {
     }
   }
 
-  async getAtomsByTopic(topicId: number): Promise<Atom[]> {
+  async getAtomsByTopic(topicId: string): Promise<Atom[]> {
     const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/topics/${topicId}/atoms`)
 
     if (!response.ok) {
@@ -90,7 +90,7 @@ class AtomService {
     return data.items || data
   }
 
-  async linkAtomToTopic(atomId: number, topicId: number, note?: string, position?: number): Promise<TopicAtom> {
+  async linkAtomToTopic(atomId: number, topicId: string, note?: string, position?: number): Promise<TopicAtom> {
     const params = new URLSearchParams()
     if (note) params.append('note', note)
     if (position !== undefined) params.append('position', position.toString())
@@ -111,7 +111,7 @@ class AtomService {
     return response.json()
   }
 
-  async unlinkAtomFromTopic(atomId: number, topicId: number): Promise<void> {
+  async unlinkAtomFromTopic(atomId: number, topicId: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/topic-atoms/${topicId}/${atomId}`, {
       method: 'DELETE',
     })

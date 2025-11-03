@@ -49,7 +49,7 @@ export type PeriodType = 'last_24h' | 'last_7d' | 'last_30d' | 'custom';
 
 export interface PeriodRequest {
   period_type: PeriodType;
-  topic_id?: number;
+  topic_id?: string;
   start_date?: string;
   end_date?: string;
 }
