@@ -111,3 +111,12 @@ export {
 } from './alert-dialog'
 export { RadioGroup, RadioGroupItem } from './radio-group'
 export { Alert, AlertTitle, AlertDescription } from './alert'
+export {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbEllipsis,
+} from './breadcrumb'

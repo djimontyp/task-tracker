@@ -74,8 +74,8 @@ const breadcrumbMap: Record<string, BreadcrumbSegment[]> = {
 
 export function useBreadcrumbs(pathname: string): BreadcrumbSegment[] {
   const queryClient = useQueryClient()
-  const topicDetailMatch = pathname.match(/^\/topics\/(\d+)$/)
-  const topicIdFromUrl = topicDetailMatch ? parseInt(topicDetailMatch[1], 10) : null
+  const topicDetailMatch = pathname.match(/^\/topics\/([a-f0-9-]+)$/)
+  const topicIdFromUrl = topicDetailMatch ? topicDetailMatch[1] : null
 
   const { data: topicData } = useQuery<Topic>({
     queryKey: ['topic', topicIdFromUrl],
