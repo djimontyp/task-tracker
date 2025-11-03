@@ -8,7 +8,7 @@ import type { VersionDiff } from '../types';
 
 interface VersionDiffViewerProps {
   entityType: 'topic' | 'atom';
-  entityId: number;
+  entityId: string | number;
   version: number;
   compareToVersion: number;
   onApprove?: () => void;
@@ -36,8 +36,8 @@ export function VersionDiffViewer({
     try {
       const fetchedDiff =
         entityType === 'topic'
-          ? await versioningService.getTopicVersionDiff(entityId, version, compareToVersion)
-          : await versioningService.getAtomVersionDiff(entityId, version, compareToVersion);
+          ? await versioningService.getTopicVersionDiff(entityId as string, version, compareToVersion)
+          : await versioningService.getAtomVersionDiff(entityId as number, version, compareToVersion);
       setDiff(fetchedDiff);
     } catch (error) {
       console.error('Failed to load diff:', error);
@@ -50,9 +50,9 @@ export function VersionDiffViewer({
     setActionLoading(true);
     try {
       if (entityType === 'topic') {
-        await versioningService.approveTopicVersion(entityId, version);
+        await versioningService.approveTopicVersion(entityId as string, version);
       } else {
-        await versioningService.approveAtomVersion(entityId, version);
+        await versioningService.approveAtomVersion(entityId as number, version);
       }
       onApprove?.();
     } catch (error) {
@@ -66,9 +66,9 @@ export function VersionDiffViewer({
     setActionLoading(true);
     try {
       if (entityType === 'topic') {
-        await versioningService.rejectTopicVersion(entityId, version);
+        await versioningService.rejectTopicVersion(entityId as string, version);
       } else {
-        await versioningService.rejectAtomVersion(entityId, version);
+        await versioningService.rejectAtomVersion(entityId as number, version);
       }
       onReject?.();
     } catch (error) {

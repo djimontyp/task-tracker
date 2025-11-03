@@ -56,7 +56,7 @@ type CreateAtomFormData = z.infer<typeof createAtomSchema>
 export interface CreateAtomDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  topicId: number
+  topicId: string
   onAtomCreated?: (atom: Atom) => void
 }
 
