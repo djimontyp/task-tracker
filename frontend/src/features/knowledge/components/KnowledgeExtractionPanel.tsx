@@ -29,7 +29,7 @@ import { toast } from 'sonner';
 
 interface KnowledgeExtractionPanelProps {
   messageIds?: number[];
-  topicId?: number;
+  topicId?: string;
   onComplete?: () => void;
 }
 

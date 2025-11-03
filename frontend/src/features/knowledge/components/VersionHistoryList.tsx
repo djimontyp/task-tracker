@@ -9,7 +9,7 @@ import type { TopicVersion, AtomVersion } from '../types';
 
 interface VersionHistoryListProps {
   entityType: 'topic' | 'atom';
-  entityId: number;
+  entityId: string | number;
   onSelectVersion?: (version: number) => void;
   enableBulkActions?: boolean;
 }
@@ -33,8 +33,8 @@ export function VersionHistoryList({
     try {
       const fetchedVersions =
         entityType === 'topic'
-          ? await versioningService.getTopicVersions(entityId)
-          : await versioningService.getAtomVersions(entityId);
+          ? await versioningService.getTopicVersions(entityId as string)
+          : await versioningService.getAtomVersions(entityId as number);
       setVersions(fetchedVersions);
     } catch (error) {
       console.error('Failed to load versions:', error);
