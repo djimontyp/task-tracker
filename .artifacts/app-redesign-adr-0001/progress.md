@@ -6,16 +6,42 @@
 
 ---
 
-## Phase Status Overview
+## Phase Status Overview (UPDATED - Simplified Roadmap)
 
-| Phase | Status | Duration | Start Date | End Date | Completion % | Blockers |
-|-------|--------|----------|------------|----------|--------------|----------|
-| 1: Foundation | ✅ Complete | 2 weeks | 2025-10-20 | 2025-11-01 | 100% | None |
-| 2: Admin Panel | ✅ Complete | 2 weeks | 2025-11-01 | 2025-11-02 | 100% | None |
-| 3: Message Inspect | 🔄 In Progress | 2 weeks | 2025-11-02 | TBD | 0% | None |
-| 4: Topics | Not Started | 1.5 weeks | TBD | TBD | 0% | Phase 2 + 3 |
-| 5: Analysis | Not Started | 1.5 weeks | TBD | TBD | 0% | Phase 2 + 3 |
-| 6: Export + API | Not Started | 2 weeks | TBD | TBD | 0% | Phase 4 + 5 |
+**CRITICAL UPDATE (Nov 3):** Original plan revised based on UX audit. Focus shifted from admin tools → consumer MVP.
+
+| Phase | Status | Admin Complete | Consumer Complete | Decision |
+|-------|--------|----------------|-------------------|----------|
+| 1: Foundation | ✅ Complete | 100% | N/A | KEEP (infrastructure) |
+| 2: Admin Panel | ✅ Complete | 100% | N/A | KEEP (admin tools) |
+| 3: Message Inspect | ✅ **COMPLETE** | 100% | **100%** ✅ | Consumer modal done (Nov 3) |
+| 4: Topics (Simplified) | ✅ **COMPLETE** | N/A | **100%** ✅ | Detail pages + drill-down done (Nov 3) |
+| 5: Analysis | Not Started | N/A | N/A | **CUT ENTIRELY** (60h saved) |
+| 6: Export (Simplified) | Not Started | N/A | 0% | KEEP simple export only |
+
+### What Changed?
+
+**Original Plan:**
+- 6 phases, 77 tasks, 11 weeks total (7 weeks remaining)
+- Focus: 60% admin tools, 40% consumer features
+
+**Simplified MVP Plan:**
+- 3 weeks, 15 core tasks, consumer-first focus
+- Phase 5 CUT entirely (admin refactoring busywork)
+- Phase 4 + 6 simplified (remove graph, batch export, API docs)
+- **Time Saved: 112 hours (70% reduction)**
+
+### Consumer vs Admin Progress (UPDATED Nov 3)
+
+| Category | Complete | In Progress | Not Started | Total |
+|----------|----------|-------------|-------------|-------|
+| **Admin Features** | 90% (excellent!) | 10% (polish) | 0% | 100% |
+| **Consumer Features** | **50%** ✅ | 0% | 50% | 100% |
+
+**Week 1 Complete (Nov 3):**
+- ✅ Admin tools: Fully functional (Phases 1-3)
+- ✅ Consumer core: Message modal + Topic detail pages **WORKING** ✅
+- 🔄 Remaining: Search (Week 2) + Export (Week 2) + Polish (Week 3)
 
 ---
 
