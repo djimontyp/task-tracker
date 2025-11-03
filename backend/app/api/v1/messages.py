@@ -327,6 +327,60 @@ async def get_message_filters(db: DatabaseDep) -> MessageFiltersResponse:
 
 
 @router.get(
+    "/{message_id}",
+    response_model=MessageResponse,
+    summary="Get message details",
+    response_description="Message details for consumer view",
+)
+async def get_message_details(
+    message_id: uuid.UUID,
+    db: DatabaseDep,
+) -> MessageResponse:
+    """
+    Get message details for consumer view.
+
+    Returns basic message information with author, source, and topic details
+    for displaying in ConsumerMessageModal.
+    """
+    message = await db.get(Message, message_id)
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    # Fetch related entities
+    user = await db.get(User, message.author_id)
+    source = await db.get(Source, message.source_id)
+    topic = await db.get(Topic, message.topic_id) if message.topic_id else None
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Message author not found")
+    if not source:
+        raise HTTPException(status_code=404, detail="Message source not found")
+
+    return MessageResponse(
+        id=message.id,
+        external_message_id=message.external_message_id,
+        content=message.content,
+        sent_at=message.sent_at,
+        source_id=source.id or 0,
+        source_name=source.name,
+        author_id=user.id or 0,
+        author_name=user.full_name,
+        avatar_url=message.avatar_url,
+        telegram_profile_id=message.telegram_profile_id,
+        topic_id=message.topic_id,
+        topic_name=topic.name if topic else None,
+        classification=message.classification,
+        confidence=message.confidence,
+        analyzed=message.analyzed,
+        importance_score=message.importance_score,
+        noise_classification=message.noise_classification,
+        noise_factors=message.noise_factors,
+        created_at=message.created_at,
+        updated_at=message.updated_at,
+    )
+
+
+@router.get(
     "/{message_id}/inspect",
     response_model=MessageInspectResponse,
     summary="Get full message inspection details",
