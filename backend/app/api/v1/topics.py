@@ -205,7 +205,7 @@ async def create_topic(
         Created topic with auto-selected or provided icon
     """
     crud = TopicCRUD(session)
-    topic = await crud.create(topic_data.model_dump(exclude_unset=True))
+    topic = await crud.create(topic_data)
 
     # Broadcast metrics update to WebSocket clients
     await metrics_broadcaster.broadcast_on_topic_change(session)
