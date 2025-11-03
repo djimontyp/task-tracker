@@ -22,6 +22,7 @@ from app.api.v1 import (
     proposals,
     providers,
     scheduler,
+    search,
     semantic_search,
     stats,
     task_configs,
@@ -56,6 +57,7 @@ api_router.include_router(atoms.router)
 api_router.include_router(experiments.router)
 api_router.include_router(embeddings.router)
 api_router.include_router(semantic_search.router)
+api_router.include_router(search.router)
 api_router.include_router(noise.router)
 api_router.include_router(knowledge.router, prefix="/knowledge", tags=["knowledge"])
 api_router.include_router(versions.router)

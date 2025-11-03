@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.atom import Atom
 from app.models.llm_provider import LLMProvider, ProviderType
 from app.models.message import Message
+from app.models.topic import Topic
 from app.services.credential_encryption import CredentialEncryption
 
 logger = logging.getLogger(__name__)
@@ -53,26 +54,50 @@ class EmbeddingService:
             )
 
     async def _validate_embedding(self, embedding: list[float]) -> list[float]:
-        """Validate embedding dimensions match expected size.
+        """Validate embedding dimensions and pad if needed for database storage.
+
+        Database uses 1536 dimensions (OpenAI ada-002 size). Ollama embeddings (768 dims)
+        are padded with zeros to match database schema without migration.
 
         Args:
             embedding: Generated embedding vector
 
         Returns:
-            Validated embedding vector
+            Validated (and potentially padded) embedding vector (1536 dimensions)
 
         Raises:
-            ValueError: If dimensions don't match
+            ValueError: If dimensions don't match expected size for provider
         """
         actual_dims = len(embedding)
-        expected_dims = settings.embedding.openai_embedding_dimensions
 
-        if actual_dims != expected_dims:
-            raise ValueError(
-                f"Embedding dimension mismatch: expected {expected_dims}, "
-                f"got {actual_dims} from provider '{self.provider.name}'"
-            )
-        return embedding
+        if self.provider.type == ProviderType.openai:
+            expected_dims = settings.embedding.openai_embedding_dimensions
+            if actual_dims != expected_dims:
+                raise ValueError(
+                    f"OpenAI embedding dimension mismatch: expected {expected_dims}, "
+                    f"got {actual_dims} from provider '{self.provider.name}'"
+                )
+            return embedding
+
+        elif self.provider.type == ProviderType.ollama:
+            expected_dims = settings.embedding.ollama_embedding_dimensions
+            if actual_dims != expected_dims:
+                raise ValueError(
+                    f"Ollama embedding dimension mismatch: expected {expected_dims}, "
+                    f"got {actual_dims} from provider '{self.provider.name}'"
+                )
+            db_dims = 1536
+            if actual_dims < db_dims:
+                padded = embedding + [0.0] * (db_dims - actual_dims)
+                logger.debug(
+                    f"Padded Ollama embedding from {actual_dims} to {db_dims} dimensions "
+                    f"for database storage (provider '{self.provider.name}')"
+                )
+                return padded
+            return embedding
+
+        else:
+            raise ValueError(f"Unsupported provider type for validation: {self.provider.type}")
 
     async def generate_embedding(self, text: str) -> list[float]:
         """Generate embedding vector for given text.
@@ -161,14 +186,16 @@ class EmbeddingService:
             )
 
         try:
+            base_url = self.provider.base_url.rstrip("/v1") if self.provider.base_url.endswith("/v1") else self.provider.base_url
+            embed_url = f"{base_url}/api/embed"
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
-                    f"{self.provider.base_url}/api/embeddings",
-                    json={"model": settings.embedding.ollama_embedding_model, "prompt": text},
+                    embed_url,
+                    json={"model": settings.embedding.ollama_embedding_model, "input": text},
                 )
                 response.raise_for_status()
                 data = response.json()
-                embedding: list[float] = data["embedding"]
+                embedding: list[float] = data["embeddings"][0]
                 return await self._validate_embedding(embedding)
         except httpx.HTTPError as e:
             logger.error(f"Ollama embedding generation failed for provider '{self.provider.name}': {e}", exc_info=True)
@@ -194,7 +221,13 @@ class EmbeddingService:
             >>> updated = await service.embed_message(session, message)
             >>> assert updated.embedding is not None
         """
-        if message.embedding is not None:
+        has_embedding = False
+        try:
+            has_embedding = message.embedding is not None and len(message.embedding) > 0
+        except (ValueError, AttributeError):
+            has_embedding = hasattr(message.embedding, '__len__') and len(message.embedding) > 0
+
+        if has_embedding:
             logger.debug(f"Message {message.id} already has embedding, skipping")
             return message
 
@@ -229,7 +262,13 @@ class EmbeddingService:
             >>> updated = await service.embed_atom(session, atom)
             >>> assert updated.embedding is not None
         """
-        if atom.embedding is not None:
+        has_embedding = False
+        try:
+            has_embedding = atom.embedding is not None and len(atom.embedding) > 0
+        except (ValueError, AttributeError):
+            has_embedding = hasattr(atom.embedding, '__len__') and len(atom.embedding) > 0
+
+        if has_embedding:
             logger.debug(f"Atom {atom.id} already has embedding, skipping")
             return atom
 
@@ -247,6 +286,47 @@ class EmbeddingService:
 
         except Exception as e:
             logger.error(f"Failed to embed atom {atom.id}: {e}", exc_info=True)
+            await session.rollback()
+            raise
+
+    async def embed_topic(self, session: AsyncSession, topic: Topic) -> Topic:
+        """Generate and save embedding for a topic.
+
+        Args:
+            session: Database session
+            topic: Topic to embed
+
+        Returns:
+            Updated topic with embedding
+
+        Example:
+            >>> topic = await session.get(Topic, topic_id)
+            >>> updated = await service.embed_topic(session, topic)
+            >>> assert updated.embedding is not None
+        """
+        try:
+            has_embedding = isinstance(topic.embedding, list) and len(topic.embedding) > 0
+        except Exception:
+            has_embedding = False
+
+        if has_embedding:
+            logger.debug(f"Topic {topic.id} already has embedding, skipping")
+            return topic
+
+        try:
+            text = f"{topic.name}\n\n{topic.description}"
+            embedding = await self.generate_embedding(text)
+            topic.embedding = embedding
+
+            session.add(topic)
+            await session.commit()
+            await session.refresh(topic)
+
+            logger.info(f"Successfully embedded topic {topic.id} ({len(embedding)} dimensions)")
+            return topic
+
+        except Exception as e:
+            logger.error(f"Failed to embed topic {topic.id}: {e}", exc_info=True)
             await session.rollback()
             raise
 
@@ -291,7 +371,13 @@ class EmbeddingService:
 
             for msg in messages:
                 try:
-                    if msg.embedding is not None:
+                    has_embedding = False
+                    try:
+                        has_embedding = msg.embedding is not None and len(msg.embedding) > 0
+                    except (ValueError, AttributeError):
+                        has_embedding = hasattr(msg.embedding, '__len__') and len(msg.embedding) > 0
+
+                    if has_embedding:
                         stats["skipped"] += 1
                         continue
 
@@ -363,7 +449,13 @@ class EmbeddingService:
 
             for atom in atoms:
                 try:
-                    if atom.embedding is not None:
+                    has_embedding = False
+                    try:
+                        has_embedding = atom.embedding is not None and len(atom.embedding) > 0
+                    except (ValueError, AttributeError):
+                        has_embedding = hasattr(atom.embedding, '__len__') and len(atom.embedding) > 0
+
+                    if has_embedding:
                         stats["skipped"] += 1
                         continue
 

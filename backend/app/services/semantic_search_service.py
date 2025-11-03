@@ -8,12 +8,12 @@ and general text-based search queries.
 import logging
 from typing import Any
 
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.ai_config import ai_config
 from app.models.atom import Atom
 from app.models.message import Message
+from app.models.topic import Topic
 from app.services.embedding_service import EmbeddingService
 
 logger = logging.getLogger(__name__)
@@ -77,32 +77,30 @@ class SemanticSearchService:
         query_embedding = await self.embedding_service.generate_embedding(query)
         query_vector = str(query_embedding)
 
-        sql = text("""
+        # Use raw SQL with asyncpg's native parameter binding
+        sql = """
             SELECT
                 m.*,
-                1 - (m.embedding <=> :query_vector::vector) / 2 AS similarity
+                1 - (m.embedding <=> $1::vector) / 2 AS similarity
             FROM messages m
             WHERE
                 m.embedding IS NOT NULL
-                AND (1 - (m.embedding <=> :query_vector::vector) / 2) >= :threshold
-            ORDER BY m.embedding <=> :query_vector::vector
-            LIMIT :limit
-        """)
+                AND (1 - (m.embedding <=> $1::vector) / 2) >= $2
+            ORDER BY m.embedding <=> $1::vector
+            LIMIT $3
+        """
 
-        result = await session.execute(
-            sql,
-            {
-                "query_vector": query_vector,
-                "threshold": threshold,
-                "limit": limit,
-            },
-        )
-
-        rows = result.fetchall()
+        # Get the raw asyncpg connection and execute
+        conn = await session.connection()
+        raw_conn = await conn.get_raw_connection()
+        driver_conn = raw_conn.driver_connection
+        assert driver_conn is not None, "Driver connection is None"
+        rows = await driver_conn.fetch(sql, query_vector, threshold, limit)
 
         messages_with_scores: list[tuple[Message, float]] = []
         for row in rows:
-            message_dict: dict[str, Any] = dict(row._mapping)
+            # asyncpg returns dict-like Record objects
+            message_dict = dict(row)
             similarity = message_dict.pop("similarity")
 
             message = Message(**message_dict)
@@ -150,34 +148,30 @@ class SemanticSearchService:
 
         query_vector = str(source_message.embedding)
 
-        sql = text("""
+        sql = """
             SELECT
                 m.*,
-                1 - (m.embedding <=> :query_vector::vector) / 2 AS similarity
+                1 - (m.embedding <=> $1::vector) / 2 AS similarity
             FROM messages m
             WHERE
                 m.embedding IS NOT NULL
-                AND m.id != :exclude_id
-                AND (1 - (m.embedding <=> :query_vector::vector) / 2) >= :threshold
-            ORDER BY m.embedding <=> :query_vector::vector
-            LIMIT :limit
-        """)
+                AND m.id != $2
+                AND (1 - (m.embedding <=> $1::vector) / 2) >= $3
+            ORDER BY m.embedding <=> $1::vector
+            LIMIT $4
+        """
 
-        result = await session.execute(
-            sql,
-            {
-                "query_vector": query_vector,
-                "exclude_id": message_id,
-                "threshold": threshold,
-                "limit": limit,
-            },
-        )
-
-        rows = result.fetchall()
+        # Get the raw asyncpg connection and execute
+        conn = await session.connection()
+        raw_conn = await conn.get_raw_connection()
+        driver_conn = raw_conn.driver_connection
+        assert driver_conn is not None, "Driver connection is None"
+        rows = await driver_conn.fetch(sql, query_vector, message_id, threshold, limit)
 
         messages_with_scores: list[tuple[Message, float]] = []
         for row in rows:
-            message_dict: dict[str, Any] = dict(row._mapping)
+            # asyncpg returns dict-like Record objects
+            message_dict = dict(row)
             similarity = message_dict.pop("similarity")
 
             message = Message(**message_dict)
@@ -267,32 +261,29 @@ class SemanticSearchService:
         query_embedding = await self.embedding_service.generate_embedding(query)
         query_vector = str(query_embedding)
 
-        sql = text("""
+        sql = """
             SELECT
                 a.*,
-                1 - (a.embedding <=> :query_vector::vector) / 2 AS similarity
+                1 - (a.embedding <=> $1::vector) / 2 AS similarity
             FROM atoms a
             WHERE
                 a.embedding IS NOT NULL
-                AND (1 - (a.embedding <=> :query_vector::vector) / 2) >= :threshold
-            ORDER BY a.embedding <=> :query_vector::vector
-            LIMIT :limit
-        """)
+                AND (1 - (a.embedding <=> $1::vector) / 2) >= $2
+            ORDER BY a.embedding <=> $1::vector
+            LIMIT $3
+        """
 
-        result = await session.execute(
-            sql,
-            {
-                "query_vector": query_vector,
-                "threshold": threshold,
-                "limit": limit,
-            },
-        )
-
-        rows = result.fetchall()
+        # Get the raw asyncpg connection and execute
+        conn = await session.connection()
+        raw_conn = await conn.get_raw_connection()
+        driver_conn = raw_conn.driver_connection
+        assert driver_conn is not None, "Driver connection is None"
+        rows = await driver_conn.fetch(sql, query_vector, threshold, limit)
 
         atoms_with_scores: list[tuple[Atom, float]] = []
         for row in rows:
-            atom_dict: dict[str, Any] = dict(row._mapping)
+            # asyncpg returns dict-like Record objects
+            atom_dict = dict(row)
             similarity = atom_dict.pop("similarity")
 
             atom = Atom(**atom_dict)
@@ -340,34 +331,30 @@ class SemanticSearchService:
 
         query_vector = str(source_atom.embedding)
 
-        sql = text("""
+        sql = """
             SELECT
                 a.*,
-                1 - (a.embedding <=> :query_vector::vector) / 2 AS similarity
+                1 - (a.embedding <=> $1::vector) / 2 AS similarity
             FROM atoms a
             WHERE
                 a.embedding IS NOT NULL
-                AND a.id != :exclude_id
-                AND (1 - (a.embedding <=> :query_vector::vector) / 2) >= :threshold
-            ORDER BY a.embedding <=> :query_vector::vector
-            LIMIT :limit
-        """)
+                AND a.id != $2
+                AND (1 - (a.embedding <=> $1::vector) / 2) >= $3
+            ORDER BY a.embedding <=> $1::vector
+            LIMIT $4
+        """
 
-        result = await session.execute(
-            sql,
-            {
-                "query_vector": query_vector,
-                "exclude_id": atom_id,
-                "threshold": threshold,
-                "limit": limit,
-            },
-        )
-
-        rows = result.fetchall()
+        # Get the raw asyncpg connection and execute
+        conn = await session.connection()
+        raw_conn = await conn.get_raw_connection()
+        driver_conn = raw_conn.driver_connection
+        assert driver_conn is not None, "Driver connection is None"
+        rows = await driver_conn.fetch(sql, query_vector, atom_id, threshold, limit)
 
         atoms_with_scores: list[tuple[Atom, float]] = []
         for row in rows:
-            atom_dict: dict[str, Any] = dict(row._mapping)
+            # asyncpg returns dict-like Record objects
+            atom_dict = dict(row)
             similarity = atom_dict.pop("similarity")
 
             atom = Atom(**atom_dict)
@@ -376,3 +363,73 @@ class SemanticSearchService:
         logger.info(f"Found {len(atoms_with_scores)} similar atoms for atom_id={atom_id} (threshold={threshold})")
 
         return atoms_with_scores
+
+    async def search_topics(
+        self,
+        session: AsyncSession,
+        query: str,
+        limit: int = 10,
+        threshold: float | None = None,
+    ) -> list[tuple[Topic, float]]:
+        """Search topics by semantic similarity to query text.
+
+        Args:
+            session: Database session
+            query: Search query text
+            limit: Maximum number of results to return
+            threshold: Minimum similarity score (default: from config)
+
+        Returns:
+            List of (topic, similarity_score) tuples, ordered by similarity
+
+        Raises:
+            ValueError: If embedding_service is not configured or query is empty
+            Exception: If embedding generation or search fails
+
+        Example:
+            >>> service = SemanticSearchService(embedding_service)
+            >>> results = await service.search_topics(session, "mobile development", limit=5)
+            >>> for topic, score in results:
+            ...     print(f"{score:.3f}: {topic.name}")
+        """
+        if threshold is None:
+            threshold = ai_config.vector_search.semantic_search_threshold
+
+        if not self.embedding_service:
+            raise ValueError("EmbeddingService is required for text-based search")
+
+        if not query or not query.strip():
+            raise ValueError("Search query cannot be empty")
+
+        query_embedding = await self.embedding_service.generate_embedding(query)
+        query_vector = str(query_embedding)
+
+        sql = """
+            SELECT
+                t.*,
+                1 - (t.embedding <=> $1::vector) / 2 AS similarity
+            FROM topics t
+            WHERE
+                t.embedding IS NOT NULL
+                AND (1 - (t.embedding <=> $1::vector) / 2) >= $2
+            ORDER BY t.embedding <=> $1::vector
+            LIMIT $3
+        """
+
+        conn = await session.connection()
+        raw_conn = await conn.get_raw_connection()
+        driver_conn = raw_conn.driver_connection
+        assert driver_conn is not None, "Driver connection is None"
+        rows = await driver_conn.fetch(sql, query_vector, threshold, limit)
+
+        topics_with_scores: list[tuple[Topic, float]] = []
+        for row in rows:
+            topic_dict = dict(row)
+            similarity = topic_dict.pop("similarity")
+
+            topic = Topic(**topic_dict)
+            topics_with_scores.append((topic, float(similarity)))
+
+        logger.info(f"Found {len(topics_with_scores)} topics for query '{query[:50]}...' (threshold={threshold})")
+
+        return topics_with_scores
