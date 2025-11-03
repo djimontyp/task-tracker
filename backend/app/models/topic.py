@@ -3,8 +3,9 @@
 import re
 import uuid
 
+from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
 from pydantic import field_validator
-from sqlalchemy import Text
+from sqlalchemy import Column, Text
 from sqlmodel import Field, Relationship, SQLModel
 
 from .base import TimestampMixin
@@ -222,6 +223,11 @@ class Topic(TimestampMixin, SQLModel, table=True):
         default=None,
         max_length=7,
         description="Hex color code for UI (format: #RRGGBB)",
+    )
+    embedding: list[float] | None = Field(
+        default=None,
+        sa_column=Column(Vector(1536)),
+        description="Vector embedding for semantic search (1536 dimensions)",
     )
 
     # Versioning relationship

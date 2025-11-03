@@ -84,8 +84,12 @@ class EmbeddingSettings(BaseSettings):
         validation_alias=AliasChoices("OPENAI_EMBEDDING_DIMENSIONS", "openai_embedding_dimensions"),
     )
     ollama_embedding_model: str = Field(
-        default="llama3",
+        default="nomic-embed-text",
         validation_alias=AliasChoices("OLLAMA_EMBEDDING_MODEL", "ollama_embedding_model"),
+    )
+    ollama_embedding_dimensions: int = Field(
+        default=768,
+        validation_alias=AliasChoices("OLLAMA_EMBEDDING_DIMENSIONS", "ollama_embedding_dimensions"),
     )
     vector_similarity_threshold: float = Field(
         default=0.7,

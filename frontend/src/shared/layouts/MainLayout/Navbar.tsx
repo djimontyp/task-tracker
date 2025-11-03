@@ -23,6 +23,7 @@ import { useServiceStatus } from '@/features/websocket/hooks/useServiceStatus'
 import { cn } from '@/shared/lib/utils'
 import { NavUser } from '@/shared/components/NavUser'
 import { UniversalThemeIcon, AdminBadge } from '@/shared/components'
+import { SearchBar } from '@/features/search/components'
 import { useBreadcrumbs } from './useBreadcrumbs'
 import { useAdminMode } from '@/shared/hooks'
 
@@ -120,6 +121,10 @@ const Navbar = () => {
               })}
             </BreadcrumbList>
           </Breadcrumb>
+        </div>
+
+        <div className="hidden lg:flex items-center flex-1 justify-center max-w-md mx-4">
+          <SearchBar />
         </div>
 
         <div className="flex items-center gap-3 flex-shrink-0">
