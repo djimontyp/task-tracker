@@ -10,7 +10,7 @@ import type {
 } from '../types';
 
 export const versioningService = {
-  async getTopicVersions(topicId: number): Promise<TopicVersion[]> {
+  async getTopicVersions(topicId: string): Promise<TopicVersion[]> {
     const response = await apiClient.get<TopicVersion[]>(
       `/api/v1/versions/topics/${topicId}/versions`
     );
@@ -18,7 +18,7 @@ export const versioningService = {
   },
 
   async getTopicVersionDiff(
-    topicId: number,
+    topicId: string,
     version: number,
     compareToVersion: number
   ): Promise<VersionDiff> {
@@ -29,7 +29,7 @@ export const versioningService = {
     return response.data;
   },
 
-  async approveTopicVersion(topicId: number, version: number): Promise<TopicVersion> {
+  async approveTopicVersion(topicId: string, version: number): Promise<TopicVersion> {
     const response = await apiClient.post<TopicVersion>(
       `/api/v1/versions/topics/${topicId}/versions/${version}/approve`,
       {}
@@ -37,7 +37,7 @@ export const versioningService = {
     return response.data;
   },
 
-  async rejectTopicVersion(topicId: number, version: number): Promise<TopicVersion> {
+  async rejectTopicVersion(topicId: string, version: number): Promise<TopicVersion> {
     const response = await apiClient.post<TopicVersion>(
       `/api/v1/versions/topics/${topicId}/versions/${version}/reject`,
       {}
