@@ -2,10 +2,9 @@
 
 import asyncio
 from datetime import UTC, datetime
-from typing import Any
 
 from loguru import logger
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import AnalysisRun
@@ -55,8 +54,7 @@ class MetricsBroadcaster:
 
         # Active analysis runs
         active_runs_result = await db.execute(
-            select(func.count()).select_from(AnalysisRun)
-            .where(AnalysisRun.status.in_(["pending", "processing"]))  # type: ignore[attr-defined]
+            select(func.count()).select_from(AnalysisRun).where(AnalysisRun.status.in_(["pending", "processing"]))  # type: ignore[attr-defined]
         )
         active_runs = active_runs_result.scalar() or 0
 
@@ -79,9 +77,7 @@ class MetricsBroadcaster:
             trends=trends,
         )
 
-    async def broadcast_metrics_update(
-        self, db: AsyncSession, event_type: str = "metrics:update"
-    ) -> None:
+    async def broadcast_metrics_update(self, db: AsyncSession, event_type: str = "metrics:update") -> None:
         """Calculate and broadcast metrics update to WebSocket clients.
 
         Rate-limited to max 1 update per second to prevent spam.

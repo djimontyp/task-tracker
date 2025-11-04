@@ -7,13 +7,11 @@ This script simulates metric changes and verifies WebSocket broadcasts work.
 """
 
 import asyncio
-from datetime import UTC, datetime
-
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
 
 from app.services.metrics_broadcaster import metrics_broadcaster
 from app.services.websocket_manager import websocket_manager
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 
 async def test_metrics_broadcast() -> None:

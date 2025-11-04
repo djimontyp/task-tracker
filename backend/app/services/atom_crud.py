@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import uuid
+from datetime import UTC
 
 from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
@@ -260,7 +261,7 @@ class AtomCRUD(BaseCRUD[Atom]):
             Uses database transaction for atomicity. Already-archived atoms
             are updated idempotently (re-archiving is safe).
         """
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         archived_count = 0
         failed_ids: list[str] = []
@@ -285,7 +286,7 @@ class AtomCRUD(BaseCRUD[Atom]):
                         continue
 
                     atom.archived = True
-                    atom.archived_at = datetime.now(timezone.utc)
+                    atom.archived_at = datetime.now(UTC)
                     self.session.add(atom)
                     archived_count += 1
 
@@ -324,7 +325,6 @@ class AtomCRUD(BaseCRUD[Atom]):
             Uses database transaction for atomicity. Foreign key constraints
             (NO ACTION) require manual cascade delete of related records.
         """
-        from app.models.atom_version import AtomVersion
 
         deleted_count = 0
         failed_ids: list[str] = []

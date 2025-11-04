@@ -190,7 +190,7 @@ async def generate_message_embedding(
     try:
         has_embedding = message.embedding is not None and len(message.embedding) > 0
     except (ValueError, AttributeError):
-        has_embedding = hasattr(message.embedding, '__len__') and len(message.embedding) > 0
+        has_embedding = hasattr(message.embedding, "__len__") and len(message.embedding) > 0
 
     if has_embedding:
         return EmbedResponse(id=message_id, embedding_length=len(message.embedding), status="skipped")
@@ -252,7 +252,7 @@ async def generate_atom_embedding(
     try:
         has_embedding = atom.embedding is not None and len(atom.embedding) > 0
     except (ValueError, AttributeError):
-        has_embedding = hasattr(atom.embedding, '__len__') and len(atom.embedding) > 0
+        has_embedding = hasattr(atom.embedding, "__len__") and len(atom.embedding) > 0
 
     if has_embedding:
         return EmbedResponse(id=atom_id, embedding_length=len(atom.embedding), status="skipped")

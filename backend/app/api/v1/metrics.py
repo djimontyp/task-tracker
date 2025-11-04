@@ -37,7 +37,7 @@ async def get_dashboard_metrics(
 
     **Example:**
     ```
-    GET /api/v1/metrics/dashboard
+    GET / api / v1 / metrics / dashboard
     ```
     """
     # Use the broadcaster's calculation method for consistency

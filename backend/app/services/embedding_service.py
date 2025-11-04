@@ -186,7 +186,11 @@ class EmbeddingService:
             )
 
         try:
-            base_url = self.provider.base_url.rstrip("/v1") if self.provider.base_url.endswith("/v1") else self.provider.base_url
+            base_url = (
+                self.provider.base_url.rstrip("/v1")
+                if self.provider.base_url.endswith("/v1")
+                else self.provider.base_url
+            )
             embed_url = f"{base_url}/api/embed"
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
@@ -225,7 +229,7 @@ class EmbeddingService:
         try:
             has_embedding = message.embedding is not None and len(message.embedding) > 0
         except (ValueError, AttributeError):
-            has_embedding = hasattr(message.embedding, '__len__') and len(message.embedding) > 0
+            has_embedding = hasattr(message.embedding, "__len__") and len(message.embedding) > 0
 
         if has_embedding:
             logger.debug(f"Message {message.id} already has embedding, skipping")
@@ -266,7 +270,7 @@ class EmbeddingService:
         try:
             has_embedding = atom.embedding is not None and len(atom.embedding) > 0
         except (ValueError, AttributeError):
-            has_embedding = hasattr(atom.embedding, '__len__') and len(atom.embedding) > 0
+            has_embedding = hasattr(atom.embedding, "__len__") and len(atom.embedding) > 0
 
         if has_embedding:
             logger.debug(f"Atom {atom.id} already has embedding, skipping")
@@ -375,7 +379,7 @@ class EmbeddingService:
                     try:
                         has_embedding = msg.embedding is not None and len(msg.embedding) > 0
                     except (ValueError, AttributeError):
-                        has_embedding = hasattr(msg.embedding, '__len__') and len(msg.embedding) > 0
+                        has_embedding = hasattr(msg.embedding, "__len__") and len(msg.embedding) > 0
 
                     if has_embedding:
                         stats["skipped"] += 1
@@ -453,7 +457,7 @@ class EmbeddingService:
                     try:
                         has_embedding = atom.embedding is not None and len(atom.embedding) > 0
                     except (ValueError, AttributeError):
-                        has_embedding = hasattr(atom.embedding, '__len__') and len(atom.embedding) > 0
+                        has_embedding = hasattr(atom.embedding, "__len__") and len(atom.embedding) > 0
 
                     if has_embedding:
                         stats["skipped"] += 1

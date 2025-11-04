@@ -1,8 +1,7 @@
 """API endpoints for prompt configuration and tuning."""
 
 import logging
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException
 
@@ -118,7 +117,7 @@ async def list_prompts() -> PromptListResponse:
                 prompt_type=prompt_type,
                 prompt_text=prompt_text,
                 placeholders=REQUIRED_PLACEHOLDERS.get(prompt_type, []),
-                updated_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(UTC),
                 updated_by=None,
             )
         )
@@ -148,7 +147,7 @@ async def get_prompt(prompt_type: PromptType) -> PromptConfig:
         prompt_type=prompt_type,
         prompt_text=prompt_text,
         placeholders=REQUIRED_PLACEHOLDERS.get(prompt_type, []),
-        updated_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(UTC),
         updated_by=None,
     )
 
@@ -193,6 +192,6 @@ async def update_prompt(prompt_type: PromptType, request: PromptUpdateRequest) -
         prompt_type=prompt_type,
         prompt_text=request.prompt_text,
         placeholders=REQUIRED_PLACEHOLDERS.get(prompt_type, []),
-        updated_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(UTC),
         updated_by=request.updated_by,
     )

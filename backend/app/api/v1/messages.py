@@ -4,8 +4,8 @@ from datetime import date, datetime
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlmodel import and_, func, select
 from pydantic import BaseModel
+from sqlmodel import and_, func, select
 
 from app.api.v1.response_models import PaginatedMessagesResponse
 from app.dependencies import DatabaseDep
