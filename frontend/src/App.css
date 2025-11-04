@@ -532,35 +532,6 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Analytics Content */
-.analytics-content {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.analytics-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0 0 2rem 0;
-  color: var(--text-primary);
-}
-
-.analytics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 2rem;
-}
-
-.analytics-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  padding: 1.5rem;
-}
-
 .card-title {
   font-size: 1.25rem;
   font-weight: 600;
@@ -656,7 +627,6 @@
 
   .dashboard-content,
   .tasks-content,
-  .analytics-content,
   .settings-content {
     padding: 1rem;
   }
@@ -707,15 +677,6 @@
   .task-filters {
     flex-direction: column;
     gap: 1rem;
-  }
-
-  .analytics-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .analytics-card {
-    padding: 1rem;
   }
 
   /* Webhook form responsive adjustments */
@@ -991,7 +952,6 @@
 /* Sidebar Layout Content Adjustments */
 .app.sidebar-layout .dashboard-content,
 .app.sidebar-layout .tasks-content,
-.app.sidebar-layout .analytics-content,
 .app.sidebar-layout .settings-content {
   padding: 2rem;
   max-width: none;

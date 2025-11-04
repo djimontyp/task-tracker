@@ -61,9 +61,6 @@ const breadcrumbMap: Record<string, BreadcrumbSegment[]> = {
     { label: 'Automation', href: '/automation/dashboard' },
     { label: 'Notifications' },
   ],
-  '/analytics': [
-    { label: 'Analytics' },
-  ],
   '/monitoring': [
     { label: 'Task Monitoring' },
   ],

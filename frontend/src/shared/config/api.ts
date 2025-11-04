@@ -17,7 +17,6 @@ export const API_ENDPOINTS = {
 
   taskConfigs: buildApiPath('task-configs'),
 
-  stats: buildApiPath('stats'),
   activity: buildApiPath('activity'),
   sidebarCounts: buildApiPath('sidebar-counts'),
 
@@ -50,11 +49,6 @@ export const API_ENDPOINTS = {
   ollamaModels: (host: string) => buildApiPath(`providers/ollama/models?host=${encodeURIComponent(host)}`),
   projects: buildApiPath('projects'),
   topics: buildApiPath('topics'),
-
-  experiments: {
-    base: buildApiPath('experiments/topic-classification'),
-    detail: (id: number) => buildApiPath(`experiments/topic-classification/${id}`),
-  },
 
   noise: {
     stats: buildApiPath('noise/stats'),

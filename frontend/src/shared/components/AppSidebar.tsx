@@ -21,7 +21,6 @@ import { useUiStore } from '@/shared/store/uiStore'
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -40,9 +39,6 @@ import { cn } from '@/shared/lib/utils'
 import { statsService, type SidebarCounts } from '@/shared/api/statsService'
 import { NotificationBadge } from '@/shared/ui'
 import { GlobalKnowledgeExtractionDialog } from '@/features/knowledge'
-import { useTheme } from '@/shared/components/ThemeProvider'
-import { UniversalThemeIcon } from '@/shared/components/ThemeIcons'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
 
 interface NavItem {
   path: string;
@@ -94,13 +90,6 @@ const navGroups: NavGroup[] = [
       { path: '/automation/notifications', label: 'Notifications', icon: BellIcon },
     ],
   },
-  {
-    label: 'Analytics & Reports',
-    hoverColor: 'pink',
-    items: [
-      { path: '/analytics', label: 'Analytics', icon: ChartBarIcon },
-    ],
-  },
 ]
 
 const getHoverClasses = (color: string = 'primary') => {
@@ -119,32 +108,7 @@ export function AppSidebar() {
   const groups = useMemo(() => navGroups, [])
   const location = useLocation()
   const queryClient = useQueryClient()
-  const { theme, setTheme } = useTheme()
   const { expandedGroups, setExpandedGroup } = useUiStore()
-
-  // Cycle through themes: light → dark → system → light
-  const cycleTheme = () => {
-    if (theme === 'light') {
-      setTheme('dark')
-    } else if (theme === 'dark') {
-      setTheme('system')
-    } else {
-      setTheme('light')
-    }
-  }
-
-  const getThemeLabel = () => {
-    switch (theme) {
-      case 'light':
-        return 'Light theme'
-      case 'dark':
-        return 'Dark theme'
-      case 'system':
-        return 'System theme'
-      default:
-        return 'Change theme'
-    }
-  }
 
   // Auto-expand groups when navigating to their pages (only if not explicitly collapsed by user)
   useEffect(() => {
@@ -428,29 +392,6 @@ export function AppSidebar() {
             )
           })}
         </SidebarContent>
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <SidebarMenuButton
-                      onClick={cycleTheme}
-                      tooltip={getThemeLabel()}
-                      aria-label="Change theme"
-                    >
-                      <UniversalThemeIcon theme={theme} />
-                      <span className="group-data-[collapsible=icon]:hidden">{getThemeLabel()}</span>
-                    </SidebarMenuButton>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p>{getThemeLabel()}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
       </Sidebar>
   )
 }

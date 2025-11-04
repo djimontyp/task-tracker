@@ -10,7 +10,6 @@ const MessagesPage = lazy(() => import('@pages/MessagesPage'))
 const AgentsPage = lazy(() => import('@pages/AgentsPage'))
 const AgentTasksPage = lazy(() => import('@pages/AgentTasksPage'))
 const ProjectsPage = lazy(() => import('@pages/ProjectsPage'))
-const AnalyticsPage = lazy(() => import('@pages/AnalyticsPage'))
 const NoiseFilteringDashboard = lazy(() => import('@pages/NoiseFilteringDashboard'))
 const SettingsPage = lazy(() => import('@pages/SettingsPage'))
 const AutomationOnboardingPage = lazy(() => import('@pages/AutomationOnboardingPage'))
@@ -40,7 +39,6 @@ const AppRoutes = () => {
         <Route element={<Navigate to="/settings" replace />} path="/providers" />
         <Route element={<MainLayout><ProjectsPage /></MainLayout>} path="/projects" />
         <Route element={<MainLayout><NoiseFilteringDashboard /></MainLayout>} path="/noise-filtering" />
-        <Route element={<MainLayout><AnalyticsPage /></MainLayout>} path="/analytics" />
         <Route element={<MainLayout><SettingsPage /></MainLayout>} path="/settings" />
         <Route element={<MainLayout><AutomationOnboardingPage /></MainLayout>} path="/onboarding/automation" />
         <Route element={<MainLayout><AutomationDashboardPage /></MainLayout>} path="/automation/dashboard" />
