@@ -13,7 +13,6 @@ from app.models import AgentConfig, LLMProvider, Message
 from app.services.embedding_service import EmbeddingService
 from app.services.knowledge_extraction_service import KnowledgeExtractionService
 from app.services.websocket_manager import websocket_manager
-from app.utils.retry_utils import task_retry_with_dlq
 
 
 @nats_broker.task
@@ -105,7 +104,6 @@ async def embed_atoms_batch_task(atom_ids: list[uuid.UUID], provider_id: str) ->
 
 
 @nats_broker.task
-@task_retry_with_dlq(max_attempts=3, task_name="extract_knowledge")
 async def extract_knowledge_from_messages_task(
     message_ids: list[uuid.UUID], agent_config_id: str, created_by: str | None = None
 ) -> dict[str, int]:
