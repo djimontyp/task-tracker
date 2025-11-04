@@ -215,8 +215,10 @@ class WebSocketManager:
             return
 
         try:
+            from app.core.json_encoder import UUIDJSONEncoder
+
             subject = f"websocket.{topic}"
-            message_bytes = json.dumps(message).encode()
+            message_bytes = json.dumps(message, cls=UUIDJSONEncoder).encode()
             await self._nats_client.publish(subject, message_bytes)
             logger.debug(f"📤 Published to NATS {subject}: {message.get('type', 'unknown')}")
         except Exception as e:
@@ -240,7 +242,9 @@ class WebSocketManager:
             logger.debug(f"⚠️ No active WebSocket clients for topic {topic}")
             return
 
-        message_json = json.dumps(message)
+        from app.core.json_encoder import UUIDJSONEncoder
+
+        message_json = json.dumps(message, cls=UUIDJSONEncoder)
         logger.info(
             f"📡 Broadcasting {message.get('type', 'unknown')} to {len(connections)} client(s) on topic {topic}"
         )
