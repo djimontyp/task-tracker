@@ -190,7 +190,7 @@ class KnowledgeOrchestrator:
                     "color": color,
                 }
 
-                version = await versioning_service.create_topic_version(
+                await versioning_service.create_topic_version(
                     db=session,
                     topic_id=existing_topic.id,
                     data=version_data,
@@ -289,7 +289,7 @@ class KnowledgeOrchestrator:
                     "meta": {"source": "llm_extraction", "message_ids": extracted_atom.related_message_ids},
                 }
 
-                version = await versioning_service.create_atom_version(
+                await versioning_service.create_atom_version(
                     db=session,
                     atom_id=existing_atom.id,
                     data=version_data,
