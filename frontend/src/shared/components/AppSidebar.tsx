@@ -1,22 +1,18 @@
 import { useMemo, useEffect, Fragment } from 'react'
 import {
   Squares2X2Icon,
-  CheckCircleIcon,
   ChartBarIcon,
   Cog6ToothIcon,
   SignalIcon,
   CpuChipIcon,
-  LightBulbIcon,
   EnvelopeIcon,
   ChatBubbleLeftRightIcon,
   ListBulletIcon,
-  ClipboardDocumentListIcon,
   FolderIcon,
   FunnelIcon,
   BellIcon,
   CalendarIcon,
   SparklesIcon,
-  CircleStackIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/solid'
 import { Link, useLocation } from 'react-router-dom'
@@ -69,15 +65,12 @@ const navGroups: NavGroup[] = [
       { path: '/', label: 'Overview', icon: Squares2X2Icon },
       { path: '/messages', label: 'Messages', icon: EnvelopeIcon },
       { path: '/topics', label: 'Topics', icon: ChatBubbleLeftRightIcon },
-      { path: '/tasks', label: 'Tasks', icon: CheckCircleIcon },
     ],
   },
   {
     label: 'AI Operations',
     hoverColor: 'purple',
     items: [
-      { path: '/analysis', label: 'Analysis Runs', icon: LightBulbIcon },
-      { path: '/proposals', label: 'Task Proposals', icon: ClipboardDocumentListIcon },
       { path: '/noise-filtering', label: 'Noise Filtering', icon: FunnelIcon },
     ],
     action: true,
@@ -106,7 +99,6 @@ const navGroups: NavGroup[] = [
     hoverColor: 'pink',
     items: [
       { path: '/analytics', label: 'Analytics', icon: ChartBarIcon },
-      { path: '/monitoring', label: 'Task Monitoring', icon: CircleStackIcon },
     ],
   },
 ]

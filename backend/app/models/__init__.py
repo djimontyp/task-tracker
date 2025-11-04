@@ -12,13 +12,6 @@ from .agent_task_assignment import (
     AgentTaskAssignmentPublic,
     AgentTaskAssignmentWithDetails,
 )
-from .analysis_run import (
-    AnalysisRun,
-    AnalysisRunCreate,
-    AnalysisRunListResponse,
-    AnalysisRunPublic,
-    AnalysisRunUpdate,
-)
 from .atom import (
     Atom,
     AtomCreate,
@@ -70,7 +63,6 @@ from .enums import (
     TaskPriority,
     TaskStatus,
 )
-from .failed_task import FailedTask
 from .legacy import (
     MessageCreate,
     MessagePublic,
@@ -122,16 +114,6 @@ from .scheduled_job import (
     ScheduledJobUpdate,
 )
 from .task_config import TaskConfig, TaskConfigCreate, TaskConfigPublic, TaskConfigUpdate
-from .task_entity import TaskEntity, TaskEntityPublic
-from .task_execution_log import TaskExecutionLog
-from .task_execution_log import TaskStatus as TaskExecutionStatus
-from .task_proposal import (
-    TaskProposal,
-    TaskProposalCreate,
-    TaskProposalListResponse,
-    TaskProposalPublic,
-    TaskProposalUpdate,
-)
 from .telegram_profile import TelegramProfile
 from .topic import (
     ICON_COLORS,
@@ -240,18 +222,6 @@ __all__ = [
     "AgentTaskAssignmentCreate",
     "AgentTaskAssignmentPublic",
     "AgentTaskAssignmentWithDetails",
-    # Analysis Run
-    "AnalysisRun",
-    "AnalysisRunCreate",
-    "AnalysisRunListResponse",
-    "AnalysisRunPublic",
-    "AnalysisRunUpdate",
-    # Task Proposal
-    "TaskProposal",
-    "TaskProposalCreate",
-    "TaskProposalPublic",
-    "TaskProposalUpdate",
-    "TaskProposalListResponse",
     # Classification Experiment
     "ClassificationExperiment",
     "ExperimentCreate",
@@ -267,9 +237,6 @@ __all__ = [
     "ProjectConfigPublic",
     "ProjectConfigUpdate",
     "ProjectConfigListResponse",
-    # Task Entity (Phase 2 placeholder)
-    "TaskEntity",
-    "TaskEntityPublic",
     # Topic
     "Topic",
     "TopicCreate",
@@ -305,9 +272,4 @@ __all__ = [
     "TopicVersionPublic",
     "AtomVersion",
     "AtomVersionPublic",
-    # Task Execution Logging
-    "TaskExecutionLog",
-    "TaskExecutionStatus",
-    # Failed Task (Dead Letter Queue)
-    "FailedTask",
 ]
