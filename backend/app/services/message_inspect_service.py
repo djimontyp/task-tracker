@@ -148,8 +148,6 @@ class MessageInspectService:
                 topic_title = topic.name
                 topic_id_str = str(topic.id)
 
-        classification_data = message.noise_factors or {}
-
         reasoning = message.classification or "No reasoning available"
         noise_score = message.importance_score or 0.0
         noise_score = (1.0 - noise_score) * 100.0
