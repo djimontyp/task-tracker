@@ -104,8 +104,8 @@ async def embed_atoms_batch_task(atom_ids: list[uuid.UUID], provider_id: str) ->
         raise
 
 
-@task_retry_with_dlq(max_attempts=3, task_name="extract_knowledge")
 @nats_broker.task
+@task_retry_with_dlq(max_attempts=3, task_name="extract_knowledge")
 async def extract_knowledge_from_messages_task(
     message_ids: list[uuid.UUID], agent_config_id: str, created_by: str | None = None
 ) -> dict[str, int]:
