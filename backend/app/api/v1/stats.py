@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlmodel import and_, func, select
+from sqlmodel import and_, select
 
 from app.api.deps import DatabaseDep
 from app.api.v1.response_models import (
@@ -13,8 +13,10 @@ from app.api.v1.response_models import (
     TaskStatusCounts,
     TrendData,
 )
-from app.models import AnalysisRun, Message, Source, Task, TaskProposal
-from app.models.enums import AnalysisRunStatus, ProposalStatus
+from app.models import Message, Source, Task
+
+# TODO: Remove Task (legacy) after migration
+# from app.models.enums import AnalysisRunStatus, ProposalStatus
 from app.services.websocket_manager import websocket_manager
 
 router = APIRouter(tags=["statistics"])
@@ -354,30 +356,10 @@ async def get_sidebar_counts(db: DatabaseDep) -> SidebarCountsResponse:
     These counts are used to display notification badges in the sidebar
     navigation to alert the PM about items requiring attention.
     """
-    # Count unclosed analysis runs (status != closed)
-    unclosed_statuses = [
-        AnalysisRunStatus.pending.value,
-        AnalysisRunStatus.running.value,
-        AnalysisRunStatus.completed.value,
-        AnalysisRunStatus.reviewed.value,
-    ]
-
-    unclosed_runs_statement = (
-        select(func.count())
-        .select_from(AnalysisRun)
-        .where(
-            AnalysisRun.status.in_(unclosed_statuses)  # type: ignore[attr-defined]
-        )
-    )
-    unclosed_runs_result = await db.execute(unclosed_runs_statement)
-    unclosed_runs_count = unclosed_runs_result.scalar() or 0
-
-    # Count pending proposals
-    pending_proposals_statement = (
-        select(func.count()).select_from(TaskProposal).where(TaskProposal.status == ProposalStatus.pending.value)
-    )
-    pending_proposals_result = await db.execute(pending_proposals_statement)
-    pending_proposals_count = pending_proposals_result.scalar() or 0
+    # NOTE: Task classification removed in nuclear cleanup
+    # unclosed_runs and pending_proposals always 0
+    unclosed_runs_count = 0
+    pending_proposals_count = 0
 
     return SidebarCountsResponse(
         unclosed_runs=unclosed_runs_count,
