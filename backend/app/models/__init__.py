@@ -40,16 +40,6 @@ from .automation_rule import (
     RuleAction,
 )
 from .base import IDMixin, TimestampMixin
-from .classification_experiment import (
-    ClassificationExperiment,
-    ClassificationResultDetail,
-    ExperimentCreate,
-    ExperimentDetailPublic,
-    ExperimentListResponse,
-    ExperimentPublic,
-    ExperimentStatus,
-    ExperimentUpdate,
-)
 from .classification_feedback import ClassificationFeedback, ClassificationFeedbackPublic
 from .enums import (
     AnalysisRunStatus,
@@ -222,15 +212,6 @@ __all__ = [
     "AgentTaskAssignmentCreate",
     "AgentTaskAssignmentPublic",
     "AgentTaskAssignmentWithDetails",
-    # Classification Experiment
-    "ClassificationExperiment",
-    "ExperimentCreate",
-    "ExperimentUpdate",
-    "ExperimentPublic",
-    "ExperimentDetailPublic",
-    "ExperimentListResponse",
-    "ExperimentStatus",
-    "ClassificationResultDetail",
     # Project Config
     "ProjectConfig",
     "ProjectConfigCreate",

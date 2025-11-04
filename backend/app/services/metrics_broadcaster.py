@@ -54,7 +54,7 @@ class MetricsBroadcaster:
         # NOTE: AnalysisRun model removed - always return 0
         active_runs = 0
 
-        # Classification accuracy (mock for now - would come from experiments)
+        # Classification accuracy (placeholder - would need implementation)
         classification_accuracy = 92.3
 
         # Trend calculations (simplified - would need historical data)

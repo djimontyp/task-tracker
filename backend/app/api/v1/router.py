@@ -6,7 +6,6 @@ from app.api.v1 import (
     atoms,
     automation,
     embeddings,
-    experiments,
     health,
     ingestion,
     knowledge,
@@ -43,7 +42,6 @@ api_router.include_router(task_configs.router)
 api_router.include_router(assignments.router)
 api_router.include_router(topics.router)
 api_router.include_router(atoms.router)
-api_router.include_router(experiments.router)
 api_router.include_router(embeddings.router)
 api_router.include_router(semantic_search.router)
 api_router.include_router(search.router)
