@@ -10,11 +10,9 @@ from app.database import get_db_session_context
 from app.models import Message
 from app.services.importance_scorer import ImportanceScorer
 from app.services.websocket_manager import websocket_manager
-from app.utils.retry_utils import task_retry_with_dlq
 
 
 @nats_broker.task
-@task_retry_with_dlq(max_attempts=3, task_name="score_message")
 async def score_message_task(message_id: uuid.UUID) -> dict[str, Any]:
     """Background task to score a single message using ImportanceScorer.
 

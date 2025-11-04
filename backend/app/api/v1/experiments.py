@@ -17,7 +17,8 @@ from app.models import (
     ExperimentStatus,
 )
 from app.services.topic_classification_service import TopicClassificationService
-from app.tasks import execute_classification_experiment
+# TODO: Re-implement execute_classification_experiment task
+# from app.tasks import execute_classification_experiment
 
 logger = logging.getLogger(__name__)
 
@@ -78,9 +79,9 @@ async def create_experiment(
             message_count=experiment_data.message_count,
         )
 
-        await execute_classification_experiment.kiq(experiment.id)
-
-        logger.info(f"Created experiment {experiment.id} and triggered background task")
+        # TODO: Re-implement execute_classification_experiment task after nuclear cleanup
+        # await execute_classification_experiment.kiq(experiment.id)
+        logger.warning(f"Created experiment {experiment.id} but NOT executed (task removed in nuclear cleanup)")
 
         return ExperimentPublic.model_validate(experiment)
 
