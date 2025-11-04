@@ -77,17 +77,17 @@ User: "Add real-time notifications"
 
 ### Common User Requests → Correct Response
 
-| User Says | ❌ DON'T | ✅ DO |
-|-----------|----------|-------|
-| "What's in TODO?" | Read NEXT_SESSION_TODO.md | `Task(subagent_type=Explore)` |
-| "Where is X implemented?" | Grep/Read files | `Task(subagent_type=Explore)` |
-| "Add feature Y" | Start coding | `Task(subagent_type=Plan)` → specialized agent |
-| "Fix bug Z" | Debug directly | `task-breakdown` → specialist |
-| "How does X work?" | Read multiple files | `Task(subagent_type=Explore)` |
-| "Review this code" | Read and review | `architecture-guardian` agent |
-| "Optimize performance" | Profile and fix | Specialist agent (database/vector/llm) |
-| "Add tests" | Write tests | `pytest-test-master` agent |
-| "Update docs" | Edit docs | `documentation-expert` agent |
+| User Says                 | ❌ DON'T                   | ✅ DO                                           |
+|---------------------------|---------------------------|------------------------------------------------|
+| "What's in TODO?"         | Read NEXT_SESSION_TODO.md | `Task(subagent_type=Explore)`                  |
+| "Where is X implemented?" | Grep/Read files           | `Task(subagent_type=Explore)`                  |
+| "Add feature Y"           | Start coding              | `Task(subagent_type=Plan)` → specialized agent |
+| "Fix bug Z"               | Debug directly            | `task-breakdown` → specialist                  |
+| "How does X work?"        | Read multiple files       | `Task(subagent_type=Explore)`                  |
+| "Review this code"        | Read and review           | `architecture-guardian` agent                  |
+| "Optimize performance"    | Profile and fix           | Specialist agent (database/vector/llm)         |
+| "Add tests"               | Write tests               | `pytest-test-master` agent                     |
+| "Update docs"             | Edit docs                 | `documentation-expert` agent                   |
 
 ### Agent Quick Reference
 
@@ -106,10 +106,10 @@ User: "Add real-time notifications"
 
 - **Task Analysis**: `task-breakdown` (assess complexity)
 - **Session Management**: `session-manager` (pause/resume/auto-save)
-- **Planning**: `Task(subagent_type=Plan)` (use subagent, not `/plan` command)
-- **Git**: `/stage`, `/commit` (or `smart-commit` skill)
-- **Documentation**: `/docs`, `sync-docs-structure`
-- **Database**: `migration-database`
+- **Planning**: `Task(subagent_type=Plan)`
+- **Git**: `smart-commit` skill
+- **Documentation**: `sync-docs-structure` skill
+- **Database**: `migration-database` skill
 
 ---
 
