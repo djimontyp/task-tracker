@@ -6,6 +6,9 @@ interface UiStore {
   toggleSidebar: () => void
   setSidebarOpen: (open: boolean) => void
 
+  expandedGroups: Record<string, boolean>
+  setExpandedGroup: (group: string, expanded: boolean) => void
+
   theme: 'light' | 'dark' | 'system'
   toggleTheme: () => void
   setTheme: (theme: 'light' | 'dark' | 'system') => void
@@ -21,6 +24,12 @@ export const useUiStore = create<UiStore>()(
       sidebarOpen: true,
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
+
+      expandedGroups: {},
+      setExpandedGroup: (group, expanded) =>
+        set((state) => ({
+          expandedGroups: { ...state.expandedGroups, [group]: expanded },
+        })),
 
       theme: 'system',
       toggleTheme: () => set((state) => {
@@ -39,6 +48,7 @@ export const useUiStore = create<UiStore>()(
       partialize: (state) => ({
         theme: state.theme,
         sidebarOpen: state.sidebarOpen,
+        expandedGroups: state.expandedGroups,
         isAdminMode: state.isAdminMode,
       }),
     }
