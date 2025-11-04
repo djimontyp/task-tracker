@@ -4,10 +4,8 @@ import asyncio
 from datetime import UTC, datetime
 
 from loguru import logger
-from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import AnalysisRun
 from app.schemas.metrics import DashboardMetricsResponse, MetricTrend
 from app.services.websocket_manager import websocket_manager
 
@@ -52,11 +50,9 @@ class MetricsBroadcaster:
         # Note: Message importance scoring would need to be implemented
         noise_ratio = 18.5  # Placeholder - implement when message scoring exists
 
-        # Active analysis runs
-        active_runs_result = await db.execute(
-            select(func.count()).select_from(AnalysisRun).where(AnalysisRun.status.in_(["pending", "processing"]))  # type: ignore[attr-defined]
-        )
-        active_runs = active_runs_result.scalar() or 0
+        # Active analysis runs (removed in nuclear cleanup)
+        # NOTE: AnalysisRun model removed - always return 0
+        active_runs = 0
 
         # Classification accuracy (mock for now - would come from experiments)
         classification_accuracy = 92.3
