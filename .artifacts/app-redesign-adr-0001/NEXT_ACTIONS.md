@@ -161,31 +161,59 @@ ERROR | Failed to publish to NATS: Object of type UUID is not JSON serializable
 
 ---
 
-### Priority 3: Production Monitoring (4-6h)
-**Goal:** Add observability for auto-task chain
+### Priority 3: Production Monitoring & Admin UI (6-8h)
+**Goal:** Add observability and configuration for auto-task chain
 
 **Tasks:**
-- [ ] Health dashboard showing last extraction time
-- [ ] Metrics: pending messages count, extraction latency
-- [ ] Admin UI for agent config management
-- [ ] Alerting for failed extractions
+- [ ] **Admin UI for Knowledge Extraction Settings** (2h)
+  - Expose `message_threshold` (default: 10)
+  - Expose `lookback_hours` (default: 24)
+  - Expose `batch_size` (default: 50)
+  - Store in `ai_config` table (new model)
+  - Real-time validation (min/max values)
+  - Apply changes without restart
+
+- [ ] Health dashboard showing last extraction time (1h)
+- [ ] Metrics: pending messages count, extraction latency (1h)
+- [ ] Admin UI for agent config management (2h)
+- [ ] Alerting for failed extractions (1h)
 
 **Owner:** fastapi-backend-expert + react-frontend-architect
+
+**Technical Details:**
+```python
+# New model: backend/app/models/ai_config.py
+class AIConfig(BaseModel):
+    id: UUID
+    key: str  # "knowledge_extraction_threshold", "lookback_hours", etc.
+    value: str  # JSON serialized
+    description: str
+    updated_at: datetime
+    updated_by: Optional[str]
+
+# API endpoint: POST /api/v1/admin/ai-config
+# Frontend: Admin Panel → AI Configuration
+```
 
 ---
 
 ### Priority 4: Performance Optimization (Optional)
-**Goal:** Tune threshold/batch size for production
+**Goal:** Tune extraction parameters for production
 
-**Current config:**
+**Current config (hardcoded in ai_config.py):**
 - Threshold: 10 messages (trigger extraction)
 - Batch size: 50 messages max
 - Lookback: 24 hours
 
+**After Admin UI (Priority 3):**
+- ✅ Change via web interface
+- ✅ A/B test different thresholds
+- ✅ Adjust based on usage patterns
+
 **Potential improvements:**
-- A/B test different thresholds
 - Add fallback LLM provider
 - Optimize embedding generation
+- Smart batching (dynamic threshold based on message velocity)
 
 ---
 
