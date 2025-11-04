@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState, Fragment } from 'react'
+import { useMemo, useEffect, Fragment } from 'react'
 import {
   Squares2X2Icon,
   CheckCircleIcon,
@@ -11,10 +11,8 @@ import {
   ChatBubbleLeftRightIcon,
   ListBulletIcon,
   ClipboardDocumentListIcon,
-  ServerIcon,
   FolderIcon,
   FunnelIcon,
-  ClockIcon,
   BellIcon,
   CalendarIcon,
   SparklesIcon,
@@ -23,6 +21,7 @@ import {
 } from '@heroicons/react/24/solid'
 import { Link, useLocation } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useUiStore } from '@/shared/store/uiStore'
 import {
   Sidebar,
   SidebarContent,
@@ -45,7 +44,6 @@ import { cn } from '@/shared/lib/utils'
 import { statsService, type SidebarCounts } from '@/shared/api/statsService'
 import { NotificationBadge } from '@/shared/ui'
 import { GlobalKnowledgeExtractionDialog } from '@/features/knowledge'
-import { PendingVersionsBadge } from '@/features/knowledge/components/PendingVersionsBadge'
 import { useTheme } from '@/shared/components/ThemeProvider'
 import { UniversalThemeIcon } from '@/shared/components/ThemeIcons'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
@@ -54,7 +52,6 @@ interface NavItem {
   path: string;
   label: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  customBadge?: boolean;
 }
 
 interface NavGroup {
@@ -82,7 +79,6 @@ const navGroups: NavGroup[] = [
       { path: '/analysis', label: 'Analysis Runs', icon: LightBulbIcon },
       { path: '/proposals', label: 'Task Proposals', icon: ClipboardDocumentListIcon },
       { path: '/noise-filtering', label: 'Noise Filtering', icon: FunnelIcon },
-      { path: '/versions', label: 'Versions', icon: ClockIcon, customBadge: true },
     ],
     action: true,
   },
@@ -92,7 +88,6 @@ const navGroups: NavGroup[] = [
     items: [
       { path: '/agents', label: 'Agents', icon: CpuChipIcon },
       { path: '/agent-tasks', label: 'Task Templates', icon: ListBulletIcon },
-      { path: '/providers', label: 'Providers', icon: ServerIcon },
       { path: '/projects', label: 'Projects', icon: FolderIcon },
     ],
   },
@@ -133,6 +128,7 @@ export function AppSidebar() {
   const location = useLocation()
   const queryClient = useQueryClient()
   const { theme, setTheme } = useTheme()
+  const { expandedGroups, setExpandedGroup } = useUiStore()
 
   // Cycle through themes: light → dark → system → light
   const cycleTheme = () => {
@@ -158,30 +154,19 @@ export function AppSidebar() {
     }
   }
 
-  // Track which groups should be expanded based on active routes
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
-    const initial: Record<string, boolean> = {}
-    groups.forEach((group) => {
-      // Check if any item in the group is active
-      const hasActiveItem = group.items.some((item) =>
-        item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
-      )
-      initial[group.label] = hasActiveItem
-    })
-    return initial
-  })
-
-  // Auto-expand groups when navigating to their pages
+  // Auto-expand groups when navigating to their pages (only if not explicitly collapsed by user)
   useEffect(() => {
-    const newExpandedState: Record<string, boolean> = {}
     groups.forEach((group) => {
       const hasActiveItem = group.items.some((item) =>
         item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
       )
-      newExpandedState[group.label] = hasActiveItem
+
+      // Only auto-expand if group was never explicitly set by user (undefined in store)
+      if (hasActiveItem && expandedGroups[group.label] === undefined) {
+        setExpandedGroup(group.label, true)
+      }
     })
-    setExpandedGroups(newExpandedState)
-  }, [location.pathname, groups])
+  }, [location.pathname, groups, expandedGroups, setExpandedGroup])
 
   // Fetch sidebar counts
   const { data: counts } = useQuery<SidebarCounts>({
@@ -271,7 +256,7 @@ export function AppSidebar() {
                 <Fragment key={group.label}>
                   <Collapsible
                     open={isGroupExpanded}
-                    onOpenChange={(open) => setExpandedGroups((prev) => ({ ...prev, [group.label]: open }))}
+                    onOpenChange={(open) => setExpandedGroup(group.label, open)}
                     className="group/collapsible"
                   >
                     <SidebarGroup className="group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-1">
@@ -424,20 +409,14 @@ export function AppSidebar() {
                                   <span className="group-data-[collapsible=icon]:sr-only">{item.label}</span>
                                 </Link>
                               </SidebarMenuButton>
-                              {item.customBadge && item.path === '/versions' ? (
-                                <div className="absolute right-2">
-                                  <PendingVersionsBadge />
-                                </div>
-                              ) : (
-                                <NotificationBadge
-                                  count={badgeCount || 0}
-                                  tooltip={badgeTooltip}
-                                  className={cn(
-                                    'absolute right-2',
-                                    isActive && 'bg-primary text-white dark:bg-primary dark:text-white border-primary'
-                                  )}
-                                />
-                              )}
+                              <NotificationBadge
+                                count={badgeCount || 0}
+                                tooltip={badgeTooltip}
+                                className={cn(
+                                  'absolute right-2',
+                                  isActive && 'bg-primary text-white dark:bg-primary dark:text-white border-primary'
+                                )}
+                              />
                             </div>
                           </SidebarMenuItem>
                         )

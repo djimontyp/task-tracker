@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { MainLayout } from '@/shared/layouts'
 import Spinner from '@/shared/ui/Spinner'
 
@@ -10,7 +10,6 @@ const TopicDetailPage = lazy(() => import('@pages/TopicDetailPage'))
 const MessagesPage = lazy(() => import('@pages/MessagesPage'))
 const AgentsPage = lazy(() => import('@pages/AgentsPage'))
 const AgentTasksPage = lazy(() => import('@pages/AgentTasksPage'))
-const ProvidersPage = lazy(() => import('@pages/ProvidersPage'))
 const ProjectsPage = lazy(() => import('@pages/ProjectsPage'))
 const AnalyticsPage = lazy(() => import('@pages/AnalyticsPage'))
 const AnalysisRunsPage = lazy(() => import('@pages/AnalysisRunsPage'))
@@ -23,7 +22,6 @@ const AutomationDashboardPage = lazy(() => import('@pages/AutomationDashboardPag
 const AutomationRulesPage = lazy(() => import('@pages/AutomationRulesPage'))
 const SchedulerPage = lazy(() => import('@pages/SchedulerPage'))
 const NotificationSettingsPage = lazy(() => import('@pages/NotificationSettingsPage'))
-const VersionsPage = lazy(() => import('@pages/VersionsPage'))
 const SearchPage = lazy(() => import('@pages/SearchPage'))
 
 const AppRoutes = () => {
@@ -46,7 +44,7 @@ const AppRoutes = () => {
         <Route element={<MainLayout><ProposalsPage /></MainLayout>} path="/proposals" />
         <Route element={<MainLayout><AgentsPage /></MainLayout>} path="/agents" />
         <Route element={<MainLayout><AgentTasksPage /></MainLayout>} path="/agent-tasks" />
-        <Route element={<MainLayout><ProvidersPage /></MainLayout>} path="/providers" />
+        <Route element={<Navigate to="/settings" replace />} path="/providers" />
         <Route element={<MainLayout><ProjectsPage /></MainLayout>} path="/projects" />
         <Route element={<MainLayout><NoiseFilteringDashboard /></MainLayout>} path="/noise-filtering" />
         <Route element={<MainLayout><MonitoringPage /></MainLayout>} path="/monitoring" />
@@ -57,7 +55,6 @@ const AppRoutes = () => {
         <Route element={<MainLayout><AutomationRulesPage /></MainLayout>} path="/automation/rules" />
         <Route element={<MainLayout><SchedulerPage /></MainLayout>} path="/automation/scheduler" />
         <Route element={<MainLayout><NotificationSettingsPage /></MainLayout>} path="/automation/notifications" />
-        <Route element={<MainLayout><VersionsPage /></MainLayout>} path="/versions" />
       </Routes>
     </Suspense>
   )

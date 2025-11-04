@@ -176,10 +176,6 @@ node_modules
 # Temporary test files
 tmp/
 
-# Claude Code session files (personal state, not team-shared)
-.claude/sessions/active/
-.claude/sessions/paused/
-# Keep completed/ for historical reference
 
 # Claude Code hook cooldown files (temporary state tracking)
 .claude/hooks/.last-commit-check
