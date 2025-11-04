@@ -11,7 +11,6 @@ All tasks are re-exported from this __init__.py for backward compatibility.
 """
 
 from app.config.ai_config import ai_config
-from app.tasks.analysis import execute_analysis_run, execute_classification_experiment
 from app.tasks.ingestion import (
     ingest_telegram_messages_task,
     process_message,
@@ -49,9 +48,6 @@ __all__ = [
     "scheduled_auto_approval_task",
     "scheduled_notification_alert_task",
     "scheduled_daily_digest_task",
-    # Analysis
-    "execute_analysis_run",
-    "execute_classification_experiment",
     # Config constants (backward compatibility)
     "KNOWLEDGE_EXTRACTION_THRESHOLD",
     "KNOWLEDGE_EXTRACTION_LOOKBACK_HOURS",
