@@ -183,8 +183,6 @@ async def get_telegram_webhook_info() -> dict[str, bool | dict[str, str] | str]:
 @router.put("/telegram/group-ids", response_model=TelegramWebhookConfig)
 async def update_telegram_group_ids(request: UpdateTelegramGroupIdsRequest, db: DatabaseDep) -> TelegramWebhookConfig:
     try:
-        groups = [{"id": gid, "name": None} for gid in request.group_ids]
-
         config = await webhook_settings_service.get_telegram_config(db)
         if config:
             for gid in request.group_ids:

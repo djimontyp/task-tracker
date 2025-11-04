@@ -304,11 +304,6 @@ async def get_message_filters(db: DatabaseDep) -> MessageFiltersResponse:
         for source_id, source_name in sources_result.all()
     ]
 
-    # Total messages count
-    count_statement = select(func.count())
-    count_result = await db.execute(count_statement)
-    total_messages = count_result.scalar() or 0
-
     # Date range
     date_range_statement = select(func.min(Message.sent_at), func.max(Message.sent_at))
     date_range_result = await db.execute(date_range_statement)
