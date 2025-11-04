@@ -11,7 +11,6 @@ This test module provides complete coverage for all /api/v1/atoms endpoints incl
 - Get topic messages (GET /api/v1/topics/{id}/messages)
 """
 
-import json
 import uuid
 from datetime import UTC, datetime
 

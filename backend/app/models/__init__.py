@@ -40,7 +40,6 @@ from .automation_rule import (
     RuleAction,
 )
 from .base import IDMixin, TimestampMixin
-from .classification_feedback import ClassificationFeedback, ClassificationFeedbackPublic
 from .classification_experiment import (
     ClassificationExperiment,
     ClassificationResultDetail,
@@ -51,6 +50,7 @@ from .classification_experiment import (
     ExperimentStatus,
     ExperimentUpdate,
 )
+from .classification_feedback import ClassificationFeedback, ClassificationFeedbackPublic
 from .enums import (
     AnalysisRunStatus,
     AnalysisStatus,

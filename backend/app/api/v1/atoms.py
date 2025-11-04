@@ -7,7 +7,7 @@ including CRUD operations and topic associations.
 import logging
 import uuid
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database import get_session

@@ -4,9 +4,6 @@ import uuid
 from datetime import datetime
 
 import pytest
-from httpx import AsyncClient
-from sqlmodel.ext.asyncio.session import AsyncSession
-
 from app.models import (
     ClassificationFeedback,
     Message,
@@ -15,6 +12,8 @@ from app.models import (
     Topic,
     User,
 )
+from httpx import AsyncClient
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 
 @pytest.fixture
