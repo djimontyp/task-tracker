@@ -15,7 +15,6 @@ description: |
   - User research/interviews → product-designer
   - Information architecture design → product-designer
   - React implementation → react-frontend-architect
-tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, WebSearch, SlashCommand
 model: sonnet
 color: pink
 ---
