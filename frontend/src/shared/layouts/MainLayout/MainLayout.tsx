@@ -49,11 +49,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       />
 
       {isDesktop ? (
-        <div className="flex flex-col min-h-screen pt-[56px]">
-          <div className="flex flex-1">
+        <div className="flex flex-col min-h-screen pt-[56px] overflow-x-hidden">
+          <div className="flex flex-1 min-w-0">
             <AppSidebar />
-            <SidebarInset>
-              <main id="main-content" className="flex flex-1 flex-col gap-4 p-4">
+            <SidebarInset className="min-w-0 flex-1">
+              <main id="main-content" className="flex flex-1 flex-col gap-4 p-4 w-full min-w-0">
                 {children}
               </main>
             </SidebarInset>

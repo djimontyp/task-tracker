@@ -105,7 +105,7 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
               <SidebarTrigger
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-11 w-11 shrink-0 rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="Toggle sidebar"
               />
             ) : (
@@ -113,7 +113,7 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
                 variant="ghost"
                 size="icon"
                 onClick={onMobileSidebarToggle}
-                className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-11 w-11 shrink-0 rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="Toggle sidebar"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
@@ -127,11 +127,11 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden h-9 w-9 sm:h-11 sm:w-11 aspect-square border border-border/60 bg-card/60 text-muted-foreground hover:bg-accent/15 hover:text-foreground shrink-0"
+              className="lg:hidden h-11 w-11 aspect-square border border-border/60 bg-card/60 text-muted-foreground hover:bg-accent/15 hover:text-foreground shrink-0"
               onClick={() => setMobileSearchOpen(true)}
               aria-label="Open search"
             >
-              <MagnifyingGlassIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              <MagnifyingGlassIcon className="h-5 w-5" />
             </Button>
 
             <div
@@ -223,11 +223,11 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="flex h-9 w-9 lg:h-11 lg:w-11 aspect-square border border-border/60 bg-card/60 text-muted-foreground hover:bg-accent/15 hover:text-foreground shrink-0"
+                  className="flex h-11 w-11 aspect-square border border-border/60 bg-card/60 text-muted-foreground hover:bg-accent/15 hover:text-foreground shrink-0"
                   onClick={cycleTheme}
                   aria-label="Change theme"
                 >
-                  <UniversalThemeIcon theme={theme} className="h-4 w-4 lg:h-5 lg:w-5" />
+                  <UniversalThemeIcon theme={theme} className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -243,9 +243,9 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
                   to="/settings"
                   aria-label="Settings"
                   title="Settings"
-                  className="inline-flex h-9 w-9 lg:h-11 lg:w-11 aspect-square items-center justify-center rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+                  className="inline-flex h-11 w-11 aspect-square items-center justify-center rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
                 >
-                  <AdjustmentsHorizontalIcon className="w-4 h-4 lg:w-5 lg:h-5" />
+                  <AdjustmentsHorizontalIcon className="w-5 h-5" />
                 </Link>
               </TooltipTrigger>
               <TooltipContent>
