@@ -182,7 +182,7 @@
 |------|------|------|-------------|
 | `.artifacts/EPIC_COMPLETION_REPORT.md` | Report | 15KB | Epic summary (5/5 sessions) |
 | `TYPE_SAFETY_STATUS_REPORT.md` | Analysis | 12KB | 180 type errors breakdown |
-| `/tmp/pytest_atoms_fixes_report.md` | Report | 8KB | Atoms test fixes details |
+| `.artifacts/reports/pytest_atoms_fixes_report.md` | Report | 8KB | Atoms test fixes details |
 
 ---
 

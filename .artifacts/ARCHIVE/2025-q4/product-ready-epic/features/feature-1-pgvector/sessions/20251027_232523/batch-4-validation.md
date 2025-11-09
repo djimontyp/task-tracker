@@ -399,7 +399,7 @@ LIMIT 1;
 ### Next Steps
 1. **Backfill Monitor**: Track Ollama model download completion
    - When complete, backfill_embeddings.py will run automatically
-   - Check `/tmp/backfill_output.log` for progress
+   - Check `.artifacts/logs/backfill_output.log` for progress
 
 2. **Production Deployment**:
    - Run migrations in production (alembic upgrade head)
