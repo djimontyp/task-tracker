@@ -1,7 +1,6 @@
 import { useMemo, useEffect, Fragment } from 'react'
 import {
   Squares2X2Icon,
-  ChartBarIcon,
   Cog6ToothIcon,
   SignalIcon,
   CpuChipIcon,
