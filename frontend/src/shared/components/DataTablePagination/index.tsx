@@ -40,13 +40,13 @@ export function DataTablePagination<TData>({
   }
 
   return (
-    <div className="flex items-center justify-between px-2 py-3">
-      <div className="flex-1 text-sm text-muted-foreground">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-2 py-3 w-full max-w-full overflow-x-hidden">
+      <div className="flex-1 text-sm text-muted-foreground w-full sm:w-auto">
         {table.getFilteredSelectedRowModel().rows.length} of{' '}
         {table.getFilteredRowModel().rows.length} row(s) selected.
       </div>
-      <div className="flex items-center space-x-6 lg:space-x-8">
-        <div className="flex items-center space-x-2">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4 lg:gap-6 w-full sm:w-auto">
+        <div className="hidden sm:flex items-center gap-2">
           <p className="text-sm font-medium">Rows per page</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
@@ -67,8 +67,8 @@ export function DataTablePagination<TData>({
           </Select>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">Page</span>
-          <form onSubmit={handlePageInputSubmit} className="flex items-center gap-2">
+          <span className="text-sm font-medium hidden sm:inline">Page</span>
+          <form onSubmit={handlePageInputSubmit} className="flex items-center gap-1 sm:gap-2">
             <Input
               type="number"
               min={1}
@@ -76,52 +76,32 @@ export function DataTablePagination<TData>({
               value={pageInput}
               onChange={handlePageInputChange}
               placeholder={String(currentPage)}
-              className="h-8 w-16 text-center"
+              className="h-8 w-12 sm:w-16 text-center"
               aria-label="Go to page"
             />
-            <span className="text-sm text-muted-foreground">of {totalPages}</span>
+            <span className="text-sm text-muted-foreground whitespace-nowrap">of {totalPages}</span>
           </form>
         </div>
-        <div className="flex items-center space-x-2">
-          {canPrevious && (
-            <>
-              <Button
-                variant="outline"
-                className="hidden h-8 w-8 p-0 lg:flex"
-                onClick={() => table.setPageIndex(0)}
-              >
-                <span className="sr-only">Go to first page</span>
-                <ChevronDoubleLeftIcon className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                className="h-8 w-8 p-0"
-                onClick={() => table.previousPage()}
-              >
-                <span className="sr-only">Go to previous page</span>
-                <ChevronLeftIcon className="h-4 w-4" />
-              </Button>
-            </>
+        <div className="flex items-center gap-1 sm:gap-2">
+          {canNext && (
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0 flex-shrink-0"
+              onClick={() => table.nextPage()}
+            >
+              <span className="sr-only">Go to next page</span>
+              <ChevronRightIcon className="h-4 w-4" />
+            </Button>
           )}
           {canNext && (
-            <>
-              <Button
-                variant="outline"
-                className="h-8 w-8 p-0"
-                onClick={() => table.nextPage()}
-              >
-                <span className="sr-only">Go to next page</span>
-                <ChevronRightIcon className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                className="hidden h-8 w-8 p-0 lg:flex"
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              >
-                <span className="sr-only">Go to last page</span>
-                <ChevronDoubleRightIcon className="h-4 w-4" />
-              </Button>
-            </>
+            <Button
+              variant="outline"
+              className="hidden lg:flex h-8 w-8 p-0 flex-shrink-0"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            >
+              <span className="sr-only">Go to last page</span>
+              <ChevronDoubleRightIcon className="h-4 w-4" />
+            </Button>
           )}
         </div>
       </div>

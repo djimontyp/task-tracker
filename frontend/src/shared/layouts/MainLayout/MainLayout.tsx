@@ -1,9 +1,10 @@
 import { ReactNode } from 'react'
 import { SidebarProvider, SidebarInset } from '@/shared/ui/sidebar'
+import { Sheet, SheetContent } from '@/shared/ui/sheet'
 import { AppSidebar } from '@/shared/components/AppSidebar'
 import { AdminPanel } from '@/shared/components/AdminPanel'
 import { useUiStore } from '@/shared/store/uiStore'
-import { useAdminMode, useKeyboardShortcut } from '@/shared/hooks'
+import { useAdminMode, useKeyboardShortcut, useMediaQuery } from '@/shared/hooks'
 import { toast } from 'sonner'
 import Navbar from './Navbar'
 
@@ -14,6 +15,7 @@ interface MainLayoutProps {
 const MainLayout = ({ children }: MainLayoutProps) => {
   const { sidebarOpen, setSidebarOpen } = useUiStore()
   const { isAdminMode, toggleAdminMode } = useAdminMode()
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   useKeyboardShortcut({
     key: 'a',
@@ -41,24 +43,49 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         Skip to main content
       </a>
 
-      <Navbar />
+      <Navbar
+        onMobileSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
+        isDesktop={isDesktop}
+      />
 
-      <div className="flex flex-col min-h-screen pt-[56px]">
-        <div className="flex flex-1">
-          <AppSidebar />
-          <SidebarInset>
-            <main id="main-content" className="flex flex-1 flex-col gap-4 p-4">
+      {isDesktop ? (
+        <div className="flex flex-col min-h-screen pt-[56px]">
+          <div className="flex flex-1">
+            <AppSidebar />
+            <SidebarInset>
+              <main id="main-content" className="flex flex-1 flex-col gap-4 p-4">
+                {children}
+              </main>
+            </SidebarInset>
+          </div>
+
+          <AdminPanel visible={isAdminMode}>
+            <div className="text-sm text-gray-500">
+              Admin tools will be added in Phase 2-6
+            </div>
+          </AdminPanel>
+        </div>
+      ) : (
+        <>
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <SheetContent side="left" className="p-0 w-[280px]">
+              <AppSidebar />
+            </SheetContent>
+          </Sheet>
+
+          <div className="flex flex-col min-h-screen pt-[100px] overflow-x-hidden">
+            <main id="main-content" className="flex flex-1 flex-col gap-4 p-2 sm:p-4 max-w-full">
               {children}
             </main>
-          </SidebarInset>
-        </div>
 
-        <AdminPanel visible={isAdminMode}>
-          <div className="text-sm text-gray-500">
-            Admin tools will be added in Phase 2-6
+            <AdminPanel visible={isAdminMode}>
+              <div className="text-sm text-gray-500">
+                Admin tools will be added in Phase 2-6
+              </div>
+            </AdminPanel>
           </div>
-        </AdminPanel>
-      </div>
+        </>
+      )}
     </SidebarProvider>
   )
 }
