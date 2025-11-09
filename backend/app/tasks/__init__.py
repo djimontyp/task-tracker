@@ -22,9 +22,7 @@ from app.tasks.knowledge import (
     embed_messages_batch_task,
     extract_knowledge_from_messages_task,
     scheduled_auto_approval_task,
-    scheduled_daily_digest_task,
     scheduled_knowledge_extraction_task,
-    scheduled_notification_alert_task,
 )
 from app.tasks.scoring import score_message_task, score_unscored_messages_task
 
@@ -46,8 +44,6 @@ __all__ = [
     "extract_knowledge_from_messages_task",
     "scheduled_knowledge_extraction_task",
     "scheduled_auto_approval_task",
-    "scheduled_notification_alert_task",
-    "scheduled_daily_digest_task",
     # Config constants (backward compatibility)
     "KNOWLEDGE_EXTRACTION_THRESHOLD",
     "KNOWLEDGE_EXTRACTION_LOOKBACK_HOURS",

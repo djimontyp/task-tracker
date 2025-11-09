@@ -395,29 +395,3 @@ async def scheduled_auto_approval_task() -> dict[str, Any]:
     }
 
 
-@nats_broker.task
-async def scheduled_notification_alert_task() -> dict[str, str]:
-    """Check thresholds and send alerts (run every hour)."""
-    from app.services.notification_service import notification_service
-
-    async with AsyncSessionLocal() as session:
-        try:
-            await notification_service.check_and_send_alerts(session)
-            return {"status": "success", "message": "Notification alerts checked"}
-        except Exception as e:
-            logger.error(f"Notification alert task failed: {e}")
-            return {"status": "error", "message": str(e)}
-
-
-@nats_broker.task
-async def scheduled_daily_digest_task() -> dict[str, str]:
-    """Send daily digest (run once per day at configured time)."""
-    from app.services.notification_service import notification_service
-
-    async with AsyncSessionLocal() as session:
-        try:
-            await notification_service.send_daily_digest(session)
-            return {"status": "success", "message": "Daily digest sent"}
-        except Exception as e:
-            logger.error(f"Daily digest task failed: {e}")
-            return {"status": "error", "message": str(e)}
