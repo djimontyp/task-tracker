@@ -435,7 +435,7 @@ Login/logout functional, password reset pending.
 - Auth endpoints: /login, /logout, /refresh (api/auth.py:28-92)
 - 12 tests added (tests/test_auth.py)
 
-### Frontend (react-frontend-architect)
+### Frontend (React Frontend Expert (F1))
 - LoginForm component (components/Login.tsx:15)
 - useAuth hook (hooks/useAuth.ts:24)
 - Token management (utils/auth.ts:10)
@@ -605,8 +605,8 @@ async def lifespan(app: FastAPI):
 ## Integration with Other Skills
 
 - **parallel-coordinator**: Provides agent outputs to aggregate
-- **task-orchestrator**: Uses aggregator for final reports
-- **documentation-expert**: May refine aggregated content for docs
+- **Task Orchestrator**: Uses aggregator for final reports
+- **Docs Expert (D2)**: May refine aggregated content for docs
 - **Standalone**: Can aggregate any multi-source information
 
 ## Notes

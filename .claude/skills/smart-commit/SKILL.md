@@ -27,13 +27,13 @@ git ls-files --others --exclude-standard
 
 ### 2. Analyze Changes Using Task Tool
 
-**CRITICAL: You MUST use the Task tool with subagent_type=general-purpose to analyze files in parallel subtasks.**
+**CRITICAL: You MUST use the Task tool with subagent_type=General Purpose to analyze files in parallel subtasks.**
 
 For each changed file, launch a subtask using:
 
 ```
 SubTask tool with:
-- subagent_type: "general-purpose"
+- subagent_type: "General Purpose"
 - description: "Analyze file diff"
 - prompt: "Analyze git diff for [filename]. Extract:
   1. Changed symbols (functions, classes, components, types)

@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Glob, TodoWrite, Bash(git:*)
 
 ## Overview
 
-Session Manager provides automatic session state management and seamless pause/resume workflows. It replaces bulky orchestration skills (task-orchestrator, parallel-coordinator, epic-orchestrator) with a lightweight, auto-saving approach.
+Session Manager provides automatic session state management and seamless pause/resume workflows. It replaces bulky orchestration skills (Task Orchestrator, parallel-coordinator, epic-orchestrator) with a lightweight, auto-saving approach.
 
 **Key capabilities:**
 - **Auto-save**: Captures session state after every TodoWrite completion
@@ -882,7 +882,7 @@ Agent session updates trigger auto-save:
 ```markdown
 ---
 
-## Agent Report: 2025-11-01 14:30 - pytest-test-master
+## Agent Report: 2025-11-01 14:30 - Pytest Master (T1)
 
 ### Summary
 Brief 1-2 sentence summary of findings.
@@ -928,7 +928,7 @@ done
 
 ### Examples
 
-#### Example 1: pytest-test-master Integration
+#### Example 1: Pytest Master (T1) Integration
 
 **Before (creates orphaned file):**
 ```bash
@@ -946,7 +946,7 @@ done
 # Result: Zero orphaned files
 ```
 
-#### Example 2: react-frontend-architect Integration
+#### Example 2: React Frontend Expert (F1) Integration
 
 **Agent completes UX audit:**
 
@@ -955,7 +955,7 @@ active_session=$(ls .claude/sessions/active/*.md | head -1)
 
 if [ -n "$active_session" ]; then
   echo -e "\n---\n" >> "$active_session"
-  echo "## Agent Report: $(date +'%Y-%m-%d %H:%M') - react-frontend-architect" >> "$active_session"
+  echo "## Agent Report: $(date +'%Y-%m-%d %H:%M') - React Frontend Expert (F1)" >> "$active_session"
   echo "" >> "$active_session"
   echo "### UX Audit Results" >> "$active_session"
   echo "" >> "$active_session"
@@ -994,7 +994,7 @@ fi
 
 ### What session-manager Replaces
 
-**task-orchestrator** (930 lines):
+**Task Orchestrator** (930 lines):
 - Over-engineered routing logic
 - Manual session state JSON files
 - Verbose coordination warnings

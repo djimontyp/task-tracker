@@ -574,7 +574,7 @@ class Task(BaseModel):
 
 - **parallel-coordinator**: Ensures backend and frontend agents sync types
 - **fastapi-backend-expert**: Generates Pydantic models this skill syncs
-- **react-frontend-architect**: Consumes synced types in components
+- **React Frontend Expert (F1)**: Consumes synced types in components
 - **artifact-aggregator**: Documents contract changes in reports
 
 ## Notes

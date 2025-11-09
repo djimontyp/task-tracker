@@ -247,7 +247,7 @@ Output a structured plan with:
 
 **Total Estimate:** 100 minutes
 **Parallelization Potential:** Phase 2 tasks 3,4 can overlap partially
-**Recommended Agents:** fastapi-backend-expert, react-frontend-architect, pytest-test-master
+**Recommended Agents:** fastapi-backend-expert, React Frontend Expert (F1), Pytest Master (T1)
 ```
 
 ### Step 6: Gate Checks

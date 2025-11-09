@@ -24,9 +24,39 @@ Trigger this skill when:
 - Simple one-off delegations with no resume needs
 - Fire-and-forget tasks with no dependencies
 
-## Quick Start
+## How to Use
 
-Basic delegation with tracking:
+**Step 1: Generate marker**
+```bash
+marker=$(uv run .claude/skills/agent-coordinator/scripts/generate_marker.py)
+```
+
+**Step 2: Delegate with marker in Task description**
+```python
+Task(
+    subagent_type="fastapi-backend-expert",
+    description=f"[{marker}] Create authentication API",
+    prompt="Implement POST /login endpoint with JWT..."
+)
+```
+
+**Step 3: Resume later (if needed)**
+```python
+# Retrieve agentId from marker
+agentId = Read(f".artifacts/coordination/{marker}.txt").strip()
+
+# Resume with full context
+Task(
+    subagent_type="fastapi-backend-expert",
+    resume=agentId,
+    description=f"[{marker}] Continue auth work",
+    prompt="Add refresh token support..."
+)
+```
+
+## Quick Start (Alternative: Inline Python)
+
+Generate marker directly in Python if needed:
 
 ```python
 import uuid
@@ -75,7 +105,7 @@ import uuid
 marker_fe = f"agent-{uuid.uuid4().hex[:8]}"
 
 Task(
-    subagent_type="react-frontend-expert",
+    subagent_type="React Frontend Expert (F1)",
     description=f"[{marker_fe}] Build login UI",
     prompt="Create login form with email/password fields, validation, submit button..."
 )
@@ -112,7 +142,7 @@ agentId = Read(f".artifacts/coordination/{marker_fe}.txt").strip()
 
 # Resume with context
 Task(
-    subagent_type="react-frontend-expert",
+    subagent_type="React Frontend Expert (F1)",
     resume=agentId,
     description=f"[{marker_fe}] Resume: Backend API ready",
     prompt="Backend /login API is now available. Complete form integration..."
@@ -153,7 +183,7 @@ for marker_file in markers:
 **Output structure:**
 ```
 agent-abc12345: f3a2b1c4 (fastapi-backend-expert) - completed
-agent-def67890: 9a8b7c6d (react-frontend-expert) - completed
+agent-def67890: 9a8b7c6d (React Frontend Expert (F1)) - completed
 ```
 
 ## Blocker Workflow Patterns
@@ -170,7 +200,7 @@ import uuid
 # Step 1: Delegate frontend
 marker_fe = f"agent-{uuid.uuid4().hex[:8]}"
 Task(
-    subagent_type="react-frontend-expert",
+    subagent_type="React Frontend Expert (F1)",
     description=f"[{marker_fe}] Build login UI",
     prompt="Create login form..."
 )
@@ -210,7 +240,7 @@ Task(
 # Step 1: Delegate database work
 marker_db = f"agent-{uuid.uuid4().hex[:8]}"
 Task(
-    subagent_type="database-reliability-engineer",
+    subagent_type="Database Engineer (D1)",
     description=f"[{marker_db}] Add user table index",
     prompt="Create index on users.email for faster lookups"
 )
@@ -240,7 +270,7 @@ Task(
 # Step 1: Spec
 marker_spec = f"agent-{uuid.uuid4().hex[:8]}"
 Task(
-    subagent_type="product-designer",
+    subagent_type="Product Designer (P2)",
     description=f"[{marker_spec}] Auth feature spec",
     prompt="Document requirements for user authentication..."
 )
@@ -258,7 +288,7 @@ marker_be = f"agent-{uuid.uuid4().hex[:8]}"
 marker_fe = f"agent-{uuid.uuid4().hex[:8]}"
 
 Task(subagent_type="fastapi-backend-expert", description=f"[{marker_be}] Backend auth", ...)
-Task(subagent_type="react-frontend-expert", description=f"[{marker_fe}] Frontend auth", ...)
+Task(subagent_type="React Frontend Expert (F1)", description=f"[{marker_fe}] Frontend auth", ...)
 
 # If either blocks, resume with fix
 ```
@@ -277,10 +307,10 @@ markers = {}
 
 tasks = [
     ("backend", "fastapi-backend-expert", "Create API endpoints"),
-    ("frontend", "react-frontend-expert", "Build UI components"),
-    ("database", "database-reliability-engineer", "Schema design"),
-    ("tests", "pytest-test-master", "E2E test suite"),
-    ("docs", "documentation-expert", "API documentation")
+    ("frontend", "React Frontend Expert (F1)", "Build UI components"),
+    ("database", "Database Engineer (D1)", "Schema design"),
+    ("tests", "Pytest Master (T1)", "E2E test suite"),
+    ("docs", "Docs Expert (D2)", "API documentation")
 ]
 
 for name, agent_type, task_desc in tasks:
@@ -442,7 +472,7 @@ marker_fe = f"agent-{uuid.uuid4().hex[:8]}"
 print(f"Frontend marker: {marker_fe}")
 
 Task(
-    subagent_type="react-frontend-expert",
+    subagent_type="React Frontend Expert (F1)",
     description=f"[{marker_fe}] Build authentication UI",
     prompt="""
 Create login page with:
