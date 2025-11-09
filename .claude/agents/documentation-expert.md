@@ -11,8 +11,8 @@ description: |-
   НЕ для:
   - Bilingual translation → i18n-engineer
   - Code implementation → Domain specialist agents
-  - UX design → ux-ui-design-expert
-  - Conceptual architecture → product-designer
+  - UX design → UX/UI Expert (U1)
+  - Conceptual architecture → Product Designer (P2)
 model: haiku
 color: green
 ---

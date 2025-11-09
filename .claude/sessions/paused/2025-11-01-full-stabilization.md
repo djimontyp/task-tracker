@@ -23,7 +23,7 @@
 > [!TIP]
 > Track progress across 3 major work streams
 
-### Track 1: Test Failures (pytest-test-master)
+### Track 1: Test Failures (Pytest Master (T1))
 - [x] Fix test_atoms.py (15 failures → 0) ✅ **COMPLETE**
 - [ ] Fix test_embeddings.py (14 failures)
 - [ ] Fix test_knowledge_extraction.py (12 failures)
@@ -45,8 +45,8 @@
 **Progress**: Analysis complete, ready for Phase 1 execution
 
 ### Track 3: E2E Tests (DECISION NEEDED)
-- [ ] **Option A**: Backend integration tests (pytest async) via pytest-test-master
-- [ ] **Option B**: Frontend Playwright tests via react-frontend-architect
+- [ ] **Option A**: Backend integration tests (pytest async) via Pytest Master (T1)
+- [ ] **Option B**: Frontend Playwright tests via React Frontend Expert (F1)
 - [ ] **Option C**: Skip E2E, focus on 44 test failures + type safety
 
 **Progress**: Blocked on decision
@@ -57,9 +57,9 @@
 
 | Agent | Task | Status | Output |
 |-------|------|--------|--------|
-| pytest-test-master | Fix 59 test failures | 🟢 Active | 15/59 fixed (25%) |
+| Pytest Master (T1) | Fix 59 test failures | 🟢 Active | 15/59 fixed (25%) |
 | fastapi-backend-expert | Fix 192 type errors | 🟢 Active | Analysis complete, ready for Phase 1 |
-| pytest-test-master (E2E) | E2E tests | 🔴 Blocked | Delegation conflict (needs frontend expert) |
+| Pytest Master (T1) (E2E) | E2E tests | 🔴 Blocked | Delegation conflict (needs frontend expert) |
 
 ---
 
@@ -67,7 +67,7 @@
 
 ### ✅ Completed Work
 
-#### 1. Test Atoms Fixed (pytest-test-master)
+#### 1. Test Atoms Fixed (Pytest Master (T1))
 **Achievement**: 15 failures → 0 failures (100% pass rate on atoms)
 
 **Root causes fixed**:
@@ -119,14 +119,14 @@
 **E2E Testing Strategy**:
 
 **Option A**: Backend integration tests
-- Use pytest-test-master
+- Use Pytest Master (T1)
 - Test Telegram→Topic via API/DB
 - Test Analysis Run via state machine API
 - **Time**: 6-8 hours
 - **Coverage**: Backend workflows only
 
 **Option B**: Frontend Playwright tests
-- Use react-frontend-architect
+- Use React Frontend Expert (F1)
 - Full browser automation
 - Axe-core accessibility
 - **Time**: 6-8 hours
@@ -140,7 +140,7 @@
 
 ### After Decision
 
-1. **Continue test fixing** (pytest-test-master)
+1. **Continue test fixing** (Pytest Master (T1))
    - Next: test_embeddings.py (14 failures)
    - Then: test_knowledge_extraction.py (12 failures)
    - Target: 59 → <5 failures (98%+ pass rate)
@@ -161,7 +161,7 @@
 ## Blockers
 
 ### 1. E2E Testing Approach (Critical)
-**Issue**: pytest-test-master identified delegation conflict
+**Issue**: Pytest Master (T1) identified delegation conflict
 - Playwright = frontend/JS expertise (not Python backend)
 - Backend integration tests = pytest async (Python)
 
@@ -251,7 +251,7 @@
 
 **When resuming**:
 1. Decide E2E approach (A/B/C)
-2. Verify pytest-test-master status on test fixes
+2. Verify Pytest Master (T1) status on test fixes
 3. Verify fastapi-backend-expert ready for Phase 1
 4. Check if agents still active or need restart
 

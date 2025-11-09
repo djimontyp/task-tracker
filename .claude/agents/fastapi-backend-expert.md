@@ -9,10 +9,10 @@ description: |-
   - Автоматично: Після змін database schema (нові моделі → нові endpoints), коли потрібна backend імплементація
 
   НЕ для:
-  - Оптимізація database queries → database-reliability-engineer
-  - Frontend → react-frontend-architect
+  - Оптимізація database queries → Database Engineer (D1)
+  - Frontend → React Frontend Expert (F1)
   - LLM patterns → llm-ml-engineer
-  - Deployment/Docker → devops-expert
+  - Deployment/Docker → DevOps Expert (O1)
 model: sonnet
 color: yellow
 ---

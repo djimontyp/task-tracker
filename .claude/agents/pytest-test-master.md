@@ -11,7 +11,7 @@ description: |-
   НЕ для:
   - E2E tests (browser) → використай Playwright MCP
   - Backend implementation → fastapi-backend-expert
-  - Frontend tests → react-frontend-expert
+  - Frontend tests → React Frontend Expert (F1)
 model: haiku
 color: yellow
 ---

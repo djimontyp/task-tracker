@@ -113,7 +113,7 @@
 
 ---
 
-## Agent Report: 2025-11-01 - react-frontend-architect
+## Agent Report: 2025-11-01 - React Frontend Expert (F1)
 
 ### Status: ✅ 6 of 7 Core Tasks Completed
 
@@ -199,11 +199,11 @@ frontend/src/shared/components/
 ---
 
 **Report generated**: 2025-11-01
-**Agent**: react-frontend-architect
+**Agent**: React Frontend Expert (F1)
 
 ---
 
-## Agent Report: 2025-11-01 13:30 - pytest-test-master
+## Agent Report: 2025-11-01 13:30 - Pytest Master (T1)
 
 ### Task: Fix All 59 Test Failures for Production Readiness
 
@@ -254,7 +254,7 @@ After:  38 passed (100% pass rate) ✅
 
 ## UX Audit Complete: 2025-11-01
 
-**Agent**: ux-ui-design-expert
+**Agent**: UX/UI Expert (U1)
 **Task**: Comprehensive UX audit of navigation system + fix all issues
 
 ### Summary
@@ -316,7 +316,7 @@ After:  38 passed (100% pass rate) ✅
 
 ---
 
-## Agent Report: 2025-11-01 - ux-ui-design-expert
+## Agent Report: 2025-11-01 - UX/UI Expert (U1)
 
 ### Theme Toggle Icons - UX Audit Complete
 
@@ -411,7 +411,7 @@ export const SystemThemeIcon = ({ className = 'size-5' }) => (
 
 #### Next Actions
 
-**Ready for implementation by react-frontend-architect agent:**
+**Ready for implementation by React Frontend Expert (F1) agent:**
 1. Replace ThemeIcons.tsx with Heroicons (critical)
 2. Add interaction polish (important)
 3. Accessibility audit (important)
@@ -422,7 +422,7 @@ export const SystemThemeIcon = ({ className = 'size-5' }) => (
 
 ---
 
-## Agent Report: 2025-11-02 - ux-ui-design-expert
+## Agent Report: 2025-11-02 - UX/UI Expert (U1)
 
 # Admin Feature Badge Implementation Report
 

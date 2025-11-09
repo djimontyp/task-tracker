@@ -9,7 +9,7 @@ description: |-
   - Автоматично: LLM output quality degradation, новий use case
 
   НЕ для:
-  - Cost optimization → llm-cost-optimizer
+  - Cost optimization → Cost Optimizer (C2)
   - Model selection → llm-ml-engineer
   - Backend integration → fastapi-backend-expert
 model: sonnet

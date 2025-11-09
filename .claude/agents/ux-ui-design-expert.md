@@ -9,10 +9,10 @@ description: |-
   - Автоматично: Після feature implementation (proactive UX review), перед PR merge
 
   НЕ для:
-  - Product strategy → product-designer
-  - User research → product-designer
-  - IA design → product-designer
-  - React implementation → react-frontend-expert
+  - Product strategy → Product Designer (P2)
+  - User research → Product Designer (P2)
+  - IA design → Product Designer (P2)
+  - React implementation → React Frontend Expert (F1)
 model: haiku
 color: pink
 ---
@@ -241,8 +241,8 @@ Components:
 
 ## 🎯 Next Steps
 
-1. ux-ui-design-expert: [Action]
-2. react-frontend-expert: [Action]
+1. UX/UI Expert (U1): [Action]
+2. React Frontend Expert (F1): [Action]
 3. Validate: [Testing approach]
 ```
 

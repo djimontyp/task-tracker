@@ -9,8 +9,8 @@ description: |-
   - Автоматично: Перед deployments, після infrastructure changes, production incidents
 
   НЕ для:
-  - General testing → pytest-test-master
-  - Performance → database-reliability-engineer
+  - General testing → Pytest Master (T1)
+  - Performance → Database Engineer (D1)
   - Deployment → release-engineer
 model: haiku
 color: green

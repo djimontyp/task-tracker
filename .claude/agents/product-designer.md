@@ -9,10 +9,10 @@ description: |-
   - Автоматично: Перед major feature implementation, strategic product decisions
 
   НЕ для:
-  - Visual UI design/Figma → ux-ui-design-expert
-  - Detailed UX audit → ux-ui-design-expert
-  - Developer handoff specs → ux-ui-design-expert
-  - Implementation → react-frontend-expert
+  - Visual UI design/Figma → UX/UI Expert (U1)
+  - Detailed UX audit → UX/UI Expert (U1)
+  - Developer handoff specs → UX/UI Expert (U1)
+  - Implementation → React Frontend Expert (F1)
 model: sonnet
 color: red
 ---

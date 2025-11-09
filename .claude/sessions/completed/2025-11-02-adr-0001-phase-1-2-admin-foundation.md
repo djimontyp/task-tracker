@@ -79,10 +79,10 @@
 
 | Agent | Tasks | Output | Status |
 |-------|-------|--------|--------|
-| react-frontend-architect | Phase 1 implementation | Admin Mode infrastructure | ✅ Complete |
+| React Frontend Expert (F1) | Phase 1 implementation | Admin Mode infrastructure | ✅ Complete |
 | fastapi-backend-expert | Phase 2 APIs | Bulk operations + metrics | ✅ Complete |
-| pytest-test-master | Test coverage | 73 new tests | ✅ Complete |
-| ux-ui-design-expert | Admin badges | Component design + implementation | ✅ Complete |
+| Pytest Master (T1) | Test coverage | 73 new tests | ✅ Complete |
+| UX/UI Expert (U1) | Admin badges | Component design + implementation | ✅ Complete |
 
 ---
 

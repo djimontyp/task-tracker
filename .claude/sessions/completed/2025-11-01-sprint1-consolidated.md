@@ -46,8 +46,8 @@ Sprint 1 focused on critical UX/UI improvements to raise production readiness fr
 ### Problem Discovery
 
 During initial Sprint 1 work, agents were delegating instead of executing:
-- Launched `Task(subagent_type=react-frontend-architect)` for simple UI tasks
-- Agent responded: "Передаю завдання агенту react-frontend-architect..."
+- Launched `Task(subagent_type=React Frontend Expert (F1))` for simple UI tasks
+- Agent responded: "Передаю завдання агенту React Frontend Expert (F1)..."
 - Infinite delegation loop detected
 
 ### Root Cause
@@ -136,7 +136,7 @@ Agents interpreted this as instruction to delegate further.
 
 #### 5. Frontend UX Improvements ✅
 **Commit**: `d14140c feat(frontend): improve UX with status colors and accessibility`
-**Agent**: `react-frontend-architect`
+**Agent**: `React Frontend Expert (F1)`
 **Time**: 2h
 
 **Files Changed** (4 files, +90 -30 LOC):
@@ -159,7 +159,7 @@ Agents interpreted this as instruction to delegate further.
 ### Backend Improvements
 
 #### 6. Test Fixes ✅
-**Agent**: `pytest-test-master`
+**Agent**: `Pytest Master (T1)`
 **Time**: 1.5h
 
 **Results**:
@@ -448,7 +448,7 @@ This consolidated report combines information from:
 
 ---
 
-## Agent Report: 2025-11-01 - pytest-test-master (Verification)
+## Agent Report: 2025-11-01 - Pytest Master (T1) (Verification)
 
 ### Orphaned Artifact 1: SPRINT1_VERIFICATION_SUMMARY.md
 
@@ -675,7 +675,7 @@ FAILED backend/tests/api/v1/test_projects.py::test_create_project - assert 500 =
 ---
 
 **Verification Status**: COMPLETE
-**Verified By**: pytest-test-master
+**Verified By**: Pytest Master (T1)
 **Confidence**: HIGH (based on actual test execution and code review)
 **Next Action**: Implement fixes from SPRINT1_TEST_FIXES_GUIDE.md
 ---
@@ -1003,7 +1003,7 @@ The reduction from 75→59 may have come from:
 ---
 
 **Report Generated**: 2025-11-01 10:57 UTC
-**Verified By**: pytest-test-master subagent
+**Verified By**: Pytest Master (T1) subagent
 **Status**: ⚠️ Incomplete - Requires follow-up work
 ---
 
@@ -12538,12 +12538,12 @@ error: Recipe `test` failed on line 274 with exit code 1
 
 ---
 
-## Agent Report: 2025-11-01 20:45 - react-frontend-architect
+## Agent Report: 2025-11-01 20:45 - React Frontend Expert (F1)
 
 ### Sprint 1 UX Fixes - Completion Report
 
 **Status**: ✅ All 4 remaining tasks completed
-**Agent**: react-frontend-architect
+**Agent**: React Frontend Expert (F1)
 **Time**: ~1.5h (vs estimated 11.5h)
 **Reason for fast completion**: Most work was already done in previous sessions
 
