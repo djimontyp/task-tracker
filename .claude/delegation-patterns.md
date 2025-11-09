@@ -226,6 +226,220 @@ User: "Find all WebSocket-related code"
 - **Git**: `smart-commit` skill
 - **Documentation**: `sync-docs-structure` skill
 - **Database**: `migration-database` skill
+- **Agent Coordination**: `agent-coordinator` (marker-based resume)
+
+---
+
+## Marker-Based Agent Coordination
+
+**Purpose:** Track subagent delegations with resume capability for blocker workflows, parallel coordination, and multi-session work.
+
+**Core Mechanism:** Unique markers (`agent-{8hex}`) → PostToolUse hook captures agentId → Resume with full context preservation.
+
+### When to Use Marker-Based Coordination
+
+Use markers when:
+- **Blocker workflows** - Agent blocked, needs another agent to fix, then resume
+- **Parallel tracking** - 5+ agents simultaneously, need to track which is which
+- **Multi-session work** - Pause agent, fix blocker hours/days later, resume with context
+- **Iterative refinement** - Agent does partial work, you review, resume for adjustments
+
+**Do NOT use markers for:**
+- Simple one-off delegations with no resume needs
+- Fire-and-forget tasks with no dependencies
+
+### Pattern 5: Blocker Workflow with Resume
+
+**Scenario:** Frontend agent blocked on missing backend API
+
+```python
+import uuid
+
+# Step 1: Delegate frontend
+marker_fe = f"agent-{uuid.uuid4().hex[:8]}"
+Task(
+    subagent_type="react-frontend-expert",
+    description=f"[{marker_fe}] Build login UI",
+    prompt="Create login form with email/password, call POST /api/auth/login"
+)
+
+# Frontend returns: Status: Blocked - API endpoint missing
+
+# Step 2: Capture frontend agentId
+fe_agentId = Read(f".artifacts/coordination/{marker_fe}.txt").strip()
+
+# Step 3: Delegate backend fix
+marker_be = f"agent-{uuid.uuid4().hex[:8]}"
+Task(
+    subagent_type="fastapi-backend-expert",
+    description=f"[{marker_be}] Create login API",
+    prompt="Implement POST /api/auth/login endpoint"
+)
+
+# Backend returns: Status: Complete
+
+# Step 4: Resume frontend with full context
+Task(
+    resume=fe_agentId,
+    description=f"[{marker_fe}] Resume: API ready",
+    prompt="Backend API now available. Complete form integration."
+)
+
+# Frontend resumes with:
+# - Remembers UI components created
+# - Remembers validation logic implemented
+# - Continues from where it left off
+```
+
+**Key Benefit:** Frontend agent doesn't start from scratch - all context preserved.
+
+### Pattern 6: Parallel Agent Coordination
+
+**Scenario:** Launch 5 agents, track separately, resume if blocked
+
+```python
+import uuid
+
+# Launch 5 parallel agents with markers
+markers = {}
+
+tasks = [
+    ("backend", "fastapi-backend-expert", "Create API endpoints"),
+    ("frontend", "react-frontend-expert", "Build UI components"),
+    ("database", "database-reliability-engineer", "Schema design"),
+    ("tests", "pytest-test-master", "E2E test suite"),
+    ("docs", "documentation-expert", "API documentation")
+]
+
+# Delegate all in parallel
+for name, agent_type, task_desc in tasks:
+    marker = f"agent-{uuid.uuid4().hex[:8]}"
+    markers[name] = marker
+
+    Task(
+        subagent_type=agent_type,
+        description=f"[{marker}] {task_desc}",
+        prompt=f"Complete {task_desc} for authentication feature"
+    )
+
+# After all complete, check status
+for name, marker in markers.items():
+    agentId = Read(f".artifacts/coordination/{marker}.txt").strip()
+    metadata = Read(f".artifacts/coordination/{marker}.json")
+    print(f"{name}: {agentId} - {metadata['status']}")
+
+# Resume any blocked agents after fixing blockers
+if metadata['status'] == 'blocked':
+    Task(
+        resume=agentId,
+        description=f"[{marker}] Resume: Blocker fixed",
+        prompt="Continue work, blocker resolved"
+    )
+```
+
+**Key Benefit:** No context mixing - each agent tracked separately, resume with correct context.
+
+### Pattern 7: Multi-Step Feature Pipeline
+
+**Scenario:** Spec → Architecture → Parallel Implementation with blocker handling
+
+```python
+import uuid
+
+# Step 1: Spec (optional marker if might need resume)
+marker_spec = f"agent-{uuid.uuid4().hex[:8]}"
+Task(
+    subagent_type="product-designer",
+    description=f"[{marker_spec}] Auth feature spec",
+    prompt="Document requirements for user authentication"
+)
+
+# Step 2: Architecture
+marker_arch = f"agent-{uuid.uuid4().hex[:8]}"
+Task(
+    subagent_type="Plan",
+    description=f"[{marker_arch}] Auth architecture",
+    prompt="Design authentication system architecture based on spec"
+)
+
+# Step 3: Parallel implementation
+marker_be = f"agent-{uuid.uuid4().hex[:8]}"
+marker_fe = f"agent-{uuid.uuid4().hex[:8]}"
+
+Task(subagent_type="fastapi-backend-expert",
+     description=f"[{marker_be}] Backend auth",
+     prompt="Implement backend per architecture")
+
+Task(subagent_type="react-frontend-expert",
+     description=f"[{marker_fe}] Frontend auth",
+     prompt="Implement frontend per architecture")
+
+# If frontend blocks on backend:
+# 1. Capture fe_agentId from marker_fe
+# 2. Resume frontend after backend completes
+```
+
+### Marker Best Practices
+
+**Generation:**
+```python
+import uuid
+marker = f"agent-{uuid.uuid4().hex[:8]}"  # ✅ Unique every time
+```
+
+**Description Format:**
+```python
+description = f"[{marker}] Task name"  # ✅ Correct - hook extracts this
+description = f"{marker} Task name"    # ❌ Wrong - missing brackets
+```
+
+**AgentId Retrieval:**
+```python
+# After delegation completes
+agentId = Read(f".artifacts/coordination/{marker}.txt").strip()
+
+# Verify before resume
+if agentId:
+    Task(resume=agentId, ...)
+```
+
+**Storage:**
+- `.artifacts/coordination/{marker}.txt` - Plain agentId
+- `.artifacts/coordination/{marker}.json` - Metadata (status, timestamp, description)
+- `.artifacts/coordination/agent-sessions.json` - Audit trail
+
+### Common Mistakes
+
+**❌ Reusing markers:**
+```python
+marker = "agent-abc12345"  # Static
+Task(..., description=f"[{marker}] Task 1")
+Task(..., description=f"[{marker}] Task 2")  # ❌ Same marker - collision
+```
+
+**✅ Always generate fresh:**
+```python
+marker1 = f"agent-{uuid.uuid4().hex[:8]}"  # Unique
+marker2 = f"agent-{uuid.uuid4().hex[:8]}"  # Different
+```
+
+**❌ Wrong pattern:**
+```python
+description = f"agent-abc12345 Task name"  # Missing brackets
+```
+
+**✅ Correct pattern:**
+```python
+description = f"[agent-abc12345] Task name"  # ✅ Hook finds this
+```
+
+### Detailed Documentation
+
+See `.claude/skills/agent-coordinator/SKILL.md` for:
+- Full hook integration details
+- Troubleshooting guide
+- Advanced patterns (session-safe coordination, cleanup)
+- Metadata schema
 
 ---
 
