@@ -11,7 +11,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 AGENTS_DIR="$PROJECT_ROOT/.claude/agents"
-TEMPLATE_FILE="$AGENTS_DIR/_session_integration_template.md"
+TEMPLATE_FILE="$PROJECT_ROOT/.claude/templates/session-integration.md"
 
 # Colors
 GREEN='\033[0;32m'
