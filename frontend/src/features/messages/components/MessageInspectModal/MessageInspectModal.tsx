@@ -91,7 +91,7 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-full max-w-[1200px] md:w-[80vw] sm:w-[95vw] h-[90vh] flex flex-col p-0">
+      <DialogContent className="w-full max-w-[1200px] md:w-[80vw] sm:w-[95vw] h-[90vh] flex flex-col p-0" aria-describedby="message-inspect-description">
         <DialogHeader className="px-6 pt-6 pb-4 border-b">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
@@ -100,7 +100,7 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
               </DialogTitle>
               {messageData && (
                 <div className="space-y-2">
-                  <p className="text-sm text-gray-600 break-words">
+                  <p id="message-inspect-description" className="text-sm text-gray-600 break-words">
                     {truncateContent(messageData.message.content)}
                   </p>
                   <div className="flex items-center gap-2 flex-wrap">
