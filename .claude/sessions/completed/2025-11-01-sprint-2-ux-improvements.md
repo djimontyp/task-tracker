@@ -247,7 +247,7 @@ After:  38 passed (100% pass rate) ✅
 
 **Overall Progress**: 15/59 fixed (25% complete) | **Target**: 98%+ pass rate (<5 failures)
 
-**Full detailed report**: `/tmp/pytest_atoms_fixes_report.md`
+**Full detailed report**: `.artifacts/reports/pytest_atoms_fixes_report.md`
 
 
 ---
