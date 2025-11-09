@@ -85,7 +85,7 @@ def create_app() -> FastAPI:
 
     # CORS configuration - restrict origins for security
     # Default allows localhost development, override with CORS_ORIGINS env var for production
-    cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost,http://localhost:80").split(",")
+    cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost,http://localhost:80,http://noutbuk-maks.local,http://192.168.3.24").split(",")
 
     app.add_middleware(ErrorHandlerMiddleware)
 
