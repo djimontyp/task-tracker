@@ -299,7 +299,6 @@ class WebhookSettingsService:
             existing = result.scalars().first()
 
             if existing:
-                # Update existing
                 from sqlalchemy.orm.attributes import flag_modified
 
                 existing.config = config_data
@@ -307,7 +306,6 @@ class WebhookSettingsService:
                 flag_modified(existing, "config")
                 db.add(existing)
             else:
-                # Create new
                 new_settings = WebhookSettings(
                     name=self.TELEGRAM_SETTINGS_NAME,
                     config=config_data,
@@ -333,7 +331,6 @@ class WebhookSettingsService:
             settings_record = result.scalars().first()
 
             if settings_record:
-                # Create a deep copy and update
                 import copy
 
                 from sqlalchemy.orm.attributes import flag_modified
