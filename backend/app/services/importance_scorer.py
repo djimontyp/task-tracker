@@ -19,6 +19,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config.ai_config import ai_config
 from app.models.message import Message
 from app.models.topic import Topic
 
@@ -286,12 +287,17 @@ class ImportanceScorer:
         temporal_score = await self._score_temporal(message, db)
         topics_score = await self._score_topics(message, db)
 
-        importance_score = content_score * 0.4 + author_score * 0.2 + temporal_score * 0.2 + topics_score * 0.2
+        importance_score = (
+            content_score * ai_config.message_scoring.content_weight
+            + author_score * ai_config.message_scoring.author_weight
+            + temporal_score * ai_config.message_scoring.temporal_weight
+            + topics_score * ai_config.message_scoring.topics_weight
+        )
         importance_score = round(importance_score, 2)
 
-        if importance_score < 0.3:
+        if importance_score < ai_config.message_scoring.noise_threshold:
             classification = "noise"
-        elif importance_score > 0.7:
+        elif importance_score > ai_config.message_scoring.signal_threshold:
             classification = "signal"
         else:
             classification = "weak_signal"

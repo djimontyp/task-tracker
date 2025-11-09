@@ -44,7 +44,7 @@ async def create_task_config(
     """
     try:
         crud = TaskCRUD(session)
-        task = await crud.create(task_data)
+        task = await crud.create(task_data.model_dump(exclude_unset=True))
         logger.info(f"Created task config '{task.name}' with ID {task.id}")
         return task
     except ValueError as e:

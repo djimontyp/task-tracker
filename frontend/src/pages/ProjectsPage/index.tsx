@@ -8,8 +8,9 @@ import { Spinner, Button, Card, Input } from '@/shared/ui'
 import { projectService } from '@/features/projects/api/projectService'
 import { ProjectCard, ProjectForm } from '@/features/projects/components'
 import type { ProjectConfig, ProjectListResponse } from '@/features/projects/types'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { PageHeader } from '@/shared/components'
 
 const ProjectsPage = () => {
   const queryClient = useQueryClient()
@@ -165,19 +166,17 @@ const ProjectsPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
-          <p className="text-muted-foreground">
-            Configure classification projects for AI analysis
-          </p>
-        </div>
-        <Button onClick={handleCreate}>
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Create Project
-        </Button>
-      </div>
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        title="Projects"
+        description="Manage projects with keyword-based message filtering and classification rules"
+        actions={
+          <Button onClick={handleCreate} size="sm">
+            <PlusIcon className="h-4 w-4 mr-2" />
+            Create Project
+          </Button>
+        }
+      />
 
       {/* Search */}
       <Card className="p-4">

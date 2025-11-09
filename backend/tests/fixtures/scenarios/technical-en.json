@@ -1,0 +1,179 @@
+{
+  "scenario": "technical_deep_dive",
+  "language": "en",
+  "description": "Deep technical discussion with code, architectural decisions, and resource links.",
+  "messages": [
+    {
+      "order": 1,
+      "text": "Looking at our vector search implementation. Why did we choose HNSW over IVFFlat?",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "technical_question",
+        "content_categories": ["algorithm_choice", "performance"]
+      }
+    },
+    {
+      "order": 2,
+      "text": "Performance at scale. HNSW has O(log n) search vs IVFFlat's O(n/lists). Better recall too",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "technical_explanation",
+        "content_categories": ["algorithm_analysis", "performance"]
+      }
+    },
+    {
+      "order": 3,
+      "text": "What's the memory tradeoff?",
+      "language": "en",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "clarifying_question",
+        "content_categories": ["resource_usage"]
+      }
+    },
+    {
+      "order": 4,
+      "text": "HNSW uses more memory for the graph structure. Roughly 1.5-2x compared to IVFFlat. But it's worth it - search is 10-100x faster depending on dataset size",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "tradeoff_analysis",
+        "content_categories": ["performance_metrics", "resource_tradeoffs"]
+      }
+    },
+    {
+      "order": 5,
+      "text": "Got a benchmark?",
+      "language": "en",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "evidence_request",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 6,
+      "text": "Yeah, check this out:\n\n```sql\n-- HNSW\nCREATE INDEX ON messages USING hnsw (embedding vector_cosine_ops)\nWITH (m = 16, ef_construction = 64);\n-- Query time: ~2ms for 100k vectors\n\n-- IVFFlat  \nCREATE INDEX ON messages USING ivfflat (embedding vector_cosine_ops)\nWITH (lists = 100);\n-- Query time: ~45ms for 100k vectors\n```",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "code_benchmark",
+        "content_categories": ["performance_data", "code_example"]
+      }
+    },
+    {
+      "order": 7,
+      "text": "Wow that's a huge difference",
+      "language": "en",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "reaction",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 8,
+      "text": "What are m and ef_construction params?",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "parameter_question",
+        "content_categories": ["configuration", "algorithm_details"]
+      }
+    },
+    {
+      "order": 9,
+      "text": "HNSW tuning params:\n- m: max connections per node (16 = good balance)\n- ef_construction: build-time search quality (64 = high quality)\n- ef_search: query-time search quality (40 default)\n\nHigher values = better recall but slower. We profiled and found m=16, ef_construction=64 optimal for our use case",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "parameter_explanation",
+        "content_categories": ["configuration_details", "optimization"]
+      }
+    },
+    {
+      "order": 10,
+      "text": "Where can I read more about HNSW internals?",
+      "language": "en",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "learning_request",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 11,
+      "text": "Best resources:\n1. Original paper: https://arxiv.org/abs/1603.09320 (Malkov & Yashunin)\n2. pgvector docs: https://github.com/pgvector/pgvector#hnsw\n3. Pinecone's HNSW guide: https://www.pinecone.io/learn/hnsw/\n4. Our implementation: backend/alembic/versions/*_add_hnsw_vector_indexes.py",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "resource_sharing",
+        "content_categories": ["documentation", "learning_resources", "links"]
+      }
+    },
+    {
+      "order": 12,
+      "text": "One more thing - how do we handle embedding updates? Rebuilding index seems expensive",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "implementation_question",
+        "content_categories": ["data_management", "performance"]
+      }
+    },
+    {
+      "order": 13,
+      "text": "We don't rebuild. HNSW supports incremental updates. When you INSERT/UPDATE a row, pgvector automatically updates the graph structure. No manual reindex needed unless you change index params",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "implementation_details",
+        "content_categories": ["index_maintenance", "data_operations"]
+      }
+    },
+    {
+      "order": 14,
+      "text": "That's clean. What about concurrent writes? Any locking issues?",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "concurrency_question",
+        "content_categories": ["concurrency", "performance"]
+      }
+    },
+    {
+      "order": 15,
+      "text": "pgvector uses PostgreSQL's MVCC. Writes don't block reads. However, heavy write load can slow down index updates. We batch embeddings in background tasks to minimize this - see app/tasks.py extract_knowledge_from_messages_task",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "concurrency_explanation",
+        "content_categories": ["concurrency_control", "optimization", "code_reference"]
+      }
+    }
+  ],
+  "expected_extraction": {
+    "topics": [
+      {
+        "title": "HNSW vs IVFFlat for Vector Search",
+        "atoms": [
+          "HNSW: O(log n) search, IVFFlat: O(n/lists)",
+          "HNSW 10-100x faster but uses 1.5-2x more memory",
+          "Benchmark: HNSW ~2ms vs IVFFlat ~45ms for 100k vectors",
+          "Optimal params: m=16, ef_construction=64"
+        ]
+      },
+      {
+        "title": "HNSW Configuration and Maintenance",
+        "atoms": [
+          "m: max connections per node, ef_construction: build quality, ef_search: query quality",
+          "Incremental updates supported - no manual reindex needed",
+          "Uses PostgreSQL MVCC - writes don't block reads",
+          "Batch embeddings in background tasks to reduce write load"
+        ]
+      }
+    ]
+  }
+}

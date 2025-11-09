@@ -9,6 +9,7 @@ Tests end-to-end workflows:
 
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, patch
+from uuid import UUID
 
 import pytest
 from app.models import (
@@ -19,8 +20,10 @@ from app.models import (
     LLMProvider,
     LLMRecommendation,
     ProposalStatus,
+    ProviderType,
     TaskConfig,
     User,
+    ValidationStatus,
 )
 
 
@@ -43,9 +46,10 @@ async def test_full_analysis_workflow(client, db_session):
 
     provider = LLMProvider(
         name="Ollama",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -99,7 +103,7 @@ async def test_full_analysis_workflow(client, db_session):
             "priority_rules": {},
             "version": "1.0.0",
         }
-        response = await client.post("/api/projects", json=project_data)
+        response = await client.post("/api/v1/projects", json=project_data)
         assert response.status_code == 201
         project_id = response.json()["id"]
 
@@ -113,7 +117,7 @@ async def test_full_analysis_workflow(client, db_session):
             "trigger_type": "manual",
             "triggered_by_user_id": user.id,
         }
-        response = await client.post("/api/runs", json=run_data)
+        response = await client.post("/api/v1/analysis/runs", json=run_data)
         assert response.status_code == 201
         run_id = response.json()["id"]
         assert response.json()["status"] == AnalysisRunStatus.pending.value
@@ -150,7 +154,7 @@ async def test_full_analysis_workflow(client, db_session):
 
     run_crud = AnalysisRunCRUD(db_session)
     await run_crud.update(
-        run_id,
+        UUID(run_id),
         AnalysisRunUpdate(
             status=AnalysisRunStatus.completed.value,
             completed_at=datetime.utcnow(),
@@ -163,20 +167,20 @@ async def test_full_analysis_workflow(client, db_session):
     with patch("app.api.v1.proposals.websocket_manager", ws_mock):
         # Approve 3 proposals
         for proposal_id in proposal_ids[:3]:
-            response = await client.put(f"/api/proposals/{proposal_id}/approve")
+            response = await client.put(f"/api/v1/analysis/proposals/{proposal_id}/approve")
             assert response.status_code == 200
             assert response.json()["status"] == ProposalStatus.approved.value
 
         # Reject 2 proposals
         for proposal_id in proposal_ids[3:]:
             response = await client.put(
-                f"/api/proposals/{proposal_id}/reject", json={"reason": "Not relevant to current sprint"}
+                f"/api/v1/analysis/proposals/{proposal_id}/reject", json={"reason": "Not relevant to current sprint"}
             )
             assert response.status_code == 200
             assert response.json()["status"] == ProposalStatus.rejected.value
 
     # Step 5: Verify run state after review
-    response = await client.get(f"/api/runs/{run_id}")
+    response = await client.get(f"/api/v1/analysis/runs/{run_id}")
     assert response.status_code == 200
     run_data = response.json()
     assert run_data["proposals_total"] == 5
@@ -186,7 +190,7 @@ async def test_full_analysis_workflow(client, db_session):
 
     # Step 6: Close run
     with patch("app.api.v1.analysis_runs.websocket_manager", ws_mock):
-        response = await client.put(f"/api/runs/{run_id}/close")
+        response = await client.put(f"/api/v1/analysis/runs/{run_id}/close")
         assert response.status_code == 200
         closed_data = response.json()
         assert closed_data["status"] == AnalysisRunStatus.closed.value
@@ -217,9 +221,10 @@ async def test_lifecycle_enforcement(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -266,7 +271,7 @@ async def test_lifecycle_enforcement(client, db_session):
             "agent_assignment_id": str(assignment.id),
             "trigger_type": "manual",
         }
-        response = await client.post("/api/runs", json=run_data)
+        response = await client.post("/api/v1/analysis/runs", json=run_data)
         assert response.status_code == 201
         run1_id = response.json()["id"]
 
@@ -278,7 +283,7 @@ async def test_lifecycle_enforcement(client, db_session):
             "agent_assignment_id": str(assignment.id),
             "trigger_type": "manual",
         }
-        response = await client.post("/api/runs", json=run_data2)
+        response = await client.post("/api/v1/analysis/runs", json=run_data2)
         assert response.status_code == 409
         assert "unclosed" in response.json()["detail"].lower()
 
@@ -288,7 +293,7 @@ async def test_lifecycle_enforcement(client, db_session):
 
     run_crud = AnalysisRunCRUD(db_session)
     await run_crud.update(
-        run1_id,
+        UUID(run1_id),
         AnalysisRunUpdate(
             status=AnalysisRunStatus.completed.value,
             proposals_total=3,
@@ -298,13 +303,13 @@ async def test_lifecycle_enforcement(client, db_session):
 
     # Try to close run - should fail (400)
     with patch("app.api.v1.analysis_runs.websocket_manager", ws_mock):
-        response = await client.put(f"/api/runs/{run1_id}/close")
+        response = await client.put(f"/api/v1/analysis/runs/{run1_id}/close")
         assert response.status_code == 400
         assert "pending" in response.json()["detail"].lower()
 
     # Mark all proposals as reviewed
     await run_crud.update(
-        run1_id,
+        UUID(run1_id),
         AnalysisRunUpdate(
             proposals_pending=0,
             proposals_approved=2,
@@ -314,7 +319,7 @@ async def test_lifecycle_enforcement(client, db_session):
 
     # Now close should succeed
     with patch("app.api.v1.analysis_runs.websocket_manager", ws_mock):
-        response = await client.put(f"/api/runs/{run1_id}/close")
+        response = await client.put(f"/api/v1/analysis/runs/{run1_id}/close")
         assert response.status_code == 200
         assert response.json()["status"] == AnalysisRunStatus.closed.value
 
@@ -337,9 +342,10 @@ async def test_websocket_events_broadcast(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -386,7 +392,7 @@ async def test_websocket_events_broadcast(client, db_session):
             "agent_assignment_id": str(assignment.id),
             "trigger_type": "manual",
         }
-        response = await client.post("/api/runs", json=run_data)
+        response = await client.post("/api/v1/analysis/runs", json=run_data)
         assert response.status_code == 201
         run_id = response.json()["id"]
 
@@ -420,7 +426,7 @@ async def test_websocket_events_broadcast(client, db_session):
 
     run_crud = AnalysisRunCRUD(db_session)
     await run_crud.update(
-        run_id,
+        UUID(run_id),
         AnalysisRunUpdate(
             status=AnalysisRunStatus.completed.value,
             proposals_total=1,
@@ -432,7 +438,7 @@ async def test_websocket_events_broadcast(client, db_session):
 
     # Approve proposal - verify broadcast
     with patch("app.api.v1.proposals.websocket_manager", ws_mock):
-        response = await client.put(f"/api/proposals/{proposal.id}/approve")
+        response = await client.put(f"/api/v1/analysis/proposals/{proposal.id}/approve")
         assert response.status_code == 200
 
         # Verify broadcast called
@@ -445,7 +451,7 @@ async def test_websocket_events_broadcast(client, db_session):
 
     # Close run - verify broadcast
     with patch("app.api.v1.analysis_runs.websocket_manager", ws_mock):
-        response = await client.put(f"/api/runs/{run_id}/close")
+        response = await client.put(f"/api/v1/analysis/runs/{run_id}/close")
         assert response.status_code == 200
 
         # Verify broadcast called
@@ -472,9 +478,10 @@ async def test_proposal_edit_before_review(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -554,14 +561,14 @@ async def test_proposal_edit_before_review(client, db_session):
             "proposed_description": "Improved description with more details",
             "proposed_priority": "high",
         }
-        response = await client.put(f"/api/proposals/{proposal.id}", json=edit_data)
+        response = await client.put(f"/api/v1/analysis/proposals/{proposal.id}", json=edit_data)
         assert response.status_code == 200
         assert response.json()["proposed_title"] == "Improved Title"
         assert response.json()["proposed_priority"] == "high"
 
     # Approve edited proposal
     with patch("app.api.v1.proposals.websocket_manager", ws_mock):
-        response = await client.put(f"/api/proposals/{proposal.id}/approve")
+        response = await client.put(f"/api/v1/analysis/proposals/{proposal.id}/approve")
         assert response.status_code == 200
         approved_data = response.json()
         assert approved_data["status"] == ProposalStatus.approved.value

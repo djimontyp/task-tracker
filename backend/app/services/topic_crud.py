@@ -1,5 +1,6 @@
 """CRUD operations for Topic management."""
 
+import uuid
 from datetime import datetime, timedelta
 
 from fastapi import HTTPException, status
@@ -21,10 +22,15 @@ from app.models import (
 )
 from app.models.atom import TopicAtom
 from app.models.message import Message
+from app.services.base_crud import BaseCRUD
 
 
-class TopicCRUD:
-    """CRUD service for Topic operations."""
+class TopicCRUD(BaseCRUD[Topic]):
+    """CRUD service for Topic operations.
+
+    Inherits standard CRUD operations from BaseCRUD and adds
+    topic-specific business logic for color conversion and activity tracking.
+    """
 
     def __init__(self, session: AsyncSession):
         """Initialize CRUD service.
@@ -32,20 +38,18 @@ class TopicCRUD:
         Args:
             session: Async database session
         """
-        self.session = session
+        super().__init__(Topic, session)
 
-    async def get(self, topic_id: int) -> TopicPublic | None:
+    async def get(self, topic_id: uuid.UUID) -> TopicPublic | None:  # type: ignore[override]
         """Get topic by ID.
 
         Args:
-            topic_id: Topic ID to retrieve
+            topic_id: Topic UUID to retrieve
 
         Returns:
             Topic or None if not found
         """
-        query = select(Topic).where(Topic.id == topic_id)
-        result = await self.session.execute(query)
-        topic = result.scalar_one_or_none()
+        topic = await super().get(topic_id)
 
         if not topic:
             return None
@@ -129,7 +133,7 @@ class TopicCRUD:
 
         return public_topics, total
 
-    async def create(self, topic_data: TopicCreate) -> TopicPublic:
+    async def create(self, topic_data: TopicCreate) -> TopicPublic:  # type: ignore[override]
         """Create a new topic.
 
         Args:
@@ -146,16 +150,12 @@ class TopicCRUD:
 
         color = convert_to_hex_if_needed(topic_data.color) if topic_data.color else None
 
-        topic = Topic(
-            name=topic_data.name,
-            description=topic_data.description,
-            icon=topic_data.icon,
-            color=color,
-        )
-
-        self.session.add(topic)
-        await self.session.commit()
-        await self.session.refresh(topic)
+        topic = await super().create({
+            "name": topic_data.name,
+            "description": topic_data.description,
+            "icon": topic_data.icon,
+            "color": color,
+        })
 
         color = convert_to_hex_if_needed(topic.color) if topic.color else None
 
@@ -169,34 +169,26 @@ class TopicCRUD:
             updated_at=topic.updated_at.isoformat() if topic.updated_at else "",
         )
 
-    async def update(self, topic_id: int, topic_data: TopicUpdate) -> TopicPublic | None:
+    async def update(self, topic_id: uuid.UUID, topic_data: TopicUpdate) -> TopicPublic | None:  # type: ignore[override]
         """Update an existing topic.
 
         Args:
-            topic_id: Topic ID to update
+            topic_id: Topic UUID to update
             topic_data: Topic update data
 
         Returns:
             Updated topic or None if not found
         """
-        query = select(Topic).where(Topic.id == topic_id)
-        result = await self.session.execute(query)
-        topic = result.scalar_one_or_none()
+        topic = await super().get(topic_id)
 
         if not topic:
             return None
 
-        if topic_data.name is not None:
-            topic.name = topic_data.name
-        if topic_data.description is not None:
-            topic.description = topic_data.description
-        if topic_data.icon is not None:
-            topic.icon = topic_data.icon
-        if topic_data.color is not None:
-            topic.color = convert_to_hex_if_needed(topic_data.color) if topic_data.color else None
+        update_data = topic_data.model_dump(exclude_unset=True)
+        if "color" in update_data and update_data["color"]:
+            update_data["color"] = convert_to_hex_if_needed(update_data["color"])
 
-        await self.session.commit()
-        await self.session.refresh(topic)
+        topic = await super().update(topic, update_data)
 
         color = convert_to_hex_if_needed(topic.color) if topic.color else None
 
@@ -206,8 +198,8 @@ class TopicCRUD:
             description=topic.description,
             icon=topic.icon,
             color=color,
-            created_at=topic.created_at.isoformat(),
-            updated_at=topic.updated_at.isoformat(),
+            created_at=topic.created_at.isoformat() if topic.created_at else "",
+            updated_at=topic.updated_at.isoformat() if topic.updated_at else "",
         )
 
     async def get_recent_topics(

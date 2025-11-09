@@ -10,6 +10,8 @@ Tests cover:
 4. Basic vector operations (not available in SQLite)
 """
 
+import os
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,37 +26,33 @@ class TestPgvectorSetup:
 
     async def test_messages_table_has_embedding_column(self, db_session: AsyncSession) -> None:
         """Verify messages table has embedding column in schema."""
-        from sqlalchemy import inspect, text
+        from sqlalchemy import inspect
 
-        inspector = inspect(db_session.bind)
-
-        if hasattr(inspector, "get_columns"):
+        def check_column(connection):
+            inspector = inspect(connection)
             columns = inspector.get_columns("messages")
             column_names = [col["name"] for col in columns]
-            assert "embedding" in column_names, "messages table should have embedding column"
-        else:
-            result = await db_session.execute(
-                text("SELECT name FROM pragma_table_info('messages') WHERE name = 'embedding'")
-            )
-            embedding_col = result.fetchone()
-            assert embedding_col is not None, "messages table should have embedding column"
+            return "embedding" in column_names
+
+        has_embedding = await db_session.connection(execution_options={"synchronize_session": False})
+        result = await has_embedding.run_sync(check_column)
+
+        assert result, "messages table should have embedding column"
 
     async def test_atoms_table_has_embedding_column(self, db_session: AsyncSession) -> None:
         """Verify atoms table has embedding column in schema."""
-        from sqlalchemy import inspect, text
+        from sqlalchemy import inspect
 
-        inspector = inspect(db_session.bind)
-
-        if hasattr(inspector, "get_columns"):
+        def check_column(connection):
+            inspector = inspect(connection)
             columns = inspector.get_columns("atoms")
             column_names = [col["name"] for col in columns]
-            assert "embedding" in column_names, "atoms table should have embedding column"
-        else:
-            result = await db_session.execute(
-                text("SELECT name FROM pragma_table_info('atoms') WHERE name = 'embedding'")
-            )
-            embedding_col = result.fetchone()
-            assert embedding_col is not None, "atoms table should have embedding column"
+            return "embedding" in column_names
+
+        has_embedding = await db_session.connection(execution_options={"synchronize_session": False})
+        result = await has_embedding.run_sync(check_column)
+
+        assert result, "atoms table should have embedding column"
 
     async def test_embedding_column_accepts_null(self, db_session: AsyncSession) -> None:
         """Verify embedding column accepts NULL values."""
@@ -205,7 +203,9 @@ class TestPgvectorSetup:
             assert len(msg.embedding) == 1536
 
 
-@pytest.mark.skipif(True, reason="Requires PostgreSQL with pgvector extension")
+@pytest.mark.skipif(
+    os.getenv("TEST_DATABASE_URL", "sqlite").startswith("sqlite"), reason="Requires PostgreSQL with pgvector extension"
+)
 @pytest.mark.asyncio
 class TestPgvectorOperations:
     """Test suite for pgvector-specific operations.

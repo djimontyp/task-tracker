@@ -1,7 +1,5 @@
 from taskiq_nats import NatsBroker, NATSObjectStoreResultBackend
 
-from app.middleware.taskiq_logging_middleware import TaskLoggingMiddleware
-
 from .config import settings
 
 nats_broker = NatsBroker(
@@ -14,8 +12,6 @@ nats_broker = NatsBroker(
 
 result_backend: NATSObjectStoreResultBackend = NATSObjectStoreResultBackend(servers=settings.taskiq.taskiq_nats_servers)
 
-nats_broker = nats_broker.with_result_backend(result_backend).with_middlewares(
-    TaskLoggingMiddleware()
-)
+nats_broker = nats_broker.with_result_backend(result_backend)
 
 __all__ = ["nats_broker", "result_backend"]

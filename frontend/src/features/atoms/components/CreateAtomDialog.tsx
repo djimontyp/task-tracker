@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -56,7 +56,7 @@ type CreateAtomFormData = z.infer<typeof createAtomSchema>
 export interface CreateAtomDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  topicId: number
+  topicId: string
   onAtomCreated?: (atom: Atom) => void
 }
 

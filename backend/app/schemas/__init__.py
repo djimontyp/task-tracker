@@ -3,14 +3,6 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from app.schemas.monitoring import (
-    ErrorResponse,
-    MonitoringMetricsResponse,
-    TaskExecutionLogResponse,
-    TaskHistoryResponse,
-    TaskMetrics,
-)
-
 
 class TextClassification(BaseModel):
     is_issue: bool

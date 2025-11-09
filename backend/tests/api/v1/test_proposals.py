@@ -20,16 +20,18 @@ from app.models import (
     LLMProvider,
     LLMRecommendation,
     ProposalStatus,
+    ProviderType,
     TaskConfig,
     TaskPriority,
     TaskProposal,
     User,
+    ValidationStatus,
 )
 
 
 @pytest.mark.asyncio
 async def test_list_proposals(client, db_session):
-    """Test GET /api/proposals - list proposals with pagination."""
+    """Test GET /api/v1/analysis/proposals - list proposals with pagination."""
     # Create dependencies
     user = User(first_name="Test", email="test@example.com")
     db_session.add(user)
@@ -38,9 +40,10 @@ async def test_list_proposals(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -107,10 +110,13 @@ async def test_list_proposals(client, db_session):
     await db_session.commit()
 
     # Test list
-    response = await client.get("/api/proposals")
+    response = await client.get("/api/v1/analysis/proposals")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 5
+    assert "items" in data
+    assert "total" in data
+    assert len(data["items"]) == 5
+    assert data["total"] == 5
 
 
 @pytest.mark.asyncio
@@ -124,9 +130,10 @@ async def test_filter_by_run_id(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -220,17 +227,17 @@ async def test_filter_by_run_id(client, db_session):
     await db_session.commit()
 
     # Filter by run1
-    response = await client.get(f"/api/proposals?run_id={run1.id}")
+    response = await client.get(f"/api/v1/analysis/proposals?run_id={run1.id}")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 3
-    for item in data:
+    assert len(data["items"]) == 3
+    for item in data["items"]:
         assert item["analysis_run_id"] == str(run1.id)
 
 
 @pytest.mark.asyncio
 async def test_get_proposal_with_details(client, db_session):
-    """Test GET /api/proposals/{id} - get proposal with details."""
+    """Test GET /api/v1/analysis/proposals/{id} - get proposal with details."""
     # Create dependencies
     user = User(first_name="Test", email="test@example.com")
     db_session.add(user)
@@ -239,9 +246,10 @@ async def test_get_proposal_with_details(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -308,7 +316,7 @@ async def test_get_proposal_with_details(client, db_session):
     await db_session.refresh(proposal)
 
     # Get proposal
-    response = await client.get(f"/api/proposals/{proposal.id}")
+    response = await client.get(f"/api/v1/analysis/proposals/{proposal.id}")
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == str(proposal.id)
@@ -328,9 +336,10 @@ async def test_approve_proposal(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -402,7 +411,7 @@ async def test_approve_proposal(client, db_session):
     # Mock WebSocket manager
     with patch("app.api.v1.proposals.websocket_manager", AsyncMock()):
         # Approve proposal
-        response = await client.put(f"/api/proposals/{proposal.id}/approve")
+        response = await client.put(f"/api/v1/analysis/proposals/{proposal.id}/approve")
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == ProposalStatus.approved.value
@@ -425,9 +434,10 @@ async def test_reject_proposal(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -500,7 +510,7 @@ async def test_reject_proposal(client, db_session):
     with patch("app.api.v1.proposals.websocket_manager", AsyncMock()):
         # Reject proposal
         response = await client.put(
-            f"/api/proposals/{proposal.id}/reject", json={"reason": "Not relevant to project goals"}
+            f"/api/v1/analysis/proposals/{proposal.id}/reject", json={"reason": "Not relevant to project goals"}
         )
         assert response.status_code == 200
         data = response.json()
@@ -525,9 +535,10 @@ async def test_merge_proposal(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -600,7 +611,9 @@ async def test_merge_proposal(client, db_session):
     # Mock WebSocket manager
     with patch("app.api.v1.proposals.websocket_manager", AsyncMock()):
         # Merge proposal
-        response = await client.put(f"/api/proposals/{proposal.id}/merge", json={"target_task_id": str(target_task_id)})
+        response = await client.put(
+            f"/api/v1/analysis/proposals/{proposal.id}/merge", json={"target_task_id": str(target_task_id)}
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == ProposalStatus.merged.value
@@ -623,9 +636,10 @@ async def test_edit_proposal(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -696,7 +710,7 @@ async def test_edit_proposal(client, db_session):
     with patch("app.api.v1.proposals.websocket_manager", AsyncMock()):
         # Edit proposal
         response = await client.put(
-            f"/api/proposals/{proposal.id}",
+            f"/api/v1/analysis/proposals/{proposal.id}",
             json={
                 "proposed_title": "Updated title",
                 "proposed_description": "Updated description",
@@ -721,9 +735,10 @@ async def test_filter_by_confidence(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -791,18 +806,18 @@ async def test_filter_by_confidence(client, db_session):
     await db_session.commit()
 
     # Filter by minimum confidence
-    response = await client.get("/api/proposals?confidence_min=0.85")
+    response = await client.get("/api/v1/analysis/proposals?confidence_min=0.85")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 3  # 0.85, 0.90, 0.95
-    for item in data:
+    assert len(data["items"]) == 3  # 0.85, 0.90, 0.95
+    for item in data["items"]:
         assert item["confidence"] >= 0.85
 
 
 @pytest.mark.asyncio
 async def test_proposal_not_found(client, db_session):
-    """Test GET /api/proposals/{id} with non-existent ID."""
+    """Test GET /api/v1/analysis/proposals/{id} with non-existent ID."""
     random_id = uuid4()
-    response = await client.get(f"/api/proposals/{random_id}")
+    response = await client.get(f"/api/v1/analysis/proposals/{random_id}")
     assert response.status_code == 404
     assert "not found" in response.json()["detail"].lower()

@@ -167,7 +167,9 @@ async def test_get_topic_messages_with_pagination(
 @pytest.mark.asyncio
 async def test_get_topic_messages_not_found(client: AsyncClient) -> None:
     """Test 404 error for non-existent topic."""
-    fake_topic_id = 99999
+    from uuid import uuid4
+
+    fake_topic_id = uuid4()
     response = await client.get(f"/api/v1/topics/{fake_topic_id}/messages")
 
     assert response.status_code == 404
@@ -216,7 +218,9 @@ async def test_filter_messages_by_topic_id_empty(
     messages_without_topic: list[Message],
 ) -> None:
     """Test filtering messages by non-existent topic_id returns empty list."""
-    fake_topic_id = 99999
+    from uuid import uuid4
+
+    fake_topic_id = uuid4()
     response = await client.get(
         "/api/v1/messages",
         params={"topic_id": fake_topic_id, "page": 1, "page_size": 50},

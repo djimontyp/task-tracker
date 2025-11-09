@@ -37,9 +37,9 @@ class TelegramClientService:
             api_hash: Telegram API Hash
             session_name: Session file name for storing auth
         """
-        self.api_id = api_id or getattr(settings, "telegram_api_id", None)
-        self.api_hash = api_hash or getattr(settings, "telegram_api_hash", None)
-        self.session_string = getattr(settings, "telegram_session_string", None)
+        self.api_id = api_id or settings.telegram.telegram_api_id
+        self.api_hash = api_hash or settings.telegram.telegram_api_hash
+        self.session_string = settings.telegram.telegram_session_string
         self.client: TelegramClient | None = None
 
     async def connect(self, phone: str | None = None) -> None:

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import uuid
+
 from sqlalchemy import desc
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -10,10 +12,15 @@ from app.models.legacy import Source
 from app.models.message import Message
 from app.models.user import User
 from app.schemas.messages import MessageResponse
+from app.services.base_crud import BaseCRUD
 
 
-class MessageCRUD:
-    """CRUD service for Message operations."""
+class MessageCRUD(BaseCRUD[Message]):
+    """CRUD service for Message operations.
+
+    Inherits standard CRUD operations from BaseCRUD and adds
+    message-specific query methods for topic filtering.
+    """
 
     def __init__(self, session: AsyncSession):
         """Initialize CRUD service.
@@ -21,18 +28,18 @@ class MessageCRUD:
         Args:
             session: Async database session
         """
-        self.session = session
+        super().__init__(Message, session)
 
     async def list_by_topic(
         self,
-        topic_id: int,
+        topic_id: uuid.UUID,
         skip: int = 0,
         limit: int = 100,
     ) -> list[MessageResponse]:
         """Get all messages belonging to a specific topic.
 
         Args:
-            topic_id: Topic ID to filter by
+            topic_id: Topic UUID to filter by
             skip: Number of records to skip (pagination)
             limit: Maximum number of records to return
 
@@ -54,7 +61,7 @@ class MessageCRUD:
 
         return [
             MessageResponse(
-                id=msg.id or 0,
+                id=msg.id,
                 external_message_id=msg.external_message_id,
                 content=msg.content,
                 sent_at=msg.sent_at,

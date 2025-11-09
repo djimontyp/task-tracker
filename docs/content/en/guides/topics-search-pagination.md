@@ -204,6 +204,9 @@ The system caches search results automatically:
 | ++escape++ | Clear search and blur input |
 | ++enter++ | (Search updates automatically, Enter not needed) |
 
+!!! tip "Complete Keyboard Navigation"
+    The DataTable and all search controls are fully keyboard accessible. See the [Keyboard Navigation guide](keyboard-navigation.md) for a complete list of keyboard shortcuts and navigation tips across the entire application.
+
 ---
 
 ## Troubleshooting

@@ -9,7 +9,7 @@ import { ScheduleConfigStep } from './ScheduleConfigStep'
 import { RulesConfigStep } from './RulesConfigStep'
 import { NotificationsConfigStep } from './NotificationsConfigStep'
 import { ReviewActivateStep } from './ReviewActivateStep'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { cn } from '@/shared/lib/utils'
 
 const STEPS = [

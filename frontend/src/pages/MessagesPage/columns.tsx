@@ -5,10 +5,17 @@ import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMen
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
 import { Message, NoiseClassification } from '@/shared/types'
 import { formatFullDate } from '@/shared/utils/date'
+import {
+  getMessageAnalysisBadge,
+  getNoiseClassificationBadge,
+  getImportanceBadge,
+  getClassificationFromScore,
+} from '@/shared/utils/statusBadges'
 
 export interface ColumnsCallbacks {
   onReset?: () => void
   hasActiveFilters?: boolean
+  onCheckboxClick?: (rowId: string, event: React.MouseEvent) => void
 }
 
 export const sourceLabels: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -17,28 +24,6 @@ export const sourceLabels: Record<string, { label: string; icon: React.Component
   slack: { label: 'Slack', icon: EnvelopeIcon },
 }
 
-export const statusLabels: Record<string, { label: string }> = {
-  analyzed: { label: 'Analyzed' },
-  pending: { label: 'Pending' },
-}
-
-export const classificationLabels: Record<NoiseClassification, { label: string; variant: 'default' | 'destructive' | 'outline' | 'secondary' }> = {
-  signal: { label: 'Signal', variant: 'default' },
-  weak_signal: { label: 'Needs Review', variant: 'secondary' },
-  noise: { label: 'Noise', variant: 'destructive' },
-}
-
-const getImportanceColor = (score: number): string => {
-  if (score < 0.3) return 'badge-error'
-  if (score < 0.7) return 'badge-warning'
-  return 'badge-success'
-}
-
-const getClassification = (score: number): NoiseClassification => {
-  if (score < 0.3) return 'noise'
-  if (score < 0.7) return 'weak_signal'
-  return 'signal'
-}
 
 export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[] => [
   {
@@ -51,7 +36,16 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       />
     ),
     cell: ({ row }) => (
-      <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        onClick={(event) => {
+          if (callbacks?.onCheckboxClick) {
+            callbacks.onCheckboxClick(row.id, event)
+          }
+        }}
+        aria-label="Select row"
+      />
     ),
     enableSorting: false,
     enableHiding: false,
@@ -62,10 +56,11 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     header: 'ID',
     cell: ({ row }) => {
       const id = row.getValue<number | string>('id')
-      return <div className="w-[60px] text-xs font-medium text-muted-foreground">MSG-{String(id).padStart(4, '0')}</div>
+      return <div className="w-[50px] text-xs font-mono text-muted-foreground">{String(id).padStart(4, '0')}</div>
     },
     enableSorting: false,
-    enableHiding: false,
+    enableHiding: true,
+    size: 50,
   },
   {
     accessorKey: 'author_name',
@@ -94,12 +89,36 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     header: 'Content',
     cell: ({ row }) => {
       const content = row.getValue<string>('content')
+      const isEmpty = !content || content.trim() === ''
+      const isLong = content && content.length > 100
+
+      if (isEmpty) {
+        return (
+          <div className="flex items-center gap-2 text-muted-foreground/50 italic text-sm">
+            <EnvelopeIcon className="h-4 w-4" />
+            <span>(Empty message)</span>
+          </div>
+        )
+      }
+
       return (
-        <div className="max-w-[400px] truncate" title={content}>
-          {content}
-        </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="min-w-0 flex-1 truncate" aria-label={isLong ? `Message content: ${content}` : undefined}>
+                {content}
+              </div>
+            </TooltipTrigger>
+            {isLong && (
+              <TooltipContent className="max-w-md">
+                <p className="text-sm whitespace-pre-wrap">{content}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       )
     },
+    size: 999,
   },
   {
     accessorKey: 'source_name',
@@ -130,9 +149,14 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     ),
     cell: ({ row }) => {
       const analyzed = row.getValue<boolean>('analyzed')
+      const config = getMessageAnalysisBadge(analyzed)
       return (
-        <Badge variant={analyzed ? 'default' : 'outline'}>
-          {analyzed ? 'Analyzed' : 'Pending'}
+        <Badge
+          variant={config.variant}
+          className={config.className}
+          aria-label={`Message status: ${config.label}`}
+        >
+          {config.label}
         </Badge>
       )
     },
@@ -152,23 +176,31 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       const score = row.getValue<number>('importance_score')
       if (score === undefined || score === null) return <div className="text-muted-foreground text-xs">-</div>
 
-      const colorClass = getImportanceColor(score)
+      const config = getImportanceBadge(score)
       const percentage = Math.round(score * 100)
 
       return (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Badge variant="outline" className={`inline-flex items-center gap-1 ${colorClass}`}>
-                {percentage}%
-                {row.original.noise_factors && (
-                  <InformationCircleIcon className="h-3 w-3" />
-                )}
-              </Badge>
+              <div className="flex flex-col gap-1">
+                <Badge
+                  variant={config.variant}
+                  className={`inline-flex items-center gap-1 ${config.className}`}
+                  aria-label={`Importance: ${config.label} (${percentage}%)`}
+                >
+                  {config.label}
+                  {row.original.noise_factors && (
+                    <InformationCircleIcon className="h-3 w-3" aria-hidden="true" />
+                  )}
+                </Badge>
+                <span className="text-xs text-muted-foreground">{percentage}%</span>
+              </div>
             </TooltipTrigger>
             {row.original.noise_factors && (
               <TooltipContent>
                 <div className="space-y-1 text-xs">
+                  <div><strong>Factors breakdown:</strong></div>
                   <div>Content: {Math.round(row.original.noise_factors.content * 100)}%</div>
                   <div>Author: {Math.round(row.original.noise_factors.author * 100)}%</div>
                   <div>Temporal: {Math.round(row.original.noise_factors.temporal * 100)}%</div>
@@ -194,17 +226,25 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     ),
     cell: ({ row }) => {
       const score = row.getValue<number>('importance_score')
-      const classification = row.original.noise_classification ?? (score !== undefined ? getClassification(score) : null)
+      const classification = row.original.noise_classification ?? (score !== undefined ? getClassificationFromScore(score) : null)
 
       if (!classification) return <div className="text-muted-foreground text-xs">-</div>
 
-      const meta = classificationLabels[classification]
-      return <Badge variant={meta.variant}>{meta.label}</Badge>
+      const config = getNoiseClassificationBadge(classification)
+      return (
+        <Badge
+          variant={config.variant}
+          className={config.className}
+          aria-label={`Classification: ${config.label}`}
+        >
+          {config.label}
+        </Badge>
+      )
     },
-    filterFn: (row, id, filterValues: NoiseClassification[]) => {
+    filterFn: (row, _id, filterValues: NoiseClassification[]) => {
       if (!filterValues || filterValues.length === 0) return true
       const score = row.getValue<number>('importance_score')
-      const classification = row.original.noise_classification ?? (score !== undefined ? getClassification(score) : null)
+      const classification = row.original.noise_classification ?? (score !== undefined ? getClassificationFromScore(score) : null)
       if (!classification) return false
       return filterValues.includes(classification)
     },
@@ -229,6 +269,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       const d = row.getValue<string>('sent_at')
       return <div className="text-muted-foreground text-xs">{d ? formatFullDate(d) : '-'}</div>
     },
+    enableHiding: true,
   },
   {
     id: 'actions',
@@ -254,9 +295,9 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" className="h-8 w-8 p-0" aria-label={`Actions for message ${message.id}`}>
               <span className="sr-only">Open menu</span>
-              <EllipsisHorizontalIcon className="h-4 w-4" />
+              <EllipsisHorizontalIcon className="h-4 w-4" aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

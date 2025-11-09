@@ -1,1 +1,5 @@
 export { MessagesErrorBoundary } from './MessagesErrorBoundary'
+export { MessageInspectModal } from './MessageInspectModal'
+export type { MessageInspectModalProps, MessageInspectData } from './MessageInspectModal'
+export { ConsumerMessageModal } from './ConsumerMessageModal'
+export type { ConsumerMessageModalProps, ConsumerMessageData } from './ConsumerMessageModal'

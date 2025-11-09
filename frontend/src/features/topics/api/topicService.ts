@@ -33,7 +33,7 @@ class TopicService {
     return response.json()
   }
 
-  async getTopicById(id: number): Promise<Topic> {
+  async getTopicById(id: string): Promise<Topic> {
     const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/${id}`)
 
     if (!response.ok) {
@@ -53,7 +53,7 @@ class TopicService {
     return response.json()
   }
 
-  async updateTopic(id: number, data: UpdateTopic): Promise<Topic> {
+  async updateTopic(id: string, data: UpdateTopic): Promise<Topic> {
     const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/${id}`, {
       method: 'PATCH',
       headers: {
@@ -69,7 +69,7 @@ class TopicService {
     return response.json()
   }
 
-  async suggestColor(topicId: number): Promise<{ topic_id: number; suggested_color: string; icon: string }> {
+  async suggestColor(topicId: string): Promise<{ topic_id: string; suggested_color: string; icon: string }> {
     const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/${topicId}/suggest-color`)
 
     if (!response.ok) {
@@ -82,7 +82,7 @@ class TopicService {
   /**
    * Update topic color
    */
-  async updateTopicColor(topicId: number, color: string): Promise<Topic> {
+  async updateTopicColor(topicId: string, color: string): Promise<Topic> {
     const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/${topicId}`, {
       method: 'PATCH',
       headers: {

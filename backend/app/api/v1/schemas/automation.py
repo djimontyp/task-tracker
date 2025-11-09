@@ -1,42 +1,19 @@
 """Schemas for automation rule engine."""
 
-from enum import Enum
-
+from app.models.automation_rule import ConditionOperator, RuleCondition
 from pydantic import BaseModel, Field
 
-
-class ConditionOperator(str, Enum):
-    """Available comparison operators for rule conditions."""
-
-    gte = "gte"
-    lte = "lte"
-    gt = "gt"
-    lt = "lt"
-    eq = "eq"
-    neq = "neq"
-    contains = "contains"
-    starts_with = "starts_with"
-    ends_with = "ends_with"
-
-
-class RuleCondition(BaseModel):
-    """
-    Single condition in an automation rule.
-
-    Evaluates a field from version data against an expected value
-    using a comparison operator.
-    """
-
-    field: str = Field(
-        description="Field path to evaluate (e.g., 'confidence', 'topic.name')",
-        min_length=1,
-    )
-    operator: ConditionOperator = Field(
-        description="Comparison operator to apply",
-    )
-    value: str | int | float = Field(
-        description="Expected value to compare against",
-    )
+__all__ = [
+    "ConditionOperator",
+    "RuleCondition",
+    "RulePreviewRequest",
+    "RulePreviewResponse",
+    "RuleAuditEntry",
+    "RuleAuditResponse",
+    "AutomationStatsResponse",
+    "AutomationTrendPoint",
+    "AutomationTrendsResponse",
+]
 
 
 class RulePreviewRequest(BaseModel):

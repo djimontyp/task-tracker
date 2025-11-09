@@ -1,49 +1,23 @@
 import { useMemo, useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ListBulletIcon, ClockIcon, ArrowPathIcon, CheckCircleIcon, WifiIcon, CpuChipIcon, DocumentCheckIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
+import { ListBulletIcon, WifiIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
 import { SignalSlashIcon } from '@heroicons/react/24/outline'
 import { OnboardingWizard } from '@/features/onboarding'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
-import { Badge, Skeleton, Button } from '@/shared/ui'
+import { Skeleton, Button } from '@/shared/ui'
 import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar'
 import { TelegramIcon } from '@/shared/components/TelegramIcon'
-import { apiClient } from '@/shared/lib/api/client'
-import { API_ENDPOINTS } from '@/shared/config/api'
-import { TaskStats, SidebarCounts } from '@/shared/types'
-import MetricCard from '@/shared/components/MetricCard'
+import { PageHeader } from '@/shared/components/PageHeader'
 import ActivityHeatmap from '@/shared/components/ActivityHeatmap'
-import { useTasksStore } from '@/features/tasks/store/tasksStore'
 import { useMessagesFeed } from '@/features/messages/hooks/useMessagesFeed'
 import { MessagesErrorBoundary } from '@/features/messages/components'
 import { formatMessageDate } from '@/shared/utils/date'
+import { MetricsDashboard } from '@/features/metrics'
 import { RecentTopics } from './RecentTopics'
 
 const DashboardPage = () => {
   const navigate = useNavigate()
-  const { setFilterStatus } = useTasksStore()
   const [showOnboarding, setShowOnboarding] = useState(false)
-
-  const { data: stats, isLoading: statsLoading } = useQuery<TaskStats>({
-    queryKey: ['stats'],
-    queryFn: async () => {
-      const response = await apiClient.get(API_ENDPOINTS.stats)
-      return response.data
-    },
-  })
-
-  const { data: sidebarCounts, isLoading: sidebarLoading } = useQuery<SidebarCounts>({
-    queryKey: ['sidebar-counts'],
-    queryFn: async () => {
-      const response = await apiClient.get(API_ENDPOINTS.sidebarCounts)
-      return response.data
-    },
-  })
-
-  const handleMetricClick = (filter: 'all' | 'pending' | 'in_progress' | 'completed' | 'open') => {
-    setFilterStatus(filter)
-    navigate('/tasks')
-  }
 
   const { messages, isLoading: messagesLoading, isConnected } = useMessagesFeed({ limit: 50 })
 
@@ -51,69 +25,29 @@ const DashboardPage = () => {
     return messages.slice(0, 5)
   }, [messages])
 
-  const metrics = useMemo(() => {
-    if (!stats) return null
-
-    const { by_status, total_trend, open_trend, in_progress_trend, completion_rate_trend } = stats
-    const completionRate = stats.total_tasks > 0
-      ? Math.round((by_status.completed / stats.total_tasks) * 100)
-      : 0
-
-    return {
-      total: {
-        value: stats.total_tasks,
-        trend: {
-          value: Math.abs(total_trend.change_percent),
-          direction: total_trend.direction,
-        },
-        subtitle: 'vs last week',
-      },
-      open: {
-        value: by_status.open,
-        trend: {
-          value: Math.abs(open_trend.change_percent),
-          direction: open_trend.direction,
-        },
-        subtitle: 'awaiting action',
-      },
-      inProgress: {
-        value: by_status.in_progress,
-        trend: {
-          value: Math.abs(in_progress_trend.change_percent),
-          direction: in_progress_trend.direction,
-        },
-        subtitle: 'actively working',
-      },
-      successRate: {
-        value: `${completionRate}%`,
-        trend: {
-          value: Math.abs(completion_rate_trend.change_percent),
-          direction: completion_rate_trend.direction,
-        },
-        subtitle: 'completion rate',
-      },
-    }
-  }, [stats])
-
   useEffect(() => {
     const hasCompletedOnboarding = localStorage.getItem('onboarding_completed')
     const hasSkippedOnboarding = localStorage.getItem('onboarding_skipped')
 
-    if (!hasCompletedOnboarding && !hasSkippedOnboarding && !statsLoading && stats) {
-      const hasNoData = stats.total_tasks === 0 && messages.length === 0
+    if (!hasCompletedOnboarding && !hasSkippedOnboarding && !messagesLoading) {
+      const hasNoData = messages.length === 0
       if (hasNoData) {
         setShowOnboarding(true)
       }
     }
-  }, [statsLoading, stats, messages.length])
+  }, [messagesLoading, messages.length])
 
-  const hasNoData = stats && stats.total_tasks === 0 && messages.length === 0
+  const hasNoData = messages.length === 0
 
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
+      <PageHeader
+        title="Dashboard"
+        description="Quick overview of recent activity, topics, and message insights"
+      />
       <OnboardingWizard open={showOnboarding} onClose={() => setShowOnboarding(false)} />
 
-      {hasNoData && !statsLoading && (
+      {hasNoData && !messagesLoading && (
         <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
           <CardContent className="flex flex-col items-center justify-center p-8 text-center">
             <div className="w-16 h-16 mb-4 rounded-full bg-primary/10 flex items-center justify-center">
@@ -136,84 +70,8 @@ const DashboardPage = () => {
         </Card>
       )}
 
-      {/* Metric Cards */}
-      <div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5 3xl:gap-6 animate-fade-in-up"
-        role="region"
-        aria-label="Task statistics"
-        aria-live="polite"
-        aria-atomic="false"
-      >
-        {statsLoading || !metrics ? (
-          <>
-            {[...Array(6)].map((_, i) => (
-              <Card key={i}>
-                <CardContent className="pt-6">
-                  <Skeleton className="h-4 w-20 mb-2" />
-                  <Skeleton className="h-8 w-12 mb-2" />
-                  <Skeleton className="h-3 w-24" />
-                </CardContent>
-              </Card>
-            ))}
-          </>
-        ) : (
-          <>
-            <MetricCard
-              title="Total Tasks"
-              value={metrics.total.value}
-              subtitle={metrics.total.subtitle}
-              trend={metrics.total.trend}
-              icon={ListBulletIcon}
-              iconColor="text-primary"
-              onClick={() => handleMetricClick('all')}
-              emptyMessage="Import messages to start tracking"
-            />
-            <MetricCard
-              title="Open Tasks"
-              value={metrics.open.value}
-              subtitle={metrics.open.subtitle}
-              trend={metrics.open.trend}
-              icon={ClockIcon}
-              iconColor="text-primary-400"
-              onClick={() => handleMetricClick('open')}
-            />
-            <MetricCard
-              title="In Progress"
-              value={metrics.inProgress.value}
-              subtitle={metrics.inProgress.subtitle}
-              trend={metrics.inProgress.trend}
-              icon={ArrowPathIcon}
-              iconColor="text-secondary-foreground"
-              onClick={() => handleMetricClick('in_progress')}
-            />
-            <MetricCard
-              title="Success Rate"
-              value={metrics.successRate.value}
-              subtitle={metrics.successRate.subtitle}
-              trend={metrics.successRate.trend}
-              icon={CheckCircleIcon}
-              iconColor="text-green-600"
-              onClick={() => handleMetricClick('completed')}
-            />
-            <MetricCard
-              title="Pending Analysis"
-              value={sidebarCounts?.unclosed_runs || 0}
-              subtitle="AI runs active"
-              icon={CpuChipIcon}
-              iconColor="text-blue-600"
-              onClick={() => navigate('/analysis')}
-            />
-            <MetricCard
-              title="Proposals to Review"
-              value={sidebarCounts?.pending_proposals || 0}
-              subtitle="awaiting review"
-              icon={DocumentCheckIcon}
-              iconColor="text-amber-600"
-              onClick={() => navigate('/proposals')}
-            />
-          </>
-        )}
-      </div>
+      {/* Admin Metrics Dashboard */}
+      <MetricsDashboard />
 
       {/* Recent Topics and Messages */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 3xl:gap-8 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
@@ -292,14 +150,6 @@ const DashboardPage = () => {
                       <p className="text-sm text-muted-foreground leading-snug break-words line-clamp-2">
                         {message.content || ''}
                       </p>
-
-                      {(message.is_task || message.isTask) && (
-                        <div className="pt-0.5">
-                          <Badge variant="outline" className="text-[10px] h-5 uppercase tracking-wide">
-                            Task
-                          </Badge>
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))

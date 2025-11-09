@@ -3,6 +3,7 @@ import type {
   MonitoringMetricsResponse,
   TaskHistoryResponse,
   HistoryFilters,
+  ScoringAccuracyResponse,
 } from '../types'
 
 class MonitoringService {
@@ -29,6 +30,13 @@ class MonitoringService {
           page_size: filters.page_size ?? 50,
         },
       }
+    )
+    return response.data
+  }
+
+  async fetchScoringAccuracy(): Promise<ScoringAccuracyResponse> {
+    const response = await apiClient.get<ScoringAccuracyResponse>(
+      '/api/v1/monitoring/scoring-accuracy'
     )
     return response.data
   }

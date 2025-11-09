@@ -79,6 +79,48 @@ async def inactive_provider(db_session: AsyncSession) -> LLMProvider:
 
 
 @pytest.fixture
+async def agent_config(db_session: AsyncSession, sample_provider: LLMProvider) -> "AgentConfig":
+    """Create a test agent config linked to sample_provider."""
+    from uuid import uuid4
+
+    from app.models import AgentConfig
+
+    config = AgentConfig(
+        id=uuid4(),
+        name="test_agent",
+        provider_id=sample_provider.id,
+        model_name="qwen2.5:14b",
+        system_prompt="Extract knowledge from messages",
+        is_active=True,
+    )
+    db_session.add(config)
+    await db_session.commit()
+    await db_session.refresh(config)
+    return config
+
+
+@pytest.fixture
+async def inactive_agent_config(db_session: AsyncSession, inactive_provider: LLMProvider) -> "AgentConfig":
+    """Create an inactive agent config linked to inactive_provider."""
+    from uuid import uuid4
+
+    from app.models import AgentConfig
+
+    config = AgentConfig(
+        id=uuid4(),
+        name="inactive_agent",
+        provider_id=inactive_provider.id,
+        model_name="qwen2.5:14b",
+        system_prompt="Extract knowledge from messages",
+        is_active=False,
+    )
+    db_session.add(config)
+    await db_session.commit()
+    await db_session.refresh(config)
+    return config
+
+
+@pytest.fixture
 async def sample_messages(db_session: AsyncSession, sample_user: User, sample_source: Source) -> list[Message]:
     """Create test messages."""
     from datetime import UTC, datetime
@@ -105,9 +147,10 @@ async def sample_messages(db_session: AsyncSession, sample_user: User, sample_so
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_success(
-    client: AsyncClient, sample_provider: LLMProvider, sample_messages: list[Message]
+    client: AsyncClient, agent_config: "AgentConfig", sample_messages: list[Message]
 ) -> None:
     """Test successfully triggering knowledge extraction."""
+
     message_ids = [msg.id for msg in sample_messages[:5]]
 
     with patch("app.api.v1.knowledge.extract_knowledge_from_messages_task") as mock_task:
@@ -115,7 +158,7 @@ async def test_trigger_extraction_success(
 
         payload = {
             "message_ids": message_ids,
-            "provider_id": str(agent_config.id),
+            "agent_config_id": str(agent_config.id),
         }
 
         response = await client.post("/api/v1/knowledge/extract", json=payload)
@@ -124,17 +167,17 @@ async def test_trigger_extraction_success(
         data = response.json()
         assert "message" in data
         assert data["message_count"] == 5
-        assert data["provider_id"] == str(agent_config.id)
+        assert data["agent_config_id"] == str(agent_config.id)
 
         mock_task.kiq.assert_called_once()
         call_kwargs = mock_task.kiq.call_args[1]
         assert call_kwargs["message_ids"] == message_ids
-        assert call_kwargs["provider_id"] == str(agent_config.id)
+        assert call_kwargs["agent_config_id"] == str(agent_config.id)
 
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_single_message(
-    client: AsyncClient, sample_provider: LLMProvider, sample_messages: list[Message]
+    client: AsyncClient, agent_config: "AgentConfig", sample_messages: list[Message]
 ) -> None:
     """Test extraction with a single message."""
     with patch("app.api.v1.knowledge.extract_knowledge_from_messages_task") as mock_task:
@@ -142,7 +185,7 @@ async def test_trigger_extraction_single_message(
 
         payload = {
             "message_ids": [sample_messages[0].id],
-            "provider_id": str(agent_config.id),
+            "agent_config_id": str(agent_config.id),
         }
 
         response = await client.post("/api/v1/knowledge/extract", json=payload)
@@ -154,7 +197,7 @@ async def test_trigger_extraction_single_message(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_max_messages(
-    client: AsyncClient, sample_provider: LLMProvider, sample_messages: list[Message]
+    client: AsyncClient, agent_config: "AgentConfig", sample_messages: list[Message]
 ) -> None:
     """Test extraction with maximum allowed messages (100)."""
     message_ids = [msg.id for msg in sample_messages]
@@ -165,7 +208,7 @@ async def test_trigger_extraction_max_messages(
 
         payload = {
             "message_ids": message_ids,
-            "provider_id": str(agent_config.id),
+            "agent_config_id": str(agent_config.id),
         }
 
         response = await client.post("/api/v1/knowledge/extract", json=payload)
@@ -182,7 +225,7 @@ async def test_trigger_extraction_provider_not_found(client: AsyncClient, sample
 
     payload = {
         "message_ids": [sample_messages[0].id],
-        "provider_id": non_existent_id,
+        "agent_config_id": non_existent_id,
     }
 
     response = await client.post("/api/v1/knowledge/extract", json=payload)
@@ -195,12 +238,12 @@ async def test_trigger_extraction_provider_not_found(client: AsyncClient, sample
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_inactive_provider(
-    client: AsyncClient, inactive_provider: LLMProvider, sample_messages: list[Message]
+    client: AsyncClient, inactive_agent_config: "AgentConfig", sample_messages: list[Message]
 ) -> None:
     """Test 400 error when provider is not active."""
     payload = {
         "message_ids": [sample_messages[0].id],
-        "provider_id": str(inactive_provider.id),
+        "agent_config_id": str(inactive_agent_config.id),
     }
 
     response = await client.post("/api/v1/knowledge/extract", json=payload)
@@ -212,11 +255,11 @@ async def test_trigger_extraction_inactive_provider(
 
 
 @pytest.mark.asyncio
-async def test_trigger_extraction_empty_message_ids(client: AsyncClient, sample_provider: LLMProvider) -> None:
+async def test_trigger_extraction_empty_message_ids(client: AsyncClient, agent_config: "AgentConfig") -> None:
     """Test validation error for empty message_ids list."""
     payload = {
         "message_ids": [],
-        "provider_id": str(agent_config.id),
+        "agent_config_id": str(agent_config.id),
     }
 
     response = await client.post("/api/v1/knowledge/extract", json=payload)
@@ -225,11 +268,11 @@ async def test_trigger_extraction_empty_message_ids(client: AsyncClient, sample_
 
 
 @pytest.mark.asyncio
-async def test_trigger_extraction_too_many_messages(client: AsyncClient, sample_provider: LLMProvider) -> None:
+async def test_trigger_extraction_too_many_messages(client: AsyncClient, agent_config: "AgentConfig") -> None:
     """Test validation error for exceeding max message limit (100)."""
     payload = {
         "message_ids": list(range(1, 102)),
-        "provider_id": str(agent_config.id),
+        "agent_config_id": str(agent_config.id),
     }
 
     response = await client.post("/api/v1/knowledge/extract", json=payload)
@@ -238,10 +281,10 @@ async def test_trigger_extraction_too_many_messages(client: AsyncClient, sample_
 
 
 @pytest.mark.asyncio
-async def test_trigger_extraction_missing_message_ids(client: AsyncClient, sample_provider: LLMProvider) -> None:
+async def test_trigger_extraction_missing_message_ids(client: AsyncClient, agent_config: "AgentConfig") -> None:
     """Test validation error for missing message_ids field."""
     payload = {
-        "provider_id": str(agent_config.id),
+        "agent_config_id": str(agent_config.id),
     }
 
     response = await client.post("/api/v1/knowledge/extract", json=payload)
@@ -268,7 +311,7 @@ async def test_trigger_extraction_invalid_provider_id_format(
     """Test validation error for invalid UUID format."""
     payload = {
         "message_ids": [sample_messages[0].id],
-        "provider_id": "not-a-valid-uuid",
+        "agent_config_id": "not-a-valid-uuid",
     }
 
     response = await client.post("/api/v1/knowledge/extract", json=payload)
@@ -277,11 +320,11 @@ async def test_trigger_extraction_invalid_provider_id_format(
 
 
 @pytest.mark.asyncio
-async def test_trigger_extraction_invalid_message_ids_type(client: AsyncClient, sample_provider: LLMProvider) -> None:
+async def test_trigger_extraction_invalid_message_ids_type(client: AsyncClient, agent_config: "AgentConfig") -> None:
     """Test validation error for invalid message_ids type."""
     payload = {
         "message_ids": "not-a-list",
-        "provider_id": str(agent_config.id),
+        "agent_config_id": str(agent_config.id),
     }
 
     response = await client.post("/api/v1/knowledge/extract", json=payload)
@@ -290,14 +333,14 @@ async def test_trigger_extraction_invalid_message_ids_type(client: AsyncClient, 
 
 
 @pytest.mark.asyncio
-async def test_trigger_extraction_negative_message_ids(client: AsyncClient, sample_provider: LLMProvider) -> None:
+async def test_trigger_extraction_negative_message_ids(client: AsyncClient, agent_config: "AgentConfig") -> None:
     """Test validation handles negative message IDs."""
     with patch("app.api.v1.knowledge.extract_knowledge_from_messages_task") as mock_task:
         mock_task.kiq = AsyncMock()
 
         payload = {
             "message_ids": [-1, -2, -3],
-            "provider_id": str(agent_config.id),
+            "agent_config_id": str(agent_config.id),
         }
 
         response = await client.post("/api/v1/knowledge/extract", json=payload)
@@ -309,7 +352,7 @@ async def test_trigger_extraction_negative_message_ids(client: AsyncClient, samp
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_duplicate_message_ids(
-    client: AsyncClient, sample_provider: LLMProvider, sample_messages: list[Message]
+    client: AsyncClient, agent_config: "AgentConfig", sample_messages: list[Message]
 ) -> None:
     """Test extraction handles duplicate message IDs."""
     with patch("app.api.v1.knowledge.extract_knowledge_from_messages_task") as mock_task:
@@ -318,7 +361,7 @@ async def test_trigger_extraction_duplicate_message_ids(
         message_id = sample_messages[0].id
         payload = {
             "message_ids": [message_id, message_id, message_id],
-            "provider_id": str(agent_config.id),
+            "agent_config_id": str(agent_config.id),
         }
 
         response = await client.post("/api/v1/knowledge/extract", json=payload)
@@ -330,7 +373,7 @@ async def test_trigger_extraction_duplicate_message_ids(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_task_queueing_failure(
-    client: AsyncClient, sample_provider: LLMProvider, sample_messages: list[Message]
+    client: AsyncClient, agent_config: "AgentConfig", sample_messages: list[Message]
 ) -> None:
     """Test handling of task queueing failure."""
     with patch("app.api.v1.knowledge.extract_knowledge_from_messages_task") as mock_task:
@@ -338,11 +381,13 @@ async def test_trigger_extraction_task_queueing_failure(
 
         payload = {
             "message_ids": [sample_messages[0].id],
-            "provider_id": str(agent_config.id),
+            "agent_config_id": str(agent_config.id),
         }
 
-        with pytest.raises(Exception, match="Task queue unavailable"):
-            await client.post("/api/v1/knowledge/extract", json=payload)
+        response = await client.post("/api/v1/knowledge/extract", json=payload)
+
+        # API should return 500 error when task queueing fails
+        assert response.status_code == 500
 
 
 # Period-based extraction tests
@@ -351,6 +396,7 @@ async def test_trigger_extraction_task_queueing_failure(
 @pytest.mark.asyncio
 async def test_trigger_extraction_with_period_last_24h(
     client: AsyncClient,
+    agent_config: "AgentConfig",
     sample_provider: LLMProvider,
     sample_user: User,
     sample_source: Source,
@@ -364,7 +410,7 @@ async def test_trigger_extraction_with_period_last_24h(
 
     agent_config = AgentConfig(
         id=uuid4(),
-        name="test_agent",
+        name="test_trigger_extraction_success",
         provider_id=sample_provider.id,
         model_name="qwen2.5:14b",
         system_prompt="Extract knowledge",
@@ -409,6 +455,7 @@ async def test_trigger_extraction_with_period_last_24h(
 @pytest.mark.asyncio
 async def test_trigger_extraction_with_period_last_7d(
     client: AsyncClient,
+    agent_config: "AgentConfig",
     sample_provider: LLMProvider,
     sample_user: User,
     sample_source: Source,
@@ -422,7 +469,7 @@ async def test_trigger_extraction_with_period_last_7d(
 
     agent_config = AgentConfig(
         id=uuid4(),
-        name="test_agent",
+        name="test_trigger_extraction_with_period_last_",
         provider_id=sample_provider.id,
         model_name="qwen2.5:14b",
         system_prompt="Extract knowledge",
@@ -467,6 +514,7 @@ async def test_trigger_extraction_with_period_last_7d(
 @pytest.mark.asyncio
 async def test_trigger_extraction_with_period_custom(
     client: AsyncClient,
+    agent_config: "AgentConfig",
     sample_provider: LLMProvider,
     sample_user: User,
     sample_source: Source,
@@ -480,7 +528,7 @@ async def test_trigger_extraction_with_period_custom(
 
     agent_config = AgentConfig(
         id=uuid4(),
-        name="test_agent",
+        name="test_trigger_extraction_with_period_custom",
         provider_id=sample_provider.id,
         model_name="qwen2.5:14b",
         system_prompt="Extract knowledge",
@@ -531,7 +579,7 @@ async def test_trigger_extraction_with_period_custom(
 @pytest.mark.asyncio
 async def test_trigger_extraction_with_period_and_topic_filter(
     client: AsyncClient,
-    sample_provider: LLMProvider,
+    agent_config: "AgentConfig",
     sample_user: User,
     sample_source: Source,
     db_session: AsyncSession,
@@ -594,7 +642,7 @@ async def test_trigger_extraction_with_period_and_topic_filter(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_with_both_message_ids_and_period_fails(
-    client: AsyncClient, sample_provider: LLMProvider, sample_messages: list[Message]
+    client: AsyncClient, agent_config: "AgentConfig", sample_messages: list[Message]
 ) -> None:
     """Test validation fails when both message_ids and period provided."""
     from datetime import UTC, datetime
@@ -614,7 +662,7 @@ async def test_trigger_extraction_with_both_message_ids_and_period_fails(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_with_neither_message_ids_nor_period_fails(
-    client: AsyncClient, sample_provider: LLMProvider
+    client: AsyncClient, agent_config: "AgentConfig"
 ) -> None:
     """Test validation fails when neither message_ids nor period provided."""
     payload = {
@@ -629,6 +677,7 @@ async def test_trigger_extraction_with_neither_message_ids_nor_period_fails(
 @pytest.mark.asyncio
 async def test_trigger_extraction_period_no_messages_found(
     client: AsyncClient,
+    agent_config: "AgentConfig",
     sample_provider: LLMProvider,
     sample_user: User,
     sample_source: Source,
@@ -642,7 +691,7 @@ async def test_trigger_extraction_period_no_messages_found(
 
     agent_config = AgentConfig(
         id=uuid4(),
-        name="test_agent",
+        name="test_trigger_extraction_with_period_and_topic_filter",
         provider_id=sample_provider.id,
         model_name="qwen2.5:14b",
         system_prompt="Extract knowledge",
@@ -678,7 +727,7 @@ async def test_trigger_extraction_period_no_messages_found(
 
 
 @pytest.mark.asyncio
-async def test_trigger_extraction_invalid_period_type(client: AsyncClient, sample_provider: LLMProvider) -> None:
+async def test_trigger_extraction_invalid_period_type(client: AsyncClient, agent_config: "AgentConfig") -> None:
     """Test validation error for invalid period_type."""
     payload = {
         "period": {"period_type": "invalid_period"},
@@ -692,7 +741,7 @@ async def test_trigger_extraction_invalid_period_type(client: AsyncClient, sampl
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_custom_period_missing_start_date(
-    client: AsyncClient, sample_provider: LLMProvider, db_session: AsyncSession
+    client: AsyncClient, agent_config: "AgentConfig", sample_provider: LLMProvider, db_session: AsyncSession
 ) -> None:
     """Test validation error for custom period without start_date."""
     from datetime import UTC, datetime, timedelta
@@ -702,7 +751,7 @@ async def test_trigger_extraction_custom_period_missing_start_date(
 
     agent_config = AgentConfig(
         id=uuid4(),
-        name="test_agent",
+        name="test_trigger_extraction_invalid_period_type",
         provider_id=sample_provider.id,
         model_name="qwen2.5:14b",
         system_prompt="Extract knowledge",
@@ -732,7 +781,7 @@ async def test_trigger_extraction_custom_period_missing_start_date(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_custom_period_missing_end_date(
-    client: AsyncClient, sample_provider: LLMProvider, db_session: AsyncSession
+    client: AsyncClient, agent_config: "AgentConfig", sample_provider: LLMProvider, db_session: AsyncSession
 ) -> None:
     """Test validation error for custom period without end_date."""
     from datetime import UTC, datetime, timedelta
@@ -742,7 +791,7 @@ async def test_trigger_extraction_custom_period_missing_end_date(
 
     agent_config = AgentConfig(
         id=uuid4(),
-        name="test_agent",
+        name="test_trigger_extraction_custom_period_missing_end_date",
         provider_id=sample_provider.id,
         model_name="qwen2.5:14b",
         system_prompt="Extract knowledge",
@@ -772,7 +821,7 @@ async def test_trigger_extraction_custom_period_missing_end_date(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_custom_period_start_after_end(
-    client: AsyncClient, sample_provider: LLMProvider, db_session: AsyncSession
+    client: AsyncClient, agent_config: "AgentConfig", sample_provider: LLMProvider, db_session: AsyncSession
 ) -> None:
     """Test validation error for custom period with start_date after end_date."""
     from datetime import UTC, datetime, timedelta
@@ -782,7 +831,7 @@ async def test_trigger_extraction_custom_period_start_after_end(
 
     agent_config = AgentConfig(
         id=uuid4(),
-        name="test_agent",
+        name="test_trigger_extraction_custom_period_start_after_end",
         provider_id=sample_provider.id,
         model_name="qwen2.5:14b",
         system_prompt="Extract knowledge",
@@ -814,7 +863,7 @@ async def test_trigger_extraction_custom_period_start_after_end(
 
 @pytest.mark.asyncio
 async def test_trigger_extraction_custom_period_future_dates(
-    client: AsyncClient, sample_provider: LLMProvider, db_session: AsyncSession
+    client: AsyncClient, agent_config: "AgentConfig", sample_provider: LLMProvider, db_session: AsyncSession
 ) -> None:
     """Test validation error for custom period with future dates."""
     from datetime import UTC, datetime, timedelta
@@ -824,7 +873,7 @@ async def test_trigger_extraction_custom_period_future_dates(
 
     agent_config = AgentConfig(
         id=uuid4(),
-        name="test_agent",
+        name="test_trigger_extraction_custom_period_future_dates",
         provider_id=sample_provider.id,
         model_name="qwen2.5:14b",
         system_prompt="Extract knowledge",

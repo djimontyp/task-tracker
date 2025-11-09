@@ -2,7 +2,8 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ...schemas import (
+from app.api.deps import DatabaseDep
+from app.schemas import (
     AddTelegramGroupRequest,
     SetWebhookRequest,
     SetWebhookResponse,
@@ -10,8 +11,7 @@ from ...schemas import (
     UpdateTelegramGroupIdsRequest,
     WebhookConfigResponse,
 )
-from ...webhook_service import telegram_webhook_service, webhook_settings_service
-from ..deps import DatabaseDep
+from app.webhook_service import telegram_webhook_service, webhook_settings_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/webhook-settings", tags=["webhook-settings"])
@@ -183,8 +183,6 @@ async def get_telegram_webhook_info() -> dict[str, bool | dict[str, str] | str]:
 @router.put("/telegram/group-ids", response_model=TelegramWebhookConfig)
 async def update_telegram_group_ids(request: UpdateTelegramGroupIdsRequest, db: DatabaseDep) -> TelegramWebhookConfig:
     try:
-        groups = [{"id": gid, "name": None} for gid in request.group_ids]
-
         config = await webhook_settings_service.get_telegram_config(db)
         if config:
             for gid in request.group_ids:

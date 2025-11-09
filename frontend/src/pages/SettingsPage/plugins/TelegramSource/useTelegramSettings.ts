@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AxiosError } from 'axios'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 import { logger } from '@/shared/utils/logger'

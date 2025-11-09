@@ -5,6 +5,7 @@ including CRUD operations and topic associations.
 """
 
 import logging
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -16,6 +17,12 @@ from app.models.atom import (
     AtomListResponse,
     AtomPublic,
     AtomUpdate,
+    BulkApproveRequest,
+    BulkApproveResponse,
+    BulkArchiveRequest,
+    BulkArchiveResponse,
+    BulkDeleteRequest,
+    BulkDeleteResponse,
 )
 from app.models.topic import Topic
 from app.services import AtomCRUD
@@ -66,7 +73,7 @@ async def list_atoms(
     description="Retrieve a specific atom by its ID.",
 )
 async def get_atom(
-    atom_id: int,
+    atom_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
 ) -> AtomPublic:
     """Get a specific atom by ID.
@@ -82,7 +89,7 @@ async def get_atom(
         HTTPException: 404 if atom not found
     """
     crud = AtomCRUD(session)
-    atom = await crud.get(atom_id)
+    atom = await crud.get_atom(atom_id)
 
     if not atom:
         raise HTTPException(
@@ -117,7 +124,7 @@ async def create_atom(
         Created atom with generated ID and timestamps
     """
     crud = AtomCRUD(session)
-    return await crud.create(atom_data)
+    return await crud.create_atom(atom_data)
 
 
 @router.patch(
@@ -127,7 +134,7 @@ async def create_atom(
     description="Update an existing atom by ID.",
 )
 async def update_atom(
-    atom_id: int,
+    atom_id: uuid.UUID,
     atom_data: AtomUpdate,
     session: AsyncSession = Depends(get_session),
 ) -> AtomPublic:
@@ -148,7 +155,7 @@ async def update_atom(
         HTTPException: 404 if atom not found
     """
     crud = AtomCRUD(session)
-    atom = await crud.update(atom_id, atom_data)
+    atom = await crud.update_atom(atom_id, atom_data)
 
     if not atom:
         raise HTTPException(
@@ -166,7 +173,7 @@ async def update_atom(
     description="Delete an atom by ID. Use with caution.",
 )
 async def delete_atom(
-    atom_id: int,
+    atom_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
 ) -> None:
     """Delete an atom.
@@ -192,14 +199,180 @@ async def delete_atom(
 
 
 @router.post(
+    "/bulk-approve",
+    response_model=BulkApproveResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Bulk approve atoms",
+    description="Approve multiple atoms in a single transaction with partial success support.",
+)
+async def bulk_approve_atoms(
+    request: BulkApproveRequest,
+    session: AsyncSession = Depends(get_session),
+) -> BulkApproveResponse:
+    """Bulk approve multiple atoms in a single operation.
+
+    This endpoint enables efficient approval of multiple atoms at once,
+    useful for admin workflows and batch operations. Uses partial success
+    strategy: successfully processes valid atoms while reporting failures.
+
+    Args:
+        request: Request containing list of atom IDs to approve
+        session: Database session
+
+    Returns:
+        Response with approved count, failed IDs, and error messages
+
+    Raises:
+        HTTPException: 400 if atom_ids list is empty
+        HTTPException: 500 on database transaction errors
+
+    Notes:
+        - Idempotent: re-approving already approved atoms is safe
+        - Atomic transaction: either all succeed or failures are reported
+        - Invalid UUIDs and non-existent atoms are reported in failed_ids
+    """
+    if not request.atom_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="atom_ids list cannot be empty",
+        )
+
+    crud = AtomCRUD(session)
+
+    try:
+        result = await crud.bulk_approve_atoms(request.atom_ids)
+    except Exception as e:
+        logger.error(f"Unexpected error in bulk approve: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during bulk approve operation",
+        )
+
+    return result
+
+
+@router.post(
+    "/bulk-archive",
+    response_model=BulkArchiveResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Bulk archive atoms",
+    description="Archive multiple atoms in a single transaction with partial success support.",
+)
+async def bulk_archive_atoms(
+    request: BulkArchiveRequest,
+    session: AsyncSession = Depends(get_session),
+) -> BulkArchiveResponse:
+    """Bulk archive multiple atoms in a single operation.
+
+    This endpoint enables efficient archiving of multiple atoms at once,
+    useful for admin workflows and batch operations. Uses partial success
+    strategy: successfully processes valid atoms while reporting failures.
+
+    Args:
+        request: Request containing list of atom IDs to archive
+        session: Database session
+
+    Returns:
+        Response with archived count, failed IDs, and error messages
+
+    Raises:
+        HTTPException: 400 if atom_ids list is empty
+        HTTPException: 500 on database transaction errors
+
+    Notes:
+        - Idempotent: re-archiving already archived atoms is safe
+        - Atomic transaction: either all succeed or failures are reported
+        - Invalid UUIDs and non-existent atoms are reported in failed_ids
+    """
+    if not request.atom_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="atom_ids list cannot be empty",
+        )
+
+    crud = AtomCRUD(session)
+
+    try:
+        result = await crud.bulk_archive_atoms(request.atom_ids)
+    except Exception as e:
+        logger.error(f"Unexpected error in bulk archive: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during bulk archive operation",
+        )
+
+    return result
+
+
+@router.post(
+    "/bulk-delete",
+    response_model=BulkDeleteResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Bulk delete atoms",
+    description="Delete multiple atoms permanently in a single transaction with partial success support.",
+)
+async def bulk_delete_atoms(
+    request: BulkDeleteRequest,
+    session: AsyncSession = Depends(get_session),
+) -> BulkDeleteResponse:
+    """Bulk delete multiple atoms in a single operation.
+
+    This endpoint enables efficient deletion of multiple atoms at once,
+    useful for admin workflows and batch operations. Uses partial success
+    strategy: successfully deletes valid atoms while reporting failures.
+
+    Cascade delete logic:
+    - Deletes all atom_links (bidirectional)
+    - Deletes all atom_versions
+    - Deletes all topic_atoms relationships
+    - Then deletes the atom itself
+
+    Args:
+        request: Request containing list of atom IDs to delete
+        session: Database session
+
+    Returns:
+        Response with deleted count, failed IDs, and error messages
+
+    Raises:
+        HTTPException: 400 if atom_ids list is empty
+        HTTPException: 500 on database transaction errors
+
+    Notes:
+        - NOT idempotent: re-deleting deleted atoms will report failures
+        - Atomic transaction: either all succeed or failures are reported
+        - Invalid UUIDs and non-existent atoms are reported in failed_ids
+        - Cascade deletes all related records to prevent orphans
+    """
+    if not request.atom_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="atom_ids list cannot be empty",
+        )
+
+    crud = AtomCRUD(session)
+
+    try:
+        result = await crud.bulk_delete_atoms(request.atom_ids)
+    except Exception as e:
+        logger.error(f"Unexpected error in bulk delete: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during bulk delete operation",
+        )
+
+    return result
+
+
+@router.post(
     "/{atom_id}/topics/{topic_id}",
     status_code=status.HTTP_201_CREATED,
     summary="Link atom to topic",
     description="Create a relationship between an atom and a topic.",
 )
 async def link_atom_to_topic(
-    atom_id: int,
-    topic_id: int,
+    atom_id: uuid.UUID,
+    topic_id: uuid.UUID,
     position: int | None = Query(None, description="Display order within topic"),
     note: str | None = Query(None, description="Contextual note about the relationship"),
     session: AsyncSession = Depends(get_session),
@@ -248,6 +421,6 @@ async def link_atom_to_topic(
 
     return {
         "message": "Atom linked to topic successfully",
-        "atom_id": atom_id,
-        "topic_id": topic_id,
+        "atom_id": str(atom_id),
+        "topic_id": str(topic_id),
     }

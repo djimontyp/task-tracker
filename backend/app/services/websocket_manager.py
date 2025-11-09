@@ -35,7 +35,9 @@ class WebSocketManager:
         self._nats_subscriptions: list[Subscription] = []
         self._is_worker = self._detect_worker_process()
         self._startup_complete = False
-        logger.info(f"🔧 WebSocketManager initialized: is_worker={self._is_worker}, TASKIQ_WORKER={os.getenv('TASKIQ_WORKER')}")
+        logger.info(
+            f"🔧 WebSocketManager initialized: is_worker={self._is_worker}, TASKIQ_WORKER={os.getenv('TASKIQ_WORKER')}"
+        )
 
     async def connect(self, websocket: WebSocket, topics: list[str] | None = None, accept: bool = True) -> None:
         """Accept WebSocket connection and subscribe to topics.
@@ -53,7 +55,7 @@ class WebSocketManager:
 
         # Default to all topics if none specified
         if topics is None:
-            topics = ["agents", "tasks", "providers"]
+            topics = ["agents", "tasks", "providers", "metrics"]
 
         async with self._lock:
             for topic in topics:
@@ -135,7 +137,7 @@ class WebSocketManager:
         if not self._nats_client or self._is_worker:
             return
 
-        topics = ["agents", "tasks", "providers", "knowledge", "messages", "monitoring"]
+        topics = ["agents", "tasks", "providers", "knowledge", "messages", "monitoring", "metrics"]
 
         for topic in topics:
             subject = f"websocket.{topic}"
@@ -213,8 +215,10 @@ class WebSocketManager:
             return
 
         try:
+            from app.core.json_encoder import UUIDJSONEncoder
+
             subject = f"websocket.{topic}"
-            message_bytes = json.dumps(message).encode()
+            message_bytes = json.dumps(message, cls=UUIDJSONEncoder).encode()
             await self._nats_client.publish(subject, message_bytes)
             logger.debug(f"📤 Published to NATS {subject}: {message.get('type', 'unknown')}")
         except Exception as e:
@@ -238,7 +242,9 @@ class WebSocketManager:
             logger.debug(f"⚠️ No active WebSocket clients for topic {topic}")
             return
 
-        message_json = json.dumps(message)
+        from app.core.json_encoder import UUIDJSONEncoder
+
+        message_json = json.dumps(message, cls=UUIDJSONEncoder)
         logger.info(
             f"📡 Broadcasting {message.get('type', 'unknown')} to {len(connections)} client(s) on topic {topic}"
         )

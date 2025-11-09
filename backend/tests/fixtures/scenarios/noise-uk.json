@@ -1,0 +1,161 @@
+{
+  "scenario": "noise_conversation",
+  "language": "uk",
+  "description": "Звичайний casual чат без технічної цінності. Привітання, емодзі, жарти, координація зустрічей.",
+  "messages": [
+    {
+      "order": 1,
+      "text": "Всім привіт! ☀️",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "greeting",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 2,
+      "text": "Здоров!",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "greeting",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 3,
+      "text": "Привіт 👋",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "greeting",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 4,
+      "text": "Як справи?",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "small_talk",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 5,
+      "text": "Норм, працюю 💻",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "small_talk",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 6,
+      "text": "Хтось йде на обід?",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "coordination",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 7,
+      "text": "+1",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "agreement",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 8,
+      "text": "Я теж",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "agreement",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 9,
+      "text": "Куди підемо?",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "coordination",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 10,
+      "text": "Може в ту нову піцерію?",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "suggestion",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 11,
+      "text": "🍕🍕🍕",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "emoji_reaction",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 12,
+      "text": "Окей, о 13:00 біля офісу?",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "coordination",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 13,
+      "text": "Домовились",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "agreement",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 14,
+      "text": "👍",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "emoji_reaction",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 15,
+      "text": "До зустрічі!",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "farewell",
+        "content_categories": []
+      }
+    }
+  ],
+  "expected_extraction": {
+    "topics": [],
+    "note": "Pure noise conversation - no knowledge should be extracted"
+  }
+}

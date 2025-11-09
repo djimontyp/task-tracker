@@ -12,6 +12,7 @@ import { TaskConfig, TaskConfigCreate, TaskConfigUpdate } from '@/features/agent
 import { toast } from 'sonner'
 import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { TaskForm } from '@/features/agents/components'
+import { PageHeader } from '@/shared/components'
 
 const AgentTasksPage = () => {
   const queryClient = useQueryClient()
@@ -94,18 +95,16 @@ const AgentTasksPage = () => {
 
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">Agent Tasks</h1>
-          <p className="text-muted-foreground">
-            Configure agent execution tasks with Pydantic schemas
-          </p>
-        </div>
-        <Button onClick={handleCreate}>
-          <PlusIcon className="mr-2 h-4 w-4" />
-          Add Task
-        </Button>
-      </div>
+      <PageHeader
+        title="Task Templates"
+        description="Manage reusable task templates for agent automation workflows"
+        actions={
+          <Button onClick={handleCreate} size="sm">
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Add Task
+          </Button>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {tasks?.length === 0 ? (

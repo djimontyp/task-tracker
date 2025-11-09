@@ -9,7 +9,7 @@ import { Badge } from '@/shared/ui/badge';
 import { Spinner } from '@/shared/ui';
 import { versioningService } from '@/features/knowledge/api/versioningService';
 import type { AutoApprovalRule } from '@/features/knowledge/types';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function AutoApprovalSettingsPage() {
   const [rule, setRule] = useState<AutoApprovalRule>({

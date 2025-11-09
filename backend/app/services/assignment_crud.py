@@ -19,10 +19,15 @@ from app.models import (
     TaskConfig,
 )
 from app.models.agent_task_assignment import AgentTaskAssignmentWithDetails
+from app.services.base_crud import BaseCRUD
 
 
-class AssignmentCRUD:
-    """CRUD service for Agent-Task Assignment operations."""
+class AssignmentCRUD(BaseCRUD[AgentTaskAssignment]):
+    """CRUD service for Agent-Task Assignment operations.
+
+    Inherits standard CRUD operations from BaseCRUD and adds
+    assignment-specific business logic for agent-task relationships.
+    """
 
     def __init__(self, session: AsyncSession):
         """Initialize CRUD service.
@@ -30,9 +35,9 @@ class AssignmentCRUD:
         Args:
             session: Async database session
         """
-        self.session = session
+        super().__init__(AgentTaskAssignment, session)
 
-    async def create(self, assignment_data: AgentTaskAssignmentCreate) -> AgentTaskAssignmentPublic:
+    async def create_assignment(self, assignment_data: AgentTaskAssignmentCreate) -> AgentTaskAssignmentPublic:
         """Create new agent-task assignment.
 
         Args:
@@ -44,33 +49,23 @@ class AssignmentCRUD:
         Raises:
             ValueError: If agent or task not found, or assignment already exists
         """
-        # Verify agent exists
         agent_result = await self.session.execute(select(AgentConfig).where(AgentConfig.id == assignment_data.agent_id))
         agent = agent_result.scalar_one_or_none()
         if not agent:
             raise ValueError(f"Agent with ID '{assignment_data.agent_id}' not found")
 
-        # Verify task exists
         task_result = await self.session.execute(select(TaskConfig).where(TaskConfig.id == assignment_data.task_id))
         task = task_result.scalar_one_or_none()
         if not task:
             raise ValueError(f"Task with ID '{assignment_data.task_id}' not found")
 
-        # Create assignment record
-        assignment = AgentTaskAssignment(
-            agent_id=assignment_data.agent_id,
-            task_id=assignment_data.task_id,
-            is_active=assignment_data.is_active,
-        )
-
         try:
-            self.session.add(assignment)
-            await self.session.commit()
-            await self.session.refresh(assignment)
+            assignment = await super().create(assignment_data.model_dump())
         except IntegrityError as e:
             await self.session.rollback()
-            # Check if it's the unique constraint violation
-            if "uq_agent_task" in str(e):
+            error_str = str(e)
+            # Check for duplicate assignment (PostgreSQL uses constraint name, SQLite describes the columns)
+            if "uq_agent_task" in error_str or "agent_task_assignments.agent_id" in error_str:
                 raise ValueError(
                     f"Assignment between agent '{assignment_data.agent_id}' "
                     f"and task '{assignment_data.task_id}' already exists"
@@ -79,7 +74,7 @@ class AssignmentCRUD:
 
         return AgentTaskAssignmentPublic.model_validate(assignment)
 
-    async def get(self, assignment_id: UUID) -> AgentTaskAssignmentPublic | None:
+    async def get(self, assignment_id: UUID) -> AgentTaskAssignmentPublic | None:  # type: ignore[override]
         """Get assignment by ID.
 
         Args:
@@ -88,8 +83,7 @@ class AssignmentCRUD:
         Returns:
             Assignment if found, None otherwise
         """
-        result = await self.session.execute(select(AgentTaskAssignment).where(AgentTaskAssignment.id == assignment_id))
-        assignment = result.scalar_one_or_none()
+        assignment = await super().get(assignment_id)
 
         if assignment:
             return AgentTaskAssignmentPublic.model_validate(assignment)
@@ -180,14 +174,13 @@ class AssignmentCRUD:
         Returns:
             List of assignments
         """
-        query = select(AgentTaskAssignment)
-
         if active_only:
-            query = query.where(AgentTaskAssignment.is_active == True)  # noqa: E712
-
-        query = query.offset(skip).limit(limit)
-        result = await self.session.execute(query)
-        assignments = result.scalars().all()
+            query = select(AgentTaskAssignment).where(AgentTaskAssignment.is_active == True)  # noqa: E712
+            query = query.offset(skip).limit(limit)
+            result = await self.session.execute(query)
+            assignments = list(result.scalars().all())
+        else:
+            assignments = await super().get_multi(skip=skip, limit=limit)
 
         return [AgentTaskAssignmentPublic.model_validate(a) for a in assignments]
 
@@ -217,7 +210,7 @@ class AssignmentCRUD:
 
         return AgentTaskAssignmentPublic.model_validate(assignment)
 
-    async def delete(self, assignment_id: UUID) -> bool:
+    async def delete(self, assignment_id: UUID) -> bool:  # type: ignore[override]
         """Delete assignment.
 
         Args:
@@ -226,15 +219,7 @@ class AssignmentCRUD:
         Returns:
             True if deleted, False if not found
         """
-        result = await self.session.execute(select(AgentTaskAssignment).where(AgentTaskAssignment.id == assignment_id))
-        assignment = result.scalar_one_or_none()
-
-        if not assignment:
-            return False
-
-        await self.session.delete(assignment)
-        await self.session.commit()
-        return True
+        return await super().delete(assignment_id)
 
     async def list_with_details(
         self,

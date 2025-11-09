@@ -8,8 +8,10 @@ import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.exc import IntegrityError
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.api.v1.schemas.agent import AgentTestRequest, AgentTestResponse
 from app.database import get_session
 from app.models import (
     AgentConfigCreate,
@@ -19,11 +21,7 @@ from app.models import (
     AgentTaskAssignmentPublic,
 )
 from app.services import AgentCRUD, AssignmentCRUD
-from app.services.agent_service import (
-    AgentTestService,
-    TestAgentRequest,
-    TestAgentResponse,
-)
+from app.services.agent_service import AgentTestService
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/agents", tags=["agents"])
@@ -61,7 +59,7 @@ async def create_agent(
     """
     try:
         crud = AgentCRUD(session)
-        agent = await crud.create(agent_data)
+        agent = await crud.create_agent(agent_data)
         logger.info(f"Created agent '{agent.name}' with ID {agent.id}")
         return agent
     except ValueError as e:
@@ -107,7 +105,7 @@ async def list_agents(
         List of agent configurations
     """
     crud = AgentCRUD(session)
-    agents = await crud.list(
+    agents = await crud.list_agents(
         skip=skip,
         limit=limit,
         active_only=active_only,
@@ -139,7 +137,7 @@ async def get_agent(
         HTTPException 404: Agent not found
     """
     crud = AgentCRUD(session)
-    agent = await crud.get(agent_id)
+    agent = await crud.get_agent(agent_id)
 
     if not agent:
         raise HTTPException(
@@ -177,7 +175,7 @@ async def update_agent(
     """
     try:
         crud = AgentCRUD(session)
-        agent = await crud.update(agent_id, update_data)
+        agent = await crud.update_agent(agent_id, update_data)
 
         if not agent:
             raise HTTPException(
@@ -187,6 +185,17 @@ async def update_agent(
 
         logger.info(f"Updated agent '{agent.name}' (ID: {agent.id})")
         return agent
+    except IntegrityError as e:
+        # Handle duplicate name constraint violation
+        if "unique constraint" in str(e).lower() or "duplicate" in str(e).lower():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Agent with name '{update_data.name}' already exists",
+            )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Database integrity error",
+        )
     except ValueError as e:
         if "not found" in str(e):
             raise HTTPException(
@@ -222,7 +231,7 @@ async def delete_agent(
         HTTPException 404: Agent not found
     """
     crud = AgentCRUD(session)
-    deleted = await crud.delete(agent_id)
+    deleted = await crud.delete_agent(agent_id)
 
     if not deleted:
         raise HTTPException(
@@ -270,7 +279,7 @@ async def assign_task(
 
     try:
         crud = AssignmentCRUD(session)
-        assignment = await crud.create(assignment_data)
+        assignment = await crud.create_assignment(assignment_data)
         logger.info(f"Assigned task '{assignment.task_id}' to agent '{agent_id}' (assignment ID: {assignment.id})")
         return assignment
     except ValueError as e:
@@ -359,15 +368,15 @@ async def unassign_task(
 
 @router.post(
     "/{agent_id}/test",
-    response_model=TestAgentResponse,
+    response_model=AgentTestResponse,
     summary="Test agent with custom prompt",
     response_description="Agent test response with LLM output",
 )
 async def test_agent(
     agent_id: UUID,
-    request: TestAgentRequest,
+    request: AgentTestRequest,
     session: AsyncSession = Depends(get_session),
-) -> TestAgentResponse:
+) -> AgentTestResponse:
     """Test an agent configuration with a custom prompt.
 
     Sends the provided prompt to the LLM using the agent's configuration

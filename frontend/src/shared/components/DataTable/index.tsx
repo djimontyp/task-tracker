@@ -11,43 +11,89 @@ import {
   flexRender,
   Table as TableType,
 } from '@tanstack/react-table'
+import { useIsMobile } from '@/shared/hooks/use-mobile'
 
 interface DataTableProps<TData> {
   table: TableType<TData>
   columns: ColumnDef<TData>[]
   emptyMessage?: string
+  renderMobileCard?: (row: TData, index: number) => React.ReactNode
+  onRowClick?: (row: TData) => void
 }
 
 export function DataTable<TData>({
   table,
   columns,
   emptyMessage = 'No results.',
+  renderMobileCard,
+  onRowClick,
 }: DataTableProps<TData>) {
+  const isMobile = useIsMobile()
+
+  if (isMobile && renderMobileCard) {
+    return (
+      <div className="space-y-3">
+        {table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row, index) => (
+            <div
+              key={row.id}
+              onClick={() => onRowClick?.(row.original)}
+              className={onRowClick ? 'cursor-pointer' : undefined}
+            >
+              {renderMobileCard(row.original, index)}
+            </div>
+          ))
+        ) : (
+          <div className="flex items-center justify-center h-24 text-center text-muted-foreground">
+            {emptyMessage}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="overflow-hidden rounded-md border">
       <Table role="grid" aria-label="Data table">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
+              {headerGroup.headers.map((header) => {
+                const isContentColumn = header.column.id === 'content'
+                return (
+                  <TableHead
+                    key={header.id}
+                    className={isContentColumn ? 'w-full' : undefined}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                )
+              })}
             </TableRow>
           ))}
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && 'selected'}
+                onClick={() => onRowClick?.(row.original)}
+                className={onRowClick ? 'cursor-pointer' : undefined}
+              >
+                {row.getVisibleCells().map((cell) => {
+                  const isContentColumn = cell.column.id === 'content'
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      className={isContentColumn ? 'w-full' : undefined}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  )
+                })}
               </TableRow>
             ))
           ) : (

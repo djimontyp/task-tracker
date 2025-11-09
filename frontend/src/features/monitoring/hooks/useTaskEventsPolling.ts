@@ -16,7 +16,7 @@ export const useTaskEventsPolling = (options: UseTaskEventsPollingOptions = {}) 
   const { data: historyData, isLoading } = useQuery({
     queryKey: ['monitoring', 'history', 'polling'],
     queryFn: async () => {
-      const response = await monitoringService.getHistory({
+      const response = await monitoringService.fetchHistory({
         page: 1,
         page_size: maxEvents,
       })
@@ -29,7 +29,7 @@ export const useTaskEventsPolling = (options: UseTaskEventsPollingOptions = {}) 
   useEffect(() => {
     if (!historyData?.items) return
 
-    const newItems = historyData.items.filter((item) => item.id > lastSeenId)
+    const newItems = historyData.items.filter((item: TaskExecutionLog) => item.id > lastSeenId)
 
     if (newItems.length > 0) {
       console.log(`[useTaskEventsPolling] 📥 Received ${newItems.length} new events`)
@@ -39,7 +39,7 @@ export const useTaskEventsPolling = (options: UseTaskEventsPollingOptions = {}) 
         return combined
       })
 
-      const maxId = Math.max(...newItems.map((item) => item.id))
+      const maxId = Math.max(...newItems.map((item: TaskExecutionLog) => item.id))
       setLastSeenId(maxId)
     }
   }, [historyData, lastSeenId, maxEvents])

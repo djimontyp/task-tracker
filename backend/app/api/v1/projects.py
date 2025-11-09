@@ -108,7 +108,7 @@ async def create_project(
     """
     try:
         crud = ProjectConfigCRUD(session)
-        project = await crud.create(project_data)
+        project = await crud.create(project_data.model_dump(exclude_unset=True))
         logger.info(f"Created project config '{project.name}' with ID {project.id}")
 
         # Broadcast WebSocket event

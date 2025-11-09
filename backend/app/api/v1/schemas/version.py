@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from typing import Any
 
@@ -13,7 +14,7 @@ class VersionBase(BaseModel):
 
 class TopicVersionResponse(VersionBase):
     id: int
-    topic_id: int
+    topic_id: uuid.UUID
     created_at: datetime
     approved_at: datetime | None = None
 
@@ -23,7 +24,7 @@ class TopicVersionResponse(VersionBase):
 
 class AtomVersionResponse(VersionBase):
     id: int
-    atom_id: int
+    atom_id: uuid.UUID
     created_at: datetime
     approved_at: datetime | None = None
 

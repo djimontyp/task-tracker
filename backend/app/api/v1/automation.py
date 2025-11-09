@@ -26,7 +26,7 @@ from app.models.automation_rule import (
 from app.models.topic_version import TopicVersion
 from app.services.rule_engine_service import rule_engine_service
 from app.services.rule_templates import RULE_TEMPLATES
-from app.services.versioning_service import VersioningService
+from app.services.versioning import VersioningService
 
 router = APIRouter(prefix="/automation", tags=["automation"])
 rules_router = APIRouter(prefix="/rules")
@@ -484,7 +484,7 @@ async def get_rule_templates() -> list[dict]:
     return RULE_TEMPLATES
 
 
-@router.post(
+@rules_router.post(
     "/preview",
     response_model=RulePreviewResponse,
     summary="Preview rule impact",

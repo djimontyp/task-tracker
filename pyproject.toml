@@ -28,6 +28,7 @@ dependencies = [
     "apscheduler>=3.11.0",
     "psycopg2-binary>=2.9.11",
     "jinja2>=3.1.6",
+    "tenacity>=9.0.0",
 ]
 
 
@@ -58,6 +59,8 @@ python_functions = "test_*"
 addopts = "-v --tb=short"
 markers = [
     "asyncio: mark test as asyncio",
+    "performance: mark test as performance/benchmark test",
+    "requires_postgres: mark test as requiring PostgreSQL (skip on SQLite)",
 ]
 pythonpath = ["backend"]
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { logger } from '@/shared/utils/logger'
 
 const DEFAULT_WS_PATH = '/ws'

@@ -1,0 +1,180 @@
+{
+  "scenario": "mixed_signal_noise",
+  "language": "uk",
+  "description": "Реалістична розмова з перемішаним сигналом і шумом. Починається з casual чату, переходить в технічну дискусію, знову повертається до casual.",
+  "messages": [
+    {
+      "order": 1,
+      "text": "Всім добрий день! Як справи? ☀️",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "greeting",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 2,
+      "text": "Привіт! Норм, працюю",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "greeting_response",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 3,
+      "text": "До речі, хтось тестував нову TaskIQ інтеграцію?",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "status_question",
+        "content_categories": ["testing", "integration"]
+      }
+    },
+    {
+      "order": 4,
+      "text": "Так, вчора запускав",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "status_response",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 5,
+      "text": "І як? Все ок?",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "follow_up_question",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 6,
+      "text": "Є проблема. Background tasks не обробляються, залипають в pending стані. Треба підняти worker instances",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "bug_report",
+        "content_categories": ["technical_issue", "infrastructure"]
+      }
+    },
+    {
+      "order": 7,
+      "text": "Скільки зараз?",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "diagnostic_question",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 8,
+      "text": "Тільки один worker. При навантаженні 100+ tasks/min він не встигає. Пропоную scale до 3 workers",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "problem_analysis",
+        "content_categories": ["performance_issue", "scalability", "solution_proposal"]
+      }
+    },
+    {
+      "order": 9,
+      "text": "Логічно 👍",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "agreement",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 10,
+      "text": "В compose.yml можна додати:\n```yaml\nworker:\n  deploy:\n    replicas: 3\n```",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "code_solution",
+        "content_categories": ["implementation_details", "configuration"]
+      }
+    },
+    {
+      "order": 11,
+      "text": "Відмінно! Хто візьме?",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "task_assignment_question",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 12,
+      "text": "Я можу зробити",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "ownership_commitment",
+        "content_categories": ["task_assignment"]
+      }
+    },
+    {
+      "order": 13,
+      "text": "Супер, дякую! 🙏",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "gratitude",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 14,
+      "text": "До речі, хто йде сьогодні на обід?",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "off_topic",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 15,
+      "text": "Я можу",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "off_topic_response",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 16,
+      "text": "+1",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "agreement",
+        "content_categories": []
+      }
+    }
+  ],
+  "expected_extraction": {
+    "topics": [
+      {
+        "title": "TaskIQ Worker Scaling",
+        "atoms": [
+          "Background tasks залипають в pending при навантаженні",
+          "Один worker не встигає обробити 100+ tasks/min",
+          "Scale до 3 workers через docker compose replicas"
+        ]
+      }
+    ],
+    "note": "Should extract only technical discussion (messages 3-12), ignore casual chat (1-2, 13-16)"
+  }
+}
