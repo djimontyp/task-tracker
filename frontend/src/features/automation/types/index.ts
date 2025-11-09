@@ -79,16 +79,6 @@ export interface RulePreviewResponse {
   }>
 }
 
-export interface NotificationPreferences {
-  email_enabled: boolean
-  email_address?: string
-  telegram_enabled: boolean
-  telegram_chat_id?: string
-  pending_threshold: number
-  daily_digest_enabled: boolean
-  digest_time?: string
-  digest_frequency: 'daily' | 'weekly'
-}
 
 export interface AutomationStats {
   auto_approval_rate: number
@@ -128,14 +118,5 @@ export interface WizardFormData {
     confidence_threshold: number
     similarity_threshold: number
     action: 'approve' | 'reject' | 'manual_review'
-  }
-  notifications: {
-    email_enabled: boolean
-    email_address?: string
-    telegram_enabled: boolean
-    telegram_chat_id?: string
-    pending_threshold: number
-    digest_enabled: boolean
-    digest_frequency: 'daily' | 'weekly'
   }
 }

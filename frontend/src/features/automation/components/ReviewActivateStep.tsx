@@ -1,7 +1,7 @@
 import { useWizardStore } from '../store/wizardStore'
 import { Card } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
-import { CheckCircleIcon, ClockIcon, BellIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
+import { ClockIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
 
 function describeCron(cron: string): string {
   if (cron === '0 * * * *') return 'Every hour'
@@ -85,55 +85,6 @@ export function ReviewActivateStep() {
           </div>
         </Card>
 
-        <Card className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="size-10 rounded-lg bg-emerald-100 dark:bg-emerald-950/30 flex items-center justify-center shrink-0">
-              <BellIcon className="size-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-medium mb-1">Notifications</h4>
-              <div className="space-y-2 text-sm">
-                {formData.notifications.email_enabled ? (
-                  <div className="flex items-center gap-2">
-                    <CheckCircleIcon className="size-4 text-emerald-600" />
-                    <span className="text-muted-foreground">Email:</span>
-                    <span className="font-medium truncate">
-                      {formData.notifications.email_address}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="text-muted-foreground">Email notifications: Disabled</div>
-                )}
-
-                {formData.notifications.telegram_enabled ? (
-                  <div className="flex items-center gap-2">
-                    <CheckCircleIcon className="size-4 text-emerald-600" />
-                    <span className="text-muted-foreground">Telegram:</span>
-                    <span className="font-mono font-medium">
-                      {formData.notifications.telegram_chat_id}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="text-muted-foreground">Telegram notifications: Disabled</div>
-                )}
-
-                <div className="text-muted-foreground">
-                  Alert threshold: {formData.notifications.pending_threshold} pending versions
-                </div>
-
-                {formData.notifications.digest_enabled && (
-                  <div className="flex items-center gap-2">
-                    <CheckCircleIcon className="size-4 text-emerald-600" />
-                    <span className="text-muted-foreground">
-                      {formData.notifications.digest_frequency === 'daily' ? 'Daily' : 'Weekly'}{' '}
-                      digest enabled
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </Card>
       </div>
 
       <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-4">
@@ -151,10 +102,6 @@ export function ReviewActivateStep() {
           </li>
           <li className="flex items-start gap-2">
             <span className="shrink-0">3.</span>
-            <span>Notification preferences will be saved</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="shrink-0">4.</span>
             <span>
               You can monitor and adjust everything from the Automation Dashboard
             </span>

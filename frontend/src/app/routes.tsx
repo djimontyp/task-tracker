@@ -16,7 +16,6 @@ const AutomationOnboardingPage = lazy(() => import('@pages/AutomationOnboardingP
 const AutomationDashboardPage = lazy(() => import('@pages/AutomationDashboardPage'))
 const AutomationRulesPage = lazy(() => import('@pages/AutomationRulesPage'))
 const SchedulerPage = lazy(() => import('@pages/SchedulerPage'))
-const NotificationSettingsPage = lazy(() => import('@pages/NotificationSettingsPage'))
 const SearchPage = lazy(() => import('@pages/SearchPage'))
 
 const AppRoutes = () => {
@@ -44,7 +43,6 @@ const AppRoutes = () => {
         <Route element={<MainLayout><AutomationDashboardPage /></MainLayout>} path="/automation/dashboard" />
         <Route element={<MainLayout><AutomationRulesPage /></MainLayout>} path="/automation/rules" />
         <Route element={<MainLayout><SchedulerPage /></MainLayout>} path="/automation/scheduler" />
-        <Route element={<MainLayout><NotificationSettingsPage /></MainLayout>} path="/automation/notifications" />
       </Routes>
     </Suspense>
   )

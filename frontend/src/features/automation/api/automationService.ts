@@ -10,7 +10,6 @@ import type {
   UpdateRuleRequest,
   RuleTemplate,
   RulePreviewResponse,
-  NotificationPreferences,
   AutomationStats,
   AutomationTrend,
   JobExecutionHistory,
@@ -120,27 +119,6 @@ class AutomationService {
     return response.data
   }
 
-  async getNotificationPreferences(): Promise<NotificationPreferences> {
-    const response = await apiClient.get(API_ENDPOINTS.notifications.preferences)
-    return response.data
-  }
-
-  async updateNotificationPreferences(
-    data: Partial<NotificationPreferences>
-  ): Promise<NotificationPreferences> {
-    const response = await apiClient.put(API_ENDPOINTS.notifications.preferences, data)
-    return response.data
-  }
-
-  async testEmail(): Promise<{ success: boolean; message: string }> {
-    const response = await apiClient.post(API_ENDPOINTS.notifications.testEmail)
-    return response.data
-  }
-
-  async testTelegram(): Promise<{ success: boolean; message: string }> {
-    const response = await apiClient.post(API_ENDPOINTS.notifications.testTelegram)
-    return response.data
-  }
 }
 
 export const automationService = new AutomationService()
@@ -262,32 +240,3 @@ export function useToggleJob() {
   })
 }
 
-export function useNotificationPreferences() {
-  return useQuery({
-    queryKey: ['notification-preferences'],
-    queryFn: () => automationService.getNotificationPreferences(),
-  })
-}
-
-export function useUpdateNotificationPreferences() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (data: Partial<NotificationPreferences>) =>
-      automationService.updateNotificationPreferences(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notification-preferences'] })
-    },
-  })
-}
-
-export function useTestEmail() {
-  return useMutation({
-    mutationFn: () => automationService.testEmail(),
-  })
-}
-
-export function useTestTelegram() {
-  return useMutation({
-    mutationFn: () => automationService.testTelegram(),
-  })
-}
