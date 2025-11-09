@@ -118,7 +118,6 @@ async def save_telegram_message(telegram_data: dict[str, Any]) -> str:
             language_code = from_user.get("language_code")
             is_bot = from_user.get("is_bot", False)
 
-            # Create or identify Telegram user with profile
             user, tg_profile = await identify_or_create_user(
                 db=db,
                 telegram_user_id=telegram_user_id,
@@ -295,14 +294,12 @@ async def ingest_telegram_messages_task(
                         else:
                             batch_errors += 1
 
-                    # Update job statistics
                     total_fetched += len(messages)
                     total_stored += batch_stored
                     total_skipped += batch_skipped
                     total_errors += batch_errors
                     messages_from_chat += len(messages)
 
-                    # Update progress tracking
                     await telegram_ingestion_service.update_job_progress(
                         db=db,
                         job=job,
@@ -330,7 +327,6 @@ async def ingest_telegram_messages_task(
                         },
                     )
 
-                    # Set offset for next batch
                     if messages:
                         offset_id = messages[-1].get("message_id", 0)
 

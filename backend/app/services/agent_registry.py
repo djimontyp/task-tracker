@@ -60,7 +60,6 @@ class AgentRegistry:
         """
         key = (agent_config.id, task_config.id)
 
-        # Get or create lock for this specific agent+task combination
         async with self._global_lock:
             if key not in self._locks:
                 self._locks[key] = asyncio.Lock()
@@ -74,10 +73,8 @@ class AgentRegistry:
                 agent = agent_ref()
                 if agent is not None:
                     return agent
-                # Weak reference was garbage collected, remove stale entry
                 del self._registry[key]
 
-            # Create new agent instance
             agent = await self._create_agent(agent_config, task_config)
 
             # Store weak reference with cleanup callback

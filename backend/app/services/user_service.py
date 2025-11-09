@@ -137,7 +137,6 @@ async def identify_or_create_user(
     Returns:
         tuple[User, TelegramProfile]: User and their Telegram profile
     """
-    # Get or create telegram source
     telegram_source = await get_or_create_source(db, name="telegram")
 
     # Try to find existing TelegramProfile
@@ -146,7 +145,6 @@ async def identify_or_create_user(
     tg_profile = result.scalar_one_or_none()
 
     if tg_profile:
-        # Update Telegram profile data (names/settings may change)
         tg_profile.first_name = first_name
         tg_profile.last_name = last_name
         tg_profile.language_code = language_code
@@ -154,7 +152,6 @@ async def identify_or_create_user(
         await db.commit()
         await db.refresh(tg_profile)
 
-        # Load User
         user_stmt = select(User).where(User.id == tg_profile.user_id)
         user_result = await db.execute(user_stmt)
         existing_user = user_result.scalar_one()
@@ -174,7 +171,6 @@ async def identify_or_create_user(
         if user:
             logger.info(f"Auto-linked Telegram user {telegram_user_id} by email")
 
-    # Create new User if auto-linking failed
     if not user:
         user = User(
             first_name=first_name,
@@ -189,7 +185,6 @@ async def identify_or_create_user(
         await db.refresh(user)
         logger.info(f"Created new user {user.id} for Telegram user {telegram_user_id}")
 
-    # Create TelegramProfile
     tg_profile = TelegramProfile(
         telegram_user_id=telegram_user_id,
         first_name=first_name,

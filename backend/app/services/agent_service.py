@@ -46,12 +46,10 @@ class AgentTestService:
             ValueError: If agent not found, provider not found, or validation failed
             Exception: If LLM request fails
         """
-        # Load agent configuration
         agent = await self.session.get(AgentConfig, agent_id)
         if not agent:
             raise ValueError(f"Agent with ID '{agent_id}' not found")
 
-        # Load associated provider
         provider = await self.session.get(LLMProvider, agent.provider_id)
         if not provider:
             raise ValueError(f"Provider with ID '{agent.provider_id}' not found. Agent configuration is invalid.")
@@ -67,7 +65,6 @@ class AgentTestService:
                 "Please validate the provider before testing."
             )
 
-        # Get API key if needed and build model
         api_key = None
         if provider.api_key_encrypted:
             try:
@@ -75,10 +72,8 @@ class AgentTestService:
             except Exception as e:
                 raise ValueError(f"Failed to decrypt API key for provider '{provider.name}': {e}")
 
-        # Build model instance with provider configuration
         model = self._build_model_instance(provider, agent.model_name, api_key)
 
-        # Create pydantic-ai agent
         start_time = time.time()
 
         try:
