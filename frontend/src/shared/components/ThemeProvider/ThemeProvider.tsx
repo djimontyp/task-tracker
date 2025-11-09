@@ -16,20 +16,16 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Initialize from localStorage or default to system
     const saved = localStorage.getItem('theme') as Theme;
     return saved || 'system';
   });
 
   const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>(() => {
-    // Check system preference
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
-  // Calculate effective theme
   const effectiveTheme = theme === 'system' ? systemTheme : theme;
 
-  // Listen for system theme changes
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {

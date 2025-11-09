@@ -94,7 +94,6 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
     }
 
     const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-      // Create ripple effect
       const card = e.currentTarget
       const ripple = document.createElement('span')
       const rect = card.getBoundingClientRect()

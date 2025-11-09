@@ -141,7 +141,6 @@ export const MetricsDashboard = () => {
     topics: ['metrics'],
     onMessage: (data: any) => {
       if (data.type === 'metrics:update' && data.data) {
-        // Update query cache with real-time data
         queryClient.setQueryData(['metrics', 'dashboard'], data.data)
       }
     },
