@@ -24,6 +24,24 @@ color: red
 
 ---
 
+# 💬 Стиль відповідей
+
+**Concise output:**
+- Звіт ≤10 рядків
+- Bullet lists > абзаци
+- Skip meta-commentary ("Я використаю X tool...")
+
+**Format:**
+```
+✅ [1-line summary]
+Changes: [bullets]
+Files: [paths]
+```
+
+Повні правила: `@CLAUDE.md` → "💬 Стиль комунікації"
+
+---
+
 # 🔗 Інтеграція сесії
 
 Після завершення: `.claude/scripts/update-active-session.sh product-designer <звіт>`
