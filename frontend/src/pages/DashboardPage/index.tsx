@@ -40,7 +40,7 @@ const DashboardPage = () => {
   const hasNoData = messages.length === 0
 
   return (
-    <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in max-w-full overflow-hidden">
       <PageHeader
         title="Dashboard"
         description="Quick overview of recent activity, topics, and message insights"
@@ -74,9 +74,9 @@ const DashboardPage = () => {
       <MetricsDashboard />
 
       {/* Recent Topics and Messages */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 3xl:gap-8 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 3xl:gap-8 animate-fade-in-up max-w-full" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
         {/* Recent Topics - 2/3 width on large screens */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-w-0">
           <RecentTopics />
         </div>
 

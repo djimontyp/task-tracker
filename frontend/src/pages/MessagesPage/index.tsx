@@ -4,8 +4,6 @@ import {
   Button,
   Card,
   Skeleton,
-  Badge,
-  Checkbox,
 } from '@/shared/ui'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { apiClient } from '@/shared/lib/api/client'
@@ -25,22 +23,22 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { createColumns, sourceLabels } from './columns'
-import { getMessageAnalysisBadge, getNoiseClassificationBadge, getImportanceBadge } from '@/shared/utils/statusBadges'
+import { getMessageAnalysisBadge, getNoiseClassificationBadge } from '@/shared/utils/statusBadges'
 import { Message, NoiseClassification } from '@/shared/types'
 import { DataTable } from '@/shared/components/DataTable'
 import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
 import { DataTablePagination } from '@/shared/components/DataTablePagination'
 import { DataTableFacetedFilter } from './faceted-filter'
 import { ImportanceScoreFilter } from './importance-score-filter'
-import { DataTableMobileCard } from '@/shared/components/DataTableMobileCard'
 import { BulkActionsToolbar } from '@/shared/components/AdminPanel/BulkActionsToolbar'
 import { useMultiSelect } from '@/shared/hooks'
 import { useAdminMode } from '@/shared/hooks/useAdminMode'
-import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
+import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon } from '@heroicons/react/24/outline'
 import { IngestionModal } from './IngestionModal'
 import { MessageInspectModal } from '@/features/messages/components/MessageInspectModal'
 import { ConsumerMessageModal } from '@/features/messages/components/ConsumerMessageModal'
-import { formatFullDate } from '@/shared/utils/date'
+import { MessageCard } from './MessageCard'
 
 interface MessageQueryParams {
   page: number
@@ -65,6 +63,7 @@ const MessagesPage = () => {
   const { isAdminMode } = useAdminMode()
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
+  const isDesktop = useMediaQuery('(min-width: 1280px)')
 
   // Data table state
   const [sorting, setSorting] = React.useState<SortingState>([
@@ -477,31 +476,33 @@ const MessagesPage = () => {
   }
 
   return (
-    <div className="space-y-4 animate-fade-in">
-      <PageHeader
-        title="Messages"
-        description="View and manage all incoming messages with importance scores, noise filtering, and real-time updates from Telegram"
-        actions={
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <Button onClick={handleRefreshMessages} size="sm" variant="outline" className="w-full sm:w-auto justify-center">
-              <ArrowPathIcon className="mr-2 h-4 w-4" />
-              Refresh
-            </Button>
-            <Button onClick={handleUpdateAuthors} size="sm" variant="outline" className="w-full sm:w-auto justify-center">
-              <UserIcon className="mr-2 h-4 w-4" />
-              <span className="hidden min-[400px]:inline">Update Authors</span>
-              <span className="min-[400px]:hidden">Authors</span>
-            </Button>
-            <Button onClick={handleIngestMessages} size="sm" className="w-full sm:w-auto justify-center">
-              <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
-              <span className="hidden min-[400px]:inline">Ingest Messages</span>
-              <span className="min-[400px]:hidden">Ingest</span>
-            </Button>
-          </div>
-        }
-      />
+    <div className="space-y-4 animate-fade-in w-full min-w-0">
+      <div className="w-full min-w-0">
+        <PageHeader
+          title="Messages"
+          description="View and manage all incoming messages with importance scores, noise filtering, and real-time updates from Telegram"
+          actions={
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto min-w-0">
+              <Button onClick={handleRefreshMessages} size="sm" variant="outline" className="w-full sm:w-auto justify-center">
+                <ArrowPathIcon className="mr-2 h-4 w-4" />
+                Refresh
+              </Button>
+              <Button onClick={handleUpdateAuthors} size="sm" variant="outline" className="w-full sm:w-auto justify-center">
+                <UserIcon className="mr-2 h-4 w-4" />
+                <span className="hidden min-[400px]:inline">Update Authors</span>
+                <span className="min-[400px]:hidden">Authors</span>
+              </Button>
+              <Button onClick={handleIngestMessages} size="sm" className="w-full sm:w-auto justify-center">
+                <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
+                <span className="hidden min-[400px]:inline">Ingest Messages</span>
+                <span className="min-[400px]:hidden">Ingest</span>
+              </Button>
+            </div>
+          }
+        />
+      </div>
 
-      <div className="min-h-[60px]">
+      <div className="min-h-[60px] w-full min-w-0">
         {selectedRowsCount > 0 && (
           <BulkActionsToolbar
             selectedCount={selectedRowsCount}
@@ -515,12 +516,13 @@ const MessagesPage = () => {
         )}
       </div>
 
-      <DataTableToolbar
-        table={table}
-        globalFilter={globalFilter}
-        onGlobalFilterChange={setGlobalFilter}
-        searchPlaceholder="Search messages..."
-      >
+      <div className="w-full min-w-0">
+        <DataTableToolbar
+          table={table}
+          globalFilter={globalFilter}
+          onGlobalFilterChange={setGlobalFilter}
+          searchPlaceholder="Search messages..."
+        >
         <DataTableFacetedFilter
           columnKey="source_name"
           table={table}
@@ -557,104 +559,61 @@ const MessagesPage = () => {
           title="Importance"
         />
       </DataTableToolbar>
+      </div>
 
-      <DataTable
-        table={table}
-        columns={columns}
-        emptyMessage="No messages found."
-        onRowClick={(message: Message) => {
-          if (isAdminMode) {
-            setInspectingMessageId(String(message.id))
-          } else {
-            setViewingMessageId(String(message.id))
-          }
-        }}
-        renderMobileCard={(message: Message) => {
-          const statusBadge = getMessageAnalysisBadge(message.analyzed || false)
-          const importanceBadge = message.importance_score !== null && message.importance_score !== undefined
-            ? getImportanceBadge(message.importance_score)
-            : null
-          const content = message.content || ''
-          const isEmpty = !content || content.trim() === ''
-          const isSelected = (rowSelection as Record<string, boolean>)[String(message.id)] || false
-
-          return (
-            <DataTableMobileCard
-              isSelected={isSelected}
-              onClick={() => {
-                if (isAdminMode) {
-                  setInspectingMessageId(String(message.id))
-                } else {
-                  setViewingMessageId(String(message.id))
-                }
-              }}
-            >
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={(checked) => {
-                        setRowSelection(prev => ({
-                          ...prev,
-                          [String(message.id)]: !!checked
-                        }))
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <div className="flex items-center gap-2 min-w-0">
-                      {message.avatar_url ? (
-                        <img
-                          src={message.avatar_url}
-                          alt={message.author_name || message.author}
-                          className="h-8 w-8 rounded-full flex-shrink-0"
-                        />
-                      ) : (
-                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                          <UserIcon className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                      )}
-                      <span className="font-medium truncate">
-                        {message.author_name || message.author}
-                      </span>
-                    </div>
-                  </div>
-                  <Badge variant={statusBadge.variant} className={statusBadge.className}>
-                    {statusBadge.label}
-                  </Badge>
-                </div>
-
-                <div>
-                  {isEmpty ? (
-                    <div className="flex items-center gap-2 text-muted-foreground/50 italic text-sm">
-                      <EnvelopeIcon className="h-4 w-4" />
-                      <span>(Empty message)</span>
-                    </div>
-                  ) : (
-                    <p className="text-sm line-clamp-3">{content}</p>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {importanceBadge && (
-                    <Badge variant={importanceBadge.variant} className={importanceBadge.className}>
-                      {importanceBadge.label}
-                    </Badge>
-                  )}
-                  {message.topic_name && (
-                    <Badge variant="outline">{message.topic_name}</Badge>
-                  )}
-                  <span className="text-xs text-muted-foreground ml-auto">
-                    {message.sent_at ? formatFullDate(message.sent_at) : '-'}
-                  </span>
-                </div>
+      <div className="w-full min-w-0">
+        {isDesktop ? (
+          <DataTable
+            table={table}
+            columns={columns}
+            emptyMessage="No messages found."
+            onRowClick={(message: Message) => {
+              if (isAdminMode) {
+                setInspectingMessageId(String(message.id))
+              } else {
+                setViewingMessageId(String(message.id))
+              }
+            }}
+          />
+        ) : (
+          <div className="space-y-3 w-full min-w-0">
+            {(paginatedData?.items ?? []).length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No messages found.
               </div>
-            </DataTableMobileCard>
-          )
-        }}
-      />
+            ) : (
+              (paginatedData?.items ?? []).map((message: Message) => {
+                const isSelected = (rowSelection as Record<string, boolean>)[String(message.id)] || false
 
-      <DataTablePagination table={table} />
+                return (
+                  <MessageCard
+                    key={message.id}
+                    message={message}
+                    isSelected={isSelected}
+                    onSelect={(checked) => {
+                      setRowSelection(prev => ({
+                        ...prev,
+                        [String(message.id)]: !!checked
+                      }))
+                    }}
+                    onClick={() => {
+                      if (isAdminMode) {
+                        setInspectingMessageId(String(message.id))
+                      } else {
+                        setViewingMessageId(String(message.id))
+                      }
+                    }}
+                  />
+                )
+              })
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="w-full min-w-0">
+        <DataTablePagination table={table} />
+      </div>
 
       <IngestionModal
         open={modalOpen}

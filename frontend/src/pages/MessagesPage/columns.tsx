@@ -49,18 +49,16 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     ),
     enableSorting: false,
     enableHiding: false,
-    size: 28,
   },
   {
     accessorKey: 'id',
     header: 'ID',
     cell: ({ row }) => {
       const id = row.getValue<number | string>('id')
-      return <div className="w-[50px] text-xs font-mono text-muted-foreground">{String(id).padStart(4, '0')}</div>
+      return <div className="w-[50px] text-xs font-mono text-muted-foreground hidden md:block">{String(id).padStart(4, '0')}</div>
     },
     enableSorting: false,
     enableHiding: true,
-    size: 50,
   },
   {
     accessorKey: 'author_name',
@@ -105,7 +103,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="min-w-0 flex-1 truncate" aria-label={isLong ? `Message content: ${content}` : undefined}>
+              <div className="max-w-xs lg:max-w-md xl:max-w-lg truncate" aria-label={isLong ? `Message content: ${content}` : undefined}>
                 {content}
               </div>
             </TooltipTrigger>
@@ -118,7 +116,6 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
         </TooltipProvider>
       )
     },
-    size: 999,
   },
   {
     accessorKey: 'source_name',
@@ -252,22 +249,22 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
   {
     accessorKey: 'topic_name',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Topic" />
+      <DataTableColumnHeader column={column} title="Topic" className="hidden md:table-cell" />
     ),
     cell: ({ row }) => {
       const topicName = row.getValue<string | null>('topic_name')
-      if (!topicName) return <div className="text-muted-foreground text-xs">-</div>
-      return <Badge variant="outline">{topicName}</Badge>
+      if (!topicName) return <div className="text-muted-foreground text-xs hidden md:block">-</div>
+      return <Badge variant="outline" className="hidden md:inline-flex">{topicName}</Badge>
     },
   },
   {
     accessorKey: 'sent_at',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Sent At" />
+      <DataTableColumnHeader column={column} title="Sent At" className="hidden lg:table-cell" />
     ),
     cell: ({ row }) => {
       const d = row.getValue<string>('sent_at')
-      return <div className="text-muted-foreground text-xs">{d ? formatFullDate(d) : '-'}</div>
+      return <div className="text-muted-foreground text-xs hidden lg:block">{d ? formatFullDate(d) : '-'}</div>
     },
     enableHiding: true,
   },

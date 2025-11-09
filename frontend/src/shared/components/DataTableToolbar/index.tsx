@@ -26,8 +26,8 @@ export function DataTableToolbar<TData>({
   children,
 }: DataTableToolbarProps<TData>) {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-      <div className="flex w-full items-center gap-2 flex-wrap">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full max-w-full overflow-x-hidden">
+      <div className="flex w-full items-center gap-2 flex-wrap max-w-full overflow-x-hidden">
         <Input
           placeholder={searchPlaceholder}
           value={globalFilter}
@@ -39,7 +39,7 @@ export function DataTableToolbar<TData>({
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="flex-shrink-0">
             View <ChevronDownIcon className="ml-1 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
