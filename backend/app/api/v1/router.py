@@ -12,7 +12,6 @@ from app.api.v1 import (
     messages,
     metrics,
     noise,
-    notifications,
     projects,
     prompts,
     providers,
@@ -50,6 +49,5 @@ api_router.include_router(knowledge.router, prefix="/knowledge", tags=["knowledg
 api_router.include_router(versions.router)
 api_router.include_router(scheduler.router)
 api_router.include_router(automation.router)
-api_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
 api_router.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
 api_router.include_router(prompts.router)

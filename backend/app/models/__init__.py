@@ -84,7 +84,6 @@ from .message_ingestion import (
     MessageIngestionJobCreate,
     MessageIngestionJobPublic,
 )
-from .notification_preference import DigestFrequency, NotificationPreference
 from .project_config import (
     ProjectConfig,
     ProjectConfigCreate,
@@ -192,9 +191,6 @@ __all__ = [
     "MessageIngestionJobCreate",
     "MessageIngestionJobPublic",
     "IngestionStatus",
-    # Notification Preferences
-    "NotificationPreference",
-    "DigestFrequency",
     # Agent Config
     "AgentConfig",
     "AgentConfigCreate",
