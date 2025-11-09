@@ -54,7 +54,7 @@ User: "Where do we handle WebSocket connections?"
 ```
 User: "Add user authentication"
 ❌ DON'T: Start reading/writing code
-✅ DO: Task(subagent_type=Plan) → fastapi-backend-expert + react-frontend-architect
+✅ DO: Task(subagent_type=Plan) → fastapi-backend-expert + react-frontend-expert
 ```
 
 ### Pattern 3: Bug Fix
@@ -84,7 +84,7 @@ User: "Add real-time notifications"
 | "Add feature Y"           | Start coding              | `Task(subagent_type=Plan)` → specialized agent |
 | "Fix bug Z"               | Debug directly            | `task-breakdown` → specialist                  |
 | "How does X work?"        | Read multiple files       | `Task(subagent_type=Explore)`                  |
-| "Review this code"        | Read and review           | `architecture-guardian` agent                  |
+| "Review this code"        | Read and review           | `code-reviewer` agent                          |
 | "Optimize performance"    | Profile and fix           | Specialist agent (database/vector/llm)         |
 | "Add tests"               | Write tests               | `pytest-test-master` agent                     |
 | "Update docs"             | Edit docs                 | `documentation-expert` agent                   |
@@ -94,7 +94,7 @@ User: "Add real-time notifications"
 - **Exploration**: `Task(subagent_type=Explore, thoroughness="medium")`
 - **Planning**: `Task(subagent_type=Plan)`
 - **Backend**: `fastapi-backend-expert`
-- **Frontend**: `react-frontend-architect`
+- **Frontend**: `react-frontend-expert`
 - **Database**: `database-reliability-engineer`
 - **LLM/Prompts**: `llm-prompt-engineer`
 - **Cost**: `llm-cost-optimizer`
