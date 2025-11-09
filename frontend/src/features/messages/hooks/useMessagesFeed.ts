@@ -130,7 +130,7 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
         setIsLoading(false)
       }
     },
-    [hydrate, limit]
+    [hydrate, limit, logger]
   )
 
   useEffect(() => {
