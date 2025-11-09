@@ -54,7 +54,7 @@ User: "Where do we handle WebSocket connections?"
 ```
 User: "Add user authentication"
 ❌ DON'T: Start reading/writing code
-✅ DO: Task(subagent_type=Plan) → fastapi-backend-expert + react-frontend-expert
+✅ DO: Task(subagent_type=Plan) → fastapi-backend-expert + React Frontend Expert (F1)
 ```
 
 ### Pattern 3: Bug Fix
@@ -110,7 +110,7 @@ User: "Create authentication API with JWT"
 Координатор: ✅ Backend ready. Переходжу до frontend integration.
 
 [TodoWrite: mark backend task complete, create frontend task]
-[Delegate to react-frontend-expert...]
+[Delegate to React Frontend Expert (F1)...]
 ```
 
 ### Scenario 2: Blocked Task
@@ -210,7 +210,7 @@ User: "Find all WebSocket-related code"
 - **Exploration**: `Task(subagent_type=Explore, thoroughness="medium")`
 - **Planning**: `Task(subagent_type=Plan)`
 - **Backend**: `fastapi-backend-expert`
-- **Frontend**: `react-frontend-expert`
+- **Frontend**: `React Frontend Expert (F1)`
 - **Database**: `Database Engineer (D1)`
 - **LLM/Prompts**: `Prompt Engineer (P1)`
 - **Cost**: `Cost Optimizer (C2)`
@@ -240,7 +240,7 @@ User: "Find all WebSocket-related code"
 
 Use markers when:
 - **Blocker workflows** - Agent blocked, needs another agent to fix, then resume
-- **Parallel tracking** - 5+ agents simultaneously, need to track which is which
+- **Parallel tracking** - Track кожен агент окремо (навіть 1), незалежно від кількості
 - **Multi-session work** - Pause agent, fix blocker hours/days later, resume with context
 - **Iterative refinement** - Agent does partial work, you review, resume for adjustments
 
@@ -258,7 +258,7 @@ import uuid
 # Step 1: Delegate frontend
 marker_fe = f"agent-{uuid.uuid4().hex[:8]}"
 Task(
-    subagent_type="react-frontend-expert",
+    subagent_type="React Frontend Expert (F1)",
     description=f"[{marker_fe}] Build login UI",
     prompt="Create login form with email/password, call POST /api/auth/login"
 )
@@ -305,7 +305,7 @@ markers = {}
 
 tasks = [
     ("backend", "fastapi-backend-expert", "Create API endpoints"),
-    ("frontend", "react-frontend-expert", "Build UI components"),
+    ("frontend", "React Frontend Expert (F1)", "Build UI components"),
     ("database", "Database Engineer (D1)", "Schema design"),
     ("tests", "Pytest Master (T1)", "E2E test suite"),
     ("docs", "Docs Expert (D2)", "API documentation")
@@ -349,7 +349,7 @@ import uuid
 # Step 1: Spec (optional marker if might need resume)
 marker_spec = f"agent-{uuid.uuid4().hex[:8]}"
 Task(
-    subagent_type="product-designer",
+    subagent_type="Product Designer (P2)",
     description=f"[{marker_spec}] Auth feature spec",
     prompt="Document requirements for user authentication"
 )
@@ -370,7 +370,7 @@ Task(subagent_type="fastapi-backend-expert",
      description=f"[{marker_be}] Backend auth",
      prompt="Implement backend per architecture")
 
-Task(subagent_type="react-frontend-expert",
+Task(subagent_type="React Frontend Expert (F1)",
      description=f"[{marker_fe}] Frontend auth",
      prompt="Implement frontend per architecture")
 
@@ -447,6 +447,7 @@ See `.claude/skills/agent-coordinator/SKILL.md` for:
 
 **Your value = Coordination, not execution**
 
-- Conducting 5 parallel agents = 5x productivity
-- Reading 50 files yourself = context exhaustion
+- Паралельні агенти з markers = множення продуктивності
+- Читання 50 файлів сам = вичерпання контексту
+- **КОЖЕН агент потребує marker для resume capability**
 - **Delegate early, delegate often, delegate always**

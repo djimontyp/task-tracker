@@ -58,7 +58,7 @@ Files: path/to/file1.py, path/to/file2.py
 
 ❌ "Я проаналізував твій запит та зрозумів що потрібно додати authentication. Це складне завдання яке включає backend (JWT tokens, password hashing) та frontend..."
 
-✅ "Додаю authentication (JWT-based). Tasks: 1) Backend → fastapi-backend-expert, 2) Frontend → react-frontend-expert" **(-60% токенів)**
+✅ "Додаю authentication (JWT-based). Tasks: 1) Backend → fastapi-backend-expert, 2) Frontend → React Frontend Expert (F1)" **(-60% токенів)**
 
 **Agent report (verbose → concise):**
 
@@ -71,7 +71,11 @@ Files: path/to/file1.py, path/to/file2.py
 **ОБОВ'ЯЗКОВИЙ workflow для КОЖНОГО запиту:**
 
 1. **Оціни складність** → `task-breakdown` skill якщо завдання >3 кроків або >15 хв
-2. **Делегуй** → Обери спеціалізованого агента з @.claude/delegation-patterns.md
+2. **Делегуй з marker** → ЗАВЖДИ генеруй marker через `agent-coordinator` скрипт, включай у Task description
+   ```bash
+   marker=$(uv run .claude/skills/agent-coordinator/scripts/generate_marker.py)
+   Task(description=f"[{marker}] Task name", ...)
+   ```
 3. **Координуй** → Використовуй TodoWrite для відстеження прогресу
 4. **Перевіряй** → Забезпеч якість (typecheck, tests, Code Reviewer (R1))
 5. **Збережи** → `smart-commit` skill після завершення
@@ -83,7 +87,7 @@ Files: path/to/file1.py, path/to/file2.py
 - ❌ Використати `Read` на >2 файлах → ✅ Відповідний агент
 - ❌ Використати `Glob` для пошуку → ✅ `Task(subagent_type=Explore)`
 - ❌ Писати backend код → ✅ `fastapi-backend-expert`
-- ❌ Писати frontend код → ✅ `react-frontend-expert`
+- ❌ Писати frontend код → ✅ `React Frontend Expert (F1)`
 - ❌ Переглядати якість коду → ✅ `Code Reviewer (R1)`
 - ❌ Дебажити → ✅ Доменний агент (Database Engineer (D1)/Vector Search (V1)/LLM Engineer (L1)/Chaos Engineer (X1))
 
@@ -145,174 +149,41 @@ Status: Complete
 </function_results>
 
 Coordinator: ✅ Backend готовий. Переходжу до frontend integration.
-[Delegate to react-frontend-expert...]
+[Delegate to React Frontend Expert (F1)...]
 ```
 
 **Пам'ятай:** Task tool результат = автоматичний, не потребує manual integration
 
-## 🤖 Agent Coordination with Resume Capability
+## 🤖 Координація субагентів
 
-**КРИТИЧНО:** Використовуй `agent-coordinator` skill для управління субагентами з можливістю resume.
+**КРИТИЧНО:** ЗАВЖДИ генеруй marker для КОЖНОЇ Task delegation.
+
+### Як працює координація?
+
+**Механізм:**
+1. Генеруй marker: `marker=$(uv run .claude/skills/agent-coordinator/scripts/generate_marker.py)`
+2. Включи у description: `Task(description=f"[{marker}] Task name", ...)`
+3. PostToolUse hook автоматично захоплює agentId → `.artifacts/coordination/{marker}.txt`
+4. Resume через agentId: `agentId = Read(f".artifacts/coordination/{marker}.txt").strip()`
+
+**Без marker → немає resume!**
 
 ### Навіщо потрібна координація?
 
 **Проблема:** Субагенти створюються з порожнім контекстом і мають заново досліджувати все.
 
-**Рішення:** Marker-based tracking + resume functionality = збереження повного контексту агента.
+**Рішення:** Marker system забезпечує:
+- Автоматичне збереження agentId для кожного агента
+- Resume з повним контекстом (file reads, analysis, partial work)
+- Tracking паралельних агентів без плутанини
+- Multi-session work (pause → hours/days later → resume)
 
-**Сценарії використання:**
-1. **Blocker workflow** - Frontend agent blocked on backend → backend fixes → resume frontend з контекстом
-2. **Parallel coordination** - 5+ агентів одночасно без плутанини контексту
-3. **Multi-session work** - Pause agent → fix blocker → resume через години/дні
-4. **Iterative refinement** - Agent робить частину → ти переглядаєш → resume для доопрацювання
+**Сценарії:**
+1. **Blocker workflow** - Frontend blocked → backend fixes → resume frontend
+2. **Parallel coordination** - Кожен агент tracked окремо (навіть 1 агент)
+3. **Iterative refinement** - Частково → review → resume
 
-### Як працює marker-based tracking?
-
-**Механізм:**
-1. Ти генеруєш унікальний marker: `agent-{uuid8}`
-2. Включаєш marker в Task description: `[agent-abc12345] Task name`
-3. PostToolUse hook перехоплює completion і зберігає: `marker → agentId`
-4. Ти читаєш agentId через marker коли потрібен resume
-5. Resume агента з повним збереженням контексту
-
-**Storage:**
-- `.artifacts/coordination/{marker}.txt` - marker → agentId mapping
-- `.artifacts/coordination/{marker}.json` - structured metadata
-- `.artifacts/coordination/agent-sessions.json` - audit trail
-
-### Quick Start: Basic Delegation
-
-```python
-import uuid
-
-# 1. Generate unique marker
-marker = f"agent-{uuid.uuid4().hex[:8]}"
-
-# 2. Delegate with marker in description
-Task(
-    subagent_type="fastapi-backend-expert",
-    description=f"[{marker}] Create authentication API",
-    prompt="""
-Implement POST /api/v1/auth/login endpoint:
-- Accept email + password
-- Return JWT token on success
-- Include error handling
-"""
-)
-
-# 3. Agent completes, hook captures agentId automatically
-# 4. Read agentId when needed
-agentId = Read(f".artifacts/coordination/{marker}.txt").strip()
-
-# 5. Resume if needed
-Task(
-    subagent_type="fastapi-backend-expert",
-    resume=agentId,
-    description=f"[{marker}] Continue auth work",
-    prompt="Add refresh token support to existing /login endpoint"
-)
-```
-
-### Pattern: Blocker Workflow
-
-**Scenario:** Frontend blocked on missing backend API
-
-```python
-import uuid
-
-# Step 1: Delegate frontend
-marker_fe = f"agent-{uuid.uuid4().hex[:8]}"
-Task(
-    subagent_type="react-frontend-expert",
-    description=f"[{marker_fe}] Build login UI",
-    prompt="Create login form with email/password, call POST /api/auth/login"
-)
-
-# Frontend returns: Status: Blocked - API endpoint missing
-
-# Step 2: Capture frontend agentId
-fe_agentId = Read(f".artifacts/coordination/{marker_fe}.txt").strip()
-
-# Step 3: Delegate backend fix
-marker_be = f"agent-{uuid.uuid4().hex[:8]}"
-Task(
-    subagent_type="fastapi-backend-expert",
-    description=f"[{marker_be}] Create login API",
-    prompt="Implement POST /api/auth/login endpoint"
-)
-
-# Backend returns: Status: Complete
-
-# Step 4: Resume frontend with full context
-Task(
-    resume=fe_agentId,
-    description=f"[{marker_fe}] Resume: API ready",
-    prompt="Backend API now available. Complete form integration."
-)
-
-# Frontend resumes with:
-# - Remembers UI components created
-# - Remembers validation logic implemented
-# - Continues from where it left off
-```
-
-### Pattern: Parallel Coordination (5+ agents)
-
-```python
-import uuid
-
-# Launch 5 parallel agents
-markers = {}
-
-tasks = [
-    ("backend", "fastapi-backend-expert", "Create API endpoints"),
-    ("frontend", "react-frontend-expert", "Build UI components"),
-    ("database", "Database Engineer (D1)", "Schema design"),
-    ("tests", "Pytest Master (T1)", "E2E test suite"),
-    ("docs", "Docs Expert (D2)", "API documentation")
-]
-
-for name, agent_type, task_desc in tasks:
-    marker = f"agent-{uuid.uuid4().hex[:8]}"
-    markers[name] = marker
-
-    Task(
-        subagent_type=agent_type,
-        description=f"[{marker}] {task_desc}",
-        prompt=f"Complete {task_desc} for authentication feature"
-    )
-
-# After completion, check which completed vs blocked
-for name, marker in markers.items():
-    agentId = Read(f".artifacts/coordination/{marker}.txt").strip()
-    metadata = Read(f".artifacts/coordination/{marker}.json")
-    print(f"{name}: {agentId} - {metadata['status']}")
-
-# Resume any blocked agents after fixing blockers
-```
-
-### Best Practices
-
-1. **Always generate unique markers** - Use `uuid.uuid4().hex[:8]` for each delegation
-2. **Include marker in description** - Pattern: `f"[{marker}] Task name"`
-3. **Store markers** - Keep markers in coordinator context for resume
-4. **Read agentId after completion** - Don't assume, always verify file exists
-5. **Use meaningful task names** - Helps debugging and audit trail
-6. **Clean up optionally** - Marker files are small, cleanup not required
-
-### Troubleshooting
-
-**Marker not found after delegation:**
-- Ensure PostToolUse hook configured in `.claude/settings.local.json`
-- Marker pattern must be exact: `agent-{8hex}`
-- Description must include marker in brackets: `[{marker}] Task name`
-
-**Wrong agent resumed:**
-- Verify marker matches original delegation
-- Check agentId in marker file before resume
-- Don't reuse markers across different tasks
-
-**Detailed Documentation:** `.claude/skills/agent-coordinator/SKILL.md`
+**Деталі:** `.claude/skills/agent-coordinator/SKILL.md`
 
 ## 📋 Робочий процес координації (детальний)
 
@@ -323,7 +194,7 @@ for name, marker in markers.items():
 1. **Автоматично делегуй задачі агентам** за правилами:
    - Дослідження коду (>5 файлів) → `Task(subagent_type=Explore, thoroughness="medium")`
    - Backend implementation → `fastapi-backend-expert`
-   - Frontend implementation → `react-frontend-expert`
+   - Frontend implementation → `React Frontend Expert (F1)`
    - Database queries/optimization → `Database Engineer (D1)`
    - LLM/prompt optimization → `Prompt Engineer (P1)`
 
@@ -346,7 +217,7 @@ for name, marker in markers.items():
 **Швидке нагадування:**
 - Дослідження (>5 файлів) → `Task(subagent_type=Explore)`
 - Backend implementation → `fastapi-backend-expert`
-- Frontend implementation → `react-frontend-expert`
+- Frontend implementation → `React Frontend Expert (F1)`
 - Database debugging → `Database Engineer (D1)`
 - LLM optimization → `Prompt Engineer (P1)` або `Cost Optimizer (C2)`
 
@@ -434,7 +305,7 @@ for name, marker in markers.items():
    - `Task(subagent_type=Explore)` - Дослідження кодової бази (>5 файлів)
    - `Task(subagent_type=Plan)` - Планування реалізації
    - `fastapi-backend-expert` - Backend implementation
-   - `react-frontend-expert` - Frontend implementation
+   - `React Frontend Expert (F1)` - Frontend implementation
    - `Database Engineer (D1)` - Database queries/optimization
    - `Prompt Engineer (P1)` - LLM/prompt optimization
    - Повний список: @.claude/delegation-patterns.md
@@ -536,7 +407,7 @@ for name, marker in markers.items():
 - Database: `db-*` (всі seed/clear команди)
 
 **Skills (завжди дозволені):**
-- `session-manager`, `task-breakdown`, `smart-commit`
+- `agent-coordinator`, `session-manager`, `task-breakdown`, `smart-commit`
 - `sync-docs-structure`, `migration-database`
 
 ### Потребують підтвердження користувача

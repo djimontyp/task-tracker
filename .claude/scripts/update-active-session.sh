@@ -5,7 +5,7 @@
 #
 # Usage:
 #   ./update-active-session.sh "agent-name" report_file.md
-#   ./update-active-session.sh "pytest-test-master" verification_report.md
+#   ./update-active-session.sh "Pytest Master (T1)" verification_report.md
 #
 # Description:
 #   - Finds active session in .claude/sessions/active/
@@ -30,12 +30,12 @@ usage() {
     echo "Usage: $0 <agent-name> <report-file>"
     echo ""
     echo "Arguments:"
-    echo "  agent-name    Name of the agent (e.g., pytest-test-master)"
+    echo "  agent-name    Name of the agent (e.g., Pytest Master (T1))"
     echo "  report-file   Path to report markdown file"
     echo ""
     echo "Examples:"
-    echo "  $0 \"pytest-test-master\" verification_report.md"
-    echo "  $0 \"react-frontend-architect\" ux_audit.md"
+    echo "  $0 \"Pytest Master (T1)\" verification_report.md"
+    echo "  $0 \"React Frontend Expert (F1)\" ux_audit.md"
     exit 1
 }
 
