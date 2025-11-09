@@ -1,6 +1,25 @@
 /* Task Tracker Documentation - Custom Color Scheme */
 /* Synchronized with frontend theme (tailwind.config.js + theme.css) */
 
+/* Prevent white flash - apply theme-specific backgrounds immediately */
+/* Light theme (default) */
+html[data-md-color-scheme="default"],
+html[data-md-color-scheme="default"] body,
+html[data-md-color-scheme="default"] .md-main,
+html[data-md-color-scheme="default"] .md-content {
+  background-color: #ffffff !important;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+/* Dark theme (slate) */
+html[data-md-color-scheme="slate"],
+html[data-md-color-scheme="slate"] body,
+html[data-md-color-scheme="slate"] .md-main,
+html[data-md-color-scheme="slate"] .md-content {
+  background-color: #1e1e1e !important;
+  color: #ebebeb;
+}
+
 :root {
   /* Brand Colors - matching frontend */
   --brand-orange: #ff6b35;
@@ -225,48 +244,14 @@
   background-color: rgba(255, 107, 53, 0.05);
 }
 
-/* Smooth transitions matching frontend */
-* {
+/* Smooth transitions matching frontend - exclude body/html to prevent white flash */
+*:not(html):not(body):not(.md-main):not(.md-content):not(.md-container) {
   transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1),
               border-color 250ms cubic-bezier(0.4, 0, 0.2, 1),
               color 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ========================================
-   CONTENT WIDTH CUSTOMIZATION
-   ======================================== */
-
-/* Increase content area width for better screen utilization */
-.md-grid {
-  max-width: 1750px !important;
-}
-
-.md-main__inner {
-  max-width: 1750px !important;
-}
-
-.md-content {
-  max-width: none !important;
-}
-
-/* Responsive width adjustment for 2K and larger screens */
-@media screen and (min-width: 120em) {
-  .md-grid {
-    max-width: 2100px !important;
-  }
-
-  .md-main__inner {
-    max-width: 2100px !important;
-  }
-}
-
-/* Ultra-wide screens (2K+) */
-@media screen and (min-width: 160em) {
-  .md-grid {
-    max-width: 2400px !important;
-  }
-
-  .md-main__inner {
-    max-width: 2400px !important;
-  }
+/* Instant background change for main containers to prevent flash */
+html, body, .md-main, .md-content, .md-container {
+  transition: none !important;
 }
