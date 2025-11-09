@@ -17,13 +17,9 @@ from uuid import uuid4
 
 import pytest
 from app.models import Atom, AtomLink, LLMProvider, Message, ProviderType, Source, SourceType, Topic, TopicAtom, User
+from app.services.knowledge.knowledge_orchestrator import KnowledgeOrchestrator as KnowledgeExtractionService
+from app.services.knowledge.knowledge_schemas import ExtractedAtom, ExtractedTopic, KnowledgeExtractionOutput
 from app.services.knowledge.llm_agents import build_model_instance
-from app.services.knowledge_extraction_service import (
-    ExtractedAtom,
-    ExtractedTopic,
-    KnowledgeExtractionOutput,
-    KnowledgeExtractionService,
-)
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -861,7 +857,7 @@ async def test_get_messages_by_period_last_24h(
     """Test last 24 hours period selection."""
     from datetime import timedelta
 
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     now = datetime.now(UTC)
     recent_time = now - timedelta(hours=12)
@@ -906,7 +902,7 @@ async def test_get_messages_by_period_last_7d(
     """Test last 7 days period selection."""
     from datetime import timedelta
 
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     now = datetime.now(UTC)
     recent_time = now - timedelta(days=3)
@@ -951,7 +947,7 @@ async def test_get_messages_by_period_last_30d(
     """Test last 30 days period selection."""
     from datetime import timedelta
 
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     now = datetime.now(UTC)
     recent_time = now - timedelta(days=15)
@@ -996,7 +992,7 @@ async def test_get_messages_by_period_custom_valid(
     """Test custom date range period selection."""
     from datetime import timedelta
 
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     now = datetime.now(UTC)
     start_date = now - timedelta(days=5)
@@ -1053,7 +1049,7 @@ async def test_get_messages_by_period_with_topic_filter(
     from datetime import timedelta
 
     from app.models import Topic
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     topic1 = Topic(name="Topic 1", description="Test", icon="Icon", color="#000")
     topic2 = Topic(name="Topic 2", description="Test", icon="Icon", color="#000")
@@ -1107,7 +1103,7 @@ async def test_get_messages_by_period_no_results(
     """Test period selection returning empty list when no messages match."""
     from datetime import timedelta
 
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     now = datetime.now(UTC)
     old_time = now - timedelta(days=100)
@@ -1133,7 +1129,7 @@ async def test_get_messages_by_period_custom_missing_start_date(
     db_session: AsyncSession,
 ) -> None:
     """Test custom period validation when start_date is missing."""
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     now = datetime.now(UTC)
     end_date = now
@@ -1149,7 +1145,7 @@ async def test_get_messages_by_period_custom_missing_end_date(
     """Test custom period validation when end_date is missing."""
     from datetime import timedelta
 
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     now = datetime.now(UTC)
     start_date = now - timedelta(days=5)
@@ -1165,7 +1161,7 @@ async def test_get_messages_by_period_custom_start_after_end(
     """Test custom period validation when start_date is after end_date."""
     from datetime import timedelta
 
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     now = datetime.now(UTC)
     start_date = now - timedelta(days=2)
@@ -1182,7 +1178,7 @@ async def test_get_messages_by_period_custom_future_start_date(
     """Test custom period validation when start_date is in the future."""
     from datetime import timedelta
 
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     now = datetime.now(UTC)
     future = now + timedelta(days=5)
@@ -1200,7 +1196,7 @@ async def test_get_messages_by_period_custom_future_end_date(
     """Test custom period validation when end_date is in the future."""
     from datetime import timedelta
 
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     now = datetime.now(UTC)
     start_date = now - timedelta(days=5)
@@ -1215,7 +1211,7 @@ async def test_get_messages_by_period_invalid_period_type(
     db_session: AsyncSession,
 ) -> None:
     """Test error handling for invalid period type."""
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     with pytest.raises(ValueError, match="Invalid period_type"):
         await get_messages_by_period(db_session, period_type="invalid_type")  # type: ignore[arg-type]
@@ -1228,7 +1224,7 @@ async def test_get_messages_by_period_naive_datetime_handling(
     """Test that naive datetimes are converted to UTC."""
     from datetime import timedelta
 
-    from app.services.knowledge_extraction_service import get_messages_by_period
+    from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 
     now = datetime.now(UTC)
     start_date = now - timedelta(days=5)

@@ -14,7 +14,7 @@ from uuid import uuid4
 
 import pytest
 from app.models import LLMProvider, Message, ProviderType, Source, SourceType, Topic, User
-from app.services.knowledge_extraction_service import ExtractedAtom, ExtractedTopic, KnowledgeExtractionOutput
+from app.services.knowledge.knowledge_schemas import ExtractedAtom, ExtractedTopic, KnowledgeExtractionOutput
 from app.tasks import KNOWLEDGE_EXTRACTION_LOOKBACK_HOURS, KNOWLEDGE_EXTRACTION_THRESHOLD
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -389,7 +389,7 @@ async def test_extract_knowledge_task_validates_agent_exists() -> None:
         is_active=True,
     )
 
-    from app.services.knowledge_extraction_service import ExtractedAtom, ExtractedTopic, KnowledgeExtractionOutput
+    from app.services.knowledge.knowledge_schemas import ExtractedAtom, ExtractedTopic, KnowledgeExtractionOutput
 
     output = KnowledgeExtractionOutput(
         topics=[
