@@ -13,6 +13,7 @@ import MetricCard from '@/shared/components/MetricCard'
 import { noiseService } from '@/features/noise/api/noiseService'
 import type { NoiseStats } from '@/features/noise/types'
 import { toast } from 'sonner'
+import { logger } from '@/shared/utils/logger'
 import {
   LineChart,
   Line,
@@ -39,7 +40,7 @@ const NoiseFilteringDashboard = () => {
     const ws = new WebSocket(`${wsUrl}?topics=noise_filtering`)
 
     ws.onopen = () => {
-      console.log('[NoiseFilteringDashboard] WebSocket connected')
+      logger.debug('[NoiseFilteringDashboard] WebSocket connected')
     }
 
     ws.onmessage = (event) => {
@@ -68,7 +69,7 @@ const NoiseFilteringDashboard = () => {
     }
 
     ws.onclose = () => {
-      console.log('[NoiseFilteringDashboard] WebSocket disconnected')
+      logger.debug('[NoiseFilteringDashboard] WebSocket disconnected')
     }
 
     return () => {

@@ -131,7 +131,7 @@ const MessagesPage = () => {
     const ws = new WebSocket(`${wsUrl}?topics=noise_filtering`)
 
     ws.onopen = () => {
-      console.log('[MessagesPage] WebSocket connected')
+      logger.debug('[MessagesPage] WebSocket connected')
     }
 
     ws.onmessage = (event) => {
@@ -158,7 +158,7 @@ const MessagesPage = () => {
     }
 
     ws.onclose = () => {
-      console.log('[MessagesPage] WebSocket disconnected')
+      logger.debug('[MessagesPage] WebSocket disconnected')
     }
 
     return () => {
@@ -258,7 +258,6 @@ const MessagesPage = () => {
     },
   })
 
-  // Update ref when multiSelect.handleCheckboxClick changes
   React.useEffect(() => {
     checkboxClickHandlerRef.current = multiSelect.handleCheckboxClick
   }, [multiSelect.handleCheckboxClick])

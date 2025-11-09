@@ -18,6 +18,7 @@ import {
 import { Link, useLocation } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useUiStore } from '@/shared/store/uiStore'
+import { logger } from '@/shared/utils/logger'
 import {
   Sidebar,
   SidebarContent,
@@ -137,7 +138,7 @@ export function AppSidebar() {
     const ws = new WebSocket(`${wsUrl}?topics=analysis,proposals,noise_filtering`)
 
     ws.onopen = () => {
-      console.log('[Sidebar] WebSocket connected for counts')
+      logger.debug('[Sidebar] WebSocket connected for counts')
     }
 
     ws.onmessage = (event) => {
@@ -176,7 +177,7 @@ export function AppSidebar() {
     }
 
     ws.onclose = () => {
-      console.log('[Sidebar] WebSocket disconnected')
+      logger.debug('[Sidebar] WebSocket disconnected')
     }
 
     return () => {
@@ -330,7 +331,6 @@ export function AppSidebar() {
                             ? location.pathname === '/'
                             : location.pathname.startsWith(item.path)
 
-                        // Get badge count and tooltip for specific items
                         let badgeCount: number | undefined
                         let badgeTooltip: string | undefined
 
