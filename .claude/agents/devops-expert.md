@@ -10,8 +10,8 @@ description: |-
 
   НЕ для:
   - Backend code → fastapi-backend-expert
-  - Frontend code → react-frontend-expert
-  - Database tuning → database-reliability-engineer
+  - Frontend code → React Frontend Expert (F1)
+  - Database tuning → Database Engineer (D1)
 model: sonnet
 color: blue
 ---

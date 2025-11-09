@@ -178,7 +178,7 @@ db83d89 docs: add Admin UI task for knowledge extraction settings
 - Fix 72 failing backend tests (8-10h)
 - Add E2E Playwright tests (7-10h)
 - Session file: `.claude/sessions/planned/testing-infrastructure.md`
-- Owner: pytest-test-master agent
+- Owner: Pytest Master (T1) agent
 
 **Priority 3: Admin UI** (6-8h)
 - Knowledge extraction settings UI (2h)
@@ -188,7 +188,7 @@ db83d89 docs: add Admin UI task for knowledge extraction settings
 - Health dashboard (1h)
 - Metrics: pending messages, extraction latency (1h)
 - Agent config management (2h)
-- Owner: fastapi-backend-expert + react-frontend-architect
+- Owner: fastapi-backend-expert + React Frontend Expert (F1)
 
 **Priority 4: Performance Optimization** (Optional)
 - A/B test extraction thresholds

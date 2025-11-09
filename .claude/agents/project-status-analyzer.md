@@ -10,8 +10,8 @@ description: |-
 
   НЕ для:
   - Implementation → Domain specialist agents
-  - Code review → code-reviewer
-  - Detailed specs → spec-driven-dev-specialist
+  - Code review → Code Reviewer (R1)
+  - Detailed specs → Spec-Driven Dev (S1)
   - Session management → session-manager skill
 model: haiku
 color: green

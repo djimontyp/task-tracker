@@ -9,7 +9,7 @@ description: |-
   - Автоматично: High token usage (>1M/day), budget alerts
 
   НЕ для:
-  - Quality optimization → llm-prompt-engineer
+  - Quality optimization → Prompt Engineer (P1)
   - Model architecture → llm-ml-engineer
   - Backend integration → fastapi-backend-expert
 model: haiku

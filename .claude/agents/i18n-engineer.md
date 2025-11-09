@@ -10,8 +10,8 @@ description: |-
 
   НЕ для:
   - Machine translation (MT) → Manual translator або MT service
-  - Content writing → documentation-expert
-  - UI design для language switcher → ux-ui-design-expert
+  - Content writing → Docs Expert (D2)
+  - UI design для language switcher → UX/UI Expert (U1)
   - Backend implementation → fastapi-backend-expert
 model: haiku
 color: purple

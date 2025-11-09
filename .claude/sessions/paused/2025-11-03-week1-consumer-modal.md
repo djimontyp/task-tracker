@@ -51,16 +51,16 @@
 
 | Agent | Task | Output | Duration |
 |-------|------|--------|----------|
-| **react-frontend-architect** | Consumer Modal component | [implementation](.artifacts/consumer-message-modal-implementation.md) | 2h |
-| **react-frontend-architect** | Routing fix + browser testing | [test report](.artifacts/consumer-modal-test-report.md) | 1h |
+| **React Frontend Expert (F1)** | Consumer Modal component | [implementation](.artifacts/consumer-message-modal-implementation.md) | 2h |
+| **React Frontend Expert (F1)** | Routing fix + browser testing | [test report](.artifacts/consumer-modal-test-report.md) | 1h |
 | **fastapi-backend-expert** | API endpoint `/messages/{id}` | [API report](.artifacts/api-endpoint-implementation-report.md) | 45m |
-| **react-frontend-architect** | Post-fix verification | [verification](.artifacts/consumer-modal-verification-report.md) | 15m |
+| **React Frontend Expert (F1)** | Post-fix verification | [verification](.artifacts/consumer-modal-verification-report.md) | 15m |
 
 ---
 
 ## Implementation Summary
 
-### 1. Consumer Message Modal (react-frontend-architect)
+### 1. Consumer Message Modal (React Frontend Expert (F1))
 
 **Created**:
 - `frontend/src/features/messages/components/ConsumerMessageModal/ConsumerMessageModal.tsx`
@@ -81,7 +81,7 @@
 
 ---
 
-### 2. Routing Fix (react-frontend-architect)
+### 2. Routing Fix (React Frontend Expert (F1))
 
 **Problem**: `/dashboard/messages` returned 404 (React Router mismatch)
 
@@ -125,7 +125,7 @@ curl http://localhost/api/v1/messages/00000000-0000-0000-0000-000000000000
 
 ---
 
-### 4. Browser Verification (react-frontend-architect)
+### 4. Browser Verification (React Frontend Expert (F1))
 
 **Test Results** (Playwright MCP):
 
@@ -157,7 +157,7 @@ curl http://localhost/api/v1/messages/00000000-0000-0000-0000-000000000000
 3. Enable drill-down from topics to messages (2h)
 
 **Approach**:
-- Delegate to `react-frontend-architect` agent
+- Delegate to `React Frontend Expert (F1)` agent
 - Reuse existing patterns from MessagesPage
 - Use shadcn/ui components (Card, Breadcrumb)
 - Maintain Admin/User mode consistency
@@ -245,7 +245,7 @@ curl http://localhost/api/v1/messages/00000000-0000-0000-0000-000000000000
 
 ---
 
-## Agent Report: 2025-11-03 18:10 - react-frontend-architect
+## Agent Report: 2025-11-03 18:10 - React Frontend Expert (F1)
 
 ### Topic Detail Page Enhancement
 
@@ -654,7 +654,7 @@ const { data: topic } = useQuery<Topic>({
 - Files requiring changes: 5+
 - Type conversions needed: 30+ occurrences
 - Service methods to update: 8+
-- Estimated effort: 1-2h (react-frontend-architect)
+- Estimated effort: 1-2h (React Frontend Expert (F1))
 
 ---
 
@@ -711,7 +711,7 @@ Backend has other type errors (not in Topics code):
 - Service methods expect wrong type
 - Blocks TopicDetailPage from loading
 
-**Next Action**: Delegate to `react-frontend-architect` to fix frontend type definitions and remove integer conversions.
+**Next Action**: Delegate to `React Frontend Expert (F1)` to fix frontend type definitions and remove integer conversions.
 
 ---
 
@@ -729,13 +729,13 @@ Backend has other type errors (not in Topics code):
 - Backend works correctly with UUIDs
 - Issue confirmed as frontend type mismatch
 - Minor backend type fix applied
-- Ready for frontend fixes by react-frontend-architect
+- Ready for frontend fixes by React Frontend Expert (F1)
 
 **Time Spent**: 60 minutes (investigation + testing + type fix + documentation)
 
 ---
 
-## Agent Report: 2025-11-03 17:45 - react-frontend-architect
+## Agent Report: 2025-11-03 17:45 - React Frontend Expert (F1)
 
 ### Frontend UUID Type Fixes
 
@@ -845,7 +845,7 @@ Backend API повертає UUID strings для Topic.id, але frontend ти�
 
 ---
 
-## Final E2E Test: 2025-11-03 19:30 - react-frontend-architect
+## Final E2E Test: 2025-11-03 19:30 - React Frontend Expert (F1)
 
 ### Test Results
 

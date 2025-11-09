@@ -9,8 +9,8 @@ description: |-
   - Автоматично: Після завершення features, перед releases, після рефакторингу
 
   НЕ для:
-  - Architecture review → code-reviewer
-  - Type errors → domain specialists (fastapi-backend-expert, react-frontend-expert)
+  - Architecture review → Code Reviewer (R1)
+  - Type errors → domain specialists (fastapi-backend-expert, React Frontend Expert (F1))
   - Code formatting → just fmt
 model: haiku
 color: cyan

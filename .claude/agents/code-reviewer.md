@@ -9,9 +9,9 @@ description: |-
   - Автоматично: Після implementation, перед PR merge
 
   НЕ для:
-  - Domain-specific review → fastapi-backend-expert, react-frontend-expert
-  - Code cleanup → code-cleaner
-  - Testing → pytest-test-master
+  - Domain-specific review → fastapi-backend-expert, React Frontend Expert (F1)
+  - Code cleanup → Code Cleaner (C1)
+  - Testing → Pytest Master (T1)
 model: haiku
 color: red
 ---
@@ -210,8 +210,8 @@ from app.utils.validation import validate_user
 ## Recommendations
 
 1. Refactor task creation → service layer (fastapi-backend-expert)
-2. Centralize validation logic (code-cleaner)
-3. Fix imports (code-cleaner)
+2. Centralize validation logic (Code Cleaner (C1))
+3. Fix imports (Code Cleaner (C1))
 ```
 
 ---

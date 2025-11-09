@@ -9,10 +9,10 @@ description: |-
   - Автоматично: Перед major feature implementation, коли немає чітких requirements
 
   НЕ для:
-  - Implementation → Domain specialist agents (fastapi-backend-expert, react-frontend-expert)
-  - Code review → code-reviewer
-  - User docs → documentation-expert
-  - UX design → ux-ui-design-expert
+  - Implementation → Domain specialist agents (fastapi-backend-expert, React Frontend Expert (F1))
+  - Code review → Code Reviewer (R1)
+  - User docs → Docs Expert (D2)
+  - UX design → UX/UI Expert (U1)
 model: haiku
 color: blue
 ---

@@ -10,8 +10,8 @@ description: |-
 
   НЕ для:
   - Backend API → fastapi-backend-expert
-  - UX/UI design → ux-ui-design-expert
-  - Database → database-reliability-engineer
+  - UX/UI design → UX/UI Expert (U1)
+  - Database → Database Engineer (D1)
 model: sonnet
 color: purple
 ---

@@ -9,7 +9,7 @@ description: |-
   - Автоматично: Нові embedding models, slow similarity queries >500ms
 
   НЕ для:
-  - Database performance → database-reliability-engineer
+  - Database performance → Database Engineer (D1)
   - LLM integration → llm-ml-engineer
   - Backend API → fastapi-backend-expert
 model: sonnet
