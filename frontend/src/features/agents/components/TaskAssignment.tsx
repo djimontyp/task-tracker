@@ -88,7 +88,7 @@ const TaskAssignment = ({ agent, open, onClose }: TaskAssignmentProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Manage Tasks for {agent.name}</DialogTitle>
         </DialogHeader>

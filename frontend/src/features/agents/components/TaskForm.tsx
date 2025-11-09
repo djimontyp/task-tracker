@@ -70,7 +70,7 @@ const TaskForm = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-2xl lg:max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? 'Edit Task' : 'Create Task'}</DialogTitle>
         </DialogHeader>

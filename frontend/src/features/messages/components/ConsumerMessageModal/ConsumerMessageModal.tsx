@@ -78,7 +78,7 @@ export function ConsumerMessageModal({ messageId, onClose }: ConsumerMessageModa
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-full max-w-3xl md:w-[80vw] sm:w-[95vw] max-h-[90vh] flex flex-col p-0" aria-describedby="consumer-message-description">
+      <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-2xl lg:max-w-3xl flex flex-col p-0" aria-describedby="consumer-message-description">
         <DialogHeader className="px-6 pt-6 pb-4 border-b">
           <DialogTitle className="text-lg font-semibold">Message Details</DialogTitle>
           <p id="consumer-message-description" className="sr-only">View and read message content with author details and related messages</p>

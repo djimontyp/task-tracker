@@ -101,7 +101,7 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Test Agent: {agent?.name || 'Unknown'}</DialogTitle>
         </DialogHeader>

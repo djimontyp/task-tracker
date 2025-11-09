@@ -79,7 +79,7 @@ export function CreateEditJobDialog({ open, onOpenChange, job }: CreateEditJobDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-2xl lg:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Job' : 'Create New Job'}</DialogTitle>
         </DialogHeader>

@@ -77,7 +77,7 @@ const ProviderForm = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-lg">
         <DialogHeader>
           <DialogTitle>{isEdit ? 'Edit Provider' : 'Create Provider'}</DialogTitle>
         </DialogHeader>
