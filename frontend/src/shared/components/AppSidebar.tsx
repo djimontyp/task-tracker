@@ -9,7 +9,6 @@ import {
   ListBulletIcon,
   FolderIcon,
   FunnelIcon,
-  BellIcon,
   CalendarIcon,
   SparklesIcon,
   ChevronRightIcon,
@@ -87,7 +86,6 @@ const navGroups: NavGroup[] = [
       { path: '/automation/dashboard', label: 'Overview', icon: SparklesIcon },
       { path: '/automation/rules', label: 'Rules', icon: Cog6ToothIcon },
       { path: '/automation/scheduler', label: 'Scheduler', icon: CalendarIcon },
-      { path: '/automation/notifications', label: 'Notifications', icon: BellIcon },
     ],
   },
 ]

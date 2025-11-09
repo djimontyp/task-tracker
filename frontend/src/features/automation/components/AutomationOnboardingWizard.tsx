@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWizardStore } from '../store/wizardStore'
-import { useCreateJob, useCreateRule, useUpdateNotificationPreferences } from '../api/automationService'
+import { useCreateJob, useCreateRule } from '../api/automationService'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
 import { Progress } from '@/shared/ui/progress'
 import { ScheduleConfigStep } from './ScheduleConfigStep'
 import { RulesConfigStep } from './RulesConfigStep'
-import { NotificationsConfigStep } from './NotificationsConfigStep'
 import { ReviewActivateStep } from './ReviewActivateStep'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/utils'
@@ -15,8 +14,7 @@ import { cn } from '@/shared/lib/utils'
 const STEPS = [
   { id: 0, title: 'Schedule', component: ScheduleConfigStep },
   { id: 1, title: 'Rules', component: RulesConfigStep },
-  { id: 2, title: 'Notifications', component: NotificationsConfigStep },
-  { id: 3, title: 'Review & Activate', component: ReviewActivateStep },
+  { id: 2, title: 'Review & Activate', component: ReviewActivateStep },
 ]
 
 export function AutomationOnboardingWizard() {
@@ -27,7 +25,6 @@ export function AutomationOnboardingWizard() {
 
   const createJobMutation = useCreateJob()
   const createRuleMutation = useCreateRule()
-  const updateNotificationsMutation = useUpdateNotificationPreferences()
 
   const CurrentStepComponent = STEPS[currentStep].component
   const progress = ((currentStep + 1) / STEPS.length) * 100
@@ -35,7 +32,6 @@ export function AutomationOnboardingWizard() {
   const canProceed = () => {
     if (currentStep === 0) return isValid.schedule
     if (currentStep === 1) return isValid.rules
-    if (currentStep === 2) return isValid.notifications
     return true
   }
 
@@ -83,16 +79,6 @@ export function AutomationOnboardingWizard() {
         action: formData.rules.action === 'manual_review' ? 'approve' : formData.rules.action,
         priority: 50,
         enabled: true,
-      })
-
-      await updateNotificationsMutation.mutateAsync({
-        email_enabled: formData.notifications.email_enabled,
-        email_address: formData.notifications.email_address,
-        telegram_enabled: formData.notifications.telegram_enabled,
-        telegram_chat_id: formData.notifications.telegram_chat_id,
-        pending_threshold: formData.notifications.pending_threshold,
-        daily_digest_enabled: formData.notifications.digest_enabled,
-        digest_frequency: formData.notifications.digest_frequency,
       })
 
       toast.success('Automation activated successfully!', { id: toastId })

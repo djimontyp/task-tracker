@@ -7,15 +7,13 @@ interface WizardState {
   isValid: {
     schedule: boolean
     rules: boolean
-    notifications: boolean
   }
   setCurrentStep: (step: number) => void
   nextStep: () => void
   prevStep: () => void
   updateSchedule: (data: Partial<WizardFormData['schedule']>) => void
   updateRules: (data: Partial<WizardFormData['rules']>) => void
-  updateNotifications: (data: Partial<WizardFormData['notifications']>) => void
-  setStepValidity: (step: 'schedule' | 'rules' | 'notifications', isValid: boolean) => void
+  setStepValidity: (step: 'schedule' | 'rules', isValid: boolean) => void
   resetWizard: () => void
 }
 
@@ -29,13 +27,6 @@ const initialFormData: WizardFormData = {
     similarity_threshold: 85,
     action: 'approve',
   },
-  notifications: {
-    email_enabled: false,
-    telegram_enabled: false,
-    pending_threshold: 10,
-    digest_enabled: false,
-    digest_frequency: 'daily',
-  },
 }
 
 export const useWizardStore = create<WizardState>((set) => ({
@@ -44,14 +35,13 @@ export const useWizardStore = create<WizardState>((set) => ({
   isValid: {
     schedule: true,
     rules: true,
-    notifications: true,
   },
 
   setCurrentStep: (step) => set({ currentStep: step }),
 
   nextStep: () =>
     set((state) => ({
-      currentStep: Math.min(state.currentStep + 1, 3),
+      currentStep: Math.min(state.currentStep + 1, 2),
     })),
 
   prevStep: () =>
@@ -81,17 +71,6 @@ export const useWizardStore = create<WizardState>((set) => ({
       },
     })),
 
-  updateNotifications: (data) =>
-    set((state) => ({
-      formData: {
-        ...state.formData,
-        notifications: {
-          ...state.formData.notifications,
-          ...data,
-        },
-      },
-    })),
-
   setStepValidity: (step, isValid) =>
     set((state) => ({
       isValid: {
@@ -107,7 +86,6 @@ export const useWizardStore = create<WizardState>((set) => ({
       isValid: {
         schedule: true,
         rules: true,
-        notifications: true,
       },
     }),
 }))
