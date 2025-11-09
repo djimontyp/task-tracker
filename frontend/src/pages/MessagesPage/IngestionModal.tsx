@@ -49,7 +49,6 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
   const fetchGroups = async () => {
     setFetchingGroups(true)
     try {
-      // Fetch webhook settings to get configured groups
       const response = await apiClient.get(API_ENDPOINTS.webhookSettings)
       const settings = response.data
       logger.debug('Webhook settings:', settings)

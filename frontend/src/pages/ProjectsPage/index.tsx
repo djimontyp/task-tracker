@@ -18,7 +18,6 @@ const ProjectsPage = () => {
   const [selectedProject, setSelectedProject] = useState<ProjectConfig | undefined>(undefined)
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Fetch projects
   const {
     data: projectsResponse,
     isLoading,
