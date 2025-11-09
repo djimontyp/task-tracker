@@ -77,27 +77,7 @@
 
 ## Common Commands
 
-```bash
-# Start all services
-just services
-
-# Development with live reload
-just services-dev
-
-# Type checking
-just typecheck
-
-# Format code
-just fmt
-
-# Run tests
-just test
-
-# View documentation
-just docs
-```
-
-See [justfile](./justfile) for the complete command reference.
+See [justfile](./justfile) for all available commands.
 
 ---
 

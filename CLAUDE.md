@@ -52,61 +52,19 @@ Files: path/to/file1.py, path/to/file2.py
 
 ---
 
-### Приклади (Good vs Bad)
+### Приклади
 
-**Scenario: User asks "Додай user authentication"**
+**Coordinator (verbose → concise):**
 
-❌ **VERBOSE (coordinator):**
-```
-Я проаналізував твій запит та зрозумів що потрібно додати authentication.
-Це складне завдання яке включає backend (JWT tokens, password hashing)
-та frontend (login форма, token storage). Я розіб'ю це на підзадачі і
-делегую спеціалізованим агентам. Спочатку я попрошу fastapi-backend-expert
-створити User model та /login endpoint...
-```
-**Tokens:** ~90
+❌ "Я проаналізував твій запит та зрозумів що потрібно додати authentication. Це складне завдання яке включає backend (JWT tokens, password hashing) та frontend..."
 
-✅ **CONCISE (coordinator):**
-```
-Додаю authentication (JWT-based).
+✅ "Додаю authentication (JWT-based). Tasks: 1) Backend → fastapi-backend-expert, 2) Frontend → react-frontend-expert" **(-60% токенів)**
 
-Tasks:
-1. Backend: User model + /login endpoint → fastapi-backend-expert
-2. Frontend: LoginForm + token storage → react-frontend-expert
+**Agent report (verbose → concise):**
 
-Почали з backend.
-```
-**Tokens:** ~35 (-61%)
+❌ "Я завершив implementation User authentication на backend. Створив User model з username, email, password_hash полями. Додав bcrypt..."
 
----
-
-❌ **VERBOSE (agent report):**
-```
-Я завершив implementation User authentication на backend. Створив User
-model з username, email, password_hash полями. Додав bcrypt для безпечного
-hashing паролів. Також створив POST /login endpoint який приймає credentials
-і повертає JWT token. Middleware перевіряє токен на protected routes.
-Все працює і покрито тестами.
-```
-**Tokens:** ~80
-
-✅ **CONCISE (agent report):**
-```
-✅ Backend authentication ready
-
-Changes:
-- User model (bcrypt password hashing)
-- POST /login → JWT token
-- Auth middleware для protected routes
-- Tests: 12 passed
-
-Files: app/models/user.py, app/api/auth.py, app/middleware/auth.py
-```
-**Tokens:** ~45 (-44%)
-
----
-
-**Note для агентів:** Повний список прикладів у `@CLAUDE.md` секція "Стиль комунікації".
+✅ "✅ Backend authentication ready. Changes: User model (bcrypt), POST /login → JWT, auth middleware. Files: app/models/user.py, app/api/auth.py" **(-45% токенів)**
 
 ## ⚡ Швидкий старт (для кожного завдання)
 
@@ -156,31 +114,18 @@ Files: app/models/user.py, app/api/auth.py, app/middleware/auth.py
    - Агенти мають ліміт контексту - надто велика задача = втрата всіх напрацювань
    - Агенти не пам'ятають нічого між викликами - надавай весь необхідний context
 
-## 🎯 Патерни делегування (з конкретними прикладами)
+## 🎯 Патерни делегування
 
-### ❌ ПОГАНО → ✅ ДОБРЕ
+**Детальні сценарії та decision tree:** @.claude/delegation-patterns.md
 
-**Scenario 1: Користувач питає "Де обробляються WebSocket з'єднання?"**
-- ❌ `Grep "websocket"` → Read файлів → відповідь (споживає контекст)
-- ✅ `Task(subagent_type=Explore, prompt="Знайди і поясни WebSocket connection handling, включаючи middleware, routes, та event handlers")`
+**Швидке нагадування:**
+- Дослідження (>5 файлів) → `Task(subagent_type=Explore)`
+- Backend implementation → `fastapi-backend-expert`
+- Frontend implementation → `react-frontend-expert`
+- Database debugging → `database-reliability-engineer`
+- LLM optimization → `llm-prompt-engineer` або `llm-cost-optimizer`
 
-**Scenario 2: "Додай user authentication"**
-- ❌ Read поточний код → планувати сам → писати код
-- ✅ `Task(subagent_type=Plan, prompt="План імплементації user authentication з JWT tokens")` → `fastapi-backend-expert` + `react-frontend-expert`
-
-**Scenario 3: "Виправ database connection timeout"**
-- ❌ Debug напряму через Read/Grep
-- ✅ `task-breakdown` skill → `database-reliability-engineer` agent
-
-**Scenario 4: "Що в TODO файлі?"**
-- ❌ `Read NEXT_SESSION_TODO.md`
-- ✅ `Skill(session-manager)` з командою "покажи сесії"
-
-**Scenario 5: "Оптимізуй LLM costs"**
-- ❌ Читати код agents/ → аналізувати сам
-- ✅ `llm-cost-optimizer` agent
-
-**ПРАВИЛО:** Якщо завдання потребує >10 хв research/implementation → ДЕЛЕГУЙ
+**Правило:** Завдання >10 хв research/implementation → ДЕЛЕГУЙ
 
 ## 🛠️ Skills (автоматичне використання)
 
@@ -213,14 +158,6 @@ Files: app/models/user.py, app/api/auth.py, app/middleware/auth.py
 - **SQLModel = single source of truth** - автоматична генерація міграцій
 - **Workflow:** Зміни моделі → alembic autogenerate → перевірка → застосування
 
-## Команди
-- Для використання Python команд: `uv run python...`
-- Для роботи з Docker командами: `just docker exec..`, `just services-dev`, `just check ...` і так далі. 
-  - Якщо команди немає краще додати туди.
-  - Justfile треба тримати невеликим. Щоб можно було швидко по ньому орієнтуватись
-  - Замість купи схожих команд наприклад для тестування краще зробити 1 або декілька універсальних. Так само і для екзекуції команд в докер наприклад. І так далі...
-
-
 ## Сесії та управління довгостроковими завданнями
 
 **Використовуй `session-manager` skill** для довготривалої консистентної роботи.
@@ -234,18 +171,13 @@ Files: app/models/user.py, app/api/auth.py, app/middleware/auth.py
 **Детальні triggers та workflow:** Див. секцію Skills → session-manager (рядок 99)
 
 ## Стек
-- **Backend**: FastAPI, SQLAlchemy, TaskIQ, Pydantic-AI
-- **Frontend**: React 18 + TypeScript, WebSocket, Docker Compose Watch
-- **Infrastructure**: PostgreSQL (порт 5555), NATS, Nginx
+**FastAPI + React + PostgreSQL + NATS.** Деталі: `docs/architecture/OVERVIEW.md`
 
 ## UX/Продуктові рішення
 
-### Інформаційна архітектура (ADR-0001)
-**Рішення:** Unified Admin Approach - Consumer UI (за замовчуванням) + Admin Panel (перемикання через Cmd+Shift+A)
-**Обґрунтування:** Evolution-proof дизайн для двох фаз: Calibration (власний інструмент) → Production (consumer tool). Zero rework при переході.
-**Вплив:** Admin tools (diagnostics, bulk ops, metrics) готові для Фази 1, Consumer UI (browse, search, export) готовий для Фази 2.
-**Деталі:** Див. `docs/architecture/adr/001-unified-admin-approach.md` (повний контекст, альтернативи, наслідки)
-**Дослідження:** `.artifacts/product-designer-research/ia-restructuring-proposal.md` (1800+ рядків аналізу)
+### Інформаційна архітектура
+**Підхід:** Unified Admin Approach (Consumer UI + Admin Panel toggle)
+**Деталі:** `docs/architecture/adr/001-unified-admin-approach.md`
 
 ## 🧭 Управління контекстом і стратегія делегування
 
@@ -325,9 +257,6 @@ Files: app/models/user.py, app/api/auth.py, app/middleware/auth.py
 - ❌ "Швидко перевірю ще один файл" (ланцюгова реакція)
   - ✅ Якщо >2 файли = делегуй агенту
 
-- ❌ Імпортувати всі docs одразу в початку сесії
-  - ✅ Lazy-load по потребі (`@INDEX.md` тільки коли треба навігація)
-
 ### Delegation - Ефективна координація
 - ❌ Давати агенту завдання на >500 рядків коду або >30 хв
   - ✅ Розбий на 2-3 підзадачі з чіткими межами
@@ -337,9 +266,6 @@ Files: app/models/user.py, app/api/auth.py, app/middleware/auth.py
 
 - ❌ Делегувати без контексту "виправ authentication"
   - ✅ Надай файли, requirements, acceptance criteria, поточну поведінку vs бажану
-
-- ❌ Запускати агентів послідовно коли можна паралельно
-  - ✅ Одне повідомлення = кілька Task calls для незалежних завдань
 
 ### Code Quality - Не роби сам, делегуй
 - ❌ Писати коментарі "// Create user object", "# Step 2: Update via API"
@@ -351,9 +277,6 @@ Files: app/models/user.py, app/api/auth.py, app/middleware/auth.py
 - ❌ Запускати `git commit` напряму через Bash
   - ✅ ТІЛЬКИ `smart-commit` skill (atomic commits, semantic grouping)
 
-- ❌ Використовувати `mypy` сам
-  - ✅ Делегуй агенту і попроси запустити `just typecheck`
-
 ### Dependencies & Security - Захист проекту
 - ❌ Змінювати `pyproject.toml` або `package.json` без схвалення
   - ✅ Завжди питай користувача перед зміною dependencies
@@ -363,9 +286,6 @@ Files: app/models/user.py, app/api/auth.py, app/middleware/auth.py
 
 - ❌ Відносні імпорти `from . import User`, `from ..models import Task`
   - ✅ Завжди абсолютні: `from app.models import User`, `from app.models import Task`
-
-- ❌ Hardcode API keys або secrets в код
-  - ✅ Environment variables через `.env` (ніколи не комітити)
 
 ### Technical Standards - Дотримуйся стандартів
 - ❌ Force push до `main`/`master` branches
@@ -386,9 +306,9 @@ Files: app/models/user.py, app/api/auth.py, app/middleware/auth.py
 - Git операції: `git status`, `git log`, `git diff`, `git show`
 
 **Just commands (whitelisted):**
-- `just typecheck`, `just fmt`, `just test`
-- `just services-dev`, `just services`, `just services-stop`
-- `just db-*` (всі database seed/clear команди)
+- Readonly: `typecheck`, `fmt`, `test`
+- Services: `services-dev`, `services`, `services-stop`
+- Database: `db-*` (всі seed/clear команди)
 
 **Skills (завжди дозволені):**
 - `session-manager`, `task-breakdown`, `smart-commit`
@@ -454,51 +374,16 @@ Files: app/models/user.py, app/api/auth.py, app/middleware/auth.py
 
 ---
 
-## 📚 Швидка довідка (вже завантажені документи)
+## 📚 Швидка довідка
 
-**Ці документи вже в system context** через CLAUDE.md imports. НЕ використовуй `@` для їх повторного імпорту.
+**Pre-loaded:**
+- **delegation-patterns.md** - Decision tree, red flags, agent/skill quick reference
 
-### Завжди доступні (pre-loaded)
-
-**delegation-patterns.md** - Детальні патерни делегування
-- **Використання:** Вибір агента, приклади delegation, decision tree
-- **Зміст:** Red flags, delegation patterns, agent quick reference, skills reference
-- ✅ Вже завантажено, використовуй без `@`
-
-### Завантажуй ТІЛЬКИ за потреби (lazy-load з `@`)
-
-**@INDEX.md** - Повна структура проекту та навігація
-- **Коли завантажувати:** Користувач питає "де знайти X", потрібна навігація по проекту
-- **Зміст:** Quick start, архітектура, документація за ролями, common commands
-
-**@justfile** - Всі доступні команди та аліаси
-- **Коли завантажувати:** Потрібна специфічна команда, яка не описана в CLAUDE.md
-- **Часто використовувані команди** (можна використовувати без завантаження justfile):
-  - `just services-dev` - Start all services з live reload
-  - `just typecheck` - mypy type checking після backend змін
-  - `just fmt backend/app` - Format Python code (ruff)
-  - `just db-nuclear-reset` - Повне очищення БД (⚠️ попередь користувача - destructive)
-  - `just test` - Run pytest tests
-  - `just docs` - Serve MkDocs documentation локально
-
-**@docs/architecture/OVERVIEW.md** - System architecture
-- **Коли завантажувати:** Питання про архітектурні рішення, tech stack обґрунтування
-- **НЕ потрібно для:** Звичайні питання (stack вже описаний в CLAUDE.md рядок 134)
-
-**@docs/architecture/adr/001-unified-admin-approach.md** - ADR для UI архітектури
-- **Коли завантажувати:** Питання про UX рішення, admin vs consumer UI design
-- **Зміст:** Unified Admin Approach, Calibration Phase → Production Phase evolution
-
-### Швидкий доступ до агентів та skills
-
-**Агенти** (детальний список в системних інструкціях):
-- `fastapi-backend-expert`, `react-frontend-expert`, `database-reliability-engineer`
-- `llm-prompt-engineer`, `llm-cost-optimizer`, `vector-search-engineer`
-- `pytest-test-master`, `code-reviewer`, `code-cleaner`, `chaos-engineer`, `devops-expert`
-
-**Skills** (`.claude/skills/*`):
-- `task-breakdown`, `smart-commit`, `session-manager`
-- `sync-docs-structure`, `migration-database`
+**Lazy-load (використовуй @ для завантаження):**
+- **INDEX.md** - Навігація по проекту та Quick start
+- **justfile** - Всі доступні команди (services, db, tests, docs)
+- **docs/architecture/OVERVIEW.md** - System architecture та tech stack
+- **docs/architecture/adr/001-unified-admin-approach.md** - UI/UX architecture decisions
 
 ---
 
