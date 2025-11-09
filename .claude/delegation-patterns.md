@@ -61,7 +61,7 @@ User: "Add user authentication"
 ```
 User: "Fix the database connection timeout"
 ❌ DON'T: Debug directly
-✅ DO: task-breakdown → database-reliability-engineer
+✅ DO: task-breakdown → Database Engineer (D1)
 ```
 
 ### Pattern 4: Multi-Domain Task
@@ -122,7 +122,7 @@ User: "Fix database slow queries"
 
 **Coordinator Response:**
 ```
-Координатор: Делегую database optimization → database-reliability-engineer
+Координатор: Делегую database optimization → Database Engineer (D1)
 
 [Task tool call...]
 ```
@@ -200,10 +200,10 @@ User: "Find all WebSocket-related code"
 | "Add feature Y"           | Start coding              | `Task(subagent_type=Plan)` → specialized agent |
 | "Fix bug Z"               | Debug directly            | `task-breakdown` → specialist                  |
 | "How does X work?"        | Read multiple files       | `Task(subagent_type=Explore)`                  |
-| "Review this code"        | Read and review           | `code-reviewer` agent                          |
+| "Review this code"        | Read and review           | `Code Reviewer (R1)` agent                     |
 | "Optimize performance"    | Profile and fix           | Specialist agent (database/vector/llm)         |
-| "Add tests"               | Write tests               | `pytest-test-master` agent                     |
-| "Update docs"             | Edit docs                 | `documentation-expert` agent                   |
+| "Add tests"               | Write tests               | `Pytest Master (T1)` agent                     |
+| "Update docs"             | Edit docs                 | `Docs Expert (D2)` agent                       |
 
 ### Agent Quick Reference
 
@@ -211,11 +211,11 @@ User: "Find all WebSocket-related code"
 - **Planning**: `Task(subagent_type=Plan)`
 - **Backend**: `fastapi-backend-expert`
 - **Frontend**: `react-frontend-expert`
-- **Database**: `database-reliability-engineer`
-- **LLM/Prompts**: `llm-prompt-engineer`
-- **Cost**: `llm-cost-optimizer`
-- **Tests**: `pytest-test-master`
-- **Docs**: `documentation-expert`
+- **Database**: `Database Engineer (D1)`
+- **LLM/Prompts**: `Prompt Engineer (P1)`
+- **Cost**: `Cost Optimizer (C2)`
+- **Tests**: `Pytest Master (T1)`
+- **Docs**: `Docs Expert (D2)`
 - **Session**: `session-manager` (pause/resume workflow)
 
 ### Skills Quick Reference
@@ -306,9 +306,9 @@ markers = {}
 tasks = [
     ("backend", "fastapi-backend-expert", "Create API endpoints"),
     ("frontend", "react-frontend-expert", "Build UI components"),
-    ("database", "database-reliability-engineer", "Schema design"),
-    ("tests", "pytest-test-master", "E2E test suite"),
-    ("docs", "documentation-expert", "API documentation")
+    ("database", "Database Engineer (D1)", "Schema design"),
+    ("tests", "Pytest Master (T1)", "E2E test suite"),
+    ("docs", "Docs Expert (D2)", "API documentation")
 ]
 
 # Delegate all in parallel
