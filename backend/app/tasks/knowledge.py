@@ -11,7 +11,7 @@ from app.config.ai_config import ai_config
 from app.database import AsyncSessionLocal, get_db_session_context
 from app.models import AgentConfig, LLMProvider, Message
 from app.services.embedding_service import EmbeddingService
-from app.services.knowledge_extraction_service import KnowledgeExtractionService
+from app.services.knowledge.knowledge_orchestrator import KnowledgeOrchestrator as KnowledgeExtractionService
 from app.services.websocket_manager import websocket_manager
 
 

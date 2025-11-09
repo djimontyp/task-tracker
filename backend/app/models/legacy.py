@@ -3,12 +3,11 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
 from .base import IDMixin, TimestampMixin
-from .enums import SourceType, TaskCategory, TaskPriority, TaskStatus
+from .enums import SourceType
 
 # ~~~~~~~~~~~~~~~~ Source Models ~~~~~~~~~~~~~~~~
 
@@ -86,66 +85,6 @@ class MessageUpdate(SQLModel):
     classification: str | None = None
     confidence: float | None = None
     analyzed: bool | None = None
-
-
-# ~~~~~~~~~~~~~~~~ Task Models ~~~~~~~~~~~~~~~~
-
-
-class TaskBase(SQLModel):
-    """Base model for Task with common fields."""
-
-    title: str = Field(max_length=200, description="Task title")
-    description: str = Field(sa_type=Text, description="Detailed task description")
-    category: TaskCategory = Field(description="Task category")
-    priority: TaskPriority = Field(description="Task priority level")
-    status: TaskStatus = Field(default=TaskStatus.open, description="Current status")
-    classification_data: dict | None = Field(default=None, sa_type=JSONB, description="AI classification metadata")
-    ai_generated: bool = Field(default=False, description="Whether task was AI-generated")
-    confidence_score: float | None = Field(default=None, description="AI confidence score")
-
-
-class Task(IDMixin, TimestampMixin, TaskBase, table=True):
-    """Task table - represents issues/tasks extracted from messages."""
-
-    __tablename__ = "tasks"
-
-    source_id: int = Field(foreign_key="sources.id", description="Source of the task")
-    source_message_id: uuid.UUID | None = Field(
-        default=None,
-        foreign_key="messages.id",
-        description="Original message if task was extracted from one",
-    )
-
-    # User assignments
-    assigned_to: int | None = Field(default=None, foreign_key="users.id", description="User assigned to this task")
-    created_by: int | None = Field(default=None, foreign_key="users.id", description="User who created this task")
-
-
-class TaskCreate(TaskBase):
-    """Schema for creating new tasks."""
-
-    source_id: int | None = None
-    source_message_id: uuid.UUID | None = None
-
-
-class TaskPublic(TaskBase):
-    """Public schema for task responses."""
-
-    id: int
-    source_id: int | None
-    source_message_id: uuid.UUID | None
-    created_at: datetime
-    updated_at: datetime | None = None
-
-
-class TaskUpdate(SQLModel):
-    """Schema for updating tasks - all fields optional."""
-
-    title: str | None = None
-    description: str | None = None
-    category: TaskCategory | None = None
-    priority: TaskPriority | None = None
-    status: TaskStatus | None = None
 
 
 # ~~~~~~~~~~~~~~~~ Webhook Settings Models ~~~~~~~~~~~~~~~~

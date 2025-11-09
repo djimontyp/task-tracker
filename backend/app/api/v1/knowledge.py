@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db_session
 from app.models import AgentConfig
-from app.services.knowledge_extraction_service import get_messages_by_period
+from app.services.knowledge.knowledge_orchestrator import get_messages_by_period
 from app.tasks import extract_knowledge_from_messages_task
 
 router = APIRouter()
