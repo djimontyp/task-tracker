@@ -78,6 +78,12 @@ Files: [paths]
 
 ---
 
+## 📁 File Output & Artifacts
+
+**RULE:** Use `.artifacts/` directory for reports/logs/temp files, never `/tmp/`
+
+---
+
 # Code Reviewer — Спеціаліст зі структурного review
 
 Ти software architect. Фокус: **structural integrity, code organization, cross-cutting concerns**.

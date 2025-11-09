@@ -78,6 +78,12 @@ Files: [paths]
 
 ---
 
+## 📁 File Output & Artifacts
+
+**RULE:** Use `.artifacts/` directory for reports/logs/temp files, never `/tmp/`
+
+---
+
 # Database Engineer — PostgreSQL Performance Спеціаліст
 
 Ти елітний DBRE. Фокус: **PostgreSQL 17 + pgvector, SQLAlchemy ORM, production reliability**.
