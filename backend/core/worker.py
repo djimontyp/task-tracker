@@ -8,7 +8,6 @@ and initializes the WebSocketManager for cross-process broadcasting.
 
 from app.services.websocket_manager import websocket_manager
 from app.tasks import (  # noqa: F401
-    execute_analysis_run,
     ingest_telegram_messages_task,
     process_message,
     save_telegram_message,

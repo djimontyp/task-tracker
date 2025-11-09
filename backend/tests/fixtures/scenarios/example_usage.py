@@ -44,7 +44,7 @@ async def test_importance_scoring_accuracy():
 # Example 2: Test Knowledge Extraction
 # ====================================
 """
-from app.services.knowledge_extraction_service import KnowledgeExtractionService
+from app.services.knowledge.knowledge_orchestrator import KnowledgeOrchestrator as KnowledgeExtractionService
 
 @pytest.mark.asyncio
 async def test_knowledge_extraction():
@@ -99,7 +99,7 @@ async def test_e2e_pipeline(db: Session):
 # Example 4: Test Noise Filtering
 # ===============================
 """
-from app.services.knowledge_extraction_service import KnowledgeExtractionService
+from app.services.knowledge.knowledge_orchestrator import KnowledgeOrchestrator as KnowledgeExtractionService
 
 @pytest.mark.asyncio
 async def test_noise_filtering():
@@ -174,7 +174,7 @@ async def test_scenario_benchmarks():
 # Example 7: Validate Expected Extractions
 # ========================================
 """
-from app.services.knowledge_extraction_service import KnowledgeExtractionService
+from app.services.knowledge.knowledge_orchestrator import KnowledgeOrchestrator as KnowledgeExtractionService
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("scenario_name", [

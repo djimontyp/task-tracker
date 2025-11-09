@@ -38,7 +38,6 @@ from app.main import app
 # Test database URL (in-memory SQLite)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
-# Create test engine
 test_engine = create_async_engine(
     TEST_DATABASE_URL,
     connect_args={"check_same_thread": False},
@@ -70,7 +69,6 @@ def visit_BIGINT(self, type_, **kw):
 SQLiteTypeCompiler.visit_BIGINT = visit_BIGINT
 
 
-# Create test session factory
 TestSessionLocal = sessionmaker(
     test_engine,
     class_=AsyncSession,
@@ -109,4 +107,4 @@ async def client(db_session):
         yield ac
 
 
-pytest_plugins = ["tests.fixtures.analysis_fixtures", "tests.fixtures.llm_fixtures"]
+pytest_plugins = ["tests.fixtures.llm_fixtures"]
