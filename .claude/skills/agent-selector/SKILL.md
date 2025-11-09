@@ -69,7 +69,7 @@ Time Estimate: [<5min / 5-15min / 15-30min / >30min]
 ### Step 2: Match Task to Agent Domain
 
 Map task characteristics to agent specializations. Agents are known through:
-1. **System context**: Built-in agents (fastapi-backend-expert, react-frontend-architect, etc.)
+1. **System context**: Built-in agents (fastapi-backend-expert, React Frontend Expert (F1), etc.)
 2. **Project agents**: Custom agents in `.claude/agents/` directory
 3. **Tool descriptions**: Task tool provides agent metadata
 
@@ -78,15 +78,15 @@ Map task characteristics to agent specializations. Agents are known through:
 | Task Indicator | Suggested Agent(s) |
 |----------------|-------------------|
 | Python/FastAPI/async/Pydantic | `fastapi-backend-expert` |
-| React/TypeScript/hooks/components | `react-frontend-architect` |
-| Docker/CI/GitHub Actions/deployment | `devops-expert` |
-| pytest/testing/coverage | `pytest-test-master` |
-| Code quality/refactoring/cleanup | `codebase-cleaner`, `architecture-guardian` |
-| Markdown/README/docs | `documentation-expert` |
-| UX/UI/accessibility/design | `ux-ui-design-expert` |
+| React/TypeScript/hooks/components | `React Frontend Expert (F1)` |
+| Docker/CI/GitHub Actions/deployment | `DevOps Expert (O1)` |
+| pytest/testing/coverage | `Pytest Master (T1)` |
+| Code quality/refactoring/cleanup | `Code Cleaner (C1)`, `Architecture Guardian` |
+| Markdown/README/docs | `Docs Expert (D2)` |
+| UX/UI/accessibility/design | `UX/UI Expert (U1)` |
 | Codebase exploration/research | `Explore` (fast, specialized for discovery) |
-| Complex multi-step coordination | `task-orchestrator` |
-| Specifications/requirements | `spec-driven-dev-specialist` |
+| Complex multi-step coordination | `Task Orchestrator` |
+| Specifications/requirements | `Spec-Driven Dev (S1)` |
 
 **Dynamic agent discovery:**
 ```bash
@@ -142,7 +142,7 @@ Based on scores and mapping, choose:
 
 **Multi-agent considerations:**
 - If task spans multiple domains, use `task-breakdown` first
-- If coordination needed, consider `task-orchestrator`
+- If coordination needed, consider `Task Orchestrator`
 - Sequential delegation allowed: Main → task-breakdown → agent-selector → specialized agent
 
 ### Step 5: Prepare Delegation
@@ -188,33 +188,33 @@ Use this reference for common scenarios:
 ### Backend Development
 - **Python/FastAPI general**: `fastapi-backend-expert`
 - **Database migrations**: Consider `migration-database` skill
-- **API testing**: `pytest-test-master`
+- **API testing**: `Pytest Master (T1)`
 
 ### Frontend Development
-- **React/TypeScript**: `react-frontend-architect`
-- **UX review**: `ux-ui-design-expert`
+- **React/TypeScript**: `React Frontend Expert (F1)`
+- **UX review**: `UX/UI Expert (U1)`
 - **Component testing**: Frontend testing agent (if available)
 
 ### Infrastructure & DevOps
-- **Docker/compose**: `devops-expert`
-- **CI/CD pipelines**: `devops-expert`
-- **Deployment**: `devops-expert`
+- **Docker/compose**: `DevOps Expert (O1)`
+- **CI/CD pipelines**: `DevOps Expert (O1)`
+- **Deployment**: `DevOps Expert (O1)`
 
 ### Quality & Maintenance
-- **Code review**: `architecture-guardian`
-- **Cleanup/refactor**: `codebase-cleaner`
-- **Comment cleanup**: `comment-cleaner`
+- **Code review**: `Architecture Guardian`
+- **Cleanup/refactor**: `Code Cleaner (C1)`
+- **Comment cleanup**: `Comment Cleaner`
 - **Type checking**: Handle directly (just run `mypy`)
 
 ### Documentation & Planning
-- **User docs**: `documentation-expert`
-- **Specifications**: `spec-driven-dev-specialist`
-- **Project status**: `project-status-analyzer`
+- **User docs**: `Docs Expert (D2)`
+- **Specifications**: `Spec-Driven Dev (S1)`
+- **Project status**: `Status Analyzer (A2)`
 
 ### Research & Exploration
 - **Codebase discovery**: `Explore` (fast, context-efficient)
-- **Architecture analysis**: `architecture-guardian`
-- **General research**: `general-purpose`
+- **Architecture analysis**: `Architecture Guardian`
+- **General research**: `General Purpose`
 
 ## Decision Trees
 
@@ -243,12 +243,12 @@ Is delegation ROI > 5?
 ```
 What's the primary domain?
 ├─ Backend/API → fastapi-backend-expert
-├─ Frontend/React → react-frontend-architect
-├─ Infrastructure → devops-expert
-├─ Testing → pytest-test-master
-├─ Documentation → documentation-expert
-├─ Research → Explore (fast) or general-purpose
-├─ Multi-domain → task-orchestrator
+├─ Frontend/React → React Frontend Expert (F1)
+├─ Infrastructure → DevOps Expert (O1)
+├─ Testing → Pytest Master (T1)
+├─ Documentation → Docs Expert (D2)
+├─ Research → Explore (fast) or General Purpose
+├─ Multi-domain → Task Orchestrator
 └─ Unclear → Use task-breakdown first
 ```
 
@@ -311,13 +311,13 @@ What's the primary domain?
 
 - **task-breakdown**: Often calls agent-selector for each decomposed task
 - **parallel-coordinator**: Uses agent-selector to assign agents to parallel work
-- **task-orchestrator**: Delegates agent selection to this skill
+- **Task Orchestrator**: Delegates agent selection to this skill
 - **Standalone**: Can be invoked independently for any delegation decision
 
 ## Notes
 
 - Agent metadata is provided by system context (Task tool descriptions)
 - Custom project agents in `.claude/agents/` augment built-in agents
-- Always prefer specialized agents for their domain over general-purpose
+- Always prefer specialized agents for their domain over General Purpose
 - When in doubt about delegation, bias toward delegating (expertise > speed)
 - Track delegation decisions to learn patterns over time
