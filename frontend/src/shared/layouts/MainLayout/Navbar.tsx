@@ -96,7 +96,7 @@ const Navbar = () => {
           <SidebarTrigger
             variant="ghost"
             size="icon"
-            className="h-11 w-11 shrink-0 rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-9 w-9 md:h-11 md:w-11 shrink-0 rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Toggle sidebar"
           />
 
@@ -127,7 +127,7 @@ const Navbar = () => {
           <SearchBar />
         </div>
 
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-1.5 md:gap-3 flex-shrink-0">
           <div
             className="flex items-center gap-2 px-2 py-1 rounded-md"
             title={statusTitle}
@@ -153,11 +153,11 @@ const Navbar = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="aspect-square border border-border/60 bg-card/60 text-muted-foreground hover:bg-accent/15 hover:text-foreground shrink-0"
+                  className="hidden md:flex h-9 w-9 md:h-11 md:w-11 aspect-square border border-border/60 bg-card/60 text-muted-foreground hover:bg-accent/15 hover:text-foreground shrink-0"
                   onClick={cycleTheme}
                   aria-label="Change theme"
                 >
-                  <UniversalThemeIcon theme={theme} />
+                  <UniversalThemeIcon theme={theme} className="h-4 w-4 md:h-5 md:w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -173,9 +173,9 @@ const Navbar = () => {
                   to="/settings"
                   aria-label="Settings"
                   title="Settings"
-                  className="inline-flex h-11 w-11 aspect-square items-center justify-center rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+                  className="inline-flex h-9 w-9 md:h-11 md:w-11 aspect-square items-center justify-center rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
                 >
-                  <AdjustmentsHorizontalIcon className="w-5 h-5" />
+                  <AdjustmentsHorizontalIcon className="w-4 h-4 md:w-5 md:h-5" />
                 </Link>
               </TooltipTrigger>
               <TooltipContent>

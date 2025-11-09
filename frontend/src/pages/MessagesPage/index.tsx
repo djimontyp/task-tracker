@@ -482,20 +482,22 @@ const MessagesPage = () => {
         title="Messages"
         description="View and manage all incoming messages with importance scores, noise filtering, and real-time updates from Telegram"
         actions={
-          <>
-            <Button onClick={handleRefreshMessages} size="sm" variant="outline">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <Button onClick={handleRefreshMessages} size="sm" variant="outline" className="w-full sm:w-auto justify-center">
               <ArrowPathIcon className="mr-2 h-4 w-4" />
               Refresh
             </Button>
-            <Button onClick={handleUpdateAuthors} size="sm" variant="outline">
+            <Button onClick={handleUpdateAuthors} size="sm" variant="outline" className="w-full sm:w-auto justify-center">
               <UserIcon className="mr-2 h-4 w-4" />
-              Update Authors
+              <span className="hidden min-[400px]:inline">Update Authors</span>
+              <span className="min-[400px]:hidden">Authors</span>
             </Button>
-            <Button onClick={handleIngestMessages} size="sm">
+            <Button onClick={handleIngestMessages} size="sm" className="w-full sm:w-auto justify-center">
               <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
-              Ingest Messages
+              <span className="hidden min-[400px]:inline">Ingest Messages</span>
+              <span className="min-[400px]:hidden">Ingest</span>
             </Button>
-          </>
+          </div>
         }
       />
 
