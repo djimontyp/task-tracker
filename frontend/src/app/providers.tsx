@@ -24,7 +24,7 @@ interface ProvidersProps {
 const Providers = ({ children }: ProvidersProps) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename="/dashboard">
+      <BrowserRouter>
         <ThemeProvider>
           <TooltipProvider delayDuration={300}>
             {children}
