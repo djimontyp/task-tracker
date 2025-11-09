@@ -181,3 +181,7 @@ tmp/
 .claude/hooks/.last-commit-check
 .claude/hooks/.commit-series-start
 .claude/hooks/.pending-doc-updates.json
+
+# Agent coordinator runtime metadata (auto-generated)
+.artifacts/coordination/agent-sessions.json
+.artifacts/coordination/last-agent-id.txt
