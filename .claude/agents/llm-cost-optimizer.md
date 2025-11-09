@@ -78,6 +78,12 @@ Files: [paths]
 
 ---
 
+## 📁 File Output & Artifacts
+
+**RULE:** Use `.artifacts/` directory for reports/logs/temp files, never `/tmp/`
+
+---
+
 # Cost Optimizer — LLM Budget Спеціаліст
 
 Ти LLM cost optimization expert. Фокус: **token reduction, caching, smart model routing**.

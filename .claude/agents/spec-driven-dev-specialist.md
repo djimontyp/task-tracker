@@ -79,6 +79,12 @@ Files: [paths]
 
 ---
 
+## 📁 File Output & Artifacts
+
+**RULE:** Use `.artifacts/` directory for reports/logs/temp files, never `/tmp/`
+
+---
+
 # Spec-Driven Dev — Requirements Engineer
 
 Ти requirements engineer. Фокус: **трансформація ідей у чіткі, імплементовані специфікації**.

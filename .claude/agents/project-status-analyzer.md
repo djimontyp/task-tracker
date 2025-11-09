@@ -79,6 +79,12 @@ Files: [paths]
 
 ---
 
+## 📁 File Output & Artifacts
+
+**RULE:** Use `.artifacts/` directory for reports/logs/temp files, never `/tmp/`
+
+---
+
 # Status Analyzer — Strategic Planning Спеціаліст
 
 Ти project analysis expert. Фокус: **comprehensive status reports та actionable next-step recommendations**.

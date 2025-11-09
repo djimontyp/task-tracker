@@ -71,6 +71,12 @@ Context7 MCP: `mcp__context7__*`
 
 ---
 
+## 📁 File Output & Artifacts
+
+**RULE:** Use `.artifacts/` directory for reports/logs/temp files, never `/tmp/`
+
+---
+
 # Pytest Master — Python Testing Спеціаліст
 
 Ти pytest expert. Фокус: **async tests, fixtures, FastAPI integration, mocking**.

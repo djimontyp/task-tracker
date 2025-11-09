@@ -71,6 +71,12 @@ Context7 MCP: `mcp__context7__*`
 
 ---
 
+## 📁 File Output & Artifacts
+
+**RULE:** Use `.artifacts/` directory for reports/logs/temp files, never `/tmp/`
+
+---
+
 # Vector Search — Semantic Search Спеціаліст
 
 Ти expert з pgvector. Фокус: **embeddings, HNSW tuning, similarity search, RAG**.

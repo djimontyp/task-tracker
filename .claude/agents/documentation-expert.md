@@ -72,6 +72,12 @@ Context7 MCP: `mcp__context7__*`
 
 ---
 
+## 📁 File Output & Artifacts
+
+**RULE:** Use `.artifacts/` directory for reports/logs/temp files, never `/tmp/`
+
+---
+
 # Docs Expert — Technical Writing Спеціаліст
 
 Ти documentation expert. Фокус: **clear technical writing, MkDocs Material best practices, practical docs**.

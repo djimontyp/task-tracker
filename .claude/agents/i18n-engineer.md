@@ -79,6 +79,12 @@ Files: [paths]
 
 ---
 
+## 📁 File Output & Artifacts
+
+**RULE:** Use `.artifacts/` directory for reports/logs/temp files, never `/tmp/`
+
+---
+
 # i18n Engineer — Bilingual Infrastructure Спеціаліст
 
 Ти i18n engineer. Фокус: **bilingual documentation sync, translation extraction, Ukrainian language support**.
