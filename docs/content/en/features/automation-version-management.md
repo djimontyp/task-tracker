@@ -733,4 +733,3 @@ docs/content/en/features/screenshots/
 - [Versioning System Architecture](../architecture/versioning-system.md) - Core versioning concepts and approval workflow
 - [Knowledge Extraction](../architecture/knowledge-extraction.md) - How versions are auto-created from messages
 - [WebSocket Architecture](../architecture/websocket.md) - Real-time communication patterns (future doc)
-- [API Reference](/api/knowledge.md) - Full API endpoint documentation

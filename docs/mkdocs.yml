@@ -73,22 +73,8 @@ nav:
     - Analysis System: architecture/analysis-system.md
     - Knowledge Extraction: architecture/knowledge-extraction.md
     - Vector Database: architecture/vector-database.md
-  - Frontend:
-    - Architecture: frontend/architecture.md
   - Features:
     - Automation-First Version Management: features/automation-version-management.md
-  - Admin Guides:
-    - Job Management: admin/job-management.md
-    - Audit Logs: admin/audit-logs.md
-    - Performance & Scaling: admin/performance-scaling.md
-  - Operations:
-    - Deployment: operations/deployment.md
-    - Configuration: operations/configuration.md
-    - Security & Privacy: operations/security-privacy.md
-  - API Reference:
-    - Topics API: api/topics.md
-    - Knowledge Extraction: api/knowledge.md
-    - Automation API: api/automation.md
 
 plugins:
   - search:
@@ -133,20 +119,8 @@ plugins:
             Noise Filtering: Noise Filtering
             Analysis System: Analysis System
             Vector Database: Vector Database
-            Frontend: Frontend
             Features: Features
             Automation-First Version Management: Automation-First Version Management
-            Admin Guides: Admin Guides
-            Job Management: Job Management
-            Audit Logs: Audit Logs
-            Performance & Scaling: Performance & Scaling
-            Operations: Operations
-            Deployment: Deployment
-            Configuration: Configuration
-            Security & Privacy: Security & Privacy
-            API Reference: API Reference
-            Topics API: Topics API
-            Automation API: Automation API
         - locale: uk
           name: Українська
           site_name: Документація Task Tracker
@@ -180,20 +154,8 @@ plugins:
             Noise Filtering: Фільтрація шуму
             Analysis System: Система аналізу
             Vector Database: Векторна база даних
-            Frontend: Фронтенд
             Features: Функції
             Automation-First Version Management: Автоматизоване керування версіями
-            Admin Guides: Посібники адміністратора
-            Job Management: Управління завданнями
-            Audit Logs: Журнали аудиту
-            Performance & Scaling: Продуктивність та масштабування
-            Operations: Операції
-            Deployment: Розгортання
-            Configuration: Конфігурація
-            Security & Privacy: Безпека і конфіденційність
-            API Reference: Довідник API
-            Topics API: API топіків
-            Automation API: API автоматизації
 
 markdown_extensions:
   # Python Markdown

@@ -733,4 +733,3 @@ docs/content/uk/features/screenshots/
 - [Архітектура системи версій](../architecture/versioning-system.md) - Основні концепції версій та робочий процес схвалення
 - [Витяг знань](../architecture/knowledge-extraction.md) - Як версії автоматично створюються з повідомлень
 - [Архітектура WebSocket](../architecture/websocket.md) - Шаблони комунікації в реальному часі (майбутній документ)
-- [API довідка](/api/knowledge.md) - Повна документація ендпоінтів API

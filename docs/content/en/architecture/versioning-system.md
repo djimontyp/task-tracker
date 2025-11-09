@@ -383,5 +383,4 @@ Version 0 represents current entity state
 ## See Also
 
 - [Knowledge Extraction](./knowledge-extraction.md) - How versions are auto-created
-- [API Documentation](/api/knowledge.md) - Versioning API reference
 - [Background Tasks](./background-tasks.md) - Knowledge extraction scheduling

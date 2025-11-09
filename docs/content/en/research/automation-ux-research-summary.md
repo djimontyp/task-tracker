@@ -192,52 +192,6 @@ Next 5 runs:
 ⚠️ Yellow 500 (#eab308) on white: 1.9:1 (FAIL - backgrounds only)
 ```
 
-**Keyboard Navigation (2.1.1):**
-- All functionality accessible via keyboard
-- Tab order logical (top-to-bottom, left-to-right)
-- No keyboard traps
-- ESC closes modals
-
-**Keyboard Shortcuts Map:**
-```
-Global:
-- Tab: Next element
-- Shift+Tab: Previous element
-- Enter: Activate
-- Space: Toggle
-- ESC: Close/Cancel
-
-Wizard:
-- Ctrl+→: Next step
-- Ctrl+←: Previous step
-
-Rule Builder:
-- Ctrl+S: Save
-- Ctrl+T: Test rule
-- Shift+Delete: Remove focused row
-```
-
-**Focus Indicators (2.4.7):**
-```css
-*:focus-visible {
-  outline: 2px solid #2563eb; /* blue-600 */
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-```
-
-**Screen Reader Support:**
-- All icons have `aria-label`
-- Form inputs have associated `<label>` elements
-- Error messages use `role="alert"`
-- Status updates use `aria-live="polite"`
-- Modals use `role="dialog" aria-modal="true"`
-
-**Touch Targets (2.5.5 - Level AAA, but we aim for it):**
-- Minimum: 44x44px (WCAG 2.1 AA recommendation)
-- Optimal: 48x48px
-- Spacing: 8-12px between targets
-
 ---
 
 ### 4. Design System Foundation
@@ -626,8 +580,6 @@ Mobile Cards:
 ✅ User Onboarding (5-step wizard)
 
 **Scope:**
-- Keyboard navigation testing
-- Screen reader testing (NVDA/JAWS)
 - Color contrast validation
 - Performance audits
 - Onboarding wizard implementation
@@ -651,9 +603,7 @@ Mobile Cards:
 | Metric | Target | Measurement Method |
 |--------|--------|-------------------|
 | WCAG 2.1 AA Compliance | 100% | axe DevTools, pa11y |
-| Keyboard Navigation Coverage | 100% | Manual testing + automated |
 | Color Contrast Violations | 0 | Lighthouse, WAVE |
-| Screen Reader Errors | 0 | Manual testing (NVDA, JAWS) |
 | Touch Target Compliance | 100% | Manual measurement (≥44x44px) |
 
 ### Business Metrics
@@ -732,11 +682,9 @@ interface AutomationAPI {
 5. **Performance Tests:** Lighthouse CI
 
 ### Manual Testing
-1. **Keyboard Navigation:** Tab through all screens
-2. **Screen Reader:** NVDA (Windows), VoiceOver (Mac)
-3. **Cross-browser:** Chrome, Firefox, Safari, Edge
-4. **Responsive:** Test on real devices (iPhone, iPad, Android)
-5. **Color Contrast:** Manual spot checks with tools
+1. **Cross-browser:** Chrome, Firefox, Safari, Edge
+2. **Responsive:** Test on real devices (iPhone, iPad, Android)
+3. **Color Contrast:** Manual spot checks with tools
 
 ### User Testing
 1. **Prototype Testing:** 5-8 users, onboarding wizard
@@ -823,22 +771,7 @@ interface AutomationAPI {
 - Recommendations for implementation (4 phases)
 - Design system requirements
 
-### Document 2: Accessibility Guidelines
-**File:** `/docs/content/en/research/automation-ux-accessibility.md`
-**Length:** ~4,500 words
-**Contents:**
-- WCAG 2.1 AA compliance checklist
-- Keyboard navigation specifications
-- Screen reader optimization
-- Color contrast requirements (tested palette)
-- Touch target sizing
-- Form accessibility best practices
-- Chart/data visualization accessibility
-- Testing checklist (manual + automated)
-- Common mistakes to avoid
-- Resource links
-
-### Document 3: Figma Design Specifications
+### Document 2: Figma Design Specifications
 **File:** `/docs/content/en/research/automation-ux-figma-design-specs.md`
 **Length:** ~9,500 words
 **Contents:**

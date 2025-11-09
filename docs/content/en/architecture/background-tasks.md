@@ -332,5 +332,4 @@ api       → FastAPI container (queues tasks)
 
 - [LLM Architecture](./llm-architecture.md) - AI model integration
 - [Database Models](./models.md) - Task-related entities
-- [API Reference](../api/knowledge.md) - Knowledge extraction API
 - [WebSocket Events](../event-flow.md) - Real-time update system
