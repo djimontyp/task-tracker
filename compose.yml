@@ -114,6 +114,10 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      # Allow all origins for local development (mobile/WiFi access)
+      # For production, set specific domains in .env: CORS_ORIGINS=https://yourdomain.com
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]
       interval: 10s
