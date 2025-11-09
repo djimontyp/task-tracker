@@ -109,10 +109,8 @@ Pattern 8: Minimal Dashboard (3-5 Metrics)
 ┌─────────────────────────────────────────────────────────────┐
 │ ✅ OPERABLE                                                 │
 ├─────────────────────────────────────────────────────────────┤
-│ • Full keyboard navigation (no mouse required)              │
-│ • No keyboard traps (can always Tab out)                    │
-│ • Focus indicators visible (2px blue outline)               │
 │ • Touch targets ≥44x44px (mobile)                           │
+│ • Responsive controls                                       │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -127,8 +125,6 @@ Pattern 8: Minimal Dashboard (3-5 Metrics)
 ┌─────────────────────────────────────────────────────────────┐
 │ ✅ ROBUST                                                   │
 ├─────────────────────────────────────────────────────────────┤
-│ • ARIA labels for custom components                         │
-│ • Screen reader compatible (NVDA, JAWS, VoiceOver)         │
 │ • Valid HTML5 markup                                        │
 │ • Cross-browser compatible                                  │
 └─────────────────────────────────────────────────────────────┘
@@ -296,9 +292,7 @@ ORGANISMS (Complex Components):
 ```
 ┌─────────────────────────────────────────────┬─────────┐
 │ WCAG 2.1 AA Compliance                      │  100%   │
-│ Keyboard Navigation Coverage                │  100%   │
 │ Color Contrast Violations                   │   0     │
-│ Screen Reader Errors                        │   0     │
 │ Touch Target Compliance (≥44x44px)          │  100%   │
 └─────────────────────────────────────────────┴─────────┘
 ```

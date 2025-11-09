@@ -6,8 +6,8 @@
 This directory contains comprehensive UX research for the Automation Version Management System. The research was conducted to ensure our automation UI/UX matches or exceeds industry standards while maintaining full accessibility compliance.
 
 **Research Date:** 2025-10-26
-**Total Documentation:** 20,000+ words across 4 documents
-**Methodology:** Competitive analysis + Accessibility audit + Design system specification
+**Total Documentation:** 15,000+ words across 3 documents
+**Methodology:** Competitive analysis + Design system specification
 
 ---
 
@@ -49,60 +49,7 @@ This directory contains comprehensive UX research for the Automation Version Man
 
 ---
 
-### ♿ [2. Accessibility Guidelines](./automation-ux-accessibility.md)
-**Length:** ~4,500 words | **Read Time:** 15 minutes
-
-**Purpose:** Ensure WCAG 2.1 Level AA compliance for all automation interfaces.
-
-**Target:** 100% WCAG 2.1 AA compliance (mandatory)
-
-**Key Sections:**
-1. **WCAG 2.1 AA Compliance Checklist**
-   - Perceivable (text alternatives, contrast, adaptable)
-   - Operable (keyboard accessible, navigable)
-   - Understandable (readable, predictable, input assistance)
-   - Robust (compatible with assistive technologies)
-
-2. **Color Contrast Requirements**
-   - Normal text: ≥4.5:1
-   - Large text: ≥3.0:1
-   - UI components: ≥3.0:1
-   - Tested color palette with ratios
-
-3. **Keyboard Navigation**
-   - Complete keyboard shortcuts map
-   - Tab order requirements
-   - Focus indicators (2px blue outline)
-   - No keyboard traps
-
-4. **Screen Reader Optimization**
-   - ARIA labels for all icons
-   - Live regions for dynamic updates
-   - Semantic HTML structure
-   - Descriptive link text
-
-5. **Touch Target Sizing**
-   - Minimum: 44x44px (mobile)
-   - Optimal: 48x48px
-   - Spacing: 8-12px between targets
-
-**What You'll Learn:**
-- How to test for accessibility (automated + manual)
-- Common accessibility mistakes to avoid
-- Screen reader best practices
-- Form accessibility requirements
-- Chart/data visualization accessibility
-
-**Testing Tools Recommended:**
-- axe DevTools (catches 57% of issues)
-- Lighthouse (Chrome DevTools)
-- WAVE (browser extension)
-- pa11y (CI/CD integration)
-- NVDA/JAWS/VoiceOver (screen readers)
-
----
-
-### 🎨 [3. Figma Design Specifications](./automation-ux-figma-design-specs.md)
+### 🎨 [2. Figma Design Specifications](./automation-ux-figma-design-specs.md)
 **Length:** ~9,500 words | **Read Time:** 30 minutes
 
 **Purpose:** Provide complete design system specifications for Figma prototype creation and implementation.
@@ -169,7 +116,7 @@ This directory contains comprehensive UX research for the Automation Version Man
 
 ---
 
-### 📋 [4. Research Summary](./automation-ux-research-summary.md)
+### 📋 [3. Research Summary](./automation-ux-research-summary.md)
 **Length:** ~5,000 words | **Read Time:** 15 minutes
 
 **Purpose:** Executive summary of all research findings with actionable recommendations.
@@ -222,8 +169,7 @@ This directory contains comprehensive UX research for the Automation Version Man
 ### For UX Designers
 1. **Start with:** [Competitive Analysis](./automation-ux-competitive-analysis.md) - understand proven patterns
 2. **Reference:** [Design Specifications](./automation-ux-figma-design-specs.md) - create Figma prototypes
-3. **Validate:** [Accessibility Guidelines](./automation-ux-accessibility.md) - ensure compliance
-4. **Plan:** [Research Summary](./automation-ux-research-summary.md) - roadmap and metrics
+3. **Plan:** [Research Summary](./automation-ux-research-summary.md) - roadmap and metrics
 
 **Next Action:** Create Figma prototypes using component specs and screen designs
 
@@ -231,9 +177,8 @@ This directory contains comprehensive UX research for the Automation Version Man
 
 ### For Frontend Developers
 1. **Start with:** [Design Specifications](./automation-ux-figma-design-specs.md) - component library
-2. **Reference:** [Accessibility Guidelines](./automation-ux-accessibility.md) - implementation requirements
-3. **Review:** [Competitive Analysis](./automation-ux-competitive-analysis.md) - understand interaction patterns
-4. **Follow:** [Research Summary](./automation-ux-research-summary.md) - phase-by-phase roadmap
+2. **Review:** [Competitive Analysis](./automation-ux-competitive-analysis.md) - understand interaction patterns
+3. **Follow:** [Research Summary](./automation-ux-research-summary.md) - phase-by-phase roadmap
 
 **Next Action:** Set up React project with shadcn/ui and Tailwind CSS
 
@@ -243,19 +188,17 @@ This directory contains comprehensive UX research for the Automation Version Man
 1. **Start with:** [Research Summary](./automation-ux-research-summary.md) - executive overview
 2. **Review:** [Competitive Analysis](./automation-ux-competitive-analysis.md) - competitive positioning
 3. **Validate:** [Design Specifications](./automation-ux-figma-design-specs.md) - screen designs
-4. **Check:** [Accessibility Guidelines](./automation-ux-accessibility.md) - compliance requirements
 
 **Next Action:** Approve research findings and prioritize implementation phases
 
 ---
 
 ### For QA Engineers
-1. **Start with:** [Accessibility Guidelines](./automation-ux-accessibility.md) - testing requirements
-2. **Reference:** [Design Specifications](./automation-ux-figma-design-specs.md) - expected behavior
-3. **Review:** [Research Summary](./automation-ux-research-summary.md) - testing strategy
-4. **Study:** [Competitive Analysis](./automation-ux-competitive-analysis.md) - benchmarks
+1. **Reference:** [Design Specifications](./automation-ux-figma-design-specs.md) - expected behavior
+2. **Review:** [Research Summary](./automation-ux-research-summary.md) - testing strategy
+3. **Study:** [Competitive Analysis](./automation-ux-competitive-analysis.md) - benchmarks
 
-**Next Action:** Set up automated accessibility testing (pa11y-ci, axe DevTools)
+**Next Action:** Set up automated testing (Lighthouse, axe DevTools)
 
 ---
 
@@ -278,15 +221,6 @@ Badge: Small (20px), Medium (24px), Large (28px)
 Touch Target: Minimum 44x44px (mobile)
 ```
 
-### Keyboard Shortcuts
-```
-Tab: Next element
-Ctrl+→: Next wizard step
-Ctrl+S: Save rule
-Ctrl+T: Test rule
-ESC: Close modal
-```
-
 ### Color Contrast Ratios
 ```
 ✅ Gray 700 on white: 11.4:1 (AAA)
@@ -306,9 +240,7 @@ ESC: Close modal
 - **Accessibility Champion:** [QA Lead Name]
 
 ### Related Documentation
-- [Frontend Architecture](/docs/content/en/frontend/architecture.md)
 - [Backend Services](/docs/content/en/architecture/backend-services.md)
-- [API Documentation](/docs/content/en/api/)
 
 ---
 

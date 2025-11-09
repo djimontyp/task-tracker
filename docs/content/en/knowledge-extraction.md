@@ -423,5 +423,4 @@ After knowledge is extracted, you can:
 
 !!! question "Need Help?"
     - Check the [Developer Guide](../architecture/knowledge-extraction.md) for technical details
-    - Review [API Reference](../api/knowledge.md) for integration options
     - Contact the team if you encounter issues

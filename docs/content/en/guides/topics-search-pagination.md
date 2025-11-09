@@ -25,8 +25,8 @@ The search bar appears at the top of the Topics page. It searches both topic nam
 
 **To search:**
 
-1. Click the search input field (or press ++ctrl+k++)
-2. Type your query (no "Enter" needed—results appear automatically)
+1. Click the search input field
+2. Type your query (results appear automatically)
 3. Results update after 300ms of typing (debounced for performance)
 
 **Search features:**
@@ -196,19 +196,6 @@ The system caches search results automatically:
 
 ---
 
-## Keyboard Shortcuts
-
-| Shortcut | Action |
-|----------|--------|
-| ++ctrl+k++ | Focus search bar |
-| ++escape++ | Clear search and blur input |
-| ++enter++ | (Search updates automatically, Enter not needed) |
-
-!!! tip "Complete Keyboard Navigation"
-    The DataTable and all search controls are fully keyboard accessible. See the [Keyboard Navigation guide](keyboard-navigation.md) for a complete list of keyboard shortcuts and navigation tips across the entire application.
-
----
-
 ## Troubleshooting
 
 ### Search Not Working
@@ -218,7 +205,7 @@ The system caches search results automatically:
 **Solutions:**
 
 1. **Check for typos** - Try different spellings
-2. **Clear browser cache** - Hard refresh with ++ctrl+shift+r++
+2. **Clear browser cache** - Hard refresh (Ctrl+Shift+R on Windows, Cmd+Shift+R on Mac)
 3. **Verify network** - Open browser DevTools → Network tab
 4. **Check API status** - Contact admin if API is down
 
@@ -320,5 +307,4 @@ This is intentional to ensure comprehensive search results.
 !!! success "Quick Wins"
     - Use search to find topics in <2 seconds
     - Sort by "Recently Updated" to see active discussions
-    - Press ++ctrl+k++ for instant search access
     - Combine search + sort for powerful filtering

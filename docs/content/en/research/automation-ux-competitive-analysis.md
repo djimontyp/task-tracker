@@ -873,10 +873,8 @@ Send notifications: [Yes ○] [No ●]
 **Focus: Accessibility + Performance**
 
 1. **Accessibility Compliance** (WCAG 2.1 AA)
-   - Keyboard navigation for all forms
-   - Screen reader labels (ARIA attributes)
    - Color contrast validation
-   - Focus management (wizard steps)
+   - Touch target sizing
 
 2. **Performance Optimization**
    - Lazy loading for execution logs (pagination)

@@ -2,11 +2,9 @@
 
 ## Key Features
 
-- **Keyboard Navigation**: Full keyboard accessibility with intuitive shortcuts across the entire application
-- **Accessibility First**: Built on Radix UI primitives with ARIA attributes and screen reader support
 - **Real-time Updates**: WebSocket integration for live data synchronization
-
-See the [Keyboard Navigation guide](guides/keyboard-navigation.md) for comprehensive keyboard shortcuts and accessibility features.
+- **Modern UI**: Built on Radix UI components with responsive design
+- **Type Safety**: Full TypeScript support across frontend and backend
 
 ## Technology Stack
 

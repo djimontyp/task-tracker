@@ -32,7 +32,6 @@
   - Condition operators (numbers + text)
   - Logic operators (AND/OR)
   - Rule templates (6 pre-built configurations)
-  - Notification settings (email, Telegram, in-app)
   - Advanced configuration (multi-rule, fallback, rate limiting)
 - **Code Examples:** 20+ JSON/YAML configurations
 
@@ -42,9 +41,8 @@
 - **Topics Covered:**
   - Issue 1: Job not running (5 solution steps)
   - Issue 2: Auto-approval not working (5 solution steps)
-  - Issue 3: Notifications not received (5 solution steps)
-  - Issue 4: High false positive rate (5 solution steps)
-  - Issue 5: Pending count stuck (5 solution steps)
+  - Issue 3: High false positive rate (5 solution steps)
+  - Issue 4: Pending count stuck (5 solution steps)
   - Debugging steps (5-phase systematic approach)
   - Error messages reference table
 - **Diagrams:** Troubleshooting decision tree (Mermaid)
@@ -55,10 +53,9 @@
 - **Topics Covered:**
   - 4 rule design patterns (conservative start, multi-tier, topic-specific, time-based)
   - Schedule optimization by volume (small/medium/large teams)
-  - 3 notification strategies (digest, threshold alerts, critical topics)
   - Monitoring & maintenance (weekly + monthly processes)
   - 3 example workflows (startup, growing team, enterprise)
-  - 5 common mistakes to avoid
+  - 4 common mistakes to avoid
   - Success checklist (before production + after 1 month)
 - **Workflow Examples:** 3 complete team scenarios
 
@@ -140,12 +137,6 @@
 - `DELETE /automation/rules/{id}` - Delete rule
 - `GET /automation/rules/{id}/preview` - Preview impact
 - `GET /automation/rules/templates` - Get templates
-
-**Notifications (4 endpoints):**
-- `GET /notifications/preferences` - Get config
-- `PUT /notifications/preferences` - Update config
-- `POST /notifications/test-email` - Test email
-- `POST /notifications/test-telegram` - Test Telegram
 
 **Statistics (2 endpoints):**
 - `GET /automation/stats` - Get metrics
