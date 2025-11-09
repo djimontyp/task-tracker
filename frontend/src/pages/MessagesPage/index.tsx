@@ -476,7 +476,7 @@ const MessagesPage = () => {
   }
 
   return (
-    <div className="space-y-4 animate-fade-in w-full min-w-0">
+    <div className="space-y-4 animate-fade-in w-full min-w-0 overflow-x-hidden">
       <div className="w-full min-w-0">
         <PageHeader
           title="Messages"

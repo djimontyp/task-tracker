@@ -53,8 +53,8 @@ export function DataTable<TData>({
   }
 
   return (
-    <div className="w-full min-w-0 overflow-x-auto rounded-md border">
-      <Table role="grid" aria-label="Data table" className="w-full">
+    <div className="w-full min-w-0 overflow-x-auto rounded-md border max-w-full">
+      <Table role="grid" aria-label="Data table" className="min-w-full">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
