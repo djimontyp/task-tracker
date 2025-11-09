@@ -936,6 +936,7 @@ App (Router)
 - Dialogs closable with Escape key
 - Enter key submits forms
 - Tab order follows visual layout
+- See [Keyboard Navigation guide](../../guides/keyboard-navigation.md) for comprehensive keyboard shortcuts and accessibility features
 
 **Screen Reader Support**:
 - Descriptive button text (not "Click here")

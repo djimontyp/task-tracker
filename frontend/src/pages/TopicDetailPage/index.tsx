@@ -1,21 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeftIcon, CheckCircleIcon, CloudArrowUpIcon, ExclamationCircleIcon, PlusIcon, ClockIcon, SparklesIcon } from '@heroicons/react/24/outline'
-import { Card, Input, Textarea, Button, Skeleton, Switch, Label, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Badge } from '@/shared/ui'
-import { ColorPickerPopover } from '@/shared/components'
+import { Card, Input, Textarea, Button, Skeleton, Switch, Label, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Badge, Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/shared/ui'
+import { ColorPickerPopover, PageHeader } from '@/shared/components'
 import { topicService } from '@/features/topics/api/topicService'
 import { atomService } from '@/features/atoms/api/atomService'
 import { messageService } from '@/features/messages/api/messageService'
 import { AtomCard, CreateAtomDialog } from '@/features/atoms/components'
 import { VersionHistoryList, VersionDiffViewer, KnowledgeExtractionPanel } from '@/features/knowledge'
+import { ConsumerMessageModal } from '@/features/messages/components'
 import { renderTopicIcon } from '@/features/topics/utils/renderIcon'
 import { useDebounce } from '@/shared/hooks'
 import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
 import type { Topic } from '@/features/topics/types'
 import type { Atom } from '@/features/atoms/types'
 import type { Message } from '@/shared/types'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -37,6 +38,7 @@ const TopicDetailPage = () => {
   const [compareToVersion, setCompareToVersion] = useState<number | null>(null)
   const [showExtractionPanel, setShowExtractionPanel] = useState(false)
   const [pendingVersionsCount, setPendingVersionsCount] = useState(0)
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null)
 
   const initialValuesRef = useRef<{ name: string; description: string } | null>(null)
   const saveTimeoutRef = useRef<NodeJS.Timeout>()
@@ -46,33 +48,33 @@ const TopicDetailPage = () => {
   const debouncedDescription = useDebounce(description, 500)
 
   const { data: topic, isLoading, error } = useQuery<Topic>({
-    queryKey: ['topic', parseInt(topicId!)],
-    queryFn: () => topicService.getTopicById(parseInt(topicId!)),
+    queryKey: ['topic', topicId],
+    queryFn: () => topicService.getTopicById(topicId!),
     enabled: !!topicId,
   })
 
   const { data: atoms = [], isLoading: isLoadingAtoms } = useQuery<Atom[]>({
-    queryKey: ['atoms', 'topic', parseInt(topicId!)],
-    queryFn: () => atomService.getAtomsByTopic(parseInt(topicId!)),
+    queryKey: ['atoms', 'topic', topicId],
+    queryFn: () => atomService.getAtomsByTopic(topicId!),
     enabled: !!topicId,
   })
 
   const { data: messages = [], isLoading: isLoadingMessages } = useQuery<Message[]>({
-    queryKey: ['messages', 'topic', parseInt(topicId!)],
-    queryFn: () => messageService.getMessagesByTopic(parseInt(topicId!)),
+    queryKey: ['messages', 'topic', topicId],
+    queryFn: () => messageService.getMessagesByTopic(topicId!),
     enabled: !!topicId,
   })
 
-  const { isConnected } = useWebSocket({
+  useWebSocket({
     topics: ['knowledge'],
     onMessage: (data: unknown) => {
-      const event = data as { type?: string; data?: { entity_type?: string; entity_id?: number } }
+      const event = data as { type?: string; data?: { entity_type?: string; entity_id?: string } }
 
       if (event.type === 'knowledge.version_created' &&
           event.data?.entity_type === 'topic' &&
-          event.data?.entity_id === parseInt(topicId!)) {
+          event.data?.entity_id === topicId) {
         setPendingVersionsCount((prev) => prev + 1)
-        queryClient.invalidateQueries({ queryKey: ['topic', parseInt(topicId!)] })
+        queryClient.invalidateQueries({ queryKey: ['topic', topicId] })
       }
     },
   })
@@ -116,7 +118,7 @@ const TopicDetailPage = () => {
   }, [name, description, isInitialized, hasUnsavedChanges])
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Topic> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<Topic> }) =>
       topicService.updateTopic(id, data),
     onMutate: async ({ data }) => {
       setSaveStatus('saving')
@@ -126,10 +128,10 @@ const TopicDetailPage = () => {
         clearTimeout(saveTimeoutRef.current)
       }
 
-      await queryClient.cancelQueries({ queryKey: ['topic', parseInt(topicId!)] })
-      const previousTopic = queryClient.getQueryData<Topic>(['topic', parseInt(topicId!)])
+      await queryClient.cancelQueries({ queryKey: ['topic', topicId] })
+      const previousTopic = queryClient.getQueryData<Topic>(['topic', topicId])
 
-      queryClient.setQueryData<Topic>(['topic', parseInt(topicId!)], (old) => {
+      queryClient.setQueryData<Topic>(['topic', topicId], (old) => {
         if (!old) return old
         return { ...old, ...data }
       })
@@ -137,7 +139,7 @@ const TopicDetailPage = () => {
       return { previousTopic }
     },
     onSuccess: (updatedTopic) => {
-      queryClient.setQueryData(['topic', parseInt(topicId!)], updatedTopic)
+      queryClient.setQueryData(['topic', topicId], updatedTopic)
       queryClient.invalidateQueries({ queryKey: ['topics'] })
 
       initialValuesRef.current = {
@@ -153,9 +155,9 @@ const TopicDetailPage = () => {
         setSaveStatus('idle')
       }, 2000)
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       if (context?.previousTopic) {
-        queryClient.setQueryData(['topic', parseInt(topicId!)], context.previousTopic)
+        queryClient.setQueryData(['topic', topicId], context.previousTopic)
       }
       setSaveStatus('error')
       setHasUnsavedChanges(true)
@@ -166,7 +168,7 @@ const TopicDetailPage = () => {
   useEffect(() => {
     if (autoSaveEnabled && !isFirstRenderRef.current && isInitialized && initialValuesRef.current && debouncedName !== initialValuesRef.current.name && debouncedName.trim()) {
       updateMutation.mutate({
-        id: parseInt(topicId!),
+        id: topicId!,
         data: { name: debouncedName },
       })
     }
@@ -175,7 +177,7 @@ const TopicDetailPage = () => {
   useEffect(() => {
     if (autoSaveEnabled && !isFirstRenderRef.current && isInitialized && initialValuesRef.current && debouncedDescription !== initialValuesRef.current.description) {
       updateMutation.mutate({
-        id: parseInt(topicId!),
+        id: topicId!,
         data: { description: debouncedDescription },
       })
     }
@@ -189,7 +191,7 @@ const TopicDetailPage = () => {
 
       if (Object.keys(updates).length > 0) {
         updateMutation.mutate({
-          id: parseInt(topicId!),
+          id: topicId!,
           data: updates,
         })
       }
@@ -206,16 +208,16 @@ const TopicDetailPage = () => {
 
   const handleColorChange = (color: string) => {
     updateMutation.mutate({
-      id: parseInt(topicId!),
+      id: topicId!,
       data: { color },
     })
   }
 
   const handleAutoPickColor = async () => {
     try {
-      const result = await topicService.suggestColor(parseInt(topicId!))
+      const result = await topicService.suggestColor(topicId!)
       updateMutation.mutate({
-        id: parseInt(topicId!),
+        id: topicId!,
         data: { color: result.suggested_color },
       })
     } catch (error) {
@@ -309,11 +311,27 @@ const TopicDetailPage = () => {
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => navigate('/topics')}>
-          <ArrowLeftIcon className="h-4 w-4 mr-2" />
-          Back to Topics
-        </Button>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-3 flex-1">
+          <Button variant="ghost" onClick={() => navigate('/topics')} size="sm">
+            <ArrowLeftIcon className="h-4 w-4 mr-2" />
+            Back to Topics
+          </Button>
+
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/topics">Topics</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{topic.name}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
         <div className="flex items-center gap-4">
           {renderSaveStatus()}
@@ -330,6 +348,70 @@ const TopicDetailPage = () => {
           </div>
         </div>
       </div>
+
+      <PageHeader
+        title={topic.name}
+        description="Detailed view of topic messages, atoms, knowledge insights, and related content with full context and version history"
+        actions={
+          <>
+            <Sheet open={showVersionHistory} onOpenChange={setShowVersionHistory}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" aria-label="View version history">
+                  <ClockIcon className="h-4 w-4 mr-2" />
+                  Version History
+                  {pendingVersionsCount > 0 && (
+                    <Badge className="ml-2 bg-amber-500 text-white hover:bg-amber-600">
+                      {pendingVersionsCount} pending
+                    </Badge>
+                  )}
+                </Button>
+              </SheetTrigger>
+
+              <SheetContent side="right" className="w-[500px] sm:w-[600px] overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>Version History - {topic.name}</SheetTitle>
+                </SheetHeader>
+
+                <div className="mt-6">
+                  <VersionHistoryList
+                    entityType="topic"
+                    entityId={topic.id}
+                    onSelectVersion={(version) => {
+                      setSelectedVersion(version)
+                      setCompareToVersion(version - 1)
+                    }}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            <Dialog open={showExtractionPanel} onOpenChange={setShowExtractionPanel}>
+              <DialogTrigger asChild>
+                <Button variant="default" size="sm" aria-label="Extract knowledge from messages">
+                  <SparklesIcon className="h-4 w-4 mr-2" />
+                  Extract Knowledge
+                </Button>
+              </DialogTrigger>
+
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Extract Knowledge from Messages</DialogTitle>
+                </DialogHeader>
+
+                <KnowledgeExtractionPanel
+                  messageIds={messages.filter(m => typeof m.id === 'number').map((m) => m.id as number)}
+                  topicId={topicId!}
+                  onComplete={() => {
+                    setShowExtractionPanel(false)
+                    queryClient.invalidateQueries({ queryKey: ['topic', topicId] })
+                    queryClient.invalidateQueries({ queryKey: ['atoms', 'topic', topicId] })
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
+          </>
+        }
+      />
 
       {!autoSaveEnabled && hasUnsavedChanges && (
         <div className="flex items-center justify-end gap-3 pb-2">
@@ -380,64 +462,6 @@ const TopicDetailPage = () => {
                       hasUnsavedChanges ? 'border-amber-300 dark:border-amber-700' : ''
                     }`}
                   />
-                </div>
-
-                <div className="flex items-center gap-2 pt-7">
-                  <Sheet open={showVersionHistory} onOpenChange={setShowVersionHistory}>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" size="sm" aria-label="View version history">
-                        <ClockIcon className="h-4 w-4 mr-2" />
-                        Version History
-                        {pendingVersionsCount > 0 && (
-                          <Badge className="ml-2 bg-amber-500 text-white hover:bg-amber-600">
-                            {pendingVersionsCount} pending
-                          </Badge>
-                        )}
-                      </Button>
-                    </SheetTrigger>
-
-                    <SheetContent side="right" className="w-[500px] sm:w-[600px] overflow-y-auto">
-                      <SheetHeader>
-                        <SheetTitle>Version History - {topic.name}</SheetTitle>
-                      </SheetHeader>
-
-                      <div className="mt-6">
-                        <VersionHistoryList
-                          entityType="topic"
-                          entityId={topic.id}
-                          onSelectVersion={(version) => {
-                            setSelectedVersion(version)
-                            setCompareToVersion(version - 1)
-                          }}
-                        />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-
-                  <Dialog open={showExtractionPanel} onOpenChange={setShowExtractionPanel}>
-                    <DialogTrigger asChild>
-                      <Button variant="default" size="sm" aria-label="Extract knowledge from messages">
-                        <SparklesIcon className="h-4 w-4 mr-2" />
-                        Extract Knowledge
-                      </Button>
-                    </DialogTrigger>
-
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle>Extract Knowledge from Messages</DialogTitle>
-                      </DialogHeader>
-
-                      <KnowledgeExtractionPanel
-                        messageIds={messages.filter(m => typeof m.id === 'number').map((m) => m.id as number)}
-                        topicId={parseInt(topicId!)}
-                        onComplete={() => {
-                          setShowExtractionPanel(false)
-                          queryClient.invalidateQueries({ queryKey: ['topic', parseInt(topicId!)] })
-                          queryClient.invalidateQueries({ queryKey: ['atoms', 'topic', parseInt(topicId!)] })
-                        }}
-                      />
-                    </DialogContent>
-                  </Dialog>
                 </div>
               </div>
 
@@ -551,7 +575,20 @@ const TopicDetailPage = () => {
           ) : (
             <div className="space-y-3">
               {messages.map((message) => (
-                <Card key={message.id} className="p-4">
+                <Card
+                  key={message.id}
+                  className="p-4 cursor-pointer hover:bg-accent hover:border-accent-foreground/20 transition-colors"
+                  onClick={() => setSelectedMessageId(message.id ? String(message.id) : null)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setSelectedMessageId(message.id ? String(message.id) : null)
+                    }
+                  }}
+                  aria-label={`Open message: ${message.content.substring(0, 50)}`}
+                >
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
@@ -584,9 +621,9 @@ const TopicDetailPage = () => {
       <CreateAtomDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
-        topicId={parseInt(topicId!)}
+        topicId={topicId!}
         onAtomCreated={() => {
-          queryClient.invalidateQueries({ queryKey: ['atoms', 'topic', parseInt(topicId!)] })
+          queryClient.invalidateQueries({ queryKey: ['atoms', 'topic', topicId] })
         }}
       />
 
@@ -614,7 +651,7 @@ const TopicDetailPage = () => {
                 setPendingVersionsCount((prev) => Math.max(0, prev - 1))
                 setSelectedVersion(null)
                 setCompareToVersion(null)
-                queryClient.invalidateQueries({ queryKey: ['topic', parseInt(topicId!)] })
+                queryClient.invalidateQueries({ queryKey: ['topic', topicId] })
               }}
               onReject={() => {
                 setSelectedVersion(null)
@@ -623,6 +660,13 @@ const TopicDetailPage = () => {
             />
           </DialogContent>
         </Dialog>
+      )}
+
+      {selectedMessageId && (
+        <ConsumerMessageModal
+          messageId={selectedMessageId}
+          onClose={() => setSelectedMessageId(null)}
+        />
       )}
     </div>
   )

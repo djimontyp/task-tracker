@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
+import { PaintBrushIcon } from '@heroicons/react/24/outline'
 
 interface ColorPickerPopoverProps {
   color: string
@@ -31,17 +33,30 @@ export const ColorPickerPopover = ({
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-          style={{ backgroundColor: color }}
-          disabled={disabled}
-          aria-label="Pick color"
-        />
-      </PopoverTrigger>
-      <PopoverContent className="w-64 p-4 space-y-3">
+    <TooltipProvider>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="relative flex items-center justify-center w-10 h-10 rounded-md border-2 border-border hover:border-primary/50 hover:bg-accent/10 transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 group"
+                disabled={disabled}
+                aria-label="Change topic color"
+              >
+                <div
+                  className="w-6 h-6 rounded-full border border-border/50"
+                  style={{ backgroundColor: color }}
+                />
+                <PaintBrushIcon className="absolute -bottom-1 -right-1 w-4 h-4 text-primary bg-background rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Change color</p>
+          </TooltipContent>
+        </Tooltip>
+        <PopoverContent className="w-64 p-4 space-y-3">
         <div className="space-y-2">
           <HexColorPicker color={tempColor} onChange={setTempColor} />
           <Input
@@ -69,5 +84,6 @@ export const ColorPickerPopover = ({
         </div>
       </PopoverContent>
     </Popover>
+    </TooltipProvider>
   )
 }

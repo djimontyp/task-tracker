@@ -146,7 +146,7 @@ async def test_queue_extraction_threshold_reached(
 
     assert len(sample_messages) >= KNOWLEDGE_EXTRACTION_THRESHOLD
 
-    with patch("app.tasks.extract_knowledge_from_messages_task") as mock_task:
+    with patch("app.tasks.knowledge.extract_knowledge_from_messages_task") as mock_task:
         mock_task.kiq = AsyncMock()
 
         await queue_knowledge_extraction_if_needed(sample_messages[-1].id, db_session)
@@ -180,7 +180,7 @@ async def test_queue_extraction_below_threshold(
 
     await db_session.commit()
 
-    with patch("app.tasks.extract_knowledge_from_messages_task") as mock_task:
+    with patch("app.tasks.knowledge.extract_knowledge_from_messages_task") as mock_task:
         mock_task.kiq = AsyncMock()
 
         await queue_knowledge_extraction_if_needed(messages[-1].id, db_session)
@@ -216,7 +216,7 @@ async def test_queue_extraction_no_active_provider(
         provider.is_active = False
     await db_session.commit()
 
-    with patch("app.tasks.extract_knowledge_from_messages_task") as mock_task:
+    with patch("app.tasks.knowledge.extract_knowledge_from_messages_task") as mock_task:
         mock_task.kiq = AsyncMock()
 
         await queue_knowledge_extraction_if_needed(messages[-1].id, db_session)
@@ -248,7 +248,7 @@ async def test_queue_extraction_old_messages_excluded(
 
     await db_session.commit()
 
-    with patch("app.tasks.extract_knowledge_from_messages_task") as mock_task:
+    with patch("app.tasks.knowledge.extract_knowledge_from_messages_task") as mock_task:
         mock_task.kiq = AsyncMock()
 
         await queue_knowledge_extraction_if_needed(old_messages[-1].id, db_session)
@@ -283,7 +283,7 @@ async def test_queue_extraction_messages_with_topics_excluded(
 
     await db_session.commit()
 
-    with patch("app.tasks.extract_knowledge_from_messages_task") as mock_task:
+    with patch("app.tasks.knowledge.extract_knowledge_from_messages_task") as mock_task:
         mock_task.kiq = AsyncMock()
 
         await queue_knowledge_extraction_if_needed(messages_with_topic[-1].id, db_session)
@@ -325,7 +325,7 @@ async def test_queue_extraction_limit_50_messages(
 
     await db_session.commit()
 
-    with patch("app.tasks.extract_knowledge_from_messages_task") as mock_task:
+    with patch("app.tasks.knowledge.extract_knowledge_from_messages_task") as mock_task:
         mock_task.kiq = AsyncMock()
 
         await queue_knowledge_extraction_if_needed(messages[-1].id, db_session)
@@ -369,7 +369,7 @@ async def test_queue_extraction_creates_agent_config_requirement(
 
     await db_session.commit()
 
-    with patch("app.tasks.extract_knowledge_from_messages_task") as mock_task:
+    with patch("app.tasks.knowledge.extract_knowledge_from_messages_task") as mock_task:
         mock_task.kiq = AsyncMock()
         await queue_knowledge_extraction_if_needed(messages[-1].id, db_session)
         mock_task.kiq.assert_called_once()

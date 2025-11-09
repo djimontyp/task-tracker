@@ -4,21 +4,14 @@ import { EllipsisHorizontalIcon, CircleStackIcon, CheckCircleIcon, ClockIcon, XC
 import type { Task } from '@/shared/types'
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
+import { getTaskStatusBadge, getTaskPriorityBadge, type TaskStatus, type TaskPriority } from '@/shared/utils/statusBadges'
 
-export const statusLabels: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
-  open: { label: 'Backlog', icon: ClockIcon },
-  in_progress: { label: 'In Progress', icon: CircleStackIcon },
-  completed: { label: 'Done', icon: CheckCircleIcon },
-  closed: { label: 'Canceled', icon: XCircleIcon },
-  pending: { label: 'Pending', icon: ClockIcon },
-}
-
-export const priorityLabels: Record<string, { label: string; icon?: React.ComponentType<{ className?: string }> }> = {
-  low: { label: 'Low' },
-  medium: { label: 'Medium' },
-  high: { label: 'High' },
-  urgent: { label: 'Urgent' },
-  critical: { label: 'Critical' },
+export const statusIconConfig: Record<string, { icon: React.ComponentType<{ className?: string }> }> = {
+  open: { icon: ClockIcon },
+  in_progress: { icon: CircleStackIcon },
+  completed: { icon: CheckCircleIcon },
+  closed: { icon: XCircleIcon },
+  pending: { icon: ClockIcon },
 }
 
 export const columns: ColumnDef<Task>[] = [
@@ -70,14 +63,15 @@ export const columns: ColumnDef<Task>[] = [
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
-      const value = row.getValue<string>('status')
-      const meta = statusLabels[value] ?? { label: value, icon: CircleStackIcon }
-      const Icon = meta.icon
+      const status = row.getValue<string>('status') as TaskStatus
+      const badgeConfig = getTaskStatusBadge(status)
+      const iconMeta = statusIconConfig[status] ?? statusIconConfig.pending
+      const Icon = iconMeta.icon
       return (
-        <div className="flex w-[100px] items-center">
-          {Icon && <Icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-          <span>{meta.label}</span>
-        </div>
+        <Badge variant={badgeConfig.variant} className={badgeConfig.className}>
+          {Icon && <Icon className="mr-1 h-3 w-3" />}
+          {badgeConfig.label}
+        </Badge>
       )
     },
     filterFn: (row, id, filterValues: string[]) => {
@@ -92,14 +86,12 @@ export const columns: ColumnDef<Task>[] = [
       <DataTableColumnHeader column={column} title="Priority" />
     ),
     cell: ({ row }) => {
-      const value = row.getValue<string>('priority')
-      const meta = priorityLabels[value] ?? { label: value }
-      const Icon = meta.icon
+      const priority = row.getValue<string>('priority') as TaskPriority
+      const badgeConfig = getTaskPriorityBadge(priority)
       return (
-        <div className="flex items-center">
-          {Icon && <Icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-          <span>{meta.label}</span>
-        </div>
+        <Badge variant={badgeConfig.variant} className={badgeConfig.className}>
+          {badgeConfig.label}
+        </Badge>
       )
     },
     filterFn: (row, id, filterValues: string[]) => {

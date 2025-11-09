@@ -1,0 +1,140 @@
+{
+  "scenario": "feature_planning",
+  "language": "uk",
+  "description": "Обговорення нової фічі від ідеї до технічного плану. Переважно сигнальні повідомлення з технічними деталями та рішеннями.",
+  "messages": [
+    {
+      "order": 1,
+      "text": "Хлопці, думаю нам треба додати real-time оновлення дашборду через WebSocket",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "feature_request",
+        "content_categories": ["feature_proposal", "technical_requirement"]
+      }
+    },
+    {
+      "order": 2,
+      "text": "Чому саме WebSocket? SSE не підійде?",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "technical_question",
+        "content_categories": ["alternative_discussion"]
+      }
+    },
+    {
+      "order": 3,
+      "text": "SSE однонапрямлений. Нам треба двосторонній зв'язок для живих оновлень топіків і можливості відправляти команди з UI",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "technical_justification",
+        "content_categories": ["architecture_decision", "requirements"]
+      }
+    },
+    {
+      "order": 4,
+      "text": "Має сенс 👌",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "agreement",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 5,
+      "text": "Які події будемо транслювати? Кожне повідомлення чи тільки зміни топіків?",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "scope_question",
+        "content_categories": ["requirements_clarification"]
+      }
+    },
+    {
+      "order": 6,
+      "text": "Пропоную такі події:\n1. new_message - нове повідомлення\n2. topic_created - створено топік\n3. topic_updated - оновлено топік\n4. atom_created - новий атом\n5. analysis_completed - завершено аналіз",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "technical_specification",
+        "content_categories": ["event_design", "api_contract"]
+      }
+    },
+    {
+      "order": 7,
+      "text": "Добре. А як з масштабуванням? Якщо буде багато з'єднань?",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "scalability_concern",
+        "content_categories": ["architecture", "performance"]
+      }
+    },
+    {
+      "order": 8,
+      "text": "Використаємо Redis Pub/Sub як message broker. Це дозволить горизонтально масштабувати FastAPI інстанси. Кожен інстанс підписується на канали, клієнти підключаються до будь-якого",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "architecture_solution",
+        "content_categories": ["scalability_design", "infrastructure"]
+      }
+    },
+    {
+      "order": 9,
+      "text": "Круто! А на фронті як?",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "implementation_question",
+        "content_categories": ["frontend"]
+      }
+    },
+    {
+      "order": 10,
+      "text": "React Query з підпискою на WebSocket. Автоматичне оновлення кешу при отриманні подій. Є готова інтеграція",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "implementation_plan",
+        "content_categories": ["frontend_architecture", "library_choice"]
+      }
+    },
+    {
+      "order": 11,
+      "text": "Я можу взяти імплементацію WebSocket на бекенді. Завтра почну",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "ownership_commitment",
+        "content_categories": ["task_assignment"]
+      }
+    },
+    {
+      "order": 12,
+      "text": "Чудово! Я тоді фронт візьму",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "ownership_commitment",
+        "content_categories": ["task_assignment"]
+      }
+    }
+  ],
+  "expected_extraction": {
+    "topics": [
+      {
+        "title": "Real-time Dashboard Updates через WebSocket",
+        "atoms": [
+          "WebSocket для двостороннього зв'язку (не SSE)",
+          "Події: new_message, topic_created, topic_updated, atom_created, analysis_completed",
+          "Redis Pub/Sub для масштабування між FastAPI інстансами",
+          "React Query з WebSocket підпискою на фронті"
+        ]
+      }
+    ]
+  }
+}

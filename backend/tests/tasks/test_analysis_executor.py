@@ -22,9 +22,13 @@ from app.models import (
     LLMProvider,
     Message,
     ProjectConfig,
+    ProviderType,
+    SourceType,
     TaskConfig,
     User,
+    ValidationStatus,
 )
+from app.models.legacy import Source
 from app.services.analysis_service import AnalysisExecutor
 
 
@@ -39,9 +43,10 @@ async def test_start_run(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -92,7 +97,7 @@ async def test_start_run(db_session):
     await db_session.refresh(run)
 
     # Mock WebSocket manager
-    with patch("app.services.analysis_service.websocket_manager", AsyncMock()):
+    with patch("app.services.analysis.analysis_executor.websocket_manager", AsyncMock()):
         # Start run
         executor = AnalysisExecutor(db_session)
         await executor.start_run(run.id)
@@ -112,11 +117,17 @@ async def test_fetch_messages(db_session):
     await db_session.commit()
     await db_session.refresh(user)
 
+    source = Source(name="Test Source", type=SourceType.telegram, is_active=True)
+    db_session.add(source)
+    await db_session.commit()
+    await db_session.refresh(source)
+
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -171,9 +182,27 @@ async def test_fetch_messages(db_session):
     await db_session.refresh(run)
 
     # Create messages (some in window, some outside)
-    msg1 = Message(content="In window", sent_at=start + timedelta(minutes=30))
-    msg2 = Message(content="Also in window", sent_at=start + timedelta(minutes=45))
-    msg3 = Message(content="Outside window", sent_at=end + timedelta(hours=1))
+    msg1 = Message(
+        external_message_id="test-msg-1",
+        content="In window",
+        sent_at=start + timedelta(minutes=30),
+        source_id=source.id,
+        author_id=user.id,
+    )
+    msg2 = Message(
+        external_message_id="test-msg-2",
+        content="Also in window",
+        sent_at=start + timedelta(minutes=45),
+        source_id=source.id,
+        author_id=user.id,
+    )
+    msg3 = Message(
+        external_message_id="test-msg-3",
+        content="Outside window",
+        sent_at=end + timedelta(hours=1),
+        source_id=source.id,
+        author_id=user.id,
+    )
     db_session.add(msg1)
     db_session.add(msg2)
     db_session.add(msg3)
@@ -198,11 +227,17 @@ async def test_prefilter_messages(db_session):
     await db_session.commit()
     await db_session.refresh(user)
 
+    source = Source(name="Test Source", type=SourceType.telegram, is_active=True)
+    db_session.add(source)
+    await db_session.commit()
+    await db_session.refresh(source)
+
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -272,10 +307,34 @@ async def test_prefilter_messages(db_session):
 
     # Create messages with different characteristics
     messages = [
-        Message(content="Fix backend API bug", sent_at=datetime.utcnow()),  # Has keyword
-        Message(content="short", sent_at=datetime.utcnow()),  # Too short
-        Message(content="Some random long message here", sent_at=datetime.utcnow()),  # No keyword, no @
-        Message(content="@john please check backend", sent_at=datetime.utcnow()),  # Has @ mention
+        Message(
+            external_message_id="prefilter-msg-1",
+            content="Fix backend API bug",
+            sent_at=datetime.utcnow(),
+            source_id=source.id,
+            author_id=user.id,
+        ),  # Has keyword
+        Message(
+            external_message_id="prefilter-msg-2",
+            content="short",
+            sent_at=datetime.utcnow(),
+            source_id=source.id,
+            author_id=user.id,
+        ),  # Too short
+        Message(
+            external_message_id="prefilter-msg-3",
+            content="Some random long message here",
+            sent_at=datetime.utcnow(),
+            source_id=source.id,
+            author_id=user.id,
+        ),  # No keyword, no @
+        Message(
+            external_message_id="prefilter-msg-4",
+            content="@john please check backend",
+            sent_at=datetime.utcnow(),
+            source_id=source.id,
+            author_id=user.id,
+        ),  # Has @ mention
     ]
     for msg in messages:
         db_session.add(msg)
@@ -320,9 +379,10 @@ async def test_save_proposals(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -387,7 +447,7 @@ async def test_save_proposals(db_session):
     ]
 
     # Mock WebSocket manager
-    with patch("app.services.analysis_service.websocket_manager", AsyncMock()):
+    with patch("app.services.analysis.analysis_executor.websocket_manager", AsyncMock()):
         # Save proposals
         executor = AnalysisExecutor(db_session)
         saved_count = await executor.save_proposals(run.id, proposals)
@@ -410,9 +470,10 @@ async def test_update_progress(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -463,7 +524,7 @@ async def test_update_progress(db_session):
     await db_session.refresh(run)
 
     # Mock WebSocket manager
-    with patch("app.services.analysis_service.websocket_manager", AsyncMock()):
+    with patch("app.services.analysis.analysis_executor.websocket_manager", AsyncMock()):
         # Update progress
         executor = AnalysisExecutor(db_session)
         await executor.update_progress(run.id, current=3, total=10)
@@ -484,9 +545,10 @@ async def test_complete_run(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -537,7 +599,7 @@ async def test_complete_run(db_session):
     await db_session.refresh(run)
 
     # Mock WebSocket manager
-    with patch("app.services.analysis_service.websocket_manager", AsyncMock()):
+    with patch("app.services.analysis.analysis_executor.websocket_manager", AsyncMock()):
         # Complete run
         executor = AnalysisExecutor(db_session)
         summary = await executor.complete_run(run.id)
@@ -560,9 +622,10 @@ async def test_fail_run(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -613,7 +676,7 @@ async def test_fail_run(db_session):
     await db_session.refresh(run)
 
     # Mock WebSocket manager
-    with patch("app.services.analysis_service.websocket_manager", AsyncMock()):
+    with patch("app.services.analysis.analysis_executor.websocket_manager", AsyncMock()):
         # Fail run
         executor = AnalysisExecutor(db_session)
         await executor.fail_run(run.id, "LLM connection timeout")

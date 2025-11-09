@@ -14,7 +14,6 @@ import {
   Label,
   Input,
   Textarea,
-  Checkbox,
   Badge,
 } from '@/shared/ui'
 import { XMarkIcon } from '@heroicons/react/24/outline'

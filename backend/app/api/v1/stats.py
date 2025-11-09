@@ -2,13 +2,10 @@ from datetime import date, datetime, timedelta
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlmodel import and_, func, select
+from sqlmodel import and_, select
 
-from ...models import AnalysisRun, Message, Source, Task, TaskProposal
-from ...models.enums import AnalysisRunStatus, ProposalStatus
-from ...services.websocket_manager import websocket_manager
-from ..deps import DatabaseDep
-from .response_models import (
+from app.api.deps import DatabaseDep
+from app.api.v1.response_models import (
     ActivityDataResponse,
     AnalyzeDayResponse,
     SidebarCountsResponse,
@@ -16,6 +13,11 @@ from .response_models import (
     TaskStatusCounts,
     TrendData,
 )
+from app.models import Message, Source, Task
+
+# TODO: Remove Task (legacy) after migration
+# from app.models.enums import AnalysisRunStatus, ProposalStatus
+from app.services.websocket_manager import websocket_manager
 
 router = APIRouter(tags=["statistics"])
 
@@ -61,7 +63,7 @@ def count_by_status(tasks: list[Task]) -> TaskStatusCounts:
     Returns:
         TaskStatusCounts with counts for each status
     """
-    from ...models.enums import TaskStatus
+    from app.models.enums import TaskStatus
 
     return TaskStatusCounts(
         open=len([t for t in tasks if t.status == TaskStatus.open]),
@@ -146,105 +148,6 @@ async def get_activity_data(
         ),
         total_messages=len(activity_data),
     )
-
-
-@router.get(
-    "/stats",
-    response_model=StatsResponse,
-    summary="Get task statistics with trends",
-    response_description="Task counts by status with trend comparison vs previous period",
-)
-async def get_stats(
-    db: DatabaseDep,
-    period: int = Query(7, description="Trend comparison period in days (default: 7)"),
-) -> StatsResponse:
-    """
-    Get aggregated task statistics with trend comparison.
-
-    Calculates task counts by status, category, and priority, plus trend data
-    comparing current period vs previous period (default: 7 days).
-
-    Args:
-        db: Database session
-        period: Number of days for trend comparison (default: 7)
-
-    Returns:
-        StatsResponse with counts, breakdowns, and trend data
-    """
-    now = datetime.utcnow()
-    current_start = now - timedelta(days=period)
-    previous_start = current_start - timedelta(days=period)
-
-    # Query current period tasks
-    current_statement = select(Task).where(
-        and_(
-            Task.created_at.isnot(None),  # type: ignore[union-attr]
-            Task.created_at >= current_start,  # type: ignore[operator]
-        )
-    )
-    current_result = await db.execute(current_statement)
-    current_tasks = list(current_result.scalars().all())
-
-    # Query previous period tasks
-    previous_statement = select(Task).where(
-        and_(
-            Task.created_at.isnot(None),  # type: ignore[union-attr]
-            Task.created_at >= previous_start,  # type: ignore[operator]
-            Task.created_at < current_start,  # type: ignore[operator]
-        )
-    )
-    previous_result = await db.execute(previous_statement)
-    previous_tasks = list(previous_result.scalars().all())
-
-    # Count by status for both periods
-    current_by_status = count_by_status(current_tasks)
-    previous_by_status = count_by_status(previous_tasks)
-
-    # Calculate trends
-    total_trend = calculate_trend(len(current_tasks), len(previous_tasks))
-    open_trend = calculate_trend(current_by_status.open, previous_by_status.open)
-    in_progress_trend = calculate_trend(current_by_status.in_progress, previous_by_status.in_progress)
-    completed_trend = calculate_trend(current_by_status.completed, previous_by_status.completed)
-
-    # Calculate completion rates for current and previous periods
-    current_completion_rate = (
-        (current_by_status.completed / len(current_tasks)) * 100 if len(current_tasks) > 0 else 0.0
-    )
-
-    previous_completion_rate = (
-        (previous_by_status.completed / len(previous_tasks)) * 100 if len(previous_tasks) > 0 else 0.0
-    )
-
-    # Calculate completion rate trend
-    completion_rate_trend = calculate_trend(
-        int(current_completion_rate),
-        int(previous_completion_rate),
-    )
-
-    # Query all tasks for categories and priorities breakdown
-    all_statement = select(Task)
-    all_result = await db.execute(all_statement)
-    all_tasks = all_result.scalars().all()
-
-    categories: dict[str, int] = {}
-    priorities: dict[str, int] = {}
-
-    for task in all_tasks:
-        categories[task.category.value] = categories.get(task.category.value, 0) + 1
-        priorities[task.priority.value] = priorities.get(task.priority.value, 0) + 1
-
-    return StatsResponse(
-        total_tasks=len(current_tasks),
-        by_status=current_by_status,
-        total_trend=total_trend,
-        open_trend=open_trend,
-        in_progress_trend=in_progress_trend,
-        completed_trend=completed_trend,
-        completion_rate_trend=completion_rate_trend,
-        categories=categories,
-        priorities=priorities,
-    )
-
 
 @router.post(
     "/analyze-day",
@@ -354,30 +257,10 @@ async def get_sidebar_counts(db: DatabaseDep) -> SidebarCountsResponse:
     These counts are used to display notification badges in the sidebar
     navigation to alert the PM about items requiring attention.
     """
-    # Count unclosed analysis runs (status != closed)
-    unclosed_statuses = [
-        AnalysisRunStatus.pending.value,
-        AnalysisRunStatus.running.value,
-        AnalysisRunStatus.completed.value,
-        AnalysisRunStatus.reviewed.value,
-    ]
-
-    unclosed_runs_statement = (
-        select(func.count())
-        .select_from(AnalysisRun)
-        .where(
-            AnalysisRun.status.in_(unclosed_statuses)  # type: ignore[attr-defined]
-        )
-    )
-    unclosed_runs_result = await db.execute(unclosed_runs_statement)
-    unclosed_runs_count = unclosed_runs_result.scalar() or 0
-
-    # Count pending proposals
-    pending_proposals_statement = (
-        select(func.count()).select_from(TaskProposal).where(TaskProposal.status == ProposalStatus.pending.value)
-    )
-    pending_proposals_result = await db.execute(pending_proposals_statement)
-    pending_proposals_count = pending_proposals_result.scalar() or 0
+    # NOTE: Task classification removed in nuclear cleanup
+    # unclosed_runs and pending_proposals always 0
+    unclosed_runs_count = 0
+    pending_proposals_count = 0
 
     return SidebarCountsResponse(
         unclosed_runs=unclosed_runs_count,

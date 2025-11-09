@@ -121,3 +121,11 @@ class NoiseClassification(str, Enum):
     spam = "spam"
     low_quality = "low_quality"
     high_quality = "high_quality"
+
+
+class FailedTaskStatus(str, Enum):
+    """Status of failed background tasks in Dead Letter Queue."""
+
+    failed = "failed"
+    retrying = "retrying"
+    abandoned = "abandoned"

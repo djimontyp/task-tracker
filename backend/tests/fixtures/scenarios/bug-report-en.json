@@ -1,0 +1,119 @@
+{
+  "scenario": "bug_report_discussion",
+  "language": "en",
+  "description": "Typical bug report conversation: user reports issue, team investigates and resolves. Contains both noise (greetings, emojis) and important technical information.",
+  "messages": [
+    {
+      "order": 1,
+      "text": "Hey team! 👋",
+      "language": "en",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "greeting",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 2,
+      "text": "Found a weird bug - the vector search is returning completely random results when I search for 'database migration'",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "bug_report",
+        "content_categories": ["technical_issue", "search_quality"]
+      }
+    },
+    {
+      "order": 3,
+      "text": "That's odd 🧐",
+      "language": "en",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "acknowledgment",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 4,
+      "text": "Can you share the exact query and what you got back?",
+      "language": "en",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "clarifying_question",
+        "content_categories": ["investigation"]
+      }
+    },
+    {
+      "order": 5,
+      "text": "Sure, searched 'database migration' but got results about React components and UI stuff. Zero relevance.",
+      "language": "en",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "bug_details",
+        "content_categories": ["reproduction_steps", "expected_vs_actual"]
+      }
+    },
+    {
+      "order": 6,
+      "text": "Sounds like embedding model issue or index corruption",
+      "language": "en",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "hypothesis",
+        "content_categories": ["root_cause_analysis"]
+      }
+    },
+    {
+      "order": 7,
+      "text": "Checked the pgvector index - HNSW parameters look wrong. ef_construction is set to 16 which is way too low for our use case. Should be at least 64",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "diagnostic_finding",
+        "content_categories": ["technical_analysis", "configuration_issue"]
+      }
+    },
+    {
+      "order": 8,
+      "text": "Good catch! Let's update the migration to set proper HNSW params",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "solution_proposal",
+        "content_categories": ["action_item", "database_change"]
+      }
+    },
+    {
+      "order": 9,
+      "text": "👍",
+      "language": "en",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "agreement",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 10,
+      "text": "Created new migration with ef_construction=64, m=16. Also added ef_search=40 for better recall. Will need to reindex all embeddings.",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "solution",
+        "content_categories": ["implementation_details", "migration"]
+      }
+    }
+  ],
+  "expected_extraction": {
+    "topics": [
+      {
+        "title": "Vector search quality issues - HNSW configuration",
+        "atoms": [
+          "HNSW ef_construction too low (16), causing poor search quality",
+          "Update to ef_construction=64, m=16, ef_search=40",
+          "Requires full reindexing of embeddings"
+        ]
+      }
+    ]
+  }
+}

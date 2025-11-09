@@ -4,19 +4,16 @@ These tests verify the monitoring endpoints match their OpenAPI contracts.
 They follow TDD: written before implementation, should fail initially.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pytest
+from app.models.task_execution_log import TaskExecutionLog, TaskStatus
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.task_execution_log import TaskExecutionLog, TaskStatus
-
 
 @pytest.mark.asyncio
-async def test_get_metrics_returns_200_with_valid_schema(
-    client: AsyncClient, db_session: AsyncSession
-):
+async def test_get_metrics_returns_200_with_valid_schema(client: AsyncClient, db_session: AsyncSession):
     """T005: Test metrics endpoint returns 200 with valid MonitoringMetricsResponse schema."""
     log = TaskExecutionLog(
         task_name="test_task",
@@ -55,9 +52,7 @@ async def test_get_metrics_returns_200_with_valid_schema(
 
 
 @pytest.mark.asyncio
-async def test_get_metrics_with_time_window_param(
-    client: AsyncClient, db_session: AsyncSession
-):
+async def test_get_metrics_with_time_window_param(client: AsyncClient, db_session: AsyncSession):
     """T006: Test metrics endpoint respects time_window query parameter."""
     log = TaskExecutionLog(
         task_name="windowed_task",
@@ -79,9 +74,7 @@ async def test_get_metrics_with_time_window_param(
 
 
 @pytest.mark.asyncio
-async def test_get_history_returns_200_with_pagination(
-    client: AsyncClient, db_session: AsyncSession
-):
+async def test_get_history_returns_200_with_pagination(client: AsyncClient, db_session: AsyncSession):
     """T007: Test history endpoint returns paginated TaskHistoryResponse."""
     for i in range(5):
         log = TaskExecutionLog(
@@ -156,9 +149,7 @@ async def test_get_history_with_filters(client: AsyncClient, db_session: AsyncSe
     db_session.add_all([failed_log, success_log, other_task_log])
     await db_session.commit()
 
-    response = await client.get(
-        "/api/v1/monitoring/history?task_name=score_message_task&status=failed"
-    )
+    response = await client.get("/api/v1/monitoring/history?task_name=score_message_task&status=failed")
 
     assert response.status_code == 200
     data = response.json()
@@ -177,3 +168,83 @@ async def test_get_history_invalid_date_format_returns_400(client: AsyncClient):
     assert response.status_code == 422
     data = response.json()
     assert "detail" in data
+
+
+@pytest.mark.asyncio
+async def test_get_scoring_accuracy_returns_200_with_valid_schema(client: AsyncClient):
+    """T010: Test scoring accuracy endpoint returns 200 with valid ScoringAccuracyResponse schema."""
+    response = await client.get("/api/v1/monitoring/scoring-accuracy")
+
+    if response.status_code in (404, 400):
+        pytest.skip("Validation dataset not found - expected in CI/development")
+
+    assert response.status_code == 200
+    data = response.json()
+
+    assert "overall_accuracy" in data
+    assert "category_metrics" in data
+    assert "total_samples" in data
+    assert "generated_at" in data
+    assert "alert_threshold_met" in data
+
+    assert isinstance(data["overall_accuracy"], (int, float))
+    assert 0.0 <= data["overall_accuracy"] <= 1.0
+
+    assert isinstance(data["category_metrics"], list)
+    assert len(data["category_metrics"]) > 0
+
+    for metric in data["category_metrics"]:
+        assert "category" in metric
+        assert "precision" in metric
+        assert "recall" in metric
+        assert "f1_score" in metric
+        assert "support" in metric
+
+        assert isinstance(metric["category"], str)
+        assert isinstance(metric["precision"], (int, float))
+        assert isinstance(metric["recall"], (int, float))
+        assert isinstance(metric["f1_score"], (int, float))
+        assert isinstance(metric["support"], int)
+
+        assert 0.0 <= metric["precision"] <= 1.0
+        assert 0.0 <= metric["recall"] <= 1.0
+        assert 0.0 <= metric["f1_score"] <= 1.0
+        assert metric["support"] >= 0
+
+    assert isinstance(data["total_samples"], int)
+    assert data["total_samples"] > 0
+
+    assert isinstance(data["alert_threshold_met"], bool)
+
+
+@pytest.mark.asyncio
+async def test_get_scoring_accuracy_missing_dataset_returns_404(client: AsyncClient, tmp_path):
+    """T011: Test scoring accuracy endpoint returns 404 when dataset file is missing."""
+    response = await client.get("/api/v1/monitoring/scoring-accuracy")
+
+    if response.status_code == 200:
+        pytest.skip("Validation dataset exists - test expects missing file")
+
+    assert response.status_code in (404, 400)
+    data = response.json()
+    assert "detail" in data
+
+
+@pytest.mark.asyncio
+async def test_get_scoring_accuracy_alert_threshold(client: AsyncClient):
+    """T012: Test scoring accuracy endpoint correctly sets alert_threshold_met flag."""
+    response = await client.get("/api/v1/monitoring/scoring-accuracy")
+
+    if response.status_code in (404, 400):
+        pytest.skip("Validation dataset not found - expected in CI/development")
+
+    assert response.status_code == 200
+    data = response.json()
+
+    overall_accuracy = data["overall_accuracy"]
+    alert_threshold_met = data["alert_threshold_met"]
+
+    if overall_accuracy < 0.8:
+        assert alert_threshold_met is True
+    else:
+        assert alert_threshold_met is False

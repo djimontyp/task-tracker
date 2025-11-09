@@ -25,11 +25,11 @@ import { useWebSocket } from '@/features/websocket/hooks/useWebSocket';
 import { agentService } from '@/features/agents/api/agentService';
 import type { AgentConfig } from '@/features/agents/types/agent';
 import type { ExtractionProgress, PeriodType, PeriodRequest } from '../types';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface KnowledgeExtractionPanelProps {
   messageIds?: number[];
-  topicId?: number;
+  topicId?: string;
   onComplete?: () => void;
 }
 

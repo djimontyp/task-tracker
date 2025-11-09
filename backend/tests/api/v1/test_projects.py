@@ -16,7 +16,7 @@ from app.models import ProjectConfig, User
 
 @pytest.mark.asyncio
 async def test_list_projects(client, db_session):
-    """Test GET /api/projects - list projects with pagination."""
+    """Test GET /api/v1/projects - list projects with pagination."""
     # Create user
     user = User(first_name="Test", email="test@example.com")
     db_session.add(user)
@@ -41,15 +41,18 @@ async def test_list_projects(client, db_session):
     await db_session.commit()
 
     # Test list
-    response = await client.get("/api/projects")
+    response = await client.get("/api/v1/projects")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 5
+    assert "items" in data
+    assert "total" in data
+    assert len(data["items"]) == 5
+    assert data["total"] == 5
 
 
 @pytest.mark.asyncio
 async def test_create_project(client, db_session):
-    """Test POST /api/projects - create new project."""
+    """Test POST /api/v1/projects - create new project."""
     # Create user
     user = User(first_name="Test", email="test@example.com")
     db_session.add(user)
@@ -71,7 +74,7 @@ async def test_create_project(client, db_session):
             "priority_rules": {"critical_keywords": ["crash"]},
             "version": "1.0.0",
         }
-        response = await client.post("/api/projects", json=project_data)
+        response = await client.post("/api/v1/projects", json=project_data)
         assert response.status_code == 201
         data = response.json()
         assert data["name"] == "Test Project"
@@ -103,14 +106,14 @@ async def test_keywords_validation(client, db_session):
             "priority_rules": {},
             "version": "1.0.0",
         }
-        response = await client.post("/api/projects", json=project_data)
+        response = await client.post("/api/v1/projects", json=project_data)
         assert response.status_code == 400
         assert "empty" in response.json()["detail"].lower()
 
 
 @pytest.mark.asyncio
 async def test_update_project(client, db_session):
-    """Test PUT /api/projects/{id} - update project."""
+    """Test PUT /api/v1/projects/{id} - update project."""
     # Create user
     user = User(first_name="Test", email="test@example.com")
     db_session.add(user)
@@ -141,7 +144,7 @@ async def test_update_project(client, db_session):
             "description": "Updated description",
             "keywords": ["updated", "keywords"],
         }
-        response = await client.put(f"/api/projects/{project.id}", json=update_data)
+        response = await client.put(f"/api/v1/projects/{project.id}", json=update_data)
         assert response.status_code == 200
         data = response.json()
         assert data["description"] == "Updated description"
@@ -179,19 +182,19 @@ async def test_version_increments(client, db_session):
     # Mock WebSocket manager
     with patch("app.api.v1.projects.websocket_manager", AsyncMock()):
         # Update keywords (should increment version)
-        response = await client.put(f"/api/projects/{project.id}", json={"keywords": ["test", "new"]})
+        response = await client.put(f"/api/v1/projects/{project.id}", json={"keywords": ["test", "new"]})
         assert response.status_code == 200
         assert response.json()["version"] == "1.1.0"
 
         # Update glossary (should increment version again)
-        response = await client.put(f"/api/projects/{project.id}", json={"glossary": {"term": "definition"}})
+        response = await client.put(f"/api/v1/projects/{project.id}", json={"glossary": {"term": "definition"}})
         assert response.status_code == 200
         assert response.json()["version"] == "1.2.0"
 
 
 @pytest.mark.asyncio
 async def test_delete_project(client, db_session):
-    """Test DELETE /api/projects/{id} - delete project."""
+    """Test DELETE /api/v1/projects/{id} - delete project."""
     # Create user
     user = User(first_name="Test", email="test@example.com")
     db_session.add(user)
@@ -218,11 +221,11 @@ async def test_delete_project(client, db_session):
     # Mock WebSocket manager
     with patch("app.api.v1.projects.websocket_manager", AsyncMock()):
         # Delete project
-        response = await client.delete(f"/api/projects/{project.id}")
+        response = await client.delete(f"/api/v1/projects/{project.id}")
         assert response.status_code == 204
 
     # Verify project deleted
-    response = await client.get(f"/api/projects/{project.id}")
+    response = await client.get(f"/api/v1/projects/{project.id}")
     assert response.status_code == 404
 
 
@@ -266,14 +269,14 @@ async def test_name_uniqueness(client, db_session):
             "priority_rules": {},
             "version": "1.0.0",
         }
-        response = await client.post("/api/projects", json=project_data)
+        response = await client.post("/api/v1/projects", json=project_data)
         assert response.status_code == 409  # Conflict
         assert "already exists" in response.json()["detail"].lower()
 
 
 @pytest.mark.asyncio
 async def test_get_project_by_id(client, db_session):
-    """Test GET /api/projects/{id} - get project details."""
+    """Test GET /api/v1/projects/{id} - get project details."""
     # Create user
     user = User(first_name="Test", email="test@example.com")
     db_session.add(user)
@@ -298,7 +301,7 @@ async def test_get_project_by_id(client, db_session):
     await db_session.refresh(project)
 
     # Get project
-    response = await client.get(f"/api/projects/{project.id}")
+    response = await client.get(f"/api/v1/projects/{project.id}")
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == str(project.id)
@@ -348,18 +351,18 @@ async def test_filter_by_active_status(client, db_session):
     await db_session.commit()
 
     # Filter by active
-    response = await client.get("/api/projects?is_active=true")
+    response = await client.get("/api/v1/projects?is_active=true")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
-    assert data[0]["name"] == "Active Project"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["name"] == "Active Project"
 
     # Filter by inactive
-    response = await client.get("/api/projects?is_active=false")
+    response = await client.get("/api/v1/projects?is_active=false")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
-    assert data[0]["name"] == "Inactive Project"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["name"] == "Inactive Project"
 
 
 @pytest.mark.asyncio
@@ -389,22 +392,26 @@ async def test_pagination(client, db_session):
     await db_session.commit()
 
     # Get first 5
-    response = await client.get("/api/projects?skip=0&limit=5")
+    response = await client.get("/api/v1/projects?skip=0&limit=5")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 5
+    assert len(data["items"]) == 5
+    assert data["total"] == 10
+    assert data["page"] == 1
 
     # Get next 5
-    response = await client.get("/api/projects?skip=5&limit=5")
+    response = await client.get("/api/v1/projects?skip=5&limit=5")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 5
+    assert len(data["items"]) == 5
+    assert data["total"] == 10
+    assert data["page"] == 2
 
 
 @pytest.mark.asyncio
 async def test_project_not_found(client, db_session):
-    """Test GET /api/projects/{id} with non-existent ID."""
+    """Test GET /api/v1/projects/{id} with non-existent ID."""
     random_id = uuid4()
-    response = await client.get(f"/api/projects/{random_id}")
+    response = await client.get(f"/api/v1/projects/{random_id}")
     assert response.status_code == 404
     assert "not found" in response.json()["detail"].lower()

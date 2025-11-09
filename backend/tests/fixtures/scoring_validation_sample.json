@@ -1,0 +1,62 @@
+[
+  {
+    "content": "lol",
+    "ground_truth": "noise",
+    "author_id": 1,
+    "message_id": 1
+  },
+  {
+    "content": "+1",
+    "ground_truth": "noise",
+    "author_id": 1,
+    "message_id": 2
+  },
+  {
+    "content": "ok thanks",
+    "ground_truth": "noise",
+    "author_id": 1,
+    "message_id": 3
+  },
+  {
+    "content": "yeah",
+    "ground_truth": "noise",
+    "author_id": 1,
+    "message_id": 4
+  },
+  {
+    "content": "This is a medium length message for testing purposes",
+    "ground_truth": "weak_signal",
+    "author_id": 1,
+    "message_id": 5
+  },
+  {
+    "content": "I think we should consider this approach",
+    "ground_truth": "weak_signal",
+    "author_id": 1,
+    "message_id": 6
+  },
+  {
+    "content": "How can I fix this critical bug in production?",
+    "ground_truth": "signal",
+    "author_id": 1,
+    "message_id": 7
+  },
+  {
+    "content": "I've been investigating the database performance issue and found that our queries are not optimized. Here's what I discovered: the main bottleneck is in the user lookup query.",
+    "ground_truth": "signal",
+    "author_id": 1,
+    "message_id": 8
+  },
+  {
+    "content": "What do you think about implementing feature X?",
+    "ground_truth": "signal",
+    "author_id": 1,
+    "message_id": 9
+  },
+  {
+    "content": "We need to discuss the architecture for the new module",
+    "ground_truth": "signal",
+    "author_id": 1,
+    "message_id": 10
+  }
+]

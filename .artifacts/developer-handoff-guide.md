@@ -153,7 +153,7 @@ const buttonVariants = cva(
 
 ```typescript
 import { ReactNode } from 'react';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUpIcon, TrendingDownIcon, MinusIcon } from '@heroicons/react/24/outline';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -330,7 +330,7 @@ export function EmptyState({
 
 ```typescript
 // Add bulk action toolbar
-import { Trash2, Check, Filter } from 'lucide-react';
+import { TrashIcon, CheckIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
 
 // In DataTable component, add selection state
@@ -650,7 +650,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Check } from 'lucide-react';
+import { CheckIcon } from '@heroicons/react/24/outline';
 
 const ONBOARDING_STEPS = [
   {
@@ -1029,7 +1029,7 @@ test.describe('Dashboard', () => {
 
 ### Design Tools
 - Figma File: "Пульс Радар" (Team: "Тім Пульс")
-- Icons: Lucide React (lucide.dev)
+- Icons: Heroicons (heroicons.com)
 - UI Components: shadcn/ui (ui.shadcn.com)
 
 ### Code References

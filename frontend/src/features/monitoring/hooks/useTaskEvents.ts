@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useWebSocket } from '@/features/websocket'
 import type { TaskEvent } from '../types'
 

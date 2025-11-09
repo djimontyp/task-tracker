@@ -11,6 +11,7 @@ from app.models import (
     AnalysisRunStatus,
     LLMProvider,
     ProjectConfig,
+    ProviderType,
     TaskConfig,
     User,
 )
@@ -27,7 +28,7 @@ async def test_create_analysis_run(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
@@ -105,7 +106,7 @@ async def test_lifecycle_transitions(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
@@ -217,7 +218,7 @@ async def test_config_snapshot_jsonb(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
@@ -310,7 +311,7 @@ async def test_run_with_project_config(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
@@ -394,7 +395,7 @@ async def test_proposals_counting(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
@@ -492,7 +493,7 @@ async def test_llm_usage_tracking(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )
@@ -570,7 +571,7 @@ async def test_error_log_jsonb(db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
     )

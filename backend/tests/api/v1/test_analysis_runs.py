@@ -17,14 +17,16 @@ from app.models import (
     AnalysisRun,
     AnalysisRunStatus,
     LLMProvider,
+    ProviderType,
     TaskConfig,
     User,
+    ValidationStatus,
 )
 
 
 @pytest.mark.asyncio
 async def test_list_runs(client, db_session):
-    """Test GET /api/runs - list analysis runs with pagination."""
+    """Test GET /api/v1/analysis/runs - list analysis runs with pagination."""
     # Create dependencies
     user = User(first_name="Test", email="test@example.com")
     db_session.add(user)
@@ -33,9 +35,10 @@ async def test_list_runs(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -88,15 +91,20 @@ async def test_list_runs(client, db_session):
     # Mock WebSocket manager
     with patch("app.api.v1.analysis_runs.websocket_manager", AsyncMock()):
         # Test list
-        response = await client.get("/api/runs")
+        response = await client.get("/api/v1/analysis/runs")
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 5
+        assert "items" in data
+        assert "total" in data
+        assert "page" in data
+        assert "page_size" in data
+        assert len(data["items"]) == 5
+        assert data["total"] == 5
 
 
 @pytest.mark.asyncio
 async def test_create_run(client, db_session):
-    """Test POST /api/runs - create new analysis run."""
+    """Test POST /api/v1/analysis/runs - create new analysis run."""
     # Create dependencies
     user = User(first_name="Test", email="test@example.com")
     db_session.add(user)
@@ -105,9 +113,10 @@ async def test_create_run(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -153,7 +162,7 @@ async def test_create_run(client, db_session):
             "agent_assignment_id": str(assignment.id),
             "trigger_type": "manual",
         }
-        response = await client.post("/api/runs", json=run_data)
+        response = await client.post("/api/v1/analysis/runs", json=run_data)
         assert response.status_code == 201
         data = response.json()
         assert data["status"] == AnalysisRunStatus.pending.value
@@ -172,9 +181,10 @@ async def test_cannot_start_if_unclosed_runs(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -232,14 +242,14 @@ async def test_cannot_start_if_unclosed_runs(client, db_session):
             "agent_assignment_id": str(assignment.id),
             "trigger_type": "manual",
         }
-        response = await client.post("/api/runs", json=run_data)
+        response = await client.post("/api/v1/analysis/runs", json=run_data)
         assert response.status_code == 409  # Conflict
         assert "unclosed run" in response.json()["detail"].lower()
 
 
 @pytest.mark.asyncio
 async def test_get_run_details(client, db_session):
-    """Test GET /api/runs/{run_id} - get run details."""
+    """Test GET /api/v1/analysis/runs/{run_id} - get run details."""
     # Create dependencies
     user = User(first_name="Test", email="test@example.com")
     db_session.add(user)
@@ -248,9 +258,10 @@ async def test_get_run_details(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -303,7 +314,7 @@ async def test_get_run_details(client, db_session):
     await db_session.refresh(run)
 
     # Get run
-    response = await client.get(f"/api/runs/{run.id}")
+    response = await client.get(f"/api/v1/analysis/runs/{run.id}")
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == str(run.id)
@@ -314,7 +325,7 @@ async def test_get_run_details(client, db_session):
 
 @pytest.mark.asyncio
 async def test_close_run(client, db_session):
-    """Test PUT /api/runs/{run_id}/close - close run successfully."""
+    """Test PUT /api/v1/analysis/runs/{run_id}/close - close run successfully."""
     # Create dependencies
     user = User(first_name="Test", email="test@example.com")
     db_session.add(user)
@@ -323,9 +334,10 @@ async def test_close_run(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -382,7 +394,7 @@ async def test_close_run(client, db_session):
     # Mock WebSocket manager
     with patch("app.api.v1.analysis_runs.websocket_manager", AsyncMock()):
         # Close run
-        response = await client.put(f"/api/runs/{run.id}/close")
+        response = await client.put(f"/api/v1/analysis/runs/{run.id}/close")
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == AnalysisRunStatus.closed.value
@@ -406,9 +418,10 @@ async def test_cannot_close_with_pending_proposals(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -465,7 +478,7 @@ async def test_cannot_close_with_pending_proposals(client, db_session):
     # Mock WebSocket manager
     with patch("app.api.v1.analysis_runs.websocket_manager", AsyncMock()):
         # Try to close run - should fail with 400
-        response = await client.put(f"/api/runs/{run.id}/close")
+        response = await client.put(f"/api/v1/analysis/runs/{run.id}/close")
         assert response.status_code == 400  # Bad Request
         assert "pending" in response.json()["detail"].lower()
 
@@ -481,9 +494,10 @@ async def test_filters_work(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -551,23 +565,23 @@ async def test_filters_work(client, db_session):
     await db_session.commit()
 
     # Test status filter
-    response = await client.get(f"/api/runs?status={AnalysisRunStatus.pending.value}")
+    response = await client.get(f"/api/v1/analysis/runs?status={AnalysisRunStatus.pending.value}")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
-    assert data[0]["status"] == AnalysisRunStatus.pending.value
+    assert len(data["items"]) == 1
+    assert data["items"][0]["status"] == AnalysisRunStatus.pending.value
 
     # Test trigger_type filter
-    response = await client.get("/api/runs?trigger_type=scheduled")
+    response = await client.get("/api/v1/analysis/runs?trigger_type=scheduled")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
-    assert data[0]["trigger_type"] == "scheduled"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["trigger_type"] == "scheduled"
 
 
 @pytest.mark.asyncio
 async def test_start_run_endpoint(client, db_session):
-    """Test POST /api/runs/{run_id}/start - trigger background job."""
+    """Test POST /api/v1/analysis/runs/{run_id}/start - trigger background job."""
     # Create dependencies
     user = User(first_name="Test", email="test@example.com")
     db_session.add(user)
@@ -576,9 +590,10 @@ async def test_start_run_endpoint(client, db_session):
 
     provider = LLMProvider(
         name="Test Provider",
-        provider_type="ollama",
+        type=ProviderType.ollama,
         base_url="http://localhost:11434",
         is_active=True,
+        validation_status=ValidationStatus.pending,
     )
     db_session.add(provider)
     await db_session.commit()
@@ -628,18 +643,23 @@ async def test_start_run_endpoint(client, db_session):
     await db_session.commit()
     await db_session.refresh(run)
 
-    # Start run
-    response = await client.post(f"/api/runs/{run.id}/start")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["status"] == "started"
-    assert "run_id" in data
+    # Mock TaskIQ background task (imported inside function, so patch at source)
+    with patch("app.tasks.execute_analysis_run") as mock_task:
+        mock_task.kiq = AsyncMock()
+        # Start run
+        response = await client.post(f"/api/v1/analysis/runs/{run.id}/start")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "started"
+        assert "run_id" in data
+        # Verify background task was triggered
+        mock_task.kiq.assert_called_once()
 
 
 @pytest.mark.asyncio
 async def test_get_run_not_found(client, db_session):
-    """Test GET /api/runs/{run_id} with non-existent ID."""
+    """Test GET /api/v1/analysis/runs/{run_id} with non-existent ID."""
     random_id = uuid4()
-    response = await client.get(f"/api/runs/{random_id}")
+    response = await client.get(f"/api/v1/analysis/runs/{random_id}")
     assert response.status_code == 404
     assert "not found" in response.json()["detail"].lower()

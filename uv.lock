@@ -1974,6 +1974,7 @@ dependencies = [
     { name = "taskiq" },
     { name = "taskiq-nats" },
     { name = "telethon" },
+    { name = "tenacity" },
     { name = "uvicorn" },
 ]
 
@@ -2019,6 +2020,7 @@ requires-dist = [
     { name = "taskiq", specifier = ">=0.11.18" },
     { name = "taskiq-nats", specifier = ">=0.5.1" },
     { name = "telethon", specifier = ">=1.38.1" },
+    { name = "tenacity", specifier = ">=9.0.0" },
     { name = "uvicorn", specifier = ">=0.35.0" },
 ]
 

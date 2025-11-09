@@ -4,6 +4,7 @@ Provides endpoints for managing topics including CRUD operations and icon listin
 """
 
 import logging
+import uuid
 from datetime import datetime
 from enum import Enum
 
@@ -26,6 +27,7 @@ from app.models import (
 from app.models.atom import AtomPublic
 from app.schemas.messages import MessageResponse
 from app.services import AtomCRUD, MessageCRUD, TopicCRUD
+from app.services.metrics_broadcaster import metrics_broadcaster
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/topics", tags=["topics"])
@@ -152,7 +154,7 @@ async def get_recent_topics(
     description="Retrieve a specific topic by its ID.",
 )
 async def get_topic(
-    topic_id: int,
+    topic_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
 ) -> TopicPublic:
     """Get a specific topic by ID.
@@ -203,7 +205,12 @@ async def create_topic(
         Created topic with auto-selected or provided icon
     """
     crud = TopicCRUD(session)
-    return await crud.create(topic_data)
+    topic = await crud.create(topic_data)
+
+    # Broadcast metrics update to WebSocket clients
+    await metrics_broadcaster.broadcast_on_topic_change(session)
+
+    return topic
 
 
 @router.patch(
@@ -213,7 +220,7 @@ async def create_topic(
     description="Update an existing topic by ID.",
 )
 async def update_topic(
-    topic_id: int,
+    topic_id: uuid.UUID,
     topic_data: TopicUpdate,
     session: AsyncSession = Depends(get_session),
 ) -> TopicPublic:
@@ -236,6 +243,9 @@ async def update_topic(
     if not topic:
         raise HTTPException(status_code=404, detail=f"Topic with id {topic_id} not found")
 
+    # Broadcast metrics update to WebSocket clients
+    await metrics_broadcaster.broadcast_on_topic_change(session)
+
     return topic
 
 
@@ -245,7 +255,7 @@ async def update_topic(
     description="Auto-suggest color based on topic name and icon",
 )
 async def suggest_topic_color(
-    topic_id: int,
+    topic_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
 ) -> dict:
     """Suggest color for topic based on its icon.
@@ -279,7 +289,7 @@ async def suggest_topic_color(
     description="Retrieve all atoms associated with a specific topic.",
 )
 async def get_topic_atoms(
-    topic_id: int,
+    topic_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
 ) -> list[AtomPublic]:
     """Get all atoms belonging to a topic.
@@ -315,7 +325,7 @@ async def get_topic_atoms(
     description="Retrieve all messages associated with a specific topic.",
 )
 async def get_topic_messages(
-    topic_id: int,
+    topic_id: uuid.UUID,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     session: AsyncSession = Depends(get_session),

@@ -67,7 +67,7 @@ class AutoApprovalService:
         Returns:
             Active ApprovalRule or None if no active rule exists
         """
-        stmt = select(ApprovalRule).where(ApprovalRule.is_active == True).limit(1)  # noqa: E712
+        stmt = select(ApprovalRule).where(ApprovalRule.is_active == True).limit(1)  # type: ignore[arg-type]  # noqa: E712
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
 

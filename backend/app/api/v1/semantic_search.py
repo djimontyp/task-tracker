@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from app.dependencies import DatabaseDep
 from app.models.atom import AtomPublic
 from app.models.llm_provider import LLMProvider
+from app.models.topic import TopicPublic
 from app.schemas.messages import MessageResponse
 from app.services.embedding_service import EmbeddingService
 from app.services.semantic_search_service import SemanticSearchService
@@ -41,6 +42,12 @@ class AtomSearchResult(SemanticSearchResult):
     """Atom search result with similarity score."""
 
     atom: AtomPublic
+
+
+class TopicSearchResult(SemanticSearchResult):
+    """Topic search result with similarity score."""
+
+    topic: TopicPublic
 
 
 @router.get(
@@ -396,6 +403,80 @@ async def find_similar_atoms(
         )
     except Exception as e:
         logger.error(f"Finding similar atoms for {atom_id} failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search failed: {str(e)}",
+        )
+
+
+@router.get(
+    "/topics",
+    response_model=list[TopicSearchResult],
+    summary="Search topics by semantic similarity",
+    response_description="List of topics ranked by semantic similarity to query",
+)
+async def search_topics_semantic(
+    db: DatabaseDep,
+    query: str = Query(..., min_length=1, description="Search query text"),
+    provider_id: UUID = Query(..., description="LLM provider UUID for generating query embeddings"),
+    limit: int = Query(10, ge=1, le=100, description="Maximum number of results"),
+    threshold: float = Query(0.7, ge=0.0, le=1.0, description="Minimum similarity score"),
+) -> list[TopicSearchResult]:
+    """
+    Search topics using semantic similarity to find relevant categories.
+
+    Uses vector embeddings to find topics that are semantically similar to the
+    query text. Searches across both topic names and descriptions. Results are
+    ranked by similarity score.
+
+    Example:
+        GET /api/v1/search/topics?query=mobile+development&provider_id=550e8400-e29b-41d4-a716-446655440000&limit=10&threshold=0.7
+
+    Args:
+        query: Natural language search query
+        provider_id: UUID of LLM provider to use for embedding generation
+        limit: Maximum results to return (1-100)
+        threshold: Minimum similarity score (0.0-1.0)
+
+    Returns:
+        List of topics with similarity scores, ordered by relevance
+    """
+    provider = await db.get(LLMProvider, provider_id)
+    if not provider:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Provider {provider_id} not found",
+        )
+
+    try:
+        embedding_service = EmbeddingService(provider)
+        search_service = SemanticSearchService(embedding_service)
+
+        results = await search_service.search_topics(db, query, limit, threshold)
+
+        return [
+            TopicSearchResult(
+                topic=TopicPublic(
+                    id=topic.id,
+                    name=topic.name,
+                    description=topic.description,
+                    icon=topic.icon,
+                    color=topic.color,
+                    created_at=topic.created_at.isoformat() if topic.created_at else "",
+                    updated_at=topic.updated_at.isoformat() if topic.updated_at else "",
+                ),
+                similarity_score=score,
+            )
+            for topic, score in results
+        ]
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except Exception as e:
+        logger.error(f"Semantic search failed for query '{query}': {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Search failed: {str(e)}",

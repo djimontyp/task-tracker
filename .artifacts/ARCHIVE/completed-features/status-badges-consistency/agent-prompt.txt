@@ -1,0 +1,97 @@
+
+You are React Frontend Architect working on task-tracker project.
+
+# Task: Create Consistent Status Badge System
+
+## Objective
+Implement a centralized status-to-badge-variant mapping system to ensure visual consistency across the application.
+
+## Technical Requirements
+
+### 1. Audit Current State
+- Analyze `/frontend/src/shared/ui/badge.tsx` - what variants exist
+- Find all `<Badge>` component usages (use Glob + Grep)
+- Identify statuses used in:
+  - MessagesPage columns
+  - TopicsPage columns
+  - ProposalsPage columns
+  - AnalysisRunsPage columns
+
+### 2. Extend badgeVariants (if needed)
+- Ensure these variants exist: `default`, `secondary`, `destructive`, `outline`, `success`
+- Add if missing: `warning`, `info`
+
+### 3. Create Centralized Mapping
+**File:** `/frontend/src/shared/constants/statusBadges.ts`
+
+```typescript
+// Status-to-badge-variant mapping for UI consistency
+export const STATUS_VARIANTS = {
+  // Messages
+  analyzed: 'success',
+  pending: 'warning',
+  // Proposals
+  approved: 'success',
+  rejected: 'destructive',
+  // Analysis
+  open: 'info',
+  closed: 'secondary',
+  failed: 'destructive',
+} as const
+
+export type StatusKey = keyof typeof STATUS_VARIANTS
+export type BadgeVariant = typeof STATUS_VARIANTS[StatusKey]
+```
+
+### 4. Refactor columns.tsx Files
+- Replace hardcoded variants with `STATUS_VARIANTS[status]`
+- Add imports from `@/shared/constants/statusBadges`
+- Ensure type safety
+
+## Acceptance Criteria
+✅ File `/frontend/src/shared/constants/statusBadges.ts` created
+✅ All statuses have consistent colors
+✅ All columns.tsx files use STATUS_VARIANTS
+✅ TypeScript compilation passes
+✅ Visual consistency verified (if Playwright available)
+
+## Verification Steps (MANDATORY)
+
+1. **TypeScript Check:**
+   ```bash
+   cd /Users/maks/PycharmProjects/task-tracker/frontend && npm run typecheck
+   ```
+
+2. **Runtime Verification (if docker running):**
+   ```bash
+   docker compose logs dashboard --tail 50
+   ```
+   Look for: no import errors, no React warnings
+
+3. **Browser Verification (if Playwright available):**
+   - Navigate to pages with badges (Messages, Topics, Proposals, Analysis)
+   - Take snapshots to verify colors
+   - Check console for errors
+
+## Expected Report Format
+
+```markdown
+## ✅ Status Badge System Created
+
+**Files Modified:**
+- [list of changed files]
+
+**Status Mappings Added:**
+- [list of status → variant mappings]
+
+**badgeVariants Extended:**
+- [Yes/No - which variants were added if any]
+
+**Verification:**
+- TypeScript: ✅ / ❌
+- Runtime: ✅ / ❌ / N/A
+- Browser: ✅ / ❌ / N/A (if Playwright used)
+```
+
+Work autonomously. Return concise Ukrainian report.
+

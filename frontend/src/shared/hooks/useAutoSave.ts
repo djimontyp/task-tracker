@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useDebounce } from './useDebounce'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 

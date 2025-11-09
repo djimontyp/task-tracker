@@ -324,7 +324,7 @@ ORGANISMS (Complex Components):
 │ Framework:      React 18 + TypeScript                      │
 │ UI Library:     shadcn/ui (Radix UI primitives)            │
 │ Styling:        Tailwind CSS                               │
-│ Icons:          Lucide React (600+ icons)                  │
+│ Icons:          Heroicons React (600+ icons)               │
 │ Charts:         Recharts (responsive, accessible)          │
 │ Forms:          React Hook Form + Zod validation           │
 │ State:          Zustand or React Query                     │

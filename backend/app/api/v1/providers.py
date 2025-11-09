@@ -45,7 +45,7 @@ async def create_provider(
     """
     try:
         crud = ProviderCRUD(session)
-        provider = await crud.create(provider_data, schedule_validation=True)
+        provider = await crud.create_provider(provider_data, schedule_validation=True)
         logger.info(f"Created provider '{provider.name}' with ID {provider.id}")
         return provider
     except ValueError as e:
@@ -149,7 +149,7 @@ async def update_provider(
     """
     try:
         crud = ProviderCRUD(session)
-        provider = await crud.update(provider_id, update_data, schedule_validation=True)
+        provider = await crud.update_provider(provider_id, update_data, schedule_validation=True)
 
         if not provider:
             raise HTTPException(

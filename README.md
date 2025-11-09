@@ -1,5 +1,5 @@
-# Task Tracker
-A universal task tracking system that processes messages from various communication channels (Telegram, Slack, etc.) and automatically classifies them as issues/tasks using AI.
+# Pulse Radar
+An AI-powered knowledge collection system that captures and organizes information from communication channels (Telegram, Slack, etc.), extracting structured knowledge and topics automatically.
 ## Quick Start
 1. **Clone the repository**:
    ```bash
@@ -23,7 +23,7 @@ A universal task tracking system that processes messages from various communicat
    just services-dev
    ```
 ## Architecture Overview
-The Task Tracker is a modern, event-driven microservices system with six Docker services:
+Pulse Radar is a modern, event-driven microservices system with six Docker services:
 - **PostgreSQL**: Database for persistent message and task storage
 - **NATS**: Message broker for asynchronous processing
 - **FastAPI Backend**: REST API with WebSocket support

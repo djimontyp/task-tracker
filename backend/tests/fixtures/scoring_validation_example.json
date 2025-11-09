@@ -1,0 +1,108 @@
+{
+  "messages": [
+    {
+      "id": "uk_noise_001",
+      "text": "👍👍👍",
+      "language": "uk",
+      "label": "noise",
+      "pattern_type": "emoji_spam",
+      "rationale": "No informational content, just emoji reaction"
+    },
+    {
+      "id": "uk_noise_002",
+      "text": "+1",
+      "language": "uk",
+      "label": "noise",
+      "pattern_type": "short_reactions",
+      "rationale": "Single character response with zero context"
+    },
+    {
+      "id": "uk_weak_signal_001",
+      "text": "що думаєте про це?",
+      "language": "uk",
+      "label": "weak_signal",
+      "pattern_type": "vague_questions",
+      "rationale": "Question lacks context about what specifically is being asked"
+    },
+    {
+      "id": "uk_signal_001",
+      "text": "знайшов баг в автентифікації - юзер може залогінитись без пароля якщо використати OAuth redirect з параметром bypass=true. Треба фіксити асап, створив PR #234",
+      "language": "uk",
+      "label": "signal",
+      "pattern_type": "bug_report_detailed",
+      "rationale": "Detailed bug report with reproduction steps, severity, and proposed solution"
+    },
+    {
+      "id": "en_noise_001",
+      "text": "lol",
+      "language": "en",
+      "label": "noise",
+      "pattern_type": "short_reactions",
+      "rationale": "Single word with no informational content"
+    },
+    {
+      "id": "en_weak_signal_001",
+      "text": "working on it",
+      "language": "en",
+      "label": "weak_signal",
+      "pattern_type": "status_updates",
+      "rationale": "Brief status update without details on progress"
+    },
+    {
+      "id": "en_signal_001",
+      "text": "Found performance issue in /api/messages endpoint - response time increased from 200ms to 3.5s. Profiling shows N+1 query problem: we're loading messages, then atoms, then embeddings separately. Fix: implement eager loading with joinedload(). This reduced latency to 180ms. Code in PR #789",
+      "language": "en",
+      "label": "signal",
+      "pattern_type": "performance_analysis",
+      "rationale": "Detailed performance analysis with metrics, root cause, solution, and results"
+    },
+    {
+      "id": "uk_signal_002",
+      "text": "Щоб зафіксити цю проблему:\n1. Зупинити worker: `docker stop task-tracker-worker`\n2. Очистити черги: `nats stream purge TASKS`\n3. Запустити міграцію: `alembic upgrade head`\n4. Перезапустити worker\n\nЦе вирішить race condition",
+      "language": "uk",
+      "label": "signal",
+      "pattern_type": "knowledge_sharing",
+      "rationale": "Step-by-step how-to guide with commands and clear explanation"
+    },
+    {
+      "id": "en_signal_002",
+      "text": "Quick fix for the embedding issue:\n```python\n# Add null check before vector operation\nif embedding is not None:\n    similarity = 1 - cosine(embedding, target)\nelse:\n    similarity = 0.0\n```\nThis prevents the NoneType error we saw in production.",
+      "language": "en",
+      "label": "signal",
+      "pattern_type": "debugging_solution",
+      "rationale": "Technical solution with code snippet and explanation of fix"
+    },
+    {
+      "id": "uk_weak_signal_002",
+      "text": "https://github.com/project/issues/123",
+      "language": "uk",
+      "label": "weak_signal",
+      "pattern_type": "links_no_context",
+      "rationale": "URL shared without explanation of relevance"
+    }
+  ],
+  "metadata": {
+    "total": 10,
+    "generated_at": "2025-10-28T12:00:00Z",
+    "generator": "anthropic:claude-sonnet-4-20250514",
+    "noise_count": 3,
+    "weak_signal_count": 3,
+    "signal_count": 4,
+    "languages": {
+      "uk": 5,
+      "en": 5
+    },
+    "pattern_types": {
+      "emoji_spam": 1,
+      "short_reactions": 2,
+      "vague_questions": 1,
+      "bug_report_detailed": 1,
+      "status_updates": 1,
+      "performance_analysis": 1,
+      "knowledge_sharing": 1,
+      "debugging_solution": 1,
+      "links_no_context": 1
+    },
+    "generation_time_seconds": 45.2
+  }
+}

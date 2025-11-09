@@ -12,13 +12,6 @@ from .agent_task_assignment import (
     AgentTaskAssignmentPublic,
     AgentTaskAssignmentWithDetails,
 )
-from .analysis_run import (
-    AnalysisRun,
-    AnalysisRunCreate,
-    AnalysisRunListResponse,
-    AnalysisRunPublic,
-    AnalysisRunUpdate,
-)
 from .atom import (
     Atom,
     AtomCreate,
@@ -29,6 +22,8 @@ from .atom import (
     AtomPublic,
     AtomType,
     AtomUpdate,
+    BulkApproveRequest,
+    BulkApproveResponse,
     LinkType,
     TopicAtom,
     TopicAtomCreate,
@@ -45,20 +40,11 @@ from .automation_rule import (
     RuleAction,
 )
 from .base import IDMixin, TimestampMixin
-from .task_execution_log import TaskExecutionLog, TaskStatus as TaskExecutionStatus
-from .classification_experiment import (
-    ClassificationExperiment,
-    ClassificationResultDetail,
-    ExperimentCreate,
-    ExperimentDetailPublic,
-    ExperimentListResponse,
-    ExperimentPublic,
-    ExperimentStatus,
-    ExperimentUpdate,
-)
+from .classification_feedback import ClassificationFeedback, ClassificationFeedbackPublic
 from .enums import (
     AnalysisRunStatus,
     AnalysisStatus,
+    FailedTaskStatus,
     LLMRecommendation,
     ProposalStatus,
     SimilarityType,
@@ -94,6 +80,7 @@ from .llm_provider import (
     ValidationStatus,
 )
 from .message import Message
+from .message_history import MessageHistory, MessageHistoryPublic
 from .message_ingestion import (
     IngestionStatus,
     MessageIngestionJob,
@@ -117,14 +104,6 @@ from .scheduled_job import (
     ScheduledJobUpdate,
 )
 from .task_config import TaskConfig, TaskConfigCreate, TaskConfigPublic, TaskConfigUpdate
-from .task_entity import TaskEntity, TaskEntityPublic
-from .task_proposal import (
-    TaskProposal,
-    TaskProposalCreate,
-    TaskProposalListResponse,
-    TaskProposalPublic,
-    TaskProposalUpdate,
-)
 from .telegram_profile import TelegramProfile
 from .topic import (
     ICON_COLORS,
@@ -148,6 +127,11 @@ __all__ = [
     # Base
     "IDMixin",
     "TimestampMixin",
+    # Message History & Feedback
+    "MessageHistory",
+    "MessageHistoryPublic",
+    "ClassificationFeedback",
+    "ClassificationFeedbackPublic",
     # Automation Rules
     "AutomationRule",
     "AutomationRuleCreate",
@@ -176,6 +160,7 @@ __all__ = [
     "ProviderType",
     "ValidationStatus",
     "IngestionStatus",
+    "FailedTaskStatus",
     # Legacy
     "Source",
     "SourceCreate",
@@ -227,36 +212,12 @@ __all__ = [
     "AgentTaskAssignmentCreate",
     "AgentTaskAssignmentPublic",
     "AgentTaskAssignmentWithDetails",
-    # Analysis Run
-    "AnalysisRun",
-    "AnalysisRunCreate",
-    "AnalysisRunListResponse",
-    "AnalysisRunPublic",
-    "AnalysisRunUpdate",
-    # Task Proposal
-    "TaskProposal",
-    "TaskProposalCreate",
-    "TaskProposalPublic",
-    "TaskProposalUpdate",
-    "TaskProposalListResponse",
-    # Classification Experiment
-    "ClassificationExperiment",
-    "ExperimentCreate",
-    "ExperimentUpdate",
-    "ExperimentPublic",
-    "ExperimentDetailPublic",
-    "ExperimentListResponse",
-    "ExperimentStatus",
-    "ClassificationResultDetail",
     # Project Config
     "ProjectConfig",
     "ProjectConfigCreate",
     "ProjectConfigPublic",
     "ProjectConfigUpdate",
     "ProjectConfigListResponse",
-    # Task Entity (Phase 2 placeholder)
-    "TaskEntity",
-    "TaskEntityPublic",
     # Topic
     "Topic",
     "TopicCreate",
@@ -285,12 +246,11 @@ __all__ = [
     "TopicAtomPublic",
     "AtomType",
     "LinkType",
+    "BulkApproveRequest",
+    "BulkApproveResponse",
     # Versioning
     "TopicVersion",
     "TopicVersionPublic",
     "AtomVersion",
     "AtomVersionPublic",
-    # Task Execution Logging
-    "TaskExecutionLog",
-    "TaskExecutionStatus",
 ]

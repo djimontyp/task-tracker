@@ -1,0 +1,161 @@
+{
+  "scenario": "mixed_language_technical",
+  "language": "mixed",
+  "description": "Realistic code-switching between Ukrainian and English in technical discussion. Common in Ukrainian tech teams.",
+  "messages": [
+    {
+      "order": 1,
+      "text": "Привіт! Дивився наш importance scorer, маємо проблему з false positives",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "bug_report",
+        "content_categories": ["quality_issue", "classification"]
+      }
+    },
+    {
+      "order": 2,
+      "text": "What kind of false positives?",
+      "language": "en",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "clarifying_question",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 3,
+      "text": "Casual messages типу 'ok', 'thanks' отримують weak_signal замість noise. Треба підтюнити prompts",
+      "language": "mixed",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "problem_details",
+        "content_categories": ["classification_accuracy", "prompt_engineering"]
+      }
+    },
+    {
+      "order": 4,
+      "text": "Цікаво 🤔",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "acknowledgment",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 5,
+      "text": "Maybe we need more examples in the system prompt? Currently we only have 3",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "solution_proposal",
+        "content_categories": ["prompt_engineering", "few_shot_learning"]
+      }
+    },
+    {
+      "order": 6,
+      "text": "Так, можна додати few-shot examples. Ось що пропоную:\n\n```python\nNOISE_EXAMPLES = [\n    \"ok\", \"thanks\", \"+1\", \"👍\",\n    \"привіт\", \"дякую\", \"норм\"\n]\n```",
+      "language": "mixed",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "code_solution",
+        "content_categories": ["implementation_proposal", "prompt_engineering"]
+      }
+    },
+    {
+      "order": 7,
+      "text": "Good start. Also should add context about Ukrainian casual phrases",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "improvement_suggestion",
+        "content_categories": ["internationalization", "prompt_engineering"]
+      }
+    },
+    {
+      "order": 8,
+      "text": "Точно! Додамо в system prompt:\n\n\"For Ukrainian: 'норм', 'ок', 'добре', 'зрозумів' are typically noise unless they're answering technical question\"",
+      "language": "mixed",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "implementation_details",
+        "content_categories": ["prompt_engineering", "language_handling"]
+      }
+    },
+    {
+      "order": 9,
+      "text": "Де це лежить в коді?",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "code_location_question",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 10,
+      "text": "app/services/importance_scorer.py - там є IMPORTANCE_SCORING_PROMPT constant",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "code_reference",
+        "content_categories": ["file_location"]
+      }
+    },
+    {
+      "order": 11,
+      "text": "А тести є на це?",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "testing_question",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 12,
+      "text": "Not yet. We should add parametrized tests with noise examples in both languages",
+      "language": "en",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "testing_proposal",
+        "content_categories": ["test_coverage", "quality_assurance"]
+      }
+    },
+    {
+      "order": 13,
+      "text": "Окей, я візьму це на себе. Зроблю:\n1. Update prompts з examples\n2. Add parametrized tests\n3. Test на обох мовах",
+      "language": "mixed",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "task_assignment",
+        "content_categories": ["ownership", "implementation_plan"]
+      }
+    },
+    {
+      "order": 14,
+      "text": "Perfect! 🎯",
+      "language": "en",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "approval",
+        "content_categories": []
+      }
+    }
+  ],
+  "expected_extraction": {
+    "topics": [
+      {
+        "title": "Importance Scorer False Positives Fix",
+        "atoms": [
+          "False positives: casual messages ('ok', 'thanks') classified as weak_signal instead of noise",
+          "Add few-shot examples to prompts: ok, thanks, +1, привіт, дякую, норм",
+          "Add Ukrainian context: 'норм', 'ок', 'добре', 'зрозумів' are noise unless answering technical question",
+          "Implementation: app/services/importance_scorer.py IMPORTANCE_SCORING_PROMPT",
+          "Add parametrized tests for both languages"
+        ]
+      }
+    ]
+  }
+}

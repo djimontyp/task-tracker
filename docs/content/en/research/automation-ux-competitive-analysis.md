@@ -897,7 +897,7 @@ Based on competitive analysis, our system should use:
 ### Component Library
 - **shadcn/ui** (Radix UI primitives) - Matches modern automation platforms
 - **Tailwind CSS** - Utility-first, consistent with Linear/Notion aesthetics
-- **Lucide Icons** - Clean, consistent icon set
+- **Heroicons** - Clean, consistent icon set
 - **Recharts** - For dashboard time-series charts
 
 ### Color System

@@ -1,4 +1,4 @@
-"""Contract tests for POST /api/providers endpoint."""
+"""Contract tests for POST /api/v1/providers endpoint."""
 
 import pytest
 from httpx import AsyncClient
@@ -8,7 +8,7 @@ from httpx import AsyncClient
 async def test_create_provider_ollama_valid(client: AsyncClient):
     """Test provider creation with valid Ollama configuration."""
     response = await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={
             "name": "Ollama Local",
             "type": "ollama",
@@ -27,7 +27,7 @@ async def test_create_provider_ollama_valid(client: AsyncClient):
 async def test_create_provider_openai_valid(client: AsyncClient):
     """Test provider creation with valid OpenAI configuration."""
     response = await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={
             "name": "OpenAI GPT-4",
             "type": "openai",
@@ -46,7 +46,7 @@ async def test_create_provider_openai_valid(client: AsyncClient):
 async def test_create_provider_missing_required_fields(client: AsyncClient):
     """Test validation error for missing required fields."""
     response = await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={
             "name": "Invalid Provider",
             # Missing 'type' field
@@ -62,7 +62,7 @@ async def test_create_provider_duplicate_name(client: AsyncClient):
     """Test 409 conflict for duplicate provider name."""
     # Create first provider
     await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={
             "name": "Duplicate Test",
             "type": "ollama",
@@ -72,7 +72,7 @@ async def test_create_provider_duplicate_name(client: AsyncClient):
 
     # Try creating duplicate
     response = await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={
             "name": "Duplicate Test",
             "type": "ollama",

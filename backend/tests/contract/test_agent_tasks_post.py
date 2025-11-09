@@ -9,14 +9,14 @@ async def test_assign_task_to_agent(client: AsyncClient):
     """Test assigning task to agent."""
     # Create provider
     provider_response = await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={"name": "Task Provider", "type": "ollama", "base_url": "http://localhost:11434"},
     )
     provider_id = provider_response.json()["id"]
 
     # Create agent
     agent_response = await client.post(
-        "/api/agents",
+        "/api/v1/agents",
         json={
             "name": "Task Agent",
             "provider_id": provider_id,
@@ -28,7 +28,7 @@ async def test_assign_task_to_agent(client: AsyncClient):
 
     # Create task
     task_response = await client.post(
-        "/api/tasks",
+        "/api/v1/task-configs",
         json={
             "name": "Classify Message",
             "description": "Categorize messages",
@@ -44,8 +44,8 @@ async def test_assign_task_to_agent(client: AsyncClient):
 
     # Assign task to agent
     response = await client.post(
-        f"/api/agents/{agent_id}/tasks",
-        json={"task_id": task_id},
+        f"/api/v1/agents/{agent_id}/tasks",
+        json={"agent_id": agent_id, "task_id": task_id},
     )
     assert response.status_code == 201
     data = response.json()
@@ -59,13 +59,13 @@ async def test_assign_task_duplicate_conflict(client: AsyncClient):
     """Test 409 conflict for duplicate task assignment."""
     # Create provider, agent, task
     provider_response = await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={"name": "Duplicate Provider", "type": "ollama", "base_url": "http://localhost:11434"},
     )
     provider_id = provider_response.json()["id"]
 
     agent_response = await client.post(
-        "/api/agents",
+        "/api/v1/agents",
         json={
             "name": "Duplicate Agent",
             "provider_id": provider_id,
@@ -76,7 +76,7 @@ async def test_assign_task_duplicate_conflict(client: AsyncClient):
     agent_id = agent_response.json()["id"]
 
     task_response = await client.post(
-        "/api/tasks",
+        "/api/v1/task-configs",
         json={
             "name": "Duplicate Task",
             "response_schema": {"type": "object", "properties": {}},
@@ -85,12 +85,12 @@ async def test_assign_task_duplicate_conflict(client: AsyncClient):
     task_id = task_response.json()["id"]
 
     # Assign task
-    await client.post(f"/api/agents/{agent_id}/tasks", json={"task_id": task_id})
+    await client.post(f"/api/v1/agents/{agent_id}/tasks", json={"agent_id": agent_id, "task_id": task_id})
 
     # Try assigning again
     response = await client.post(
-        f"/api/agents/{agent_id}/tasks",
-        json={"task_id": task_id},
+        f"/api/v1/agents/{agent_id}/tasks",
+        json={"agent_id": agent_id, "task_id": task_id},
     )
     assert response.status_code == 409
 
@@ -100,7 +100,7 @@ async def test_assign_task_agent_not_found(client: AsyncClient):
     """Test 404 when agent doesn't exist."""
     # Create task
     task_response = await client.post(
-        "/api/tasks",
+        "/api/v1/task-configs",
         json={
             "name": "Orphan Task",
             "response_schema": {"type": "object", "properties": {}},
@@ -110,8 +110,8 @@ async def test_assign_task_agent_not_found(client: AsyncClient):
 
     fake_uuid = "00000000-0000-0000-0000-000000000000"
     response = await client.post(
-        f"/api/agents/{fake_uuid}/tasks",
-        json={"task_id": task_id},
+        f"/api/v1/agents/{fake_uuid}/tasks",
+        json={"agent_id": fake_uuid, "task_id": task_id},
     )
     assert response.status_code == 404
 
@@ -121,13 +121,13 @@ async def test_assign_task_task_not_found(client: AsyncClient):
     """Test 404 when task doesn't exist."""
     # Create provider and agent
     provider_response = await client.post(
-        "/api/providers",
+        "/api/v1/providers",
         json={"name": "Taskless Provider", "type": "ollama", "base_url": "http://localhost:11434"},
     )
     provider_id = provider_response.json()["id"]
 
     agent_response = await client.post(
-        "/api/agents",
+        "/api/v1/agents",
         json={
             "name": "Taskless Agent",
             "provider_id": provider_id,
@@ -139,7 +139,7 @@ async def test_assign_task_task_not_found(client: AsyncClient):
 
     fake_uuid = "00000000-0000-0000-0000-000000000000"
     response = await client.post(
-        f"/api/agents/{agent_id}/tasks",
+        f"/api/v1/agents/{agent_id}/tasks",
         json={"task_id": fake_uuid},
     )
     assert response.status_code == 404

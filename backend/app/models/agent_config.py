@@ -88,26 +88,26 @@ class AgentConfig(SQLModel, table=True):
 class AgentConfigCreate(SQLModel):
     """Schema for creating new agent configuration."""
 
-    name: str
+    name: str = Field(min_length=1, description="Agent name (required, non-empty)")
     description: str | None = None
     provider_id: UUID
-    model_name: str
-    system_prompt: str
-    temperature: float | None = 0.7
-    max_tokens: int | None = None
+    model_name: str = Field(min_length=1, description="Model name (required, non-empty)")
+    system_prompt: str = Field(min_length=1, description="System prompt (required, non-empty)")
+    temperature: float | None = Field(default=0.7, ge=0.0, le=1.0, description="Temperature (0.0-1.0)")
+    max_tokens: int | None = Field(default=None, gt=0, description="Maximum tokens (must be positive)")
     is_active: bool = True
 
 
 class AgentConfigUpdate(SQLModel):
     """Schema for updating agent configuration."""
 
-    name: str | None = None
+    name: str | None = Field(default=None, min_length=1, description="Agent name (non-empty if provided)")
     description: str | None = None
     provider_id: UUID | None = None
-    model_name: str | None = None
-    system_prompt: str | None = None
-    temperature: float | None = None
-    max_tokens: int | None = None
+    model_name: str | None = Field(default=None, min_length=1, description="Model name (non-empty if provided)")
+    system_prompt: str | None = Field(default=None, min_length=1, description="System prompt (non-empty if provided)")
+    temperature: float | None = Field(default=None, ge=0.0, le=1.0, description="Temperature (0.0-1.0 if provided)")
+    max_tokens: int | None = Field(default=None, gt=0, description="Maximum tokens (positive if provided)")
     is_active: bool | None = None
 
 

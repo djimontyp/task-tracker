@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '@/shared/components/ThemeProvider'
+import { TooltipProvider } from '@/shared/ui/tooltip'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,7 +26,9 @@ const Providers = ({ children }: ProvidersProps) => {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter basename="/dashboard">
         <ThemeProvider>
-          {children}
+          <TooltipProvider delayDuration={300}>
+            {children}
+          </TooltipProvider>
         </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>

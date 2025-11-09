@@ -1,23 +1,33 @@
 ---
 name: pycharm-refs
-description: This skill should be used when agents need to provide clickable code references to users in reports, investigations, or bug findings. It ensures file references use the file:// protocol with absolute paths and line numbers for immediate navigation in PyCharm/JetBrains IDEs. Do not use for general documentation or conceptual explanations.
+description: This skill should be used when agents need to provide clickable code references to users in reports, investigations, or bug findings. It ensures file references use the simple path:line_number format that Claude Code automatically converts to clickable links. Do not use for general documentation or conceptual explanations.
 ---
 
-# PyCharm-Style Clickable Code References
+# Clickable Code References for Claude Code
 
 ## Overview
 
-When providing code references to users that require immediate action or investigation, use clickable file:// URLs with absolute paths and line numbers. This enables users to click and jump directly to the relevant code in their IDE.
+When providing code references to users that require immediate action or investigation, use the simple `path:line_number` format. Claude Code automatically recognizes this pattern and converts it to clickable links that open directly in the IDE.
 
 ## Critical Format Rule
 
-**ALWAYS use absolute paths with file:// protocol:**
+**Use simple relative or absolute paths with colon and line number:**
 
 ```
-file:///ABSOLUTE_PATH_TO_FILE:LINE_NUMBER
+path/to/file.py:LINE_NUMBER
+backend/app/services/task_service.py:45
 ```
 
 **Working directory context:** `{{env.WORKING_DIRECTORY}}`
+
+## How It Works
+
+1. Use tools like `Grep` or `Read` with `-n: true` parameter to see line numbers
+2. Reference code using `path/to/file:line_number` format in responses
+3. Claude Code automatically detects this pattern and makes it clickable
+4. User clicks the link and IDE opens the file at that exact line
+
+**No need for file:// protocol or special formatting!**
 
 ## When to Use This Format
 
@@ -47,27 +57,28 @@ The common pattern: if the reference is **conceptual or documentary**, omit clic
 
 ### Single Line Reference (Clickable)
 ```
-file:///Users/maks/PycharmProjects/task-tracker/backend/app/services/task_service.py:45
+backend/app/services/task_service.py:45
 ```
 
 ### Line Range Reference
-Note: PyCharm file:// protocol doesn't support ranges, use single line:
+Claude Code supports range format:
 ```
-file:///Users/maks/PycharmProjects/task-tracker/frontend/src/features/agents/components/TaskForm.tsx:127
+backend/app/models/contract.py:120
+frontend/src/features/agents/components/TaskForm.tsx:55-58
 ```
 
 ### In Natural Language
 ```
 Found performance bottleneck in the task classification loop at
-file:///Users/maks/PycharmProjects/task-tracker/backend/app/services/classification.py:156
+backend/app/services/classification.py:156
 ```
 
 ### Multiple References
 ```
 The validation error chain:
-1. file:///Users/maks/PycharmProjects/task-tracker/frontend/src/features/agents/components/TaskForm.tsx:89
-2. file:///Users/maks/PycharmProjects/task-tracker/backend/app/api/routes/tasks.py:234
-3. file:///Users/maks/PycharmProjects/task-tracker/backend/app/services/validation.py:67
+1. frontend/src/features/agents/components/TaskForm.tsx:89
+2. backend/app/api/routes/tasks.py:234
+3. backend/app/services/validation.py:67
 ```
 
 ## Examples
@@ -80,13 +91,13 @@ The validation error chain:
 Identified slow database queries:
 
 1. N+1 query in task fetching
-   file:///Users/maks/PycharmProjects/task-tracker/backend/app/services/task_service.py:156
+   backend/app/services/task_service.py:156
 
 2. Missing index on topic_messages join
-   file:///Users/maks/PycharmProjects/task-tracker/backend/app/models/topic.py:45
+   backend/app/models/topic.py:45
 
 3. Inefficient serialization in API response
-   file:///Users/maks/PycharmProjects/task-tracker/backend/app/api/routes/topics.py:89
+   backend/app/api/routes/topics.py:89
 ```
 
 ### ✅ Good Usage (Bug Report)
@@ -95,10 +106,10 @@ Identified slow database queries:
 ## TypeError in Task Creation
 
 The error originates from missing validation:
-file:///Users/maks/PycharmProjects/task-tracker/frontend/src/features/agents/components/TaskForm.tsx:127
+frontend/src/features/agents/components/TaskForm.tsx:127
 
 Root cause in schema definition:
-file:///Users/maks/PycharmProjects/task-tracker/backend/app/schemas/task.py:34
+backend/app/schemas/task.py:34
 ```
 
 ### ❌ Bad Usage (Documentation Context)
@@ -126,10 +137,12 @@ We use dependency injection throughout the codebase, see backend/app/api/depende
 
 When writing reports or providing findings:
 
-1. **Get working directory** - Use `{{env.WORKING_DIRECTORY}}` or context to build absolute paths
+1. **Use tools with line numbers** - Run `Grep` or `Read` with `-n: true` to see line numbers
 2. **Identify context** - Is this report/investigation or documentation/concept?
 3. **Check actionability** - Does the user need to inspect this code now?
-4. **Use clickable format** - If actionable, use `file:///absolute/path/to/file:line_number`
-5. **Omit if conceptual** - If discussing general architecture or patterns, use simple file paths without protocol
+4. **Use simple format** - If actionable, use `path/to/file:line_number` (relative or absolute)
+5. **Omit if conceptual** - If discussing general architecture or patterns, use simple paths without line numbers
+
+**Claude Code automatically converts `path:line` format to clickable links!**
 
 Keep references **contextual and actionable** - clickable links are for helping users navigate to code they need to see immediately, not for documenting general file locations.

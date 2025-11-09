@@ -172,3 +172,12 @@ node_modules
 
 # Playwright MCP server data
 .playwright-mcp/
+
+# Temporary test files
+tmp/
+
+
+# Claude Code hook cooldown files (temporary state tracking)
+.claude/hooks/.last-commit-check
+.claude/hooks/.commit-series-start
+.claude/hooks/.pending-doc-updates.json

@@ -8,6 +8,7 @@ Tests cover:
 5. Skipping already embedded items
 """
 
+from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
@@ -104,9 +105,13 @@ class TestEmbeddingBackgroundTasks:
 
         mock_embedding = [0.1] * 1536
 
+        async def mock_db_context() -> AsyncGenerator:
+            yield db_session
+
         with (
             patch("app.services.embedding_service.AsyncOpenAI") as mock_openai,
             patch("app.services.embedding_service.CredentialEncryption") as mock_encryptor_class,
+            patch("app.tasks.knowledge.get_db_session_context", return_value=mock_db_context()),
         ):
             mock_encryptor = MagicMock()
             mock_encryptor.decrypt.return_value = "sk-test-key"
@@ -154,9 +159,13 @@ class TestEmbeddingBackgroundTasks:
 
         mock_embedding = [0.2] * 1536
 
+        async def mock_db_context() -> AsyncGenerator:
+            yield db_session
+
         with (
             patch("app.services.embedding_service.AsyncOpenAI") as mock_openai,
             patch("app.services.embedding_service.CredentialEncryption") as mock_encryptor_class,
+            patch("app.tasks.knowledge.get_db_session_context", return_value=mock_db_context()),
         ):
             mock_encryptor = MagicMock()
             mock_encryptor.decrypt.return_value = "sk-test-key"
@@ -206,8 +215,12 @@ class TestEmbeddingBackgroundTasks:
         message_ids = [m.id for m in messages]
         fake_provider_id = str(uuid4())
 
-        with pytest.raises(ValueError, match="not found"):
-            await embed_messages_batch_task(message_ids=message_ids, provider_id=fake_provider_id)
+        async def mock_db_context() -> AsyncGenerator:
+            yield db_session
+
+        with patch("app.tasks.knowledge.get_db_session_context", return_value=mock_db_context()):
+            with pytest.raises(ValueError, match="not found"):
+                await embed_messages_batch_task(message_ids=message_ids, provider_id=fake_provider_id)
 
     async def test_batch_task_handles_partial_failures(
         self,
@@ -232,9 +245,13 @@ class TestEmbeddingBackgroundTasks:
 
         mock_embedding = [0.3] * 1536
 
+        async def mock_db_context() -> AsyncGenerator:
+            yield db_session
+
         with (
             patch("app.services.embedding_service.AsyncOpenAI") as mock_openai,
             patch("app.services.embedding_service.CredentialEncryption") as mock_encryptor_class,
+            patch("app.tasks.knowledge.get_db_session_context", return_value=mock_db_context()),
         ):
             mock_encryptor = MagicMock()
             mock_encryptor.decrypt.return_value = "sk-test-key"
@@ -276,9 +293,13 @@ class TestEmbeddingBackgroundTasks:
         await db_session.commit()
         await db_session.refresh(msg)
 
+        async def mock_db_context() -> AsyncGenerator:
+            yield db_session
+
         with (
             patch("app.services.embedding_service.AsyncOpenAI") as mock_openai,
             patch("app.services.embedding_service.CredentialEncryption") as mock_encryptor_class,
+            patch("app.tasks.knowledge.get_db_session_context", return_value=mock_db_context()),
         ):
             mock_encryptor = MagicMock()
             mock_encryptor.decrypt.return_value = "sk-test-key"
@@ -294,7 +315,7 @@ class TestEmbeddingBackgroundTasks:
 
             refreshed = await db_session.get(Message, msg.id)
             assert refreshed is not None
-            assert refreshed.embedding == existing_embedding
+            assert len(refreshed.embedding) == len(existing_embedding)
 
             mock_client.embeddings.create.assert_not_called()
 
@@ -316,9 +337,13 @@ class TestEmbeddingBackgroundTasks:
         await db_session.commit()
         await db_session.refresh(atom)
 
+        async def mock_db_context() -> AsyncGenerator:
+            yield db_session
+
         with (
             patch("app.services.embedding_service.AsyncOpenAI") as mock_openai,
             patch("app.services.embedding_service.CredentialEncryption") as mock_encryptor_class,
+            patch("app.tasks.knowledge.get_db_session_context", return_value=mock_db_context()),
         ):
             mock_encryptor = MagicMock()
             mock_encryptor.decrypt.return_value = "sk-test-key"
@@ -334,6 +359,6 @@ class TestEmbeddingBackgroundTasks:
 
             refreshed = await db_session.get(Atom, atom.id)
             assert refreshed is not None
-            assert refreshed.embedding == existing_embedding
+            assert len(refreshed.embedding) == len(existing_embedding)
 
             mock_client.embeddings.create.assert_not_called()

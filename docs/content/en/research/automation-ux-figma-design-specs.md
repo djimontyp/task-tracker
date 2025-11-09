@@ -1958,7 +1958,7 @@ System Event                 System Response                User Notification
 - **Framework**: React 18 + TypeScript
 - **UI Library**: shadcn/ui (Radix UI primitives)
 - **Styling**: Tailwind CSS
-- **Icons**: Lucide React
+- **Icons**: Heroicons React
 - **Charts**: Recharts
 - **Forms**: React Hook Form + Zod validation
 - **State**: Zustand or React Query
@@ -2007,7 +2007,7 @@ src/
     "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@radix-ui/react-slider": "^1.1.2",
     "@radix-ui/react-switch": "^1.0.3",
-    "lucide-react": "^0.294.0",
+    "@heroicons/react": "^2.2.0",
     "recharts": "^2.10.0",
     "react-hook-form": "^7.49.0",
     "zod": "^3.22.4",
@@ -2152,7 +2152,7 @@ interface AutomationAPI {
 - Switch/Toggle
 - Slider
 - Checkbox/Radio
-- Icon set (20+ icons from Lucide)
+- Icon set (20+ icons from Heroicons)
 
 ✅ **Component Library (Molecules)**
 - Form Field (label + input + error)

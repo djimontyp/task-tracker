@@ -1,0 +1,179 @@
+{
+  "scenario": "technical_deep_dive",
+  "language": "uk",
+  "description": "Глибоке технічне обговорення з кодом, архітектурними рішеннями та посиланнями на ресурси.",
+  "messages": [
+    {
+      "order": 1,
+      "text": "Переглянув наш LLM сервіс. Чому використовуємо hexagonal architecture?",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "architecture_question",
+        "content_categories": ["architecture", "design_patterns"]
+      }
+    },
+    {
+      "order": 2,
+      "text": "Framework independence. Можемо замінити Pydantic AI на LangChain без зміни domain логіки",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "architecture_explanation",
+        "content_categories": ["design_rationale", "maintainability"]
+      }
+    },
+    {
+      "order": 3,
+      "text": "А як саме це досягається?",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "implementation_question",
+        "content_categories": ["technical_details"]
+      }
+    },
+    {
+      "order": 4,
+      "text": "Через ports & adapters. Дивись:\n\n```python\nclass LLMPort(Protocol):\n    async def generate(self, prompt: str) -> str: ...\n\nclass PydanticAIAdapter(LLMPort):\n    async def generate(self, prompt: str) -> str:\n        # Pydantic AI implementation\n        ...\n```",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "code_example",
+        "content_categories": ["implementation_details", "code_reference"]
+      }
+    },
+    {
+      "order": 5,
+      "text": "Аа, розумію! Protocol = port, concrete class = adapter",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "understanding_confirmation",
+        "content_categories": ["learning"]
+      }
+    },
+    {
+      "order": 6,
+      "text": "Точно. Domain сервіси приймають LLMPort, не знають про конкретну імплементацію. Ось приклад з нашого коду:\n\napp/services/llm/domain/ports/llm_port.py - порт\napp/services/llm/infrastructure/pydantic_ai_adapter.py - адаптер",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "architecture_example",
+        "content_categories": ["code_reference", "file_locations"]
+      }
+    },
+    {
+      "order": 7,
+      "text": "Чудово! А dependency injection як реалізовано?",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "technical_question",
+        "content_categories": ["dependency_injection", "architecture"]
+      }
+    },
+    {
+      "order": 8,
+      "text": "FastAPI Depends. В app/dependencies.py є фабрики:\n\n```python\ndef get_llm_service() -> LLMService:\n    adapter = PydanticAIAdapter()\n    return LLMService(llm_port=adapter)\n```\n\nПотім в ендпоінтах:\n```python\n@router.post(\"/analyze\")\nasync def analyze(\n    service: LLMService = Depends(get_llm_service)\n):\n    ...\n```",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "implementation_details",
+        "content_categories": ["code_example", "dependency_injection"]
+      }
+    },
+    {
+      "order": 9,
+      "text": "Є якісь ресурси про цей патерн? Хочу глибше зрозуміти",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "learning_request",
+        "content_categories": ["resources"]
+      }
+    },
+    {
+      "order": 10,
+      "text": "Так! Дивись:\n1. https://alistair.cockburn.us/hexagonal-architecture/ - оригінальна стаття Cockburn\n2. https://netflixtechblog.com/ready-for-changes-with-hexagonal-architecture-b315ec967749 - Netflix про практичне застосування\n3. docs/content/en/architecture/llm-architecture.md - наша документація",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "resource_sharing",
+        "content_categories": ["documentation", "learning_resources", "links"]
+      }
+    },
+    {
+      "order": 11,
+      "text": "Дякую! 🙏",
+      "language": "uk",
+      "expected_label": "noise",
+      "metadata": {
+        "type": "gratitude",
+        "content_categories": []
+      }
+    },
+    {
+      "order": 12,
+      "text": "Ще момент - чому обрали Pydantic AI, а не LangChain?",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "technology_choice_question",
+        "content_categories": ["framework_comparison"]
+      }
+    },
+    {
+      "order": 13,
+      "text": "Кілька причин:\n1. Type safety - Pydantic AI має краще mypy покриття\n2. Простота - менше boilerplate для базових use cases\n3. Швидкість - нижча latency через менше абстракцій\n4. Integration - природна інтеграція з FastAPI (обидва на Pydantic)\n\nЛангчейн потужніший для складних chains, але нам поки не треба",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "technology_decision_rationale",
+        "content_categories": ["framework_comparison", "decision_justification"]
+      }
+    },
+    {
+      "order": 14,
+      "text": "Логічно. Якщо потрібна складніша оркестрація - просто пишемо новий adapter",
+      "language": "uk",
+      "expected_label": "strong_signal",
+      "metadata": {
+        "type": "architecture_understanding",
+        "content_categories": ["extensibility"]
+      }
+    },
+    {
+      "order": 15,
+      "text": "Саме так! От для чого hexagonal architecture 🎯",
+      "language": "uk",
+      "expected_label": "weak_signal",
+      "metadata": {
+        "type": "confirmation",
+        "content_categories": []
+      }
+    }
+  ],
+  "expected_extraction": {
+    "topics": [
+      {
+        "title": "Hexagonal Architecture в LLM сервісі",
+        "atoms": [
+          "Ports & Adapters паттерн: Protocol = port, concrete class = adapter",
+          "LLMPort протокол дозволяє міняти Pydantic AI ↔ LangChain без зміни domain",
+          "Dependency injection через FastAPI Depends + фабрики в app/dependencies.py",
+          "Ресурси: Cockburn original, Netflix blog, docs/llm-architecture.md"
+        ]
+      },
+      {
+        "title": "Вибір Pydantic AI замість LangChain",
+        "atoms": [
+          "Type safety - краще mypy покриття",
+          "Простота - менше boilerplate",
+          "Швидкість - нижча latency",
+          "Integration - природна інтеграція з FastAPI"
+        ]
+      }
+    ]
+  }
+}

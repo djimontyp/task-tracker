@@ -11,16 +11,20 @@ Tests cover:
 8. Performance characteristics
 """
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
+from app.models.agent_config import AgentConfig
+from app.models.agent_task_assignment import AgentTaskAssignment
+from app.models.analysis_run import AnalysisRun, AnalysisRunStatus
 from app.models.atom import Atom
 from app.models.enums import ProposalStatus, SourceType
 from app.models.legacy import Source
 from app.models.llm_provider import LLMProvider, ProviderType
 from app.models.message import Message
+from app.models.task_config import TaskConfig
 from app.models.task_proposal import TaskProposal
 from app.models.user import User
 from app.services.embedding_service import EmbeddingService
@@ -82,16 +86,100 @@ def mock_embedding() -> list[float]:
 
 
 @pytest.fixture
-async def historical_proposals(db_session: AsyncSession) -> list[TaskProposal]:
+async def test_task_config(db_session: AsyncSession) -> TaskConfig:
+    """Create test task configuration."""
+    task = TaskConfig(
+        id=uuid4(),
+        name="RAG Test Task",
+        description="Test task for RAG",
+        response_schema={"type": "object", "properties": {}},
+        is_active=True,
+    )
+    db_session.add(task)
+    await db_session.commit()
+    await db_session.refresh(task)
+    return task
+
+
+@pytest.fixture
+async def test_agent(db_session: AsyncSession, openai_provider: LLMProvider) -> AgentConfig:
+    """Create test agent."""
+    agent = AgentConfig(
+        id=uuid4(),
+        provider_id=openai_provider.id,
+        name="RAG Test Agent",
+        model_name="gpt-4",
+        system_prompt="Test agent for RAG",
+        is_active=True,
+    )
+    db_session.add(agent)
+    await db_session.commit()
+    await db_session.refresh(agent)
+    return agent
+
+
+@pytest.fixture
+async def test_agent_assignment(
+    db_session: AsyncSession,
+    test_agent: AgentConfig,
+    test_task_config: TaskConfig,
+) -> AgentTaskAssignment:
+    """Create test agent task assignment."""
+    assignment = AgentTaskAssignment(
+        id=uuid4(),
+        agent_id=test_agent.id,
+        task_id=test_task_config.id,
+        task_type="message_classification",
+        priority=1,
+        is_active=True,
+    )
+    db_session.add(assignment)
+    await db_session.commit()
+    await db_session.refresh(assignment)
+    return assignment
+
+
+@pytest.fixture
+async def test_analysis_run(
+    db_session: AsyncSession,
+    test_agent_assignment: AgentTaskAssignment,
+) -> AnalysisRun:
+    """Create test analysis run for proposals."""
+    run = AnalysisRun(
+        id=uuid4(),
+        agent_assignment_id=test_agent_assignment.id,
+        trigger_type="manual",
+        status=AnalysisRunStatus.completed,
+        time_window_start=datetime.now(UTC) - timedelta(days=7),
+        time_window_end=datetime.now(UTC),
+        completed_at=datetime.now(UTC),
+    )
+    db_session.add(run)
+    await db_session.commit()
+    await db_session.refresh(run)
+    return run
+
+
+@pytest.fixture
+async def historical_proposals(
+    db_session: AsyncSession,
+    test_analysis_run: AnalysisRun,
+) -> list[TaskProposal]:
     """Create historical approved proposals with embeddings."""
     proposals = []
 
     for i in range(3):
         proposal = TaskProposal(
             id=uuid4(),
-            title=f"Historical Proposal {i}",
-            description=f"This is a past proposal about feature {i}",
-            priority="medium",
+            analysis_run_id=test_analysis_run.id,
+            proposed_title=f"Historical Proposal {i}",
+            proposed_description=f"This is a past proposal about feature {i}",
+            proposed_priority="medium",
+            proposed_category="feature",
+            source_message_ids=[],
+            message_count=1,
+            time_span_seconds=0,
+            reasoning=f"Test reasoning for proposal {i}",
             status=ProposalStatus.approved,
             confidence=0.9,
             embedding=[float(i) * 0.1] * 1536,

@@ -71,7 +71,7 @@ export interface CreateAtomLink {
 }
 
 export interface TopicAtom {
-  topic_id: number
+  topic_id: string
   atom_id: number
   position: number | null
   note: string | null
@@ -79,7 +79,7 @@ export interface TopicAtom {
 }
 
 export interface CreateTopicAtom {
-  topic_id: number
+  topic_id: string
   atom_id: number
   position?: number
   note?: string

@@ -152,7 +152,7 @@ async def multiple_agents(db_session: AsyncSession, test_provider: LLMProvider) 
 @pytest.mark.asyncio
 async def test_list_agents_empty(client: AsyncClient):
     """Test listing agents when database is empty."""
-    response = await client.get("/api/agents")
+    response = await client.get("/api/v1/agents")
 
     assert response.status_code == 200
     data = response.json()
@@ -163,7 +163,7 @@ async def test_list_agents_empty(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_list_agents_with_data(client: AsyncClient, multiple_agents: list[AgentConfig]):
     """Test listing all agents with data."""
-    response = await client.get("/api/agents")
+    response = await client.get("/api/v1/agents")
 
     assert response.status_code == 200
     data = response.json()
@@ -183,7 +183,7 @@ async def test_list_agents_with_data(client: AsyncClient, multiple_agents: list[
 @pytest.mark.asyncio
 async def test_list_agents_pagination_skip(client: AsyncClient, multiple_agents: list[AgentConfig]):
     """Test pagination with skip parameter."""
-    response = await client.get("/api/agents?skip=2&limit=2")
+    response = await client.get("/api/v1/agents?skip=2&limit=2")
 
     assert response.status_code == 200
     data = response.json()
@@ -193,7 +193,7 @@ async def test_list_agents_pagination_skip(client: AsyncClient, multiple_agents:
 @pytest.mark.asyncio
 async def test_list_agents_pagination_limit(client: AsyncClient, multiple_agents: list[AgentConfig]):
     """Test pagination with limit parameter."""
-    response = await client.get("/api/agents?limit=3")
+    response = await client.get("/api/v1/agents?limit=3")
 
     assert response.status_code == 200
     data = response.json()
@@ -203,7 +203,7 @@ async def test_list_agents_pagination_limit(client: AsyncClient, multiple_agents
 @pytest.mark.asyncio
 async def test_list_agents_filter_active_only(client: AsyncClient, multiple_agents: list[AgentConfig]):
     """Test filtering for active agents only."""
-    response = await client.get("/api/agents?active_only=true")
+    response = await client.get("/api/v1/agents?active_only=true")
 
     assert response.status_code == 200
     data = response.json()
@@ -238,7 +238,7 @@ async def test_list_agents_filter_by_provider(
     await db_session.commit()
 
     # Filter by Ollama provider
-    response = await client.get(f"/api/agents?provider_id={test_provider.id}")
+    response = await client.get(f"/api/v1/agents?provider_id={test_provider.id}")
 
     assert response.status_code == 200
     data = response.json()
@@ -272,7 +272,7 @@ async def test_list_agents_combine_filters(client: AsyncClient, test_provider: L
     await db_session.commit()
 
     # Filter by provider and active only
-    response = await client.get(f"/api/agents?provider_id={test_provider.id}&active_only=true")
+    response = await client.get(f"/api/v1/agents?provider_id={test_provider.id}&active_only=true")
 
     assert response.status_code == 200
     data = response.json()
@@ -283,7 +283,7 @@ async def test_list_agents_combine_filters(client: AsyncClient, test_provider: L
 @pytest.mark.asyncio
 async def test_list_agents_invalid_pagination_negative_skip(client: AsyncClient):
     """Test validation error for negative skip value."""
-    response = await client.get("/api/agents?skip=-1")
+    response = await client.get("/api/v1/agents?skip=-1")
 
     assert response.status_code == 422  # Validation error
 
@@ -291,7 +291,7 @@ async def test_list_agents_invalid_pagination_negative_skip(client: AsyncClient)
 @pytest.mark.asyncio
 async def test_list_agents_invalid_pagination_zero_limit(client: AsyncClient):
     """Test validation error for zero limit value."""
-    response = await client.get("/api/agents?limit=0")
+    response = await client.get("/api/v1/agents?limit=0")
 
     assert response.status_code == 422  # Validation error
 
@@ -299,7 +299,7 @@ async def test_list_agents_invalid_pagination_zero_limit(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_list_agents_invalid_pagination_excessive_limit(client: AsyncClient):
     """Test validation error for limit exceeding maximum (1000)."""
-    response = await client.get("/api/agents?limit=1001")
+    response = await client.get("/api/v1/agents?limit=1001")
 
     assert response.status_code == 422  # Validation error
 
@@ -310,7 +310,7 @@ async def test_list_agents_invalid_pagination_excessive_limit(client: AsyncClien
 @pytest.mark.asyncio
 async def test_get_agent_success(client: AsyncClient, test_agent: AgentConfig):
     """Test successfully retrieving an agent by ID."""
-    response = await client.get(f"/api/agents/{test_agent.id}")
+    response = await client.get(f"/api/v1/agents/{test_agent.id}")
 
     assert response.status_code == 200
     data = response.json()
@@ -329,7 +329,7 @@ async def test_get_agent_success(client: AsyncClient, test_agent: AgentConfig):
 async def test_get_agent_not_found(client: AsyncClient):
     """Test 404 error when agent doesn't exist."""
     fake_uuid = uuid4()
-    response = await client.get(f"/api/agents/{fake_uuid}")
+    response = await client.get(f"/api/v1/agents/{fake_uuid}")
 
     assert response.status_code == 404
     data = response.json()
@@ -340,7 +340,7 @@ async def test_get_agent_not_found(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_get_agent_invalid_uuid(client: AsyncClient):
     """Test 422 error for invalid UUID format."""
-    response = await client.get("/api/agents/not-a-uuid")
+    response = await client.get("/api/v1/agents/not-a-uuid")
 
     assert response.status_code == 422
 
@@ -362,7 +362,7 @@ async def test_create_agent_all_fields(client: AsyncClient, test_provider: LLMPr
         "is_active": True,
     }
 
-    response = await client.post("/api/agents", json=payload)
+    response = await client.post("/api/v1/agents", json=payload)
 
     assert response.status_code == 201
     data = response.json()
@@ -388,7 +388,7 @@ async def test_create_agent_minimal_fields(client: AsyncClient, test_provider: L
         "system_prompt": "Test prompt",
     }
 
-    response = await client.post("/api/agents", json=payload)
+    response = await client.post("/api/v1/agents", json=payload)
 
     assert response.status_code == 201
     data = response.json()
@@ -412,7 +412,7 @@ async def test_create_agent_missing_required_name(client: AsyncClient, test_prov
         "system_prompt": "Test",
     }
 
-    response = await client.post("/api/agents", json=payload)
+    response = await client.post("/api/v1/agents", json=payload)
 
     assert response.status_code == 422
 
@@ -427,7 +427,7 @@ async def test_create_agent_missing_required_provider_id(client: AsyncClient):
         "system_prompt": "Test",
     }
 
-    response = await client.post("/api/agents", json=payload)
+    response = await client.post("/api/v1/agents", json=payload)
 
     assert response.status_code == 422
 
@@ -442,7 +442,7 @@ async def test_create_agent_missing_required_model_name(client: AsyncClient, tes
         "system_prompt": "Test",
     }
 
-    response = await client.post("/api/agents", json=payload)
+    response = await client.post("/api/v1/agents", json=payload)
 
     assert response.status_code == 422
 
@@ -457,7 +457,7 @@ async def test_create_agent_missing_required_system_prompt(client: AsyncClient, 
         # Missing "system_prompt"
     }
 
-    response = await client.post("/api/agents", json=payload)
+    response = await client.post("/api/v1/agents", json=payload)
 
     assert response.status_code == 422
 
@@ -472,7 +472,7 @@ async def test_create_agent_duplicate_name(client: AsyncClient, test_provider: L
         "system_prompt": "Different prompt",
     }
 
-    response = await client.post("/api/agents", json=payload)
+    response = await client.post("/api/v1/agents", json=payload)
 
     assert response.status_code == 409
     data = response.json()
@@ -491,7 +491,7 @@ async def test_create_agent_nonexistent_provider(client: AsyncClient):
         "system_prompt": "Test",
     }
 
-    response = await client.post("/api/agents", json=payload)
+    response = await client.post("/api/v1/agents", json=payload)
 
     assert response.status_code == 404
     data = response.json()
@@ -501,7 +501,7 @@ async def test_create_agent_nonexistent_provider(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_create_agent_invalid_temperature_below_zero(client: AsyncClient, test_provider: LLMProvider):
-    """Test 400 error for temperature below 0.0."""
+    """Test 422 error for temperature below 0.0 (Pydantic validation)."""
     payload = {
         "name": "Invalid Temp Agent",
         "provider_id": str(test_provider.id),
@@ -510,16 +510,16 @@ async def test_create_agent_invalid_temperature_below_zero(client: AsyncClient, 
         "temperature": -0.1,
     }
 
-    response = await client.post("/api/agents", json=payload)
+    response = await client.post("/api/v1/agents", json=payload)
 
-    assert response.status_code == 400
+    assert response.status_code == 422
     data = response.json()
-    assert "temperature" in data["detail"].lower()
+    assert "temperature" in str(data["detail"]).lower()
 
 
 @pytest.mark.asyncio
 async def test_create_agent_invalid_temperature_above_one(client: AsyncClient, test_provider: LLMProvider):
-    """Test 400 error for temperature above 1.0."""
+    """Test 422 error for temperature above 1.0 (Pydantic validation)."""
     payload = {
         "name": "Invalid Temp Agent",
         "provider_id": str(test_provider.id),
@@ -528,11 +528,11 @@ async def test_create_agent_invalid_temperature_above_one(client: AsyncClient, t
         "temperature": 1.1,
     }
 
-    response = await client.post("/api/agents", json=payload)
+    response = await client.post("/api/v1/agents", json=payload)
 
-    assert response.status_code == 400
+    assert response.status_code == 422
     data = response.json()
-    assert "temperature" in data["detail"].lower()
+    assert "temperature" in str(data["detail"]).lower()
 
 
 @pytest.mark.asyncio
@@ -545,7 +545,7 @@ async def test_create_agent_empty_model_name(client: AsyncClient, test_provider:
         "system_prompt": "Test",
     }
 
-    response = await client.post("/api/agents", json=payload)
+    response = await client.post("/api/v1/agents", json=payload)
 
     # Should be 422 (validation error) or 400 (bad request)
     assert response.status_code in [400, 422]
@@ -561,7 +561,7 @@ async def test_create_agent_empty_system_prompt(client: AsyncClient, test_provid
         "system_prompt": "",  # Empty string
     }
 
-    response = await client.post("/api/agents", json=payload)
+    response = await client.post("/api/v1/agents", json=payload)
 
     # Should be 422 (validation error) or 400 (bad request)
     assert response.status_code in [400, 422]
@@ -584,7 +584,7 @@ async def test_update_agent_all_fields(client: AsyncClient, test_agent: AgentCon
         "is_active": False,
     }
 
-    response = await client.put(f"/api/agents/{test_agent.id}", json=payload)
+    response = await client.put(f"/api/v1/agents/{test_agent.id}", json=payload)
 
     assert response.status_code == 200
     data = response.json()
@@ -610,7 +610,7 @@ async def test_update_agent_partial_update(client: AsyncClient, test_agent: Agen
         "temperature": 0.9,
     }
 
-    response = await client.put(f"/api/agents/{test_agent.id}", json=payload)
+    response = await client.put(f"/api/v1/agents/{test_agent.id}", json=payload)
 
     assert response.status_code == 200
     data = response.json()
@@ -627,7 +627,7 @@ async def test_update_agent_not_found(client: AsyncClient):
     fake_uuid = uuid4()
     payload = {"name": "New Name"}
 
-    response = await client.put(f"/api/agents/{fake_uuid}", json=payload)
+    response = await client.put(f"/api/v1/agents/{fake_uuid}", json=payload)
 
     assert response.status_code == 404
 
@@ -651,7 +651,7 @@ async def test_update_agent_duplicate_name(
     # Try to update test_agent to have same name as other_agent
     payload = {"name": other_agent.name}
 
-    response = await client.put(f"/api/agents/{test_agent.id}", json=payload)
+    response = await client.put(f"/api/v1/agents/{test_agent.id}", json=payload)
 
     assert response.status_code == 409
     data = response.json()
@@ -664,19 +664,19 @@ async def test_update_agent_invalid_provider_id(client: AsyncClient, test_agent:
     fake_uuid = uuid4()
     payload = {"provider_id": str(fake_uuid)}
 
-    response = await client.put(f"/api/agents/{test_agent.id}", json=payload)
+    response = await client.put(f"/api/v1/agents/{test_agent.id}", json=payload)
 
     assert response.status_code == 404
 
 
 @pytest.mark.asyncio
 async def test_update_agent_invalid_temperature(client: AsyncClient, test_agent: AgentConfig):
-    """Test 400 error for invalid temperature during update."""
+    """Test 422 error for invalid temperature during update (Pydantic validation)."""
     payload = {"temperature": 1.5}
 
-    response = await client.put(f"/api/agents/{test_agent.id}", json=payload)
+    response = await client.put(f"/api/v1/agents/{test_agent.id}", json=payload)
 
-    assert response.status_code == 400
+    assert response.status_code == 422
 
 
 @pytest.mark.asyncio
@@ -690,7 +690,7 @@ async def test_update_agent_timestamp_changes(client: AsyncClient, test_agent: A
     await asyncio.sleep(0.1)
 
     payload = {"description": "New description"}
-    response = await client.put(f"/api/agents/{test_agent.id}", json=payload)
+    response = await client.put(f"/api/v1/agents/{test_agent.id}", json=payload)
 
     assert response.status_code == 200
     data = response.json()
@@ -708,11 +708,12 @@ async def test_delete_agent_success(client: AsyncClient, test_agent: AgentConfig
     """Test successfully deleting an agent."""
     agent_id = test_agent.id
 
-    response = await client.delete(f"/api/agents/{agent_id}")
+    response = await client.delete(f"/api/v1/agents/{agent_id}")
 
     assert response.status_code == 204
 
-    # Verify agent is deleted from database
+    # Verify agent is deleted from database (expire cache to force DB query)
+    db_session.expire_all()
     deleted_agent = await db_session.get(AgentConfig, agent_id)
     assert deleted_agent is None
 
@@ -722,7 +723,7 @@ async def test_delete_agent_not_found(client: AsyncClient):
     """Test 404 error when deleting non-existent agent."""
     fake_uuid = uuid4()
 
-    response = await client.delete(f"/api/agents/{fake_uuid}")
+    response = await client.delete(f"/api/v1/agents/{fake_uuid}")
 
     assert response.status_code == 404
 
@@ -730,7 +731,7 @@ async def test_delete_agent_not_found(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_delete_agent_invalid_uuid(client: AsyncClient):
     """Test 422 error for invalid UUID format."""
-    response = await client.delete("/api/agents/not-a-uuid")
+    response = await client.delete("/api/v1/agents/not-a-uuid")
 
     assert response.status_code == 422
 
@@ -751,7 +752,7 @@ async def test_test_agent_success(client: AsyncClient, test_agent: AgentConfig):
 
         payload = {"prompt": "What is the capital of France?"}
 
-        response = await client.post(f"/api/agents/{test_agent.id}/test", json=payload)
+        response = await client.post(f"/api/v1/agents/{test_agent.id}/test", json=payload)
 
         assert response.status_code == 200
         data = response.json()
@@ -772,7 +773,7 @@ async def test_test_agent_not_found(client: AsyncClient):
     fake_uuid = uuid4()
     payload = {"prompt": "Test prompt"}
 
-    response = await client.post(f"/api/agents/{fake_uuid}/test", json=payload)
+    response = await client.post(f"/api/v1/agents/{fake_uuid}/test", json=payload)
 
     assert response.status_code == 400  # Service raises ValueError -> 400
 
@@ -795,7 +796,7 @@ async def test_test_agent_with_inactive_provider(
 
     payload = {"prompt": "Test prompt"}
 
-    response = await client.post(f"/api/agents/{agent.id}/test", json=payload)
+    response = await client.post(f"/api/v1/agents/{agent.id}/test", json=payload)
 
     assert response.status_code == 400
     data = response.json()
@@ -825,7 +826,7 @@ async def test_test_agent_with_unvalidated_provider(
 
     payload = {"prompt": "Test prompt"}
 
-    response = await client.post(f"/api/agents/{agent.id}/test", json=payload)
+    response = await client.post(f"/api/v1/agents/{agent.id}/test", json=payload)
 
     assert response.status_code == 400
     data = response.json()
@@ -837,7 +838,7 @@ async def test_test_agent_empty_prompt(client: AsyncClient, test_agent: AgentCon
     """Test validation error for empty prompt."""
     payload = {"prompt": ""}
 
-    response = await client.post(f"/api/agents/{test_agent.id}/test", json=payload)
+    response = await client.post(f"/api/v1/agents/{test_agent.id}/test", json=payload)
 
     # Should be 422 (validation error from Pydantic)
     assert response.status_code == 422
@@ -848,7 +849,7 @@ async def test_test_agent_missing_prompt(client: AsyncClient, test_agent: AgentC
     """Test validation error for missing prompt field."""
     payload = {}  # Missing "prompt"
 
-    response = await client.post(f"/api/agents/{test_agent.id}/test", json=payload)
+    response = await client.post(f"/api/v1/agents/{test_agent.id}/test", json=payload)
 
     assert response.status_code == 422
 
@@ -858,7 +859,7 @@ async def test_test_agent_prompt_too_long(client: AsyncClient, test_agent: Agent
     """Test validation error for prompt exceeding max length (5000)."""
     payload = {"prompt": "A" * 5001}
 
-    response = await client.post(f"/api/agents/{test_agent.id}/test", json=payload)
+    response = await client.post(f"/api/v1/agents/{test_agent.id}/test", json=payload)
 
     assert response.status_code == 422
 
@@ -874,7 +875,7 @@ async def test_test_agent_llm_failure(client: AsyncClient, test_agent: AgentConf
 
         payload = {"prompt": "Test prompt"}
 
-        response = await client.post(f"/api/agents/{test_agent.id}/test", json=payload)
+        response = await client.post(f"/api/v1/agents/{test_agent.id}/test", json=payload)
 
         assert response.status_code == 500
         data = response.json()
@@ -906,7 +907,7 @@ async def test_test_agent_with_openai_provider(
 
         payload = {"prompt": "Hello"}
 
-        response = await client.post(f"/api/agents/{agent.id}/test", json=payload)
+        response = await client.post(f"/api/v1/agents/{agent.id}/test", json=payload)
 
         assert response.status_code == 200
         data = response.json()

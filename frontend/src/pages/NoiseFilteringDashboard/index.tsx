@@ -8,10 +8,11 @@ import {
 } from '@heroicons/react/24/outline'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Badge, Skeleton, Button } from '@/shared/ui'
+import { PageHeader } from '@/shared/components/PageHeader'
 import MetricCard from '@/shared/components/MetricCard'
 import { noiseService } from '@/features/noise/api/noiseService'
 import type { NoiseStats } from '@/features/noise/types'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import {
   LineChart,
   Line,
@@ -133,17 +134,20 @@ const NoiseFilteringDashboard = () => {
 
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Noise Filtering Dashboard</h1>
-        <Button
-          onClick={() => scoreBatchMutation.mutate(batchScoringLimit)}
-          disabled={scoreBatchMutation.isPending}
-          className="flex items-center gap-2"
-        >
-          <ArrowPathIcon className={`w-4 h-4 ${scoreBatchMutation.isPending ? 'animate-spin' : ''}`} />
-          Score Unscored Messages
-        </Button>
-      </div>
+      <PageHeader
+        title="Noise Filtering"
+        description="Message scoring statistics, signal-to-noise ratio, quality metrics, and filtering effectiveness over time"
+        actions={
+          <Button
+            onClick={() => scoreBatchMutation.mutate(batchScoringLimit)}
+            disabled={scoreBatchMutation.isPending}
+            size="sm"
+          >
+            <ArrowPathIcon className={`w-4 h-4 mr-2 ${scoreBatchMutation.isPending ? 'animate-spin' : ''}`} />
+            Score Unscored Messages
+          </Button>
+        }
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 animate-fade-in-up">
         {statsLoading ? (

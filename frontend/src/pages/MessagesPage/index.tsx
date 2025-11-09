@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  Spinner,
   Button,
   Card,
+  Skeleton,
+  Badge,
+  Checkbox,
 } from '@/shared/ui'
+import { PageHeader } from '@/shared/components/PageHeader'
 import { apiClient } from '@/shared/lib/api/client'
-import { API_ENDPOINTS } from '@/shared/config/api'
+import { API_ENDPOINTS, API_BASE_PATH } from '@/shared/config/api'
 import { toast } from 'sonner'
 import { logger } from '@/shared/utils/logger'
 import {
@@ -21,15 +24,23 @@ import {
   getFacetedUniqueValues,
   useReactTable,
 } from '@tanstack/react-table'
-import { createColumns, sourceLabels, statusLabels, classificationLabels } from './columns'
+import { createColumns, sourceLabels } from './columns'
+import { getMessageAnalysisBadge, getNoiseClassificationBadge, getImportanceBadge } from '@/shared/utils/statusBadges'
 import { Message, NoiseClassification } from '@/shared/types'
 import { DataTable } from '@/shared/components/DataTable'
 import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
 import { DataTablePagination } from '@/shared/components/DataTablePagination'
 import { DataTableFacetedFilter } from './faceted-filter'
 import { ImportanceScoreFilter } from './importance-score-filter'
-import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { DataTableMobileCard } from '@/shared/components/DataTableMobileCard'
+import { BulkActionsToolbar } from '@/shared/components/AdminPanel/BulkActionsToolbar'
+import { useMultiSelect } from '@/shared/hooks'
+import { useAdminMode } from '@/shared/hooks/useAdminMode'
+import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
 import { IngestionModal } from './IngestionModal'
+import { MessageInspectModal } from '@/features/messages/components/MessageInspectModal'
+import { ConsumerMessageModal } from '@/features/messages/components/ConsumerMessageModal'
+import { formatFullDate } from '@/shared/utils/date'
 
 interface MessageQueryParams {
   page: number
@@ -49,6 +60,9 @@ interface PaginatedResponse {
 const MessagesPage = () => {
   const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
+  const [inspectingMessageId, setInspectingMessageId] = useState<string | null>(null)
+  const [viewingMessageId, setViewingMessageId] = useState<string | null>(null)
+  const { isAdminMode } = useAdminMode()
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
 
@@ -57,7 +71,10 @@ const MessagesPage = () => {
     { id: 'sent_at', desc: true }
   ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
+    id: false,
+    sent_at: false,
+  })
   const [rowSelection, setRowSelection] = React.useState({})
   const [globalFilter, setGlobalFilter] = React.useState('')
 
@@ -66,12 +83,17 @@ const MessagesPage = () => {
       const isMobile = window.innerWidth < 768
       if (isMobile) {
         setColumnVisibility({
-          source: false,
+          id: false,
+          sent_at: false,
+          source_name: false,
           importance_score: false,
-          classification: false,
+          noise_classification: false,
         })
       } else {
-        setColumnVisibility({})
+        setColumnVisibility({
+          id: false,
+          sent_at: false,
+        })
       }
     }
 
@@ -156,14 +178,27 @@ const MessagesPage = () => {
     return sort.id !== 'sent_at' || sort.desc !== true
   }, [columnFilters, sorting])
 
-  const handleReset = React.useCallback(() => {
+  const handleReset = useCallback(() => {
     setColumnFilters([])
     setSorting([{ id: 'sent_at', desc: true }])
   }, [])
 
-  const columns = React.useMemo(
-    () => createColumns({ onReset: handleReset, hasActiveFilters }),
-    [hasActiveFilters, handleReset]
+  // Use ref to store checkbox click handler to avoid columns recreation
+  const checkboxClickHandlerRef = React.useRef<((rowId: string, event: React.MouseEvent) => void) | undefined>(undefined)
+
+  // Stable callback that delegates to ref
+  const handleCheckboxClick = useCallback((rowId: string, event: React.MouseEvent) => {
+    checkboxClickHandlerRef.current?.(rowId, event)
+  }, [])
+
+  const columns = useMemo(
+    () =>
+      createColumns({
+        onReset: handleReset,
+        hasActiveFilters,
+        onCheckboxClick: handleCheckboxClick,
+      }),
+    [hasActiveFilters, handleReset, handleCheckboxClick]
   )
 
   const table = useReactTable({
@@ -216,6 +251,18 @@ const MessagesPage = () => {
     },
   })
 
+  const multiSelect = useMultiSelect({
+    table,
+    onSelectionChange: (selectedIds) => {
+      logger.debug('Selection changed:', selectedIds)
+    },
+  })
+
+  // Update ref when multiSelect.handleCheckboxClick changes
+  React.useEffect(() => {
+    checkboxClickHandlerRef.current = multiSelect.handleCheckboxClick
+  }, [multiSelect.handleCheckboxClick])
+
   const handleIngestMessages = () => {
     logger.debug('Opening ingestion modal')
     setModalOpen(true)
@@ -261,46 +308,210 @@ const MessagesPage = () => {
 
   const selectedRowsCount = Object.keys(rowSelection).length
 
-  const handleBulkDelete = () => {
-    if (selectedRowsCount === 0) return
-    const confirmed = window.confirm(`Delete ${selectedRowsCount} selected messages?`)
-    if (confirmed) {
-      toast.success(`${selectedRowsCount} messages deleted (demo)`)
-      setRowSelection({})
-    }
-  }
+  const handleBulkApprove = useCallback(async () => {
+    const count = Object.keys(table.getState().rowSelection).length
+    if (count === 0) return
 
-  const handleBulkExport = () => {
-    if (selectedRowsCount === 0) return
-    toast.success(`Exporting ${selectedRowsCount} messages (demo)`)
-  }
+    const selectedIds = table.getSelectedRowModel().rows.map(row => row.original.id)
+    const toastId = toast.loading(`Approving ${count} messages...`)
+
+    try {
+      const response = await fetch(`${API_BASE_PATH}/atoms/bulk-approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ atom_ids: selectedIds }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to approve messages: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      const { approved_count, failed_ids = [], errors = [] } = data
+
+      if (failed_ids.length > 0) {
+        toast.warning(
+          `Approved ${approved_count}/${count} messages. ${failed_ids.length} failed.`,
+          { id: toastId }
+        )
+        logger.warn('Bulk approve partial failure:', { failed_ids, errors })
+      } else {
+        toast.success(`Approved ${approved_count} messages`, { id: toastId })
+      }
+
+      multiSelect.handleClearSelection()
+      await refetch()
+    } catch (error) {
+      logger.error('Bulk approve error:', error)
+      toast.error('Failed to approve messages', { id: toastId })
+    }
+  }, [table, multiSelect, refetch])
+
+  const handleBulkArchive = useCallback(async () => {
+    const count = Object.keys(table.getState().rowSelection).length
+    if (count === 0) return
+
+    const selectedIds = table.getSelectedRowModel().rows.map(row => row.original.id)
+    const toastId = toast.loading(`Archiving ${count} messages...`)
+
+    try {
+      const response = await fetch(`${API_BASE_PATH}/atoms/bulk-archive`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ atom_ids: selectedIds }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to archive messages: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      const { archived_count, failed_ids = [], errors = [] } = data
+
+      if (failed_ids.length > 0) {
+        toast.warning(
+          `Archived ${archived_count}/${count} messages. ${failed_ids.length} failed.`,
+          { id: toastId }
+        )
+        logger.warn('Bulk archive partial failure:', { failed_ids, errors })
+      } else {
+        toast.success(`Archived ${archived_count} messages`, { id: toastId })
+      }
+
+      multiSelect.handleClearSelection()
+      await refetch()
+    } catch (error) {
+      logger.error('Bulk archive error:', error)
+      toast.error('Failed to archive messages', { id: toastId })
+    }
+  }, [table, multiSelect, refetch])
+
+  const handleBulkDelete = useCallback(async () => {
+    const count = Object.keys(table.getState().rowSelection).length
+    if (count === 0) return
+
+    const confirmed = window.confirm(`Delete ${count} selected messages?`)
+    if (!confirmed) return
+
+    const selectedIds = table.getSelectedRowModel().rows.map(row => row.original.id)
+    const toastId = toast.loading(`Deleting ${count} messages...`)
+
+    try {
+      const response = await fetch(`${API_BASE_PATH}/atoms/bulk-delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ atom_ids: selectedIds }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete messages: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      const { deleted_count, failed_ids = [], errors = [] } = data
+
+      if (failed_ids.length > 0) {
+        toast.warning(
+          `Deleted ${deleted_count}/${count} messages. ${failed_ids.length} failed.`,
+          { id: toastId }
+        )
+        logger.warn('Bulk delete partial failure:', { failed_ids, errors })
+      } else {
+        toast.success(`Deleted ${deleted_count} messages`, { id: toastId })
+      }
+
+      multiSelect.handleClearSelection()
+      await refetch()
+    } catch (error) {
+      logger.error('Bulk delete error:', error)
+      toast.error('Failed to delete messages', { id: toastId })
+    }
+  }, [table, multiSelect, refetch])
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Spinner size="lg" />
+      <div className="space-y-4 animate-fade-in" role="status" aria-label="Loading messages" aria-live="polite">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-32" />
+          <div className="flex gap-2">
+            <Skeleton className="h-9 w-24" />
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-9 w-36" />
+          </div>
+        </div>
+        <Card className="overflow-hidden">
+          <div className="p-4 space-y-4">
+            <div className="flex gap-2 mb-4">
+              <Skeleton className="h-10 flex-1 max-w-xs" />
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-24" />
+            </div>
+            <div className="border rounded-md">
+              <div className="border-b">
+                <Skeleton className="h-12 w-full" />
+              </div>
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="border-b last:border-b-0 p-4 flex gap-4">
+                  <Skeleton className="h-5 w-5 rounded" />
+                  <Skeleton className="h-5 w-16" />
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-5 flex-1" />
+                  <Skeleton className="h-5 w-20" />
+                  <Skeleton className="h-5 w-20" />
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-between pt-2">
+              <Skeleton className="h-9 w-48" />
+              <Skeleton className="h-9 w-64" />
+            </div>
+          </div>
+        </Card>
       </div>
     )
   }
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">Messages</h2>
-        <div className="flex gap-2">
-          <Button onClick={handleRefreshMessages} size="sm" variant="outline">
-            <ArrowPathIcon className="mr-2 h-4 w-4" />
-            Refresh
-          </Button>
-          <Button onClick={handleUpdateAuthors} size="sm" variant="outline">
-            <UserIcon className="mr-2 h-4 w-4" />
-            Update Authors
-          </Button>
-          <Button onClick={handleIngestMessages} size="sm">
-            <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
-            Ingest Messages
-          </Button>
-        </div>
+      <PageHeader
+        title="Messages"
+        description="View and manage all incoming messages with importance scores, noise filtering, and real-time updates from Telegram"
+        actions={
+          <>
+            <Button onClick={handleRefreshMessages} size="sm" variant="outline">
+              <ArrowPathIcon className="mr-2 h-4 w-4" />
+              Refresh
+            </Button>
+            <Button onClick={handleUpdateAuthors} size="sm" variant="outline">
+              <UserIcon className="mr-2 h-4 w-4" />
+              Update Authors
+            </Button>
+            <Button onClick={handleIngestMessages} size="sm">
+              <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
+              Ingest Messages
+            </Button>
+          </>
+        }
+      />
+
+      <div className="min-h-[60px]">
+        {selectedRowsCount > 0 && (
+          <BulkActionsToolbar
+            selectedCount={selectedRowsCount}
+            totalCount={paginatedData?.total || 0}
+            onSelectAll={multiSelect.handleSelectAll}
+            onClearSelection={multiSelect.handleClearSelection}
+            onApprove={handleBulkApprove}
+            onArchive={handleBulkArchive}
+            onDelete={handleBulkDelete}
+          />
+        )}
       </div>
 
       <DataTableToolbar
@@ -323,19 +534,22 @@ const MessagesPage = () => {
           columnKey="analyzed"
           table={table}
           title="Status"
-          options={Object.entries(statusLabels).map(([value, meta]) => ({
-            value,
-            label: meta.label
-          }))}
+          options={[
+            { value: 'analyzed', label: getMessageAnalysisBadge(true).label || 'Analyzed' },
+            { value: 'pending', label: getMessageAnalysisBadge(false).label || 'Pending' },
+          ]}
         />
         <DataTableFacetedFilter
           columnKey="noise_classification"
           table={table}
           title="Classification"
-          options={Object.entries(classificationLabels).map(([value, meta]) => ({
-            value: value as NoiseClassification,
-            label: meta.label
-          }))}
+          options={(['signal', 'weak_signal', 'noise'] as NoiseClassification[]).map((value) => {
+            const config = getNoiseClassificationBadge(value)
+            return {
+              value,
+              label: config.label || value,
+            }
+          })}
         />
         <ImportanceScoreFilter
           column={table.getColumn('importance_score')}
@@ -343,41 +557,123 @@ const MessagesPage = () => {
         />
       </DataTableToolbar>
 
-      <DataTable table={table} columns={columns} emptyMessage="No messages found." />
+      <DataTable
+        table={table}
+        columns={columns}
+        emptyMessage="No messages found."
+        onRowClick={(message: Message) => {
+          if (isAdminMode) {
+            setInspectingMessageId(String(message.id))
+          } else {
+            setViewingMessageId(String(message.id))
+          }
+        }}
+        renderMobileCard={(message: Message) => {
+          const statusBadge = getMessageAnalysisBadge(message.analyzed || false)
+          const importanceBadge = message.importance_score !== null && message.importance_score !== undefined
+            ? getImportanceBadge(message.importance_score)
+            : null
+          const content = message.content || ''
+          const isEmpty = !content || content.trim() === ''
+          const isSelected = (rowSelection as Record<string, boolean>)[String(message.id)] || false
+
+          return (
+            <DataTableMobileCard
+              isSelected={isSelected}
+              onClick={() => {
+                if (isAdminMode) {
+                  setInspectingMessageId(String(message.id))
+                } else {
+                  setViewingMessageId(String(message.id))
+                }
+              }}
+            >
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={(checked) => {
+                        setRowSelection(prev => ({
+                          ...prev,
+                          [String(message.id)]: !!checked
+                        }))
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <div className="flex items-center gap-2 min-w-0">
+                      {message.avatar_url ? (
+                        <img
+                          src={message.avatar_url}
+                          alt={message.author_name || message.author}
+                          className="h-8 w-8 rounded-full flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          <UserIcon className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <span className="font-medium truncate">
+                        {message.author_name || message.author}
+                      </span>
+                    </div>
+                  </div>
+                  <Badge variant={statusBadge.variant} className={statusBadge.className}>
+                    {statusBadge.label}
+                  </Badge>
+                </div>
+
+                <div>
+                  {isEmpty ? (
+                    <div className="flex items-center gap-2 text-muted-foreground/50 italic text-sm">
+                      <EnvelopeIcon className="h-4 w-4" />
+                      <span>(Empty message)</span>
+                    </div>
+                  ) : (
+                    <p className="text-sm line-clamp-3">{content}</p>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {importanceBadge && (
+                    <Badge variant={importanceBadge.variant} className={importanceBadge.className}>
+                      {importanceBadge.label}
+                    </Badge>
+                  )}
+                  {message.topic_name && (
+                    <Badge variant="outline">{message.topic_name}</Badge>
+                  )}
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {message.sent_at ? formatFullDate(message.sent_at) : '-'}
+                  </span>
+                </div>
+              </div>
+            </DataTableMobileCard>
+          )
+        }}
+      />
 
       <DataTablePagination table={table} />
-
-      {selectedRowsCount > 0 && (
-        <Card className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 shadow-lg border-2">
-          <div className="flex items-center gap-4 px-6 py-3 bg-primary text-primary-foreground rounded-lg">
-            <span className="font-medium">{selectedRowsCount} selected</span>
-            <div className="flex gap-2">
-              <Button size="sm" variant="secondary" onClick={handleBulkExport}>
-                <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
-                Export
-              </Button>
-              <Button size="sm" variant="destructive" onClick={handleBulkDelete}>
-                <TrashIcon className="h-4 w-4 mr-1" />
-                Delete
-              </Button>
-            </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setRowSelection({})}
-              className="text-primary-foreground hover:bg-primary-foreground/20"
-            >
-              Clear
-            </Button>
-          </div>
-        </Card>
-      )}
 
       <IngestionModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSuccess={handleIngestionSuccess}
       />
+
+      {inspectingMessageId && (
+        <MessageInspectModal
+          messageId={inspectingMessageId}
+          onClose={() => setInspectingMessageId(null)}
+        />
+      )}
+
+      {viewingMessageId && (
+        <ConsumerMessageModal
+          messageId={viewingMessageId}
+          onClose={() => setViewingMessageId(null)}
+        />
+      )}
     </div>
   )
 }

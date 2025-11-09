@@ -8,35 +8,16 @@ import logging
 import time
 from uuid import UUID
 
-from pydantic import BaseModel, Field
 from pydantic_ai import Agent as PydanticAgent
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.settings import ModelSettings
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.api.v1.schemas.agent import AgentTestResponse
 from app.models import AgentConfig, LLMProvider, ProviderType, ValidationStatus
 from app.services.credential_encryption import CredentialEncryption
 
 logger = logging.getLogger(__name__)
-
-
-class TestAgentRequest(BaseModel):
-    """Request schema for testing an agent."""
-
-    prompt: str = Field(min_length=1, max_length=5000, description="Test prompt to send to the agent")
-
-
-class TestAgentResponse(BaseModel):
-    """Response schema for agent test results."""
-
-    agent_id: UUID = Field(description="UUID of the tested agent")
-    agent_name: str = Field(description="Name of the tested agent")
-    prompt: str = Field(description="Prompt that was sent to the agent")
-    response: str = Field(description="Agent's response from LLM")
-    elapsed_time: float = Field(description="Time taken to get response in seconds")
-    model_name: str = Field(description="Model used for the test")
-    provider_name: str = Field(description="Provider name")
-    provider_type: str = Field(description="Provider type (ollama, openai)")
 
 
 class AgentTestService:
@@ -51,7 +32,7 @@ class AgentTestService:
         self.session = session
         self.encryptor = CredentialEncryption()
 
-    async def test_agent(self, agent_id: UUID, test_prompt: str) -> TestAgentResponse:
+    async def test_agent(self, agent_id: UUID, test_prompt: str) -> AgentTestResponse:
         """Test an agent configuration with a custom prompt.
 
         Args:
@@ -128,7 +109,7 @@ class AgentTestService:
 
             logger.info(f"Successfully tested agent '{agent.name}' (elapsed: {elapsed_time:.2f}s)")
 
-            return TestAgentResponse(
+            return AgentTestResponse(
                 agent_id=agent.id,
                 agent_name=agent.name,
                 prompt=test_prompt,

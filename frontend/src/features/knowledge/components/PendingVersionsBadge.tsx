@@ -65,12 +65,16 @@ export function PendingVersionsBadge() {
     return null;
   }
 
+  const tooltipText = pendingCount.count === 1
+    ? '1 version awaiting approval'
+    : `${pendingCount.count} versions awaiting approval (${pendingCount.topics} topics, ${pendingCount.atoms} atoms)`;
+
   return (
     <Badge
       variant="destructive"
       className="cursor-pointer transition-all duration-300 ease-in-out hover:scale-110"
       onClick={handleClick}
-      title={`Очікують схвалення: ${pendingCount.topics} топіків, ${pendingCount.atoms} атомів`}
+      title={tooltipText}
       style={{
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'scale(1)' : 'scale(0.8)',

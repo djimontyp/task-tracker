@@ -7,8 +7,8 @@ from core.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
-from .models import WebhookSettings
-from .schemas import TelegramWebhookConfig
+from app.models import WebhookSettings
+from app.schemas import TelegramWebhookConfig
 
 logger = logging.getLogger(__name__)
 
@@ -58,14 +58,14 @@ class TelegramWebhookService:
         """Fetch Telegram user avatar URL using Bot API."""
 
         if not user_id:
-            print(f"❌ get_user_avatar_url: user_id is None or 0")
+            logger.debug("get_user_avatar_url: user_id is None or 0")
             return None
 
         if user_id in self._avatar_cache:
-            print(f"💾 get_user_avatar_url: returning cached avatar for user {user_id}")
+            logger.debug("get_user_avatar_url: returning cached avatar for user %s", user_id)
             return self._avatar_cache[user_id]
 
-        print(f"🔄 get_user_avatar_url: fetching avatar for user {user_id}")
+        logger.debug("get_user_avatar_url: fetching avatar for user %s", user_id)
         profile_photos_url = f"{self.TELEGRAM_API_BASE}{self.bot_token}/getUserProfilePhotos"
 
         try:
@@ -88,10 +88,15 @@ class TelegramWebhookService:
 
             photos = result.get("result", {}).get("photos", [])
             total_count = result.get("result", {}).get("total_count", 0)
-            print(f"📸 get_user_avatar_url: user {user_id} has {total_count} photos, got {len(photos)} in response")
+            logger.debug(
+                "get_user_avatar_url: user %s has %s photos, got %s in response",
+                user_id,
+                total_count,
+                len(photos),
+            )
 
             if not photos:
-                print(f"⚠️  get_user_avatar_url: user {user_id} has no profile photos")
+                logger.debug("get_user_avatar_url: user %s has no profile photos", user_id)
                 return None
 
             # Latest photo is first in array. Take biggest size (last item)
@@ -113,12 +118,12 @@ class TelegramWebhookService:
 
             file_path = file_result.get("result", {}).get("file_path")
             if not file_path:
-                print(f"❌ get_user_avatar_url: no file_path in response for user {user_id}")
+                logger.debug("get_user_avatar_url: no file_path in response for user %s", user_id)
                 return None
 
             avatar_url = f"https://api.telegram.org/file/bot{self.bot_token}/{file_path}"
             self._avatar_cache[user_id] = avatar_url
-            print(f"✅ get_user_avatar_url: successfully got avatar for user {user_id}: {avatar_url[:50]}...")
+            logger.debug("get_user_avatar_url: successfully got avatar for user %s", user_id)
             return avatar_url
 
         except httpx.RequestError as exc:
@@ -223,7 +228,7 @@ class WebhookSettingsService:
     @staticmethod
     def _dict_to_telegram_config(data: dict[str, Any]) -> TelegramWebhookConfig:
         """Convert dict to TelegramWebhookConfig, handling type conversions"""
-        from .schemas import TelegramGroupInfo
+        from app.schemas import TelegramGroupInfo
 
         last_set_at_str = data.get("last_set_at")
         last_set_at = datetime.fromisoformat(last_set_at_str) if last_set_at_str else None

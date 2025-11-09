@@ -144,7 +144,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
       return new Date(selectedYear, selectedMonth + 1, 0).getDate()
     }, [selectedMonth, selectedYear])
 
-    const _cells = useMemo(() => {
+    useMemo(() => {
       const result: HeatmapCell[] = []
       const daysToShow = selectedPeriod === 'week' ? 7 : daysInMonth
 

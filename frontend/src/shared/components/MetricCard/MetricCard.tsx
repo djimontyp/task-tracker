@@ -1,7 +1,10 @@
 import React, { useCallback } from 'react'
 import { ArrowUpIcon, ArrowDownIcon, MinusIcon } from '@heroicons/react/24/outline'
 import { Card, CardContent } from '@/shared/ui/card'
+import { Badge } from '@/shared/ui/badge'
 import { cn } from '@/shared/lib'
+
+type MetricStatus = 'critical' | 'warning' | 'optimal'
 
 export interface MetricCardProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string
@@ -15,10 +18,57 @@ export interface MetricCardProps extends React.HTMLAttributes<HTMLDivElement> {
   iconColor?: string
   loading?: boolean
   emptyMessage?: string
+  status?: MetricStatus
+}
+
+const getStatusBadgeVariant = (
+  status: MetricStatus
+): 'default' | 'destructive' | 'secondary' => {
+  switch (status) {
+    case 'critical':
+      return 'destructive'
+    case 'warning':
+      return 'secondary'
+    case 'optimal':
+      return 'default'
+  }
+}
+
+const getStatusBadgeLabel = (status: MetricStatus): string => {
+  switch (status) {
+    case 'critical':
+      return 'Critical'
+    case 'warning':
+      return 'Warning'
+    case 'optimal':
+      return 'Good'
+  }
+}
+
+const getStatusBadgeColor = (status: MetricStatus): string => {
+  switch (status) {
+    case 'critical':
+      return 'border-red-500 text-red-600 bg-red-50 dark:bg-red-950'
+    case 'warning':
+      return 'border-yellow-500 text-yellow-600 bg-yellow-50 dark:bg-yellow-950'
+    case 'optimal':
+      return 'border-green-500 text-green-600 bg-green-50 dark:bg-green-950'
+  }
+}
+
+const getCardBorderColor = (status: MetricStatus): string => {
+  switch (status) {
+    case 'critical':
+      return 'border-red-500'
+    case 'warning':
+      return 'border-yellow-500'
+    case 'optimal':
+      return 'border-green-500/30'
+  }
 }
 
 const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
-  ({ title, value, subtitle, trend, icon: Icon, iconColor, className, onClick, loading = false, emptyMessage, ...props }, ref) => {
+  ({ title, value, subtitle, trend, icon: Icon, iconColor, className, onClick, loading = false, emptyMessage, status, ...props }, ref) => {
     const getTrendIcon = () => {
       if (!trend) return null
       switch (trend.direction) {
@@ -102,8 +152,10 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
       <Card
         ref={ref}
         className={cn(
-          'transition-all duration-300 min-h-[7rem] sm:min-h-[8rem]',
+          'transition-all duration-300 min-h-[7rem] sm:min-h-[8rem] relative',
           onClick && 'ripple-container click-feedback cursor-pointer hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+          status && getCardBorderColor(status),
+          status === 'critical' && 'animate-pulse',
           className
         )}
         onClick={onClick ? handleClick : undefined}
@@ -115,9 +167,19 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
       >
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              {Icon && <Icon className={cn('w-4 h-4', iconColor || 'text-muted-foreground')} />}
-              <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {Icon && <Icon className={cn('w-4 h-4', iconColor || 'text-muted-foreground')} />}
+                <p className="text-sm font-medium text-muted-foreground">{title}</p>
+              </div>
+              {status && (
+                <Badge
+                  variant={getStatusBadgeVariant(status)}
+                  className={cn('text-xs', getStatusBadgeColor(status))}
+                >
+                  {getStatusBadgeLabel(status)}
+                </Badge>
+              )}
             </div>
 
             <p className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl 3xl:text-5xl font-bold text-foreground">{value}</p>

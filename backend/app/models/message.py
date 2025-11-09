@@ -1,5 +1,6 @@
 """Message model for storing messages from various sources."""
 
+import uuid
 from datetime import datetime
 
 from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
@@ -7,11 +8,11 @@ from sqlalchemy import Column, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
-from .base import IDMixin, TimestampMixin
+from .base import TimestampMixin
 from .enums import AnalysisStatus
 
 
-class Message(IDMixin, TimestampMixin, SQLModel, table=True):
+class Message(TimestampMixin, SQLModel, table=True):
     """Message table - stores incoming messages from various sources.
 
     Each message MUST have:
@@ -21,6 +22,12 @@ class Message(IDMixin, TimestampMixin, SQLModel, table=True):
 
     __tablename__ = "messages"
 
+    id: uuid.UUID = Field(
+        default_factory=uuid.uuid4,
+        primary_key=True,
+        index=True,
+        description="Unique identifier for the message",
+    )
     external_message_id: str = Field(index=True, max_length=100, description="ID from external system")
     content: str = Field(sa_type=Text, description="Message content")
     sent_at: datetime = Field(description="When message was sent")
@@ -51,7 +58,7 @@ class Message(IDMixin, TimestampMixin, SQLModel, table=True):
         description="UUIDs of AnalysisRuns that processed this message",
     )
 
-    topic_id: int | None = Field(
+    topic_id: uuid.UUID | None = Field(
         default=None,
         foreign_key="topics.id",
         index=True,
@@ -79,4 +86,28 @@ class Message(IDMixin, TimestampMixin, SQLModel, table=True):
         default=None,
         sa_type=JSONB,
         description="Contributing factors for noise score (JSONB: {factor_name: weight})",
+    )
+
+    status: str | None = Field(
+        default="pending",
+        max_length=20,
+        description="Message status: pending, approved, rejected",
+    )
+    approved_at: datetime | None = Field(
+        default=None,
+        description="Timestamp when message was approved",
+    )
+    rejected_at: datetime | None = Field(
+        default=None,
+        description="Timestamp when message was rejected",
+    )
+    rejection_reason: str | None = Field(
+        default=None,
+        max_length=50,
+        description="Reason for rejection: wrong_topic, noise, duplicate, other",
+    )
+    rejection_comment: str | None = Field(
+        default=None,
+        sa_type=Text,
+        description="Additional comment for rejection",
     )

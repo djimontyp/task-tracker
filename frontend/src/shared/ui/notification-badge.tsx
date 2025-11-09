@@ -16,9 +16,15 @@ interface NotificationBadgeProps {
 export function NotificationBadge({ count, tooltip, className }: NotificationBadgeProps) {
   if (!count || count <= 0) return null
 
+  const displayCount = count > 999 ? "999+" : count
+  const ariaLabel = tooltip || `${displayCount} notifications`
+
   return (
     <span
       title={tooltip}
+      aria-label={ariaLabel}
+      role="status"
+      aria-live="polite"
       className={cn(
         "min-w-6 h-6 px-2 flex items-center justify-center",
         "bg-orange-200 text-orange-900 dark:bg-orange-950 dark:text-orange-100",
@@ -29,7 +35,7 @@ export function NotificationBadge({ count, tooltip, className }: NotificationBad
         className
       )}
     >
-      {count > 999 ? "999+" : count}
+      {displayCount}
     </span>
   )
 }

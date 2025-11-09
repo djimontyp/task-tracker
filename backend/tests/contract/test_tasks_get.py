@@ -1,4 +1,4 @@
-"""Contract tests for GET /api/tasks endpoints."""
+"""Contract tests for GET /api/v1/task-configs endpoints."""
 
 import pytest
 from httpx import AsyncClient
@@ -10,18 +10,18 @@ async def test_list_all_tasks(client: AsyncClient):
     # Create test tasks
     for i in range(2):
         await client.post(
-            "/api/tasks",
+            "/api/v1/task-configs",
             json={
                 "name": f"List Task {i}",
                 "response_schema": {"type": "object", "properties": {}},
             },
         )
 
-    response = await client.get("/api/tasks")
+    response = await client.get("/api/v1/task-configs")
     assert response.status_code == 200
     data = response.json()
-    assert "tasks" in data
-    assert len(data["tasks"]) >= 2
+    assert isinstance(data, list)
+    assert len(data) >= 2
 
 
 @pytest.mark.asyncio
@@ -29,7 +29,7 @@ async def test_get_task_by_id(client: AsyncClient):
     """Test getting task by ID."""
     # Create task
     create_response = await client.post(
-        "/api/tasks",
+        "/api/v1/task-configs",
         json={
             "name": "Get Test Task",
             "response_schema": {
@@ -41,7 +41,7 @@ async def test_get_task_by_id(client: AsyncClient):
     task_id = create_response.json()["id"]
 
     # Get task
-    response = await client.get(f"/api/tasks/{task_id}")
+    response = await client.get(f"/api/v1/task-configs/{task_id}")
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == task_id
@@ -52,5 +52,5 @@ async def test_get_task_by_id(client: AsyncClient):
 async def test_get_task_not_found(client: AsyncClient):
     """Test 404 for non-existent task."""
     fake_uuid = "00000000-0000-0000-0000-000000000000"
-    response = await client.get(f"/api/tasks/{fake_uuid}")
+    response = await client.get(f"/api/v1/task-configs/{fake_uuid}")
     assert response.status_code == 404

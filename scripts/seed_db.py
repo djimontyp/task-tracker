@@ -244,7 +244,7 @@ async def main():
         return
     
     # Create async engine
-    engine = create_async_engine(settings.database_url, echo=False)
+    engine = create_async_engine(settings.database.database_url, echo=False)
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     
     async with async_session() as session:

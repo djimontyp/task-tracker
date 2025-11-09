@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
+import { ChatBubbleLeftRightIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs'
 import { Skeleton } from '@/shared/ui/skeleton'
@@ -7,41 +9,13 @@ import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Button } from '@/shared/ui/button'
 import { apiClient } from '@/shared/lib/api/client'
-import { TopicListResponse, TimePeriod } from '@/shared/types'
+import { TopicListResponse } from '@/shared/types'
 import { TopicCard } from './TopicCard'
 
-const getDateRange = (period: TimePeriod): { start: Date; end: Date } => {
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-
-  switch (period) {
-    case 'today':
-      return { start: today, end: now }
-
-    case 'yesterday': {
-      const yesterday = new Date(today)
-      yesterday.setDate(yesterday.getDate() - 1)
-      return { start: yesterday, end: today }
-    }
-
-    case 'week': {
-      const weekAgo = new Date(today)
-      weekAgo.setDate(weekAgo.getDate() - 7)
-      return { start: weekAgo, end: now }
-    }
-
-    case 'month': {
-      const monthAgo = new Date(today)
-      monthAgo.setMonth(monthAgo.getMonth() - 1)
-      return { start: monthAgo, end: now }
-    }
-
-    default:
-      return { start: today, end: now }
-  }
-}
+type TimePeriod = 'today' | 'yesterday' | 'week' | 'month' | 'custom'
 
 export const RecentTopics = () => {
+  const navigate = useNavigate()
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('today')
   const [customDateRange, setCustomDateRange] = useState<{ start?: Date; end?: Date }>({})
 
@@ -163,8 +137,27 @@ export const RecentTopics = () => {
                   <TopicCard key={topic.id} topic={topic} />
                 ))
               ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">No topics for this period</p>
+                <div className="text-center py-12 px-4 space-y-4">
+                  <div className="flex justify-center">
+                    <div className="rounded-full bg-muted p-6">
+                      <ChatBubbleLeftRightIcon className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-lg text-foreground">No topics yet</h3>
+                    <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                      Topics are AI-extracted themes from your messages. Import messages to automatically generate topics.
+                    </p>
+                  </div>
+                  <Button
+                    variant="default"
+                    onClick={() => navigate('/messages')}
+                    className="mt-4"
+                    aria-label="Navigate to Messages page to import messages"
+                  >
+                    Import Messages
+                    <ArrowRightIcon className="ml-2 h-4 w-4" aria-hidden="true" />
+                  </Button>
                 </div>
               )}
             </div>

@@ -739,7 +739,7 @@ async def seed_data(
             recommendation = random.choice([LLMRecommendation.merge, LLMRecommendation.reject])
 
         source_msg_count = random.randint(1, 5)
-        source_msg_ids = random.sample(message_ids, min(source_msg_count, len(message_ids)))
+        source_msg_ids = [str(msg_id) for msg_id in random.sample(message_ids, min(source_msg_count, len(message_ids)))]
 
         if run.status == AnalysisRunStatus.completed.value:
             status = ProposalStatus.pending
@@ -749,12 +749,12 @@ async def seed_data(
         elif run.status == AnalysisRunStatus.reviewed.value:
             status = random.choices([ProposalStatus.approved, ProposalStatus.rejected], weights=[70, 30])[0]
             reviewed_by = pm_user.id
-            reviewed_at = run.completed_at + timedelta(hours=random.randint(1, 48))
+            reviewed_at = (run.completed_at + timedelta(hours=random.randint(1, 48))).replace(tzinfo=None)
             review_action = "approve" if status == ProposalStatus.approved else "reject"
         else:
             status = random.choices([ProposalStatus.approved, ProposalStatus.rejected], weights=[80, 20])[0]
             reviewed_by = pm_user.id
-            reviewed_at = run.completed_at + timedelta(hours=random.randint(1, 48))
+            reviewed_at = (run.completed_at + timedelta(hours=random.randint(1, 48))).replace(tzinfo=None)
             review_action = "approve" if status == ProposalStatus.approved else "reject"
 
         proposal = TaskProposal(

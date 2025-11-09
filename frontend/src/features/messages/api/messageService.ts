@@ -9,7 +9,7 @@ interface TopicMessagesResponse {
 }
 
 class MessageService {
-  async getMessagesByTopic(topicId: number): Promise<Message[]> {
+  async getMessagesByTopic(topicId: string): Promise<Message[]> {
     const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/topics/${topicId}/messages`)
 
     if (!response.ok) {

@@ -1,5 +1,6 @@
 """Legacy models from old task tracker system."""
 
+import uuid
 from datetime import datetime
 
 from sqlalchemy import Text
@@ -66,7 +67,7 @@ class MessageCreate(SQLModel):
 class MessagePublic(SQLModel):
     """Public schema for message responses."""
 
-    id: int
+    id: uuid.UUID
     external_message_id: str
     content: str
     sent_at: datetime
@@ -109,8 +110,10 @@ class Task(IDMixin, TimestampMixin, TaskBase, table=True):
     __tablename__ = "tasks"
 
     source_id: int = Field(foreign_key="sources.id", description="Source of the task")
-    source_message_id: int | None = Field(
-        default=None, foreign_key="messages.id", description="Original message if task was extracted from one"
+    source_message_id: uuid.UUID | None = Field(
+        default=None,
+        foreign_key="messages.id",
+        description="Original message if task was extracted from one",
     )
 
     # User assignments
@@ -122,7 +125,7 @@ class TaskCreate(TaskBase):
     """Schema for creating new tasks."""
 
     source_id: int | None = None
-    source_message_id: int | None = None
+    source_message_id: uuid.UUID | None = None
 
 
 class TaskPublic(TaskBase):
@@ -130,7 +133,7 @@ class TaskPublic(TaskBase):
 
     id: int
     source_id: int | None
-    source_message_id: int | None
+    source_message_id: uuid.UUID | None
     created_at: datetime
     updated_at: datetime | None = None
 

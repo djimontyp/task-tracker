@@ -18,6 +18,18 @@ export default defineConfig({
     },
   },
 
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/tests/e2e/**',
+      '**/*.spec.ts',
+    ],
+  },
+
   server: {
     port: 3000,
     host: true, // Listen on all addresses (for Docker)
