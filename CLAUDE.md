@@ -13,7 +13,7 @@
 1. **Оціни складність** → `task-breakdown` skill якщо завдання >3 кроків або >15 хв
 2. **Делегуй** → Обери спеціалізованого агента з @.claude/delegation-patterns.md
 3. **Координуй** → Використовуй TodoWrite для відстеження прогресу
-4. **Перевіряй** → Забезпеч якість (typecheck, tests, architecture-guardian)
+4. **Перевіряй** → Забезпеч якість (typecheck, tests, code-reviewer)
 5. **Збережи** → `smart-commit` skill після завершення
 
 ## 🚫 Червоні прапорці (STOP → DELEGATE)
@@ -23,8 +23,8 @@
 - ❌ Використати `Read` на >2 файлах → ✅ Відповідний агент
 - ❌ Використати `Glob` для пошуку → ✅ `Task(subagent_type=Explore)`
 - ❌ Писати backend код → ✅ `fastapi-backend-expert`
-- ❌ Писати frontend код → ✅ `react-frontend-architect`
-- ❌ Переглядати якість коду → ✅ `architecture-guardian`
+- ❌ Писати frontend код → ✅ `react-frontend-expert`
+- ❌ Переглядати якість коду → ✅ `code-reviewer`
 - ❌ Дебажити → ✅ Доменний агент (database/vector/llm/chaos)
 
 **ПРАВИЛО:** Твій інстинкт "швидко перевірити" = RED FLAG = ДЕЛЕГУЙ
@@ -38,7 +38,7 @@
 1. **Автоматично делегуй задачі агентам** за правилами:
    - Дослідження коду (>5 файлів) → `Task(subagent_type=Explore, thoroughness="medium")`
    - Backend implementation → `fastapi-backend-expert`
-   - Frontend implementation → `react-frontend-architect`
+   - Frontend implementation → `react-frontend-expert`
    - Database queries/optimization → `database-reliability-engineer`
    - LLM/prompt optimization → `llm-prompt-engineer`
 
@@ -64,7 +64,7 @@
 
 **Scenario 2: "Додай user authentication"**
 - ❌ Read поточний код → планувати сам → писати код
-- ✅ `Task(subagent_type=Plan, prompt="План імплементації user authentication з JWT tokens")` → `fastapi-backend-expert` + `react-frontend-architect`
+- ✅ `Task(subagent_type=Plan, prompt="План імплементації user authentication з JWT tokens")` → `fastapi-backend-expert` + `react-frontend-expert`
 
 **Scenario 3: "Виправ database connection timeout"**
 - ❌ Debug напряму через Read/Grep
@@ -175,12 +175,12 @@
    - `Task(subagent_type=Explore)` - Дослідження кодової бази (>5 файлів)
    - `Task(subagent_type=Plan)` - Планування реалізації
    - `fastapi-backend-expert` - Backend implementation
-   - `react-frontend-architect` - Frontend implementation
+   - `react-frontend-expert` - Frontend implementation
    - `database-reliability-engineer` - Database queries/optimization
    - `llm-prompt-engineer` - LLM/prompt optimization
    - Повний список: @.claude/delegation-patterns.md
 6. **Координуй** - Відстежуй прогрес через TodoWrite, обробляй блокери, запускай агентів паралельно
-7. **Перевіряй** - Забезпеч якість (`just typecheck`, `architecture-guardian`), потім `smart-commit`
+7. **Перевіряй** - Забезпеч якість (`just typecheck`, `code-reviewer`), потім `smart-commit`
 
 ### ⚠️ Правила збереження контексту
 
@@ -190,7 +190,7 @@
 - Досліджуєш кодову базу (використовуй `Task(subagent_type=Explore)`)
 - Реалізуєш функції (використовуй спеціалізованих агентів)
 - Виправляєш баги (використовуй доменних агентів)
-- Переглядаєш код (використовуй architecture-guardian)
+- Переглядаєш код (використовуй code-reviewer)
 - Досліджуєш патерни/API (використовуй `Task(subagent_type=Explore)`)
 - Тестуєш реалізації (використовуй pytest-test-master)
 - Оптимізуєш продуктивність (використовуй відповідного спеціаліста)
@@ -244,7 +244,7 @@
   - ✅ Самодокументований код, коментарі лише для ЧОМУ, не ЩО
 
 - ❌ Перевіряти код quality сам через Read
-  - ✅ `architecture-guardian` agent для code review
+  - ✅ `code-reviewer` agent для code review
 
 - ❌ Запускати `git commit` напряму через Bash
   - ✅ ТІЛЬКИ `smart-commit` skill (atomic commits, semantic grouping)
@@ -326,8 +326,8 @@
 
 **Перевірки якості коду = Робота для агентів-спеціалістів**
 
-- ❌ НЕ читай код для перевірки якості → ✅ ВИКОРИСТОВУЙ `architecture-guardian` агента
-- ❌ НЕ переглядай стиль коду → ✅ ВИКОРИСТОВУЙ `codebase-cleaner` агента
+- ❌ НЕ читай код для перевірки якості → ✅ ВИКОРИСТОВУЙ `code-reviewer` агента
+- ❌ НЕ переглядай стиль коду → ✅ ВИКОРИСТОВУЙ `code-cleaner` агента
 - ❌ НЕ перевіряй безпеку типів → ✅ ДЕЛЕГУЙ і попроси агента запустити `just typecheck`
 - ❌ НЕ переглядай тести → ✅ ВИКОРИСТОВУЙ `pytest-test-master` агента
 
@@ -390,9 +390,9 @@
 ### Швидкий доступ до агентів та skills
 
 **Агенти** (детальний список в системних інструкціях):
-- `fastapi-backend-expert`, `react-frontend-architect`, `database-reliability-engineer`
+- `fastapi-backend-expert`, `react-frontend-expert`, `database-reliability-engineer`
 - `llm-prompt-engineer`, `llm-cost-optimizer`, `vector-search-engineer`
-- `pytest-test-master`, `architecture-guardian`, `codebase-cleaner`
+- `pytest-test-master`, `code-reviewer`, `code-cleaner`, `chaos-engineer`, `devops-expert`
 
 **Skills** (`.claude/skills/*`):
 - `task-breakdown`, `smart-commit`, `session-manager`
