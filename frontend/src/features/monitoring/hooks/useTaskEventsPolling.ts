@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { monitoringService } from '../api/monitoringService'
 import type { TaskExecutionLog } from '../types'
+import { logger } from '@/shared/utils/logger'
 
 interface UseTaskEventsPollingOptions {
   pollingInterval?: number
@@ -32,7 +33,7 @@ export const useTaskEventsPolling = (options: UseTaskEventsPollingOptions = {}) 
     const newItems = historyData.items.filter((item: TaskExecutionLog) => item.id > lastSeenId)
 
     if (newItems.length > 0) {
-      console.log(`[useTaskEventsPolling] 📥 Received ${newItems.length} new events`)
+      logger.debug(`[useTaskEventsPolling] 📥 Received ${newItems.length} new events`)
 
       setEvents((prev) => {
         const combined = [...newItems, ...prev].slice(0, maxEvents)

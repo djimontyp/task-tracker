@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useWebSocket } from '@/features/websocket'
 import type { TaskEvent } from '../types'
+import { logger } from '@/shared/utils/logger'
 
 interface UseTaskEventsOptions {
   onTaskEvent?: (event: TaskEvent) => void
@@ -14,17 +15,17 @@ export const useTaskEvents = (options: UseTaskEventsOptions = {}) => {
   const { isConnected } = useWebSocket({
     topics: ['monitoring'],
     onMessage: (data) => {
-      console.log('[useTaskEvents] Received WebSocket message:', data)
+      logger.debug('[useTaskEvents] Received WebSocket message:', data)
 
       if (isTaskEvent(data)) {
-        console.log('[useTaskEvents] ✅ Valid task event:', data)
+        logger.debug('[useTaskEvents] ✅ Valid task event:', data)
         setEvents((prev) => {
           const newEvents = [data, ...prev].slice(0, maxEvents)
           return newEvents
         })
         onTaskEvent?.(data)
       } else {
-        console.log('[useTaskEvents] ❌ Invalid task event structure:', data)
+        logger.debug('[useTaskEvents] ❌ Invalid task event structure:', data)
       }
     },
   })
