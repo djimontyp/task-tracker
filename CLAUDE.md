@@ -73,7 +73,7 @@ Files: path/to/file1.py, path/to/file2.py
 1. **Оціни складність** → `task-breakdown` skill якщо завдання >3 кроків або >15 хв
 2. **Делегуй** → Обери спеціалізованого агента з @.claude/delegation-patterns.md
 3. **Координуй** → Використовуй TodoWrite для відстеження прогресу
-4. **Перевіряй** → Забезпеч якість (typecheck, tests, code-reviewer)
+4. **Перевіряй** → Забезпеч якість (typecheck, tests, Code Reviewer (R1))
 5. **Збережи** → `smart-commit` skill після завершення
 
 ## 🚫 Червоні прапорці (STOP → DELEGATE)
@@ -84,8 +84,8 @@ Files: path/to/file1.py, path/to/file2.py
 - ❌ Використати `Glob` для пошуку → ✅ `Task(subagent_type=Explore)`
 - ❌ Писати backend код → ✅ `fastapi-backend-expert`
 - ❌ Писати frontend код → ✅ `react-frontend-expert`
-- ❌ Переглядати якість коду → ✅ `code-reviewer`
-- ❌ Дебажити → ✅ Доменний агент (database/vector/llm/chaos)
+- ❌ Переглядати якість коду → ✅ `Code Reviewer (R1)`
+- ❌ Дебажити → ✅ Доменний агент (Database Engineer (D1)/Vector Search (V1)/LLM Engineer (L1)/Chaos Engineer (X1))
 
 **ПРАВИЛО:** Твій інстинкт "швидко перевірити" = RED FLAG = ДЕЛЕГУЙ
 
@@ -267,9 +267,9 @@ markers = {}
 tasks = [
     ("backend", "fastapi-backend-expert", "Create API endpoints"),
     ("frontend", "react-frontend-expert", "Build UI components"),
-    ("database", "database-reliability-engineer", "Schema design"),
-    ("tests", "pytest-test-master", "E2E test suite"),
-    ("docs", "documentation-expert", "API documentation")
+    ("database", "Database Engineer (D1)", "Schema design"),
+    ("tests", "Pytest Master (T1)", "E2E test suite"),
+    ("docs", "Docs Expert (D2)", "API documentation")
 ]
 
 for name, agent_type, task_desc in tasks:
@@ -324,8 +324,8 @@ for name, marker in markers.items():
    - Дослідження коду (>5 файлів) → `Task(subagent_type=Explore, thoroughness="medium")`
    - Backend implementation → `fastapi-backend-expert`
    - Frontend implementation → `react-frontend-expert`
-   - Database queries/optimization → `database-reliability-engineer`
-   - LLM/prompt optimization → `llm-prompt-engineer`
+   - Database queries/optimization → `Database Engineer (D1)`
+   - LLM/prompt optimization → `Prompt Engineer (P1)`
 
 2. **Управління контекстом:**
    - Твоє контекстне вікно = стан координації, НЕ деталі реалізації
@@ -347,8 +347,8 @@ for name, marker in markers.items():
 - Дослідження (>5 файлів) → `Task(subagent_type=Explore)`
 - Backend implementation → `fastapi-backend-expert`
 - Frontend implementation → `react-frontend-expert`
-- Database debugging → `database-reliability-engineer`
-- LLM optimization → `llm-prompt-engineer` або `llm-cost-optimizer`
+- Database debugging → `Database Engineer (D1)`
+- LLM optimization → `Prompt Engineer (P1)` або `Cost Optimizer (C2)`
 
 **Правило:** Завдання >10 хв research/implementation → ДЕЛЕГУЙ
 
@@ -435,11 +435,11 @@ for name, marker in markers.items():
    - `Task(subagent_type=Plan)` - Планування реалізації
    - `fastapi-backend-expert` - Backend implementation
    - `react-frontend-expert` - Frontend implementation
-   - `database-reliability-engineer` - Database queries/optimization
-   - `llm-prompt-engineer` - LLM/prompt optimization
+   - `Database Engineer (D1)` - Database queries/optimization
+   - `Prompt Engineer (P1)` - LLM/prompt optimization
    - Повний список: @.claude/delegation-patterns.md
 6. **Координуй** - Відстежуй прогрес через TodoWrite, **обробляй Task tool results одразу після завершення**, обробляй блокери, запускай агентів паралельно
-7. **Перевіряй** - Забезпеч якість (`just typecheck`, `code-reviewer`), потім `smart-commit`
+7. **Перевіряй** - Забезпеч якість (`just typecheck`, `Code Reviewer (R1)`), потім `smart-commit`
 
 ### ⚠️ Правила збереження контексту
 
@@ -449,9 +449,9 @@ for name, marker in markers.items():
 - Досліджуєш кодову базу (використовуй `Task(subagent_type=Explore)`)
 - Реалізуєш функції (використовуй спеціалізованих агентів)
 - Виправляєш баги (використовуй доменних агентів)
-- Переглядаєш код (використовуй code-reviewer)
+- Переглядаєш код (використовуй `Code Reviewer (R1)`)
 - Досліджуєш патерни/API (використовуй `Task(subagent_type=Explore)`)
-- Тестуєш реалізації (використовуй pytest-test-master)
+- Тестуєш реалізації (використовуй `Pytest Master (T1)`)
 - Оптимізуєш продуктивність (використовуй відповідного спеціаліста)
 
 **ТИ МОЖЕШ працювати безпосередньо ЛИШЕ коли:**
@@ -497,7 +497,7 @@ for name, marker in markers.items():
   - ✅ Самодокументований код, коментарі лише для ЧОМУ, не ЩО
 
 - ❌ Перевіряти код quality сам через Read
-  - ✅ `code-reviewer` agent для code review
+  - ✅ `Code Reviewer (R1)` agent для code review
 
 - ❌ Запускати `git commit` напряму через Bash
   - ✅ ТІЛЬКИ `smart-commit` skill (atomic commits, semantic grouping)
@@ -573,10 +573,10 @@ for name, marker in markers.items():
 
 **Перевірки якості коду = Робота для агентів-спеціалістів**
 
-- ❌ НЕ читай код для перевірки якості → ✅ ВИКОРИСТОВУЙ `code-reviewer` агента
-- ❌ НЕ переглядай стиль коду → ✅ ВИКОРИСТОВУЙ `code-cleaner` агента
+- ❌ НЕ читай код для перевірки якості → ✅ ВИКОРИСТОВУЙ `Code Reviewer (R1)` агента
+- ❌ НЕ переглядай стиль коду → ✅ ВИКОРИСТОВУЙ `Code Cleaner (C1)` агента
 - ❌ НЕ перевіряй безпеку типів → ✅ ДЕЛЕГУЙ і попроси агента запустити `just typecheck`
-- ❌ НЕ переглядай тести → ✅ ВИКОРИСТОВУЙ `pytest-test-master` агента
+- ❌ НЕ переглядай тести → ✅ ВИКОРИСТОВУЙ `Pytest Master (T1)` агента
 
 ### Коментарі і стиль коду
 
