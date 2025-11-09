@@ -150,6 +150,170 @@ Coordinator: ✅ Backend готовий. Переходжу до frontend integr
 
 **Пам'ятай:** Task tool результат = автоматичний, не потребує manual integration
 
+## 🤖 Agent Coordination with Resume Capability
+
+**КРИТИЧНО:** Використовуй `agent-coordinator` skill для управління субагентами з можливістю resume.
+
+### Навіщо потрібна координація?
+
+**Проблема:** Субагенти створюються з порожнім контекстом і мають заново досліджувати все.
+
+**Рішення:** Marker-based tracking + resume functionality = збереження повного контексту агента.
+
+**Сценарії використання:**
+1. **Blocker workflow** - Frontend agent blocked on backend → backend fixes → resume frontend з контекстом
+2. **Parallel coordination** - 5+ агентів одночасно без плутанини контексту
+3. **Multi-session work** - Pause agent → fix blocker → resume через години/дні
+4. **Iterative refinement** - Agent робить частину → ти переглядаєш → resume для доопрацювання
+
+### Як працює marker-based tracking?
+
+**Механізм:**
+1. Ти генеруєш унікальний marker: `agent-{uuid8}`
+2. Включаєш marker в Task description: `[agent-abc12345] Task name`
+3. PostToolUse hook перехоплює completion і зберігає: `marker → agentId`
+4. Ти читаєш agentId через marker коли потрібен resume
+5. Resume агента з повним збереженням контексту
+
+**Storage:**
+- `.artifacts/coordination/{marker}.txt` - marker → agentId mapping
+- `.artifacts/coordination/{marker}.json` - structured metadata
+- `.artifacts/coordination/agent-sessions.json` - audit trail
+
+### Quick Start: Basic Delegation
+
+```python
+import uuid
+
+# 1. Generate unique marker
+marker = f"agent-{uuid.uuid4().hex[:8]}"
+
+# 2. Delegate with marker in description
+Task(
+    subagent_type="fastapi-backend-expert",
+    description=f"[{marker}] Create authentication API",
+    prompt="""
+Implement POST /api/v1/auth/login endpoint:
+- Accept email + password
+- Return JWT token on success
+- Include error handling
+"""
+)
+
+# 3. Agent completes, hook captures agentId automatically
+# 4. Read agentId when needed
+agentId = Read(f".artifacts/coordination/{marker}.txt").strip()
+
+# 5. Resume if needed
+Task(
+    subagent_type="fastapi-backend-expert",
+    resume=agentId,
+    description=f"[{marker}] Continue auth work",
+    prompt="Add refresh token support to existing /login endpoint"
+)
+```
+
+### Pattern: Blocker Workflow
+
+**Scenario:** Frontend blocked on missing backend API
+
+```python
+import uuid
+
+# Step 1: Delegate frontend
+marker_fe = f"agent-{uuid.uuid4().hex[:8]}"
+Task(
+    subagent_type="react-frontend-expert",
+    description=f"[{marker_fe}] Build login UI",
+    prompt="Create login form with email/password, call POST /api/auth/login"
+)
+
+# Frontend returns: Status: Blocked - API endpoint missing
+
+# Step 2: Capture frontend agentId
+fe_agentId = Read(f".artifacts/coordination/{marker_fe}.txt").strip()
+
+# Step 3: Delegate backend fix
+marker_be = f"agent-{uuid.uuid4().hex[:8]}"
+Task(
+    subagent_type="fastapi-backend-expert",
+    description=f"[{marker_be}] Create login API",
+    prompt="Implement POST /api/auth/login endpoint"
+)
+
+# Backend returns: Status: Complete
+
+# Step 4: Resume frontend with full context
+Task(
+    resume=fe_agentId,
+    description=f"[{marker_fe}] Resume: API ready",
+    prompt="Backend API now available. Complete form integration."
+)
+
+# Frontend resumes with:
+# - Remembers UI components created
+# - Remembers validation logic implemented
+# - Continues from where it left off
+```
+
+### Pattern: Parallel Coordination (5+ agents)
+
+```python
+import uuid
+
+# Launch 5 parallel agents
+markers = {}
+
+tasks = [
+    ("backend", "fastapi-backend-expert", "Create API endpoints"),
+    ("frontend", "react-frontend-expert", "Build UI components"),
+    ("database", "database-reliability-engineer", "Schema design"),
+    ("tests", "pytest-test-master", "E2E test suite"),
+    ("docs", "documentation-expert", "API documentation")
+]
+
+for name, agent_type, task_desc in tasks:
+    marker = f"agent-{uuid.uuid4().hex[:8]}"
+    markers[name] = marker
+
+    Task(
+        subagent_type=agent_type,
+        description=f"[{marker}] {task_desc}",
+        prompt=f"Complete {task_desc} for authentication feature"
+    )
+
+# After completion, check which completed vs blocked
+for name, marker in markers.items():
+    agentId = Read(f".artifacts/coordination/{marker}.txt").strip()
+    metadata = Read(f".artifacts/coordination/{marker}.json")
+    print(f"{name}: {agentId} - {metadata['status']}")
+
+# Resume any blocked agents after fixing blockers
+```
+
+### Best Practices
+
+1. **Always generate unique markers** - Use `uuid.uuid4().hex[:8]` for each delegation
+2. **Include marker in description** - Pattern: `f"[{marker}] Task name"`
+3. **Store markers** - Keep markers in coordinator context for resume
+4. **Read agentId after completion** - Don't assume, always verify file exists
+5. **Use meaningful task names** - Helps debugging and audit trail
+6. **Clean up optionally** - Marker files are small, cleanup not required
+
+### Troubleshooting
+
+**Marker not found after delegation:**
+- Ensure PostToolUse hook configured in `.claude/settings.local.json`
+- Marker pattern must be exact: `agent-{8hex}`
+- Description must include marker in brackets: `[{marker}] Task name`
+
+**Wrong agent resumed:**
+- Verify marker matches original delegation
+- Check agentId in marker file before resume
+- Don't reuse markers across different tasks
+
+**Detailed Documentation:** `.claude/skills/agent-coordinator/SKILL.md`
+
 ## 📋 Робочий процес координації (детальний)
 
 Всі субагенти та підзадачі мають свій контекст і їх активне використання допомагає отримувати найрелевантніший контекст та відповіді економлячи поточний контекст наш.
