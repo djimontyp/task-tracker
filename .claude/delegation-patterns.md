@@ -71,6 +71,34 @@ User: "Add real-time notifications"
 ✅ DO: session-manager or task-breakdown → coordinate specialists
 ```
 
+### Pattern 4.5: Agent Requests Cross-Domain Context
+
+**Scenario:** Agent working autonomously realizes they need info from another domain.
+
+```
+Product Designer: Working on auth spec
+└─ Needs backend API patterns (outside domain)
+   └─ Signals: Status: Blocked, Domain: backend, Required: "Current auth API design"
+
+Coordinator: Receives blocker
+└─ Delegates to backend expert for context gathering
+   └─ Backend expert: Surveys auth API patterns
+      └─ Returns: "POST /login, JWT tokens, bcrypt passwords"
+
+Coordinator: Resumes Product Designer
+└─ Product Designer continues with full context:
+   - Previous work preserved (user research, competitive analysis)
+   - New technical context added (backend auth patterns)
+   - Completes spec with informed recommendations
+```
+
+**Key Rules:**
+- ✅ Agent works autonomously in their domain
+- ✅ Agent CAN request cross-domain context via blocker signal
+- ❌ Agent CANNOT delegate directly (no Task tool)
+- ✅ Coordinator orchestrates specialists for context gathering
+- ✅ Resume preserves ALL previous context + adds new context
+
 ---
 
 ## Example: Successful Delegation with Result Handling
