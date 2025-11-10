@@ -246,11 +246,11 @@ const TopicsPage = () => {
       {topics && topics.items.length > 0 ? (
         <>
           {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {topics.items.map((topic) => (
                 <Card
                   key={topic.id}
-                  className="p-6 transition-all duration-200 hover:shadow-lg hover:scale-[1.01] cursor-pointer"
+                  className="p-3 sm:p-4 md:p-6 transition-all duration-200 hover:shadow-lg hover:scale-[1.01] cursor-pointer"
                   onClick={() => navigate(`/topics/${topic.id}`)}
                 >
                   <div className="flex items-center gap-3 mb-2">
@@ -378,7 +378,7 @@ const TopicsPage = () => {
           )}
         </>
       ) : (
-        <Card className="p-12 border-dashed border-2">
+        <Card className="p-6 sm:p-8 md:p-12 border-dashed border-2">
           <div className="flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 mb-4 rounded-full bg-primary/10 flex items-center justify-center">
               {debouncedSearch ? (
