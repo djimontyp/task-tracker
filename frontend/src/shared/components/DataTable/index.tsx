@@ -58,13 +58,16 @@ export function DataTable<TData>({
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
+              {headerGroup.headers.map((header) => {
+                const meta = header.column.columnDef.meta as { className?: string } | undefined
+                return (
+                  <TableHead key={header.id} className={meta?.className}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                )
+              })}
             </TableRow>
           ))}
         </TableHeader>
@@ -77,11 +80,14 @@ export function DataTable<TData>({
                 onClick={() => onRowClick?.(row.original)}
                 className={onRowClick ? 'cursor-pointer' : undefined}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+                {row.getVisibleCells().map((cell) => {
+                  const meta = cell.column.columnDef.meta as { className?: string } | undefined
+                  return (
+                    <TableCell key={cell.id} className={meta?.className}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  )
+                })}
               </TableRow>
             ))
           ) : (

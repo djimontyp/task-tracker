@@ -138,6 +138,9 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       const v = row.getValue<string>(id)
       return filterValues.includes(v)
     },
+    meta: {
+      className: 'hidden md:table-cell',
+    },
   },
   {
     accessorKey: 'analyzed',
@@ -215,6 +218,9 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       if (score === undefined || score === null) return false
       return score >= filterValue[0] && score <= filterValue[1]
     },
+    meta: {
+      className: 'hidden md:table-cell',
+    },
   },
   {
     accessorKey: 'noise_classification',
@@ -245,28 +251,37 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       if (!classification) return false
       return filterValues.includes(classification)
     },
+    meta: {
+      className: 'hidden md:table-cell',
+    },
   },
   {
     accessorKey: 'topic_name',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Topic" className="hidden md:table-cell" />
+      <DataTableColumnHeader column={column} title="Topic" />
     ),
     cell: ({ row }) => {
       const topicName = row.getValue<string | null>('topic_name')
-      if (!topicName) return <div className="text-muted-foreground text-xs hidden md:block">-</div>
-      return <Badge variant="outline" className="hidden md:inline-flex">{topicName}</Badge>
+      if (!topicName) return <div className="text-muted-foreground text-xs">-</div>
+      return <Badge variant="outline">{topicName}</Badge>
+    },
+    meta: {
+      className: 'hidden md:table-cell',
     },
   },
   {
     accessorKey: 'sent_at',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Sent At" className="hidden lg:table-cell" />
+      <DataTableColumnHeader column={column} title="Sent At" />
     ),
     cell: ({ row }) => {
       const d = row.getValue<string>('sent_at')
-      return <div className="text-muted-foreground text-xs hidden lg:block">{d ? formatFullDate(d) : '-'}</div>
+      return <div className="text-muted-foreground text-xs">{d ? formatFullDate(d) : '-'}</div>
     },
     enableHiding: true,
+    meta: {
+      className: 'hidden lg:table-cell',
+    },
   },
   {
     id: 'actions',
