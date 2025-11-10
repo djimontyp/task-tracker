@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Badge, Button } from '@/shared/ui'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import { ClockIcon } from '@heroicons/react/24/outline'
 import { versioningService } from '@/features/knowledge/api/versioningService'
 import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
+import { VersionHistoryList } from '@/features/knowledge/components/VersionHistoryList'
 import type { Atom, AtomType } from '../types'
 
 interface AtomCardProps {
@@ -32,6 +34,7 @@ const atomTypeLabels: Record<AtomType, string> = {
 
 const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
   const [pendingVersionsCount, setPendingVersionsCount] = useState(0)
+  const [showVersionHistory, setShowVersionHistory] = useState(false)
 
   useEffect(() => {
     loadPendingVersions()
@@ -108,6 +111,7 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
               className="h-7 text-xs"
               onClick={(e) => {
                 e.stopPropagation()
+                setShowVersionHistory(true)
               }}
               aria-label="View version history"
             >
@@ -117,6 +121,22 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
           </div>
         )}
       </div>
+
+      <Dialog open={showVersionHistory} onOpenChange={setShowVersionHistory}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Version History - {atom.title}</DialogTitle>
+          </DialogHeader>
+          <VersionHistoryList
+            entityType="atom"
+            entityId={atom.id}
+            enableBulkActions={true}
+            onSelectVersion={(version) => {
+              console.log('Selected version:', version)
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }
