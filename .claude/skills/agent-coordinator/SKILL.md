@@ -293,6 +293,63 @@ Task(subagent_type="React Frontend Expert (F1)", description=f"[{marker_fe}] Fro
 # If either blocks, resume with fix
 ```
 
+### Pattern 4: Agent Requests Cross-Domain Context
+
+**Scenario:** Product Designer needs technical context from backend/frontend experts to complete strategic spec.
+
+**Workflow:**
+
+```python
+import uuid
+
+# Step 1: Delegate Product Designer
+marker_pd = f"agent-{uuid.uuid4().hex[:8]}"
+Task(
+    subagent_type="Product Designer (P2)",
+    description=f"[{marker_pd}] Auth feature spec",
+    prompt="Create product spec for authentication feature"
+)
+
+# Product Designer returns:
+# Status: Blocked
+# Domain: Backend + Frontend
+# Required: "Current auth patterns, API design, state management"
+
+# Step 2: Store Product Designer agentId
+pd_agentId = Read(f".artifacts/coordination/{marker_pd}.txt").strip()
+
+# Step 3: Gather context from specialists
+marker_be = f"agent-{uuid.uuid4().hex[:8]}"
+Task(
+    subagent_type="fastapi-backend-expert",
+    description=f"[{marker_be}] Survey backend auth patterns",
+    prompt="Document current backend auth approach for product spec context"
+)
+
+marker_fe = f"agent-{uuid.uuid4().hex[:8]}"
+Task(
+    subagent_type="React Frontend Expert (F1)",
+    description=f"[{marker_fe}] Survey frontend auth patterns",
+    prompt="Document current frontend auth approach for product spec context"
+)
+
+# Step 4: Resume Product Designer with gathered context
+Task(
+    resume=pd_agentId,
+    description=f"[{marker_pd}] Resume: Technical context ready",
+    prompt="""
+    Technical context from specialists:
+
+    **Backend:** JWT tokens via POST /login, bcrypt hashing
+    **Frontend:** Zustand authStore, protected routes, axios client
+
+    Complete product spec with this technical context.
+    """
+)
+```
+
+**Key benefit:** Agent doesn't waste context reading cross-domain files. Coordinator orchestrates specialists, agent gets curated context via resume.
+
 ## Advanced Usage
 
 ### Parallel Agent Coordination
