@@ -15,7 +15,7 @@ interface MainLayoutProps {
 const MainLayout = ({ children }: MainLayoutProps) => {
   const { sidebarOpen, setSidebarOpen } = useUiStore()
   const { isAdminMode, toggleAdminMode } = useAdminMode()
-  const isDesktop = useMediaQuery('(min-width: 1024px)')
+  const isDesktop = useMediaQuery('(min-width: 768px)')
 
   useKeyboardShortcut({
     key: 'a',
@@ -49,13 +49,15 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       />
 
       {isDesktop ? (
-        <div className="flex flex-col min-h-screen pt-[56px] overflow-x-hidden">
+        <div className="flex flex-col min-h-screen pt-14 overflow-x-hidden">
           <div className="flex flex-1 min-w-0">
             <AppSidebar />
             <SidebarInset className="min-w-0 flex-1">
-              <main id="main-content" className="flex flex-1 flex-col gap-4 p-4 w-full min-w-0">
-                {children}
-              </main>
+              <div className="flex-1 overflow-auto">
+                <main id="main-content" className="container max-w-screen-2xl mx-auto flex flex-1 flex-col gap-4 p-4 w-full min-w-0">
+                  {children}
+                </main>
+              </div>
             </SidebarInset>
           </div>
 
@@ -69,12 +71,12 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         <>
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetContent side="left" className="p-0 w-[280px]">
-              <AppSidebar />
+              <AppSidebar mobile />
             </SheetContent>
           </Sheet>
 
-          <div className="flex flex-col min-h-screen pt-[100px] overflow-x-hidden">
-            <main id="main-content" className="flex flex-1 flex-col gap-4 p-2 sm:p-4 max-w-full">
+          <div className="flex flex-col min-h-screen pt-14 md:pt-16 overflow-x-hidden">
+            <main id="main-content" className="flex flex-1 flex-col gap-4 p-2 md:p-4 max-w-full">
               {children}
             </main>
 
