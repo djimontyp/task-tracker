@@ -8,7 +8,7 @@ import {
   Button,
   Input,
 } from '@/shared/ui'
-import { ChevronLeftIcon, ChevronRightIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from '@heroicons/react/24/outline'
+import { ChevronRightIcon, ChevronDoubleRightIcon } from '@heroicons/react/24/outline'
 import { Table as TableType } from '@tanstack/react-table'
 
 interface DataTablePaginationProps<TData> {
@@ -23,7 +23,6 @@ export function DataTablePagination<TData>({
   const [pageInput, setPageInput] = React.useState('')
   const currentPage = table.getState().pagination.pageIndex + 1
   const totalPages = table.getPageCount()
-  const canPrevious = table.getCanPreviousPage()
   const canNext = table.getCanNextPage()
 
   const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
