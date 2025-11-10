@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Button,
   Card,
@@ -38,6 +39,7 @@ export function KnowledgeExtractionPanel({
   topicId,
   onComplete,
 }: KnowledgeExtractionPanelProps) {
+  const navigate = useNavigate();
   const [agentConfigs, setAgentConfigs] = useState<AgentConfig[]>([]);
   const [agentConfigsLoading, setAgentConfigsLoading] = useState(true);
   const [agentConfigId, setAgentConfigId] = useState<string>('');
@@ -100,8 +102,22 @@ export function KnowledgeExtractionPanel({
         setProgress((prev) => ({ ...prev, status: 'completed' }));
         setExtracting(false);
         const stats = data.data || {};
+
+        // Enhanced notification with CTA to review versions
+        const versionsCreated = stats.versions_created || 0;
+        const atomsCreated = stats.atoms_created || 0;
+        const topicsCreated = stats.topics_created || 0;
+
         toast.success(
-          `Extraction completed! Created ${stats.topics_created || 0} topics, ${stats.atoms_created || 0} atoms, ${stats.versions_created || 0} versions`
+          `Extraction complete! ${atomsCreated} atoms created, ${versionsCreated} pending review`,
+          {
+            duration: 8000,
+            action: versionsCreated > 0 ? {
+              label: 'Review Now',
+              onClick: () => navigate('/versions?status=pending')
+            } : undefined,
+            description: topicsCreated > 0 ? `${topicsCreated} topics identified` : undefined,
+          }
         );
         onComplete?.();
       } else if (data.type === 'knowledge.extraction_failed') {

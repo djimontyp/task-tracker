@@ -376,6 +376,7 @@ const TopicDetailPage = () => {
                   <VersionHistoryList
                     entityType="topic"
                     entityId={topic.id}
+                    enableBulkActions={true}
                     onSelectVersion={(version) => {
                       setSelectedVersion(version)
                       setCompareToVersion(version - 1)
