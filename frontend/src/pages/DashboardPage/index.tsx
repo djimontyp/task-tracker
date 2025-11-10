@@ -49,7 +49,7 @@ const DashboardPage = () => {
 
       {hasNoData && !messagesLoading && (
         <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
-          <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+          <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 text-center">
             <div className="w-16 h-16 mb-4 rounded-full bg-primary/10 flex items-center justify-center">
               <ListBulletIcon className="h-8 w-8 text-primary" />
             </div>
@@ -74,7 +74,7 @@ const DashboardPage = () => {
       <MetricsDashboard />
 
       {/* Recent Topics and Messages */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 3xl:gap-8 animate-fade-in-up max-w-full" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 animate-fade-in-up max-w-full" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
         {/* Recent Topics - 2/3 width on large screens */}
         <div className="lg:col-span-2 min-w-0">
           <RecentTopics />

@@ -77,30 +77,6 @@ const MessagesPage = () => {
   const [rowSelection, setRowSelection] = React.useState({})
   const [globalFilter, setGlobalFilter] = React.useState('')
 
-  useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth < 768
-      if (isMobile) {
-        setColumnVisibility({
-          id: false,
-          sent_at: false,
-          source_name: false,
-          importance_score: false,
-          noise_classification: false,
-        })
-      } else {
-        setColumnVisibility({
-          id: false,
-          sent_at: false,
-        })
-      }
-    }
-
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
   const { data: paginatedData, isLoading, refetch } = useQuery<PaginatedResponse>({
     queryKey: ['messages', currentPage, pageSize, sorting],
     queryFn: async () => {
@@ -489,13 +465,13 @@ const MessagesPage = () => {
               </Button>
               <Button onClick={handleUpdateAuthors} size="sm" variant="outline" className="w-full sm:w-auto justify-center">
                 <UserIcon className="mr-2 h-4 w-4" />
-                <span className="hidden min-[400px]:inline">Update Authors</span>
-                <span className="min-[400px]:hidden">Authors</span>
+                <span className="hidden sm:inline">Update Authors</span>
+                <span className="sm:hidden">Authors</span>
               </Button>
               <Button onClick={handleIngestMessages} size="sm" className="w-full sm:w-auto justify-center">
                 <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
-                <span className="hidden min-[400px]:inline">Ingest Messages</span>
-                <span className="min-[400px]:hidden">Ingest</span>
+                <span className="hidden sm:inline">Ingest Messages</span>
+                <span className="sm:hidden">Ingest</span>
               </Button>
             </div>
           }

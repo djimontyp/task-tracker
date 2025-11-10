@@ -78,21 +78,21 @@ export const MessageCard: React.FC<MessageCardProps> = ({
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2 w-full min-w-0">
+      <div className="flex flex-wrap items-center gap-2 w-full max-w-full min-w-0">
         {importanceBadge && (
-          <Badge variant={importanceBadge.variant} className={`${importanceBadge.className} flex-shrink-0`}>
+          <Badge variant={importanceBadge.variant} className={`${importanceBadge.className} flex-shrink-0 truncate max-w-[120px]`}>
             {importanceBadge.label}
           </Badge>
         )}
         {classificationBadge && (
-          <Badge variant={classificationBadge.variant} className={`${classificationBadge.className} flex-shrink-0`}>
+          <Badge variant={classificationBadge.variant} className={`${classificationBadge.className} flex-shrink-0 truncate max-w-[120px]`}>
             {classificationBadge.label}
           </Badge>
         )}
         {message.topic_name && (
           <Badge variant="outline" className="truncate max-w-[150px] flex-shrink-0">{message.topic_name}</Badge>
         )}
-        <span className="text-xs text-muted-foreground ml-auto flex-shrink-0">
+        <span className="text-xs text-muted-foreground ml-auto flex-shrink-0 whitespace-nowrap">
           {message.sent_at ? formatFullDate(message.sent_at) : '-'}
         </span>
       </div>

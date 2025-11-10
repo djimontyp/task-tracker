@@ -195,7 +195,7 @@ const ProjectsPage = () => {
 
       {/* Projects List */}
       {filteredProjects.length === 0 ? (
-        <Card className="p-12">
+        <Card className="p-6 sm:p-8 md:p-12">
           <div className="text-center text-muted-foreground">
             <p className="text-lg font-medium mb-2">No projects found</p>
             <p className="text-sm">
@@ -206,7 +206,7 @@ const ProjectsPage = () => {
           </div>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filteredProjects.map((project) => (
             <ProjectCard
               key={project.id}
