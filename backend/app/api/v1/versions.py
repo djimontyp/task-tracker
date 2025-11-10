@@ -14,6 +14,7 @@ from app.api.v1.schemas.version import (
     VersionDiffResponse,
 )
 from app.database import get_session
+from app.exceptions import ConflictError, LockedError, NotFoundError
 from app.services.versioning import VersioningService
 
 router = APIRouter(tags=["versions"])
@@ -82,8 +83,12 @@ async def approve_topic_version(
     try:
         approved_version = await service.approve_version(db, "topic", topic_id, version)
         return approved_version
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ConflictError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    except LockedError as e:
+        raise HTTPException(status_code=423, detail=str(e))
 
 
 @router.post(
@@ -102,8 +107,10 @@ async def reject_topic_version(
     try:
         rejected_version = await service.reject_version(db, "topic", topic_id, version)
         return rejected_version
-    except ValueError as e:
+    except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except LockedError as e:
+        raise HTTPException(status_code=423, detail=str(e))
 
 
 @router.get(
@@ -157,8 +164,12 @@ async def approve_atom_version(
     try:
         approved_version = await service.approve_version(db, "atom", atom_id, version)
         return approved_version
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ConflictError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    except LockedError as e:
+        raise HTTPException(status_code=423, detail=str(e))
 
 
 @router.post(
@@ -177,8 +188,10 @@ async def reject_atom_version(
     try:
         rejected_version = await service.reject_version(db, "atom", atom_id, version)
         return rejected_version
-    except ValueError as e:
+    except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except LockedError as e:
+        raise HTTPException(status_code=423, detail=str(e))
 
 
 @router.post(

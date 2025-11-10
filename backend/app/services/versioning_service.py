@@ -5,8 +5,10 @@ from typing import Any, Literal
 
 from deepdiff import DeepDiff
 from sqlalchemy import desc, func, select
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.exceptions import ConflictError, LockedError, NotFoundError
 from app.models.atom import Atom
 from app.models.atom_version import AtomVersion
 from app.models.topic import Topic
@@ -173,7 +175,7 @@ class VersioningService:
         version_number: int,
     ) -> TopicVersion | AtomVersion:
         """
-        Approve a version and apply changes to main entity.
+        Approve a version and apply changes to main entity with transaction isolation.
 
         Args:
             db: Database session
@@ -185,7 +187,9 @@ class VersioningService:
             Approved version record
 
         Raises:
-            ValueError: If version not found or already approved
+            NotFoundError: If version not found
+            ConflictError: If version already approved
+            LockedError: If lock acquisition times out
         """
         if entity_type == "topic":
             model = TopicVersion
@@ -196,33 +200,42 @@ class VersioningService:
             entity_model = Atom
             id_field = "atom_id"
 
-        stmt = (
-            select(model).where(getattr(model, id_field) == entity_id).where(model.version == version_number)  # type: ignore[attr-defined]
-        )
-        result = await db.execute(stmt)
-        version = result.scalar_one_or_none()
+        try:
+            async with db.begin_nested():
+                stmt = (
+                    select(model)
+                    .where(getattr(model, id_field) == entity_id)
+                    .where(model.version == version_number)  # type: ignore[attr-defined]
+                    .with_for_update()
+                )
+                result = await db.execute(stmt)
+                version = result.scalar_one_or_none()
 
-        if not version:
-            raise ValueError(f"Version {version_number} not found")
+                if not version:
+                    raise NotFoundError(f"Version {version_number} not found")
 
-        if version.approved:
-            raise ValueError("Version already approved")
+                if version.approved:
+                    raise ConflictError("Version already approved")
 
-        entity = await db.get(entity_model, entity_id)
-        if entity:
-            for key, value in version.data.items():
-                if hasattr(entity, key):
-                    setattr(entity, key, value)
+                entity = await db.get(entity_model, entity_id)
+                if entity:
+                    for key, value in version.data.items():
+                        if hasattr(entity, key):
+                            setattr(entity, key, value)
 
-        version.approved = True
-        version.approved_at = datetime.now(UTC)
+                version.approved = True
+                version.approved_at = datetime.now(UTC)
 
-        await db.commit()
-        await db.refresh(version)
+            await db.commit()
+            await db.refresh(version)
 
-        await self._broadcast_pending_count_update(db)
+            await self._broadcast_pending_count_update(db)
 
-        return version
+            return version
+        except OperationalError as e:
+            if "lock" in str(e).lower():
+                raise LockedError("Failed to acquire lock on version, please retry") from e
+            raise
 
     async def reject_version(
         self,
@@ -232,7 +245,7 @@ class VersioningService:
         version_number: int,
     ) -> TopicVersion | AtomVersion:
         """
-        Reject a version (mark as reviewed but not applied).
+        Reject a version (mark as reviewed but not applied) with transaction isolation.
 
         Args:
             db: Database session
@@ -244,7 +257,8 @@ class VersioningService:
             Version record
 
         Raises:
-            ValueError: If version not found
+            NotFoundError: If version not found
+            LockedError: If lock acquisition times out
         """
         if entity_type == "topic":
             model = TopicVersion
@@ -253,20 +267,29 @@ class VersioningService:
             model = AtomVersion
             id_field = "atom_id"
 
-        stmt = (
-            select(model).where(getattr(model, id_field) == entity_id).where(model.version == version_number)  # type: ignore[attr-defined]
-        )
-        result = await db.execute(stmt)
-        version = result.scalar_one_or_none()
+        try:
+            async with db.begin_nested():
+                stmt = (
+                    select(model)
+                    .where(getattr(model, id_field) == entity_id)
+                    .where(model.version == version_number)  # type: ignore[attr-defined]
+                    .with_for_update()
+                )
+                result = await db.execute(stmt)
+                version = result.scalar_one_or_none()
 
-        if not version:
-            raise ValueError(f"Version {version_number} not found")
+                if not version:
+                    raise NotFoundError(f"Version {version_number} not found")
 
-        await db.commit()
+            await db.commit()
 
-        await self._broadcast_pending_count_update(db)
+            await self._broadcast_pending_count_update(db)
 
-        return version
+            return version
+        except OperationalError as e:
+            if "lock" in str(e).lower():
+                raise LockedError("Failed to acquire lock on version, please retry") from e
+            raise
 
     async def _get_latest_topic_version(self, db: AsyncSession, topic_id: int) -> TopicVersion | None:
         """Get the latest version for a topic."""
@@ -360,45 +383,49 @@ class VersioningService:
     async def _bulk_approve_topic_versions(
         self, db: AsyncSession, version_ids: list[int]
     ) -> tuple[int, list[int], dict[int, str]]:
-        """Bulk approve topic versions."""
-        model = TopicVersion
-
+        """Bulk approve topic versions with sequential transaction-safe processing."""
         success_count = 0
         failed_ids: list[int] = []
         errors: dict[int, str] = {}
 
-        stmt = select(model).where(TopicVersion.id.in_(version_ids))  # type: ignore[arg-type]
-        result = await db.execute(stmt)
-        versions = list(result.scalars().all())
-
-        version_map = {v.id: v for v in versions}
-
         for version_id in version_ids:
-            version = version_map.get(version_id)
-            if not version:
-                failed_ids.append(version_id)
-                errors[version_id] = "Version not found"
-                continue
+            try:
+                async with db.begin_nested():
+                    stmt = select(TopicVersion).where(TopicVersion.id == version_id).with_for_update()
+                    result = await db.execute(stmt)
+                    version = result.scalar_one_or_none()
 
-            if version.approved:
+                    if not version:
+                        failed_ids.append(version_id)
+                        errors[version_id] = "Version not found"
+                        continue
+
+                    if version.approved:
+                        failed_ids.append(version_id)
+                        errors[version_id] = "Version already approved"
+                        continue
+
+                    entity = await db.get(Topic, version.topic_id)
+                    if entity:
+                        for key, value in version.data.items():
+                            if hasattr(entity, key):
+                                setattr(entity, key, value)
+
+                    version.approved = True
+                    version.approved_at = datetime.now(UTC)
+                    success_count += 1
+            except ConflictError:
                 failed_ids.append(version_id)
                 errors[version_id] = "Version already approved"
-                continue
-
-            try:
-                entity = await db.get(Topic, version.topic_id)
-
-                if entity:
-                    for key, value in version.data.items():
-                        if hasattr(entity, key):
-                            setattr(entity, key, value)
-
-                version.approved = True
-                version.approved_at = datetime.now(UTC)
-                success_count += 1
-            except Exception as e:
+            except NotFoundError:
+                failed_ids.append(version_id)
+                errors[version_id] = "Version not found"
+            except LockedError as e:
                 failed_ids.append(version_id)
                 errors[version_id] = str(e)
+            except Exception as e:
+                failed_ids.append(version_id)
+                errors[version_id] = f"Unexpected error: {str(e)}"
 
         await db.commit()
 
@@ -409,44 +436,49 @@ class VersioningService:
     async def _bulk_approve_atom_versions(
         self, db: AsyncSession, version_ids: list[int]
     ) -> tuple[int, list[int], dict[int, str]]:
-        """Bulk approve atom versions."""
-        model = AtomVersion
+        """Bulk approve atom versions with sequential transaction-safe processing."""
         success_count = 0
         failed_ids: list[int] = []
         errors: dict[int, str] = {}
 
-        stmt = select(model).where(AtomVersion.id.in_(version_ids))  # type: ignore[arg-type]
-        result = await db.execute(stmt)
-        versions = list(result.scalars().all())
-
-        version_map = {v.id: v for v in versions}
-
         for version_id in version_ids:
-            version = version_map.get(version_id)
-            if not version:
-                failed_ids.append(version_id)
-                errors[version_id] = "Version not found"
-                continue
+            try:
+                async with db.begin_nested():
+                    stmt = select(AtomVersion).where(AtomVersion.id == version_id).with_for_update()
+                    result = await db.execute(stmt)
+                    version = result.scalar_one_or_none()
 
-            if version.approved:
+                    if not version:
+                        failed_ids.append(version_id)
+                        errors[version_id] = "Version not found"
+                        continue
+
+                    if version.approved:
+                        failed_ids.append(version_id)
+                        errors[version_id] = "Version already approved"
+                        continue
+
+                    entity = await db.get(Atom, version.atom_id)
+                    if entity:
+                        for key, value in version.data.items():
+                            if hasattr(entity, key):
+                                setattr(entity, key, value)
+
+                    version.approved = True
+                    version.approved_at = datetime.now(UTC)
+                    success_count += 1
+            except ConflictError:
                 failed_ids.append(version_id)
                 errors[version_id] = "Version already approved"
-                continue
-
-            try:
-                entity = await db.get(Atom, version.atom_id)
-
-                if entity:
-                    for key, value in version.data.items():
-                        if hasattr(entity, key):
-                            setattr(entity, key, value)
-
-                version.approved = True
-                version.approved_at = datetime.now(UTC)
-                success_count += 1
-            except Exception as e:
+            except NotFoundError:
+                failed_ids.append(version_id)
+                errors[version_id] = "Version not found"
+            except LockedError as e:
                 failed_ids.append(version_id)
                 errors[version_id] = str(e)
+            except Exception as e:
+                failed_ids.append(version_id)
+                errors[version_id] = f"Unexpected error: {str(e)}"
 
         await db.commit()
 
