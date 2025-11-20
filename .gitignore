@@ -176,6 +176,9 @@ node_modules
 # Temporary test files
 tmp/
 
+# User uploaded files
+static/avatars/
+
 
 # Claude Code hook cooldown files (temporary state tracking)
 .claude/hooks/.last-commit-check
