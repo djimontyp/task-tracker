@@ -29,7 +29,8 @@ const AppRoutes = () => {
       }
     >
       <Routes>
-        <Route element={<MainLayout><DashboardPage /></MainLayout>} path="/" />
+        <Route element={<Navigate to="/dashboard" replace />} path="/" />
+        <Route element={<MainLayout><DashboardPage /></MainLayout>} path="/dashboard" />
         <Route element={<MainLayout><SearchPage /></MainLayout>} path="/search" />
         <Route element={<MainLayout><MessagesPage /></MainLayout>} path="/messages" />
         <Route element={<MainLayout><VersionsPage /></MainLayout>} path="/versions" />
