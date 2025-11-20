@@ -38,7 +38,7 @@ const navGroups: NavGroup[] = [
     label: 'Data Management',
     hoverColor: 'blue',
     items: [
-      { path: '/', label: 'Overview', icon: Squares2X2Icon },
+      { path: '/dashboard', label: 'Overview', icon: Squares2X2Icon },
       { path: '/messages', label: 'Messages', icon: EnvelopeIcon },
       { path: '/topics', label: 'Topics', icon: ChatBubbleLeftRightIcon },
     ],
@@ -80,7 +80,7 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
   useEffect(() => {
     groups.forEach((group) => {
       const hasActiveItem = group.items.some((item) =>
-        item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
+        item.path === '/dashboard' ? location.pathname === '/dashboard' : location.pathname.startsWith(item.path)
       )
 
       if (hasActiveItem && expandedGroups[group.label] === undefined) {
