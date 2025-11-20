@@ -173,6 +173,13 @@ docs:
     @echo "Serving documentation with live reload..."
     uv run --group docs mkdocs serve --config-file docs/mkdocs.yml --dev-addr 127.0.0.1:8081 --livereload
 
+# Serve learning documentation (окрема від основної docs)
+[group: 'Documentation']
+learn:
+    @echo "📚 Serving Frontend Learning documentation..."
+    @echo "→ http://127.0.0.1:8082"
+    uv run --group docs mkdocs serve --config-file docs/learning/mkdocs.yml --dev-addr 127.0.0.1:8082 --livereload
+
 # Clear all test data from database
 [group: 'Database']
 db-clear:
