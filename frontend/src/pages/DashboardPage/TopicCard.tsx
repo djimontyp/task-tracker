@@ -23,7 +23,7 @@ export const TopicCard = ({ topic }: TopicCardProps) => {
     }
   }
 
-  const topicColor = topic.color || '#6366f1'
+  const topicColor = topic.color || 'hsl(var(--topic-default))'
 
   const IconComponent = topic.icon
     ? (HeroIcons[topic.icon as keyof typeof HeroIcons] as React.ComponentType<{ className?: string }>) || HeroIcons.FolderIcon
@@ -35,7 +35,7 @@ export const TopicCard = ({ topic }: TopicCardProps) => {
       style={{
         borderLeft: `4px solid ${topicColor}`,
         background: `linear-gradient(135deg, hsl(var(--card)) 0%, color-mix(in srgb, ${topicColor} 3%, hsl(var(--card))) 100%)`,
-        boxShadow: `0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04), inset 4px 0 0 0 ${topicColor}20, inset 0 0 0 1px rgba(255, 255, 255, 0.02)`,
+        boxShadow: `var(--shadow-card), inset 4px 0 0 0 ${topicColor}20, inset 0 0 0 1px hsl(var(--border) / 0.5)`,
         '--ring-color': `color-mix(in srgb, ${topicColor} 70%, hsl(var(--ring)))`,
       } as React.CSSProperties & { '--ring-color': string }}
       tabIndex={0}
@@ -47,7 +47,7 @@ export const TopicCard = ({ topic }: TopicCardProps) => {
       <CardContent className="px-5 py-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2.5 mb-1.5">
+            <div className="flex items-center gap-3 mb-2">
               <span
                 className="w-5 h-5 flex items-center justify-center shrink-0 rounded-full transition-all duration-300"
                 style={{
@@ -60,31 +60,31 @@ export const TopicCard = ({ topic }: TopicCardProps) => {
                 <IconComponent className="w-4 h-4" />
               </span>
               <h3
-                className="text-[17px] font-semibold leading-[1.4] tracking-[-0.01em] truncate transition-colors duration-300 group-hover:opacity-90"
+                className="text-base font-semibold leading-[1.4] tracking-[-0.01em] truncate transition-colors duration-300 group-hover:opacity-90"
                 style={{ color: 'hsl(var(--foreground))' }}
               >
                 {topic.name}
               </h3>
             </div>
             {topic.description && (
-              <p className="text-[13px] leading-[1.5] text-muted-foreground opacity-70 line-clamp-2 mb-3">
+              <p className="text-sm leading-[1.5] text-muted-foreground opacity-70 line-clamp-2 mb-3">
                 {topic.description}
               </p>
             )}
             <div className="flex items-center gap-3">
               <Badge
                 variant="secondary"
-                className="h-6 px-2 text-[10px] font-semibold uppercase tracking-wider bg-background/60 backdrop-blur-sm border shadow-sm"
+                className="h-6 px-2 text-xs font-semibold uppercase tracking-wider bg-background/60 backdrop-blur-sm border shadow-sm"
                 style={{
                   borderColor: `color-mix(in srgb, ${topicColor} 30%, hsl(var(--border)))`,
                   color: `color-mix(in srgb, ${topicColor} 70%, hsl(var(--foreground)))`,
                 }}
               >
-                <HeroIcons.ChatBubbleLeftIcon className="w-3 h-3 mr-1.5 opacity-80" />
+                <HeroIcons.ChatBubbleLeftIcon className="w-3 h-3 mr-2 opacity-80" />
                 {topic.message_count || 0}
               </Badge>
               <div
-                className="flex items-center gap-1.5 text-[11px] font-medium"
+                className="flex items-center gap-2 text-xs font-medium"
                 style={{ color: `color-mix(in srgb, ${topicColor} 60%, hsl(var(--muted-foreground)))` }}
               >
                 <HeroIcons.LightBulbIcon className="w-3.5 h-3.5 opacity-75" />
@@ -92,7 +92,7 @@ export const TopicCard = ({ topic }: TopicCardProps) => {
                 <span className="font-normal opacity-60">atoms</span>
               </div>
               {topic.last_message_at && (
-                <span className="ml-auto text-[11px] font-normal text-muted-foreground opacity-50 tabular-nums">
+                <span className="ml-auto text-xs font-normal text-muted-foreground opacity-50 tabular-nums">
                   {formatMessageDate(topic.last_message_at)}
                 </span>
               )}

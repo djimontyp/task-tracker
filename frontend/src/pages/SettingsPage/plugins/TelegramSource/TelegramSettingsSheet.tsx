@@ -95,7 +95,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
               <Badge
                 variant={isActive ? 'default' : 'secondary'}
                 className={cn(
-                  'flex items-center gap-1.5',
+                  'flex items-center gap-2',
                   isActive && 'bg-green-600 hover:bg-green-600 text-white border-green-600'
                 )}
               >

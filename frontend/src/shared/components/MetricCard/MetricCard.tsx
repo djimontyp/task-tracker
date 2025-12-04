@@ -48,22 +48,22 @@ const getStatusBadgeLabel = (status: MetricStatus): string => {
 const getStatusBadgeColor = (status: MetricStatus): string => {
   switch (status) {
     case 'critical':
-      return 'border-red-500 text-red-600 bg-red-50 dark:bg-red-950'
+      return 'border-semantic-error text-semantic-error bg-semantic-error/10'
     case 'warning':
-      return 'border-yellow-500 text-yellow-600 bg-yellow-50 dark:bg-yellow-950'
+      return 'border-semantic-warning text-semantic-warning bg-semantic-warning/10'
     case 'optimal':
-      return 'border-green-500 text-green-600 bg-green-50 dark:bg-green-950'
+      return 'border-semantic-success text-semantic-success bg-semantic-success/10'
   }
 }
 
 const getCardBorderColor = (status: MetricStatus): string => {
   switch (status) {
     case 'critical':
-      return 'border-red-500'
+      return 'border-semantic-error'
     case 'warning':
-      return 'border-yellow-500'
+      return 'border-semantic-warning'
     case 'optimal':
-      return 'border-green-500/30'
+      return 'border-semantic-success/30'
   }
 }
 
@@ -85,9 +85,9 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
       if (!trend) return ''
       switch (trend.direction) {
         case 'up':
-          return 'text-green-600'
+          return 'text-semantic-success'
         case 'down':
-          return 'text-red-600'
+          return 'text-semantic-error'
         default:
           return 'text-muted-foreground'
       }

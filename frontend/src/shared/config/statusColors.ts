@@ -7,27 +7,27 @@ export type StatusVariant = 'info' | 'success' | 'warning' | 'error'
 
 export const STATUS_COLORS = {
   info: {
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-700 dark:text-blue-400',
-    border: 'border-blue-500/50',
+    bg: 'bg-semantic-info/10',
+    text: 'text-semantic-info',
+    border: 'border-semantic-info/50',
     badgeVariant: 'outline' as const,
   },
   success: {
-    bg: 'bg-green-500/10',
-    text: 'text-green-700 dark:text-green-400',
-    border: 'border-green-500/50',
+    bg: 'bg-semantic-success/10',
+    text: 'text-semantic-success',
+    border: 'border-semantic-success/50',
     badgeVariant: 'default' as const,
   },
   warning: {
-    bg: 'bg-yellow-500/10',
-    text: 'text-yellow-700 dark:text-yellow-400',
-    border: 'border-yellow-500/50',
+    bg: 'bg-semantic-warning/10',
+    text: 'text-semantic-warning',
+    border: 'border-semantic-warning/50',
     badgeVariant: 'outline' as const,
   },
   error: {
-    bg: 'bg-red-500/10',
-    text: 'text-red-700 dark:text-red-400',
-    border: 'border-red-500/50',
+    bg: 'bg-semantic-error/10',
+    text: 'text-semantic-error',
+    border: 'border-semantic-error/50',
     badgeVariant: 'destructive' as const,
   },
 } as const

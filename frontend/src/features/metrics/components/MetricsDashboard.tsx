@@ -294,7 +294,7 @@ export const MetricsDashboard = () => {
         <div className="flex items-center gap-3">
           {isWsConnected ? (
             <>
-              <Badge variant="outline" className="gap-1.5 border-green-500 text-green-600">
+              <Badge variant="outline" className="gap-2 border-green-500 text-green-600">
                 <SignalIcon className="w-3.5 h-3.5" />
                 Live
               </Badge>
@@ -307,7 +307,7 @@ export const MetricsDashboard = () => {
             </>
           ) : (
             <>
-              <Badge variant="outline" className="gap-1.5 border-yellow-500 text-yellow-600">
+              <Badge variant="outline" className="gap-2 border-yellow-500 text-yellow-600">
                 <SignalSlashIcon className="w-3.5 h-3.5" />
                 Polling
               </Badge>

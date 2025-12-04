@@ -1,0 +1,264 @@
+{
+  "project": "pulse-radar",
+  "created": "2025-11-30",
+  "updated": "2025-11-30",
+  "core_flow": "Telegram → Інгест повідомлень → AI-екстракція знань → Атом → Топік → Дашборд",
+  "features": [
+    {
+      "id": "F001",
+      "name": "Telegram інгест",
+      "category": "integration",
+      "status": "works",
+      "verified": true,
+      "release": "mvp"
+    },
+    {
+      "id": "F002",
+      "name": "Повідомлення CRUD",
+      "category": "api",
+      "status": "works",
+      "verified": true,
+      "release": "mvp"
+    },
+    {
+      "id": "F003",
+      "name": "AI-екстракція знань",
+      "category": "ai",
+      "status": "works",
+      "verified": true,
+      "release": "mvp"
+    },
+    {
+      "id": "F004",
+      "name": "Управління топіками",
+      "category": "api",
+      "status": "works",
+      "verified": true,
+      "release": "mvp"
+    },
+    {
+      "id": "F005",
+      "name": "Управління атомами",
+      "category": "api",
+      "status": "works",
+      "verified": true,
+      "release": "mvp"
+    },
+    {
+      "id": "F006",
+      "name": "Дашборд",
+      "category": "ui",
+      "status": "works",
+      "verified": true,
+      "release": "mvp"
+    },
+    {
+      "id": "F007",
+      "name": "WebSocket реалтайм",
+      "category": "integration",
+      "status": "unknown",
+      "verified": false,
+      "release": "v1.1"
+    },
+    {
+      "id": "F008",
+      "name": "LLM-провайдери",
+      "category": "ai",
+      "status": "works",
+      "verified": true,
+      "release": "mvp"
+    },
+    {
+      "id": "F009",
+      "name": "AI-агенти",
+      "category": "ai",
+      "status": "unknown",
+      "verified": false,
+      "release": "v1.1"
+    },
+    {
+      "id": "F010",
+      "name": "Призначення задач агентам",
+      "category": "ai",
+      "status": "unknown",
+      "verified": false,
+      "release": "v1.2"
+    },
+    {
+      "id": "F011",
+      "name": "Семантичний пошук",
+      "category": "ai",
+      "status": "unknown",
+      "verified": false,
+      "release": "v1.1"
+    },
+    {
+      "id": "F012",
+      "name": "Повнотекстовий пошук",
+      "category": "api",
+      "status": "unknown",
+      "verified": false,
+      "release": "v1.2"
+    },
+    {
+      "id": "F013",
+      "name": "Конфігурація проєктів",
+      "category": "api",
+      "status": "unknown",
+      "verified": false,
+      "release": "v1.2"
+    },
+    {
+      "id": "F014",
+      "name": "Фільтрація шуму",
+      "category": "ai",
+      "status": "unknown",
+      "verified": false,
+      "release": "later"
+    },
+    {
+      "id": "F015",
+      "name": "Правила автоматизації",
+      "category": "automation",
+      "status": "unknown",
+      "verified": false,
+      "release": "later"
+    },
+    {
+      "id": "F016",
+      "name": "Заплановані задачі",
+      "category": "automation",
+      "status": "unknown",
+      "verified": false,
+      "release": "later"
+    },
+    {
+      "id": "F017",
+      "name": "Історія версій",
+      "category": "api",
+      "status": "unknown",
+      "verified": false,
+      "release": "v1.2"
+    },
+    {
+      "id": "F018",
+      "name": "API ембедінгів",
+      "category": "ai",
+      "status": "unknown",
+      "verified": false,
+      "release": "v1.1"
+    },
+    {
+      "id": "F019",
+      "name": "Health Check",
+      "category": "api",
+      "status": "works",
+      "verified": true,
+      "release": "mvp"
+    },
+    {
+      "id": "F020",
+      "name": "Метрики WebSocket",
+      "category": "integration",
+      "status": "unknown",
+      "verified": false,
+      "release": "dormant"
+    },
+    {
+      "id": "F021",
+      "name": "Управління користувачами",
+      "category": "api",
+      "status": "unknown",
+      "verified": false,
+      "release": "v1.2"
+    },
+    {
+      "id": "F022",
+      "name": "Конфігурація задач",
+      "category": "api",
+      "status": "unknown",
+      "verified": false,
+      "release": "dormant"
+    },
+    {
+      "id": "F023",
+      "name": "Управління промптами",
+      "category": "ai",
+      "status": "unknown",
+      "verified": false,
+      "release": "dormant"
+    },
+    {
+      "id": "F024",
+      "name": "API інгесту",
+      "category": "api",
+      "status": "unknown",
+      "verified": false,
+      "release": "v1.1"
+    },
+    {
+      "id": "F025",
+      "name": "Авто-затвердження",
+      "category": "automation",
+      "status": "unknown",
+      "verified": false,
+      "release": "later"
+    },
+    {
+      "id": "F026",
+      "name": "Фонові задачі (TaskIQ)",
+      "category": "integration",
+      "status": "works",
+      "verified": true,
+      "release": "mvp"
+    },
+    {
+      "id": "F027",
+      "name": "Скоринг важливості",
+      "category": "ai",
+      "status": "unknown",
+      "verified": false,
+      "release": "later"
+    },
+    {
+      "id": "F028",
+      "name": "RAG Context Builder",
+      "category": "ai",
+      "status": "unknown",
+      "verified": false,
+      "release": "dormant"
+    },
+    {
+      "id": "F029",
+      "name": "Онбординг автоматизації",
+      "category": "ui",
+      "status": "unknown",
+      "verified": false,
+      "release": "dormant"
+    },
+    {
+      "id": "F030",
+      "name": "Сторінка налаштувань",
+      "category": "ui",
+      "status": "works",
+      "verified": true,
+      "release": "mvp"
+    }
+  ],
+  "statistics": {
+    "total": 30,
+    "by_status": {
+      "unknown": 20,
+      "works": 10,
+      "partial": 0,
+      "broken": 0
+    },
+    "by_release": {
+      "mvp": 10,
+      "v1.1": 5,
+      "v1.2": 5,
+      "later": 5,
+      "dormant": 5
+    }
+  }
+}
