@@ -233,23 +233,23 @@ const NoiseFilteringDashboard = () => {
                   <Line
                     type="monotone"
                     dataKey="Signal"
-                    stroke="#10b981"
+                    stroke="hsl(var(--chart-signal))"
                     strokeWidth={2}
-                    dot={{ fill: '#10b981' }}
+                    dot={{ fill: 'hsl(var(--chart-signal))' }}
                   />
                   <Line
                     type="monotone"
                     dataKey="Noise"
-                    stroke="#ef4444"
+                    stroke="hsl(var(--semantic-error))"
                     strokeWidth={2}
-                    dot={{ fill: '#ef4444' }}
+                    dot={{ fill: 'hsl(var(--semantic-error))' }}
                   />
                   <Line
                     type="monotone"
                     dataKey="Weak Signal"
-                    stroke="#f59e0b"
+                    stroke="hsl(var(--semantic-warning))"
                     strokeWidth={2}
-                    dot={{ fill: '#f59e0b' }}
+                    dot={{ fill: 'hsl(var(--semantic-warning))' }}
                   />
                 </LineChart>
               </ResponsiveContainer>

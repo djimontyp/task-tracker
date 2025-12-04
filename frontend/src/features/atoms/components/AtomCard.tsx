@@ -13,13 +13,13 @@ interface AtomCardProps {
 }
 
 const atomTypeColors: Record<AtomType, string> = {
-  problem: 'badge-error',
-  solution: 'badge-success',
-  decision: 'badge-info',
-  question: 'badge-warning',
-  insight: 'badge-purple',
-  pattern: 'badge-purple',
-  requirement: 'badge-info',
+  problem: 'bg-semantic-error text-white',
+  solution: 'bg-semantic-success text-white',
+  decision: 'bg-semantic-info text-white',
+  question: 'bg-semantic-warning text-white',
+  insight: 'bg-purple-500 text-white',
+  pattern: 'bg-purple-500 text-white',
+  requirement: 'bg-semantic-info text-white',
 }
 
 const atomTypeLabels: Record<AtomType, string> = {
@@ -88,7 +88,7 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
         </div>
 
         {atom.user_approved && (
-          <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+          <div className="flex items-center gap-1 text-semantic-success">
             <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
@@ -102,7 +102,7 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
 
         {pendingVersionsCount > 0 && (
           <div className="flex items-center gap-2 pt-2 border-t border-border">
-            <Badge className="text-xs bg-amber-500 text-white hover:bg-amber-600">
+            <Badge className="text-xs bg-semantic-warning text-white hover:bg-semantic-warning/90">
               {pendingVersionsCount} pending version{pendingVersionsCount > 1 ? 's' : ''}
             </Badge>
             <Button

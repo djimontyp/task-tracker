@@ -14,6 +14,7 @@ import { MessagesErrorBoundary } from '@/features/messages/components'
 import { formatMessageDate } from '@/shared/utils/date'
 import { MetricsDashboard } from '@/features/metrics'
 import { RecentTopics } from './RecentTopics'
+import { TrendingTopics } from './TrendingTopics'
 
 const DashboardPage = () => {
   const navigate = useNavigate()
@@ -74,14 +75,19 @@ const DashboardPage = () => {
       <MetricsDashboard />
 
       {/* Recent Topics and Messages */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 animate-fade-in-up max-w-full" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 animate-fade-in-up max-w-full" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
         {/* Recent Topics - 2/3 width on large screens */}
-        <div className="lg:col-span-2 min-w-0">
+        <div className="lg:col-span-2 min-w-0 order-1">
           <RecentTopics />
         </div>
 
-        {/* Recent Messages - 1/3 width on large screens */}
-        <MessagesErrorBoundary>
+        {/* Right column - Trending Topics + Recent Messages */}
+        <div className="space-y-4 sm:space-y-5 md:space-y-6 order-2 lg:order-3">
+          {/* Trending Topics */}
+          <TrendingTopics />
+
+          {/* Recent Messages - 1/3 width on large screens */}
+          <MessagesErrorBoundary>
           <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
@@ -102,7 +108,7 @@ const DashboardPage = () => {
                   {[...Array(3)].map((_, i) => (
                     <div key={i} className="flex items-start gap-3 py-2 border-b last:border-b-0">
                       <Skeleton className="h-10 w-10 rounded-full shrink-0" />
-                      <div className="flex-1 space-y-1.5">
+                      <div className="flex-1 space-y-2">
                         <Skeleton className="h-4 w-2/3" />
                         <Skeleton className="h-3 w-1/3" />
                       </div>
@@ -132,7 +138,7 @@ const DashboardPage = () => {
                           {message.author_name?.charAt(0).toUpperCase() || '?'}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-[#0088cc] flex items-center justify-center shadow-md ring-2 ring-background">
+                      <div className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-brand-telegram flex items-center justify-center shadow-md ring-2 ring-background">
                         <TelegramIcon size={14} className="text-white drop-shadow-sm" />
                       </div>
                     </div>
@@ -162,6 +168,7 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
         </MessagesErrorBoundary>
+        </div>
       </div>
 
       {/* Activity Heatmap */}

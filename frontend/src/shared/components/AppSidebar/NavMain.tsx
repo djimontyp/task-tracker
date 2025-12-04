@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { ChevronRightIcon } from '@heroicons/react/24/solid'
+import { ChevronRight } from 'lucide-react'
 import { Fragment } from 'react'
 import { cn } from '@/shared/lib/utils'
 import { useUiStore } from '@/shared/store/uiStore'
@@ -19,17 +19,7 @@ import {
 import { Separator } from '@/shared/ui/separator'
 import type { NavGroup } from './types'
 
-const getHoverClasses = (color: string = 'primary') => {
-  const colorMap: Record<string, string> = {
-    blue: 'hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400',
-    purple: 'hover:bg-purple-500/10 hover:text-purple-600 dark:hover:text-purple-400',
-    amber: 'hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400',
-    green: 'hover:bg-green-500/10 hover:text-green-600 dark:hover:text-green-400',
-    pink: 'hover:bg-pink-500/10 hover:text-pink-600 dark:hover:text-pink-400',
-    primary: 'hover:bg-primary/10 hover:text-primary',
-  }
-  return colorMap[color] || colorMap.primary
-}
+const HOVER_CLASSES = 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
 
 interface NavMainProps {
   groups: NavGroup[];
@@ -59,16 +49,16 @@ export function NavMain({ groups }: NavMainProps) {
                 <SidebarGroup className="group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-1">
                   <SidebarGroupLabel
                     asChild
-                    className="px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70"
+                    className="px-2 text-xs font-semibold uppercase tracking-wider text-foreground"
                   >
                     <CollapsibleTrigger
                       className={cn(
                         'flex w-full items-center justify-between rounded-md transition-colors hover:bg-accent/50',
-                        hasActiveItem && 'text-primary font-semibold'
+                        hasActiveItem && 'text-foreground font-semibold'
                       )}
                     >
                       <span>{group.label}</span>
-                      <ChevronRightIcon
+                      <ChevronRight
                         className={cn(
                           'h-4 w-4 transition-transform duration-200 group-data-[collapsible=icon]:hidden',
                           isGroupExpanded && 'rotate-90'
@@ -93,11 +83,11 @@ export function NavMain({ groups }: NavMainProps) {
                                 tooltip={item.label}
                                 className={cn(
                                   'relative transition-all duration-300',
-                                  'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold',
-                                  !isActive && getHoverClasses(group.hoverColor)
+                                  'data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:font-semibold',
+                                  !isActive && HOVER_CLASSES
                                 )}
                               >
-                                <Link to={item.path}>
+                                <Link to={item.path} className="flex items-center gap-2">
                                   <item.icon className="size-5" />
                                   <span>{item.label}</span>
                                 </Link>
@@ -128,11 +118,11 @@ export function NavMain({ groups }: NavMainProps) {
                               className={cn(
                                 'relative transition-all duration-300',
                                 'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold',
-                                'group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0',
-                                !isActive && getHoverClasses(group.hoverColor)
+                                'group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0',
+                                !isActive && HOVER_CLASSES
                               )}
                             >
-                              <Link to={item.path}>
+                              <Link to={item.path} className="flex items-center gap-2">
                                 <item.icon className="size-5" />
                                 <span className="group-data-[collapsible=icon]:sr-only">{item.label}</span>
                               </Link>
@@ -156,7 +146,7 @@ export function NavMain({ groups }: NavMainProps) {
             <SidebarGroup>
               <SidebarGroupLabel
                 className={cn(
-                  'px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70',
+                  'px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground',
                   hasActiveItem && 'text-primary'
                 )}
               >
@@ -179,11 +169,11 @@ export function NavMain({ groups }: NavMainProps) {
                           className={cn(
                             'relative transition-all duration-300',
                             'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold',
-                            'group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0',
-                            !isActive && getHoverClasses(group.hoverColor)
+                            'group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0',
+                            !isActive && HOVER_CLASSES
                           )}
                         >
-                          <Link to={item.path}>
+                          <Link to={item.path} className="flex items-center gap-2">
                             <item.icon className="size-5" />
                             <span className="group-data-[collapsible=icon]:sr-only">{item.label}</span>
                           </Link>

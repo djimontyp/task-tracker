@@ -91,7 +91,7 @@ export function ReviewActivateStep() {
         <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
           What happens next?
         </h4>
-        <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1.5">
+        <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
           <li className="flex items-start gap-2">
             <span className="shrink-0">1.</span>
             <span>Scheduler job will be created with your configured schedule</span>

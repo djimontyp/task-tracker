@@ -28,7 +28,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-lg font-semibold">{project.name}</h3>
-              <Badge variant="outline" className={project.is_active ? 'badge-success' : 'badge-neutral'}>
+              <Badge variant="outline" className={project.is_active ? 'bg-semantic-success text-white border-semantic-success' : 'bg-slate-500 text-white border-slate-600'}>
                 {project.is_active ? 'Active' : 'Inactive'}
               </Badge>
             </div>

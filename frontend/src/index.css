@@ -4,66 +4,142 @@
 
 @layer base {
   :root {
-    /* Light Theme - Elegant Techno-Neon with Enhanced Contrast */
-    --background: 0 0% 98%;
-    --foreground: 0 0% 12%;
+    --background: 0 0% 100%;
+    --foreground: 20 14.3% 4.1%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 12%;
+    --card-foreground: 20 14.3% 4.1%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 12%;
-    --primary: 14 82% 53%; /* Warm copper gradient start #E4572E */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 16%; /* Dark charcoal #2A2A2A */
-    --secondary-foreground: 0 0% 92%;
-    --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 20%; /* Much darker gray for excellent contrast on light background */
-    --accent: 17 90% 65%; /* Copper accent #F58549 */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 353 84% 46%; /* Deep ruby #D72638 */
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 82%;
-    --input: 0 0% 82%;
-    --ring: 14 82% 53%;
-    --radius: 6px;
+    --popover-foreground: 20 14.3% 4.1%;
+    --primary: 24.6 95% 53.1%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 60 4.8% 95.9%;
+    --secondary-foreground: 24 9.8% 10%;
+    --muted: 60 4.8% 95.9%;
+    --muted-foreground: 25 5.3% 33.3%;
+    --accent: 60 4.8% 95.9%;
+    --accent-foreground: 24 9.8% 10%;
+    --destructive: 0 84.2% 40.1%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 20 5.9% 90%;
+    --input: 20 5.9% 90%;
+    --ring: 24.6 95% 53.1%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 12%;
-    --sidebar-primary: 0 0% 12%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 95%;
-    --sidebar-accent-foreground: 0 0% 12%;
-    --sidebar-border: 0 0% 91%;
-    --sidebar-ring: 14 82% 53%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 24.6 95% 53.1%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 24.6 95% 53.1%;
+    /* Atom type semantic colors */
+    --atom-problem: 0 84.2% 60.2%;
+    --atom-solution: 142 76% 36%;
+    --atom-decision: 217 91% 60%;
+    --atom-question: 43 96% 56%;
+    --atom-insight: 280 85% 63%;
+    --atom-pattern: 280 85% 63%;
+    --atom-requirement: 217 91% 60%;
+    /* Status indicator colors */
+    --status-connected: 142 76% 36%;
+    --status-validating: 217 91% 60%;
+    --status-pending: 43 96% 56%;
+    --status-error: 0 84.2% 60.2%;
+    /* Shadow tokens */
+    --shadow-color: 222.2 47.4% 11.2%;
+    --shadow-card: 0 1px 3px hsl(var(--shadow-color) / 0.06),
+                   0 1px 2px hsl(var(--shadow-color) / 0.04);
+    /* Heatmap colors */
+    --heatmap-telegram: 200 80% 50%;
+    --heatmap-slack: 280 70% 50%;
+    --heatmap-email: 140 70% 45%;
+    /* Semantic Status (for text/icons) */
+    --semantic-success: 142 76% 36%;
+    --semantic-warning: 43 96% 56%;
+    --semantic-error: 0 84.2% 60.2%;
+    --semantic-info: 217 91% 60%;
+    /* Chart Colors */
+    --chart-signal: 142 76% 36%;
+    --chart-noise: 0 84.2% 60.2%;
+    --chart-weak-signal: 43 96% 56%;
+    /* Brand */
+    --brand-telegram: 200 80% 50%;
+    /* Topic Default */
+    --topic-default: 231 65% 61%;
   }
 
   .dark {
-    /* Dark Theme - Elegant Techno-Neon */
-    --background: 0 0% 12%; /* Deep charcoal #1E1E1E */
-    --foreground: 0 0% 92%;
-    --card: 0 0% 16%; /* Dark grey #2A2A2A */
-    --card-foreground: 0 0% 92%;
-    --popover: 0 0% 16%;
-    --popover-foreground: 0 0% 92%;
-    --primary: 14 82% 53%; /* Warm copper #E4572E */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 16%; /* Dark charcoal #2A2A2A */
-    --secondary-foreground: 0 0% 92%;
-    --muted: 0 0% 18%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 17 90% 65%; /* Copper accent #F58549 */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 353 84% 46%; /* Deep ruby #D72638 */
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 14 82% 53%;
-    --sidebar-background: 0 0% 12%;
-    --sidebar-foreground: 0 0% 92%;
-    --sidebar-primary: 14 82% 53%;
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+    --card: 20 14.3% 4.1%;
+    --card-foreground: 60 9.1% 97.8%;
+    --popover: 20 14.3% 4.1%;
+    --popover-foreground: 60 9.1% 97.8%;
+    --primary: 20.5 90.2% 48.2%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --secondary: 12 6.5% 15.1%;
+    --secondary-foreground: 60 9.1% 97.8%;
+    --muted: 12 6.5% 15.1%;
+    --muted-foreground: 24 5.4% 63.9%;
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 60 9.1% 97.8%;
+    --destructive: 0 72.2% 50.6%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 12 6.5% 15.1%;
+    --input: 12 6.5% 15.1%;
+    --ring: 20.5 90.2% 48.2%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 20 14.3% 4.1%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 20.5 90.2% 48.2%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 18%;
-    --sidebar-accent-foreground: 0 0% 92%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 14 82% 53%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 20.5 90.2% 48.2%;
+    /* Atom type semantic colors */
+    --atom-problem: 0 84.2% 60.2%;
+    --atom-solution: 142 76% 36%;
+    --atom-decision: 217 91% 60%;
+    --atom-question: 43 96% 56%;
+    --atom-insight: 280 85% 63%;
+    --atom-pattern: 280 85% 63%;
+    --atom-requirement: 217 91% 60%;
+    /* Status indicator colors */
+    --status-connected: 142 76% 36%;
+    --status-validating: 217 91% 60%;
+    --status-pending: 43 96% 56%;
+    --status-error: 0 84.2% 60.2%;
+    /* Shadow tokens */
+    --shadow-color: 210 40% 98%;
+    --shadow-card: 0 1px 3px hsl(var(--shadow-color) / 0.04),
+                   0 1px 2px hsl(var(--shadow-color) / 0.02);
+    /* Heatmap colors */
+    --heatmap-telegram: 200 80% 60%;
+    --heatmap-slack: 280 70% 60%;
+    --heatmap-email: 140 70% 55%;
+    /* Semantic Status (for text/icons) - slightly lighter for dark mode */
+    --semantic-success: 142 76% 46%;
+    --semantic-warning: 43 96% 66%;
+    --semantic-error: 0 84.2% 70%;
+    --semantic-info: 217 91% 70%;
+    /* Chart Colors - adjusted for dark mode contrast */
+    --chart-signal: 142 76% 46%;
+    --chart-noise: 0 84.2% 70%;
+    --chart-weak-signal: 43 96% 66%;
+    /* Brand */
+    --brand-telegram: 200 80% 60%;
+    /* Topic Default - lighter for dark mode */
+    --topic-default: 231 65% 71%;
   }
 }
 
@@ -73,210 +149,33 @@
   }
   body {
     @apply bg-background text-foreground;
-  }
-
-  button:focus-visible,
-  a:focus-visible,
-  input:focus-visible,
-  textarea:focus-visible,
-  select:focus-visible,
-  [tabindex]:focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-4 ring-offset-background;
-  }
-
-  [role="button"]:focus-visible,
-  [role="link"]:focus-visible,
-  [role="tab"]:focus-visible,
-  [role="menuitem"]:focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-4 ring-offset-background;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-body {
-  margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-/* Ripple Effect Animation */
-@keyframes ripple {
-  0% {
-    transform: scale(0);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scale(4);
-    opacity: 0;
+@layer base {
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-.ripple-container {
-  position: relative;
-  overflow: hidden;
-}
-
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
-  pointer-events: none;
-  animation: ripple 0.6s ease-out;
-}
-
-.dark .ripple {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* Click Feedback Animation */
-@keyframes click-scale {
-  0% {
-    transform: scale(1);
+@layer components {
+  /* WCAG 2.4.7 Focus Visible - 3px outline with offset */
+  :where(button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
-  50% {
-    transform: scale(0.97);
+
+  /* Remove default outline-none that hides focus */
+  .focus-visible\:outline-none:focus-visible {
+    outline: 3px solid hsl(var(--ring)) !important;
+    outline-offset: 2px !important;
   }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.click-feedback:active {
-  animation: click-scale 0.2s ease-in-out;
-}
-
-/* Loading Spinner */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-/* Pulse Animation for Loading States */
-@keyframes pulse-subtle {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Container with max-width and horizontal padding */
-.container {
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 1536px; /* 2xl breakpoint */
-}
-
-@media (min-width: 1536px) {
-  .container {
-    max-width: 1536px;
-  }
-}
-
-@media (min-width: 1920px) {
-  .container {
-    max-width: 1728px; /* 3xl custom */
-  }
-}
-
-/* React Colorful Custom Styles */
-.react-colorful {
-  width: 100% !important;
-  height: 150px !important;
-}
-
-.react-colorful__saturation {
-  border-radius: 4px 4px 0 0;
-  border-bottom: none;
-}
-
-.react-colorful__hue {
-  height: 12px;
-  border-radius: 0 0 4px 4px;
-  margin-top: 8px;
-}
-
-.react-colorful__pointer {
-  width: 16px;
-  height: 16px;
-  border-width: 2px;
-}
-
-.dark .react-colorful__pointer {
-  border-color: hsl(var(--border));
-}
-
-/**
- * Semantic Badge Colors - WCAG AA Compliant
- * All combinations tested for ≥4.5:1 contrast ratio
- */
-
-/* Success/Connected/Approved */
-.badge-success {
-  @apply bg-emerald-700 text-white border-emerald-800;
-  @apply dark:bg-emerald-500 dark:text-white dark:border-emerald-600;
-}
-
-/* Error/Failed/Rejected */
-.badge-error {
-  @apply bg-rose-700 text-white border-rose-800;
-  @apply dark:bg-rose-500 dark:text-white dark:border-rose-600;
-}
-
-/* Warning/Pending/Medium */
-.badge-warning {
-  @apply bg-amber-700 text-white border-amber-800;
-  @apply dark:bg-amber-500 dark:text-white dark:border-amber-600;
-}
-
-/* Info/Validating/Running */
-.badge-info {
-  @apply bg-blue-700 text-white border-blue-800;
-  @apply dark:bg-blue-500 dark:text-white dark:border-blue-600;
-}
-
-/* Neutral/Inactive/Low */
-.badge-neutral {
-  @apply bg-slate-700 text-white border-slate-800;
-  @apply dark:bg-slate-500 dark:text-white dark:border-slate-600;
-}
-
-/* High Priority/Critical */
-.badge-critical {
-  @apply bg-orange-700 text-white border-orange-800;
-  @apply dark:bg-orange-500 dark:text-white dark:border-orange-600;
-}
-
-/* Reviewed/Completed */
-.badge-complete {
-  @apply bg-emerald-800 text-white border-emerald-900;
-  @apply dark:bg-emerald-600 dark:text-white dark:border-emerald-700;
-}
-
-/* Special: Purple for misc */
-.badge-purple {
-  @apply bg-purple-700 text-white border-purple-800;
-  @apply dark:bg-purple-500 dark:text-white dark:border-purple-600;
 }

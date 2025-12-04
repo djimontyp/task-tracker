@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { AdjustmentsHorizontalIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
-import { SignalIcon } from '@heroicons/react/24/solid'
+import { Radar, Settings, Search, Menu } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { SidebarTrigger } from '@/shared/ui/sidebar'
 import { Button } from '@/shared/ui/button'
@@ -64,10 +63,10 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
 
   const indicatorClasses =
     indicator === 'healthy'
-      ? 'bg-emerald-400 shadow-[0_0_0_3px_rgba(16,185,129,0.25)]'
+      ? 'bg-green-500 shadow-[0_0_0_3px_rgba(34,197,94,0.25)]'
       : indicator === 'warning'
-        ? 'bg-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.25)] animate-pulse'
-        : 'bg-rose-500 shadow-[0_0_0_3px_rgba(244,63,94,0.25)] animate-pulse'
+        ? 'bg-yellow-500 shadow-[0_0_0_3px_rgba(234,179,8,0.25)] animate-pulse'
+        : 'bg-destructive shadow-[0_0_0_3px_rgba(239,68,68,0.25)] animate-pulse'
 
   const statusTitle =
     indicator === 'healthy'
@@ -84,17 +83,17 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
         : 'Offline'
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-card border-b border-border/80 overflow-hidden">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-card border-b border-border overflow-hidden">
       <div className="flex flex-col md:flex-row h-auto md:h-14 px-2 sm:px-3 md:px-4 lg:px-6">
-        <div className="flex items-center justify-between gap-1.5 sm:gap-2 min-w-0 flex-1 py-2 md:py-0">
-          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-shrink">
+        <div className="flex items-center justify-between gap-2 sm:gap-2 min-w-0 flex-1 py-2 md:py-0">
+          <div className="flex items-center gap-2 sm:gap-2 min-w-0 flex-shrink">
             <Link
               to="/"
-              className="flex h-11 shrink-0 items-center gap-1.5 sm:gap-2 rounded-lg px-1.5 sm:px-2 text-foreground transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-11 shrink-0 items-center gap-2 sm:gap-2 rounded-lg px-2 sm:px-2 text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label={`${appName} home`}
             >
-              <span className="flex size-8 sm:size-9 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary shadow-sm">
-                <SignalIcon className="size-4 sm:size-5" />
+              <span className="flex size-8 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary shadow-sm">
+                <Radar className="size-4" />
               </span>
               <span className="hidden text-sm sm:text-base font-semibold tracking-tight text-foreground sm:inline-block">
                 {appName}
@@ -105,7 +104,7 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
               <SidebarTrigger
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11 shrink-0 rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-11 w-11 shrink-0 rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="Toggle sidebar"
               />
             ) : (
@@ -113,29 +112,27 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
                 variant="ghost"
                 size="icon"
                 onClick={onMobileSidebarToggle}
-                className="h-11 w-11 shrink-0 rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-11 w-11 shrink-0 rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="Toggle sidebar"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
+                <Menu className="size-5" />
               </Button>
             )}
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden min-h-11 min-w-11 h-11 w-11 aspect-square border border-border/60 bg-card/60 text-muted-foreground hover:bg-accent/15 hover:text-foreground shrink-0"
+              className="lg:hidden min-h-11 min-w-11 h-11 w-11 aspect-square border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground shrink-0"
               onClick={() => setMobileSearchOpen(true)}
               aria-label="Open search"
             >
-              <MagnifyingGlassIcon className="h-5 w-5" />
+              <Search className="h-5 w-5" />
             </Button>
 
             <div
-              className="hidden sm:flex items-center gap-1.5 px-1.5 py-1 rounded-md"
+              className="hidden sm:flex items-center gap-2 px-2 py-1 rounded-md"
               title={statusTitle}
               role="status"
               aria-label={statusTitle}
@@ -160,7 +157,7 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
           </div>
         </div>
 
-        <div className="md:hidden px-2 pb-2 border-t border-border/40 overflow-hidden">
+        <div className="md:hidden px-2 pb-2 border-t border-border overflow-hidden">
           <Breadcrumb className="pt-2">
             <BreadcrumbList className="flex-wrap overflow-hidden">
               {crumbs.map((segment, index) => {
@@ -223,7 +220,7 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="flex h-11 w-11 aspect-square border border-border/60 bg-card/60 text-muted-foreground hover:bg-accent/15 hover:text-foreground shrink-0"
+                  className="flex h-11 w-11 aspect-square border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground shrink-0"
                   onClick={cycleTheme}
                   aria-label="Change theme"
                 >
@@ -243,9 +240,9 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
                   to="/settings"
                   aria-label="Settings"
                   title="Settings"
-                  className="inline-flex h-11 w-11 aspect-square items-center justify-center rounded-lg border border-border/60 bg-card/60 text-muted-foreground transition-colors hover:bg-accent/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+                  className="inline-flex h-11 w-11 aspect-square items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
                 >
-                  <AdjustmentsHorizontalIcon className="w-5 h-5" />
+                  <Settings className="w-5 h-5" />
                 </Link>
               </TooltipTrigger>
               <TooltipContent>
