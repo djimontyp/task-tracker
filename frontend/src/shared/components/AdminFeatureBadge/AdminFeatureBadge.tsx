@@ -1,6 +1,6 @@
 import { Badge } from '@/shared/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/tooltip'
-import { ShieldCheckIcon } from '@heroicons/react/24/solid'
+import { ShieldCheck } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useUiStore } from '@/shared/store/uiStore'
 
@@ -26,9 +26,9 @@ export const AdminFeatureBadge: React.FC<AdminFeatureBadgeProps> = ({
   if (!isAdminMode) return null
 
   const sizeClasses = {
-    sm: 'text-xs px-1.5 py-0.5',
+    sm: 'text-xs px-2.5 py-0.5',
     default: 'text-xs px-2.5 py-0.5',
-    lg: 'text-sm px-3 py-1',
+    lg: 'text-sm px-4 py-2',
   }
 
   const iconSizes = {
@@ -38,8 +38,8 @@ export const AdminFeatureBadge: React.FC<AdminFeatureBadgeProps> = ({
   }
 
   const badgeClasses = cn(
-    'inline-flex items-center gap-1',
-    'bg-amber-500/90 hover:bg-amber-600 text-white border-amber-500',
+    'inline-flex items-center gap-2',
+    'bg-semantic-warning hover:bg-semantic-warning/90 text-white border-semantic-warning',
     'font-medium shadow-sm',
     variant === 'floating' && 'absolute top-2 right-2 z-10',
     variant === 'inline' && 'ml-2',
@@ -55,7 +55,7 @@ export const AdminFeatureBadge: React.FC<AdminFeatureBadgeProps> = ({
       aria-label="Admin only feature"
     >
       {showIcon && (
-        <ShieldCheckIcon className={cn(iconSizes[size], 'flex-shrink-0')} aria-hidden="true" />
+        <ShieldCheck className={cn(iconSizes[size], 'flex-shrink-0')} aria-hidden="true" />
       )}
       <span>{text}</span>
     </Badge>

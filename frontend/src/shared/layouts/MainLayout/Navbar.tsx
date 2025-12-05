@@ -63,10 +63,10 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
 
   const indicatorClasses =
     indicator === 'healthy'
-      ? 'bg-green-500 shadow-[0_0_0_3px_rgba(34,197,94,0.25)]'
+      ? 'bg-semantic-success shadow-[0_0_0_3px_hsl(var(--semantic-success)/0.25)]'
       : indicator === 'warning'
-        ? 'bg-yellow-500 shadow-[0_0_0_3px_rgba(234,179,8,0.25)] animate-pulse'
-        : 'bg-destructive shadow-[0_0_0_3px_rgba(239,68,68,0.25)] animate-pulse'
+        ? 'bg-semantic-warning shadow-[0_0_0_3px_hsl(var(--semantic-warning)/0.25)] animate-pulse'
+        : 'bg-destructive shadow-[0_0_0_3px_hsl(var(--destructive)/0.25)] animate-pulse'
 
   const statusTitle =
     indicator === 'healthy'
@@ -84,7 +84,7 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full bg-card border-b border-border overflow-hidden">
-      <div className="flex flex-col md:flex-row h-auto md:h-14 px-2 sm:px-3 md:px-4 lg:px-6">
+      <div className="flex flex-col md:flex-row h-auto md:h-14 px-2 sm:px-4 md:px-4 lg:px-6">
         <div className="flex items-center justify-between gap-2 sm:gap-2 min-w-0 flex-1 py-2 md:py-0">
           <div className="flex items-center gap-2 sm:gap-2 min-w-0 flex-shrink">
             <Link
@@ -120,7 +120,7 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
             )}
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2 flex-shrink-0">
             <Button
               variant="ghost"
               size="icon"
@@ -132,7 +132,7 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
             </Button>
 
             <div
-              className="hidden sm:flex items-center gap-2 px-2 py-1 rounded-md"
+              className="hidden sm:flex items-center gap-2 px-2 py-2 rounded-md"
               title={statusTitle}
               role="status"
               aria-label={statusTitle}
@@ -185,7 +185,7 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
           </Breadcrumb>
         </div>
 
-        <div className="hidden md:flex items-center gap-2 lg:gap-3 flex-shrink-0 overflow-hidden">
+        <div className="hidden md:flex items-center gap-2 lg:gap-4 flex-shrink-0 overflow-hidden">
           <Breadcrumb className="flex min-w-0">
             <BreadcrumbList className="min-w-0">
               {crumbs.map((segment, index) => {

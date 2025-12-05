@@ -61,7 +61,7 @@ const MyComponent = () => {
 - Buttons only visible when items selected
 - Amber theme matching Admin Panel
 - Dark mode support
-- Heroicons icons
+- Lucide icons
 
 **Visual States:**
 1. **No Selection**: Only checkbox + "Select all" label visible

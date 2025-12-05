@@ -3,11 +3,11 @@ import { Checkbox } from '@/shared/ui/checkbox'
 import { cn } from '@/shared/lib/utils'
 import { AdminFeatureBadge } from '@/shared/components'
 import {
-  CheckIcon,
-  ArchiveBoxIcon,
-  TrashIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline'
+  Check,
+  Archive,
+  Trash,
+  X,
+} from 'lucide-react'
 
 export interface BulkActionsToolbarProps {
   selectedCount: number
@@ -37,7 +37,7 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
   return (
     <div
       className={cn(
-        'flex items-center gap-4 px-4 py-3 border-b bg-muted/50',
+        'flex items-center gap-4 px-4 py-4 border-b bg-muted/50',
         'animate-in slide-in-from-top-2 fade-in duration-200',
         className
       )}
@@ -66,14 +66,14 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
         <div className="flex items-center gap-2 ml-auto">
           {onApprove && (
             <Button size="sm" variant="default" onClick={onApprove}>
-              <CheckIcon className="mr-2 h-4 w-4" />
+              <Check className="mr-2 h-4 w-4" />
               Approve
             </Button>
           )}
 
           {onArchive && (
             <Button size="sm" variant="outline" onClick={onArchive}>
-              <ArchiveBoxIcon className="mr-2 h-4 w-4" />
+              <Archive className="mr-2 h-4 w-4" />
               Archive
             </Button>
           )}
@@ -84,7 +84,7 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
               variant="destructive"
               onClick={onDelete}
             >
-              <TrashIcon className="mr-2 h-4 w-4" />
+              <Trash className="mr-2 h-4 w-4" />
               Delete
             </Button>
           )}
@@ -94,7 +94,7 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
             variant="ghost"
             onClick={onClearSelection}
           >
-            <XMarkIcon className="mr-2 h-4 w-4" />
+            <X className="mr-2 h-4 w-4" />
             Clear
           </Button>
         </div>

@@ -1,5 +1,5 @@
 import { Badge } from '@/shared/ui/badge'
-import { ShieldCheckIcon, UserIcon } from '@heroicons/react/24/outline'
+import { ShieldCheck, User } from 'lucide-react'
 import { cn } from '@/shared/lib/index'
 
 export interface AdminBadgeProps {
@@ -11,15 +11,15 @@ export const AdminBadge: React.FC<AdminBadgeProps> = ({
   isAdminMode,
   className,
 }) => {
-  const Icon = isAdminMode ? ShieldCheckIcon : UserIcon
+  const Icon = isAdminMode ? ShieldCheck : User
   const label = isAdminMode ? 'Admin' : 'User'
 
   return (
     <Badge
       className={cn(
-        'flex items-center gap-2 whitespace-nowrap px-3 py-1.5 text-xs font-semibold border border-border/60 bg-card/80 text-foreground transition-colors',
+        'flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-xs font-semibold border border-border/60 bg-card/80 text-foreground transition-colors',
         'hover:bg-accent/15 hover:text-foreground',
-        isAdminMode && 'bg-amber-500/15 text-amber-400 border-amber-400 hover:bg-amber-500/25',
+        isAdminMode && 'bg-semantic-warning/15 text-semantic-warning border-semantic-warning hover:bg-semantic-warning/25',
         className
       )}
       role="status"

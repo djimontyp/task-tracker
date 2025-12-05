@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { CheckIcon, PlusCircleIcon } from '@heroicons/react/24/outline'
+import { useMemo } from 'react'
+import { Check, PlusCircle } from 'lucide-react'
 import { Column } from '@tanstack/react-table'
 
 import { cn } from '@/shared/lib/utils'
@@ -21,30 +22,34 @@ export function DataTableFacetedFilter<TData, TValue>({
   options,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const facets = column?.getFacetedUniqueValues()
-  const selectedValues = new Set(column?.getFilterValue() as string[])
+  const filterValue = column?.getFilterValue() as string[] | undefined
+  const selectedValues = useMemo(
+    () => new Set(filterValue ?? []),
+    [filterValue]
+  )
 
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="h-8 border-dashed">
-          <PlusCircleIcon className="mr-2 h-4 w-4" />
+          <PlusCircle className="mr-2 h-4 w-4" />
           {title}
           {selectedValues?.size > 0 && (
             <>
               <Separator orientation="vertical" className="mx-2 h-4" />
-              <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
+              <Badge variant="secondary" className="rounded-sm px-2 font-normal lg:hidden">
                 {selectedValues.size}
               </Badge>
-              <div className="hidden space-x-1 lg:flex">
+              <div className="hidden space-x-2 lg:flex">
                 {selectedValues.size > 2 ? (
-                  <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                  <Badge variant="secondary" className="rounded-sm px-2 font-normal">
                     {selectedValues.size} selected
                   </Badge>
                 ) : (
                   options
                     .filter((option) => selectedValues.has(option.value))
                     .map((option) => (
-                      <Badge variant="secondary" key={option.value} className="rounded-sm px-1 font-normal">
+                      <Badge variant="secondary" key={option.value} className="rounded-sm px-2 font-normal">
                         {option.label}
                       </Badge>
                     ))
@@ -81,7 +86,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                         isSelected ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
                       )}
                     >
-                      <CheckIcon className={cn('h-4 w-4')} />
+                      <Check className={cn('h-4 w-4')} />
                     </div>
                     {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
                     <span>{option.label}</span>

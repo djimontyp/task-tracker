@@ -69,7 +69,7 @@ export const getAnalysisRunBadge = (status: AnalysisRunStatus): BadgeConfig => {
     },
     cancelled: {
       variant: 'outline',
-      className: 'bg-gray-500/10 text-gray-800 dark:text-gray-300 border-gray-500/50 font-semibold',
+      className: 'bg-muted text-muted-foreground border-border font-semibold',
       label: 'Cancelled',
     },
   }
@@ -150,20 +150,20 @@ export const getImportanceBadge = (score: number): BadgeConfig => {
   if (score >= 0.7) {
     return {
       variant: 'outline',
-      className: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/50',
+      className: 'bg-semantic-success/10 text-semantic-success border-semantic-success/50',
       label: 'High',
     }
   }
   if (score >= 0.4) {
     return {
       variant: 'outline',
-      className: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/50',
+      className: 'bg-semantic-warning/10 text-semantic-warning border-semantic-warning/50',
       label: 'Medium',
     }
   }
   return {
     variant: 'outline',
-    className: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/50',
+    className: 'bg-semantic-error/10 text-semantic-error border-semantic-error/50',
     label: 'Low',
   }
 }
@@ -206,7 +206,7 @@ export const getTaskStatusBadge = (status: TaskStatus): BadgeConfig => {
     },
     closed: {
       variant: 'outline',
-      className: 'bg-gray-500/10 text-gray-800 dark:text-gray-300 border-gray-500/50 font-semibold',
+      className: 'bg-muted text-muted-foreground border-border font-semibold',
       label: 'Canceled',
     },
   }
@@ -229,7 +229,7 @@ export const getTaskPriorityBadge = (priority: TaskPriority): BadgeConfig => {
   const configs: Record<TaskPriority, BadgeConfig> = {
     low: {
       variant: 'outline',
-      className: 'bg-gray-500/10 text-gray-800 dark:text-gray-300 border-gray-500/50 font-semibold',
+      className: 'bg-muted text-muted-foreground border-border font-semibold',
       label: 'Low',
     },
     medium: {
@@ -244,7 +244,7 @@ export const getTaskPriorityBadge = (priority: TaskPriority): BadgeConfig => {
     },
     urgent: {
       variant: 'outline',
-      className: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/50',
+      className: 'bg-semantic-warning/10 text-semantic-warning border-semantic-warning/50',
       label: 'Urgent',
     },
     critical: {

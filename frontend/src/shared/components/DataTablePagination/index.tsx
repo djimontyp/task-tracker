@@ -8,7 +8,7 @@ import {
   Button,
   Input,
 } from '@/shared/ui'
-import { ChevronRightIcon, ChevronDoubleRightIcon } from '@heroicons/react/24/outline'
+import { ChevronRight, ChevronsRight } from 'lucide-react'
 import { Table as TableType } from '@tanstack/react-table'
 
 interface DataTablePaginationProps<TData> {
@@ -39,12 +39,12 @@ export function DataTablePagination<TData>({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-2 py-3 w-full max-w-full overflow-x-hidden">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2 py-4 w-full max-w-full overflow-x-hidden">
       <div className="flex-1 text-sm text-muted-foreground w-full sm:w-auto">
         {table.getFilteredSelectedRowModel().rows.length} of{' '}
         {table.getFilteredRowModel().rows.length} row(s) selected.
       </div>
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4 lg:gap-6 w-full sm:w-auto">
+      <div className="flex flex-wrap items-center gap-4 sm:gap-4 lg:gap-6 w-full sm:w-auto">
         <div className="hidden sm:flex items-center gap-2">
           <p className="text-sm font-medium">Rows per page</p>
           <Select
@@ -67,7 +67,7 @@ export function DataTablePagination<TData>({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium hidden sm:inline">Page</span>
-          <form onSubmit={handlePageInputSubmit} className="flex items-center gap-1 sm:gap-2">
+          <form onSubmit={handlePageInputSubmit} className="flex items-center gap-2 sm:gap-2">
             <Input
               type="number"
               min={1}
@@ -81,25 +81,25 @@ export function DataTablePagination<TData>({
             <span className="text-sm text-muted-foreground whitespace-nowrap">of {totalPages}</span>
           </form>
         </div>
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-2 sm:gap-2">
           {canNext && (
             <Button
               variant="outline"
-              className="h-8 w-8 p-0 flex-shrink-0"
+              className="h-11 w-11 p-0 flex-shrink-0"
               onClick={() => table.nextPage()}
             >
               <span className="sr-only">Go to next page</span>
-              <ChevronRightIcon className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4" />
             </Button>
           )}
           {canNext && (
             <Button
               variant="outline"
-              className="hidden lg:flex h-8 w-8 p-0 flex-shrink-0"
+              className="hidden lg:flex h-11 w-11 p-0 flex-shrink-0"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             >
               <span className="sr-only">Go to last page</span>
-              <ChevronDoubleRightIcon className="h-4 w-4" />
+              <ChevronsRight className="h-4 w-4" />
             </Button>
           )}
         </div>

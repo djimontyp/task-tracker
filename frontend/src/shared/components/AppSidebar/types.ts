@@ -8,5 +8,4 @@ export interface NavGroup {
   label: string;
   items: NavItem[];
   action?: boolean;
-  hoverColor?: string;
 }

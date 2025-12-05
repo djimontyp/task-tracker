@@ -14,7 +14,7 @@ export const UniversalThemeIcon = ({ theme, className = 'size-5' }: ThemeIconPro
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className={`${className} text-blue-500 dark:text-blue-400 transition-all duration-300`}
+        className={`${className} text-semantic-info transition-all duration-300`}
         aria-hidden="true"
       >
         <circle cx="12" cy="12" r="9" />
@@ -27,7 +27,7 @@ export const UniversalThemeIcon = ({ theme, className = 'size-5' }: ThemeIconPro
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
-        className={`${className} fill-zinc-800 dark:fill-zinc-200 transition-all duration-300`}
+        className={`${className} fill-foreground transition-all duration-300`}
         aria-hidden="true"
       >
         <circle cx="12" cy="12" r="9" />
@@ -56,7 +56,7 @@ export const UniversalThemeIcon = ({ theme, className = 'size-5' }: ThemeIconPro
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
-        className="text-indigo-500 dark:text-indigo-400"
+        className="text-primary"
       />
 
       <circle
@@ -64,7 +64,7 @@ export const UniversalThemeIcon = ({ theme, className = 'size-5' }: ThemeIconPro
         cy="12"
         r="9"
         fill="currentColor"
-        className="text-indigo-200 dark:text-indigo-300"
+        className="text-primary/50"
         clipPath="url(#half-circle-clip)"
       />
     </svg>

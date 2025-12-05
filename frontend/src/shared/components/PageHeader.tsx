@@ -21,7 +21,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   return (
     <div
-      className={`flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 pb-3 md:pb-4 ${className}`}
+      className={`flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 md:gap-4 pb-4 md:pb-4 ${className}`}
     >
       <div className="min-w-0 flex-1">
         <h1 className="text-2xl font-bold tracking-tight truncate">{title}</h1>

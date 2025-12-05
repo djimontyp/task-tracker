@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
-import { PaintBrushIcon } from '@heroicons/react/24/outline'
+import { Paintbrush } from 'lucide-react'
 
 interface ColorPickerPopoverProps {
   color: string
@@ -48,7 +48,7 @@ export const ColorPickerPopover = ({
                   className="w-6 h-6 rounded-full border border-border/50"
                   style={{ backgroundColor: color }}
                 />
-                <PaintBrushIcon className="absolute -bottom-1 -right-1 w-4 h-4 text-primary bg-background rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Paintbrush className="absolute -bottom-2 -right-2 w-4 h-4 text-primary bg-background rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
             </PopoverTrigger>
           </TooltipTrigger>
@@ -56,7 +56,7 @@ export const ColorPickerPopover = ({
             <p>Change color</p>
           </TooltipContent>
         </Tooltip>
-        <PopoverContent className="w-64 p-4 space-y-3">
+        <PopoverContent className="w-64 p-4 space-y-4">
         <div className="space-y-2">
           <HexColorPicker color={tempColor} onChange={setTempColor} />
           <Input

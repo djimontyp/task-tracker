@@ -1,17 +1,12 @@
 import { useMemo, useEffect } from 'react'
 import {
-  Squares2X2Icon,
-  Cog6ToothIcon,
-  SignalIcon,
-  CpuChipIcon,
-  EnvelopeIcon,
-  ChatBubbleLeftRightIcon,
-  ListBulletIcon,
-  FolderIcon,
-  FunnelIcon,
-  CalendarIcon,
-  SparklesIcon,
-} from '@heroicons/react/24/solid'
+  LayoutGrid,
+  Cpu,
+  Mail,
+  MessageSquare,
+  List,
+  Folder,
+} from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useUiStore } from '@/shared/store/uiStore'
@@ -19,14 +14,9 @@ import { logger } from '@/shared/utils/logger'
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroupContent,
-  SidebarHeader,
-  SidebarMenu,
 } from '@/shared/ui/sidebar'
 import { statsService, type SidebarCounts } from '@/shared/api/statsService'
-import { GlobalKnowledgeExtractionDialog } from '@/features/knowledge'
 import { NavMain } from './NavMain'
-import { NavNotifications } from './NavNotifications'
 import type { NavGroup } from './types'
 
 interface AppSidebarProps {
@@ -36,39 +26,37 @@ interface AppSidebarProps {
 const navGroups: NavGroup[] = [
   {
     label: 'Data Management',
-    hoverColor: 'blue',
     items: [
-      { path: '/dashboard', label: 'Overview', icon: Squares2X2Icon },
-      { path: '/messages', label: 'Messages', icon: EnvelopeIcon },
-      { path: '/topics', label: 'Topics', icon: ChatBubbleLeftRightIcon },
+      { path: '/dashboard', label: 'Overview', icon: LayoutGrid },
+      { path: '/messages', label: 'Messages', icon: Mail },
+      { path: '/topics', label: 'Topics', icon: MessageSquare },
     ],
   },
-  {
-    label: 'AI Operations',
-    hoverColor: 'purple',
-    items: [
-      { path: '/noise-filtering', label: 'Noise Filtering', icon: FunnelIcon },
-    ],
-    action: true,
-  },
+  // DORMANT: AI Operations (F014 Noise Filtering) - приховано до v1.1+
+  // {
+  //   label: 'AI Operations',
+  //   items: [
+  //     { path: '/noise-filtering', label: 'Noise Filtering', icon: FunnelIcon },
+  //   ],
+  //   action: true,
+  // },
   {
     label: 'AI Setup',
-    hoverColor: 'amber',
     items: [
-      { path: '/agents', label: 'Agents', icon: CpuChipIcon },
-      { path: '/agent-tasks', label: 'Task Templates', icon: ListBulletIcon },
-      { path: '/projects', label: 'Projects', icon: FolderIcon },
+      { path: '/agents', label: 'Agents', icon: Cpu },
+      { path: '/agent-tasks', label: 'Task Templates', icon: List },
+      { path: '/projects', label: 'Projects', icon: Folder },
     ],
   },
-  {
-    label: 'Automation',
-    hoverColor: 'green',
-    items: [
-      { path: '/automation/dashboard', label: 'Overview', icon: SparklesIcon },
-      { path: '/automation/rules', label: 'Rules', icon: Cog6ToothIcon },
-      { path: '/automation/scheduler', label: 'Scheduler', icon: CalendarIcon },
-    ],
-  },
+  // DORMANT: Automation (F015, F016) - приховано до v1.2+
+  // {
+  //   label: 'Automation',
+  //   items: [
+  //     { path: '/automation/dashboard', label: 'Overview', icon: SparklesIcon },
+  //     { path: '/automation/rules', label: 'Rules', icon: Cog6ToothIcon },
+  //     { path: '/automation/scheduler', label: 'Scheduler', icon: CalendarIcon },
+  //   ],
+  // },
 ]
 
 export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
@@ -89,7 +77,7 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
     })
   }, [location.pathname, groups, expandedGroups, setExpandedGroup])
 
-  const { data: counts } = useQuery<SidebarCounts>({
+  const { data: _counts } = useQuery<SidebarCounts>({
     queryKey: ['sidebar-counts'],
     queryFn: () => statsService.getSidebarCounts(),
     refetchInterval: 30000,
@@ -146,24 +134,15 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
     }
   }, [queryClient])
 
-  const aiOperationsGroup = groups.find((g) => g.label === 'AI Operations')
+  // DORMANT: AI Operations group приховано
+  // const aiOperationsGroup = groups.find((g) => g.label === 'AI Operations')
 
   if (mobile) {
     return (
       <div className="flex flex-col h-full">
-        <div className="h-14 px-4 border-b border-border flex items-center">
-          <div className="flex w-full items-center gap-3">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-              <SignalIcon className="size-4" />
-            </div>
-            <span className="text-sm font-semibold">
-              {import.meta.env.VITE_APP_NAME || 'Pulse Radar'}
-            </span>
-          </div>
-        </div>
         <div className="flex-1 overflow-y-auto py-2">
-          <NavMain groups={groups.filter((g) => g.label !== 'AI Operations')} />
-
+          <NavMain groups={groups} />
+          {/* DORMANT: AI Operations + Extract Knowledge button приховано
           {aiOperationsGroup && (
             <>
               <div className="px-2">
@@ -173,7 +152,6 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
                       key={item.path}
                       item={item}
                       counts={counts}
-                      hoverColor={aiOperationsGroup.hoverColor}
                     />
                   ))}
                 </div>
@@ -183,6 +161,7 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
               </div>
             </>
           )}
+          */}
         </div>
       </div>
     )
@@ -190,19 +169,9 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="h-14 px-2 border-b border-border flex items-center">
-        <div className="flex w-full items-center gap-3 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-            <SignalIcon className="size-4" />
-          </div>
-          <span className="text-sm font-semibold group-data-[collapsible=icon]:hidden">
-            {import.meta.env.VITE_APP_NAME || 'Pulse Radar'}
-          </span>
-        </div>
-      </SidebarHeader>
       <SidebarContent>
-        <NavMain groups={groups.filter((g) => g.label !== 'AI Operations')} />
-
+        <NavMain groups={groups} />
+        {/* DORMANT: AI Operations + Extract Knowledge button приховано
         {aiOperationsGroup && (
           <>
             <SidebarGroupContent className="group-data-[collapsible=icon]:p-0">
@@ -212,16 +181,16 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
                     key={item.path}
                     item={item}
                     counts={counts}
-                    hoverColor={aiOperationsGroup.hoverColor}
                   />
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
-            <div className="px-2 mt-2 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+            <div className="px-2 mt-2 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
               <GlobalKnowledgeExtractionDialog />
             </div>
           </>
         )}
+        */}
       </SidebarContent>
     </Sidebar>
   )
