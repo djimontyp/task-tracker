@@ -37,7 +37,7 @@ interface MobileCardFieldProps {
 
 export function MobileCardField({ label, value, className }: MobileCardFieldProps) {
   return (
-    <div className={cn('flex flex-col gap-1', className)}>
+    <div className={cn('flex flex-col gap-2', className)}>
       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
         {label}
       </span>

@@ -46,7 +46,7 @@ export function NavMain({ groups }: NavMainProps) {
                 onOpenChange={(open) => setExpandedGroup(group.label, open)}
                 className="group/collapsible"
               >
-                <SidebarGroup className="group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-1">
+                <SidebarGroup className="group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
                   <SidebarGroupLabel
                     asChild
                     className="px-2 text-xs font-semibold uppercase tracking-wider text-foreground"
@@ -135,7 +135,7 @@ export function NavMain({ groups }: NavMainProps) {
                 </SidebarGroup>
               </Collapsible>
               {groupIndex < groups.length - 1 && (
-                <Separator className="hidden group-data-[collapsible=icon]:block !w-auto mx-3 my-2" />
+                <Separator className="hidden group-data-[collapsible=icon]:block !w-auto mx-4 my-2" />
               )}
             </Fragment>
           )
@@ -185,7 +185,7 @@ export function NavMain({ groups }: NavMainProps) {
               </SidebarGroupContent>
             </SidebarGroup>
             {groupIndex < groups.length - 1 && (
-              <Separator className="hidden group-data-[collapsible=icon]:block !w-auto mx-3 my-2" />
+              <Separator className="hidden group-data-[collapsible=icon]:block !w-auto mx-4 my-2" />
             )}
           </Fragment>
         )

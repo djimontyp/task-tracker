@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { AdminFeatureBadge } from '@/shared/components/AdminFeatureBadge'
 
@@ -26,7 +26,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   return (
     <div
       className={cn(
-        "border-t border-gray-200 bg-amber-50",
+        "border-t border-border bg-semantic-warning/10",
         "transition-all duration-300 ease-in-out"
       )}
       role="region"
@@ -37,28 +37,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         className={cn(
           "w-full flex items-center justify-between",
           "px-4 py-2 text-sm font-medium",
-          "hover:bg-amber-100 focus:outline-none focus:ring-2",
-          "focus:ring-amber-500 focus:ring-offset-2"
+          "hover:bg-semantic-warning/20 focus:outline-none focus:ring-2",
+          "focus:ring-ring focus:ring-offset-2"
         )}
         aria-expanded={isExpanded}
         aria-controls="admin-panel-content"
       >
         <span className="flex items-center gap-2">
-          <span className="text-amber-700">Admin Panel</span>
+          <span className="text-semantic-warning">Admin Panel</span>
           <AdminFeatureBadge variant="inline" size="sm" className="ml-0" />
-          <span className="text-xs text-gray-500">(Cmd+Shift+A to toggle)</span>
+          <span className="text-xs text-muted-foreground">(Cmd+Shift+A to toggle)</span>
         </span>
         {isExpanded ? (
-          <ChevronUpIcon className="h-4 w-4 text-gray-500" aria-hidden="true" />
+          <ChevronUp className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
         ) : (
-          <ChevronDownIcon className="h-4 w-4 text-gray-500" aria-hidden="true" />
+          <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
         )}
       </button>
 
       {isExpanded && (
         <div
           id="admin-panel-content"
-          className="px-4 py-3 animate-in slide-in-from-top-2"
+          className="px-4 py-4 animate-in slide-in-from-top-2"
           role="region"
         >
           {children}

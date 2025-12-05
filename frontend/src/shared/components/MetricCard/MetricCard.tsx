@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { ArrowUpIcon, ArrowDownIcon, MinusIcon } from '@heroicons/react/24/outline'
+import { ArrowUp, ArrowDown, Minus } from 'lucide-react'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { cn } from '@/shared/lib'
@@ -73,11 +73,11 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
       if (!trend) return null
       switch (trend.direction) {
         case 'up':
-          return <ArrowUpIcon className="w-4 h-4" aria-hidden="true" />
+          return <ArrowUp className="w-4 h-4" aria-hidden="true" />
         case 'down':
-          return <ArrowDownIcon className="w-4 h-4" aria-hidden="true" />
+          return <ArrowDown className="w-4 h-4" aria-hidden="true" />
         default:
-          return <MinusIcon className="w-4 h-4" aria-hidden="true" />
+          return <Minus className="w-4 h-4" aria-hidden="true" />
       }
     }
 
@@ -152,7 +152,9 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
         ref={ref}
         className={cn(
           'transition-all duration-300 min-h-[7rem] sm:min-h-[8rem] relative',
-          onClick && 'ripple-container click-feedback cursor-pointer hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+          // Permanent subtle glow on all MetricCards (per Brand Brief REF-002)
+          'shadow-glow',
+          onClick && 'ripple-container click-feedback cursor-pointer hover:shadow-glow-hover hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           status && getCardBorderColor(status),
           status === 'critical' && 'animate-pulse',
           className
@@ -185,7 +187,7 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
 
             {shouldShowTrend && (
               <div
-                className={cn('flex items-center gap-1 text-sm font-medium', getTrendColor())}
+                className={cn('flex items-center gap-2 text-sm font-medium', getTrendColor())}
                 aria-label={`${trend.direction === 'up' ? 'Increased' : trend.direction === 'down' ? 'Decreased' : 'No change'} by ${Math.abs(trend.value)} percent`}
               >
                 {getTrendIcon()}

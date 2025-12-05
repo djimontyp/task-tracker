@@ -1,5 +1,5 @@
 import React from 'react'
-import { CheckCircleIcon, CloudArrowUpIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline'
+import { CheckCircle, CloudUpload, AlertCircle } from 'lucide-react'
 import type { SaveStatus } from '@/shared/hooks/useAutoSave'
 
 interface SaveStatusIndicatorProps {
@@ -29,34 +29,34 @@ export const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({
     switch (status) {
       case 'saving':
         return (
-          <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 animate-pulse">
-            <CloudArrowUpIcon className="h-5 w-5" />
+          <div className="flex items-center gap-2 text-semantic-info animate-pulse">
+            <CloudUpload className="h-5 w-5" />
             <span className="text-sm font-medium">Saving...</span>
           </div>
         )
       case 'saved':
         return (
-          <div className="flex items-center gap-2 text-green-600 dark:text-green-400 animate-in fade-in slide-in-from-top-1 duration-300">
-            <CheckCircleIcon className="h-5 w-5" />
+          <div className="flex items-center gap-2 text-semantic-success animate-in fade-in slide-in-from-top-2 duration-300">
+            <CheckCircle className="h-5 w-5" />
             <span className="text-sm font-medium">Saved {formatTimeAgo(lastSavedAt)}</span>
           </div>
         )
       case 'error':
         return (
-          <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-            <ExclamationCircleIcon className="h-5 w-5" />
+          <div className="flex items-center gap-2 text-semantic-error">
+            <AlertCircle className="h-5 w-5" />
             <span className="text-sm font-medium">Save failed</span>
           </div>
         )
       default:
         return hasUnsavedChanges ? (
-          <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-            <div className="h-2 w-2 rounded-full bg-amber-600 dark:bg-amber-400 animate-pulse" />
+          <div className="flex items-center gap-2 text-semantic-warning">
+            <div className="h-2 w-2 rounded-full bg-semantic-warning animate-pulse" />
             <span className="text-sm font-medium">Unsaved changes</span>
           </div>
         ) : (
           <div className="flex items-center gap-2 text-muted-foreground">
-            <CheckCircleIcon className="h-5 w-5" />
+            <CheckCircle className="h-5 w-5" />
             <span className="text-sm">All changes saved</span>
           </div>
         )

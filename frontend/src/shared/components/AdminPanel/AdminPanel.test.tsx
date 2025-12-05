@@ -95,14 +95,14 @@ describe('AdminPanel', () => {
   })
 
   it('should have correct styling classes', () => {
-    const { container } = render(
+    render(
       <AdminPanel visible={true}>
         <div>Content</div>
       </AdminPanel>
     )
 
     const panel = screen.getByRole('region', { name: 'Admin Panel' })
-    expect(panel).toHaveClass('bg-amber-50')
+    expect(panel).toHaveClass('bg-semantic-warning/10')
     expect(panel).toHaveClass('border-t')
     expect(panel).toHaveClass('transition-all')
   })

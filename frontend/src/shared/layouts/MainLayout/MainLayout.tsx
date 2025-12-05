@@ -62,7 +62,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           </div>
 
           <AdminPanel visible={isAdminMode}>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-muted-foreground">
               Admin tools will be added in Phase 2-6
             </div>
           </AdminPanel>
@@ -81,7 +81,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             </main>
 
             <AdminPanel visible={isAdminMode}>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-muted-foreground">
                 Admin tools will be added in Phase 2-6
               </div>
             </AdminPanel>

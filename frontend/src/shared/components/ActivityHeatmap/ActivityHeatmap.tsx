@@ -36,21 +36,6 @@ interface ProcessedData {
   }
 }
 
-const SOURCE_COLORS = {
-  telegram: {
-    light: 'hsl(200, 80%, 50%)',
-    dark: 'hsl(200, 80%, 60%)',
-  },
-  slack: {
-    light: 'hsl(280, 70%, 50%)',
-    dark: 'hsl(280, 70%, 60%)',
-  },
-  email: {
-    light: 'hsl(140, 70%, 45%)',
-    dark: 'hsl(140, 70%, 55%)',
-  },
-} as const
-
 const DAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const DAYS_FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -169,14 +154,11 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
     const getCellColor = (count: number, source: 'telegram' | 'slack' | 'email') => {
       if (count === 0) return 'hsl(var(--muted))'
 
-      const colors = SOURCE_COLORS[source]
-      const baseColor = colors.light
-
       const maxCount = Math.max(...Object.values(processedData).map((d) => d.count), 1)
       const intensity = Math.min(count / maxCount, 1)
       const opacity = 0.2 + intensity * 0.8
 
-      return baseColor.replace(')', `, ${opacity})`)
+      return `hsl(var(--heatmap-${source}) / ${opacity})`
     }
 
     // Handle title save
@@ -293,7 +275,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                     ? DAYS_SHORT.map((day, i) => (
                         <div
                           key={i}
-                          className="flex-1 text-center text-xs font-medium text-muted-foreground px-1 min-w-[40px]"
+                          className="flex-1 text-center text-xs font-medium text-muted-foreground px-2 min-w-[28px] sm:min-w-[36px] md:min-w-[40px]"
                         >
                           {day}
                         </div>
@@ -301,7 +283,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                     : Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => (
                         <div
                           key={day}
-                          className="flex-1 text-center text-xs font-medium text-muted-foreground px-1 min-w-[30px]"
+                          className="flex-1 text-center text-xs font-medium text-muted-foreground px-2 min-w-[20px] sm:min-w-[26px] md:min-w-[30px]"
                         >
                           {day}
                         </div>
@@ -312,7 +294,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                   const numDays = selectedPeriod === 'week' ? 7 : daysInMonth
 
                   return (
-                    <div key={hour} className="flex items-center mb-1">
+                    <div key={hour} className="flex items-center mb-2">
                       <div className="w-12 flex-shrink-0 text-xs text-right pr-2 text-muted-foreground">
                         {hour.toString().padStart(2, '0')}:00
                       </div>
@@ -333,7 +315,9 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                               <div
                                 className={cn(
                                   'flex-1 h-6 mx-0.5 rounded-sm transition-all hover:ring-2 hover:ring-primary cursor-pointer',
-                                  selectedPeriod === 'week' ? 'min-w-[40px]' : 'min-w-[30px]'
+                                  selectedPeriod === 'week'
+                                    ? 'min-w-[28px] sm:min-w-[36px] md:min-w-[40px]'
+                                    : 'min-w-[20px] sm:min-w-[26px] md:min-w-[30px]'
                                 )}
                                 style={{
                                   backgroundColor: getCellColor(count, cellData?.source || 'telegram'),
@@ -347,7 +331,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                                   {hour.toString().padStart(2, '0')}:00 -{' '}
                                   {(hour + 1).toString().padStart(2, '0')}:00
                                 </div>
-                                <div className="mt-1">
+                                <div className="mt-2">
                                   Messages: <span className="font-semibold">{count}</span>
                                 </div>
                                 {cellData && (
@@ -368,7 +352,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
               <div className="mt-6 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span>Less</span>
-                  <div className="flex gap-1">
+                  <div className="flex gap-2">
                     {[0, 0.25, 0.5, 0.75, 1].map((intensity, i) => (
                       <div
                         key={i}
@@ -377,7 +361,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                           backgroundColor:
                             intensity === 0
                               ? 'hsl(var(--muted))'
-                              : SOURCE_COLORS.telegram.light.replace(')', `, ${0.2 + intensity * 0.8})`),
+                              : `hsl(var(--heatmap-telegram) / ${0.2 + intensity * 0.8})`,
                         }}
                       />
                     ))}
@@ -391,7 +375,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                       <div
                         className="w-3 h-3 rounded-sm"
                         style={{
-                          backgroundColor: SOURCE_COLORS[source as 'telegram' | 'slack' | 'email'].light,
+                          backgroundColor: `hsl(var(--heatmap-${source}))`,
                         }}
                       />
                       <span className="capitalize text-muted-foreground">{source}</span>
