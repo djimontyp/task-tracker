@@ -10,7 +10,7 @@ import {
 import { providerService } from '@/features/providers/api'
 import { LLMProvider, LLMProviderCreate, LLMProviderUpdate, ValidationStatus as ValidationStatusEnum } from '@/features/providers/types'
 import { toast } from 'sonner'
-import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { Pencil, Trash2, Plus } from 'lucide-react'
 import { ProviderForm } from '@/features/agents/components'
 import { ValidationStatus } from '@/features/providers/components'
 import { formatFullDate } from '@/shared/utils/date'
@@ -142,7 +142,7 @@ const ProvidersTab = () => {
           </p>
         </div>
         <Button onClick={handleCreate} size="sm">
-          <PlusIcon className="mr-2 h-4 w-4" />
+          <Plus className="mr-2 h-4 w-4" />
           Add Provider
         </Button>
       </div>
@@ -160,11 +160,11 @@ const ProvidersTab = () => {
           providers?.map((provider) => (
             <Card key={provider.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="pt-6">
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg">{provider.name}</h3>
-                      <Badge variant="outline" className="mt-1">
+                      <Badge variant="outline" className="mt-2">
                         {provider.type}
                       </Badge>
                     </div>
@@ -175,7 +175,7 @@ const ProvidersTab = () => {
                         onClick={() => handleEdit(provider)}
                         aria-label="Edit provider"
                       >
-                        <PencilIcon className="h-4 w-4" />
+                        <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         size="icon"
@@ -184,7 +184,7 @@ const ProvidersTab = () => {
                         aria-label="Delete provider"
                         disabled={deleteMutation.isPending}
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -213,7 +213,7 @@ const ProvidersTab = () => {
 
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Active:</span>
-                      <Badge variant="outline" className={provider.is_active ? 'badge-success' : 'badge-neutral'}>
+                      <Badge variant="outline" className={provider.is_active ? 'bg-semantic-success text-white border-semantic-success' : 'bg-muted text-muted-foreground border-border'}>
                         {provider.is_active ? 'Yes' : 'No'}
                       </Badge>
                     </div>

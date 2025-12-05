@@ -9,8 +9,9 @@ import { projectService } from '@/features/projects/api/projectService'
 import { ProjectCard, ProjectForm } from '@/features/projects/components'
 import type { ProjectConfig, ProjectListResponse } from '@/features/projects/types'
 import { toast } from 'sonner'
-import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { Plus, Search, Folder } from 'lucide-react'
 import { PageHeader } from '@/shared/components'
+import { EmptyState } from '@/shared/patterns'
 
 const ProjectsPage = () => {
   const queryClient = useQueryClient()
@@ -89,6 +90,7 @@ const ProjectsPage = () => {
   })
 
   const updateMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       projectService.updateProject(id, data),
     onSuccess: () => {
@@ -129,6 +131,7 @@ const ProjectsPage = () => {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = (data: any) => {
     if (selectedProject) {
       updateMutation.mutate({ id: selectedProject.id, data })
@@ -150,10 +153,10 @@ const ProjectsPage = () => {
       <div className="p-6 space-y-6">
         <h1 className="text-3xl font-bold">Projects</h1>
         <Card className="p-6 border-destructive">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-4">
             <div className="text-destructive text-lg">⚠️</div>
             <div>
-              <p className="font-semibold text-destructive mb-1">Error loading data</p>
+              <p className="font-semibold text-destructive mb-2">Error loading data</p>
               <p className="text-sm text-muted-foreground">
                 {error instanceof Error ? error.message : 'Unknown error'}
               </p>
@@ -171,7 +174,7 @@ const ProjectsPage = () => {
         description="Manage projects with keyword-based message filtering and classification rules"
         actions={
           <Button onClick={handleCreate} size="sm">
-            <PlusIcon className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-2" />
             Create Project
           </Button>
         }
@@ -180,7 +183,7 @@ const ProjectsPage = () => {
       {/* Search */}
       <Card className="p-4">
         <div className="flex items-center gap-2">
-          <MagnifyingGlassIcon className="h-4 w-4 text-muted-foreground" />
+          <Search className="h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search projects by name, keywords, or components..."
             value={searchQuery}
@@ -195,16 +198,24 @@ const ProjectsPage = () => {
 
       {/* Projects List */}
       {filteredProjects.length === 0 ? (
-        <Card className="p-6 sm:p-8 md:p-12">
-          <div className="text-center text-muted-foreground">
-            <p className="text-lg font-medium mb-2">No projects found</p>
-            <p className="text-sm">
-              {totalProjects === 0
-                ? 'Create your first project to get started'
-                : 'Try adjusting your search query'}
-            </p>
-          </div>
-        </Card>
+        <EmptyState
+          variant="card"
+          icon={Folder}
+          title="No projects found"
+          description={
+            totalProjects === 0
+              ? 'Create your first project to organize message classification.'
+              : 'Try adjusting your search query.'
+          }
+          action={
+            totalProjects === 0 ? (
+              <Button onClick={handleCreate}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Project
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filteredProjects.map((project) => (

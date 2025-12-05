@@ -5,7 +5,7 @@ const SourcesTab = () => {
     <div className="space-y-4">
       <div>
         <h2 className="text-lg font-semibold">Data Sources</h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-2">
           Configure integrations and data sources for your task tracking system
         </p>
       </div>

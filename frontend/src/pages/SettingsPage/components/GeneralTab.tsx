@@ -27,7 +27,7 @@ const GeneralTab = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label className="text-sm font-medium mb-3 block">Theme</Label>
+            <Label className="text-sm font-medium mb-4 block">Theme</Label>
             <RadioGroup value={theme} onValueChange={setTheme}>
               {themeOptions.map(({ value, label }) => (
                 <div key={value} className="flex items-center space-x-2">
@@ -64,14 +64,14 @@ const GeneralTab = () => {
             />
           </div>
 
-          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950 p-4">
-            <p className="text-sm text-gray-700 dark:text-amber-100">
+          <div className="rounded-lg border border-semantic-warning/20 bg-semantic-warning/10 p-4">
+            <p className="text-sm text-foreground">
               <strong>Keyboard shortcut:</strong> Press{' '}
-              <kbd className="px-2 py-1 text-xs font-semibold bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded">
+              <kbd className="px-2 py-2 text-xs font-semibold bg-background border border-border rounded">
                 Cmd+Shift+A
               </kbd>{' '}
               (Mac) or{' '}
-              <kbd className="px-2 py-1 text-xs font-semibold bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded">
+              <kbd className="px-2 py-2 text-xs font-semibold bg-background border border-border rounded">
                 Ctrl+Shift+A
               </kbd>{' '}
               (Windows/Linux) to quickly toggle Admin Mode from anywhere in the app.

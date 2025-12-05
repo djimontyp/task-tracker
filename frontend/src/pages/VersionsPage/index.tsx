@@ -6,13 +6,15 @@ import { Input, Button, Badge, Spinner } from '@/shared/ui'
 import { Card } from '@/shared/components'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { Dialog, DialogContent } from '@/shared/ui/dialog'
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Search, X } from 'lucide-react'
 import { topicService } from '@/features/topics/api/topicService'
 import { versioningService } from '@/features/knowledge/api/versioningService'
 import { BulkVersionActions } from '@/features/knowledge/components/BulkVersionActions'
 import { VersionDiffViewer } from '@/features/knowledge/components/VersionDiffViewer'
+import { EmptyState } from '@/shared/patterns'
 import type { TopicVersion, AtomVersion } from '@/features/knowledge/types'
 import { toast } from 'sonner'
+import { CheckCircle, AlertTriangle } from 'lucide-react'
 
 type EntityType = 'all' | 'topic' | 'atom'
 type VersionStatus = 'pending' | 'approved' | 'rejected'
@@ -157,11 +159,11 @@ const VersionsPage = () => {
   const getStatusBadge = (status: VersionStatus) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">Pending</Badge>
+        return <Badge variant="outline" className="bg-status-pending/10 text-status-pending border-status-pending/30">Pending</Badge>
       case 'approved':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">Approved</Badge>
+        return <Badge variant="outline" className="bg-status-connected/10 text-status-connected border-status-connected/30">Approved</Badge>
       case 'rejected':
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">Rejected</Badge>
+        return <Badge variant="outline" className="bg-status-error/10 text-status-error border-status-error/30">Rejected</Badge>
     }
   }
 
@@ -175,19 +177,19 @@ const VersionsPage = () => {
       <div className="space-y-4 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-4 top-2/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by entity name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+              className="pl-10"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2"
+                className="absolute right-4 top-2/2 -translate-y-1/2"
               >
-                <XMarkIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
               </button>
             )}
           </div>
@@ -233,18 +235,13 @@ const VersionsPage = () => {
             <Spinner size="lg" />
           </div>
         ) : filteredVersions.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-500 space-y-2">
-              {statusFilter === 'pending' ? (
-                <>
-                  <p className="text-lg font-semibold">No pending versions</p>
-                  <p>All caught up! 🎉</p>
-                </>
-              ) : (
-                <p className="text-lg">No {statusFilter} versions found</p>
-              )}
-            </div>
-          </div>
+          <EmptyState
+            icon={statusFilter === 'pending' ? CheckCircle : AlertTriangle}
+            title={statusFilter === 'pending' ? 'No pending versions' : `No ${statusFilter} versions`}
+            description={statusFilter === 'pending'
+              ? 'All caught up! All versions have been reviewed.'
+              : `No ${statusFilter} versions found. Try adjusting your filters.`}
+          />
         ) : (
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {filteredVersions.map((version) => (
@@ -253,7 +250,7 @@ const VersionsPage = () => {
                 className="p-4 cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => handleCardClick(version)}
               >
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-start justify-between gap-2">
                     {statusFilter === 'pending' && (
                       <input
@@ -264,22 +261,22 @@ const VersionsPage = () => {
                           handleSelectVersion(version, e.target.checked)
                         }}
                         onClick={(e) => e.stopPropagation()}
-                        className="mt-1"
+                        className="mt-2"
                       />
                     )}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-sm truncate">{version.entityName}</h3>
-                      <p className="text-xs text-gray-500">Version {version.version}</p>
+                      <p className="text-xs text-muted-foreground">Version {version.version}</p>
                     </div>
                     {getStatusBadge(version.status)}
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>Confidence: {Math.round(version.confidence * 100)}%</span>
                     <span className="capitalize">{version.entityType}</span>
                   </div>
 
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-muted-foreground/70">
                     {new Date(version.createdAt).toLocaleDateString()}
                   </div>
                 </div>
@@ -309,7 +306,7 @@ const VersionsPage = () => {
                   queryClient.invalidateQueries({ queryKey: ['topic-versions'] })
                   queryClient.invalidateQueries({ queryKey: ['pending-versions-count'] })
                   setDialogVersion(null)
-                } catch (error) {
+                } catch {
                   toast.error('Failed to approve version')
                 }
               }}
@@ -325,7 +322,7 @@ const VersionsPage = () => {
                   queryClient.invalidateQueries({ queryKey: ['topic-versions'] })
                   queryClient.invalidateQueries({ queryKey: ['pending-versions-count'] })
                   setDialogVersion(null)
-                } catch (error) {
+                } catch {
                   toast.error('Failed to reject version')
                 }
               }}

@@ -1,11 +1,11 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  ChatBubbleLeftRightIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  ArrowPathIcon,
-} from '@heroicons/react/24/outline'
+  MessageSquare,
+  CheckCircle,
+  AlertTriangle,
+  RefreshCw,
+} from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Badge, Skeleton, Button } from '@/shared/ui'
 import { PageHeader } from '@/shared/components/PageHeader'
@@ -134,7 +134,7 @@ const NoiseFilteringDashboard = () => {
   }, [stats])
 
   return (
-    <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in">
+    <div className="space-y-4 sm:space-y-6 md:space-y-6 animate-fade-in">
       <PageHeader
         title="Noise Filtering"
         description="Message scoring statistics, signal-to-noise ratio, quality metrics, and filtering effectiveness over time"
@@ -144,13 +144,13 @@ const NoiseFilteringDashboard = () => {
             disabled={scoreBatchMutation.isPending}
             size="sm"
           >
-            <ArrowPathIcon className={`w-4 h-4 mr-2 ${scoreBatchMutation.isPending ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 mr-2 ${scoreBatchMutation.isPending ? 'animate-spin' : ''}`} />
             Score Unscored Messages
           </Button>
         }
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 animate-fade-in-up">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-4 md:gap-6 animate-fade-in-up">
         {statsLoading ? (
           <>
             {[...Array(4)].map((_, i) => (
@@ -169,7 +169,7 @@ const NoiseFilteringDashboard = () => {
               title="Total Messages"
               value={metrics.totalMessages.value}
               subtitle={metrics.totalMessages.subtitle}
-              icon={ChatBubbleLeftRightIcon}
+              icon={MessageSquare}
               iconColor="text-primary"
             />
             <MetricCard
@@ -177,29 +177,29 @@ const NoiseFilteringDashboard = () => {
               value={metrics.signalRatio.value}
               subtitle={metrics.signalRatio.subtitle}
               trend={metrics.signalRatio.trend}
-              icon={CheckCircleIcon}
-              iconColor="text-green-600"
+              icon={CheckCircle}
+              iconColor="text-semantic-success"
             />
             <MetricCard
               title="Needs Review"
               value={metrics.needsReview.value}
               subtitle={metrics.needsReview.subtitle}
               trend={metrics.needsReview.trend}
-              icon={ExclamationTriangleIcon}
-              iconColor="text-amber-600"
+              icon={AlertTriangle}
+              iconColor="text-semantic-warning"
             />
             <MetricCard
               title="Top Noise Source"
               value={metrics.topNoiseSource.value}
               subtitle={metrics.topNoiseSource.subtitle}
-              icon={ArrowPathIcon}
-              iconColor="text-red-600"
+              icon={RefreshCw}
+              iconColor="text-semantic-error"
             />
           </>
         ) : null}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-6 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Noise Trends - Last 7 Days</CardTitle>
@@ -262,7 +262,7 @@ const NoiseFilteringDashboard = () => {
             <CardTitle>Top Noise Sources</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3" role="list" aria-label="Top noise sources">
+            <div className="space-y-4" role="list" aria-label="Top noise sources">
               {statsLoading ? (
                 <>
                   {[...Array(5)].map((_, i) => (

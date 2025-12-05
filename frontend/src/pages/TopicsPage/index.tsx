@@ -17,7 +17,7 @@ import {
 import { topicService } from '@/features/topics/api/topicService'
 import type { TopicListResponse, TopicSortBy } from '@/features/topics/types'
 import { renderTopicIcon } from '@/features/topics/utils/renderIcon'
-import { FolderIcon, ChatBubbleLeftRightIcon, MagnifyingGlassIcon, XMarkIcon, Squares2X2Icon, ListBulletIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { Folder, MessageSquare, Search, X, LayoutGrid, List, ChevronRight } from 'lucide-react'
 
 type ViewMode = 'grid' | 'list'
 
@@ -148,10 +148,10 @@ const TopicsPage = () => {
       <div className="p-6 space-y-6">
         <h1 className="text-3xl font-bold">Topics</h1>
         <Card className="p-6 border-destructive">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-4">
             <div className="text-destructive text-lg">⚠️</div>
             <div>
-              <p className="font-semibold text-destructive mb-1">Error loading data</p>
+              <p className="font-semibold text-destructive mb-2">Error loading data</p>
               <p className="text-sm text-muted-foreground">
                 {error instanceof Error ? error.message : 'Unknown error'}
               </p>
@@ -174,7 +174,7 @@ const TopicsPage = () => {
               size="sm"
               onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
             >
-              {viewMode === 'grid' ? <ListBulletIcon className="h-4 w-4" /> : <Squares2X2Icon className="h-4 w-4" />}
+              {viewMode === 'grid' ? <List className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
             </Button>
           </div>
         }
@@ -182,7 +182,7 @@ const TopicsPage = () => {
 
       <div className="flex gap-4 items-center flex-wrap">
         <div className="flex-1 max-w-md relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Search className="absolute left-4 top-2/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             ref={searchInputRef}
             placeholder="Search topics by name or description..."
@@ -195,9 +195,10 @@ const TopicsPage = () => {
               variant="ghost"
               size="icon"
               onClick={() => setSearchQuery('')}
-              className="absolute right-1 top-1/2 -translate-y-1/2"
+              className="absolute right-2 top-2/2 -translate-y-1/2"
+              aria-label="Clear search"
             >
-              <XMarkIcon className="h-5 w-5" />
+              <X className="h-5 w-5" />
             </Button>
           )}
         </div>
@@ -215,14 +216,15 @@ const TopicsPage = () => {
           </SelectContent>
         </Select>
 
-        <div className="flex gap-1 border border-border rounded-lg p-1">
+        <div className="flex gap-2 border border-border rounded-lg p-2">
           <Button
             variant={viewMode === 'grid' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setViewMode('grid')}
             className="h-9"
+            aria-label="Switch to grid view"
           >
-            <Squares2X2Icon className="h-4 w-4" />
+            <LayoutGrid className="h-4 w-4" />
             <span className="sr-only md:not-sr-only md:ml-2">Grid</span>
           </Button>
           <Button
@@ -230,8 +232,9 @@ const TopicsPage = () => {
             size="sm"
             onClick={() => setViewMode('list')}
             className="h-9"
+            aria-label="Switch to list view"
           >
-            <ListBulletIcon className="h-4 w-4" />
+            <List className="h-4 w-4" />
             <span className="sr-only md:not-sr-only md:ml-2">List</span>
           </Button>
         </div>
@@ -250,10 +253,10 @@ const TopicsPage = () => {
               {topics.items.map((topic) => (
                 <Card
                   key={topic.id}
-                  className="p-3 sm:p-4 md:p-6 transition-all duration-200 hover:shadow-lg hover:scale-[1.01] cursor-pointer"
+                  className="p-4 sm:p-4 md:p-6 transition-all duration-200 hover:shadow-lg hover:scale-[1.01] cursor-pointer"
                   onClick={() => navigate(`/topics/${topic.id}`)}
                 >
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-4 mb-2">
                     <div className="text-primary flex-shrink-0">
                       {renderTopicIcon(topic.icon, 'h-5 w-5', topic.color)}
                     </div>
@@ -291,7 +294,7 @@ const TopicsPage = () => {
                     <h3 className="font-semibold truncate">{topic.name}</h3>
                     <p className="text-sm text-muted-foreground truncate">{topic.description}</p>
                   </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
+                  <div className="flex items-center gap-4 flex-shrink-0">
                     <span className="text-xs text-muted-foreground hidden md:block">
                       ID: {topic.id}
                     </span>
@@ -306,7 +309,7 @@ const TopicsPage = () => {
                         disabled={updateColorMutation.isPending}
                       />
                     </div>
-                    <ChevronRightIcon className="h-5 w-5 text-muted-foreground" />
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </div>
                 </div>
               ))}
@@ -382,9 +385,9 @@ const TopicsPage = () => {
           <div className="flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 mb-4 rounded-full bg-primary/10 flex items-center justify-center">
               {debouncedSearch ? (
-                <MagnifyingGlassIcon className="h-8 w-8 text-primary" />
+                <Search className="h-8 w-8 text-primary" />
               ) : (
-                <FolderIcon className="h-8 w-8 text-primary" />
+                <Folder className="h-8 w-8 text-primary" />
               )}
             </div>
             <h3 className="text-lg font-semibold mb-2">
@@ -393,7 +396,7 @@ const TopicsPage = () => {
             <p className="text-muted-foreground mb-6 max-w-md">
               {debouncedSearch ? (
                 <>
-                  No topics found matching <strong>"{debouncedSearch}"</strong>.
+                  No topics found matching <strong>&quot;{debouncedSearch}&quot;</strong>.
                   <br />
                   Try searching with different keywords or clear the search to see all topics.
                 </>
@@ -401,16 +404,16 @@ const TopicsPage = () => {
                 'Topics help organize messages by theme. They are automatically created during AI analysis of your messages.'
               )}
             </p>
-            <div className="flex gap-3 flex-wrap justify-center">
+            <div className="flex gap-4 flex-wrap justify-center">
               {debouncedSearch ? (
                 <Button onClick={() => setSearchQuery('')} variant="outline">
-                  <XMarkIcon className="mr-2 h-5 w-5" />
+                  <X className="mr-2 h-5 w-5" />
                   Clear search
                 </Button>
               ) : (
                 <>
                   <Button onClick={() => navigate('/messages')}>
-                    <ChatBubbleLeftRightIcon className="mr-2 h-5 w-5" />
+                    <MessageSquare className="mr-2 h-5 w-5" />
                     View Messages
                   </Button>
                   <Button onClick={() => navigate('/analysis')} variant="outline">

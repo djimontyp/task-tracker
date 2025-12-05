@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline'
+import { MessageSquare } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,7 +60,7 @@ const TelegramCard = () => {
   return (
     <>
       <SourceCard
-        icon={ChatBubbleLeftRightIcon}
+        icon={MessageSquare}
         name="Telegram"
         description="Bot integration & groups management"
         status={status}
