@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Card, CardContent, Button, Spinner } from '@/shared/ui'
+import { Button, Spinner } from '@/shared/ui'
 import { agentService } from '@/features/agents/api'
 import { AgentConfig, AgentConfigCreate, AgentConfigUpdate } from '@/features/agents/types'
 import { toast } from 'sonner'
-import { PlusIcon } from '@heroicons/react/24/outline'
+import { Plus, Cpu } from 'lucide-react'
+import { EmptyState } from '@/shared/patterns'
 import AgentForm from './AgentForm'
 import AgentCard from './AgentCard'
 import TaskAssignment from './TaskAssignment'
@@ -104,20 +105,27 @@ const AgentList = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">AI Agents</h2>
         <Button onClick={handleCreate}>
-          <PlusIcon className="mr-2 h-4 w-4" />
+          <Plus className="mr-2 h-4 w-4" />
           Add Agent
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-4">
         {agents?.length === 0 ? (
-          <Card className="col-span-full">
-            <CardContent className="py-8">
-              <p className="text-center text-muted-foreground">
-                No agents found. Create one to get started.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="col-span-full">
+            <EmptyState
+              variant="card"
+              icon={Cpu}
+              title="No agents found"
+              description="Create your first AI agent to start automating tasks."
+              action={
+                <Button onClick={handleCreate}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Agent
+                </Button>
+              }
+            />
+          </div>
         ) : (
           agents?.map((agent) => (
             <AgentCard

@@ -17,6 +17,7 @@ import {
   Checkbox,
   Spinner,
 } from '@/shared/ui'
+import { FormField } from '@/shared/patterns'
 import { AgentConfigCreate, AgentConfigUpdate } from '@/features/agents/types'
 import { providerService } from '@/features/providers/api'
 import { useOllamaModels } from '@/features/providers/hooks'
@@ -96,6 +97,7 @@ const AgentForm = ({
     if (models.length > 0 && !formData.model_name && !isEdit) {
       setFormData((prev) => ({ ...prev, model_name: models[0].name }))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [models, isEdit])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -116,8 +118,7 @@ const AgentForm = ({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name *</Label>
+            <FormField label="Name" id="name" required>
               <Input
                 id="name"
                 value={formData.name}
@@ -125,20 +126,18 @@ const AgentForm = ({
                 placeholder="My Agent"
                 required
               />
-            </div>
+            </FormField>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+            <FormField label="Description" id="description">
               <Input
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Agent description"
               />
-            </div>
+            </FormField>
 
-            <div className="space-y-2">
-              <Label htmlFor="provider_id">Provider *</Label>
+            <FormField label="Provider" id="provider_id" required>
               <Select
                 value={formData.provider_id}
                 onValueChange={(value) => setFormData({ ...formData, provider_id: value })}
@@ -154,7 +153,7 @@ const AgentForm = ({
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </FormField>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -171,19 +170,19 @@ const AgentForm = ({
               </div>
 
               {!hasProviderSelected ? (
-                <div className="px-3 py-2 text-sm border border-input bg-muted rounded-md text-muted-foreground">
+                <div className="px-4 py-2 text-sm border border-input bg-muted rounded-md text-muted-foreground">
                   Please select a provider first
                 </div>
               ) : isOllamaProvider && !manualModelInput ? (
                 <>
                   {modelsLoading ? (
-                    <div className="flex items-center gap-2 px-3 py-2 text-sm border border-input bg-background rounded-md">
+                    <div className="flex items-center gap-2 px-4 py-2 text-sm border border-input bg-background rounded-md">
                       <Spinner className="w-4 h-4" />
                       <span className="text-muted-foreground">Loading models...</span>
                     </div>
                   ) : modelsError ? (
                     <div className="space-y-2">
-                      <div className="px-3 py-2 text-sm border border-destructive bg-destructive/10 rounded-md text-destructive">
+                      <div className="px-4 py-2 text-sm border border-destructive bg-destructive/10 rounded-md text-destructive">
                         {modelsError}
                       </div>
                       <Input
@@ -212,7 +211,7 @@ const AgentForm = ({
                     </Select>
                   ) : (
                     <div className="space-y-2">
-                      <div className="px-3 py-2 text-sm border border-input bg-muted rounded-md text-muted-foreground">
+                      <div className="px-4 py-2 text-sm border border-input bg-muted rounded-md text-muted-foreground">
                         No models found. Please enter model name manually.
                       </div>
                       <Input
@@ -244,13 +243,12 @@ const AgentForm = ({
                 onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
                 placeholder="You are a helpful assistant..."
                 required
-                className="w-full min-h-[100px] px-3 py-2 text-sm rounded-md border border-input bg-background"
+                className="w-full min-h-[100px] px-4 py-2 text-sm rounded-md border border-input bg-background"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="temperature">Temperature</Label>
+              <FormField label="Temperature" id="temperature">
                 <Input
                   id="temperature"
                   type="number"
@@ -262,10 +260,9 @@ const AgentForm = ({
                     setFormData({ ...formData, temperature: parseFloat(e.target.value) })
                   }
                 />
-              </div>
+              </FormField>
 
-              <div className="space-y-2">
-                <Label htmlFor="max_tokens">Max Tokens</Label>
+              <FormField label="Max Tokens" id="max_tokens">
                 <Input
                   id="max_tokens"
                   type="number"
@@ -276,7 +273,7 @@ const AgentForm = ({
                     setFormData({ ...formData, max_tokens: parseInt(e.target.value) })
                   }
                 />
-              </div>
+              </FormField>
             </div>
 
             <div className="flex items-center space-x-2">

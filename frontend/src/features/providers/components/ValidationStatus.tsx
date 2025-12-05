@@ -13,19 +13,19 @@ const ValidationStatus = ({ status, error }: ValidationStatusProps) => {
       case Status.CONNECTED:
         return {
           text: 'Connected',
-          className: 'bg-emerald-500 text-white border-emerald-600',
+          className: 'bg-semantic-success text-white border-semantic-success',
           Icon: CheckCircle,
         }
       case Status.ERROR:
         return {
           text: 'Error',
-          className: 'bg-rose-500 text-white border-rose-600',
+          className: 'bg-semantic-error text-white border-semantic-error',
           Icon: XCircle,
         }
       case Status.VALIDATING:
         return {
           text: 'Validating...',
-          className: 'bg-blue-500 text-white border-blue-600',
+          className: 'bg-semantic-info text-white border-semantic-info',
           Icon: Loader2,
           animated: true,
         }
@@ -33,7 +33,7 @@ const ValidationStatus = ({ status, error }: ValidationStatusProps) => {
       default:
         return {
           text: 'Pending',
-          className: 'bg-amber-500 text-white border-amber-600',
+          className: 'bg-semantic-warning text-white border-semantic-warning',
           Icon: Clock,
         }
     }
@@ -44,7 +44,7 @@ const ValidationStatus = ({ status, error }: ValidationStatusProps) => {
 
   return (
     <Badge variant="outline" className={config.className} title={error}>
-      <IconComponent className={`h-4 w-4 mr-1 ${config.animated ? 'animate-spin' : ''}`} />
+      <IconComponent className={`h-4 w-4 mr-2 ${config.animated ? 'animate-spin' : ''}`} />
       {config.text}
     </Badge>
   )

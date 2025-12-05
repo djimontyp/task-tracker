@@ -102,7 +102,7 @@ export function AutomationOnboardingWizard() {
       </div>
 
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
             {STEPS.map((step, index) => (
               <button
@@ -150,7 +150,7 @@ export function AutomationOnboardingWizard() {
             </Button>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {currentStep > 0 && (
             <Button variant="outline" onClick={handlePrevious} disabled={isActivating}>
               Previous
@@ -164,7 +164,7 @@ export function AutomationOnboardingWizard() {
             <Button
               onClick={handleActivate}
               disabled={isActivating}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="bg-semantic-success hover:bg-semantic-success/90 text-white"
             >
               {isActivating ? 'Activating...' : 'Activate Automation'}
             </Button>

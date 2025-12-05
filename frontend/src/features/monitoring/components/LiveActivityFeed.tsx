@@ -20,7 +20,7 @@ export const LiveActivityFeed = ({ events }: LiveActivityFeedProps) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Активність в реальному часі</CardTitle>
+          <CardTitle>Активність в реальному часі</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
@@ -34,8 +34,8 @@ export const LiveActivityFeed = ({ events }: LiveActivityFeedProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+        <CardTitle className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-semantic-success animate-pulse" />
           Активність в реальному часі
           <Badge variant="secondary" className="ml-auto">
             {events.length}
@@ -50,10 +50,10 @@ export const LiveActivityFeed = ({ events }: LiveActivityFeedProps) => {
           {events.map((event, index) => (
             <div
               key={`${event.id}-${index}`}
-              className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+              className="flex items-start gap-4 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
             >
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-2">
                   <Badge variant={getStatusVariant(event.status)}>
                     {getStatusText(event.status)}
                   </Badge>
@@ -72,7 +72,7 @@ export const LiveActivityFeed = ({ events }: LiveActivityFeedProps) => {
                   {event.error_message && (
                     <>
                       <span>•</span>
-                      <span className="text-red-600 dark:text-red-400 truncate" title={event.error_message}>
+                      <span className="text-semantic-error truncate" title={event.error_message}>
                         {event.error_message}
                       </span>
                     </>

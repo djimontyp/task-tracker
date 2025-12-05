@@ -1,6 +1,6 @@
 import { Card, CardContent, Button, Badge } from '@/shared/ui'
 import { AgentConfig } from '@/features/agents/types'
-import { PencilIcon, TrashIcon, Cog6ToothIcon, BeakerIcon } from '@heroicons/react/24/outline'
+import { Pencil, Trash2, Settings, TestTube2 } from 'lucide-react'
 
 interface AgentCardProps {
   agent: AgentConfig
@@ -22,12 +22,12 @@ const AgentCard = ({
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardContent className="pt-6">
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <h3 className="font-semibold text-lg">{agent.name}</h3>
               {agent.description && (
-                <p className="text-sm text-muted-foreground mt-1">{agent.description}</p>
+                <p className="text-sm text-muted-foreground mt-2">{agent.description}</p>
               )}
             </div>
             <div className="flex gap-2">
@@ -37,7 +37,7 @@ const AgentCard = ({
                 onClick={() => onEdit(agent)}
                 aria-label="Edit agent"
               >
-                <PencilIcon className="h-4 w-4" />
+                <Pencil className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"
@@ -45,7 +45,7 @@ const AgentCard = ({
                 onClick={() => onManageTasks(agent)}
                 aria-label="Manage tasks"
               >
-                <Cog6ToothIcon className="h-4 w-4" />
+                <Settings className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"
@@ -53,7 +53,7 @@ const AgentCard = ({
                 onClick={() => onTest(agent)}
                 aria-label="Test agent"
               >
-                <BeakerIcon className="h-4 w-4" />
+                <TestTube2 className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"
@@ -62,7 +62,7 @@ const AgentCard = ({
                 aria-label="Delete agent"
                 disabled={isDeleting}
               >
-                <TrashIcon className="h-4 w-4" />
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -90,7 +90,7 @@ const AgentCard = ({
 
             <div>
               <span className="text-muted-foreground">System Prompt:</span>
-              <p className="text-xs mt-1 line-clamp-2">{agent.system_prompt}</p>
+              <p className="text-xs mt-2 line-clamp-2">{agent.system_prompt}</p>
             </div>
 
             <div className="flex items-center justify-between pt-2">

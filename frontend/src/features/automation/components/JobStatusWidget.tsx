@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Badge } from '@/shared/ui/badge'
 import { Skeleton } from '@/shared/ui/skeleton'
-import { CheckCircleIcon, XCircleIcon, ClockIcon } from '@heroicons/react/24/outline'
+import { CheckCircle, XCircle, Clock } from 'lucide-react'
 import { useSchedulerJobs, useTriggerJob } from '../api/automationService'
 
 export function JobStatusWidget() {
@@ -19,7 +19,7 @@ export function JobStatusWidget() {
     try {
       await triggerMutation.mutateAsync(mainJob.id)
       toast.success('Job triggered successfully')
-    } catch (error) {
+    } catch {
       toast.error('Failed to trigger job')
     }
   }
@@ -28,7 +28,7 @@ export function JobStatusWidget() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Scheduler Status</CardTitle>
+          <CardTitle>Scheduler Status</CardTitle>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-24 w-full" />
@@ -41,7 +41,7 @@ export function JobStatusWidget() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Scheduler Status</CardTitle>
+          <CardTitle>Scheduler Status</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-sm text-muted-foreground">No scheduled jobs configured</div>
@@ -53,13 +53,13 @@ export function JobStatusWidget() {
   const getStatusIcon = () => {
     switch (mainJob.status) {
       case 'success':
-        return <CheckCircleIcon className="h-5 w-5 text-green-600" />
+        return <CheckCircle className="h-5 w-5 text-semantic-success" />
       case 'failed':
-        return <XCircleIcon className="h-5 w-5 text-red-600" />
+        return <XCircle className="h-5 w-5 text-semantic-error" />
       case 'running':
-        return <ClockIcon className="h-5 w-5 text-blue-600 animate-spin" />
+        return <Clock className="h-5 w-5 text-semantic-info animate-spin" />
       default:
-        return <ClockIcon className="h-5 w-5 text-muted-foreground" />
+        return <Clock className="h-5 w-5 text-muted-foreground" />
     }
   }
 
@@ -79,7 +79,7 @@ export function JobStatusWidget() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Scheduler Status</CardTitle>
+        <CardTitle>Scheduler Status</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -111,7 +111,7 @@ export function JobStatusWidget() {
         </div>
 
         {mainJob.error_message && (
-          <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md">
             <p className="text-xs text-destructive">{mainJob.error_message}</p>
           </div>
         )}

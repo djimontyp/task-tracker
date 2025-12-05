@@ -10,7 +10,8 @@ import {
 import { taskService } from '@/features/agents/api'
 import { TaskConfig, TaskConfigCreate, TaskConfigUpdate } from '@/features/agents/types'
 import { toast } from 'sonner'
-import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { Pencil, Trash2, Plus, ClipboardList } from 'lucide-react'
+import { EmptyState } from '@/shared/patterns'
 import TaskForm from './TaskForm'
 
 const TaskList = () => {
@@ -97,30 +98,37 @@ const TaskList = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Task Configurations</h2>
         <Button onClick={handleCreate}>
-          <PlusIcon className="mr-2 h-4 w-4" />
+          <Plus className="mr-2 h-4 w-4" />
           Add Task
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {tasks?.length === 0 ? (
-          <Card className="col-span-full">
-            <CardContent className="py-8">
-              <p className="text-center text-muted-foreground">
-                No tasks found. Create one to get started.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="col-span-full">
+            <EmptyState
+              variant="card"
+              icon={ClipboardList}
+              title="No tasks found"
+              description="Define task configurations to structure AI agent outputs."
+              action={
+                <Button onClick={handleCreate}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Task
+                </Button>
+              }
+            />
+          </div>
         ) : (
           tasks?.map((task) => (
             <Card key={task.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="pt-6">
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg">{task.name}</h3>
                       {task.description && (
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-sm text-muted-foreground mt-2">
                           {task.description}
                         </p>
                       )}
@@ -132,7 +140,7 @@ const TaskList = () => {
                         onClick={() => handleEdit(task)}
                         aria-label="Edit task"
                       >
-                        <PencilIcon className="h-4 w-4" />
+                        <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         size="icon"
@@ -141,7 +149,7 @@ const TaskList = () => {
                         aria-label="Delete task"
                         disabled={deleteMutation.isPending}
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -149,7 +157,7 @@ const TaskList = () => {
                   <div className="space-y-2 text-sm">
                     <div>
                       <span className="text-muted-foreground">Schema Fields:</span>
-                      <div className="mt-1 space-x-1">
+                      <div className="mt-2 space-x-2">
                         {task.response_schema?.properties ? (
                           Object.keys(task.response_schema.properties).map(
                             (field) => (

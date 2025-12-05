@@ -84,7 +84,7 @@ const HexColorPickerComponent: React.FC<HexColorPickerComponentProps> = ({
 
       {/* Color Input */}
       <div className="space-y-2">
-        <label htmlFor="hex-input" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="hex-input" className="block text-sm font-medium text-foreground">
           Hex Color Code
         </label>
         <div className="relative">
@@ -94,37 +94,37 @@ const HexColorPickerComponent: React.FC<HexColorPickerComponentProps> = ({
             onChange={handleInputChange}
             prefixed
             placeholder="#000000"
-            className={`w-full px-3 py-2 pr-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 ${
+            className={`w-full px-4 py-2 pr-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 ${
               isValidHex
-                ? 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-                : 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                ? 'border-input focus:ring-ring focus:border-primary'
+                : 'border-destructive focus:ring-destructive focus:border-destructive'
             }`}
             style={{ fontFamily: 'monospace' }}
           />
           <div
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded border-2 border-gray-300"
+            className="absolute right-2 top-2/2 transform -translate-y-1/2 w-6 h-6 rounded border-2 border-border"
             style={{ backgroundColor: color }}
           />
         </div>
         {!isValidHex && (
-          <p className="text-xs text-red-600">Please enter a valid hex color (e.g., #FF5733)</p>
+          <p className="text-xs text-destructive">Please enter a valid hex color (e.g., #FF5733)</p>
         )}
       </div>
 
       {/* Preset Colors */}
       <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-700">Quick Select</p>
+        <p className="text-sm font-medium text-foreground">Quick Select</p>
         <div className="grid grid-cols-6 gap-2">
           {presetColors.map((presetColor) => (
             <button
               key={presetColor}
               onClick={() => handlePresetColor(presetColor)}
               className={`
-                h-8 w-8 rounded-full border-2 transition-all duration-200
-                hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2
+                h-11 w-11 rounded-full border-2 transition-all duration-200
+                hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2
                 ${color === presetColor
-                  ? 'border-gray-800 ring-2 ring-offset-2 ring-gray-400'
-                  : 'border-gray-300 hover:border-gray-500'
+                  ? 'border-foreground ring-2 ring-offset-2 ring-ring'
+                  : 'border-border hover:border-muted-foreground'
                 }
               `}
               style={{ backgroundColor: presetColor }}
@@ -136,13 +136,13 @@ const HexColorPickerComponent: React.FC<HexColorPickerComponentProps> = ({
       </div>
 
       {/* Current Color Display */}
-      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
         <div className="flex items-center gap-2">
           <div
-            className="w-8 h-8 rounded border-2 border-gray-300"
+            className="w-8 h-8 rounded border-2 border-border"
             style={{ backgroundColor: color }}
           />
-          <span className="text-sm font-medium text-gray-700" style={{ fontFamily: 'monospace' }}>
+          <span className="text-sm font-medium text-foreground" style={{ fontFamily: 'monospace' }}>
             {color.toUpperCase()}
           </span>
         </div>

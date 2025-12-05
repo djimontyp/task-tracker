@@ -39,13 +39,13 @@ export const TopicSearchCard = ({ result }: TopicSearchCardProps) => {
       }}
     >
       <CardContent className="p-4">
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-4">
           <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-lg" style={{ backgroundColor: topic.color || '#e5e7eb' }}>
             {renderIcon(topic.icon)}
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <h3 className="font-semibold text-base">{topic.name}</h3>
               <Badge variant="outline" className="text-xs">
                 {formatSimilarity(similarity_score)} match

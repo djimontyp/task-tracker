@@ -14,7 +14,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/shared/ui'
-import { InformationCircleIcon } from '@heroicons/react/24/outline'
+import { FormField } from '@/shared/patterns'
+import { Info } from 'lucide-react'
 import { TaskConfigCreate, TaskConfigUpdate, JsonSchema } from '@/features/agents/types'
 import SchemaEditor from './SchemaEditor'
 
@@ -76,8 +77,7 @@ const TaskForm = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Task Name *</Label>
+          <FormField label="Task Name" required>
             <Input
               id="name"
               value={formData.name}
@@ -85,10 +85,9 @@ const TaskForm = ({
               placeholder="My Task"
               required
             />
-          </div>
+          </FormField>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+          <FormField label="Description">
             <Input
               id="description"
               value={formData.description}
@@ -97,7 +96,7 @@ const TaskForm = ({
               }
               placeholder="Task description"
             />
-          </div>
+          </FormField>
 
           <fieldset className="space-y-2">
             <legend className="sr-only">Response Fields Configuration</legend>
@@ -106,7 +105,7 @@ const TaskForm = ({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <InformationCircleIcon
+                    <Info
                       className="h-4 w-4 text-muted-foreground cursor-help"
                       aria-label="Response fields help"
                     />

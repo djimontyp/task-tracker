@@ -38,11 +38,11 @@ export function ScheduleConfigStep() {
         onValidate={handleValidate}
       />
 
-      <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-4">
-        <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+      <div className="rounded-lg bg-semantic-info/10 border border-semantic-info/20 p-4">
+        <h4 className="text-sm font-medium text-semantic-info mb-2">
           What happens when the job runs?
         </h4>
-        <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-disc list-inside">
+        <ul className="text-sm text-semantic-info/80 space-y-2 list-disc list-inside">
           <li>Fetches all pending topic/atom versions</li>
           <li>Applies automation rules to each version</li>
           <li>Auto-approves/rejects based on configured thresholds</li>

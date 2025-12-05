@@ -45,3 +45,14 @@ export interface ListTopicsParams {
   search?: string
   sort_by?: TopicSortBy
 }
+
+export interface RecentTopic extends Topic {
+  last_message_at: string
+  message_count: number
+  atoms_count: number
+}
+
+export interface RecentTopicsResponse {
+  items: RecentTopic[]
+  total: number
+}

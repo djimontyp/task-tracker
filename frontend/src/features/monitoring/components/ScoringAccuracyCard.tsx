@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { ExclamationCircleIcon, CheckCircleIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
+import { AlertCircle, CheckCircle, TrendingUp } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { monitoringService } from '../api/monitoringService'
@@ -16,7 +16,7 @@ export const ScoringAccuracyCard = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ArrowTrendingUpIcon className="h-5 w-5" />
+            <TrendingUp className="h-5 w-5" />
             Точність класифікації
           </CardTitle>
           <CardDescription>Метрики якості системи оцінки важливості повідомлень</CardDescription>
@@ -35,14 +35,14 @@ export const ScoringAccuracyCard = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ArrowTrendingUpIcon className="h-5 w-5" />
+            <TrendingUp className="h-5 w-5" />
             Точність класифікації
           </CardTitle>
           <CardDescription>Метрики якості системи оцінки важливості повідомлень</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-12">
-            <ExclamationCircleIcon className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
             <div className="text-destructive mb-2">Помилка завантаження метрик</div>
             <div className="text-sm text-muted-foreground">{String(error)}</div>
           </div>
@@ -63,17 +63,17 @@ export const ScoringAccuracyCard = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ArrowTrendingUpIcon className="h-5 w-5" />
+            <TrendingUp className="h-5 w-5" />
             <CardTitle>Точність класифікації</CardTitle>
           </div>
           {isHealthy ? (
-            <Badge variant="default" className="bg-green-500 hover:bg-green-600">
-              <CheckCircleIcon className="h-3 w-3 mr-1" />
+            <Badge variant="default" className="bg-semantic-success hover:bg-semantic-success/90">
+              <CheckCircle className="h-3 w-3 mr-2" />
               Норма
             </Badge>
           ) : (
             <Badge variant="destructive">
-              <ExclamationCircleIcon className="h-3 w-3 mr-1" />
+              <AlertCircle className="h-3 w-3 mr-2" />
               Потребує уваги
             </Badge>
           )}
@@ -85,11 +85,11 @@ export const ScoringAccuracyCard = () => {
       <CardContent>
         <div className="space-y-6">
           <div className="text-center">
-            <div className="text-4xl font-bold mb-1">{accuracyPercentage}%</div>
+            <div className="text-4xl font-bold mb-2">{accuracyPercentage}%</div>
             <div className="text-sm text-muted-foreground">Загальна точність</div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {data.category_metrics.map((metric) => {
               const categoryLabels: Record<string, string> = {
                 noise: 'Шум',
@@ -123,11 +123,11 @@ export const ScoringAccuracyCard = () => {
           </div>
 
           {!isHealthy && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md">
               <div className="flex items-start gap-2">
-                <ExclamationCircleIcon className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
                 <div className="text-sm">
-                  <div className="font-medium text-destructive mb-1">
+                  <div className="font-medium text-destructive mb-2">
                     Точність нижче порогу 80%
                   </div>
                   <div className="text-muted-foreground">

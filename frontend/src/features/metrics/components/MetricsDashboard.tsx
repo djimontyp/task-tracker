@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  ChartBarIcon,
-  CheckCircleIcon,
-  CpuChipIcon,
-  SignalIcon,
-  SignalSlashIcon,
-  ExclamationTriangleIcon,
-} from '@heroicons/react/24/outline'
+  BarChart3,
+  CheckCircle,
+  Cpu,
+  Signal,
+  SignalLow,
+  AlertTriangle,
+} from 'lucide-react'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { Button } from '@/shared/ui/button'
@@ -103,22 +103,22 @@ const getStatusBadgeLabel = (status: MetricStatus): string => {
 const getStatusBadgeColor = (status: MetricStatus): string => {
   switch (status) {
     case 'critical':
-      return 'border-red-500 text-red-600 bg-red-50 dark:bg-red-950'
+      return 'border-status-error text-status-error bg-status-error/10'
     case 'warning':
-      return 'border-yellow-500 text-yellow-600 bg-yellow-50 dark:bg-yellow-950'
+      return 'border-status-validating text-status-validating bg-status-validating/10'
     case 'optimal':
-      return 'border-green-500 text-green-600 bg-green-50 dark:bg-green-950'
+      return 'border-status-connected text-status-connected bg-status-connected/10'
   }
 }
 
 const getCardBorderColor = (status: MetricStatus): string => {
   switch (status) {
     case 'critical':
-      return 'border-red-500'
+      return 'border-status-error'
     case 'warning':
-      return 'border-yellow-500'
+      return 'border-status-validating'
     case 'optimal':
-      return 'border-green-500/30'
+      return 'border-status-connected/30'
   }
 }
 
@@ -139,6 +139,7 @@ export const MetricsDashboard = () => {
   // WebSocket connection for real-time updates
   const { isConnected: isWsConnected, connectionState } = useWebSocket({
     topics: ['metrics'],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onMessage: (data: any) => {
       if (data.type === 'metrics:update' && data.data) {
         queryClient.setQueryData(['metrics', 'dashboard'], data.data)
@@ -291,15 +292,15 @@ export const MetricsDashboard = () => {
           <h2 className="text-xl font-semibold">System Metrics</h2>
           <AdminFeatureBadge variant="inline" size="sm" />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {isWsConnected ? (
             <>
-              <Badge variant="outline" className="gap-2 border-green-500 text-green-600">
-                <SignalIcon className="w-3.5 h-3.5" />
+              <Badge variant="outline" className="gap-2 border-status-connected text-status-connected">
+                <Signal className="w-3.5 h-3.5" />
                 Live
               </Badge>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-status-connected animate-pulse" />
                 <span className="text-xs text-muted-foreground">
                   Real-time updates
                 </span>
@@ -307,12 +308,12 @@ export const MetricsDashboard = () => {
             </>
           ) : (
             <>
-              <Badge variant="outline" className="gap-2 border-yellow-500 text-yellow-600">
-                <SignalSlashIcon className="w-3.5 h-3.5" />
+              <Badge variant="outline" className="gap-2 border-status-validating text-status-validating">
+                <SignalLow className="w-3.5 h-3.5" />
                 Polling
               </Badge>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-status-validating animate-pulse" />
                 <span className="text-xs text-muted-foreground">
                   {connectionState === 'reconnecting' ? 'Reconnecting...' : 'Auto-refresh every 30s'}
                 </span>
@@ -324,10 +325,10 @@ export const MetricsDashboard = () => {
 
       {hasCriticalMetrics && (
         <Alert variant="destructive" className="animate-fade-in">
-          <ExclamationTriangleIcon className="h-4 w-4" />
+          <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Critical Metrics Detected</AlertTitle>
           <AlertDescription>
-            <ul className="list-disc pl-4 mt-2 space-y-1">
+            <ul className="list-disc pl-4 mt-2 space-y-2">
               {criticalMetrics.map((metric) => (
                 <li key={metric.name}>
                   <span className="font-medium">{metric.name}:</span> {metric.value} (Critical)
@@ -364,10 +365,10 @@ export const MetricsDashboard = () => {
           )}
         >
           <CardContent className="p-6">
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <ChartBarIcon className="w-5 h-5 text-primary" />
+                  <BarChart3 className="w-5 h-5 text-primary" />
                   <p className="text-sm font-medium text-muted-foreground">
                     Topic Quality Score
                   </p>
@@ -414,8 +415,8 @@ export const MetricsDashboard = () => {
             value: Math.abs(metrics.trends.classificationAccuracy.change),
             direction: mapTrendDirection(metrics.trends.classificationAccuracy.direction),
           }}
-          icon={CheckCircleIcon}
-          iconColor="text-green-600"
+          icon={CheckCircle}
+          iconColor="text-semantic-success"
           status={accuracyStatus}
         />
 
@@ -427,8 +428,8 @@ export const MetricsDashboard = () => {
             value: Math.abs(metrics.trends.activeAnalysisRuns.change),
             direction: mapTrendDirection(metrics.trends.activeAnalysisRuns.direction),
           }}
-          icon={CpuChipIcon}
-          iconColor="text-blue-600"
+          icon={Cpu}
+          iconColor="text-semantic-info"
         />
       </div>
     </div>

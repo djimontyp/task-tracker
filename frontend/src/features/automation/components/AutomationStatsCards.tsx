@@ -1,4 +1,4 @@
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
+import { ArrowUp, ArrowDown } from 'lucide-react'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { useAutomationStats } from '../api/automationService'
@@ -30,28 +30,28 @@ export function AutomationStatsCards() {
       changeLabel: stats.approval_rate_change
         ? `${stats.approval_rate_change > 0 ? '+' : ''}${stats.approval_rate_change.toFixed(1)}%`
         : 'No change',
-      color: 'text-blue-600 dark:text-blue-400',
+      color: 'text-semantic-info',
     },
     {
       label: 'Pending Versions',
       value: (stats.pending_versions_count ?? 0).toString(),
       change: 0,
       changeLabel: 'Awaiting review',
-      color: 'text-yellow-600 dark:text-yellow-400',
+      color: 'text-semantic-warning',
     },
     {
       label: 'Total Rules',
       value: (stats.total_rules_count ?? 0).toString(),
       change: 0,
       changeLabel: 'Configured',
-      color: 'text-green-600 dark:text-green-400',
+      color: 'text-semantic-success',
     },
     {
       label: 'Active Rules',
       value: (stats.active_rules_count ?? 0).toString(),
       change: 0,
       changeLabel: 'Running',
-      color: 'text-purple-600 dark:text-purple-400',
+      color: 'text-accent-foreground',
     },
   ]
 
@@ -67,13 +67,13 @@ export function AutomationStatsCards() {
                 {item.change !== 0 && (
                   <span
                     className={`flex items-center text-xs font-medium ${
-                      item.change > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                      item.change > 0 ? 'text-semantic-success' : 'text-semantic-error'
                     }`}
                   >
                     {item.change > 0 ? (
-                      <ArrowUpIcon className="h-3 w-3 mr-1" />
+                      <ArrowUp className="h-3 w-3 mr-2" />
                     ) : (
-                      <ArrowDownIcon className="h-3 w-3 mr-1" />
+                      <ArrowDown className="h-3 w-3 mr-2" />
                     )}
                     {item.changeLabel}
                   </span>

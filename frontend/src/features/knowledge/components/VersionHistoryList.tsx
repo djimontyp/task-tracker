@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, Badge, Spinner } from '@/shared/ui';
 import { Checkbox } from '@/shared/ui/checkbox';
 import { Button } from '@/shared/ui/button';
-import { CheckIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { Check, Clock } from 'lucide-react';
 import { versioningService } from '../api/versioningService';
 import { BulkVersionActions } from './BulkVersionActions';
 import type { TopicVersion, AtomVersion } from '../types';
@@ -26,6 +26,7 @@ export function VersionHistoryList({
 
   useEffect(() => {
     loadVersions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entityType, entityId]);
 
   const loadVersions = async () => {
@@ -85,7 +86,7 @@ export function VersionHistoryList({
 
   if (versions.length === 0) {
     return (
-      <div className="text-center p-4 text-gray-500">
+      <div className="text-center p-4 text-muted-foreground">
         No version history available
       </div>
     );
@@ -98,8 +99,8 @@ export function VersionHistoryList({
     <div className="space-y-4">
       {enableBulkActions && (
         <>
-          <div className="flex items-center justify-between rounded-lg border bg-gray-50 p-3 dark:bg-gray-900">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between rounded-lg border bg-muted p-4">
+            <div className="flex items-center gap-4">
               <Checkbox
                 checked={allSelected}
                 onCheckedChange={toggleSelectAll}
@@ -134,8 +135,8 @@ export function VersionHistoryList({
             <Card
               key={version.id}
               className={`p-4 transition-colors ${
-                enableBulkActions ? '' : 'cursor-pointer hover:bg-gray-50'
-              } ${isSelected ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                enableBulkActions ? '' : 'cursor-pointer hover:bg-muted'
+              } ${isSelected ? 'border-primary bg-primary/10' : ''}`}
               onClick={() => {
                 if (!enableBulkActions) {
                   onSelectVersion?.(version.version);
@@ -143,7 +144,7 @@ export function VersionHistoryList({
               }}
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   {enableBulkActions && (
                     <Checkbox
                       checked={isSelected}
@@ -156,25 +157,25 @@ export function VersionHistoryList({
                   <div className="text-lg font-semibold">v{version.version}</div>
 
                   {version.approved ? (
-                    <Badge variant="default" className="bg-green-500 hover:bg-green-600">
-                      <CheckIcon className="h-3 w-3 mr-1" />
+                    <Badge variant="default" className="bg-semantic-success hover:bg-semantic-success/90">
+                      <Check className="h-3 w-3 mr-2" />
                       Approved
                     </Badge>
                   ) : (
                     <Badge variant="secondary">
-                      <ClockIcon className="h-3 w-3 mr-1" />
+                      <Clock className="h-3 w-3 mr-2" />
                       Pending
                     </Badge>
                   )}
                 </div>
 
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-muted-foreground">
                   {new Date(version.created_at).toLocaleString()}
                 </div>
               </div>
 
               {version.created_by && (
-                <div className="mt-2 text-sm text-gray-500">
+                <div className="mt-2 text-sm text-muted-foreground">
                   By {version.created_by}
                 </div>
               )}

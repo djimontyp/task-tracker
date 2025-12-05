@@ -9,9 +9,9 @@ import { cn } from '@/shared/lib'
 import type { QualityScoreProps } from '../types'
 
 const getScoreColor = (score: number): string => {
-  if (score >= 71) return 'bg-green-500 text-white border-green-500'
-  if (score >= 41) return 'bg-yellow-500 text-white border-yellow-500'
-  return 'bg-red-500 text-white border-red-500'
+  if (score >= 71) return 'bg-semantic-success text-white border-semantic-success'
+  if (score >= 41) return 'bg-semantic-warning text-white border-semantic-warning'
+  return 'bg-semantic-error text-white border-semantic-error'
 }
 
 const getScoreLabel = (score: number): string => {
@@ -30,7 +30,7 @@ export const QualityScoreDisplay = ({
       <Badge
         variant="outline"
         className={cn(
-          'text-xs font-semibold px-2 py-1',
+          'text-xs font-semibold px-2 py-2',
           getScoreColor(score)
         )}
         aria-label={`Quality score: ${score} out of 100, ${getScoreLabel(score)}`}
@@ -54,7 +54,7 @@ export const QualityScoreDisplay = ({
           {scoreContent}
         </TooltipTrigger>
         <TooltipContent>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-2">
             <p className="font-semibold">Quality Score: {score}/100</p>
             <p className="text-muted-foreground">Based on:</p>
             <ul className="list-disc list-inside space-y-0.5 text-muted-foreground">

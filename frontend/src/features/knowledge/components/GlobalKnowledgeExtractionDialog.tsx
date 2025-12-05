@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Button } from '@/shared/ui';
-import { SparklesIcon } from '@heroicons/react/24/outline';
+import { Sparkles } from 'lucide-react';
 import { KnowledgeExtractionPanel } from './KnowledgeExtractionPanel';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -12,7 +12,7 @@ export function GlobalKnowledgeExtractionDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="default" size="sm" className="w-full" aria-label="Extract knowledge globally">
-          <SparklesIcon className="h-4 w-4 mr-2" />
+          <Sparkles className="h-4 w-4 mr-2" />
           Extract Knowledge
         </Button>
       </DialogTrigger>

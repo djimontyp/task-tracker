@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/select'
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { TaskHistoryResponse, HistoryFilters, TaskStatus } from '../types'
 
 interface TaskHistoryTableProps {
@@ -54,7 +54,7 @@ export const TaskHistoryTable = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Історія виконання задач</CardTitle>
+        <CardTitle>Історія виконання задач</CardTitle>
         <div className="flex flex-wrap gap-4 pt-4">
           <div className="flex-1 min-w-[200px]">
             <label className="text-sm font-medium mb-2 block">Тип задачі</label>
@@ -138,7 +138,7 @@ export const TaskHistoryTable = ({
                     </TableCell>
                     <TableCell className="text-sm">
                       {log.error_message ? (
-                        <span className="text-red-600 dark:text-red-400 truncate max-w-[300px] block" title={log.error_message}>
+                        <span className="text-semantic-error truncate max-w-[300px] block" title={log.error_message}>
                           {log.error_message}
                         </span>
                       ) : (
@@ -151,13 +151,13 @@ export const TaskHistoryTable = ({
                       <TableCell colSpan={5} className="bg-muted/50">
                         <div className="p-4">
                           <h4 className="font-semibold mb-2">Деталі помилки:</h4>
-                          <pre className="text-xs overflow-x-auto bg-background p-3 rounded-md border">
+                          <pre className="text-xs overflow-x-auto bg-background p-4 rounded-md border">
                             {log.error_traceback}
                           </pre>
                           {log.params && (
                             <>
                               <h4 className="font-semibold mt-4 mb-2">Параметри:</h4>
-                              <pre className="text-xs overflow-x-auto bg-background p-3 rounded-md border">
+                              <pre className="text-xs overflow-x-auto bg-background p-4 rounded-md border">
                                 {JSON.stringify(log.params, null, 2)}
                               </pre>
                             </>
@@ -184,7 +184,7 @@ export const TaskHistoryTable = ({
                 onClick={() => handlePageChange(history.page - 1)}
                 disabled={history.page === 1}
               >
-                <ChevronLeftIcon className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" />
                 Назад
               </Button>
               <Button
@@ -194,7 +194,7 @@ export const TaskHistoryTable = ({
                 disabled={history.page === history.total_pages}
               >
                 Далі
-                <ChevronRightIcon className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </div>

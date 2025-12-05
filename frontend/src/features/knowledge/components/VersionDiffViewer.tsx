@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import ReactDiffViewer from 'react-diff-viewer-continued';
 import { Button, Card, CardContent, CardHeader, CardTitle, Badge, Spinner } from '@/shared/ui';
-import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Check, X } from 'lucide-react';
 import { versioningService } from '../api/versioningService';
 import { formatDiffChanges } from '../utils/diffFormatters';
 import type { VersionDiff } from '../types';
@@ -29,6 +29,7 @@ export function VersionDiffViewer({
 
   useEffect(() => {
     loadDiff();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entityType, entityId, version, compareToVersion]);
 
   const loadDiff = async () => {
@@ -87,7 +88,7 @@ export function VersionDiffViewer({
   }
 
   if (!diff) {
-    return <div className="text-center p-4 text-gray-500">No diff available</div>;
+    return <div className="text-center p-4 text-muted-foreground">No diff available</div>;
   }
 
   const { added, removed, modified } = formatDiffChanges(diff.changes);
@@ -106,7 +107,7 @@ export function VersionDiffViewer({
               onClick={handleReject}
               disabled={actionLoading}
             >
-              <XMarkIcon className="h-4 w-4 mr-1" />
+              <X className="h-4 w-4 mr-2" />
               Reject
             </Button>
             <Button
@@ -114,30 +115,30 @@ export function VersionDiffViewer({
               onClick={handleApprove}
               disabled={actionLoading}
             >
-              <CheckIcon className="h-4 w-4 mr-1" />
+              <Check className="h-4 w-4 mr-2" />
               Approve
             </Button>
           </div>
         </div>
         {diff.summary && (
-          <p className="text-sm text-gray-600 mt-2">{diff.summary}</p>
+          <p className="text-sm text-muted-foreground mt-2">{diff.summary}</p>
         )}
       </CardHeader>
 
       <CardContent>
         <div className="mb-4 flex gap-2">
           {added.length > 0 && (
-            <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+            <Badge variant="default" className="bg-semantic-success hover:bg-semantic-success/90">
               +{added.length} added
             </Badge>
           )}
           {removed.length > 0 && (
-            <Badge variant="default" className="bg-red-500 hover:bg-red-600">
+            <Badge variant="default" className="bg-semantic-error hover:bg-semantic-error/90">
               -{removed.length} removed
             </Badge>
           )}
           {modified.length > 0 && (
-            <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600">
+            <Badge variant="default" className="bg-semantic-warning hover:bg-semantic-warning/90">
               {modified.length} modified
             </Badge>
           )}
@@ -146,7 +147,7 @@ export function VersionDiffViewer({
         <div className="space-y-4">
           {modified.map((change, idx) => (
             <div key={idx} className="border rounded-lg overflow-hidden">
-              <div className="bg-gray-100 px-3 py-2 text-sm font-medium">
+              <div className="bg-muted px-4 py-2 text-sm font-medium">
                 {change.field}
               </div>
               <ReactDiffViewer
@@ -160,9 +161,9 @@ export function VersionDiffViewer({
           ))}
 
           {added.length > 0 && (
-            <div className="border-l-4 border-green-500 pl-4">
-              <h4 className="font-medium text-green-700 mb-2">Added</h4>
-              <ul className="space-y-1">
+            <div className="border-l-4 border-semantic-success pl-4">
+              <h4 className="font-medium text-semantic-success mb-2">Added</h4>
+              <ul className="space-y-2">
                 {added.map((item, idx) => (
                   <li key={idx} className="text-sm">
                     {item}
@@ -173,9 +174,9 @@ export function VersionDiffViewer({
           )}
 
           {removed.length > 0 && (
-            <div className="border-l-4 border-red-500 pl-4">
-              <h4 className="font-medium text-red-700 mb-2">Removed</h4>
-              <ul className="space-y-1">
+            <div className="border-l-4 border-semantic-error pl-4">
+              <h4 className="font-medium text-semantic-error mb-2">Removed</h4>
+              <ul className="space-y-2">
                 {removed.map((item, idx) => (
                   <li key={idx} className="text-sm">
                     {item}

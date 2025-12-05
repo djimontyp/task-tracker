@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/shared/ui/select'
 import { Slider } from '@/shared/ui/slider'
+import { FormField } from '@/shared/patterns'
 import { atomService } from '../api/atomService'
 import { AtomType, type Atom } from '../types'
 
@@ -138,15 +139,12 @@ export function CreateAtomDialog({
         <DialogHeader>
           <DialogTitle>Створити новий атом</DialogTitle>
           <DialogDescription>
-            Атом буде автоматично прив'язаний до поточного топіка
+            Атом буде автоматично прив&apos;язаний до поточного топіка
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="type">
-              Тип атома <span className="text-destructive">*</span>
-            </Label>
+          <FormField label="Тип атома" required error={errors.type?.message}>
             <Select value={selectedType} onValueChange={handleTypeChange}>
               <SelectTrigger id="type" aria-label="Тип атома">
                 <SelectValue placeholder="Оберіть тип" />
@@ -159,55 +157,30 @@ export function CreateAtomDialog({
                 ))}
               </SelectContent>
             </Select>
-            {errors.type && (
-              <p className="text-sm text-destructive" role="alert">
-                {errors.type.message}
-              </p>
-            )}
-          </div>
+          </FormField>
 
-          <div className="space-y-2">
-            <Label htmlFor="title">
-              Заголовок <span className="text-destructive">*</span>
-            </Label>
+          <FormField label="Заголовок" required error={errors.title?.message}>
             <Input
               id="title"
               {...register('title')}
               placeholder="Короткий опис атома"
               maxLength={200}
-              aria-invalid={!!errors.title}
-              aria-describedby={errors.title ? 'title-error' : undefined}
             />
-            {errors.title && (
-              <p id="title-error" className="text-sm text-destructive" role="alert">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
+          </FormField>
 
-          <div className="space-y-2">
-            <Label htmlFor="content">
-              Зміст <span className="text-destructive">*</span>
-            </Label>
+          <FormField label="Зміст" required error={errors.content?.message}>
             <Textarea
               id="content"
               {...register('content')}
               placeholder="Детальний опис атома (мінімум 10 символів)"
               rows={8}
               className="resize-y"
-              aria-invalid={!!errors.content}
-              aria-describedby={errors.content ? 'content-error' : undefined}
             />
-            {errors.content && (
-              <p id="content-error" className="text-sm text-destructive" role="alert">
-                {errors.content.message}
-              </p>
-            )}
-          </div>
+          </FormField>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label htmlFor="confidence">Впевненість (необов'язково)</Label>
+              <Label htmlFor="confidence">Впевненість (необов&apos;язково)</Label>
               <span className="text-sm font-medium text-muted-foreground">
                 {Math.round(confidenceValue * 100)}%
               </span>

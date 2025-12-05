@@ -64,7 +64,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
   ) => (
     <Card key={type}>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+        <CardTitle className="font-semibold">{title}</CardTitle>
         <CardDescription>
           {entities.length === 0
             ? `No ${type.toLowerCase()} detected`
@@ -73,7 +73,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
       </CardHeader>
       <CardContent>
         {entities.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">No {type.toLowerCase()} found</p>
+          <p className="text-sm text-muted-foreground italic">No {type.toLowerCase()} found</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {entities.map((entity) => (
@@ -102,7 +102,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
         {!hasEntities ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-gray-500 text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 No entities detected in this message
               </p>
             </CardContent>
@@ -113,25 +113,25 @@ export function AtomsTab({ data }: AtomsTabProps) {
               'People',
               data.entities.people,
               'People',
-              'bg-blue-100 text-blue-800 hover:bg-blue-200'
+              'bg-semantic-info/10 text-semantic-info hover:bg-semantic-info/20'
             )}
             {renderEntityCard(
               'Places',
               data.entities.places,
               'Places',
-              'bg-green-100 text-green-800 hover:bg-green-200'
+              'bg-semantic-success/10 text-semantic-success hover:bg-semantic-success/20'
             )}
             {renderEntityCard(
               'Organizations',
               data.entities.organizations,
               'Organizations',
-              'bg-purple-100 text-purple-800 hover:bg-purple-200'
+              'bg-accent/10 text-accent-foreground hover:bg-accent/20'
             )}
             {renderEntityCard(
               'Concepts',
               data.entities.concepts,
               'Concepts',
-              'bg-orange-100 text-orange-800 hover:bg-orange-200'
+              'bg-semantic-warning/10 text-semantic-warning hover:bg-semantic-warning/20'
             )}
           </div>
         )}
@@ -145,7 +145,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
         {!hasKeywords ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-gray-500 text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 No keywords extracted from this message
               </p>
             </CardContent>
@@ -159,7 +159,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-4">
                 {data.keywords
                   .sort((a, b) => b.relevance - a.relevance)
                   .map((keyword) => {
@@ -172,7 +172,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
                               variant="outline"
                               style={{ fontSize: `${fontSize}px` }}
                               onClick={() => handleSearchKeyword(keyword.text)}
-                              className="cursor-pointer hover:bg-gray-100 transition-colors"
+                              className="cursor-pointer hover:bg-muted transition-colors"
                             >
                               {keyword.text}
                             </Badge>
@@ -198,7 +198,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
         {!hasEmbedding ? (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-gray-500 text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 No embedding data available for this message
               </p>
             </CardContent>
@@ -216,7 +216,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
                 <Label className="text-sm font-medium">Vector Norm:</Label>
                 <div className="mt-2">
                   <Progress value={calculateVectorNorm() * 100} className="h-2" />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-2">
                     {calculateVectorNorm().toFixed(4)}
                   </p>
                 </div>
@@ -242,7 +242,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
                     {data.similarMessages.map((msg) => (
                       <div
                         key={msg.id}
-                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                         onClick={() =>
                           toast.info('Message details', {
                             description: `Opening message ${msg.id} - coming soon`,
@@ -262,7 +262,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
               )}
 
               {(!data.similarMessages || data.similarMessages.length === 0) && (
-                <div className="text-sm text-gray-500 text-center py-4 border rounded-lg bg-gray-50">
+                <div className="text-sm text-muted-foreground text-center py-4 border rounded-lg bg-muted">
                   No similar messages found
                 </div>
               )}

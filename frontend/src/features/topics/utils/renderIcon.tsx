@@ -1,17 +1,18 @@
-import * as HeroIcons from '@heroicons/react/24/outline'
+import * as LucideIcons from 'lucide-react'
 
 export const renderTopicIcon = (
   iconName?: string | null,
   className = 'h-5 w-5',
   color?: string | null
 ) => {
-  const defaultIcon = <HeroIcons.FolderIcon className={className} />
+  const defaultIcon = <LucideIcons.Folder className={className} />
 
   if (!iconName) {
     return defaultIcon
   }
 
-  const Icon = (HeroIcons as any)[iconName]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Icon = (LucideIcons as any)[iconName]
 
   if (!Icon) {
     return defaultIcon

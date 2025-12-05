@@ -9,7 +9,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/shared/ui'
-import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { Plus, Trash2 } from 'lucide-react'
 import { JsonSchema, SchemaPropertyConfig, SchemaField, FieldType } from '@/features/agents/types'
 
 interface SchemaEditorProps {
@@ -107,7 +107,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
 
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {fields.length > 0 && (
         <div className="hidden md:grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground">
           <div className="col-span-4">Field Name</div>
@@ -124,14 +124,14 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
             <p className="text-sm">
               Fields define what data the AI agent should return.
               <br />
-              For example: "summary" (text), "priority" (number), "tags" (array)
+              For example: &quot;summary&quot; (text), &quot;priority&quot; (number), &quot;tags&quot; (array)
             </p>
           </div>
         ) : (
           fields.map((field, index) => (
             <div
               key={index}
-              className="flex flex-col space-y-3 md:space-y-0 md:grid md:grid-cols-12 md:gap-2 p-3 border-b last:border-b-0"
+              className="flex flex-col space-y-4 md:space-y-0 md:grid md:grid-cols-12 md:gap-2 p-4 border-b last:border-b-0"
             >
               <div className="w-full md:col-span-4">
                 <Label htmlFor={`field-name-${index}`} className="text-xs md:sr-only">
@@ -144,7 +144,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
                     handleFieldChange(index, 'name', e.target.value)
                   }
                   placeholder="field_name"
-                  className="w-full mt-1 md:mt-0"
+                  className="w-full mt-2 md:mt-0"
                   aria-required="true"
                 />
               </div>
@@ -159,7 +159,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
                     handleFieldChange(index, 'type', value)
                   }
                 >
-                  <SelectTrigger id={`field-type-${index}`} className="w-full mt-1 md:mt-0">
+                  <SelectTrigger id={`field-type-${index}`} className="w-full mt-2 md:mt-0">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -186,7 +186,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
                     handleFieldChange(index, 'description', e.target.value)
                   }
                   placeholder="Optional"
-                  className="w-full mt-1 md:mt-0"
+                  className="w-full mt-2 md:mt-0"
                 />
               </div>
 
@@ -198,7 +198,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
                   aria-label={`Remove ${field.name || 'field ' + (index + 1)}`}
                   className="w-full md:w-auto min-h-[44px] md:min-h-0 md:size-9"
                 >
-                  <TrashIcon className="h-4 w-4 md:mr-0 mr-2" />
+                  <Trash2 className="h-4 w-4 md:mr-0 mr-2" />
                   <span className="md:hidden">Remove Field</span>
                 </Button>
               </div>
@@ -209,7 +209,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
 
       <div className="flex justify-center pt-2">
         <Button type="button" size="sm" onClick={handleAddField} className="min-h-[44px]">
-          <PlusIcon className="h-4 w-4 mr-1" />
+          <Plus className="h-4 w-4 mr-2" />
           Add Field
         </Button>
       </div>

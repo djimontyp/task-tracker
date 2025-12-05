@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ClipboardDocumentIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { Clipboard, ChevronDown, ChevronRight } from 'lucide-react'
 import { Progress } from '@/shared/ui/progress'
 import { Badge } from '@/shared/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
@@ -26,22 +26,22 @@ interface ConfidenceLevelConfig {
 const CONFIDENCE_LEVELS: Record<ConfidenceLevel, ConfidenceLevelConfig> = {
   high: {
     label: 'High Confidence',
-    color: 'bg-green-500',
-    bgColor: 'bg-green-500',
+    color: 'bg-semantic-success',
+    bgColor: 'bg-semantic-success',
     badgeVariant: 'success',
     description: '71-100% - Classification is reliable',
   },
   medium: {
     label: 'Medium Confidence',
-    color: 'bg-yellow-500',
-    bgColor: 'bg-yellow-500',
+    color: 'bg-semantic-warning',
+    bgColor: 'bg-semantic-warning',
     badgeVariant: 'default',
     description: '41-70% - Manual review recommended',
   },
   low: {
     label: 'Low Confidence',
-    color: 'bg-red-500',
-    bgColor: 'bg-red-500',
+    color: 'bg-semantic-error',
+    bgColor: 'bg-semantic-error',
     badgeVariant: 'destructive',
     description: '0-40% - Likely misclassified',
   },
@@ -150,11 +150,11 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
   return (
     <div className="space-y-6 p-4">
       {/* Overall Confidence Section */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Overall Confidence</h3>
+          <h3 className="text-lg font-semibold text-foreground">Overall Confidence</h3>
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-gray-900">{data.confidence}%</span>
+            <span className="text-2xl font-bold text-foreground">{data.confidence}%</span>
             <Badge variant={overallConfig.badgeVariant}>{overallConfig.label}</Badge>
           </div>
         </div>
@@ -174,12 +174,12 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
                 />
 
                 {/* Threshold markers */}
-                <div className="absolute inset-0 flex justify-between px-1 pointer-events-none">
+                <div className="absolute inset-0 flex justify-between px-2 pointer-events-none">
                   <div className="relative" style={{ left: '40%' }}>
-                    <div className="absolute h-4 w-px bg-white/50" />
+                    <div className="absolute h-4 w-px bg-card/50" />
                   </div>
                   <div className="relative" style={{ left: '70%' }}>
-                    <div className="absolute h-4 w-px bg-white/50" />
+                    <div className="absolute h-4 w-px bg-card/50" />
                   </div>
                 </div>
               </div>
@@ -191,7 +191,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
           </Tooltip>
         </TooltipProvider>
 
-        <div className="flex justify-between text-xs text-gray-500">
+        <div className="flex justify-between text-xs text-muted-foreground">
           <span>Low (0-40)</span>
           <span>Medium (41-70)</span>
           <span>High (71-100)</span>
@@ -200,7 +200,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
 
       {/* Dimension Breakdown */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">Dimension Breakdown</h3>
+        <h3 className="text-lg font-semibold text-foreground">Dimension Breakdown</h3>
 
         {dimensions.map((dimension) => {
           const displayValue = dimension.inverted ? 100 - dimension.value : dimension.value
@@ -209,8 +209,8 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
           return (
             <div key={dimension.label} className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">{dimension.label}</span>
-                <span className="text-sm font-semibold text-gray-900">{dimension.value}%</span>
+                <span className="text-sm font-medium text-foreground">{dimension.label}</span>
+                <span className="text-sm font-semibold text-foreground">{dimension.value}%</span>
               </div>
 
               <TooltipProvider>
@@ -226,7 +226,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-xs">{dimension.description}</p>
-                    {dimension.inverted && <p className="text-xs mt-1">Lower scores are better</p>}
+                    {dimension.inverted && <p className="text-xs mt-2">Lower scores are better</p>}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -238,30 +238,30 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
       {/* Decision Rationale */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Decision Rationale</h3>
+          <h3 className="text-lg font-semibold text-foreground">Decision Rationale</h3>
           <Button variant="ghost" size="sm" onClick={handleCopyReasoning}>
-            <ClipboardDocumentIcon className="size-4 mr-1" />
+            <Clipboard className="size-4 mr-2" />
             Copy Reasoning
           </Button>
         </div>
 
         {/* Why this topic? */}
         <Collapsible open={whyTopicOpen} onOpenChange={setWhyTopicOpen}>
-          <div className="rounded-lg border border-gray-200 bg-white">
+          <div className="rounded-lg border border-border bg-card">
             <CollapsibleTrigger asChild>
-              <button className="flex w-full items-center justify-between p-4 hover:bg-gray-50 transition-colors">
-                <span className="text-sm font-semibold text-gray-900">Why this topic?</span>
+              <button className="flex w-full items-center justify-between p-4 hover:bg-muted transition-colors">
+                <span className="text-sm font-semibold text-foreground">Why this topic?</span>
                 {whyTopicOpen ? (
-                  <ChevronDownIcon className="size-5 text-gray-500" />
+                  <ChevronDown className="size-5 text-muted-foreground" />
                 ) : (
-                  <ChevronRightIcon className="size-5 text-gray-500" />
+                  <ChevronRight className="size-5 text-muted-foreground" />
                 )}
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent>
               <div className="px-4 pb-4">
-                <div className="rounded-md bg-blue-50 p-3">
-                  <p className="text-sm text-gray-700 leading-relaxed">
+                <div className="rounded-md bg-semantic-info/10 p-4">
+                  <p className="text-sm text-foreground leading-relaxed">
                     {reasoning.whyTopic || `This message was classified to "${data.topic_title}" based on content analysis and semantic similarity.`}
                   </p>
                 </div>
@@ -272,21 +272,21 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
 
         {/* Why not noise? */}
         <Collapsible open={whyNotNoiseOpen} onOpenChange={setWhyNotNoiseOpen}>
-          <div className="rounded-lg border border-gray-200 bg-white">
+          <div className="rounded-lg border border-border bg-card">
             <CollapsibleTrigger asChild>
-              <button className="flex w-full items-center justify-between p-4 hover:bg-gray-50 transition-colors">
-                <span className="text-sm font-semibold text-gray-900">Why not noise?</span>
+              <button className="flex w-full items-center justify-between p-4 hover:bg-muted transition-colors">
+                <span className="text-sm font-semibold text-foreground">Why not noise?</span>
                 {whyNotNoiseOpen ? (
-                  <ChevronDownIcon className="size-5 text-gray-500" />
+                  <ChevronDown className="size-5 text-muted-foreground" />
                 ) : (
-                  <ChevronRightIcon className="size-5 text-gray-500" />
+                  <ChevronRight className="size-5 text-muted-foreground" />
                 )}
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent>
               <div className="px-4 pb-4">
-                <div className="rounded-md bg-green-50 p-3">
-                  <p className="text-sm text-gray-700 leading-relaxed">
+                <div className="rounded-md bg-semantic-success/10 p-4">
+                  <p className="text-sm text-foreground leading-relaxed">
                     {reasoning.whyNotNoise || 'Message contains actionable content with clear signals, not casual conversation or spam.'}
                   </p>
                 </div>
@@ -297,14 +297,14 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
 
         {/* Key Indicators */}
         <Collapsible open={keyIndicatorsOpen} onOpenChange={setKeyIndicatorsOpen}>
-          <div className="rounded-lg border border-gray-200 bg-white">
+          <div className="rounded-lg border border-border bg-card">
             <CollapsibleTrigger asChild>
-              <button className="flex w-full items-center justify-between p-4 hover:bg-gray-50 transition-colors">
-                <span className="text-sm font-semibold text-gray-900">Key Indicators</span>
+              <button className="flex w-full items-center justify-between p-4 hover:bg-muted transition-colors">
+                <span className="text-sm font-semibold text-foreground">Key Indicators</span>
                 {keyIndicatorsOpen ? (
-                  <ChevronDownIcon className="size-5 text-gray-500" />
+                  <ChevronDown className="size-5 text-muted-foreground" />
                 ) : (
-                  <ChevronRightIcon className="size-5 text-gray-500" />
+                  <ChevronRight className="size-5 text-muted-foreground" />
                 )}
               </button>
             </CollapsibleTrigger>
@@ -313,24 +313,24 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
                 {reasoning.keyIndicators.length > 0 ? (
                   <ul className="space-y-2">
                     {reasoning.keyIndicators.map((indicator, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm text-gray-700">
-                        <span className="text-green-600 mt-0.5">✓</span>
+                      <li key={index} className="flex items-start gap-2 text-sm text-foreground">
+                        <span className="text-semantic-success mt-0.5">✓</span>
                         <span>{indicator}</span>
                       </li>
                     ))}
                   </ul>
                 ) : (
                   <ul className="space-y-2">
-                    <li className="flex items-start gap-2 text-sm text-gray-700">
-                      <span className="text-green-600 mt-0.5">✓</span>
+                    <li className="flex items-start gap-2 text-sm text-foreground">
+                      <span className="text-semantic-success mt-0.5">✓</span>
                       <span>Content matched topic criteria</span>
                     </li>
-                    <li className="flex items-start gap-2 text-sm text-gray-700">
-                      <span className="text-green-600 mt-0.5">✓</span>
+                    <li className="flex items-start gap-2 text-sm text-foreground">
+                      <span className="text-semantic-success mt-0.5">✓</span>
                       <span>Signal-to-noise ratio above threshold</span>
                     </li>
-                    <li className="flex items-start gap-2 text-sm text-gray-700">
-                      <span className="text-green-600 mt-0.5">✓</span>
+                    <li className="flex items-start gap-2 text-sm text-foreground">
+                      <span className="text-semantic-success mt-0.5">✓</span>
                       <span>Semantic similarity score acceptable</span>
                     </li>
                   </ul>
@@ -342,10 +342,10 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
       </div>
 
       {/* Topic Assignment */}
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <div className="rounded-lg border border-border bg-muted p-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Assigned Topic</span>
-          <span className="text-sm font-semibold text-gray-900">{data.topic_title}</span>
+          <span className="text-sm font-medium text-foreground">Assigned Topic</span>
+          <span className="text-sm font-semibold text-foreground">{data.topic_title}</span>
         </div>
       </div>
     </div>
