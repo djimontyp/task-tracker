@@ -1,0 +1,15 @@
+Agent ID: 5b0c5f6c
+Marker: 5b0c5f6c
+Session: 7fc33e42-e1bd-4381-a30b-ccaf729505a7
+Timestamp: 2025-11-30T15:55:32Z
+Working Directory: /Users/maks/PycharmProjects/task-tracker
+
+Blocker Signal:
+Перевірю наявність API endpoint та реалізую віджет.
+Бачу, що endpoint `GET /api/v1/topics/trending` не існує — отримую 422 помилку про UUID parsing, що означає роутинг намагається інтерпретувати "trending" як topic_id. 
+
+**Status:** Blocked  
+**Problem:** GET /api/v1/topics/trending returns 422 (endpoint не існує)  
+**Need:** Backend endpoint для отримання топ-5 topics з найбільшою кількістю atoms
+
+Зупиняюсь до реалізації backend endpoint.

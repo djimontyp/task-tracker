@@ -76,7 +76,7 @@ src/
 | **@tanstack/react-table** | 8.21.3 | Table utilities |
 
 ### Other UI
-- **@heroicons/react** 2.2.0 - Icon library
+- **lucide-react** - Icon library (SVG icons)
 - **react-colorful** 5.6.1 - Color picker
 - **react-hot-toast** 2.6.0 / **sonner** 2.0.7 - Toast notifications
 - **next-themes** 0.4.6 - Theme switching

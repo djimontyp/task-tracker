@@ -1,0 +1,91 @@
+# Buttons & Actions Audit - Quick Summary
+
+## Statistics
+- Button variants: 6 types (all used except 'link' - 1 file only)
+- Button sizes: 4 types (all actively used)
+- Badge variants: 6 types (success/warning underused - 3-4 files)
+- DropdownMenu: 13 components (all used, no issues)
+
+## Button Usage
+- outline: 72 files 🔥 (most popular)
+- ghost: 33 files (icon buttons, subtle actions)
+- destructive: 17 files (delete operations)
+- secondary: 15 files
+- default: ~50 files
+- link: 1 file ❌ (candidate for deprecation)
+
+## Badge Usage
+- outline: ~50 files 🔥 (status badges, tags)
+- secondary: 15 files
+- destructive: 4 files
+- success: 4 files ⚠️ (underused)
+- warning: 3 files ⚠️ (underused)
+
+## Key Issues
+
+### 1. Badge API Inconsistency (HIGH PRIORITY)
+Two competing patterns for status badges:
+
+Pattern A (CVA variants):
+  <Badge variant="success">Connected</Badge>
+  ❌ No icons (WCAG violation)
+  ❌ Rarely used (3-4 files)
+
+Pattern B (outline + className):
+  <Badge variant="outline" className="border-status-connected text-status-connected">
+    <CheckCircle className="h-3.5 w-3.5" />
+    Connected
+  </Badge>
+  ✅ WCAG compliant
+  ✅ Widely used (~50 files)
+  ❌ Boilerplate heavy
+
+Solution: Standardize on Pattern B via tokens (badges.status.*)
+
+### 2. Badge Missing Gap (MEDIUM PRIORITY)
+Base styles don't have gap-1.5 for icons
+→ Every file manually adds "flex items-center gap-1.5"
+→ Fix: Add gap-1.5 to badgeVariants cva
+
+### 3. Link Variant Unused (LOW PRIORITY)
+Button variant="link" only in stories
+→ Consider deprecation (asChild pattern preferred)
+
+## Recommendations
+
+High Priority:
+1. Add gap-1.5 to Badge base styles
+2. Migrate status badges to tokens (badges.status.*)
+3. Remove manual className overrides
+
+Medium Priority:
+4. Deprecate success/warning Badge variants (if Pattern B wins)
+5. Document Button loading prop usage
+
+Low Priority:
+6. Consider deprecating link variant
+7. Create StatusBadge composition helper
+
+## WCAG Compliance
+
+Button: ✅ Pass
+- Touch target (44x44px icon buttons)
+- Focus visible (ring-1)
+- Aria-label for icon buttons
+
+Badge: ⚠️ Partial
+- Pattern B (icon + text): ✅ Pass
+- Pattern A (CVA variants): ❌ Fail (color only)
+
+DropdownMenu: ✅ Pass
+- Keyboard navigation
+- Hover/focus states
+
+## Migration Effort
+Phase 1 (Gap fix): 2 hours
+Phase 2 (Token migration): 4 hours (50 files)
+Phase 3 (Variant cleanup): 1 hour
+Total: ~7 hours
+
+## Files
+Full report: .artifacts/design-system-audit/04-buttons-actions.md
