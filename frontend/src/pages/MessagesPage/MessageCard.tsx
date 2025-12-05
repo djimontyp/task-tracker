@@ -3,7 +3,7 @@ import { Badge, Checkbox } from '@/shared/ui'
 import { Message } from '@/shared/types'
 import { getMessageAnalysisBadge, getImportanceBadge, getNoiseClassificationBadge } from '@/shared/utils/statusBadges'
 import { formatFullDate } from '@/shared/utils/date'
-import { UserIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
+import { User, Mail } from 'lucide-react'
 
 interface MessageCardProps {
   message: Message
@@ -29,11 +29,15 @@ export const MessageCard: React.FC<MessageCardProps> = ({
   const content = message.content || ''
   const isEmpty = !content || content.trim() === ''
 
+  const isHighImportance = message.importance_score !== null && message.importance_score !== undefined && message.importance_score > 0.7
+  const glowClass = isHighImportance ? 'shadow-glow-sm' : ''
+
   return (
     <div
       className={`
-        border rounded-lg p-3 sm:p-4 space-y-3 cursor-pointer transition-colors w-full min-w-0
+        border rounded-lg p-4 sm:p-4 space-y-4 cursor-pointer transition-all duration-300 w-full min-w-0
         ${isSelected ? 'border-primary bg-accent/5' : 'hover:bg-accent/10'}
+        ${glowClass}
       `}
       onClick={onClick}
     >
@@ -54,7 +58,7 @@ export const MessageCard: React.FC<MessageCardProps> = ({
               />
             ) : (
               <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                <UserIcon className="h-5 w-5 text-muted-foreground" />
+                <User className="h-5 w-5 text-muted-foreground" />
               </div>
             )}
             <span className="font-medium truncate">
@@ -70,7 +74,7 @@ export const MessageCard: React.FC<MessageCardProps> = ({
       <div className="w-full min-w-0">
         {isEmpty ? (
           <div className="flex items-center gap-2 text-muted-foreground/50 italic text-sm">
-            <EnvelopeIcon className="h-4 w-4 flex-shrink-0" />
+            <Mail className="h-4 w-4 flex-shrink-0" />
             <span className="truncate">(Empty message)</span>
           </div>
         ) : (

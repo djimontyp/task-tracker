@@ -11,6 +11,7 @@ import {
   Label,
   Input,
 } from '@/shared/ui'
+import { FormField } from '@/shared/patterns'
 import { apiClient } from '@/shared/lib/api/client'
 import { toast } from 'sonner'
 import { logger } from '@/shared/utils/logger'
@@ -171,8 +172,10 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="limit">Messages limit per group</Label>
+              <FormField
+                label="Messages limit per group"
+                description="Maximum number of messages to fetch from each group (1-10000)"
+              >
                 <Input
                   id="limit"
                   type="number"
@@ -181,10 +184,7 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
                   min={1}
                   max={10000}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Maximum number of messages to fetch from each group (1-10000)
-                </p>
-              </div>
+              </FormField>
             </>
           )}
         </div>

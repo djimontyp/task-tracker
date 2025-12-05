@@ -10,7 +10,7 @@ import {
 import { taskService } from '@/features/agents/api'
 import { TaskConfig, TaskConfigCreate, TaskConfigUpdate } from '@/features/agents/types'
 import { toast } from 'sonner'
-import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { Pencil, Trash2, Plus } from 'lucide-react'
 import { TaskForm } from '@/features/agents/components'
 import { PageHeader } from '@/shared/components'
 
@@ -94,13 +94,13 @@ const AgentTasksPage = () => {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-5 md:space-y-6">
+    <div className="space-y-4 sm:space-y-6 md:space-y-6">
       <PageHeader
         title="Task Templates"
         description="Manage reusable task templates for agent automation workflows"
         actions={
           <Button onClick={handleCreate} size="sm">
-            <PlusIcon className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4" />
             Add Task
           </Button>
         }
@@ -119,12 +119,12 @@ const AgentTasksPage = () => {
           tasks?.map((task) => (
             <Card key={task.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="pt-6">
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg">{task.name}</h3>
                       {task.description && (
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-sm text-muted-foreground mt-2">
                           {task.description}
                         </p>
                       )}
@@ -136,7 +136,7 @@ const AgentTasksPage = () => {
                         onClick={() => handleEdit(task)}
                         aria-label="Edit task"
                       >
-                        <PencilIcon className="h-4 w-4" />
+                        <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         size="icon"
@@ -145,7 +145,7 @@ const AgentTasksPage = () => {
                         aria-label="Delete task"
                         disabled={deleteMutation.isPending}
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -153,7 +153,7 @@ const AgentTasksPage = () => {
                   <div className="space-y-2 text-sm">
                     <div>
                       <span className="text-muted-foreground">Schema Fields:</span>
-                      <div className="mt-1 space-x-1">
+                      <div className="mt-2 space-x-2">
                         {task.response_schema?.properties ? (
                           Object.keys(task.response_schema.properties).map(
                             (field) => (

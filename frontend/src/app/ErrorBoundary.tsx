@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from 'react'
-import { ExclamationTriangleIcon, ArrowPathIcon, HomeIcon } from '@heroicons/react/24/outline'
+import { AlertTriangle, RotateCw, Home } from 'lucide-react'
 import { logger } from '@/shared/utils/logger'
 
 interface ErrorBoundaryProps {
@@ -61,7 +61,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
           <div className="max-w-md w-full space-y-6 text-center">
             <div className="flex justify-center">
               <div className="rounded-full bg-destructive/10 p-4">
-                <ExclamationTriangleIcon className="h-12 w-12 text-destructive" aria-hidden="true" />
+                <AlertTriangle className="h-12 w-12 text-destructive" aria-hidden="true" />
               </div>
             </div>
 
@@ -70,7 +70,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                 Oops! Something went wrong
               </h1>
               <p className="text-muted-foreground">
-                We encountered an unexpected error. Don't worry, we've logged it and will look into it.
+                We encountered an unexpected error. Don&apos;t worry, we&apos;ve logged it and will look into it.
               </p>
             </div>
 
@@ -79,17 +79,17 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                 <summary className="cursor-pointer font-semibold text-sm text-foreground hover:text-primary transition-colors">
                   Error Details (Development Only)
                 </summary>
-                <div className="mt-3 space-y-2 text-xs font-mono">
+                <div className="mt-4 space-y-2 text-xs font-mono">
                   <div>
                     <strong className="text-destructive">Error:</strong>
-                    <pre className="mt-1 overflow-auto bg-background p-2 rounded border border-border text-muted-foreground">
+                    <pre className="mt-2 overflow-auto bg-background p-2 rounded border border-border text-muted-foreground">
                       {this.state.error.toString()}
                     </pre>
                   </div>
                   {this.state.errorInfo && (
                     <div>
                       <strong className="text-destructive">Component Stack:</strong>
-                      <pre className="mt-1 overflow-auto bg-background p-2 rounded border border-border text-muted-foreground max-h-48">
+                      <pre className="mt-2 overflow-auto bg-background p-2 rounded border border-border text-muted-foreground max-h-48">
                         {this.state.errorInfo.componentStack}
                       </pre>
                     </div>
@@ -98,13 +98,13 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               </details>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <button
                 onClick={this.handleRetry}
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 aria-label="Retry the previous action"
               >
-                <ArrowPathIcon className="h-4 w-4" aria-hidden="true" />
+                <RotateCw className="h-4 w-4" aria-hidden="true" />
                 Try Again
               </button>
               <button
@@ -112,7 +112,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-secondary text-secondary-foreground rounded-md font-medium hover:bg-secondary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 aria-label="Go back to home page"
               >
-                <HomeIcon className="h-4 w-4" aria-hidden="true" />
+                <Home className="h-4 w-4" aria-hidden="true" />
                 Go Home
               </button>
             </div>

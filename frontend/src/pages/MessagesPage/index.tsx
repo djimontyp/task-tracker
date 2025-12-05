@@ -6,6 +6,7 @@ import {
   Skeleton,
 } from '@/shared/ui'
 import { PageHeader } from '@/shared/components/PageHeader'
+import { EmptyState } from '@/shared/patterns'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS, API_BASE_PATH } from '@/shared/config/api'
 import { toast } from 'sonner'
@@ -14,6 +15,7 @@ import {
   SortingState,
   VisibilityState,
   ColumnFiltersState,
+  ColumnSizingState,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -28,13 +30,13 @@ import { Message, NoiseClassification } from '@/shared/types'
 import { DataTable } from '@/shared/components/DataTable'
 import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
 import { DataTablePagination } from '@/shared/components/DataTablePagination'
-import { DataTableFacetedFilter } from './faceted-filter'
+import { DataTableFacetedFilter } from '@/shared/components/DataTableFacetedFilter'
 import { ImportanceScoreFilter } from './importance-score-filter'
 import { BulkActionsToolbar } from '@/shared/components/AdminPanel/BulkActionsToolbar'
 import { useMultiSelect } from '@/shared/hooks'
 import { useAdminMode } from '@/shared/hooks/useAdminMode'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
-import { ArrowDownTrayIcon, ArrowPathIcon, UserIcon } from '@heroicons/react/24/outline'
+import { Download, RotateCw, User, Mail } from 'lucide-react'
 import { IngestionModal } from './IngestionModal'
 import { MessageInspectModal } from '@/features/messages/components/MessageInspectModal'
 import { ConsumerMessageModal } from '@/features/messages/components/ConsumerMessageModal'
@@ -74,6 +76,7 @@ const MessagesPage = () => {
     id: false,
     sent_at: false,
   })
+  const [columnSizing, setColumnSizing] = React.useState<ColumnSizingState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [globalFilter, setGlobalFilter] = React.useState('')
 
@@ -94,7 +97,7 @@ const MessagesPage = () => {
 
         const response = await apiClient.get(API_ENDPOINTS.messages, { params })
         return response.data
-      } catch (error) {
+      } catch {
         logger.warn('Messages endpoint not available yet, returning empty response')
         return { items: [], total: 0, page: 1, page_size: pageSize, total_pages: 1 }
       }
@@ -123,8 +126,8 @@ const MessagesPage = () => {
             queryClient.invalidateQueries({ queryKey: ['messages'] })
           }
         }
-      } catch (error) {
-        console.error('[MessagesPage] Error parsing WebSocket message:', error)
+      } catch (parseError) {
+        console.error('[MessagesPage] Error parsing WebSocket message:', parseError)
       }
     }
 
@@ -188,9 +191,13 @@ const MessagesPage = () => {
     manualPagination: true, // Server-side pagination
     manualSorting: true, // Server-side sorting
     pageCount: paginatedData?.total_pages || 1,
+    // Column resizing
+    enableColumnResizing: true,
+    columnResizeMode: 'onEnd', // More performant - updates on mouse release
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnSizingChange: setColumnSizing,
     onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: (updater) => {
@@ -210,6 +217,7 @@ const MessagesPage = () => {
       sorting,
       columnFilters,
       columnVisibility,
+      columnSizing,
       rowSelection,
       globalFilter,
       pagination: {
@@ -251,7 +259,7 @@ const MessagesPage = () => {
     try {
       await refetch()
       toast.success('Messages refreshed')
-    } catch (error) {
+    } catch {
       toast.error('Failed to refresh messages')
     }
   }
@@ -274,8 +282,8 @@ const MessagesPage = () => {
       } else {
         toast.error(response.data.message || 'Failed to update authors', { id: 'update-authors' })
       }
-    } catch (error) {
-      logger.error('Update authors error:', error)
+    } catch (updateError) {
+      logger.error('Update authors error:', updateError)
       toast.error('Failed to update message authors', { id: 'update-authors' })
     }
   }
@@ -317,8 +325,8 @@ const MessagesPage = () => {
 
       multiSelect.handleClearSelection()
       await refetch()
-    } catch (error) {
-      logger.error('Bulk approve error:', error)
+    } catch (approveError) {
+      logger.error('Bulk approve error:', approveError)
       toast.error('Failed to approve messages', { id: toastId })
     }
   }, [table, multiSelect, refetch])
@@ -358,8 +366,8 @@ const MessagesPage = () => {
 
       multiSelect.handleClearSelection()
       await refetch()
-    } catch (error) {
-      logger.error('Bulk archive error:', error)
+    } catch (archiveError) {
+      logger.error('Bulk archive error:', archiveError)
       toast.error('Failed to archive messages', { id: toastId })
     }
   }, [table, multiSelect, refetch])
@@ -402,8 +410,8 @@ const MessagesPage = () => {
 
       multiSelect.handleClearSelection()
       await refetch()
-    } catch (error) {
-      logger.error('Bulk delete error:', error)
+    } catch (deleteError) {
+      logger.error('Bulk delete error:', deleteError)
       toast.error('Failed to delete messages', { id: toastId })
     }
   }, [table, multiSelect, refetch])
@@ -460,16 +468,16 @@ const MessagesPage = () => {
           actions={
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto min-w-0">
               <Button onClick={handleRefreshMessages} size="sm" variant="outline" className="w-full sm:w-auto justify-center">
-                <ArrowPathIcon className="mr-2 h-4 w-4" />
+                <RotateCw className="mr-2 h-4 w-4" />
                 Refresh
               </Button>
               <Button onClick={handleUpdateAuthors} size="sm" variant="outline" className="w-full sm:w-auto justify-center">
-                <UserIcon className="mr-2 h-4 w-4" />
+                <User className="mr-2 h-4 w-4" />
                 <span className="hidden sm:inline">Update Authors</span>
                 <span className="sm:hidden">Authors</span>
               </Button>
               <Button onClick={handleIngestMessages} size="sm" className="w-full sm:w-auto justify-center">
-                <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-4 w-4" />
                 <span className="hidden sm:inline">Ingest Messages</span>
                 <span className="sm:hidden">Ingest</span>
               </Button>
@@ -500,8 +508,7 @@ const MessagesPage = () => {
           searchPlaceholder="Search messages..."
         >
         <DataTableFacetedFilter
-          columnKey="source_name"
-          table={table}
+          column={table.getColumn('source_name')}
           title="Source"
           options={Object.entries(sourceLabels).map(([value, meta]) => ({
             value,
@@ -510,8 +517,7 @@ const MessagesPage = () => {
           }))}
         />
         <DataTableFacetedFilter
-          columnKey="analyzed"
-          table={table}
+          column={table.getColumn('analyzed')}
           title="Status"
           options={[
             { value: 'analyzed', label: getMessageAnalysisBadge(true).label || 'Analyzed' },
@@ -519,8 +525,7 @@ const MessagesPage = () => {
           ]}
         />
         <DataTableFacetedFilter
-          columnKey="noise_classification"
-          table={table}
+          column={table.getColumn('noise_classification')}
           title="Classification"
           options={(['signal', 'weak_signal', 'noise'] as NoiseClassification[]).map((value) => {
             const config = getNoiseClassificationBadge(value)
@@ -539,24 +544,46 @@ const MessagesPage = () => {
 
       <div className="w-full min-w-0">
         {isDesktop ? (
-          <DataTable
-            table={table}
-            columns={columns}
-            emptyMessage="No messages found."
-            onRowClick={(message: Message) => {
-              if (isAdminMode) {
-                setInspectingMessageId(String(message.id))
-              } else {
-                setViewingMessageId(String(message.id))
+          (paginatedData?.items ?? []).length === 0 ? (
+            <EmptyState
+              icon={Mail}
+              title="No messages yet"
+              description="Messages will appear here once you ingest them from your sources."
+              action={
+                <Button onClick={handleIngestMessages} className="mt-4">
+                  <Download className="mr-2 h-4 w-4" />
+                  Ingest Messages
+                </Button>
               }
-            }}
-          />
+            />
+          ) : (
+            <DataTable
+              table={table}
+              columns={columns}
+              onRowClick={(message: Message) => {
+                if (isAdminMode) {
+                  setInspectingMessageId(String(message.id))
+                } else {
+                  setViewingMessageId(String(message.id))
+                }
+              }}
+            />
+          )
         ) : (
-          <div className="space-y-3 w-full min-w-0">
+          <div className="space-y-4 w-full min-w-0">
             {(paginatedData?.items ?? []).length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No messages found.
-              </div>
+              <EmptyState
+                variant="compact"
+                icon={Mail}
+                title="No messages yet"
+                description="Ingest messages to get started"
+                action={
+                  <Button onClick={handleIngestMessages} size="sm">
+                    <Download className="mr-2 h-4 w-4" />
+                    Ingest
+                  </Button>
+                }
+              />
             ) : (
               (paginatedData?.items ?? []).map((message: Message) => {
                 const isSelected = (rowSelection as Record<string, boolean>)[String(message.id)] || false

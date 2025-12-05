@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { EllipsisHorizontalIcon, EnvelopeIcon, UserIcon, XMarkIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
+import { MoreHorizontal, Mail, User, X, Info } from 'lucide-react'
 
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui'
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
@@ -18,16 +18,26 @@ export interface ColumnsCallbacks {
   onCheckboxClick?: (rowId: string, event: React.MouseEvent) => void
 }
 
+// Type for importance score filter with separate unscored toggle
+export interface ImportanceFilterValue {
+  range: [number, number] | null  // null = no range filter applied
+  showUnscored: boolean           // true = include messages without score
+}
+
 export const sourceLabels: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
-  telegram: { label: 'Telegram', icon: EnvelopeIcon },
-  api: { label: 'API', icon: EnvelopeIcon },
-  slack: { label: 'Slack', icon: EnvelopeIcon },
+  telegram: { label: 'Telegram', icon: Mail },
+  api: { label: 'API', icon: Mail },
+  slack: { label: 'Slack', icon: Mail },
 }
 
 
 export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[] => [
   {
     id: 'select',
+    size: 40,
+    minSize: 40,
+    maxSize: 40,
+    enableResizing: false,
     header: ({ table }) => (
       <Checkbox
         checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
@@ -52,16 +62,20 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
   },
   {
     accessorKey: 'id',
+    size: 70,
+    minSize: 50,
     header: 'ID',
     cell: ({ row }) => {
       const id = row.getValue<number | string>('id')
-      return <div className="w-[50px] text-xs font-mono text-muted-foreground hidden md:block">{String(id).padStart(4, '0')}</div>
+      return <div className="text-xs font-mono text-muted-foreground">{String(id).padStart(4, '0')}</div>
     },
     enableSorting: false,
     enableHiding: true,
   },
   {
     accessorKey: 'author_name',
+    size: 150,
+    minSize: 100,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Author" />
     ),
@@ -74,16 +88,18 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
             <img src={avatarUrl} alt={authorName} className="h-6 w-6 rounded-full" />
           ) : (
             <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
-              <UserIcon className="h-4 w-4 text-muted-foreground" />
+              <User className="h-4 w-4 text-muted-foreground" />
             </div>
           )}
-          <span className="font-medium">{authorName}</span>
+          <span className="font-medium truncate">{authorName}</span>
         </div>
       )
     },
   },
   {
     accessorKey: 'content',
+    size: 400,
+    minSize: 200,
     header: 'Content',
     cell: ({ row }) => {
       const content = row.getValue<string>('content')
@@ -93,7 +109,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       if (isEmpty) {
         return (
           <div className="flex items-center gap-2 text-muted-foreground/50 italic text-sm">
-            <EnvelopeIcon className="h-4 w-4" />
+            <Mail className="h-4 w-4" />
             <span>(Empty message)</span>
           </div>
         )
@@ -103,7 +119,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="max-w-xs lg:max-w-md xl:max-w-lg truncate" aria-label={isLong ? `Message content: ${content}` : undefined}>
+              <div className="truncate" aria-label={isLong ? `Message content: ${content}` : undefined}>
                 {content}
               </div>
             </TooltipTrigger>
@@ -119,15 +135,17 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
   },
   {
     accessorKey: 'source_name',
+    size: 120,
+    minSize: 80,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Source" />
     ),
     cell: ({ row }) => {
       const value = row.getValue<string>('source_name')
-      const meta = sourceLabels[value] ?? { label: value, icon: EnvelopeIcon }
+      const meta = sourceLabels[value] ?? { label: value, icon: Mail }
       const Icon = meta.icon
       return (
-        <div className="flex w-[100px] items-center">
+        <div className="flex items-center">
           {Icon && <Icon className="mr-2 h-4 w-4 text-muted-foreground" />}
           <span>{meta.label}</span>
         </div>
@@ -144,6 +162,8 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
   },
   {
     accessorKey: 'analyzed',
+    size: 100,
+    minSize: 80,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
@@ -169,6 +189,8 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
   },
   {
     accessorKey: 'importance_score',
+    size: 130,
+    minSize: 100,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Importance" />
     ),
@@ -183,15 +205,15 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <Badge
                   variant={config.variant}
-                  className={`inline-flex items-center gap-1 ${config.className}`}
+                  className={`inline-flex items-center gap-2 ${config.className}`}
                   aria-label={`Importance: ${config.label} (${percentage}%)`}
                 >
                   {config.label}
                   {row.original.noise_factors && (
-                    <InformationCircleIcon className="h-3 w-3" aria-hidden="true" />
+                    <Info className="h-3 w-3" aria-hidden="true" />
                   )}
                 </Badge>
                 <span className="text-xs text-muted-foreground">{percentage}%</span>
@@ -199,7 +221,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
             </TooltipTrigger>
             {row.original.noise_factors && (
               <TooltipContent>
-                <div className="space-y-1 text-xs">
+                <div className="space-y-2 text-xs">
                   <div><strong>Factors breakdown:</strong></div>
                   <div>Content: {Math.round(row.original.noise_factors.content * 100)}%</div>
                   <div>Author: {Math.round(row.original.noise_factors.author * 100)}%</div>
@@ -212,11 +234,21 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
         </TooltipProvider>
       )
     },
-    filterFn: (row, id, filterValue: [number, number]) => {
+    filterFn: (row, id, filterValue: ImportanceFilterValue | undefined) => {
+      // No filter = show all
       if (!filterValue) return true
-      const score = row.getValue<number>(id)
-      if (score === undefined || score === null) return false
-      return score >= filterValue[0] && score <= filterValue[1]
+
+      const score = row.getValue<number | null>(id)
+      const hasScore = score !== null && score !== undefined
+
+      // Handle unscored messages
+      if (!hasScore) {
+        return filterValue.showUnscored
+      }
+
+      // Handle scored messages - if no range filter, show all scored
+      if (!filterValue.range) return true
+      return score >= filterValue.range[0] && score <= filterValue.range[1]
     },
     meta: {
       className: 'hidden md:table-cell',
@@ -224,6 +256,8 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
   },
   {
     accessorKey: 'noise_classification',
+    size: 130,
+    minSize: 100,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Classification" />
     ),
@@ -257,13 +291,32 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
   },
   {
     accessorKey: 'topic_name',
+    size: 150,
+    minSize: 100,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Topic" />
     ),
     cell: ({ row }) => {
       const topicName = row.getValue<string | null>('topic_name')
       if (!topicName) return <div className="text-muted-foreground text-xs">-</div>
-      return <Badge variant="outline">{topicName}</Badge>
+
+      const isLong = topicName.length > 20
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="outline" className="truncate max-w-[150px] lg:max-w-[180px] 2xl:max-w-[250px]">
+                {topicName}
+              </Badge>
+            </TooltipTrigger>
+            {isLong && (
+              <TooltipContent>
+                <p>{topicName}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      )
     },
     meta: {
       className: 'hidden md:table-cell',
@@ -271,6 +324,8 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
   },
   {
     accessorKey: 'sent_at',
+    size: 140,
+    minSize: 100,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Sent At" />
     ),
@@ -285,6 +340,10 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
   },
   {
     id: 'actions',
+    size: 60,
+    minSize: 60,
+    maxSize: 60,
+    enableResizing: false,
     header: () => {
       if (callbacks?.hasActiveFilters) {
         return (
@@ -294,7 +353,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
             onClick={callbacks.onReset}
             className="h-8 w-8 p-0 hover:bg-destructive/10"
           >
-            <XMarkIcon className="h-4 w-4 text-destructive/70 hover:text-destructive" />
+            <X className="h-4 w-4 text-destructive/70 hover:text-destructive" />
             <span className="sr-only">Reset filters</span>
           </Button>
         )
@@ -307,9 +366,9 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0" aria-label={`Actions for message ${message.id}`}>
+            <Button variant="ghost" className="h-11 w-11 p-0" aria-label={`Actions for message ${message.id}`}>
               <span className="sr-only">Open menu</span>
-              <EllipsisHorizontalIcon className="h-4 w-4" aria-hidden="true" />
+              <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

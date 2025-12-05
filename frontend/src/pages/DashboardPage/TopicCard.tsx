@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
-import * as HeroIcons from '@heroicons/react/24/outline'
+import * as LucideIcons from 'lucide-react'
 import { formatMessageDate } from '@/shared/utils/date'
 import { Topic } from '@/shared/types'
 
@@ -26,12 +26,12 @@ export const TopicCard = ({ topic }: TopicCardProps) => {
   const topicColor = topic.color || 'hsl(var(--topic-default))'
 
   const IconComponent = topic.icon
-    ? (HeroIcons[topic.icon as keyof typeof HeroIcons] as React.ComponentType<{ className?: string }>) || HeroIcons.FolderIcon
-    : HeroIcons.FolderIcon
+    ? (LucideIcons[topic.icon as keyof typeof LucideIcons] as React.ComponentType<{ className?: string }>) || LucideIcons.Folder
+    : LucideIcons.Folder
 
   return (
     <Card
-      className="group cursor-pointer min-h-[96px] transition-all duration-300 ease-out hover:duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+      className="group cursor-pointer min-h-[96px] transition-all duration-300 ease-out hover:duration-200 shadow-glow-sm hover:shadow-glow-hover hover:-translate-y-0.5 hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
       style={{
         borderLeft: `4px solid ${topicColor}`,
         background: `linear-gradient(135deg, hsl(var(--card)) 0%, color-mix(in srgb, ${topicColor} 3%, hsl(var(--card))) 100%)`,
@@ -44,10 +44,10 @@ export const TopicCard = ({ topic }: TopicCardProps) => {
       onClick={handleClick}
       onKeyDown={handleKeyDown}
     >
-      <CardContent className="px-5 py-4">
-        <div className="flex items-start justify-between gap-3">
+      <CardContent className="px-6 py-4">
+        <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-4 mb-2">
               <span
                 className="w-5 h-5 flex items-center justify-center shrink-0 rounded-full transition-all duration-300"
                 style={{
@@ -67,11 +67,11 @@ export const TopicCard = ({ topic }: TopicCardProps) => {
               </h3>
             </div>
             {topic.description && (
-              <p className="text-sm leading-[1.5] text-muted-foreground opacity-70 line-clamp-2 mb-3">
+              <p className="text-sm leading-[1.5] text-muted-foreground opacity-70 line-clamp-2 mb-4">
                 {topic.description}
               </p>
             )}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <Badge
                 variant="secondary"
                 className="h-6 px-2 text-xs font-semibold uppercase tracking-wider bg-background/60 backdrop-blur-sm border shadow-sm"
@@ -80,14 +80,14 @@ export const TopicCard = ({ topic }: TopicCardProps) => {
                   color: `color-mix(in srgb, ${topicColor} 70%, hsl(var(--foreground)))`,
                 }}
               >
-                <HeroIcons.ChatBubbleLeftIcon className="w-3 h-3 mr-2 opacity-80" />
+                <LucideIcons.MessageSquare className="w-3 h-3 mr-2 opacity-80" />
                 {topic.message_count || 0}
               </Badge>
               <div
                 className="flex items-center gap-2 text-xs font-medium"
                 style={{ color: `color-mix(in srgb, ${topicColor} 60%, hsl(var(--muted-foreground)))` }}
               >
-                <HeroIcons.LightBulbIcon className="w-3.5 h-3.5 opacity-75" />
+                <LucideIcons.Lightbulb className="w-3.5 h-3.5 opacity-75" />
                 <span className="tabular-nums">{topic.atoms_count || 0}</span>
                 <span className="font-normal opacity-60">atoms</span>
               </div>

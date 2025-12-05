@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { FireIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
+import { Flame, TrendingUp } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { Button } from '@/shared/ui/button'
 import { apiClient } from '@/shared/lib/api/client'
 import type { RecentTopicsResponse } from '@/features/topics/types'
-import * as HeroIcons from '@heroicons/react/24/outline'
+import * as LucideIcons from 'lucide-react'
 
 export const TrendingTopics = () => {
   const navigate = useNavigate()
@@ -24,10 +24,10 @@ export const TrendingTopics = () => {
   const trendingTopics = data?.items || []
 
   const renderIcon = (iconName?: string) => {
-    if (!iconName) return <FireIcon className="h-4 w-4" aria-hidden="true" />
+    if (!iconName) return <Flame className="h-4 w-4" aria-hidden="true" />
 
-    const IconComponent = HeroIcons[iconName as keyof typeof HeroIcons]
-    if (!IconComponent) return <FireIcon className="h-4 w-4" aria-hidden="true" />
+    const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons] as React.ComponentType<{ className?: string }>
+    if (!IconComponent || typeof IconComponent !== 'function') return <Flame className="h-4 w-4" aria-hidden="true" />
 
     return <IconComponent className="h-4 w-4" aria-hidden="true" />
   }
@@ -37,12 +37,12 @@ export const TrendingTopics = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ArrowTrendingUpIcon className="h-5 w-5" aria-hidden="true" />
+            <TrendingUp className="h-5 w-5" aria-hidden="true" />
             Trending Topics
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 space-y-3">
+          <div className="text-center py-8 space-y-4">
             <div className="text-sm text-muted-foreground">
               Failed to load trending topics
             </div>
@@ -62,9 +62,9 @@ export const TrendingTopics = () => {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <ArrowTrendingUpIcon className="h-5 w-5" aria-hidden="true" />
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5" aria-hidden="true" />
           Trending Topics
         </CardTitle>
       </CardHeader>
@@ -73,7 +73,7 @@ export const TrendingTopics = () => {
           {isLoading ? (
             <>
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 border rounded-lg">
+                <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
                   <Skeleton className="h-9 w-9 rounded-full shrink-0" />
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-3.5 w-2/3" />
@@ -87,7 +87,7 @@ export const TrendingTopics = () => {
               <div
                 key={topic.id}
                 role="listitem"
-                className="group flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-accent/50 hover:shadow-sm hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="group flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:bg-accent/50 hover:shadow-sm hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 tabIndex={0}
                 onClick={() => navigate(`/topics/${topic.id}`)}
                 onKeyDown={(e) => {
@@ -109,7 +109,7 @@ export const TrendingTopics = () => {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-2">
                     <span className="text-xs font-bold text-muted-foreground/50 w-3.5 tabular-nums">
                       {index + 1}
                     </span>
@@ -124,13 +124,13 @@ export const TrendingTopics = () => {
               </div>
             ))
           ) : (
-            <div className="text-center py-8 space-y-3">
+            <div className="text-center py-8 space-y-4">
               <div className="flex justify-center">
                 <div className="rounded-full bg-muted p-4">
-                  <FireIcon className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+                  <Flame className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
                 </div>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <h3 className="font-medium text-sm text-foreground">No trending topics</h3>
                 <p className="text-muted-foreground text-xs max-w-xs mx-auto">
                   Topics will appear here once you have message activity

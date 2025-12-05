@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ChatBubbleLeftRightIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
+import { MessageSquare, ArrowRight } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs'
 import { Skeleton } from '@/shared/ui/skeleton'
@@ -58,12 +58,12 @@ export const RecentTopics = () => {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="today" value={timePeriod} onValueChange={(value) => setTimePeriod(value as TimePeriod)}>
-          <TabsList className="grid w-full grid-cols-5 mb-4" role="tablist" aria-label="Time period filter">
-            <TabsTrigger value="today" aria-label="Show topics from today">Today</TabsTrigger>
-            <TabsTrigger value="yesterday" aria-label="Show topics from yesterday">Yesterday</TabsTrigger>
-            <TabsTrigger value="week" aria-label="Show topics from this week">Week</TabsTrigger>
-            <TabsTrigger value="month" aria-label="Show topics from this month">Month</TabsTrigger>
-            <TabsTrigger value="custom" aria-label="Select custom date range">Custom</TabsTrigger>
+          <TabsList className="flex w-full mb-4 overflow-x-auto gap-2" role="tablist" aria-label="Time period filter">
+            <TabsTrigger value="today" className="flex-shrink-0 min-w-fit" aria-label="Show topics from today">Today</TabsTrigger>
+            <TabsTrigger value="yesterday" className="flex-shrink-0 min-w-fit" aria-label="Show topics from yesterday">Yesterday</TabsTrigger>
+            <TabsTrigger value="week" className="flex-shrink-0 min-w-fit" aria-label="Show topics from this week">Week</TabsTrigger>
+            <TabsTrigger value="month" className="flex-shrink-0 min-w-fit" aria-label="Show topics from this month">Month</TabsTrigger>
+            <TabsTrigger value="custom" className="flex-shrink-0 min-w-fit" aria-label="Select custom date range">Custom</TabsTrigger>
           </TabsList>
 
           {timePeriod === 'custom' && (
@@ -115,15 +115,15 @@ export const RecentTopics = () => {
           )}
 
           <TabsContent value={timePeriod} className="mt-0">
-            <div className="space-y-3 overflow-y-auto max-h-[600px] pr-2" role="feed" aria-label="Recent topics" aria-busy={isLoading}>
+            <div className="space-y-4 overflow-y-auto max-h-[400px] sm:max-h-[500px] md:max-h-[600px] pr-2 sm:pr-2" role="feed" aria-label="Recent topics" aria-busy={isLoading}>
               {isLoading ? (
                 <>
                   {[...Array(3)].map((_, i) => (
                     <Card key={i} className="min-h-[80px]">
                       <CardContent className="pt-4 pb-4">
                         <Skeleton className="h-4 w-3/4 mb-2" />
-                        <Skeleton className="h-3 w-full mb-3" />
-                        <div className="flex gap-3">
+                        <Skeleton className="h-3 w-full mb-4" />
+                        <div className="flex gap-4">
                           <Skeleton className="h-3 w-12" />
                           <Skeleton className="h-3 w-12" />
                           <Skeleton className="h-3 w-20 ml-auto" />
@@ -140,7 +140,7 @@ export const RecentTopics = () => {
                 <div className="text-center py-12 px-4 space-y-4">
                   <div className="flex justify-center">
                     <div className="rounded-full bg-muted p-6">
-                      <ChatBubbleLeftRightIcon className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
+                      <MessageSquare className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -156,7 +156,7 @@ export const RecentTopics = () => {
                     aria-label="Navigate to Messages page to import messages"
                   >
                     Import Messages
-                    <ArrowRightIcon className="ml-2 h-4 w-4" aria-hidden="true" />
+                    <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                   </Button>
                 </div>
               )}

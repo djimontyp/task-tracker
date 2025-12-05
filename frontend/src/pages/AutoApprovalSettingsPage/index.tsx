@@ -84,7 +84,7 @@ export default function AutoApprovalSettingsPage() {
     <div className="container mx-auto max-w-3xl space-y-6 p-4 md:p-8">
       <div className="space-y-2">
         <h1 className="text-2xl font-bold md:text-3xl">Автоматичне схвалення версій</h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-muted-foreground">
           Налаштуйте правила автоматичної обробки версій на основі метрик якості
         </p>
       </div>
@@ -92,11 +92,11 @@ export default function AutoApprovalSettingsPage() {
       <Card className="p-4 md:p-6">
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <div className="space-y-1">
+            <div className="space-y-2">
               <Label htmlFor="enable-toggle" className="text-base font-semibold">
                 Увімкнути автоматичне схвалення
               </Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Автоматично обробляти версії на основі порогових значень
               </p>
             </div>
@@ -107,13 +107,13 @@ export default function AutoApprovalSettingsPage() {
             />
           </div>
 
-          <div className="h-px bg-gray-200 dark:bg-gray-700" />
+          <div className="h-px bg-border" />
 
           <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: rule.enabled ? 1 : 0.5 }}>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium">Поріг впевненості ({rule.confidence_threshold}%)</Label>
-                <span className="text-xs text-gray-500">0% - 100%</span>
+                <span className="text-xs text-muted-foreground">0% - 100%</span>
               </div>
               <Slider
                 value={[rule.confidence_threshold]}
@@ -124,15 +124,15 @@ export default function AutoApprovalSettingsPage() {
                 disabled={!rule.enabled}
                 className="w-full"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Мінімальна впевненість моделі для автоматичної обробки
               </p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium">Поріг схожості ({rule.similarity_threshold}%)</Label>
-                <span className="text-xs text-gray-500">0% - 100%</span>
+                <span className="text-xs text-muted-foreground">0% - 100%</span>
               </div>
               <Slider
                 value={[rule.similarity_threshold]}
@@ -143,20 +143,20 @@ export default function AutoApprovalSettingsPage() {
                 disabled={!rule.enabled}
                 className="w-full"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Мінімальна векторна схожість для автоматичної обробки
               </p>
             </div>
 
             {rule.confidence_threshold < rule.similarity_threshold && (
-              <div className="rounded-md bg-yellow-50 p-3 dark:bg-yellow-900/20">
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <div className="rounded-md bg-semantic-warning/10 p-4 border border-semantic-warning/20">
+                <p className="text-sm text-semantic-warning">
                   ⚠️ Поріг впевненості має бути не менше порогу схожості
                 </p>
               </div>
             )}
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <Label className="text-sm font-medium">Дія для версій, що відповідають критеріям</Label>
               <Select
                 value={rule.action}
@@ -171,7 +171,7 @@ export default function AutoApprovalSettingsPage() {
                 <SelectContent>
                   <SelectItem value="approve">
                     <div className="flex items-center gap-2">
-                      <Badge variant="default" className="bg-green-500">Схвалити</Badge>
+                      <Badge variant="default" className="bg-semantic-success">Схвалити</Badge>
                       <span className="text-sm">Автоматично схвалювати версії</span>
                     </div>
                   </SelectItem>
@@ -192,10 +192,10 @@ export default function AutoApprovalSettingsPage() {
             </div>
           </div>
 
-          <div className="h-px bg-gray-200 dark:bg-gray-700" />
+          <div className="h-px bg-border" />
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
               <Button
                 variant="outline"
                 onClick={handlePreview}
@@ -220,9 +220,9 @@ export default function AutoApprovalSettingsPage() {
         </div>
       </Card>
 
-      <Card className="border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
-        <h3 className="mb-2 font-semibold text-blue-900 dark:text-blue-100">Як це працює</h3>
-        <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
+      <Card className="border-semantic-info/30 bg-semantic-info/10 p-4">
+        <h3 className="mb-2 font-semibold text-semantic-info">Як це працює</h3>
+        <ul className="space-y-2 text-sm text-semantic-info/90">
           <li>• Версії автоматично оцінюються на основі впевненості моделі та векторної схожості</li>
           <li>• Якщо обидва порогові значення перевищені, виконується обрана дія</li>
           <li>• Версії, які не відповідають критеріям, залишаються для ручного перегляду</li>

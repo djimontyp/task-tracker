@@ -7,7 +7,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -26,6 +25,7 @@ import {
   AlertDialogTitle,
 } from '@/shared/ui'
 import { AdminFeatureBadge } from '@/shared/components'
+import { FormField } from '@/shared/patterns'
 import { promptsService } from '@/features/prompts/api/promptsService'
 import {
   PromptType,
@@ -88,6 +88,7 @@ const PromptTuningTab = () => {
         prompt_type: selectedType,
       })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPrompt])
 
   useEffect(() => {
@@ -100,6 +101,7 @@ const PromptTuningTab = () => {
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPrompt, originalPrompt])
 
   const isDirty = currentPrompt !== originalPrompt
@@ -148,8 +150,7 @@ const PromptTuningTab = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="prompt-type">Prompt Type</Label>
+          <FormField label="Prompt Type" id="prompt-type">
             <Select value={selectedType} onValueChange={(value) => setSelectedType(value as PromptType)}>
               <SelectTrigger id="prompt-type">
                 <SelectValue />
@@ -165,23 +166,24 @@ const PromptTuningTab = () => {
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </FormField>
 
           {isLoading ? (
             <div className="text-center text-muted-foreground py-8">Loading prompt...</div>
           ) : (
             <>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="prompt-text">Prompt Text</Label>
-                  <span
-                    className={`text-sm ${
-                      isWithinLimits ? 'text-muted-foreground' : 'text-destructive font-medium'
-                    }`}
-                  >
-                    {charCount} / {CHARACTER_LIMITS.max} characters
-                  </span>
-                </div>
+              <FormField
+                label="Prompt Text"
+                id="prompt-text"
+                error={
+                  !isWithinLimits
+                    ? charCount < CHARACTER_LIMITS.min
+                      ? `Prompt must be at least ${CHARACTER_LIMITS.min} characters`
+                      : `Prompt must not exceed ${CHARACTER_LIMITS.max} characters`
+                    : undefined
+                }
+                description={`${charCount} / ${CHARACTER_LIMITS.max} characters`}
+              >
                 <Textarea
                   id="prompt-text"
                   value={currentPrompt}
@@ -190,19 +192,12 @@ const PromptTuningTab = () => {
                   className="font-mono text-sm"
                   placeholder="Enter prompt text..."
                 />
-                {!isWithinLimits && (
-                  <p className="text-sm text-destructive">
-                    {charCount < CHARACTER_LIMITS.min
-                      ? `Prompt must be at least ${CHARACTER_LIMITS.min} characters`
-                      : `Prompt must not exceed ${CHARACTER_LIMITS.max} characters`}
-                  </p>
-                )}
-              </div>
+              </FormField>
 
               {validationErrors.length > 0 && (
                 <div className="rounded-lg border border-destructive bg-destructive/10 p-4 space-y-2">
                   <p className="text-sm font-medium text-destructive">Validation Errors:</p>
-                  <ul className="list-disc list-inside space-y-1">
+                  <ul className="list-disc list-inside space-y-2">
                     {validationErrors.map((error, idx) => (
                       <li key={idx} className="text-sm text-destructive">
                         {error.message}
@@ -225,7 +220,7 @@ const PromptTuningTab = () => {
                 </div>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <Button onClick={handleSave} disabled={!isDirty || !isValid || !isWithinLimits}>
                   Save Changes
                 </Button>

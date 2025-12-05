@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ListBulletIcon, WifiIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
-import { SignalSlashIcon } from '@heroicons/react/24/outline'
+import { List, Wifi, Settings, WifiOff } from 'lucide-react'
 import { OnboardingWizard } from '@/features/onboarding'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Skeleton, Button } from '@/shared/ui'
@@ -41,7 +40,7 @@ const DashboardPage = () => {
   const hasNoData = messages.length === 0
 
   return (
-    <div className="space-y-4 sm:space-y-5 md:space-y-6 animate-fade-in max-w-full overflow-hidden">
+    <div className="space-y-4 sm:space-y-6 md:space-y-6 animate-fade-in max-w-full overflow-hidden">
       <PageHeader
         title="Dashboard"
         description="Quick overview of recent activity, topics, and message insights"
@@ -52,15 +51,15 @@ const DashboardPage = () => {
         <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
           <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 text-center">
             <div className="w-16 h-16 mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <ListBulletIcon className="h-8 w-8 text-primary" />
+              <List className="h-8 w-8 text-primary" />
             </div>
             <h3 className="text-lg font-semibold mb-2">No Messages Yet</h3>
             <p className="text-muted-foreground mb-6 max-w-md">
               Connect your Telegram to start tracking messages and analyzing tasks
             </p>
-            <div className="flex gap-3 flex-wrap justify-center">
+            <div className="flex gap-4 flex-wrap justify-center">
               <Button onClick={() => navigate('/settings')} size="lg">
-                <Cog6ToothIcon className="mr-2 h-5 w-5" />
+                <Settings className="mr-2 h-5 w-5" />
                 Configure Settings
               </Button>
               <Button onClick={() => navigate('/messages')} variant="outline" size="lg">
@@ -75,14 +74,14 @@ const DashboardPage = () => {
       <MetricsDashboard />
 
       {/* Recent Topics and Messages */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 animate-fade-in-up max-w-full" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-6 animate-fade-in-up max-w-full" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
         {/* Recent Topics - 2/3 width on large screens */}
         <div className="lg:col-span-2 min-w-0 order-1">
           <RecentTopics />
         </div>
 
         {/* Right column - Trending Topics + Recent Messages */}
-        <div className="space-y-4 sm:space-y-5 md:space-y-6 order-2 lg:order-3">
+        <div className="space-y-4 sm:space-y-6 md:space-y-6 order-2 lg:order-3">
           {/* Trending Topics */}
           <TrendingTopics />
 
@@ -94,19 +93,19 @@ const DashboardPage = () => {
               <span>Recent Messages</span>
               <div className="flex items-center gap-2">
                 {isConnected ? (
-                  <WifiIcon className="h-4 w-4 text-green-500" />
+                  <Wifi className="h-4 w-4 text-semantic-success" />
                 ) : (
-                  <SignalSlashIcon className="h-4 w-4 text-amber-500" />
+                  <WifiOff className="h-4 w-4 text-semantic-warning" />
                 )}
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3" role="feed" aria-label="Recent messages feed" aria-busy={messagesLoading}>
+            <div className="space-y-4" role="feed" aria-label="Recent messages feed" aria-busy={messagesLoading}>
               {messagesLoading ? (
                 <>
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="flex items-start gap-3 py-2 border-b last:border-b-0">
+                    <div key={i} className="flex items-start gap-4 py-2 border-b last:border-b-0">
                       <Skeleton className="h-10 w-10 rounded-full shrink-0" />
                       <div className="flex-1 space-y-2">
                         <Skeleton className="h-4 w-2/3" />
@@ -119,7 +118,7 @@ const DashboardPage = () => {
                 recentMessages.map((message) => (
                   <div
                     key={message.id}
-                    className="group flex items-start gap-3 py-2 border-b last:border-b-0 rounded-md cursor-pointer transition-all duration-200 hover:bg-accent/50 -mx-2 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="group flex items-start gap-4 py-2 border-b last:border-b-0 rounded-md cursor-pointer transition-all duration-200 hover:bg-accent/50 -mx-2 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     tabIndex={0}
                     role="button"
                     aria-label={`Message from ${message.author_name || 'Unknown'}: ${message.content || ''}`}
@@ -143,7 +142,7 @@ const DashboardPage = () => {
                       </div>
                     </div>
 
-                    <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex-1 min-w-0 space-y-2">
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="text-sm font-semibold text-foreground truncate">
                           {message.author_name || 'Unknown'}

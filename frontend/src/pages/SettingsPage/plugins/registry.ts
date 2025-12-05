@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline'
+import { MessageSquare } from 'lucide-react'
 import TelegramCard from './TelegramSource/TelegramCard'
 
 export interface SourcePlugin {
@@ -14,7 +14,7 @@ export const sourcePlugins: SourcePlugin[] = [
   {
     id: 'telegram',
     name: 'Telegram',
-    icon: ChatBubbleLeftRightIcon,
+    icon: MessageSquare,
     description: 'Bot integration & groups management',
     CardComponent: TelegramCard,
   },

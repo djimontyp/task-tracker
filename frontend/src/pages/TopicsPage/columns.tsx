@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { EllipsisHorizontalIcon, CircleStackIcon, CheckCircleIcon, ClockIcon, XCircleIcon } from '@heroicons/react/24/outline'
+import { MoreHorizontal, Database, CheckCircle, Clock, XCircle } from 'lucide-react'
 
 import type { Task } from '@/shared/types'
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'
@@ -7,11 +7,11 @@ import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader
 import { getTaskStatusBadge, getTaskPriorityBadge, type TaskStatus, type TaskPriority } from '@/shared/utils/statusBadges'
 
 export const statusIconConfig: Record<string, { icon: React.ComponentType<{ className?: string }> }> = {
-  open: { icon: ClockIcon },
-  in_progress: { icon: CircleStackIcon },
-  completed: { icon: CheckCircleIcon },
-  closed: { icon: XCircleIcon },
-  pending: { icon: ClockIcon },
+  open: { icon: Clock },
+  in_progress: { icon: Database },
+  completed: { icon: CheckCircle },
+  closed: { icon: XCircle },
+  pending: { icon: Clock },
 }
 
 export const columns: ColumnDef<Task>[] = [
@@ -69,7 +69,7 @@ export const columns: ColumnDef<Task>[] = [
       const Icon = iconMeta.icon
       return (
         <Badge variant={badgeConfig.variant} className={badgeConfig.className}>
-          {Icon && <Icon className="mr-1 h-3 w-3" />}
+          {Icon && <Icon className="mr-2 h-3 w-3" />}
           {badgeConfig.label}
         </Badge>
       )
@@ -112,15 +112,16 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     id: 'actions',
+    header: () => <span className="sr-only">Actions</span>,
     enableHiding: false,
     cell: ({ row }) => {
       const task = row.original
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" className="h-11 w-11 p-0" aria-label={`Task actions for ${task.title || `Task ${task.id}`}`}>
               <span className="sr-only">Open menu</span>
-              <EllipsisHorizontalIcon className="h-4 w-4" />
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
