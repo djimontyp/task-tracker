@@ -1,0 +1,97 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Design System/Introduction" />
+
+# Pulse Radar Design System
+
+> **Type-safe, WCAG AA compliant design system for consistent UI development**
+
+## Quick Start
+
+```tsx
+// 1. Import tokens
+import { badges, cards, gap } from '@/shared/tokens';
+
+// 2. Use in components
+<Badge className={badges.status.connected}>
+  <CheckCircleIcon className="h-3.5 w-3.5" />
+  Connected
+</Badge>
+```
+
+## Core Principles
+
+### 1. Semantic Tokens Only
+
+```tsx
+// ✅ CORRECT — uses semantic token
+<Badge className="bg-semantic-success text-semantic-success">
+
+// ❌ WRONG — raw Tailwind color
+<Badge className="bg-green-500 text-green-700">
+```
+
+**ESLint enforces this** — `local-rules/no-raw-tailwind-colors` will error on raw colors.
+
+### 2. 4px Grid System
+
+All spacing must be multiples of 4px:
+
+| Allowed | Not Allowed |
+|---------|-------------|
+| `gap-2` (8px) | `gap-3` (12px) |
+| `gap-4` (16px) | `gap-5` (20px) |
+| `p-6` (24px) | `p-7` (28px) |
+
+**ESLint enforces this** — `local-rules/no-odd-spacing` will error on non-4px values.
+
+### 3. 44px Touch Targets (WCAG 2.5.5)
+
+All interactive elements must have minimum 44×44px touch area:
+
+```tsx
+// ✅ CORRECT
+<Button size="icon" className="h-11 w-11">
+
+// ❌ WRONG — too small
+<Button size="icon" className="h-8 w-8">
+```
+
+### 4. Status = Icon + Text
+
+Never rely on color alone for status information:
+
+```tsx
+// ✅ CORRECT — icon + text
+<Badge className={badges.status.connected}>
+  <CheckCircleIcon className="h-3.5 w-3.5" />
+  Connected
+</Badge>
+
+// ❌ WRONG — color only
+<span className="h-2 w-2 rounded-full bg-green-500" />
+```
+
+## Technology Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Components** | Radix UI + shadcn/ui |
+| **Styling** | Tailwind CSS |
+| **Type Safety** | TypeScript tokens |
+| **Enforcement** | ESLint custom rules |
+| **Documentation** | Storybook |
+
+## Navigation
+
+Use the sidebar to explore:
+
+- **Design System** — Principles, colors, spacing, tokens
+- **UI** — Base components (Button, Card, Badge, etc.)
+- **Components** — Business components (DataTable, MetricCard, etc.)
+
+## Resources
+
+- [CLAUDE.md Guidelines](/docs/CLAUDE.md) — AI agent instructions
+- [GitHub Repository](https://github.com/your-repo) — Source code
+- [TypeScript Tokens](/frontend/src/shared/tokens/) — Token source files

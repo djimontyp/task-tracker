@@ -1,0 +1,322 @@
+import { Meta, Source } from '@storybook/addon-docs/blocks';
+
+<Meta title="Design System/TypeScript Tokens" />
+
+# TypeScript Design Tokens
+
+> **Type-safe, autocomplete-friendly styling utilities**
+
+## Why Tokens?
+
+<table>
+  <thead>
+    <tr>
+      <th>Without Tokens (❌)</th>
+      <th>With Tokens (✅)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Manual Tailwind classes</td>
+      <td>Type-safe imports</td>
+    </tr>
+    <tr>
+      <td>Easy to make mistakes</td>
+      <td>IDE autocomplete</td>
+    </tr>
+    <tr>
+      <td>Inconsistent across codebase</td>
+      <td>Single source of truth</td>
+    </tr>
+    <tr>
+      <td>Hard to refactor</td>
+      <td>Change once, update everywhere</td>
+    </tr>
+  </tbody>
+</table>
+
+## Quick Example
+
+```tsx
+// ❌ Before: Manual, error-prone
+<Badge className="flex items-center gap-1.5 border-status-connected text-status-connected bg-status-connected/10">
+  <CheckCircle className="h-3.5 w-3.5" />
+  Connected
+</Badge>
+
+// ✅ After: Type-safe, autocomplete
+import { badges } from '@/shared/tokens';
+
+<Badge variant="outline" className={badges.status.connected}>
+  <CheckCircle className="h-3.5 w-3.5" />
+  Connected
+</Badge>
+```
+
+## Token Categories
+
+### 1. Colors
+
+```tsx
+import { semantic, status, atom, chart, brand, base } from '@/shared/tokens';
+
+// Semantic (general purpose)
+semantic.success.bg       // bg-semantic-success
+semantic.error.text       // text-semantic-error
+semantic.warning.border   // border-semantic-warning
+
+// Status (connection states)
+status.connected.bg       // bg-status-connected
+status.validating.text    // text-status-validating
+
+// Atom types (knowledge atoms)
+atom.problem.bg           // bg-atom-problem
+atom.solution.text        // text-atom-solution
+
+// Base (shadcn/ui)
+base.primary.bg           // bg-primary
+base.muted.foreground     // text-muted-foreground
+```
+
+### 2. Spacing
+
+```tsx
+import { gap, padding, spacing, touchTarget, radius } from '@/shared/tokens';
+
+// Gap (Flexbox/Grid)
+gap.sm                    // gap-2 (8px)
+gap.md                    // gap-4 (16px)
+gap.lg                    // gap-6 (24px)
+
+// Padding
+padding.card.default      // p-6
+padding.button.md         // px-4 py-2
+
+// Stack spacing
+spacing.stack.md          // space-y-4
+spacing.inline.sm         // space-x-2
+
+// Touch targets (WCAG 2.5.5)
+touchTarget.min           // h-11 w-11 (44px)
+
+// Border radius
+radius.lg                 // rounded-lg
+radius.full               // rounded-full
+```
+
+### 3. Patterns
+
+```tsx
+import { badges, cards, buttons, emptyState, lists, focus } from '@/shared/tokens';
+
+// Badge patterns
+badges.status.connected   // Full status badge styling
+badges.semantic.success   // Semantic badge styling
+badges.atom.problem       // Atom type badge
+
+// Card patterns
+cards.default             // Standard card
+cards.interactive         // Hover + click effects
+cards.empty               // Dashed border empty state
+cards.alert.error         // Alert with semantic color
+
+// Button patterns
+buttons.icon.default      // Icon button (44px)
+
+// Empty state
+emptyState.container      // Centered flex container
+emptyState.icon           // Icon wrapper with bg
+emptyState.title          // Title typography
+emptyState.description    // Description typography
+
+// Lists
+lists.grid.responsive     // 1/2/3 column grid
+lists.divided             // List with dividers
+
+// Focus (accessibility)
+focus.ring                // Focus ring for keyboard nav
+```
+
+## Usage Examples
+
+### Status Badges
+
+```tsx
+import { badges } from '@/shared/tokens';
+import { Badge } from '@/shared/ui/badge';
+import { CheckCircle, XCircle, Clock } from 'lucide-react';
+
+// Connected
+<Badge variant="outline" className={badges.status.connected}>
+  <CheckCircle className="h-3.5 w-3.5" />
+  Connected
+</Badge>
+
+// Error
+<Badge variant="outline" className={badges.status.error}>
+  <XCircle className="h-3.5 w-3.5" />
+  Failed
+</Badge>
+
+// Pending
+<Badge variant="outline" className={badges.status.pending}>
+  <Clock className="h-3.5 w-3.5" />
+  Pending
+</Badge>
+```
+
+### Interactive Cards
+
+```tsx
+import { cards, gap } from '@/shared/tokens';
+import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
+
+<Card className={cards.interactive}>
+  <CardHeader>
+    <CardTitle>Clickable Card</CardTitle>
+  </CardHeader>
+  <CardContent className={gap.md}>
+    <p>Hover to see effect</p>
+  </CardContent>
+</Card>
+```
+
+### Empty States
+
+```tsx
+import { emptyState } from '@/shared/tokens';
+import { Inbox } from 'lucide-react';
+import { Button } from '@/shared/ui/button';
+
+<div className={emptyState.container}>
+  <div className={emptyState.icon}>
+    <Inbox className="h-8 w-8 text-muted-foreground" />
+  </div>
+  <h3 className={emptyState.title}>No messages yet</h3>
+  <p className={emptyState.description}>
+    Messages will appear here when they arrive
+  </p>
+  <Button className="mt-4">Add Message</Button>
+</div>
+```
+
+### Responsive Grids
+
+```tsx
+import { lists, cards } from '@/shared/tokens';
+import { Card } from '@/shared/ui/card';
+
+<div className={lists.grid.responsive}>
+  {items.map(item => (
+    <Card key={item.id} className={cards.default}>
+      {item.title}
+    </Card>
+  ))}
+</div>
+```
+
+### Alert Cards
+
+```tsx
+import { cards } from '@/shared/tokens';
+
+<div className={cards.alert.info}>
+  <h4 className="font-semibold mb-2">Information</h4>
+  <p className="text-sm">This is an informational message.</p>
+</div>
+
+<div className={cards.alert.warning}>
+  <h4 className="font-semibold mb-2">Warning</h4>
+  <p className="text-sm">Please review before proceeding.</p>
+</div>
+
+<div className={cards.alert.error}>
+  <h4 className="font-semibold mb-2">Error</h4>
+  <p className="text-sm">Something went wrong.</p>
+</div>
+```
+
+## Combining Tokens with cn()
+
+Use `cn()` utility to combine tokens with additional classes:
+
+```tsx
+import { cards } from '@/shared/tokens';
+import { cn } from '@/shared/lib/utils';
+
+// Add custom width
+<Card className={cn(cards.interactive, 'max-w-md')}>
+
+// Conditional classes
+<Card className={cn(
+  cards.default,
+  isSelected && 'ring-2 ring-primary'
+)}>
+```
+
+## File Structure
+
+```
+frontend/src/shared/tokens/
+├── colors.ts       # semantic, status, atom, chart, brand, base
+├── spacing.ts      # gap, padding, spacing, touchTarget, radius
+├── patterns.ts     # badges, cards, buttons, emptyState, lists, focus
+├── index.ts        # Central export
+└── README.md       # Documentation
+```
+
+## Adding New Tokens
+
+### Step 1: Define CSS Variable (if needed)
+
+```css
+/* index.css */
+:root {
+  --my-new-color: 200 80% 50%;
+}
+```
+
+### Step 2: Add to Tailwind Config (if needed)
+
+```js
+// tailwind.config.js
+colors: {
+  myNew: 'hsl(var(--my-new-color))',
+}
+```
+
+### Step 3: Create Token
+
+```ts
+// colors.ts
+export const myCategory = {
+  newColor: {
+    bg: 'bg-myNew',
+    text: 'text-myNew',
+    border: 'border-myNew',
+  },
+} as const;
+```
+
+### Step 4: Export
+
+```ts
+// index.ts
+export { myCategory } from './colors';
+```
+
+## Best Practices
+
+### DO ✅
+
+- Import tokens from `@/shared/tokens`
+- Use pattern tokens for common UI (`badges`, `cards`, `emptyState`)
+- Combine with `cn()` for custom overrides
+- Leverage TypeScript autocomplete
+
+### DON'T ❌
+
+- Use raw Tailwind colors (`bg-green-500`)
+- Use non-4px spacing (`gap-3`, `p-5`)
+- Create new patterns without documenting
+- Mix tokens with conflicting raw classes

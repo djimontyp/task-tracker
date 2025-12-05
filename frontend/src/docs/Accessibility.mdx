@@ -1,0 +1,287 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Design System/Accessibility" />
+
+# Accessibility (WCAG 2.1 AA)
+
+> **Our design system is built to meet WCAG 2.1 AA standards**
+
+## Core Requirements
+
+| Requirement | Standard | Our Implementation |
+|-------------|----------|-------------------|
+| **Color Contrast** | 4.5:1 (text), 3:1 (large text) | All semantic colors tested |
+| **Touch Targets** | 44×44px minimum | `touchTarget.min` token |
+| **Focus Indicators** | Visible on keyboard nav | `focus.ring` token |
+| **Status Communication** | Not color-only | Icon + text pattern |
+| **Reduced Motion** | Respect preference | `prefers-reduced-motion` |
+
+## 1. Color Contrast
+
+All semantic colors pass WCAG AA contrast requirements:
+
+| Color | Contrast Ratio | Status |
+|-------|---------------|--------|
+| `semantic.success` | 4.5:1+ | ✅ AA |
+| `semantic.warning` | 4.5:1+ | ✅ AA |
+| `semantic.error` | 4.5:1+ | ✅ AA |
+| `semantic.info` | 4.5:1+ | ✅ AA |
+
+### Testing Contrast
+
+Use browser DevTools or:
+- [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
+- Storybook's `@storybook/addon-a11y` (already installed)
+
+## 2. Touch Targets (WCAG 2.5.5)
+
+All interactive elements must have 44×44px minimum touch area.
+
+### Using Touch Target Tokens
+
+```tsx
+import { touchTarget, buttons } from '@/shared/tokens';
+
+// Icon button with proper size
+<Button
+  variant="ghost"
+  size="icon"
+  className={touchTarget.min}  // h-11 w-11 (44px)
+  aria-label="Delete item"
+>
+  <Trash2 className="h-5 w-5" />
+</Button>
+
+// Or use buttons pattern
+<Button
+  variant="ghost"
+  size="icon"
+  className={buttons.icon.default}
+>
+```
+
+### Common Mistakes
+
+```tsx
+// ❌ WRONG — too small
+<Button size="icon" className="h-8 w-8">
+
+// ✅ CORRECT — meets WCAG
+<Button size="icon" className="h-11 w-11">
+```
+
+## 3. Focus Indicators (WCAG 2.4.7)
+
+All interactive elements must have visible focus indication.
+
+### Focus Ring Token
+
+```tsx
+import { focus } from '@/shared/tokens';
+
+// Apply focus ring
+<button className={focus.ring}>
+  Click me
+</button>
+
+// Result: focus-visible:outline-none focus-visible:ring-2
+//         focus-visible:ring-ring focus-visible:ring-offset-2
+```
+
+### Built-in Focus Styles
+
+All shadcn/ui components include focus styles:
+
+```tsx
+// Button already has focus ring
+<Button>Already accessible</Button>
+
+// Input already has focus ring
+<Input placeholder="Already accessible" />
+```
+
+## 4. Status Communication (WCAG 1.4.1)
+
+Never rely on color alone to communicate status.
+
+### Pattern: Icon + Text
+
+```tsx
+import { badges } from '@/shared/tokens';
+import { CheckCircle, XCircle, Trash2, Plus } from 'lucide-react';
+
+// ✅ CORRECT — icon + text
+<Badge variant="outline" className={badges.status.connected}>
+  <CheckCircle className="h-3.5 w-3.5" />
+  Connected
+</Badge>
+
+// ❌ WRONG — color only
+<span className="h-2 w-2 rounded-full bg-green-500" />
+```
+
+### Status Badge Components
+
+Our `badges.*` tokens include proper icon spacing:
+
+```tsx
+badges.status.connected   // flex items-center gap-1.5 + colors
+badges.status.error       // flex items-center gap-1.5 + colors
+badges.semantic.success   // flex items-center gap-1.5 + colors
+```
+
+## 5. Reduced Motion (WCAG 2.3.3)
+
+Respect user's motion preferences.
+
+### CSS Implementation
+
+```css
+/* Already in index.css */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+### In Components
+
+```tsx
+// Tailwind's motion-safe/motion-reduce
+<div className="motion-safe:animate-bounce motion-reduce:animate-none">
+```
+
+## 6. Keyboard Navigation
+
+### Required for All Interactive Elements
+
+| Element | Required Keys |
+|---------|--------------|
+| **Button** | `Enter`, `Space` |
+| **Link** | `Enter` |
+| **Checkbox** | `Space` |
+| **Radio** | `Arrow keys` |
+| **Select** | `Arrow keys`, `Enter` |
+| **Dialog** | `Escape` to close |
+| **Menu** | `Arrow keys`, `Enter`, `Escape` |
+
+### Trap Focus in Modals
+
+```tsx
+// Radix UI Dialog handles this automatically
+<Dialog>
+  <DialogContent>
+    {/* Focus is trapped here */}
+  </DialogContent>
+</Dialog>
+```
+
+## 7. ARIA Labels
+
+### Icon Buttons
+
+```tsx
+// ❌ WRONG — no accessible name
+<Button size="icon">
+  <Trash2 className="h-5 w-5" />
+</Button>
+
+// ✅ CORRECT — aria-label provides name
+<Button size="icon" aria-label="Delete item">
+  <Trash2 className="h-5 w-5" />
+</Button>
+```
+
+### Decorative Icons
+
+```tsx
+// Icon is decorative (label is visible)
+<Button>
+  <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
+  Add Item
+</Button>
+```
+
+### Form Fields
+
+```tsx
+// Always associate labels with inputs
+<Label htmlFor="email">Email</Label>
+<Input id="email" type="email" />
+
+// For errors
+<Input
+  id="email"
+  aria-invalid={!!error}
+  aria-describedby="email-error"
+/>
+<p id="email-error" className="text-destructive text-xs">
+  {error}
+</p>
+```
+
+## 8. Screen Reader Support
+
+### Announce Dynamic Content
+
+```tsx
+// Use aria-live for dynamic updates
+<div aria-live="polite" aria-atomic="true">
+  {notification && <span>{notification}</span>}
+</div>
+```
+
+### Hide Decorative Content
+
+```tsx
+// Hide from screen readers
+<div aria-hidden="true">
+  <DecorativePattern />
+</div>
+```
+
+## Testing Accessibility
+
+### Automated Testing
+
+1. **Storybook addon-a11y** — Run axe-core on every story
+2. **ESLint jsx-a11y** — Catch issues during development
+3. **Playwright axe** — E2E accessibility tests
+
+### Manual Testing
+
+1. **Keyboard only** — Navigate entire app without mouse
+2. **Screen reader** — Test with VoiceOver (Mac) or NVDA (Windows)
+3. **Zoom 200%** — Ensure content is still usable
+4. **Color blindness** — Use browser extension to simulate
+
+### Storybook A11y Panel
+
+Every story shows accessibility violations:
+
+```tsx
+// In Storybook, click "Accessibility" tab
+// to see axe-core results
+```
+
+## Checklist
+
+Before shipping any UI:
+
+```
+□ Color contrast ≥4.5:1 for text
+□ Touch targets ≥44px
+□ Focus visible on keyboard navigation
+□ Status uses icon + text (not just color)
+□ Icon buttons have aria-label
+□ Form fields have associated labels
+□ Dialogs trap focus properly
+□ Dynamic content uses aria-live
+□ Works at 200% zoom
+□ Reduced motion respected
+```

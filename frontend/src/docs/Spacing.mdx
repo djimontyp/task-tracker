@@ -1,0 +1,222 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Design System/Spacing & Layout" />
+
+# Spacing & Layout
+
+> **4px grid system for consistent visual rhythm**
+
+## The 4px Grid
+
+All spacing values must be multiples of 4px:
+
+| Token | Pixels | Tailwind | Use Case |
+|-------|--------|----------|----------|
+| `xs` | 4px | `gap-1`, `p-1` | Tight inline spacing |
+| `sm` | 8px | `gap-2`, `p-2` | Compact elements |
+| `md` | 16px | `gap-4`, `p-4` | Default spacing |
+| `lg` | 24px | `gap-6`, `p-6` | Cards, sections |
+| `xl` | 32px | `gap-8`, `p-8` | Large sections |
+| `2xl` | 40px | `gap-10`, `p-10` | Page sections |
+| `3xl` | 48px | `gap-12`, `p-12` | Major divisions |
+
+### Forbidden Values
+
+These values break the grid and are **blocked by ESLint**:
+
+| ❌ Forbidden | ✅ Use Instead |
+|-------------|---------------|
+| `gap-3` (12px) | `gap-2` or `gap-4` |
+| `gap-5` (20px) | `gap-4` or `gap-6` |
+| `p-3` (12px) | `p-2` or `p-4` |
+| `p-5` (20px) | `p-4` or `p-6` |
+| `p-7` (28px) | `p-6` or `p-8` |
+
+## TypeScript Tokens
+
+### Gap Utilities
+
+```tsx
+import { gap } from '@/shared/tokens';
+
+<div className={gap.sm}>    // gap-2 (8px)
+<div className={gap.md}>    // gap-4 (16px)
+<div className={gap.lg}>    // gap-6 (24px)
+<div className={gap.xl}>    // gap-8 (32px)
+```
+
+### Padding Presets
+
+```tsx
+import { padding } from '@/shared/tokens';
+
+// Card padding
+<Card className={padding.card.default}>  // p-6 (24px)
+<Card className={padding.card.sm}>       // p-4 (16px)
+<Card className={padding.card.lg}>       // p-8 (32px)
+
+// Button padding
+<Button className={padding.button.md}>   // px-4 py-2
+<Button className={padding.button.lg}>   // px-6 py-4
+
+// Section padding (responsive)
+<section className={`${padding.section.mobile} ${padding.section.tablet} ${padding.section.desktop}`}>
+// Results in: p-4 md:p-6 lg:p-8
+```
+
+### Stack Spacing
+
+```tsx
+import { spacing } from '@/shared/tokens';
+
+// Vertical stack
+<div className={spacing.stack.md}>  // space-y-4
+  <Item />
+  <Item />
+</div>
+
+// Horizontal inline
+<div className={spacing.inline.sm}>  // space-x-2
+  <Tag />
+  <Tag />
+</div>
+```
+
+## Touch Targets (WCAG 2.5.5)
+
+All interactive elements must have minimum 44×44px touch area:
+
+```tsx
+import { touchTarget } from '@/shared/tokens';
+
+<Button className={touchTarget.min}>          // h-11 w-11 (44px)
+<Button className={touchTarget.comfortable}>  // h-12 w-12 (48px)
+<Button className={touchTarget.large}>        // h-14 w-14 (56px)
+```
+
+### Icon Buttons
+
+```tsx
+import { buttons } from '@/shared/tokens';
+
+<Button variant="ghost" size="icon" className={buttons.icon.default}>
+  <TrashIcon className="h-5 w-5" />
+</Button>
+```
+
+## Border Radius
+
+Consistent rounding values:
+
+```tsx
+import { radius } from '@/shared/tokens';
+
+<div className={radius.sm}>    // rounded-sm (2px)
+<Card className={radius.lg}>   // rounded-lg (8px)
+<Avatar className={radius.full}>  // rounded-full
+```
+
+| Token | Class | Pixels | Use Case |
+|-------|-------|--------|----------|
+| `none` | `rounded-none` | 0px | Sharp edges |
+| `sm` | `rounded-sm` | 2px | Subtle rounding |
+| `md` | `rounded-md` | 4px | Buttons, inputs |
+| `lg` | `rounded-lg` | 8px | Cards |
+| `xl` | `rounded-xl` | 12px | Modals |
+| `2xl` | `rounded-2xl` | 16px | Large cards |
+| `full` | `rounded-full` | 50% | Avatars, pills |
+
+## Responsive Breakpoints
+
+| Breakpoint | Width | Typical Device |
+|------------|-------|----------------|
+| `xs:` | 375px | Small phones |
+| `sm:` | 640px | Phones landscape |
+| `md:` | 768px | Tablets |
+| `lg:` | 1024px | Laptops |
+| `xl:` | 1280px | Desktops |
+| `2xl:` | 1536px | Large screens |
+| `3xl:` | 1920px | Full HD |
+| `4xl:` | 2560px | 2K/4K |
+
+### Mobile-First Pattern
+
+```tsx
+// Base = mobile, then scale up
+<div className="p-4 md:p-6 lg:p-8">
+<div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+<div className="text-sm md:text-base">
+```
+
+## Layout Patterns
+
+### Responsive Grid
+
+```tsx
+import { lists } from '@/shared/tokens';
+
+// Standard responsive grid
+<div className={lists.grid.responsive}>
+  {/* 1 col → 2 cols → 3 cols */}
+</div>
+
+// Dense grid (more columns)
+<div className={lists.grid.dense}>
+  {/* 1 → 2 → 3 → 4 columns */}
+</div>
+```
+
+### Container
+
+```tsx
+// Centered content with responsive padding
+<div className="container">
+  {/*
+    padding: 1rem (mobile)
+           → 1.5rem (sm)
+           → 2rem (lg)
+           → 2.5rem (xl)
+           → 3rem (2xl)
+  */}
+</div>
+```
+
+## Common Spacing Patterns
+
+### Card Content
+
+```tsx
+<Card>
+  <CardHeader className="pb-2">     {/* Reduced bottom padding */}
+    <CardTitle>Title</CardTitle>
+  </CardHeader>
+  <CardContent className={spacing.stack.md}>  {/* space-y-4 */}
+    <p>Content line 1</p>
+    <p>Content line 2</p>
+  </CardContent>
+</Card>
+```
+
+### Form Layout
+
+```tsx
+<form className={spacing.stack.lg}>      {/* space-y-6 between sections */}
+  <div className={spacing.stack.sm}>     {/* space-y-2 between field + error */}
+    <Label>Email</Label>
+    <Input />
+    <p className="text-destructive text-xs">Error message</p>
+  </div>
+</form>
+```
+
+### List with Dividers
+
+```tsx
+import { lists } from '@/shared/tokens';
+
+<div className={lists.divided}>
+  <Item />  {/* py-4 border-b */}
+  <Item />
+  <Item />  {/* last:border-b-0 */}
+</div>
+```
