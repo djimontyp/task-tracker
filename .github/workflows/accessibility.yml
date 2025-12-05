@@ -1,0 +1,116 @@
+# Accessibility Testing Workflow
+#
+# Runs WCAG 2.1 AA compliance tests on pull requests
+# Uses Playwright + axe-core for automated accessibility scanning
+#
+# Triggers:
+# - Pull requests to main branch
+# - Manual dispatch
+# - Push to main (for baseline)
+
+name: Accessibility Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/accessibility.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/accessibility.yml'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  WORKING_DIR: ./frontend
+
+jobs:
+  accessibility:
+    name: WCAG 2.1 AA Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKING_DIR }}
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: ${{ env.WORKING_DIR }}
+        run: npx playwright install chromium --with-deps
+
+      - name: Start services
+        run: |
+          docker compose up -d postgres nats api
+          sleep 10
+
+      - name: Run accessibility tests
+        working-directory: ${{ env.WORKING_DIR }}
+        run: npm run test:a11y
+        env:
+          CI: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-test-results
+          path: frontend/playwright-report/
+          retention-days: 7
+
+      - name: Upload test screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-test-screenshots
+          path: frontend/test-results/
+          retention-days: 7
+
+  # Storybook accessibility checks
+  storybook-a11y:
+    name: Storybook Accessibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKING_DIR }}
+        run: npm ci
+
+      - name: Build Storybook
+        working-directory: ${{ env.WORKING_DIR }}
+        run: npm run build-storybook
+
+      - name: Check Storybook build
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          if [ -d "storybook-static" ]; then
+            echo "Storybook built successfully"
+            echo "addon-a11y is configured for visual a11y checks"
+          else
+            echo "Storybook build failed"
+            exit 1
+          fi

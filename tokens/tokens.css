@@ -1,0 +1,272 @@
+/**
+ * Pulse Radar Design Tokens - CSS Custom Properties
+ *
+ * This file consolidates all design tokens for the Pulse Radar design system.
+ * Import this file OR use frontend/src/index.css (which contains the same tokens).
+ *
+ * Usage:
+ *   color: hsl(var(--primary));
+ *   padding: var(--space-4);
+ *   border-radius: var(--radius);
+ *
+ * @version 1.0.0
+ * @see docs/design-system/01-colors.md
+ */
+
+:root {
+  /* ========================
+   * COLORS - Light Mode
+   * ======================== */
+
+  /* Brand Colors */
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+
+  /* Primary - Orange */
+  --primary: 24.6 95% 53.1%;
+  --primary-foreground: 0 0% 0%;
+
+  /* Secondary - Light Gray */
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+
+  /* Muted */
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 33.3%;
+
+  /* Accent */
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+
+  /* Destructive - Red */
+  --destructive: 0 84.2% 40.1%;
+  --destructive-foreground: 60 9.1% 97.8%;
+
+  /* Utility */
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --ring: 24.6 95% 53.1%;
+  --radius: 0.5rem;
+
+  /* Chart Colors */
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+
+  /* Sidebar */
+  --sidebar-background: 0 0% 98%;
+  --sidebar-foreground: 240 5.3% 26.1%;
+  --sidebar-primary: 24.6 95% 53.1%;
+  --sidebar-primary-foreground: 0 0% 0%;
+  --sidebar-accent: 240 4.8% 95.9%;
+  --sidebar-accent-foreground: 240 5.9% 10%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 24.6 95% 53.1%;
+
+  /* ========================
+   * SEMANTIC COLORS
+   * ======================== */
+
+  /* Atom Type Colors */
+  --atom-problem: 0 84.2% 60.2%;
+  --atom-solution: 142 76% 36%;
+  --atom-decision: 217 91% 60%;
+  --atom-question: 43 96% 56%;
+  --atom-insight: 280 85% 63%;
+  --atom-pattern: 280 85% 63%;
+  --atom-requirement: 217 91% 60%;
+
+  /* Status Indicator Colors */
+  --status-connected: 142 76% 36%;
+  --status-validating: 217 91% 60%;
+  --status-pending: 43 96% 56%;
+  --status-error: 0 84.2% 60.2%;
+
+  /* ========================
+   * SHADOWS
+   * ======================== */
+  --shadow-color: 222.2 47.4% 11.2%;
+  --shadow-card: 0 1px 3px hsl(var(--shadow-color) / 0.06),
+                 0 1px 2px hsl(var(--shadow-color) / 0.04);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Elevation System */
+  --elevation-0: 0 0 0 0 rgba(0,0,0,0);
+  --elevation-1: 0 1px 3px 0 rgba(0,0,0,0.1);
+  --elevation-2: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --elevation-3: 0 10px 15px -3px rgba(0,0,0,0.1);
+  --elevation-4: 0 20px 25px -5px rgba(0,0,0,0.1);
+
+  /* ========================
+   * HEATMAP COLORS
+   * ======================== */
+  --heatmap-telegram: 200 80% 50%;
+  --heatmap-slack: 280 70% 50%;
+  --heatmap-email: 140 70% 45%;
+
+  /* ========================
+   * SPACING (4px grid)
+   * ======================== */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* ========================
+   * TYPOGRAPHY
+   * ======================== */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+  --text-4xl: 2.25rem;    /* 36px */
+
+  /* ========================
+   * TRANSITIONS
+   * ======================== */
+  --duration-instant: 75ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ========================
+   * Z-INDEX SCALE
+   * ======================== */
+  --z-0: 0;
+  --z-10: 10;
+  --z-20: 20;
+  --z-30: 30;
+  --z-40: 40;
+  --z-50: 50;
+  --z-60: 60;
+  --z-70: 70;
+
+  /* ========================
+   * TOUCH TARGETS
+   * ======================== */
+  --touch-target-min: 44px;
+  --touch-target-sm: 32px;
+  --touch-target-md: 40px;
+  --touch-target-lg: 48px;
+}
+
+/* ========================
+ * DARK MODE
+ * ======================== */
+.dark {
+  /* Brand Colors */
+  --background: 20 14.3% 4.1%;
+  --foreground: 60 9.1% 97.8%;
+  --card: 20 14.3% 4.1%;
+  --card-foreground: 60 9.1% 97.8%;
+  --popover: 20 14.3% 4.1%;
+  --popover-foreground: 60 9.1% 97.8%;
+
+  /* Primary - Darker Orange */
+  --primary: 20.5 90.2% 48.2%;
+  --primary-foreground: 60 9.1% 97.8%;
+
+  /* Secondary */
+  --secondary: 12 6.5% 15.1%;
+  --secondary-foreground: 60 9.1% 97.8%;
+
+  /* Muted */
+  --muted: 12 6.5% 15.1%;
+  --muted-foreground: 24 5.4% 63.9%;
+
+  /* Accent */
+  --accent: 12 6.5% 15.1%;
+  --accent-foreground: 60 9.1% 97.8%;
+
+  /* Destructive */
+  --destructive: 0 72.2% 50.6%;
+  --destructive-foreground: 60 9.1% 97.8%;
+
+  /* Utility */
+  --border: 12 6.5% 15.1%;
+  --input: 12 6.5% 15.1%;
+  --ring: 20.5 90.2% 48.2%;
+
+  /* Chart Colors - Dark Mode */
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+
+  /* Sidebar */
+  --sidebar-background: 20 14.3% 4.1%;
+  --sidebar-foreground: 240 4.8% 95.9%;
+  --sidebar-primary: 20.5 90.2% 48.2%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 3.7% 15.9%;
+  --sidebar-accent-foreground: 240 4.8% 95.9%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 20.5 90.2% 48.2%;
+
+  /* Shadows - Dark Mode (lighter for visibility) */
+  --shadow-color: 210 40% 98%;
+  --shadow-card: 0 1px 3px hsl(var(--shadow-color) / 0.04),
+                 0 1px 2px hsl(var(--shadow-color) / 0.02);
+
+  /* Heatmap Colors - Dark Mode (brighter) */
+  --heatmap-telegram: 200 80% 60%;
+  --heatmap-slack: 280 70% 60%;
+  --heatmap-email: 140 70% 55%;
+}
+
+/* ========================
+ * UTILITY CLASSES
+ * ======================== */
+
+/* Focus Ring - WCAG 2.4.7 compliant */
+.focus-ring {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Touch Target Minimum */
+.touch-target {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
