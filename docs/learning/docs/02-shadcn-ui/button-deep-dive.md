@@ -31,7 +31,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-import { ArrowPathIcon } from "@heroicons/react/24/outline"
+import { RotateCw } from "lucide-react"
 
 import { cn } from "@/shared/lib/index"
 
@@ -83,7 +83,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {loading && <ArrowPathIcon className="animate-spin" />}
+        {loading && <RotateCw className="animate-spin" />}
         {children}
       </Comp>
     )
@@ -398,7 +398,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}  // Disabled коли loading
         {...props}
       >
-        {loading && <ArrowPathIcon className="animate-spin" />}
+        {loading && <RotateCw className="animate-spin" />}
         {children}
       </Comp>
     )
@@ -429,7 +429,7 @@ const [isLoading, setIsLoading] = useState(false)
 
 **Trade-offs:**
 - ✅ Зручно (не треба вручну додавати spinner)
-- ❌ Іконка завжди ArrowPathIcon (не можна змінити)
+- ❌ Іконка завжди RotateCw (не можна змінити)
 - ❌ Disabled автоматично (іноді треба loading без disabled)
 
 **Shadcn підхід:**

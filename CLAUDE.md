@@ -4,6 +4,7 @@
 
 - **Спілкування:** завжди українською
 - **Код:** коментарі та docstrings **ТІЛЬКИ** англійською
+- **Питання:** спершу пряма відповідь, потім дії (не ігноруй питання!)
 
 ## Проект
 
@@ -519,13 +520,26 @@ import { CardWithStatus, ListItemWithAvatar, FormField } from '@/shared/patterns
 <ListContainer divided>
   <ListItemWithAvatar .../>
 </ListContainer>
+
+// Empty state (порожній список)
+<EmptyState
+  icon={InboxIcon}
+  title="No messages yet"
+  description="Messages will appear here"
+  action={<Button>Add first message</Button>}
+/>
+
+// Empty state variants: default, card, compact, inline
+<EmptyState variant="compact" icon={SearchIcon} title="No results" />
 ```
 
 **Файли:**
 - `frontend/src/shared/patterns/CardWithStatus.tsx`
 - `frontend/src/shared/patterns/ListItemWithAvatar.tsx`
 - `frontend/src/shared/patterns/FormField.tsx`
+- `frontend/src/shared/patterns/EmptyState.tsx`
 - `frontend/src/shared/patterns/index.ts`
+- `frontend/src/shared/patterns/README.md` — повна документація
 
 **Storybook:** Design System / Patterns (http://localhost:6006)
 
@@ -626,6 +640,46 @@ import { CardWithStatus, ListItemWithAvatar, FormField } from '@/shared/patterns
 <div className="text-sm md:text-base">
 ```
 
+### Icons
+
+| ❌ ЗАБОРОНЕНО | ✅ ВИКОРИСТОВУЙ |
+|--------------|-----------------|
+| `@heroicons/react` | `lucide-react` (єдина дозволена) |
+| `@radix-ui/react-icons` | `lucide-react` |
+| Custom SVG imports | `lucide-react` |
+
+**ESLint правило:** `local-rules/no-heroicons` блокує heroicons імпорти автоматично.
+
+**Dynamic icons:** Для динамічного вибору іконок по імені (без direct import) використовуй утиліту:
+```typescript
+import { getIconByName } from '@/shared/utils/iconMapping';
+const Icon = getIconByName('Folder'); // CamelCase lucide name
+```
+
+**Приклад використання:**
+```tsx
+import { Folder, Check, X, Settings } from 'lucide-react';
+
+// Icon Button (завжди aria-label!)
+<Button variant="ghost" size="icon" aria-label="Open folder">
+  <Folder className="h-4 w-4" />
+</Button>
+
+// Badge з іконкою
+<Badge className="gap-1.5">
+  <Check className="h-3.5 w-3.5" />
+  Connected
+</Badge>
+
+// Empty state
+<div className="text-center py-12">
+  <Settings className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+  <h3 className="text-lg font-medium">No settings</h3>
+</div>
+```
+
+**Розмири:** `h-4 w-4` (16px) для buttons, `h-5 w-5` (20px) для inline, `h-8 w-8` (32px) для icons в заголовках.
+
 ## 📚 Storybook — Component Library
 
 > **URL:** http://localhost:6006
@@ -716,6 +770,28 @@ export const Destructive: Story = {
 1. Створи `{component}.stories.tsx`
 2. Додай `tags: ['autodocs']`
 3. Покрий всі варіанти та стани
+
+**Required Providers для Stories:**
+
+| Hook | Provider | Import |
+|------|----------|--------|
+| `useTheme` | `ThemeProvider` | `@/shared/components/ThemeProvider` |
+| `useLocation`, `Link` | `MemoryRouter` | `react-router-dom` |
+| `useQuery` | `QueryClientProvider` | `@tanstack/react-query` |
+| `useSidebar` | `SidebarProvider` | `@/shared/ui/sidebar` |
+
+**Template:**
+```tsx
+const StoryWrapper = ({ children }) => (
+  <QueryClientProvider client={new QueryClient()}>
+    <ThemeProvider>
+      <MemoryRouter initialEntries={['/']}>
+        {children}
+      </MemoryRouter>
+    </ThemeProvider>
+  </QueryClientProvider>
+);
+```
 
 ## Документація
 

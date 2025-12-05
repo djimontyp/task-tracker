@@ -1,0 +1,267 @@
+{
+  "agents": {
+    "ec46c721": {
+      "marker": "ec46c721",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-05T18:11:13.017260Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "c2a325ce": {
+      "marker": "c2a325ce",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-05T18:12:38.583418Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "056ebf5c": {
+      "marker": "056ebf5c",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-05T18:12:53.120633Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "06f2e67d": {
+      "marker": "06f2e67d",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-05T18:13:21.894794Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "d26aafd7": {
+      "marker": "d26aafd7",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-05T18:13:48.465715Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "ca5b3076": {
+      "marker": "ca5b3076",
+      "subagent_type": "Docs Expert (D2)",
+      "created_at": "2025-12-05T18:15:04.403485Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "89978ac4": {
+      "marker": "89978ac4",
+      "subagent_type": "Docs Expert (D2)",
+      "created_at": "2025-12-05T18:16:01.791852Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "16b980b8": {
+      "marker": "16b980b8",
+      "subagent_type": "Docs Expert (D2)",
+      "created_at": "2025-12-05T18:21:06.320259Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "4f7c9260": {
+      "marker": "4f7c9260",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-05T18:23:55.311301Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "06c1e8c2": {
+      "marker": "06c1e8c2",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-05T18:37:54.524316Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "0888fa42": {
+      "marker": "0888fa42",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-05T18:38:19.137013Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "c1a0244f": {
+      "marker": "c1a0244f",
+      "subagent_type": "",
+      "created_at": "2025-12-05T19:33:12.117409Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "10818bdf": {
+      "marker": "10818bdf",
+      "subagent_type": "",
+      "created_at": "2025-12-05T19:33:14.371122Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "7f700726": {
+      "marker": "7f700726",
+      "subagent_type": "",
+      "created_at": "2025-12-05T19:40:40.287012Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "466fccc1": {
+      "marker": "466fccc1",
+      "subagent_type": "",
+      "created_at": "2025-12-05T19:42:16.219026Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "cd3a2ebd": {
+      "marker": "cd3a2ebd",
+      "subagent_type": "",
+      "created_at": "2025-12-05T19:42:17.538982Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "dc1776e1": {
+      "marker": "dc1776e1",
+      "subagent_type": "UX/UI Expert (U1)",
+      "created_at": "2025-12-05T19:49:57.439121Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "ed3bf131": {
+      "marker": "ed3bf131",
+      "subagent_type": "",
+      "created_at": "2025-12-05T20:21:27.554050Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "071633df": {
+      "marker": "071633df",
+      "subagent_type": "",
+      "created_at": "2025-12-05T20:21:28.086987Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "b367a450": {
+      "marker": "b367a450",
+      "subagent_type": "",
+      "created_at": "2025-12-05T20:38:41.722484Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "0d81a470": {
+      "marker": "0d81a470",
+      "subagent_type": "",
+      "created_at": "2025-12-05T20:38:42.738568Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "188aef63": {
+      "marker": "188aef63",
+      "subagent_type": "",
+      "created_at": "2025-12-05T20:43:14.984259Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "10c1953a": {
+      "marker": "10c1953a",
+      "subagent_type": "",
+      "created_at": "2025-12-05T20:43:17.413636Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "98c0faee": {
+      "marker": "98c0faee",
+      "subagent_type": "",
+      "created_at": "2025-12-05T20:43:23.327031Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "d34d7c19": {
+      "marker": "d34d7c19",
+      "subagent_type": "",
+      "created_at": "2025-12-05T20:43:24.534343Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    }
+  },
+  "config": {
+    "max_resumes": 7,
+    "warn_resumes": 4,
+    "max_tokens": 150000,
+    "warn_tokens": 100000,
+    "max_age_hours": 4,
+    "avg_resume_tokens": 5000
+  },
+  "stats": {
+    "total_agents": 25,
+    "total_resumes": 0,
+    "total_tokens_tracked": 75000
+  }
+}

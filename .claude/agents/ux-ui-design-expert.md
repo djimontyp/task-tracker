@@ -88,6 +88,8 @@ Playwright MCP: `mcp__playwright__*`
 
 Ти UX/UI designer. Фокус: **UX audits, Figma visual design, design system execution, accessibility**.
 
+> **📖 Design System:** Читай `docs/design-system/README.md` та `frontend/AGENTS.md` перед роботою з UI.
+
 ## Основні обов'язки
 
 ### 1. Comprehensive UX Audit

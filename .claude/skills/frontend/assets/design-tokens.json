@@ -1,0 +1,196 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "brand": {
+    "primary": {
+      "$value": "24.6 95% 53.1%",
+      "$type": "color",
+      "$description": "Orange primary color"
+    },
+    "telegram": {
+      "$value": "200 80% 50%",
+      "$type": "color",
+      "$description": "Telegram brand color (cyan)"
+    }
+  },
+  "semantic": {
+    "success": {
+      "$value": "142 76% 36%",
+      "$type": "color",
+      "$description": "Success/connected state"
+    },
+    "warning": {
+      "$value": "43 96% 56%",
+      "$type": "color",
+      "$description": "Warning/pending state"
+    },
+    "error": {
+      "$value": "0 84.2% 60.2%",
+      "$type": "color",
+      "$description": "Error/disconnected state"
+    },
+    "info": {
+      "$value": "217 91% 60%",
+      "$type": "color",
+      "$description": "Info/validating state"
+    }
+  },
+  "atom": {
+    "problem": {
+      "$value": "0 84.2% 60.2%",
+      "$type": "color",
+      "$description": "Problem atom type (red)"
+    },
+    "solution": {
+      "$value": "142 76% 36%",
+      "$type": "color",
+      "$description": "Solution atom type (green)"
+    },
+    "decision": {
+      "$value": "217 91% 60%",
+      "$type": "color",
+      "$description": "Decision atom type (blue)"
+    },
+    "question": {
+      "$value": "43 96% 56%",
+      "$type": "color",
+      "$description": "Question atom type (amber)"
+    },
+    "insight": {
+      "$value": "280 85% 63%",
+      "$type": "color",
+      "$description": "Insight atom type (purple)"
+    },
+    "pattern": {
+      "$value": "280 85% 63%",
+      "$type": "color",
+      "$description": "Pattern atom type (purple)"
+    },
+    "requirement": {
+      "$value": "217 91% 60%",
+      "$type": "color",
+      "$description": "Requirement atom type (blue)"
+    }
+  },
+  "status": {
+    "connected": {
+      "$value": "142 76% 36%",
+      "$type": "color",
+      "$description": "Connected provider status"
+    },
+    "error": {
+      "$value": "0 84.2% 60.2%",
+      "$type": "color",
+      "$description": "Error provider status"
+    },
+    "pending": {
+      "$value": "43 96% 56%",
+      "$type": "color",
+      "$description": "Pending status"
+    },
+    "validating": {
+      "$value": "217 91% 60%",
+      "$type": "color",
+      "$description": "Validating status"
+    }
+  },
+  "chart": {
+    "signal": {
+      "$value": "142 76% 36%",
+      "$type": "color",
+      "$description": "Signal classification (green)"
+    },
+    "noise": {
+      "$value": "0 84.2% 60.2%",
+      "$type": "color",
+      "$description": "Noise classification (red)"
+    },
+    "weak-signal": {
+      "$value": "43 96% 56%",
+      "$type": "color",
+      "$description": "Weak signal classification (amber)"
+    }
+  },
+  "heatmap": {
+    "telegram": {
+      "$value": "200 80% 50%",
+      "$type": "color",
+      "$description": "Telegram source in heatmap (cyan)"
+    },
+    "slack": {
+      "$value": "280 70% 50%",
+      "$type": "color",
+      "$description": "Slack source in heatmap (purple)"
+    },
+    "email": {
+      "$value": "140 70% 45%",
+      "$type": "color",
+      "$description": "Email source in heatmap (green)"
+    }
+  },
+  "spacing": {
+    "1": {
+      "$value": "4px",
+      "$type": "dimension",
+      "$description": "Tight spacing (icon+text)"
+    },
+    "2": {
+      "$value": "8px",
+      "$type": "dimension",
+      "$description": "Small spacing"
+    },
+    "3": {
+      "$value": "12px",
+      "$type": "dimension",
+      "$description": "Medium spacing"
+    },
+    "4": {
+      "$value": "16px",
+      "$type": "dimension",
+      "$description": "Standard spacing"
+    },
+    "6": {
+      "$value": "24px",
+      "$type": "dimension",
+      "$description": "Section spacing"
+    },
+    "8": {
+      "$value": "32px",
+      "$type": "dimension",
+      "$description": "Large spacing"
+    }
+  },
+  "size": {
+    "touch-target": {
+      "$value": "44px",
+      "$type": "dimension",
+      "$description": "Minimum touch target size (WCAG 2.5.5)"
+    },
+    "icon-sm": {
+      "$value": "16px",
+      "$type": "dimension",
+      "$description": "Small icon size (h-4 w-4)"
+    },
+    "icon-md": {
+      "$value": "20px",
+      "$type": "dimension",
+      "$description": "Medium icon size (h-5 w-5)"
+    },
+    "icon-lg": {
+      "$value": "24px",
+      "$type": "dimension",
+      "$description": "Large icon size (h-6 w-6)"
+    }
+  },
+  "focus": {
+    "ring-width": {
+      "$value": "3px",
+      "$type": "dimension",
+      "$description": "Focus ring width"
+    },
+    "ring-offset": {
+      "$value": "2px",
+      "$type": "dimension",
+      "$description": "Focus ring offset"
+    }
+  }
+}
