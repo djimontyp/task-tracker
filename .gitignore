@@ -188,3 +188,6 @@ static/avatars/
 # Agent coordinator runtime metadata (auto-generated)
 .artifacts/coordination/agent-sessions.json
 .artifacts/coordination/last-agent-id.txt.DS_Store
+
+*storybook.log
+storybook-static

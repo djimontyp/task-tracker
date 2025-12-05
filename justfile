@@ -180,6 +180,36 @@ learn:
     @echo "→ http://127.0.0.1:8082"
     uv run --group docs mkdocs serve --config-file docs/learning/mkdocs.yml --dev-addr 127.0.0.1:8082 --livereload
 
+# ═══════════════════════════════════════════════════════════════════════════
+# STORYBOOK
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Run Storybook component library
+[group: 'Frontend']
+storybook:
+    @echo "📚 Starting Storybook..."
+    @echo "→ http://localhost:6006"
+    cd frontend && npm run storybook
+
+# Build static Storybook
+[group: 'Frontend']
+storybook-build:
+    @echo "📦 Building static Storybook..."
+    cd frontend && npm run build-storybook
+    @echo "✅ Built to frontend/storybook-static/"
+
+# Run Storybook tests (requires Storybook running on :6006)
+[group: 'Frontend']
+storybook-test:
+    @echo "🧪 Running Storybook tests..."
+    cd frontend && npm run test:storybook
+
+# Run Storybook tests in CI mode
+[group: 'Frontend']
+storybook-test-ci:
+    @echo "🧪 Running Storybook tests (CI mode)..."
+    cd frontend && npm run test:storybook:ci
+
 # Clear all test data from database
 [group: 'Database']
 db-clear:
@@ -291,3 +321,73 @@ test-atoms:
 test-all:
     @echo "Running all tests with coverage..."
     uv run pytest --cov=app --cov-report=term-missing
+
+# Run E2E tests (Playwright)
+[group: 'Testing']
+e2e *ARGS:
+    @echo "🎭 Running E2E tests..."
+    cd frontend && npx playwright test {{ARGS}}
+
+# Run E2E tests on chromium only (faster)
+[group: 'Testing']
+e2e-fast *ARGS:
+    @echo "🎭 Running E2E tests (chromium only)..."
+    cd frontend && npx playwright test --project=chromium {{ARGS}}
+
+# Run E2E tests with UI mode
+[group: 'Testing']
+e2e-ui:
+    @echo "🎭 Opening Playwright UI..."
+    cd frontend && npx playwright test --ui
+
+# Install Playwright browsers
+[group: 'Testing']
+e2e-install:
+    @echo "📦 Installing Playwright browsers..."
+    cd frontend && npx playwright install
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FRONTEND
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Install frontend dependencies
+[group: 'Frontend']
+front-install:
+    @echo "📦 Installing frontend dependencies..."
+    cd frontend && npm install
+    @echo "✅ Frontend dependencies installed!"
+
+# Run ESLint on frontend (warnings only - no fail)
+[group: 'Frontend']
+lint:
+    @echo "🔍 Running ESLint on frontend..."
+    cd frontend && ESLINT_USE_FLAT_CONFIG=false npx eslint src --ext .ts,.tsx || true
+    @echo "ℹ️  Lint complete (check output above for issues)"
+
+# Run ESLint strict (fails on errors)
+[group: 'Frontend']
+lint-strict:
+    @echo "🔍 Running ESLint strict mode..."
+    cd frontend && ESLINT_USE_FLAT_CONFIG=false npx eslint src --ext .ts,.tsx --max-warnings 0
+    @echo "✅ Lint passed!"
+
+# Run ESLint with auto-fix
+[group: 'Frontend']
+lint-fix:
+    @echo "🔧 Running ESLint with auto-fix..."
+    cd frontend && ESLINT_USE_FLAT_CONFIG=false npx eslint src --ext .ts,.tsx --fix
+    @echo "✅ Lint fix complete!"
+
+# Run frontend TypeScript check
+[group: 'Frontend']
+front-typecheck:
+    @echo "🔎 Running TypeScript check on frontend..."
+    cd frontend && npx tsc --noEmit
+    @echo "✅ Frontend TypeScript check passed!"
+
+# Run frontend unit tests
+[group: 'Frontend']
+front-test:
+    @echo "🧪 Running frontend unit tests..."
+    cd frontend && npm run test:run
+    @echo "✅ Frontend tests passed!"
