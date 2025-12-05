@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# ═══════════════════════════════════════════════════════════════
+# FRONTEND PRE-COMMIT CHECKS
+# ═══════════════════════════════════════════════════════════════
+#
+# Runs before `git commit` to enforce code quality standards:
+# 1. ESLint (Design System rules: no raw colors, 4px grid)
+# 2. TypeScript type checking
+# 3. Prettier formatting (staged files only)
+#
+# To bypass (emergency only): git commit --no-verify
+# ═══════════════════════════════════════════════════════════════
+
+cd frontend
+
+echo "🔍 Running pre-commit checks..."
+echo ""
+
+# Run lint-staged for incremental checks
+npx lint-staged
