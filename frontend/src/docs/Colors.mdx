@@ -1,0 +1,247 @@
+import { Meta, ColorPalette, ColorItem } from '@storybook/addon-docs/blocks';
+
+<Meta title="Design System/Colors" />
+
+# Color System
+
+> **Semantic colors that work in both light and dark modes**
+
+## Principles
+
+1. **Never use raw Tailwind colors** (`bg-red-500`, `text-green-600`)
+2. **Always use semantic tokens** (`bg-semantic-error`, `text-status-connected`)
+3. **All colors must pass WCAG AA contrast** (4.5:1 for text)
+
+## Semantic Colors
+
+General-purpose colors for feedback and status.
+
+<ColorPalette>
+  <ColorItem
+    title="semantic.success"
+    subtitle="For positive feedback, confirmations"
+    colors={{
+      'Light': 'hsl(142 76% 36%)',
+      'Dark': 'hsl(142 76% 46%)'
+    }}
+  />
+  <ColorItem
+    title="semantic.warning"
+    subtitle="For warnings, attention needed"
+    colors={{
+      'Light': 'hsl(43 96% 56%)',
+      'Dark': 'hsl(43 96% 66%)'
+    }}
+  />
+  <ColorItem
+    title="semantic.error"
+    subtitle="For errors, destructive actions"
+    colors={{
+      'Light': 'hsl(0 84.2% 60.2%)',
+      'Dark': 'hsl(0 72.2% 50.6%)'
+    }}
+  />
+  <ColorItem
+    title="semantic.info"
+    subtitle="For informational messages"
+    colors={{
+      'Light': 'hsl(217 91% 60%)',
+      'Dark': 'hsl(217 91% 70%)'
+    }}
+  />
+</ColorPalette>
+
+### Usage
+
+```tsx
+import { semantic } from '@/shared/tokens';
+
+// Background
+<div className={semantic.success.bg}>
+
+// Text
+<span className={semantic.error.text}>
+
+// Border
+<div className={semantic.warning.border}>
+```
+
+## Status Colors
+
+Connection and validation states.
+
+<ColorPalette>
+  <ColorItem
+    title="status.connected"
+    subtitle="Active, online, healthy"
+    colors={{ 'Default': 'hsl(142 76% 36%)' }}
+  />
+  <ColorItem
+    title="status.validating"
+    subtitle="In progress, loading"
+    colors={{ 'Default': 'hsl(217 91% 60%)' }}
+  />
+  <ColorItem
+    title="status.pending"
+    subtitle="Waiting, queued"
+    colors={{ 'Default': 'hsl(43 96% 56%)' }}
+  />
+  <ColorItem
+    title="status.error"
+    subtitle="Failed, disconnected"
+    colors={{ 'Default': 'hsl(0 84.2% 60.2%)' }}
+  />
+</ColorPalette>
+
+### Usage
+
+```tsx
+import { status, badges } from '@/shared/tokens';
+
+// Individual classes
+<span className={status.connected.text}>Online</span>
+
+// Pre-built badge pattern (recommended)
+<Badge className={badges.status.connected}>
+  <CheckCircleIcon className="h-3.5 w-3.5" />
+  Connected
+</Badge>
+```
+
+## Atom Colors
+
+Knowledge atom type indicators.
+
+<ColorPalette>
+  <ColorItem
+    title="atom.problem"
+    subtitle="Problems, issues, bugs"
+    colors={{ 'Default': 'hsl(0 84.2% 60.2%)' }}
+  />
+  <ColorItem
+    title="atom.solution"
+    subtitle="Solutions, fixes, answers"
+    colors={{ 'Default': 'hsl(142 76% 36%)' }}
+  />
+  <ColorItem
+    title="atom.decision"
+    subtitle="Decisions, choices"
+    colors={{ 'Default': 'hsl(217 91% 60%)' }}
+  />
+  <ColorItem
+    title="atom.question"
+    subtitle="Questions, inquiries"
+    colors={{ 'Default': 'hsl(43 96% 56%)' }}
+  />
+  <ColorItem
+    title="atom.insight"
+    subtitle="Insights, learnings"
+    colors={{ 'Default': 'hsl(280 85% 63%)' }}
+  />
+</ColorPalette>
+
+### Usage
+
+```tsx
+import { atom, badges } from '@/shared/tokens';
+
+// Individual classes
+<span className={atom.problem.bg}>
+
+// Pre-built badge pattern
+<Badge className={badges.atom.problem}>Problem</Badge>
+```
+
+## Base Colors (shadcn/ui)
+
+Foundation colors inherited from shadcn/ui.
+
+<ColorPalette>
+  <ColorItem
+    title="primary"
+    subtitle="Brand color, CTAs"
+    colors={{
+      'Light': 'hsl(24.6 95% 53.1%)',
+      'Dark': 'hsl(20.5 90.2% 48.2%)'
+    }}
+  />
+  <ColorItem
+    title="secondary"
+    subtitle="Secondary actions"
+    colors={{
+      'Light': 'hsl(60 4.8% 95.9%)',
+      'Dark': 'hsl(12 6.5% 15.1%)'
+    }}
+  />
+  <ColorItem
+    title="muted"
+    subtitle="Backgrounds, disabled"
+    colors={{
+      'Light': 'hsl(60 4.8% 95.9%)',
+      'Dark': 'hsl(12 6.5% 15.1%)'
+    }}
+  />
+  <ColorItem
+    title="destructive"
+    subtitle="Delete, danger"
+    colors={{
+      'Light': 'hsl(0 84.2% 40.1%)',
+      'Dark': 'hsl(0 72.2% 50.6%)'
+    }}
+  />
+</ColorPalette>
+
+### Usage
+
+```tsx
+import { base } from '@/shared/tokens';
+
+<Button className={base.primary.bg}>Primary Action</Button>
+<div className={base.muted.bg}>Muted background</div>
+```
+
+## CSS Variables
+
+All colors are defined as CSS variables in `index.css`:
+
+```css
+:root {
+  --semantic-success: 142 76% 36%;
+  --semantic-warning: 43 96% 56%;
+  --semantic-error: 0 84.2% 60.2%;
+  --semantic-info: 217 91% 60%;
+
+  --status-connected: 142 76% 36%;
+  --status-validating: 217 91% 60%;
+  --status-pending: 43 96% 56%;
+  --status-error: 0 84.2% 60.2%;
+}
+
+.dark {
+  /* Dark mode overrides */
+  --semantic-success: 142 76% 46%;
+  /* ... */
+}
+```
+
+## Migration Guide
+
+### From Raw Colors
+
+| Before (❌) | After (✅) |
+|------------|-----------|
+| `bg-green-500` | `bg-semantic-success` |
+| `text-red-600` | `text-semantic-error` |
+| `border-blue-500` | `border-semantic-info` |
+| `bg-amber-500` | `bg-semantic-warning` |
+
+### From Manual Classes to Tokens
+
+```tsx
+// Before
+<Badge className="flex items-center gap-1.5 border-status-connected text-status-connected bg-status-connected/10">
+
+// After
+import { badges } from '@/shared/tokens';
+<Badge className={badges.status.connected}>
+```

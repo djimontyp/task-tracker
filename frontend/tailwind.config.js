@@ -8,17 +8,31 @@ module.exports = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: {
+        DEFAULT: '1rem',
+        sm: '1.5rem',
+        lg: '2rem',
+        xl: '2.5rem',
+        '2xl': '3rem',
+      },
       screens: {
-        "2xl": "1400px",
+        sm: '640px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
+        '2xl': '1536px',
+        '3xl': '1920px',
+        '4xl': '2560px',
       },
     },
     extend: {
       screens: {
         xs: "375px",
+        '3xl': '1920px',
+        '4xl': '2560px',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Raleway', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -101,6 +115,23 @@ module.exports = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      letterSpacing: {
+        tight: "-0.01em",
+        normal: "0em",
+        relaxed: "0.015em",
+        loose: "0.025em",
+        "extra-loose": "0.05em",
+      },
+      boxShadow: {
+        // Subtle permanent glow (for cards at rest)
+        glow: "0 0 25px hsl(var(--accent-glow) / 2), 0 0 50px hsl(var(--accent-glow))",
+        // Stronger hover glow
+        "glow-hover": "0 0 35px hsl(var(--accent-glow) / 2.5), 0 0 70px hsl(var(--accent-glow) / 1.5)",
+        // Small subtle glow
+        "glow-sm": "0 0 15px hsl(var(--accent-glow) / 1.5), 0 0 30px hsl(var(--accent-glow) / 0.5)",
+        // Large prominent glow
+        "glow-lg": "0 0 50px hsl(var(--accent-glow) / 2.5), 0 0 100px hsl(var(--accent-glow) / 1.5)",
       },
       keyframes: {
         "fade-in": {

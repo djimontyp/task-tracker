@@ -16,8 +16,12 @@
     --secondary-foreground: 24 9.8% 10%;
     --muted: 60 4.8% 95.9%;
     --muted-foreground: 25 5.3% 33.3%;
-    --accent: 60 4.8% 95.9%;
+    --accent: 38 51% 50%;
     --accent-foreground: 24 9.8% 10%;
+    --accent-light: 38 60% 59%;
+    --accent-dark: 38 76% 31%;
+    --accent-muted: 38 51% 50% / 0.25;
+    --accent-glow: 38 51% 50% / 0.45;
     --destructive: 0 84.2% 40.1%;
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 20 5.9% 90%;
@@ -43,7 +47,7 @@
     --atom-decision: 217 91% 60%;
     --atom-question: 43 96% 56%;
     --atom-insight: 280 85% 63%;
-    --atom-pattern: 280 85% 63%;
+    --atom-pattern: 210 100% 50%;
     --atom-requirement: 217 91% 60%;
     /* Status indicator colors */
     --status-connected: 142 76% 36%;
@@ -86,8 +90,12 @@
     --secondary-foreground: 60 9.1% 97.8%;
     --muted: 12 6.5% 15.1%;
     --muted-foreground: 24 5.4% 63.9%;
-    --accent: 12 6.5% 15.1%;
+    --accent: 38 55% 55%;
     --accent-foreground: 60 9.1% 97.8%;
+    --accent-light: 38 60% 65%;
+    --accent-dark: 38 70% 40%;
+    --accent-muted: 38 55% 55% / 0.25;
+    --accent-glow: 38 55% 55% / 0.5;
     --destructive: 0 72.2% 50.6%;
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 12 6.5% 15.1%;
@@ -112,7 +120,7 @@
     --atom-decision: 217 91% 60%;
     --atom-question: 43 96% 56%;
     --atom-insight: 280 85% 63%;
-    --atom-pattern: 280 85% 63%;
+    --atom-pattern: 210 100% 60%;
     --atom-requirement: 217 91% 60%;
     /* Status indicator colors */
     --status-connected: 142 76% 36%;
@@ -149,10 +157,11 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    font-family: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    letter-spacing: 0.015em;
   }
 }
 
