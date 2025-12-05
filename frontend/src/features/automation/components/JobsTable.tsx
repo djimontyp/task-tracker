@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
 import {
@@ -10,10 +11,11 @@ import { Button } from '@/shared/ui/button'
 import { Badge } from '@/shared/ui/badge'
 import { Switch } from '@/shared/ui/switch'
 import { DataTable } from '@/shared/components/DataTable'
-import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
+import { MoreVertical } from 'lucide-react'
 import { useSchedulerJobs, useDeleteJob, useToggleJob, useTriggerJob } from '../api/automationService'
 import type { SchedulerJob } from '../types'
 import type { ColumnDef } from '@tanstack/react-table'
+import { getJobStatusVariant } from '@/shared/utils/badgeVariants'
 import {
   useReactTable,
   getCoreRowModel,
@@ -31,49 +33,34 @@ export function JobsTable({ onEdit, onViewHistory }: JobsTableProps) {
   const toggleMutation = useToggleJob()
   const triggerMutation = useTriggerJob()
 
-  const handleDelete = async (jobId: string) => {
+  const handleDelete = useCallback(async (jobId: string) => {
     try {
       await deleteMutation.mutateAsync(jobId)
       toast.success('Job deleted successfully')
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete job')
     }
-  }
+  }, [deleteMutation])
 
-  const handleToggle = async (jobId: string) => {
+  const handleToggle = useCallback(async (jobId: string) => {
     try {
       await toggleMutation.mutateAsync(jobId)
       toast.success('Job status updated')
-    } catch (error) {
+    } catch {
       toast.error('Failed to update job status')
     }
-  }
+  }, [toggleMutation])
 
-  const handleTrigger = async (jobId: string) => {
+  const handleTrigger = useCallback(async (jobId: string) => {
     try {
       await triggerMutation.mutateAsync(jobId)
       toast.success('Job triggered successfully')
-    } catch (error) {
+    } catch {
       toast.error('Failed to trigger job')
     }
-  }
+  }, [triggerMutation])
 
-  const getStatusVariant = (
-    status: string
-  ): 'default' | 'success' | 'destructive' | 'secondary' => {
-    switch (status) {
-      case 'success':
-        return 'success'
-      case 'failed':
-        return 'destructive'
-      case 'running':
-        return 'secondary'
-      default:
-        return 'default'
-    }
-  }
-
-  const columns: ColumnDef<SchedulerJob>[] = [
+  const columns: ColumnDef<SchedulerJob>[] = useMemo(() => [
     {
       accessorKey: 'name',
       header: 'Job Name',
@@ -83,7 +70,7 @@ export function JobsTable({ onEdit, onViewHistory }: JobsTableProps) {
       accessorKey: 'schedule_cron',
       header: 'Schedule',
       cell: ({ row }) => (
-        <code className="text-xs bg-muted px-2 py-1 rounded">{row.original.schedule_cron}</code>
+        <code className="text-sm bg-muted px-2 py-2 rounded">{row.original.schedule_cron}</code>
       ),
     },
     {
@@ -94,6 +81,7 @@ export function JobsTable({ onEdit, onViewHistory }: JobsTableProps) {
           checked={row.original.enabled}
           onCheckedChange={() => handleToggle(row.original.id)}
           disabled={toggleMutation.isPending}
+          aria-label={`Toggle ${row.original.name} enabled status`}
         />
       ),
     },
@@ -101,7 +89,7 @@ export function JobsTable({ onEdit, onViewHistory }: JobsTableProps) {
       accessorKey: 'status',
       header: 'Status',
       cell: ({ row }) => (
-        <Badge variant={getStatusVariant(row.original.status)}>{row.original.status}</Badge>
+        <Badge variant={getJobStatusVariant(row.original.status)}>{row.original.status}</Badge>
       ),
     },
     {
@@ -130,11 +118,12 @@ export function JobsTable({ onEdit, onViewHistory }: JobsTableProps) {
     },
     {
       id: 'actions',
+      header: () => <span className="sr-only">Actions</span>,
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <EllipsisVerticalIcon className="h-4 w-4" />
+            <Button variant="ghost" size="icon" aria-label={`Job actions for ${row.original.name}`}>
+              <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -159,7 +148,7 @@ export function JobsTable({ onEdit, onViewHistory }: JobsTableProps) {
         </DropdownMenu>
       ),
     },
-  ]
+  ], [handleToggle, toggleMutation.isPending, handleTrigger, onEdit, onViewHistory, handleDelete])
 
   const table = useReactTable({
     data: jobs || [],

@@ -19,7 +19,7 @@ import {
   Label,
   Checkbox,
 } from '@/shared/ui';
-import { SparklesIcon } from '@heroicons/react/24/outline';
+import { Sparkles } from 'lucide-react';
 import { TimeWindowSelector } from '@/features/analysis/components/TimeWindowSelector';
 import { knowledgeService } from '../api/knowledgeService';
 import { useWebSocket } from '@/features/websocket/hooks/useWebSocket';
@@ -73,10 +73,12 @@ export function KnowledgeExtractionPanel({
     };
 
     fetchAgentConfigs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useWebSocket({
     topics: ['knowledge'],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onMessage: (data: any) => {
       if (!data?.type) return;
 
@@ -309,7 +311,7 @@ export function KnowledgeExtractionPanel({
         </div>
 
         <Button onClick={handleExtract} disabled={!agentConfigId || extracting} className="w-full">
-          <SparklesIcon className="h-4 w-4 mr-2" />
+          <Sparkles className="h-4 w-4 mr-2" />
           {extracting ? 'Extracting...' : 'Extract Knowledge'}
         </Button>
 
@@ -317,7 +319,7 @@ export function KnowledgeExtractionPanel({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Progress</span>
-              <span className="text-gray-500">
+              <span className="text-muted-foreground">
                 {progress.status === 'running'
                   ? 'Processing...'
                   : progress.status === 'completed'
@@ -329,28 +331,28 @@ export function KnowledgeExtractionPanel({
             {progress.status === 'running' && <Progress value={undefined} className="w-full" />}
 
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="p-2 bg-blue-50 dark:bg-blue-950 rounded">
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              <div className="p-2 bg-semantic-info/10 rounded">
+                <div className="text-2xl font-bold text-semantic-info">
                   {progress.topics_created}
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Topics</div>
+                <div className="text-xs text-muted-foreground">Topics</div>
               </div>
-              <div className="p-2 bg-green-50 dark:bg-green-950 rounded">
-                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+              <div className="p-2 bg-semantic-success/10 rounded">
+                <div className="text-2xl font-bold text-semantic-success">
                   {progress.atoms_created}
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Atoms</div>
+                <div className="text-xs text-muted-foreground">Atoms</div>
               </div>
-              <div className="p-2 bg-yellow-50 dark:bg-yellow-950 rounded">
-                <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+              <div className="p-2 bg-semantic-warning/10 rounded">
+                <div className="text-2xl font-bold text-semantic-warning">
                   {progress.versions_created}
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Versions</div>
+                <div className="text-xs text-muted-foreground">Versions</div>
               </div>
             </div>
 
             {progress.error && (
-              <div className="p-3 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 text-sm rounded">
+              <div className="p-4 bg-semantic-error/10 text-semantic-error text-sm rounded">
                 {progress.error}
               </div>
             )}

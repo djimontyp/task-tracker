@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { Card, Badge, Button, Separator } from '@/shared/ui'
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { Pencil, Trash2 } from 'lucide-react'
 import type { ProjectConfig } from '../types'
 
 interface ProjectCardProps {
@@ -22,13 +22,13 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
 }) => {
   return (
     <Card className="p-4 hover:shadow-md transition-shadow">
-      <div className="space-y-3">
+      <div className="space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-2">
               <h3 className="text-lg font-semibold">{project.name}</h3>
-              <Badge variant="outline" className={project.is_active ? 'bg-semantic-success text-white border-semantic-success' : 'bg-slate-500 text-white border-slate-600'}>
+              <Badge variant="outline" className={project.is_active ? 'bg-semantic-success text-white border-semantic-success' : 'bg-muted text-muted-foreground border-border'}>
                 {project.is_active ? 'Active' : 'Inactive'}
               </Badge>
             </div>
@@ -42,7 +42,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         {project.keywords.length > 0 && (
           <div>
             <div className="text-sm font-medium mb-2">Keywords</div>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-2">
               {project.keywords.map((keyword, index) => (
                 <Badge key={index} variant="outline" className="text-xs">
                   {keyword}
@@ -60,7 +60,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               {project.components.map((component, index) => (
                 <div
                   key={`${component.name}-${index}`}
-                  className="rounded border p-2 text-xs space-y-1"
+                  className="rounded border p-2 text-xs space-y-2"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-sm">{component.name}</span>
@@ -71,7 +71,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                     )}
                   </div>
                   {component.keywords.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-2">
                       {component.keywords.map((keyword, keywordIndex) => (
                         <Badge key={keywordIndex} variant="outline" className="text-2xs">
                           {keyword}
@@ -89,7 +89,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         {Object.keys(project.glossary).length > 0 && (
           <div className="space-y-2">
             <div className="text-sm font-medium">Glossary</div>
-            <div className="space-y-1 text-xs text-muted-foreground">
+            <div className="space-y-2 text-xs text-muted-foreground">
               {Object.entries(project.glossary).map(([term, definition]) => (
                 <div key={term} className="flex gap-2">
                   <span className="font-medium text-foreground">{term}:</span>
@@ -116,9 +116,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                     low_keywords: 'Low',
                   }
                   return (
-                    <div key={key} className="space-y-1">
+                    <div key={key} className="space-y-2">
                       <div className="font-medium text-muted-foreground">{labelMap[key]}</div>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-2">
                         {keywords.map((keyword, index) => (
                           <Badge key={index} variant="outline" className="text-2xs">
                             {keyword}
@@ -134,15 +134,15 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         )}
 
         {/* Assignees & PM */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
-            <div className="text-sm font-medium mb-1">Default Assignees</div>
-            <div className="flex flex-wrap gap-1">
+            <div className="text-sm font-medium mb-2">Default Assignees</div>
+            <div className="flex flex-wrap gap-2">
               {project.default_assignee_ids.length === 0 ? (
                 <span className="text-muted-foreground">None</span>
               ) : (
                 project.default_assignee_ids.map((id) => (
-                  <Badge key={id} variant="outline" className="text-2xs bg-purple-50">
+                  <Badge key={id} variant="outline" className="text-2xs bg-accent/10">
                     #{id}
                   </Badge>
                 ))
@@ -150,7 +150,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             </div>
           </div>
           <div>
-            <div className="text-sm font-medium mb-1">Project Manager</div>
+            <div className="text-sm font-medium mb-2">Project Manager</div>
             <Badge variant="outline" className="text-2xs">
               User #{project.pm_user_id}
             </Badge>
@@ -165,7 +165,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
 
         {/* Actions */}
         {(onEdit || onDelete) && (
-          <div className="flex gap-2 pt-3 border-t">
+          <div className="flex gap-2 pt-4 border-t">
             {onEdit && (
               <Button
                 size="sm"
@@ -174,7 +174,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                 disabled={isLoading}
                 className="flex-1"
               >
-                <PencilIcon className="h-4 w-4 mr-1" />
+                <Pencil className="h-4 w-4 mr-2" />
                 Edit
               </Button>
             )}
@@ -185,7 +185,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                 onClick={() => onDelete(project.id)}
                 disabled={isLoading}
               >
-                <TrashIcon className="h-4 w-4" />
+                <Trash2 className="h-4 w-4" />
               </Button>
             )}
           </div>

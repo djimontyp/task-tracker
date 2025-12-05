@@ -13,6 +13,7 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Switch } from '@/shared/ui/switch'
+import { FormField } from '@/shared/patterns'
 import { CronPicker } from './CronPicker'
 import { useCreateJob, useUpdateJob } from '../api/automationService'
 import type { SchedulerJob } from '../types'
@@ -72,7 +73,7 @@ export function CreateEditJobDialog({ open, onOpenChange, job }: CreateEditJobDi
         toast.success('Job created successfully')
       }
       onOpenChange(false)
-    } catch (error) {
+    } catch {
       toast.error(isEditing ? 'Failed to update job' : 'Failed to create job')
     }
   }
@@ -85,18 +86,15 @@ export function CreateEditJobDialog({ open, onOpenChange, job }: CreateEditJobDi
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">Job Name</Label>
+          <FormField label="Job Name" error={errors.name?.message}>
             <Input
               id="name"
               {...register('name')}
               placeholder="Daily Knowledge Extraction"
             />
-            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-          </div>
+          </FormField>
 
-          <div className="space-y-2">
-            <Label>Schedule (Cron Expression)</Label>
+          <FormField label="Schedule (Cron Expression)" error={errors.schedule_cron?.message}>
             <Controller
               control={control}
               name="schedule_cron"
@@ -104,10 +102,7 @@ export function CreateEditJobDialog({ open, onOpenChange, job }: CreateEditJobDi
                 <CronPicker value={field.value} onChange={field.onChange} />
               )}
             />
-            {errors.schedule_cron && (
-              <p className="text-sm text-destructive">{errors.schedule_cron.message}</p>
-            )}
-          </div>
+          </FormField>
 
           <div className="flex items-center justify-between">
             <Label htmlFor="enabled">Enable Job</Label>

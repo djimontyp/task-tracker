@@ -1,7 +1,7 @@
 import { useWizardStore } from '../store/wizardStore'
 import { Card } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
-import { ClockIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
+import { Clock, Settings } from 'lucide-react'
 
 function describeCron(cron: string): string {
   if (cron === '0 * * * *') return 'Every hour'
@@ -20,9 +20,9 @@ export function ReviewActivateStep() {
   }
 
   const actionColors = {
-    approve: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200',
-    reject: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200',
-    manual_review: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200',
+    approve: 'bg-semantic-success/10 text-semantic-success',
+    reject: 'bg-semantic-error/10 text-semantic-error',
+    manual_review: 'bg-semantic-warning/10 text-semantic-warning',
   }
 
   return (
@@ -36,16 +36,16 @@ export function ReviewActivateStep() {
 
       <div className="grid gap-4">
         <Card className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="size-10 rounded-lg bg-blue-100 dark:bg-blue-950/30 flex items-center justify-center shrink-0">
-              <ClockIcon className="size-5 text-blue-600 dark:text-blue-400" />
+          <div className="flex items-start gap-4">
+            <div className="size-10 rounded-lg bg-semantic-info/10 flex items-center justify-center shrink-0">
+              <Clock className="size-5 text-semantic-info" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-medium mb-1">Schedule</h4>
+              <h4 className="text-sm font-medium mb-2">Schedule</h4>
               <p className="text-sm text-muted-foreground">
                 {describeCron(formData.schedule.cron_expression)}
               </p>
-              <p className="text-xs text-muted-foreground mt-1 font-mono">
+              <p className="text-xs text-muted-foreground mt-2 font-mono">
                 {formData.schedule.cron_expression}
               </p>
             </div>
@@ -53,12 +53,12 @@ export function ReviewActivateStep() {
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="size-10 rounded-lg bg-violet-100 dark:bg-violet-950/30 flex items-center justify-center shrink-0">
-              <Cog6ToothIcon className="size-5 text-violet-600 dark:text-violet-400" />
+          <div className="flex items-start gap-4">
+            <div className="size-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+              <Settings className="size-5 text-accent-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-medium mb-1">Automation Rules</h4>
+              <h4 className="text-sm font-medium mb-2">Automation Rules</h4>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">Action:</span>
@@ -66,7 +66,7 @@ export function ReviewActivateStep() {
                     {actionLabels[formData.rules.action]}
                   </Badge>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground">Confidence:</span>{' '}
                     <span className="font-mono font-medium">
@@ -87,11 +87,11 @@ export function ReviewActivateStep() {
 
       </div>
 
-      <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-4">
-        <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+      <div className="rounded-lg bg-semantic-info/10 border border-semantic-info/20 p-4">
+        <h4 className="text-sm font-medium text-semantic-info mb-2">
           What happens next?
         </h4>
-        <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
+        <ul className="text-sm text-semantic-info/80 space-y-2">
           <li className="flex items-start gap-2">
             <span className="shrink-0">1.</span>
             <span>Scheduler job will be created with your configured schedule</span>

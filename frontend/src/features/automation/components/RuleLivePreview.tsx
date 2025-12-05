@@ -28,13 +28,13 @@ export function RuleLivePreview({ conditions, action, logicOperator }: RuleLiveP
   const getActionColor = (act: string) => {
     switch (act) {
       case 'approve':
-        return 'text-green-600 dark:text-green-400'
+        return 'text-semantic-success'
       case 'reject':
-        return 'text-red-600 dark:text-red-400'
+        return 'text-semantic-error'
       case 'escalate':
-        return 'text-yellow-600 dark:text-yellow-400'
+        return 'text-semantic-warning'
       case 'notify':
-        return 'text-blue-600 dark:text-blue-400'
+        return 'text-semantic-info'
       default:
         return 'text-muted-foreground'
     }
@@ -43,7 +43,7 @@ export function RuleLivePreview({ conditions, action, logicOperator }: RuleLiveP
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Live Preview</CardTitle>
+        <CardTitle>Live Preview</CardTitle>
       </CardHeader>
       <CardContent>
         {!hasValidConditions ? (
@@ -74,7 +74,7 @@ export function RuleLivePreview({ conditions, action, logicOperator }: RuleLiveP
                   {preview.versions.slice(0, 5).map((version, index) => (
                     <div
                       key={version.id || index}
-                      className="text-xs p-2 bg-muted/50 rounded border space-y-1"
+                      className="text-xs p-2 bg-muted/50 rounded border space-y-2"
                     >
                       <div className="font-medium">{version.topic_name}</div>
                       <div className="text-muted-foreground line-clamp-2">

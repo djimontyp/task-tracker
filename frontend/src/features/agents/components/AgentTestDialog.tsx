@@ -12,6 +12,7 @@ import {
   Spinner,
   Badge,
 } from '@/shared/ui'
+import { FormField } from '@/shared/patterns'
 import { AgentConfig } from '@/features/agents/types'
 import { agentService } from '@/features/agents/api'
 import { toast } from 'sonner'
@@ -94,9 +95,9 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
   const characterCount = prompt.length
   const characterCountColor =
     characterCount < MIN_PROMPT_LENGTH
-      ? 'text-red-500'
+      ? 'text-semantic-error'
       : characterCount > MAX_PROMPT_LENGTH
-        ? 'text-red-500'
+        ? 'text-semantic-error'
         : 'text-muted-foreground'
 
   return (
@@ -108,8 +109,7 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
 
         <div className="space-y-4">
           {/* Prompt Input */}
-          <div className="space-y-2">
-            <Label htmlFor="prompt">Prompt</Label>
+          <FormField label="Prompt">
             <Textarea
               id="prompt"
               value={prompt}
@@ -118,17 +118,17 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
               className="min-h-[120px] resize-none"
               disabled={testMutation.isPending}
             />
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center justify-between text-xs mt-2">
               <span className={characterCountColor}>
                 Characters: {characterCount}/{MAX_PROMPT_LENGTH}
               </span>
               {characterCount < MIN_PROMPT_LENGTH && (
-                <span className="text-red-500">
+                <span className="text-semantic-error">
                   Minimum {MIN_PROMPT_LENGTH} characters required
                 </span>
               )}
             </div>
-          </div>
+          </FormField>
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
@@ -167,7 +167,7 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
           )}
 
           {result && !testMutation.isPending && (
-            <div className="space-y-3 animate-fade-in">
+            <div className="space-y-4 animate-fade-in">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold">Test Results</span>
                 <Badge variant="default">Success</Badge>
@@ -175,25 +175,25 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
 
               <div className="space-y-2">
                 <Label>Response</Label>
-                <div className="max-h-[300px] overflow-y-auto rounded-md border border-input bg-muted/50 px-3 py-2">
+                <div className="max-h-[300px] overflow-y-auto rounded-md border border-input bg-muted/50 px-4 py-2">
                   <pre className="text-sm whitespace-pre-wrap break-words">
                     {result.response}
                   </pre>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 text-sm">
+              <div className="grid grid-cols-3 gap-4 text-sm">
                 <div>
                   <span className="text-muted-foreground">Model:</span>
-                  <p className="font-mono text-xs mt-1">{result.model_name}</p>
+                  <p className="font-mono text-xs mt-2">{result.model_name}</p>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Provider:</span>
-                  <p className="font-mono text-xs mt-1 capitalize">{result.provider_type}</p>
+                  <p className="font-mono text-xs mt-2 capitalize">{result.provider_type}</p>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Time:</span>
-                  <p className="font-mono text-xs mt-1">
+                  <p className="font-mono text-xs mt-2">
                     {(result.elapsed_time * 1000).toFixed(0)} ms
                   </p>
                 </div>

@@ -100,18 +100,18 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
               </DialogTitle>
               {messageData && (
                 <div className="space-y-2">
-                  <p id="message-inspect-description" className="text-sm text-gray-600 break-words">
+                  <p id="message-inspect-description" className="text-sm text-muted-foreground break-words">
                     {truncateContent(messageData.message.content)}
                   </p>
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant={messageData.message.source === 'telegram' ? 'default' : 'secondary'}>
                       {messageData.message.source === 'telegram' ? 'Telegram' : 'Manual'}
                     </Badge>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       {formatDate(messageData.message.created_at)}
                     </span>
                     {messageData.message.telegram_message_id && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-muted-foreground">
                         ID: {messageData.message.telegram_message_id}
                       </span>
                     )}
@@ -125,7 +125,7 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
         <div className="flex-1 overflow-hidden">
           {isLoading && (
             <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" role="status" aria-label="Loading">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" role="status" aria-label="Loading">
                 <span className="sr-only">Loading...</span>
               </div>
             </div>
@@ -134,8 +134,8 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
           {error && !messageData && (
             <div className="flex flex-col items-center justify-center h-full gap-4 p-6">
               <div className="text-center">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load message</h3>
-                <p className="text-sm text-gray-500">{error}</p>
+                <h3 className="text-lg font-medium text-foreground mb-2">Failed to load message</h3>
+                <p className="text-sm text-muted-foreground">{error}</p>
               </div>
               <Button onClick={() => window.location.reload()} variant="outline">
                 Retry
@@ -148,19 +148,19 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
               <TabsList className="w-full justify-start px-6 border-b rounded-none bg-transparent h-auto">
                 <TabsTrigger
                   value="classification"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
                 >
                   Classification
                 </TabsTrigger>
                 <TabsTrigger
                   value="atoms"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
                 >
                   Atoms
                 </TabsTrigger>
                 <TabsTrigger
                   value="history"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
                 >
                   History
                 </TabsTrigger>

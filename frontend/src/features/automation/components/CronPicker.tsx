@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Input } from '@/shared/ui/input'
-import { Label } from '@/shared/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/shared/ui/radio-group'
 import { cn } from '@/shared/lib/utils'
+import { FormField } from '@/shared/patterns'
 
 interface CronPickerProps {
   value: string
@@ -110,16 +110,15 @@ export function CronPicker({ value, onChange, onValidate, className }: CronPicke
 
   return (
     <div className={cn('space-y-4', className)}>
-      <div>
-        <Label className="text-sm font-medium mb-3 block">Schedule Frequency</Label>
+      <FormField label="Schedule Frequency">
         <RadioGroup value={selectedPreset} onValueChange={handlePresetChange}>
-          <div className="grid gap-3">
+          <div className="grid gap-4">
             {Object.entries(CRON_PRESETS).map(([key, config]) => (
               <label
                 key={key}
                 htmlFor={key}
                 className={cn(
-                  'flex items-start space-x-3 rounded-lg border p-3 transition-colors cursor-pointer',
+                  'flex items-start space-x-4 rounded-lg border p-4 transition-colors cursor-pointer',
                   selectedPreset === key
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-primary/50'
@@ -130,34 +129,31 @@ export function CronPicker({ value, onChange, onValidate, className }: CronPicke
                   <span className="text-sm font-medium leading-none cursor-pointer block">
                     {config.label}
                   </span>
-                  <p className="text-xs text-muted-foreground mt-1">{config.description}</p>
+                  <p className="text-xs text-muted-foreground mt-2">{config.description}</p>
                 </div>
               </label>
             ))}
           </div>
         </RadioGroup>
-      </div>
+      </FormField>
 
       {selectedPreset === 'custom' && (
-        <div>
-          <Label htmlFor="custom-cron" className="text-sm font-medium">
-            Cron Expression
-          </Label>
+        <FormField
+          label="Cron Expression"
+          description="Format: minute hour day month weekday (0-6 = Sun-Sat)"
+          error={!isValid ? 'Invalid cron expression' : undefined}
+        >
           <Input
-            id="custom-cron"
             value={customCron}
             onChange={(e) => handleCustomCronChange(e.target.value)}
             placeholder="0 9 * * *"
-            className={cn('mt-2 font-mono', !isValid && 'border-destructive')}
+            className={cn('font-mono', !isValid && 'border-destructive')}
             aria-invalid={!isValid}
           />
-          <p className="text-xs text-muted-foreground mt-1.5">
-            Format: minute hour day month weekday (0-6 = Sun-Sat)
-          </p>
-        </div>
+        </FormField>
       )}
 
-      <div className="rounded-lg bg-muted/50 p-3 border border-border">
+      <div className="rounded-lg bg-muted/50 p-4 border border-border">
         <p className={cn('text-sm', isValid ? 'text-foreground' : 'text-destructive')}>
           {isValid ? (
             <>

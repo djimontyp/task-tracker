@@ -19,16 +19,16 @@ export const HealthCards = ({ metrics }: HealthCardsProps) => {
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {metrics.map((metric) => (
         <Card key={metric.task_name} className="hover:shadow-lg transition-shadow">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-4">
             <CardTitle className="text-sm font-medium text-muted-foreground truncate" title={metric.task_name}>
               {formatTaskName(metric.task_name)}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
               {metric.running > 0 && (
-                <Badge variant="default" className="bg-yellow-600 hover:bg-yellow-600/80">
-                  <span className="flex items-center gap-1">
+                <Badge variant="default" className="bg-status-validating hover:bg-status-validating/80">
+                  <span className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                     Виконується: {metric.running}
                   </span>
@@ -51,7 +51,7 @@ export const HealthCards = ({ metrics }: HealthCardsProps) => {
               )}
             </div>
 
-            <div className="space-y-1 text-sm">
+            <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Всього:</span>
                 <span className="font-medium">{metric.total_executions}</span>
@@ -88,7 +88,7 @@ function formatDuration(ms: number): string {
 }
 
 function getSuccessRateColor(rate: number): string {
-  if (rate >= 95) return 'text-green-600 dark:text-green-400'
-  if (rate >= 80) return 'text-yellow-600 dark:text-yellow-400'
-  return 'text-red-600 dark:text-red-400'
+  if (rate >= 95) return 'text-semantic-success'
+  if (rate >= 80) return 'text-semantic-warning'
+  return 'text-semantic-error'
 }

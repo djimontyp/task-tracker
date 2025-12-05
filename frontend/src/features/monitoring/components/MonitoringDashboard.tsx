@@ -54,7 +54,7 @@ export const MonitoringDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Моніторинг фонових задач</h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-2">
             Статус та історія виконання всіх задач системи
           </p>
         </div>
@@ -62,10 +62,10 @@ export const MonitoringDashboard = () => {
           <div
             className={`w-2 h-2 rounded-full ${
               isConnected
-                ? 'bg-green-500 animate-pulse'
+                ? 'bg-status-connected animate-pulse'
                 : connectionState === 'reconnecting'
-                  ? 'bg-yellow-500 animate-pulse'
-                  : 'bg-red-500'
+                  ? 'bg-status-validating animate-pulse'
+                  : 'bg-status-error'
             }`}
           />
           <span className="text-sm text-muted-foreground">

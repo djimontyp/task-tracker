@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Badge, Button } from '@/shared/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
-import { ClockIcon } from '@heroicons/react/24/outline'
+import { Clock } from 'lucide-react'
 import { versioningService } from '@/features/knowledge/api/versioningService'
 import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
 import { VersionHistoryList } from '@/features/knowledge/components/VersionHistoryList'
@@ -13,13 +13,13 @@ interface AtomCardProps {
 }
 
 const atomTypeColors: Record<AtomType, string> = {
-  problem: 'bg-semantic-error text-white',
-  solution: 'bg-semantic-success text-white',
-  decision: 'bg-semantic-info text-white',
-  question: 'bg-semantic-warning text-white',
-  insight: 'bg-purple-500 text-white',
-  pattern: 'bg-purple-500 text-white',
-  requirement: 'bg-semantic-info text-white',
+  problem: 'bg-[hsl(var(--atom-problem))] text-white',
+  solution: 'bg-[hsl(var(--atom-solution))] text-white',
+  decision: 'bg-[hsl(var(--atom-decision))] text-white',
+  question: 'bg-[hsl(var(--atom-question))] text-white',
+  insight: 'bg-[hsl(var(--atom-insight))] text-white',
+  pattern: 'bg-[hsl(var(--atom-pattern))] text-white',
+  requirement: 'bg-[hsl(var(--atom-requirement))] text-white',
 }
 
 const atomTypeLabels: Record<AtomType, string> = {
@@ -36,19 +36,19 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
   const [pendingVersionsCount, setPendingVersionsCount] = useState(0)
   const [showVersionHistory, setShowVersionHistory] = useState(false)
 
-  useEffect(() => {
-    loadPendingVersions()
-  }, [atom.id])
-
-  const loadPendingVersions = async () => {
+  const loadPendingVersions = React.useCallback(async () => {
     try {
       const versions = await versioningService.getAtomVersions(atom.id)
       const pendingCount = versions.filter((v) => !v.approved).length
       setPendingVersionsCount(pendingCount)
-    } catch (error) {
-      console.error('Failed to load atom versions:', error)
+    } catch {
+      // Silently handle error - versions may not be available
     }
-  }
+  }, [atom.id])
+
+  useEffect(() => {
+    loadPendingVersions()
+  }, [loadPendingVersions])
 
   useWebSocket({
     topics: ['knowledge'],
@@ -65,14 +65,21 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
     },
   })
 
+  const isFeatured = atom.confidence !== null && atom.confidence > 0.8
+  // Featured atoms: always glow + stronger on hover
+  // Regular atoms: glow only on hover
+  const glowClass = isFeatured
+    ? 'shadow-glow-sm hover:shadow-glow-hover'
+    : 'hover:shadow-glow-sm'
+
   return (
     <Card
-      className={`p-4 hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`}
+      className={`p-4 transition-all duration-300 ${glowClass} ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}
     >
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-start justify-between gap-2">
-          <span className={`text-xs font-semibold px-2 py-1 rounded-full ${atomTypeColors[atom.type]}`}>
+          <span className={`text-xs font-semibold px-2 py-2 rounded-full ${atomTypeColors[atom.type]}`}>
             {atomTypeLabels[atom.type]}
           </span>
           {atom.confidence !== null && (
@@ -88,7 +95,7 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
         </div>
 
         {atom.user_approved && (
-          <div className="flex items-center gap-1 text-semantic-success">
+          <div className="flex items-center gap-2 text-semantic-success">
             <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
@@ -115,7 +122,7 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
               }}
               aria-label="View version history"
             >
-              <ClockIcon className="h-3 w-3 mr-1" />
+              <Clock className="h-3 w-3 mr-2" />
               View History
             </Button>
           </div>
@@ -131,8 +138,8 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
             entityType="atom"
             entityId={atom.id}
             enableBulkActions={true}
-            onSelectVersion={(version) => {
-              console.log('Selected version:', version)
+            onSelectVersion={(_version) => {
+              // Version selected - implementation pending
             }}
           />
         </DialogContent>

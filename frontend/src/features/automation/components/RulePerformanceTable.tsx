@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -8,10 +9,11 @@ import {
 import { Button } from '@/shared/ui/button'
 import { Badge } from '@/shared/ui/badge'
 import { DataTable } from '@/shared/components/DataTable'
-import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
+import { MoreVertical } from 'lucide-react'
 import { useAutomationRules, useDeleteRule } from '../api/automationService'
 import type { AutomationRule } from '../types'
 import type { ColumnDef } from '@tanstack/react-table'
+import { getRuleActionVariant } from '@/shared/utils/badgeVariants'
 import {
   useReactTable,
   getCoreRowModel,
@@ -26,33 +28,16 @@ export function RulePerformanceTable({ onEdit }: RulePerformanceTableProps) {
   const { data: rules, isLoading } = useAutomationRules()
   const deleteMutation = useDeleteRule()
 
-  const handleDelete = async (ruleId: string) => {
+  const handleDelete = useCallback(async (ruleId: string) => {
     try {
       await deleteMutation.mutateAsync(ruleId)
       toast.success('Rule deleted successfully')
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete rule')
     }
-  }
+  }, [deleteMutation])
 
-  const getActionVariant = (
-    action: string
-  ): 'default' | 'secondary' | 'success' | 'destructive' => {
-    switch (action) {
-      case 'approve':
-        return 'success'
-      case 'reject':
-        return 'destructive'
-      case 'escalate':
-        return 'secondary'
-      case 'notify':
-        return 'default'
-      default:
-        return 'default'
-    }
-  }
-
-  const columns: ColumnDef<AutomationRule>[] = [
+  const columns: ColumnDef<AutomationRule>[] = useMemo(() => [
     {
       accessorKey: 'name',
       header: 'Rule Name',
@@ -76,7 +61,7 @@ export function RulePerformanceTable({ onEdit }: RulePerformanceTableProps) {
       accessorKey: 'action',
       header: 'Action',
       cell: ({ row }) => (
-        <Badge variant={getActionVariant(row.original.action)}>{row.original.action}</Badge>
+        <Badge variant={getRuleActionVariant(row.original.action)}>{row.original.action}</Badge>
       ),
     },
     {
@@ -103,11 +88,12 @@ export function RulePerformanceTable({ onEdit }: RulePerformanceTableProps) {
     },
     {
       id: 'actions',
+      header: () => <span className="sr-only">Actions</span>,
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <EllipsisVerticalIcon className="h-4 w-4" />
+            <Button variant="ghost" size="icon" aria-label={`Rule actions for ${row.original.name}`}>
+              <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -124,7 +110,7 @@ export function RulePerformanceTable({ onEdit }: RulePerformanceTableProps) {
         </DropdownMenu>
       ),
     },
-  ]
+  ], [onEdit, handleDelete])
 
   const table = useReactTable({
     data: rules || [],

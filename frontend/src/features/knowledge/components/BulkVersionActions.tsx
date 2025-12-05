@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/shared/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/shared/ui/alert-dialog';
-import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Check, X } from 'lucide-react';
 import { versioningService } from '../api/versioningService';
 import type { TopicVersion, AtomVersion } from '../types';
 import { toast } from 'sonner';
@@ -77,9 +77,9 @@ export function BulkVersionActions({
 
   return (
     <>
-      <div className="sticky top-0 z-10 flex items-center justify-between gap-4 rounded-lg border bg-white p-4 shadow-md dark:bg-gray-800">
+      <div className="sticky top-0 z-10 flex items-center justify-between gap-4 rounded-lg border bg-background p-4 shadow-md">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-medium text-muted-foreground">
             Обрано: {selectedVersions.length} версій
           </span>
         </div>
@@ -92,7 +92,7 @@ export function BulkVersionActions({
             disabled={isProcessing}
             className="gap-2"
           >
-            <CheckIcon className="h-4 w-4" />
+            <Check className="h-4 w-4" />
             Схвалити вибрані
           </Button>
 
@@ -103,7 +103,7 @@ export function BulkVersionActions({
             disabled={isProcessing}
             className="gap-2"
           >
-            <XMarkIcon className="h-4 w-4" />
+            <X className="h-4 w-4" />
             Відхилити вибрані
           </Button>
 
@@ -129,19 +129,19 @@ export function BulkVersionActions({
                 Ви збираєтеся {pendingAction === 'approve' ? 'схвалити' : 'відхилити'}{' '}
                 <strong>{selectedVersions.length}</strong> версій.
               </p>
-              <div className="mt-3 max-h-32 overflow-y-auto rounded border p-2 text-xs">
+              <div className="mt-4 max-h-32 overflow-y-auto rounded border p-2 text-xs">
                 {selectedVersions.slice(0, 10).map((v) => (
-                  <div key={v.id} className="text-gray-600 dark:text-gray-400">
+                  <div key={v.id} className="text-muted-foreground">
                     • v{v.version} (ID: {v.id})
                   </div>
                 ))}
                 {selectedVersions.length > 10 && (
-                  <div className="mt-1 text-gray-500">
+                  <div className="mt-2 text-muted-foreground">
                     ...та ще {selectedVersions.length - 10} версій
                   </div>
                 )}
               </div>
-              <p className="mt-3 text-sm">Ви впевнені?</p>
+              <p className="mt-4 text-sm">Ви впевнені?</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

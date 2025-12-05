@@ -15,6 +15,7 @@ import {
   SelectItem,
   Checkbox,
 } from '@/shared/ui'
+import { FormField } from '@/shared/patterns'
 import { ProviderType, LLMProviderCreate, LLMProviderUpdate } from '@/features/providers/types'
 
 interface ProviderFormProps {
@@ -83,8 +84,7 @@ const ProviderForm = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
+          <FormField label="Name" id="name" required>
             <Input
               id="name"
               value={formData.name}
@@ -92,10 +92,9 @@ const ProviderForm = ({
               placeholder="My LLM Provider"
               required
             />
-          </div>
+          </FormField>
 
-          <div className="space-y-2">
-            <Label htmlFor="type">Provider Type *</Label>
+          <FormField label="Provider Type" id="type" required>
             <Select
               value={formData.type}
               onValueChange={(value) => handleTypeChange(value as ProviderType)}
@@ -108,11 +107,10 @@ const ProviderForm = ({
                 <SelectItem value={ProviderType.OPENAI}>OpenAI</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </FormField>
 
           {formData.type === ProviderType.OLLAMA && (
-            <div className="space-y-2">
-              <Label htmlFor="base_url">Base URL *</Label>
+            <FormField label="Base URL" id="base_url" required>
               <Input
                 id="base_url"
                 value={formData.base_url}
@@ -120,12 +118,16 @@ const ProviderForm = ({
                 placeholder="http://localhost:11434"
                 required
               />
-            </div>
+            </FormField>
           )}
 
           {formData.type === ProviderType.OPENAI && (
-            <div className="space-y-2">
-              <Label htmlFor="api_key">API Key *</Label>
+            <FormField
+              label="API Key"
+              id="api_key"
+              required={!isEdit}
+              description={isEdit ? "Leave empty to keep existing key" : undefined}
+            >
               <Input
                 id="api_key"
                 type="password"
@@ -134,12 +136,7 @@ const ProviderForm = ({
                 placeholder="sk-..."
                 required={!isEdit}
               />
-              {isEdit && (
-                <p className="text-xs text-muted-foreground">
-                  Leave empty to keep existing key
-                </p>
-              )}
-            </div>
+            </FormField>
           )}
 
           <div className="flex items-center space-x-2">

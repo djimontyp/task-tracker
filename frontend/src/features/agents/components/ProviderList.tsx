@@ -10,7 +10,8 @@ import {
 import { providerService } from '@/features/providers/api'
 import { LLMProvider, LLMProviderCreate, LLMProviderUpdate, ValidationStatus } from '@/features/providers/types'
 import { toast } from 'sonner'
-import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { Pencil, Trash2, Plus, Server } from 'lucide-react'
+import { EmptyState } from '@/shared/patterns'
 import ProviderForm from './ProviderForm'
 import { ValidationStatus as ValidationStatusComponent } from '@/features/providers/components'
 
@@ -136,29 +137,36 @@ const ProviderList = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">LLM Providers</h2>
         <Button onClick={handleCreate}>
-          <PlusIcon className="mr-2 h-4 w-4" />
+          <Plus className="mr-2 h-4 w-4" />
           Add Provider
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {providers?.length === 0 ? (
-          <Card className="col-span-full">
-            <CardContent className="py-8">
-              <p className="text-center text-muted-foreground">
-                No providers found. Create one to get started.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="col-span-full">
+            <EmptyState
+              variant="card"
+              icon={Server}
+              title="No providers found"
+              description="Add an LLM provider to enable AI-powered analysis."
+              action={
+                <Button onClick={handleCreate}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Provider
+                </Button>
+              }
+            />
+          </div>
         ) : (
           providers?.map((provider) => (
             <Card key={provider.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="pt-6">
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg">{provider.name}</h3>
-                      <Badge variant="outline" className="mt-1">
+                      <Badge variant="outline" className="mt-2">
                         {provider.type}
                       </Badge>
                     </div>
@@ -169,7 +177,7 @@ const ProviderList = () => {
                         onClick={() => handleEdit(provider)}
                         aria-label="Edit provider"
                       >
-                        <PencilIcon className="h-4 w-4" />
+                        <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         size="icon"
@@ -178,7 +186,7 @@ const ProviderList = () => {
                         aria-label="Delete provider"
                         disabled={deleteMutation.isPending}
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>

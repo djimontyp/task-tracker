@@ -34,7 +34,7 @@ export const MessageSearchCard = ({ result }: MessageSearchCardProps) => {
       aria-label={`Message from user ${message.telegram_profile_id || message.author_id}`}
     >
       <CardContent className="p-4">
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-4">
           <Avatar className="h-10 w-10 flex-shrink-0">
             <AvatarFallback className="bg-primary/10 text-primary">
               {getInitials(message.telegram_profile_id)}
@@ -42,7 +42,7 @@ export const MessageSearchCard = ({ result }: MessageSearchCardProps) => {
           </Avatar>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="font-medium text-sm">
                 {message.telegram_profile_id || `User ${message.author_id}`}
               </span>

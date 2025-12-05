@@ -98,7 +98,7 @@ const TaskAssignment = ({ agent, open, onClose }: TaskAssignmentProps) => {
             <Spinner />
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {allTasks?.length === 0 ? (
               <p className="text-center text-muted-foreground py-4">
                 No tasks available. Create tasks first.
@@ -109,7 +109,7 @@ const TaskAssignment = ({ agent, open, onClose }: TaskAssignmentProps) => {
                 return (
                   <div
                     key={task.id}
-                    className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-accent/5"
+                    className="flex items-start space-x-4 p-4 border rounded-lg hover:bg-accent/5"
                   >
                     <Checkbox
                       id={`task-${task.id}`}
@@ -125,7 +125,7 @@ const TaskAssignment = ({ agent, open, onClose }: TaskAssignmentProps) => {
                         {task.name}
                       </Label>
                       {task.description && (
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-sm text-muted-foreground mt-2">
                           {task.description}
                         </p>
                       )}

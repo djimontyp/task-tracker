@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
+import { ArrowUp, ArrowDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { cn } from '@/shared/lib'
@@ -8,9 +8,9 @@ import type { NoiseStatsProps } from '../types'
 type MetricStatus = 'critical' | 'warning' | 'optimal'
 
 const getNoiseColor = (noiseRatio: number): string => {
-  if (noiseRatio <= 20) return 'text-green-600'
-  if (noiseRatio <= 40) return 'text-yellow-600'
-  return 'text-red-600'
+  if (noiseRatio <= 20) return 'text-semantic-success'
+  if (noiseRatio <= 40) return 'text-semantic-warning'
+  return 'text-semantic-error'
 }
 
 const getNoiseStatus = (noiseRatio: number): string => {
@@ -46,22 +46,22 @@ const getStatusBadgeLabel = (status: MetricStatus): string => {
 const getStatusBadgeColor = (status: MetricStatus): string => {
   switch (status) {
     case 'critical':
-      return 'border-red-500 text-red-600 bg-red-50 dark:bg-red-950'
+      return 'border-status-error text-status-error bg-status-error/10'
     case 'warning':
-      return 'border-yellow-500 text-yellow-600 bg-yellow-50 dark:bg-yellow-950'
+      return 'border-status-validating text-status-validating bg-status-validating/10'
     case 'optimal':
-      return 'border-green-500 text-green-600 bg-green-50 dark:bg-green-950'
+      return 'border-status-connected text-status-connected bg-status-connected/10'
   }
 }
 
 const getCardBorderColor = (status: MetricStatus): string => {
   switch (status) {
     case 'critical':
-      return 'border-red-500'
+      return 'border-status-error'
     case 'warning':
-      return 'border-yellow-500'
+      return 'border-status-validating'
     case 'optimal':
-      return 'border-green-500/30'
+      return 'border-status-connected/30'
   }
 }
 
@@ -113,8 +113,8 @@ export const NoiseStatsDisplay = ({
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="space-y-1">
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
           <div className="flex items-baseline justify-between">
             <span className={cn('text-3xl font-bold', getNoiseColor(noiseRatio))}>
               {noiseRatio.toFixed(1)}%
@@ -131,15 +131,15 @@ export const NoiseStatsDisplay = ({
         {trendDirection && trendDirection !== 'stable' && (
           <div
             className={cn(
-              'flex items-center gap-1 text-sm font-medium',
-              trendDirection === 'up' ? 'text-red-600' : 'text-green-600'
+              'flex items-center gap-2 text-sm font-medium',
+              trendDirection === 'up' ? 'text-semantic-error' : 'text-semantic-success'
             )}
             aria-label={`Noise ratio ${trendDirection === 'up' ? 'increased' : 'decreased'} by ${trendChange.toFixed(1)}%`}
           >
             {trendDirection === 'up' ? (
-              <ArrowUpIcon className="w-4 h-4" aria-hidden="true" />
+              <ArrowUp className="w-4 h-4" aria-hidden="true" />
             ) : (
-              <ArrowDownIcon className="w-4 h-4" aria-hidden="true" />
+              <ArrowDown className="w-4 h-4" aria-hidden="true" />
             )}
             <span>{trendChange.toFixed(1)}% vs yesterday</span>
           </div>
@@ -147,7 +147,7 @@ export const NoiseStatsDisplay = ({
 
         {trendData && trendData.length > 0 && (
           <div className="pt-2">
-            <div className="flex items-end justify-between h-12 gap-1">
+            <div className="flex items-end justify-between h-12 gap-2">
               {trendData.map((value, index) => (
                 <div
                   key={index}
@@ -161,7 +161,7 @@ export const NoiseStatsDisplay = ({
                 />
               ))}
             </div>
-            <p className="text-xs text-muted-foreground text-center mt-1">
+            <p className="text-xs text-muted-foreground text-center mt-2">
               Last 7 days trend
             </p>
           </div>

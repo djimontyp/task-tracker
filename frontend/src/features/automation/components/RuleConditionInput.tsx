@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { X } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import {
@@ -116,8 +116,8 @@ export function RuleConditionInput({ value, onChange, onRemove }: RuleConditionI
         max={selectedField?.type === 'number' ? 100 : undefined}
       />
 
-      <Button variant="ghost" size="icon" onClick={onRemove} type="button">
-        <XMarkIcon className="h-4 w-4" />
+      <Button variant="ghost" size="icon" onClick={onRemove} type="button" aria-label="Remove condition">
+        <X className="h-4 w-4" />
       </Button>
     </div>
   )

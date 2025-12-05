@@ -16,7 +16,8 @@ import {
   Textarea,
   Badge,
 } from '@/shared/ui'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { FormField } from '@/shared/patterns'
+import { X } from 'lucide-react'
 import type { ProjectConfig, CreateProjectConfig, ProjectComponent } from '../types'
 
 interface ProjectFormProps {
@@ -260,8 +261,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Project Name *</Label>
+          <FormField label="Project Name" required>
             <Input
               id="name"
               value={formData.name}
@@ -269,10 +269,9 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               placeholder="e.g., Task Tracker Frontend"
               required
             />
-          </div>
+          </FormField>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+          <FormField label="Description">
             <Textarea
               id="description"
               value={formData.description}
@@ -280,10 +279,9 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               placeholder="Brief project description..."
               rows={3}
             />
-          </div>
+          </FormField>
 
-          <div className="space-y-2">
-            <Label htmlFor="pm_user_id">Project Manager User ID *</Label>
+          <FormField label="Project Manager User ID" required>
             <Input
               id="pm_user_id"
               type="number"
@@ -294,10 +292,9 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               min={0}
               required
             />
-          </div>
+          </FormField>
 
-          <div className="space-y-2">
-            <Label htmlFor="keywords">Keywords</Label>
+          <FormField label="Keywords">
             <div className="flex gap-2">
               <Input
                 id="keywords"
@@ -315,21 +312,21 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                 Add
               </Button>
             </div>
-            <div className="flex flex-wrap gap-1 mt-2">
+            <div className="flex flex-wrap gap-2 mt-2">
               {formData.keywords?.map((keyword, index) => (
                 <Badge key={index} variant="outline" className="text-xs">
                   {keyword}
                   <button
                     type="button"
                     onClick={() => handleRemoveKeyword(keyword)}
-                    className="ml-1 hover:text-destructive"
+                    className="ml-2 hover:text-destructive"
                   >
-                    <XMarkIcon className="h-3 w-3" />
+                    <X className="h-3 w-3" />
                   </button>
                 </Badge>
               ))}
             </div>
-          </div>
+          </FormField>
 
           <div className="space-y-2">
             <Label>Components</Label>
@@ -363,7 +360,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               {formData.components?.map((component, index) => (
                 <div
                   key={`${component.name}-${index}`}
-                  className="flex flex-col gap-1 rounded border p-2 text-sm"
+                  className="flex flex-col gap-2 rounded border p-2 text-sm"
                 >
                   <div className="flex items-center justify-between">
                     <div className="font-medium">{component.name}</div>
@@ -372,7 +369,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                       onClick={() => handleRemoveComponent(index)}
                       className="text-muted-foreground hover:text-destructive"
                     >
-                      <XMarkIcon className="h-4 w-4" />
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
                   {component.description && (
@@ -381,7 +378,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     </div>
                   )}
                   {component.keywords.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-2">
                       {component.keywords.map((keyword, keywordIndex) => (
                         <Badge key={keywordIndex} variant="outline" className="text-2xs">
                           {keyword}
@@ -394,8 +391,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Default Assignee IDs</Label>
+          <FormField label="Default Assignee IDs">
             <div className="flex gap-2">
               <Input
                 value={assigneeInput}
@@ -412,24 +408,23 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                 Add
               </Button>
             </div>
-            <div className="flex flex-wrap gap-1 mt-2">
+            <div className="flex flex-wrap gap-2 mt-2">
               {formData.default_assignee_ids?.map((assigneeId) => (
-                <Badge key={assigneeId} variant="outline" className="text-xs bg-purple-50">
+                <Badge key={assigneeId} variant="outline" className="text-xs bg-accent/10">
                   {assigneeId}
                   <button
                     type="button"
                     onClick={() => handleRemoveAssignee(assigneeId)}
-                    className="ml-1 hover:text-destructive"
+                    className="ml-2 hover:text-destructive"
                   >
-                    <XMarkIcon className="h-3 w-3" />
+                    <X className="h-3 w-3" />
                   </button>
                 </Badge>
               ))}
             </div>
-          </div>
+          </FormField>
 
-          <div className="space-y-2">
-            <Label>Glossary</Label>
+          <FormField label="Glossary">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <Input
                 value={glossaryTermInput}
@@ -459,17 +454,17 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     onClick={() => handleRemoveGlossaryEntry(term)}
                     className="text-muted-foreground hover:text-destructive"
                   >
-                    <XMarkIcon className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
               ))}
             </div>
-          </div>
+          </FormField>
 
           <div className="space-y-2">
             <Label>Priority Rules</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <Label htmlFor="critical_keywords" className="text-xs">
                   Critical Keywords
                 </Label>
@@ -480,7 +475,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                   placeholder="Comma separated keywords"
                 />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <Label htmlFor="high_keywords" className="text-xs">
                   High Keywords
                 </Label>
@@ -491,7 +486,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                   placeholder="Comma separated keywords"
                 />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <Label htmlFor="medium_keywords" className="text-xs">
                   Medium Keywords
                 </Label>
@@ -502,7 +497,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                   placeholder="Comma separated keywords"
                 />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <Label htmlFor="low_keywords" className="text-xs">
                   Low Keywords
                 </Label>
@@ -516,15 +511,14 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="version">Version</Label>
+          <FormField label="Version">
             <Input
               id="version"
               value={formData.version ?? '1.0.0'}
               onChange={(e) => setFormData({ ...formData, version: e.target.value })}
               placeholder="e.g., 1.0.0"
             />
-          </div>
+          </FormField>
 
           <DialogFooter>
             <Button

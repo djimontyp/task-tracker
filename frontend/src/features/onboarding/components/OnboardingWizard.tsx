@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { Progress } from '@/shared/ui/progress'
-import { CheckIcon, RocketLaunchIcon, ChatBubbleLeftRightIcon, CpuChipIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline'
+import { Check, Rocket, MessageSquare, Cpu, FileDown } from 'lucide-react'
 
 interface OnboardingStep {
   id: string
@@ -40,11 +40,11 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 ]
 
 const STEP_ICONS = {
-  welcome: RocketLaunchIcon,
-  telegram: ChatBubbleLeftRightIcon,
-  agent: CpuChipIcon,
-  import: DocumentArrowDownIcon,
-  complete: CheckIcon,
+  welcome: Rocket,
+  telegram: MessageSquare,
+  agent: Cpu,
+  import: FileDown,
+  complete: Check,
 }
 
 interface OnboardingWizardProps {
@@ -113,8 +113,8 @@ export function OnboardingWizard({ open: controlledOpen, onClose, onComplete }: 
 
         <div className="py-8 text-center">
           {currentStep === ONBOARDING_STEPS.length - 1 ? (
-            <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-6">
-              <CheckIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <div className="w-16 h-16 rounded-full bg-semantic-success/10 flex items-center justify-center mx-auto mb-6">
+              <Check className="h-8 w-8 text-semantic-success" />
             </div>
           ) : (
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
@@ -122,7 +122,7 @@ export function OnboardingWizard({ open: controlledOpen, onClose, onComplete }: 
             </div>
           )}
 
-          <h2 className="text-2xl font-semibold mb-3">{step.title}</h2>
+          <h2 className="text-2xl font-semibold mb-4">{step.title}</h2>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">{step.description}</p>
 
           <div className="min-h-[200px] flex items-center justify-center">
@@ -131,7 +131,7 @@ export function OnboardingWizard({ open: controlledOpen, onClose, onComplete }: 
                 <p className="text-sm">Для підключення Telegram:</p>
                 <ol className="text-sm space-y-2 list-decimal list-inside">
                   <li>Перейдіть до Settings → Sources</li>
-                  <li>Натисніть "Connect Telegram"</li>
+                  <li>Натисніть &quot;Connect Telegram&quot;</li>
                   <li>Введіть API credentials</li>
                 </ol>
               </div>
@@ -142,7 +142,7 @@ export function OnboardingWizard({ open: controlledOpen, onClose, onComplete }: 
                 <p className="text-sm">Створення AI агента:</p>
                 <ol className="text-sm space-y-2 list-decimal list-inside">
                   <li>Перейдіть до Agents</li>
-                  <li>Натисніть "Create Agent"</li>
+                  <li>Натисніть &quot;Create Agent&quot;</li>
                   <li>Налаштуйте параметри аналізу</li>
                 </ol>
               </div>
@@ -153,7 +153,7 @@ export function OnboardingWizard({ open: controlledOpen, onClose, onComplete }: 
                 <p className="text-sm">Імпорт повідомлень:</p>
                 <ol className="text-sm space-y-2 list-decimal list-inside">
                   <li>Перейдіть до Messages</li>
-                  <li>Натисніть "Ingest Messages"</li>
+                  <li>Натисніть &quot;Ingest Messages&quot;</li>
                   <li>Виберіть джерело та період</li>
                 </ol>
               </div>

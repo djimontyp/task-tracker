@@ -3,6 +3,7 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { cn } from '@/shared/lib'
+import { FormField } from '@/shared/patterns'
 
 interface TimeWindowSelectorProps {
   value: {
@@ -65,7 +66,7 @@ export const TimeWindowSelector: React.FC<TimeWindowSelectorProps> = ({ value, o
   return (
     <div className="space-y-4">
       <div>
-        <Label className="mb-3 block">Time Window</Label>
+        <Label className="mb-4 block">Time Window</Label>
         <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
           {PRESETS.map((preset) => (
             <Button
@@ -90,8 +91,7 @@ export const TimeWindowSelector: React.FC<TimeWindowSelectorProps> = ({ value, o
 
       {isCustomMode && (
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="time_window_start">From *</Label>
+          <FormField label="From" required>
             <Input
               id="time_window_start"
               type="datetime-local"
@@ -101,10 +101,9 @@ export const TimeWindowSelector: React.FC<TimeWindowSelectorProps> = ({ value, o
               className="min-h-[44px]"
               aria-label="Time window start"
             />
-          </div>
+          </FormField>
 
-          <div className="space-y-2">
-            <Label htmlFor="time_window_end">To *</Label>
+          <FormField label="To" required>
             <Input
               id="time_window_end"
               type="datetime-local"
@@ -114,7 +113,7 @@ export const TimeWindowSelector: React.FC<TimeWindowSelectorProps> = ({ value, o
               className="min-h-[44px]"
               aria-label="Time window end"
             />
-          </div>
+          </FormField>
         </div>
       )}
     </div>
