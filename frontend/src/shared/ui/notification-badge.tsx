@@ -27,10 +27,10 @@ export function NotificationBadge({ count, tooltip, className }: NotificationBad
       aria-live="polite"
       className={cn(
         "min-w-6 h-6 px-2 flex items-center justify-center",
-        "bg-orange-200 text-orange-900 dark:bg-orange-950 dark:text-orange-100",
-        "hover:bg-orange-300 dark:hover:bg-orange-900 transition-colors",
+        "bg-semantic-warning/20 text-semantic-warning",
+        "hover:bg-semantic-warning/30 transition-colors",
         "font-semibold rounded-full",
-        "border border-orange-400 dark:border-orange-800",
+        "border border-semantic-warning/40",
         count > 99 ? "text-[10px]" : "text-xs",
         className
       )}
