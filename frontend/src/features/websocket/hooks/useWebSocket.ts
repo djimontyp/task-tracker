@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/shared/utils/logger'
 
+// Ping timeout - if no ping received within this time, connection is considered dead
+const PING_TIMEOUT = 45_000
+
 const DEFAULT_WS_PATH = '/ws'
 
 const normalizePath = (value?: string | null) => {
@@ -80,6 +83,26 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   const isConnectingRef = useRef(false)
   const reconnectAttemptsRef = useRef(0)
 
+  // Reliability: connection ID, ping tracking, sequence numbers
+  const connectionIdRef = useRef<string | null>(null)
+  const lastPingTimeRef = useRef<number>(Date.now())
+  const pingTimeoutRef = useRef<NodeJS.Timeout>()
+  const lastSeqRef = useRef<Record<string, number>>({}) // topic -> last seq for replay on reconnect
+
+  // Reset ping timeout - called on each ping or connection event
+  const resetPingTimeout = () => {
+    if (pingTimeoutRef.current) {
+      clearTimeout(pingTimeoutRef.current)
+    }
+    lastPingTimeRef.current = Date.now()
+    pingTimeoutRef.current = setTimeout(() => {
+      logger.warn('No ping received for 45s, connection may be dead')
+      if (wsRef.current) {
+        wsRef.current.close(4000, 'Ping timeout')
+      }
+    }, PING_TIMEOUT)
+  }
+
   const connect = () => {
     if (isConnectingRef.current) {
       logger.debug('⚠️  Connection already in progress, skipping...')
@@ -98,22 +121,35 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       isConnectingRef.current = true
       setConnectionState('connecting')
 
-      // Always use resolveWebSocketUrl to append topics query param
-      // VITE_WS_URL is ignored to ensure topic subscriptions work correctly
-      const wsUrl = resolveWebSocketUrl(topics)
-      logger.debug('🔌 Connecting to WebSocket:', wsUrl, 'with topics:', topics)
+      // Build URL with topics
+      let wsUrl = resolveWebSocketUrl(topics)
+
+      // Add lastSeq for message replay on reconnect (only if we have tracked sequences)
+      const seqParams = Object.entries(lastSeqRef.current)
+        .filter(([, seq]) => seq > 0)
+        .map(([topic, seq]) => `${topic}:${seq}`)
+        .join(',')
+
+      if (seqParams) {
+        wsUrl += (wsUrl.includes('?') ? '&' : '?') + `lastSeq=${seqParams}`
+      }
+
+      logger.debug('Connecting to WebSocket:', wsUrl, 'with topics:', topics)
       const ws = new WebSocket(wsUrl)
 
       ws.onopen = () => {
-        logger.debug('✅ WebSocket opened successfully')
+        logger.debug('WebSocket opened successfully')
         isConnectingRef.current = false
         reconnectAttemptsRef.current = 0
 
         if (!isMountedRef.current) {
-          logger.debug('⚠️  Component unmounted, closing connection')
+          logger.debug('Component unmounted, closing connection')
           ws.close()
           return
         }
+
+        // Start ping timeout tracking
+        resetPingTimeout()
 
         setIsConnected(true)
         setConnectionState('connected')
@@ -127,10 +163,29 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data)
-          logger.debug('📨 WebSocket message received:', data)
 
+          // Handle ping - respond immediately with pong
+          if (data.type === 'ping') {
+            ws.send(JSON.stringify({ type: 'pong', ts: data.ts }))
+            resetPingTimeout()
+            return // Don't pass ping to onMessage callback
+          }
+
+          // Handle connection confirmation - store connectionId
+          if (data.type === 'connection' && data.data?.connectionId) {
+            connectionIdRef.current = data.data.connectionId
+            resetPingTimeout()
+            logger.debug(`Connection ID: ${data.data.connectionId}`)
+          }
+
+          // Track sequence numbers for replay on reconnect
+          if (data.seq !== undefined && data.topic) {
+            lastSeqRef.current[data.topic] = data.seq
+          }
+
+          logger.debug('WebSocket message received:', data)
           if (data.type) {
-            logger.debug(`📬 Message type: ${data.type}`)
+            logger.debug(`Message type: ${data.type}`)
           }
 
           onMessage?.(data)
@@ -152,15 +207,20 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       }
 
       ws.onclose = (event) => {
-        logger.debug('🔌 WebSocket closed:', {
+        logger.debug('WebSocket closed:', {
           code: event.code,
           reason: event.reason,
           wasClean: event.wasClean
         })
         isConnectingRef.current = false
 
+        // Clear ping timeout on close
+        if (pingTimeoutRef.current) {
+          clearTimeout(pingTimeoutRef.current)
+        }
+
         if (!isMountedRef.current) {
-          logger.debug('⚠️  Component unmounted, skipping reconnect')
+          logger.debug('Component unmounted, skipping reconnect')
           return
         }
 
@@ -213,12 +273,18 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   }
 
   const disconnect = () => {
-    logger.debug('🔌 Disconnecting WebSocket...')
+    logger.debug('Disconnecting WebSocket...')
 
     // Clear reconnect timeout
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current)
       reconnectTimeoutRef.current = undefined
+    }
+
+    // Clear ping timeout
+    if (pingTimeoutRef.current) {
+      clearTimeout(pingTimeoutRef.current)
+      pingTimeoutRef.current = undefined
     }
 
     // Close WebSocket connection safely
@@ -263,14 +329,17 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   }
 
   useEffect(() => {
-    logger.debug('🎯 useWebSocket mounted')
+    logger.debug('useWebSocket mounted')
     isMountedRef.current = true
 
     connect()
 
     return () => {
-      logger.debug('🎯 useWebSocket unmounting')
+      logger.debug('useWebSocket unmounting')
       isMountedRef.current = false
+      if (pingTimeoutRef.current) {
+        clearTimeout(pingTimeoutRef.current)
+      }
       disconnect()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -282,5 +351,6 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     disconnect,
     reconnect: connect,
     connectionState,
+    connectionId: connectionIdRef.current,
   }
 }
