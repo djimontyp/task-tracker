@@ -49,12 +49,13 @@ export function NavMain({ groups }: NavMainProps) {
                 <SidebarGroup className="group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
                   <SidebarGroupLabel
                     asChild
-                    className="px-2 text-xs font-semibold uppercase tracking-wider text-foreground"
+                    className="px-2 text-xs font-semibold uppercase tracking-wider"
                   >
                     <CollapsibleTrigger
                       className={cn(
-                        'flex w-full items-center justify-between rounded-md transition-colors hover:bg-accent/50',
-                        hasActiveItem && 'text-foreground font-semibold'
+                        'flex w-full items-center justify-between rounded-md transition-colors',
+                        'text-accent hover:text-accent-light',
+                        hasActiveItem && 'font-bold'
                       )}
                     >
                       <span>{group.label}</span>
@@ -84,6 +85,7 @@ export function NavMain({ groups }: NavMainProps) {
                                 className={cn(
                                   'relative transition-all duration-300',
                                   'data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:font-semibold',
+                                  'data-[active=true]:shadow-glow-sm data-[active=true]:border-l-2 data-[active=true]:border-accent',
                                   !isActive && HOVER_CLASSES
                                 )}
                               >
@@ -135,7 +137,10 @@ export function NavMain({ groups }: NavMainProps) {
                 </SidebarGroup>
               </Collapsible>
               {groupIndex < groups.length - 1 && (
-                <Separator className="hidden group-data-[collapsible=icon]:block !w-auto mx-4 my-2" />
+                <Separator
+                  className="!w-auto mx-4 my-4"
+                  data-testid="group-separator"
+                />
               )}
             </Fragment>
           )
@@ -146,8 +151,9 @@ export function NavMain({ groups }: NavMainProps) {
             <SidebarGroup>
               <SidebarGroupLabel
                 className={cn(
-                  'px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground',
-                  hasActiveItem && 'text-primary'
+                  'px-2 text-xs font-semibold uppercase tracking-wider',
+                  'text-accent',
+                  hasActiveItem && 'font-bold'
                 )}
               >
                 {group.label}
@@ -169,6 +175,7 @@ export function NavMain({ groups }: NavMainProps) {
                           className={cn(
                             'relative transition-all duration-300',
                             'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold',
+                            'data-[active=true]:shadow-glow-sm',
                             'group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0',
                             !isActive && HOVER_CLASSES
                           )}
@@ -185,7 +192,10 @@ export function NavMain({ groups }: NavMainProps) {
               </SidebarGroupContent>
             </SidebarGroup>
             {groupIndex < groups.length - 1 && (
-              <Separator className="hidden group-data-[collapsible=icon]:block !w-auto mx-4 my-2" />
+              <Separator
+                className="!w-auto mx-4 my-4"
+                data-testid="group-separator"
+              />
             )}
           </Fragment>
         )

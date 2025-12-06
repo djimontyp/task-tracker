@@ -43,24 +43,29 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         Skip to main content
       </a>
 
-      <Navbar
-        onMobileSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
-        isDesktop={isDesktop}
-      />
-
       {isDesktop ? (
-        <div className="flex flex-col min-h-screen pt-14 overflow-x-hidden">
-          <div className="flex flex-1 min-w-0">
-            <AppSidebar />
-            <SidebarInset className="min-w-0 flex-1">
-              <div className="flex-1 overflow-auto">
-                <main id="main-content" className="container max-w-screen-2xl mx-auto flex flex-1 flex-col gap-4 p-4 w-full min-w-0">
-                  {children}
-                </main>
-              </div>
+        // Desktop: Grid layout (full-height sidebar + navbar offset)
+        <div className="grid grid-cols-[auto_1fr] h-screen overflow-hidden">
+          {/* Column 1: Sidebar (auto width: 256px expanded or 56px collapsed) */}
+          <AppSidebar />
+
+          {/* Column 2: Navbar + Content */}
+          <div className="grid grid-rows-[56px_1fr] overflow-hidden">
+            {/* Row 1: Navbar (fixed height 56px) */}
+            <Navbar isDesktop={true} />
+
+            {/* Row 2: Main content (fills remaining space, full-width per design system) */}
+            <SidebarInset className="overflow-auto">
+              <main
+                id="main-content"
+                className="px-4 lg:px-6 xl:px-8 2xl:px-10 py-4 w-full"
+              >
+                {children}
+              </main>
             </SidebarInset>
           </div>
 
+          {/* Admin Panel */}
           <AdminPanel visible={isAdminMode}>
             <div className="text-sm text-muted-foreground">
               Admin tools will be added in Phase 2-6
@@ -69,6 +74,12 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </div>
       ) : (
         <>
+          {/* Mobile: Top navbar */}
+          <Navbar
+            onMobileSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
+            isDesktop={false}
+          />
+
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetContent side="left" className="p-0 w-[280px]">
               <AppSidebar mobile />

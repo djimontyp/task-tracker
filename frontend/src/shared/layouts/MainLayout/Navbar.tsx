@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { Radar, Settings, Search, Menu } from 'lucide-react'
+import { Settings, Search, Menu } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
-import { SidebarTrigger } from '@/shared/ui/sidebar'
+import { Logo } from '@/shared/components/Logo'
 import { Button } from '@/shared/ui/button'
 import {
   Breadcrumb,
@@ -38,7 +38,6 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
   const { isAdminMode } = useAdminMode()
   const location = useLocation()
   const crumbs = useBreadcrumbs(location.pathname)
-  const appName = import.meta.env.VITE_APP_NAME || 'Pulse Radar'
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
 
   const cycleTheme = () => {
@@ -83,31 +82,24 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
         : 'Offline'
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-card border-b border-border overflow-hidden">
+    <header className={cn(
+      "z-50 h-14 w-full",
+      "bg-card border-b border-border",
+      // Desktop: no positioning (in grid), Mobile: fixed
+      !isDesktop && "fixed top-0 left-0 right-0"
+    )}>
       <div className="flex flex-col md:flex-row h-auto md:h-14 px-2 sm:px-4 md:px-4 lg:px-6">
         <div className="flex items-center justify-between gap-2 sm:gap-2 min-w-0 flex-1 py-2 md:py-0">
           <div className="flex items-center gap-2 sm:gap-2 min-w-0 flex-shrink">
-            <Link
-              to="/"
-              className="flex h-11 shrink-0 items-center gap-2 sm:gap-2 rounded-lg px-2 sm:px-2 text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label={`${appName} home`}
-            >
-              <span className="flex size-8 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary shadow-sm">
-                <Radar className="size-4" />
-              </span>
-              <span className="hidden text-sm sm:text-base font-semibold tracking-tight text-foreground sm:inline-block">
-                {appName}
-              </span>
-            </Link>
+            {/* Desktop: NO logo (it's in sidebar) */}
+            {/* Mobile: Logo in navbar */}
+            {!isDesktop && (
+              <Logo size="sm" showText className="-ml-2 sm:-ml-4" />
+            )}
 
-            {isDesktop ? (
-              <SidebarTrigger
-                variant="ghost"
-                size="icon"
-                className="h-11 w-11 shrink-0 rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Toggle sidebar"
-              />
-            ) : (
+            {/* Desktop: NO sidebar trigger (it's in sidebar footer now) */}
+            {/* Mobile: Keep hamburger menu button */}
+            {!isDesktop && (
               <Button
                 variant="ghost"
                 size="icon"
