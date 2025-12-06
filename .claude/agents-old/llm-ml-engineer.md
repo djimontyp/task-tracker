@@ -12,7 +12,7 @@ description: |-
   - Prompt quality → Prompt Engineer (P1)
   - Cost optimization → Cost Optimizer (C2)
   - Backend API → fastapi-backend-expert
-model: sonnet
+model: opus
 color: purple
 ---
 

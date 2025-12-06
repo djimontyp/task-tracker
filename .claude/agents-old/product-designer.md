@@ -13,7 +13,7 @@ description: |-
   - Detailed UX audit → UX/UI Expert (U1)
   - Developer handoff specs → UX/UI Expert (U1)
   - Implementation → React Frontend Expert (F1)
-model: sonnet
+model: opus
 color: red
 ---
 

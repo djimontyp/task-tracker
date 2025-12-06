@@ -12,7 +12,7 @@ description: |-
   - Backend API → fastapi-backend-expert
   - UX/UI design → UX/UI Expert (U1)
   - Database → Database Engineer (D1)
-model: sonnet
+model: opus
 color: purple
 ---
 

@@ -12,7 +12,7 @@ description: |-
   - General testing → Pytest Master (T1)
   - Performance → Database Engineer (D1)
   - Deployment → release-engineer
-model: haiku
+model: sonnet
 color: green
 ---
 

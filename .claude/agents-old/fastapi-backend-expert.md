@@ -13,7 +13,7 @@ description: |-
   - Frontend → React Frontend Expert (F1)
   - LLM patterns → llm-ml-engineer
   - Deployment/Docker → DevOps Expert (O1)
-model: sonnet
+model: opus
 color: yellow
 ---
 
