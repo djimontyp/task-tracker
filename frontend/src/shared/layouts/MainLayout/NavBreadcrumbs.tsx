@@ -62,12 +62,15 @@ export function NavBreadcrumbs({
               >
                 {segment.href && !isLast ? (
                   <BreadcrumbLink asChild>
-                    <Link to={segment.href} className="truncate block max-w-full">
+                    <Link
+                      to={segment.href}
+                      className="truncate block max-w-full min-h-[44px] flex items-center rounded-md px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
                       {segment.label}
                     </Link>
                   </BreadcrumbLink>
                 ) : (
-                  <BreadcrumbPage className="truncate block max-w-full">
+                  <BreadcrumbPage className="truncate block max-w-full min-h-[44px] flex items-center px-1">
                     {segment.label}
                   </BreadcrumbPage>
                 )}

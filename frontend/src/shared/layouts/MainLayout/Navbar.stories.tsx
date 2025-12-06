@@ -8,15 +8,12 @@ import Navbar from './Navbar';
 /**
  * Navbar component stories.
  *
- * The Navbar provides:
- * - Logo (mobile only)
- * - Mobile menu toggle
- * - Breadcrumb navigation
- * - Search bar (desktop) / Search button (mobile)
- * - Service status indicator
- * - Theme toggle
- * - Settings link
- * - User menu
+ * The Navbar uses a 3-zone architecture:
+ * - **CONTEXT** (left): Breadcrumbs - "Where am I?"
+ * - **COMMAND** (center): Search bar - "What can I do?"
+ * - **ACTIONS** (right): Status dot, Theme toggle, User menu
+ *
+ * Settings and Admin Mode are accessible via User dropdown.
  */
 
 const queryClient = new QueryClient({
@@ -58,19 +55,33 @@ const meta: Meta<typeof Navbar> = {
         component: `
 ## Navbar Component
 
-Main navigation header for the application.
+Main navigation header using **3-zone architecture**.
 
-### Features
-- **Logo**: Shown only on mobile (desktop shows logo in sidebar)
-- **Breadcrumbs**: Responsive - mobile variant is more compact
-- **Service Status**: Dot indicator with tooltip
-- **Theme Toggle**: Cycles through light/dark/system
-- **Settings**: Link to settings page
+### Desktop Layout
+\`[CONTEXT: Breadcrumbs] [COMMAND: Search] [ACTIONS: ●🌙👤]\`
+
+### Mobile Layout
+- Row 1: Logo + Hamburger ... Search + Status + Theme + User
+- Row 2: Breadcrumbs (full width)
+
+### Zone Breakdown
+| Zone | Purpose | Elements |
+|------|---------|----------|
+| **CONTEXT** | Where am I? | Breadcrumbs (flex-1) |
+| **COMMAND** | What can I do? | Search bar (w-80) |
+| **ACTIONS** | Quick access | Status dot, Theme, User menu |
+
+### User Menu Contains
+- Account link
+- Settings link
+- Admin Mode toggle
+- Logout
 
 ### Design System Compliance
 - Uses semantic color tokens
 - 44px touch targets (WCAG 2.5.5)
 - All buttons have aria-labels
+- \`<nav aria-label="Main navigation">\`
         `,
       },
     },
@@ -81,7 +92,7 @@ export default meta;
 type Story = StoryObj<typeof Navbar>;
 
 /**
- * Default desktop view with all features visible.
+ * Default desktop view with 3-zone layout.
  */
 export const Default: Story = {
   args: {
@@ -92,7 +103,7 @@ export const Default: Story = {
     docs: {
       description: {
         story:
-          'Default desktop view. Shows breadcrumbs, search bar, status indicator, theme toggle, and settings.',
+          'Desktop view with 3 zones: Context (breadcrumbs), Command (search), Actions (status + theme + user).',
       },
     },
   },
@@ -171,7 +182,7 @@ export const StatusError: Story = {
 };
 
 /**
- * Navbar with admin mode enabled.
+ * Navbar with admin mode toggle in user menu.
  */
 export const WithAdminMode: Story = {
   args: {
@@ -181,7 +192,7 @@ export const WithAdminMode: Story = {
     docs: {
       description: {
         story:
-          'Navbar showing admin badge when admin mode is active. Use localStorage to enable admin mode.',
+          'Admin Mode toggle is in the User dropdown menu. Click the user avatar to see the toggle.',
       },
     },
   },
