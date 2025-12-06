@@ -9,4 +9,5 @@ module.exports = {
   'no-raw-tailwind-colors': require('./eslint-local-rules/no-raw-tailwind-colors'),
   'no-odd-spacing': require('./eslint-local-rules/no-odd-spacing'),
   'no-heroicons': require('./eslint-local-rules/no-heroicons'),
+  'no-raw-page-wrapper': require('./eslint-local-rules/no-raw-page-wrapper'),
 };
