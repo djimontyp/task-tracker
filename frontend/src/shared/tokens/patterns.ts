@@ -376,3 +376,41 @@ export const pageLayouts = {
 } as const;
 
 export type PageLayoutVariant = keyof typeof pageLayouts;
+
+// ═══════════════════════════════════════════════════════════════
+// STATUS INDICATOR PATTERNS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Status indicator dot patterns for service health, connection status, etc.
+ *
+ * @example
+ * import { statusIndicators } from '@/shared/tokens';
+ * <span className={statusIndicators.healthy} />
+ * <span className={statusIndicators.warning} />
+ */
+export const statusIndicators = {
+  /** Healthy/connected state - solid green with glow */
+  healthy: cn(
+    'size-2.5 sm:size-3 rounded-full',
+    'bg-semantic-success',
+    'shadow-[0_0_0_3px_hsl(var(--semantic-success)/0.25)]',
+    'transition-colors duration-300'
+  ),
+  /** Warning/unstable state - yellow with pulse animation */
+  warning: cn(
+    'size-2.5 sm:size-3 rounded-full',
+    'bg-semantic-warning',
+    'shadow-[0_0_0_3px_hsl(var(--semantic-warning)/0.25)]',
+    'animate-pulse'
+  ),
+  /** Error/offline state - red with pulse animation */
+  error: cn(
+    'size-2.5 sm:size-3 rounded-full',
+    'bg-destructive',
+    'shadow-[0_0_0_3px_hsl(var(--destructive)/0.25)]',
+    'animate-pulse'
+  ),
+} as const;
+
+export type StatusIndicatorVariant = keyof typeof statusIndicators;
