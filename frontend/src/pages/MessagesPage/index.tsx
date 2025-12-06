@@ -7,6 +7,7 @@ import {
 } from '@/shared/ui'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { EmptyState } from '@/shared/patterns'
+import { PageWrapper } from '@/shared/primitives'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS, API_BASE_PATH } from '@/shared/config/api'
 import { toast } from 'sonner'
@@ -418,8 +419,8 @@ const MessagesPage = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-4 animate-fade-in" role="status" aria-label="Loading messages" aria-live="polite">
-        <div className="flex items-center justify-between">
+      <PageWrapper variant="fullWidth">
+        <div className="flex items-center justify-between" role="status" aria-label="Loading messages" aria-live="polite">
           <Skeleton className="h-8 w-32" />
           <div className="flex gap-2">
             <Skeleton className="h-9 w-24" />
@@ -455,12 +456,12 @@ const MessagesPage = () => {
             </div>
           </div>
         </Card>
-      </div>
+      </PageWrapper>
     )
   }
 
   return (
-    <div className="space-y-4 animate-fade-in w-full min-w-0 overflow-x-hidden">
+    <PageWrapper variant="fullWidth" className="w-full min-w-0 overflow-x-hidden">
       <div className="w-full min-w-0">
         <PageHeader
           title="Messages"
@@ -637,7 +638,7 @@ const MessagesPage = () => {
           onClose={() => setViewingMessageId(null)}
         />
       )}
-    </div>
+    </PageWrapper>
   )
 }
 

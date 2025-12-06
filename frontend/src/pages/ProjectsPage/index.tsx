@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import { Plus, Search, Folder } from 'lucide-react'
 import { PageHeader } from '@/shared/components'
 import { EmptyState } from '@/shared/patterns'
+import { PageWrapper } from '@/shared/primitives'
 
 const ProjectsPage = () => {
   const queryClient = useQueryClient()
@@ -168,7 +169,7 @@ const ProjectsPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <PageWrapper variant="fullWidth">
       <PageHeader
         title="Projects"
         description="Manage projects with keyword-based message filtering and classification rules"
@@ -237,7 +238,7 @@ const ProjectsPage = () => {
         project={selectedProject}
         isLoading={createMutation.isPending || updateMutation.isPending}
       />
-    </div>
+    </PageWrapper>
   )
 }
 

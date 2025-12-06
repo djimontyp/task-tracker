@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { PageWrapper } from '@/shared/primitives'
 import { AutomationStatsCards } from '@/features/automation/components/AutomationStatsCards'
 import { AutomationTrendsChart } from '@/features/automation/components/AutomationTrendsChart'
 import { RulePerformanceTable } from '@/features/automation/components/RulePerformanceTable'
@@ -32,7 +33,7 @@ export default function AutomationDashboardPage() {
   })
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <PageWrapper variant="fullWidth" className="p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Automation Dashboard</h1>
@@ -67,6 +68,6 @@ export default function AutomationDashboardPage() {
         <h2 className="text-lg font-semibold mb-4">Rule Performance</h2>
         <RulePerformanceTable />
       </div>
-    </div>
+    </PageWrapper>
   )
 }

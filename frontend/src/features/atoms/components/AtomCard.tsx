@@ -1,10 +1,20 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Badge, Button } from '@/shared/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
-import { Clock } from 'lucide-react'
+import {
+  Clock,
+  AlertCircle,
+  CheckCircle,
+  Diamond,
+  HelpCircle,
+  Lightbulb,
+  Cog,
+  FileText
+} from 'lucide-react'
 import { versioningService } from '@/features/knowledge/api/versioningService'
 import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
 import { VersionHistoryList } from '@/features/knowledge/components/VersionHistoryList'
+import { badges } from '@/shared/tokens/patterns'
 import type { Atom, AtomType } from '../types'
 
 interface AtomCardProps {
@@ -12,14 +22,14 @@ interface AtomCardProps {
   onClick?: () => void
 }
 
-const atomTypeColors: Record<AtomType, string> = {
-  problem: 'bg-[hsl(var(--atom-problem))] text-white',
-  solution: 'bg-[hsl(var(--atom-solution))] text-white',
-  decision: 'bg-[hsl(var(--atom-decision))] text-white',
-  question: 'bg-[hsl(var(--atom-question))] text-white',
-  insight: 'bg-[hsl(var(--atom-insight))] text-white',
-  pattern: 'bg-[hsl(var(--atom-pattern))] text-white',
-  requirement: 'bg-[hsl(var(--atom-requirement))] text-white',
+const atomTypeIcons: Record<AtomType, React.ComponentType<{ className?: string }>> = {
+  problem: AlertCircle,
+  solution: CheckCircle,
+  decision: Diamond,
+  question: HelpCircle,
+  insight: Lightbulb,
+  pattern: Cog,
+  requirement: FileText,
 }
 
 const atomTypeLabels: Record<AtomType, string> = {
@@ -79,9 +89,10 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
     >
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-2">
-          <span className={`text-xs font-semibold px-2 py-2 rounded-full ${atomTypeColors[atom.type]}`}>
+          <Badge variant="outline" className={badges.atom[atom.type]}>
+            {React.createElement(atomTypeIcons[atom.type], { className: 'h-3.5 w-3.5' })}
             {atomTypeLabels[atom.type]}
-          </span>
+          </Badge>
           {atom.confidence !== null && (
             <span className="text-xs text-muted-foreground">
               {Math.round(atom.confidence * 100)}%

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/shared/ui/button'
+import { PageWrapper } from '@/shared/primitives'
 import { RuleTemplatesLibrary } from '@/features/automation/components/RuleTemplatesLibrary'
 import { RuleBuilderForm } from '@/features/automation/components/RuleBuilderForm'
 import { RuleLivePreview } from '@/features/automation/components/RuleLivePreview'
@@ -54,7 +55,7 @@ export default function AutomationRulesPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <PageWrapper variant="fullWidth" className="p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Automation Rules</h1>
@@ -98,6 +99,6 @@ export default function AutomationRulesPage() {
           </div>
         </div>
       )}
-    </div>
+    </PageWrapper>
   )
 }

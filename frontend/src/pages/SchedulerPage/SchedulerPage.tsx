@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/shared/ui/button'
+import { PageWrapper } from '@/shared/primitives'
 import { JobsTable } from '@/features/automation/components/JobsTable'
 import { CreateEditJobDialog } from '@/features/automation/components/CreateEditJobDialog'
 import type { SchedulerJob } from '@/features/automation/types'
@@ -24,7 +25,7 @@ export default function SchedulerPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <PageWrapper variant="fullWidth" className="p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Scheduled Jobs</h1>
@@ -42,6 +43,6 @@ export default function SchedulerPage() {
         onOpenChange={handleDialogClose}
         job={editingJob}
       />
-    </div>
+    </PageWrapper>
   )
 }

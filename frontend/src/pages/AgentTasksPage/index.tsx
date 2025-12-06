@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import { Pencil, Trash2, Plus } from 'lucide-react'
 import { TaskForm } from '@/features/agents/components'
 import { PageHeader } from '@/shared/components'
+import { PageWrapper } from '@/shared/primitives'
 
 const AgentTasksPage = () => {
   const queryClient = useQueryClient()
@@ -94,7 +95,7 @@ const AgentTasksPage = () => {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 md:space-y-6">
+    <PageWrapper variant="fullWidth">
       <PageHeader
         title="Task Templates"
         description="Manage reusable task templates for agent automation workflows"
@@ -199,7 +200,7 @@ const AgentTasksPage = () => {
         isEdit={!!editingTask}
         loading={createMutation.isPending || updateMutation.isPending}
       />
-    </div>
+    </PageWrapper>
   )
 }
 
