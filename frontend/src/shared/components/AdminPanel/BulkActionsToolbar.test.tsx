@@ -13,7 +13,8 @@ describe('BulkActionsToolbar', () => {
   it('should render with no selection', () => {
     render(<BulkActionsToolbar {...defaultProps} />)
 
-    expect(screen.getByText('Select all')).toBeInTheDocument()
+    // Label shows "0 selected" when no items selected
+    expect(screen.getByText('0 selected')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /approve/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /archive/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument()
@@ -159,7 +160,10 @@ describe('BulkActionsToolbar', () => {
     const checkbox = screen.getByRole('checkbox')
     expect(checkbox).toHaveAttribute('id', 'select-all')
 
-    const label = screen.getByLabelText('Select all')
+    // Label is associated with checkbox via htmlFor="select-all"
+    const label = screen.getByText('0 selected')
     expect(label).toBeInTheDocument()
+    expect(label.tagName.toLowerCase()).toBe('label')
+    expect(label).toHaveAttribute('for', 'select-all')
   })
 })
