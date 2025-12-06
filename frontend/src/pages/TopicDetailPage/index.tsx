@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle, CloudUpload, AlertCircle, Plus, Clock, Sparkles
 import { Card, Input, Textarea, Button, Skeleton, Switch, Label, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Badge, Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/shared/ui'
 import { ColorPickerPopover, PageHeader } from '@/shared/components'
 import { FormField } from '@/shared/patterns'
+import { PageWrapper } from '@/shared/primitives'
 import { topicService } from '@/features/topics/api/topicService'
 import { atomService } from '@/features/atoms/api/atomService'
 import { messageService } from '@/features/messages/api/messageService'
@@ -313,7 +314,7 @@ const TopicDetailPage = () => {
   }
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
+    <PageWrapper variant="fullWidth" className="p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-4 flex-1">
           <Button variant="ghost" onClick={() => navigate('/topics')} size="sm">
@@ -664,7 +665,7 @@ const TopicDetailPage = () => {
           onClose={() => setSelectedMessageId(null)}
         />
       )}
-    </div>
+    </PageWrapper>
   )
 }
 

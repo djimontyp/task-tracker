@@ -14,6 +14,7 @@ import { formatMessageDate } from '@/shared/utils/date'
 import { MetricsDashboard } from '@/features/metrics'
 import { RecentTopics } from './RecentTopics'
 import { TrendingTopics } from './TrendingTopics'
+import { PageWrapper } from '@/shared/primitives'
 
 const DashboardPage = () => {
   const navigate = useNavigate()
@@ -40,7 +41,7 @@ const DashboardPage = () => {
   const hasNoData = messages.length === 0
 
   return (
-    <div className="space-y-4 sm:space-y-6 md:space-y-6 animate-fade-in max-w-full overflow-hidden">
+    <PageWrapper variant="fullWidth">
       <PageHeader
         title="Dashboard"
         description="Quick overview of recent activity, topics, and message insights"
@@ -179,7 +180,7 @@ const DashboardPage = () => {
           className="w-full"
         />
       </div>
-    </div>
+    </PageWrapper>
   )
 }
 export default DashboardPage

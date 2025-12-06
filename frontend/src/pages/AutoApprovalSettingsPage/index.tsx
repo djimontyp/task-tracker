@@ -10,6 +10,7 @@ import { Spinner } from '@/shared/ui';
 import { versioningService } from '@/features/knowledge/api/versioningService';
 import type { AutoApprovalRule } from '@/features/knowledge/types';
 import { toast } from 'sonner';
+import { PageWrapper } from '@/shared/primitives';
 
 export default function AutoApprovalSettingsPage() {
   const [rule, setRule] = useState<AutoApprovalRule>({
@@ -81,7 +82,7 @@ export default function AutoApprovalSettingsPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-3xl space-y-6 p-4 md:p-8">
+    <PageWrapper variant="centered">
       <div className="space-y-2">
         <h1 className="text-2xl font-bold md:text-3xl">Автоматичне схвалення версій</h1>
         <p className="text-sm text-muted-foreground">
@@ -229,6 +230,6 @@ export default function AutoApprovalSettingsPage() {
           <li>• Ви можете переглянути, скільки версій будуть оброблені, перш ніж зберігати</li>
         </ul>
       </Card>
-    </div>
+    </PageWrapper>
   );
 }

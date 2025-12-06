@@ -5,12 +5,13 @@ import ProvidersTab from './components/ProvidersTab'
 import PromptTuningTab from './components/PromptTuningTab'
 import { PageHeader } from '@/shared/components'
 import { useAdminMode } from '@/shared/hooks'
+import { PageWrapper } from '@/shared/primitives'
 
 const SettingsPage = () => {
   const { isAdminMode } = useAdminMode()
 
   return (
-    <div className="space-y-6">
+    <PageWrapper variant="fullWidth">
       <PageHeader
         title="Settings"
         description="Configure application preferences and integrations"
@@ -42,7 +43,7 @@ const SettingsPage = () => {
           </TabsContent>
         )}
       </Tabs>
-    </div>
+    </PageWrapper>
   )
 }
 

@@ -18,6 +18,7 @@ import { topicService } from '@/features/topics/api/topicService'
 import type { TopicListResponse, TopicSortBy } from '@/features/topics/types'
 import { renderTopicIcon } from '@/features/topics/utils/renderIcon'
 import { Folder, MessageSquare, Search, X, LayoutGrid, List, ChevronRight } from 'lucide-react'
+import { PageWrapper } from '@/shared/primitives'
 
 type ViewMode = 'grid' | 'list'
 
@@ -163,7 +164,7 @@ const TopicsPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <PageWrapper variant="fullWidth">
       <PageHeader
         title="Topics"
         description="Manage classification topics for task organization with custom icons and colors"
@@ -425,7 +426,7 @@ const TopicsPage = () => {
           </div>
         </Card>
       )}
-    </div>
+    </PageWrapper>
   )
 }
 

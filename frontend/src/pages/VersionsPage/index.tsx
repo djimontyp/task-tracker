@@ -15,6 +15,7 @@ import { EmptyState } from '@/shared/patterns'
 import type { TopicVersion, AtomVersion } from '@/features/knowledge/types'
 import { toast } from 'sonner'
 import { CheckCircle, AlertTriangle } from 'lucide-react'
+import { PageWrapper } from '@/shared/primitives'
 
 type EntityType = 'all' | 'topic' | 'atom'
 type VersionStatus = 'pending' | 'approved' | 'rejected'
@@ -168,13 +169,13 @@ const VersionsPage = () => {
   }
 
   return (
-    <>
+    <PageWrapper variant="fullWidth">
       <PageHeader
         title="Version Management"
         description="Review and approve pending knowledge versions"
       />
 
-      <div className="space-y-4 p-4 sm:p-6">
+      <div className="space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-2/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -330,7 +331,7 @@ const VersionsPage = () => {
           </DialogContent>
         </Dialog>
       )}
-    </>
+    </PageWrapper>
   )
 }
 

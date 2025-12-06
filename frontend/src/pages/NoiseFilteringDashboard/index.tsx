@@ -24,6 +24,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
+import { PageWrapper } from '@/shared/primitives'
 
 const NoiseFilteringDashboard = () => {
   const queryClient = useQueryClient()
@@ -134,7 +135,7 @@ const NoiseFilteringDashboard = () => {
   }, [stats])
 
   return (
-    <div className="space-y-4 sm:space-y-6 md:space-y-6 animate-fade-in">
+    <PageWrapper variant="fullWidth">
       <PageHeader
         title="Noise Filtering"
         description="Message scoring statistics, signal-to-noise ratio, quality metrics, and filtering effectiveness over time"
@@ -292,7 +293,7 @@ const NoiseFilteringDashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageWrapper>
   )
 }
 
