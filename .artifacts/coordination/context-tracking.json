@@ -1129,6 +1129,216 @@
       "estimated_tokens": 3000,
       "status": "active",
       "warnings": []
+    },
+    "fde46017": {
+      "marker": "fde46017",
+      "subagent_type": "Frontend Expert (F1)",
+      "created_at": "2025-12-06T19:31:41.254139Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "7fd78208": {
+      "marker": "7fd78208",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T19:36:30.999004Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "57d7ce84": {
+      "marker": "57d7ce84",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T19:36:31.791261Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "85105822": {
+      "marker": "85105822",
+      "subagent_type": "UX Specialist (U1)",
+      "created_at": "2025-12-06T19:41:48.903800Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "23fcae91": {
+      "marker": "23fcae91",
+      "subagent_type": "UX Specialist (U1)",
+      "created_at": "2025-12-06T19:42:24.278504Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "afa33607": {
+      "marker": "afa33607",
+      "subagent_type": "Visual Designer (V1)",
+      "created_at": "2025-12-06T19:46:30.973541Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "bcae4efc": {
+      "marker": "bcae4efc",
+      "subagent_type": "Visual Designer (V1)",
+      "created_at": "2025-12-06T19:47:46.282103Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "e4ac43ce": {
+      "marker": "e4ac43ce",
+      "subagent_type": "",
+      "created_at": "2025-12-06T19:57:48.654820Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "7f4bd65e": {
+      "marker": "7f4bd65e",
+      "subagent_type": "",
+      "created_at": "2025-12-06T19:57:49.494041Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "254301ac": {
+      "marker": "254301ac",
+      "subagent_type": "",
+      "created_at": "2025-12-06T20:14:37.663324Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "8103fe72": {
+      "marker": "8103fe72",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T20:17:13.970959Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "a243d936": {
+      "marker": "a243d936",
+      "subagent_type": "Plan",
+      "created_at": "2025-12-06T20:22:40.790171Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "a95c07f0": {
+      "marker": "a95c07f0",
+      "subagent_type": "Frontend Expert (F1)",
+      "created_at": "2025-12-06T20:31:58.566387Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "d513b8c0": {
+      "marker": "d513b8c0",
+      "subagent_type": "Frontend Expert (F1)",
+      "created_at": "2025-12-06T20:33:54.345591Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "0d72a5a8": {
+      "marker": "0d72a5a8",
+      "subagent_type": "",
+      "created_at": "2025-12-06T20:52:04.416942Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "6bf0d4d0": {
+      "marker": "6bf0d4d0",
+      "subagent_type": "Super QA (Q1)",
+      "created_at": "2025-12-06T20:53:32.247895Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "6fcfdb42": {
+      "marker": "6fcfdb42",
+      "subagent_type": "Super QA (Q1)",
+      "created_at": "2025-12-06T20:53:42.396923Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "d579643b": {
+      "marker": "d579643b",
+      "subagent_type": "Super QA (Q1)",
+      "created_at": "2025-12-06T20:55:05.549651Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "ad30f7e8": {
+      "marker": "ad30f7e8",
+      "subagent_type": "Backend Expert (B1)",
+      "created_at": "2025-12-06T20:57:31.483962Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "ee3a087b": {
+      "marker": "ee3a087b",
+      "subagent_type": "Backend Expert (B1)",
+      "created_at": "2025-12-06T20:57:37.573230Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "7e5403da": {
+      "marker": "7e5403da",
+      "subagent_type": "Backend Expert (B1)",
+      "created_at": "2025-12-06T20:58:27.401145Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
     }
   },
   "config": {
@@ -1140,8 +1350,8 @@
     "avg_resume_tokens": 5000
   },
   "stats": {
-    "total_agents": 113,
+    "total_agents": 134,
     "total_resumes": 0,
-    "total_tokens_tracked": 339000
+    "total_tokens_tracked": 402000
   }
 }
