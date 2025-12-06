@@ -249,6 +249,886 @@
       "estimated_tokens": 3000,
       "status": "active",
       "warnings": []
+    },
+    "f3b20f6f": {
+      "marker": "f3b20f6f",
+      "subagent_type": "",
+      "created_at": "2025-12-05T21:11:39.137471Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "207e5101": {
+      "marker": "207e5101",
+      "subagent_type": "",
+      "created_at": "2025-12-05T21:11:40.325169Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "b2ec69fb": {
+      "marker": "b2ec69fb",
+      "subagent_type": "",
+      "created_at": "2025-12-05T21:11:41.237868Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "67bfa08b": {
+      "marker": "67bfa08b",
+      "subagent_type": "claude-code-guide",
+      "created_at": "2025-12-05T21:12:44.205424Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "142fd99b": {
+      "marker": "142fd99b",
+      "subagent_type": "",
+      "created_at": "2025-12-05T21:21:18.519869Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "be9f7954": {
+      "marker": "be9f7954",
+      "subagent_type": "",
+      "created_at": "2025-12-05T21:21:22.138702Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "6ed5c72c": {
+      "marker": "6ed5c72c",
+      "subagent_type": "",
+      "created_at": "2025-12-05T21:24:51.756452Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "3984ebf5": {
+      "marker": "3984ebf5",
+      "subagent_type": "",
+      "created_at": "2025-12-05T21:24:53.429627Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "d9f781f1": {
+      "marker": "d9f781f1",
+      "subagent_type": "",
+      "created_at": "2025-12-05T21:28:10.995296Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "40a3402b": {
+      "marker": "40a3402b",
+      "subagent_type": "",
+      "created_at": "2025-12-05T21:28:11.988082Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "3b4ae413": {
+      "marker": "3b4ae413",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-05T21:29:33.238106Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "85d20278": {
+      "marker": "85d20278",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-05T21:30:06.048893Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "b5603a8c": {
+      "marker": "b5603a8c",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-05T21:31:42.488927Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "8657b8d1": {
+      "marker": "8657b8d1",
+      "subagent_type": "",
+      "created_at": "2025-12-05T23:00:50.476365Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "8030ce59": {
+      "marker": "8030ce59",
+      "subagent_type": "",
+      "created_at": "2025-12-05T23:00:53.936327Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "0efd9f15": {
+      "marker": "0efd9f15",
+      "subagent_type": "",
+      "created_at": "2025-12-05T23:03:33.305853Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "39d29450": {
+      "marker": "39d29450",
+      "subagent_type": "",
+      "created_at": "2025-12-05T23:08:43.506271Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "36502a4b": {
+      "marker": "36502a4b",
+      "subagent_type": "",
+      "created_at": "2025-12-06T12:29:01.022299Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "35ef68a3": {
+      "marker": "35ef68a3",
+      "subagent_type": "",
+      "created_at": "2025-12-06T12:29:07.141015Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "121d68d1": {
+      "marker": "121d68d1",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T12:33:25.574314Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "9ebf2929": {
+      "marker": "9ebf2929",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T12:33:26.021223Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "8a1e3b0a": {
+      "marker": "8a1e3b0a",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T12:34:02.306948Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "cb2336fc": {
+      "marker": "cb2336fc",
+      "subagent_type": "",
+      "created_at": "2025-12-06T12:43:42.858693Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "d12326cf": {
+      "marker": "d12326cf",
+      "subagent_type": "",
+      "created_at": "2025-12-06T12:43:56.890766Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "56e903c9": {
+      "marker": "56e903c9",
+      "subagent_type": "",
+      "created_at": "2025-12-06T12:44:05.562649Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "79bfc3d9": {
+      "marker": "79bfc3d9",
+      "subagent_type": "Plan",
+      "created_at": "2025-12-06T12:45:09.232430Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "205a598f": {
+      "marker": "205a598f",
+      "subagent_type": "Plan",
+      "created_at": "2025-12-06T12:46:36.462372Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "d0f7844e": {
+      "marker": "d0f7844e",
+      "subagent_type": "",
+      "created_at": "2025-12-06T12:47:56.601349Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "16864026": {
+      "marker": "16864026",
+      "subagent_type": "",
+      "created_at": "2025-12-06T12:48:05.174755Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "58e67200": {
+      "marker": "58e67200",
+      "subagent_type": "Plan",
+      "created_at": "2025-12-06T12:53:03.581990Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "e73eb886": {
+      "marker": "e73eb886",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T12:53:07.676449Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "2ea6cf7b": {
+      "marker": "2ea6cf7b",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T12:53:41.906793Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "faedd479": {
+      "marker": "faedd479",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T12:53:51.261856Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "3b4dc1e8": {
+      "marker": "3b4dc1e8",
+      "subagent_type": "",
+      "created_at": "2025-12-06T13:21:55.267912Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "09234610": {
+      "marker": "09234610",
+      "subagent_type": "",
+      "created_at": "2025-12-06T13:21:59.039629Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "4f09baf2": {
+      "marker": "4f09baf2",
+      "subagent_type": "Plan",
+      "created_at": "2025-12-06T13:26:58.993711Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "e49dee3e": {
+      "marker": "e49dee3e",
+      "subagent_type": "Plan",
+      "created_at": "2025-12-06T13:28:32.910664Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "c103a644": {
+      "marker": "c103a644",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-06T13:40:19.123816Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "f8c7472e": {
+      "marker": "f8c7472e",
+      "subagent_type": "",
+      "created_at": "2025-12-06T15:29:53.991002Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "ed642fa1": {
+      "marker": "ed642fa1",
+      "subagent_type": "",
+      "created_at": "2025-12-06T15:29:57.174252Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "4096e220": {
+      "marker": "4096e220",
+      "subagent_type": "",
+      "created_at": "2025-12-06T15:43:19.693025Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "bcb8d02c": {
+      "marker": "bcb8d02c",
+      "subagent_type": "",
+      "created_at": "2025-12-06T15:43:22.400176Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "45aa61dd": {
+      "marker": "45aa61dd",
+      "subagent_type": "",
+      "created_at": "2025-12-06T16:04:04.527425Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "3bde1f2f": {
+      "marker": "3bde1f2f",
+      "subagent_type": "",
+      "created_at": "2025-12-06T16:04:09.983423Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "0703c20f": {
+      "marker": "0703c20f",
+      "subagent_type": "",
+      "created_at": "2025-12-06T16:43:52.813198Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "d61bb1ae": {
+      "marker": "d61bb1ae",
+      "subagent_type": "",
+      "created_at": "2025-12-06T16:43:54.593782Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "23ee1d10": {
+      "marker": "23ee1d10",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T16:47:04.028330Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "6636dbba": {
+      "marker": "6636dbba",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T16:47:14.977447Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "1285eb8f": {
+      "marker": "1285eb8f",
+      "subagent_type": "",
+      "created_at": "2025-12-06T17:12:02.158655Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "bf80132d": {
+      "marker": "bf80132d",
+      "subagent_type": "",
+      "created_at": "2025-12-06T17:12:03.935801Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "3db76c46": {
+      "marker": "3db76c46",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T17:28:37.368220Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "4ff5c59b": {
+      "marker": "4ff5c59b",
+      "subagent_type": "",
+      "created_at": "2025-12-06T17:29:38.841315Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "4da72fb0": {
+      "marker": "4da72fb0",
+      "subagent_type": "",
+      "created_at": "2025-12-06T17:29:40.761753Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "b067b0a5": {
+      "marker": "b067b0a5",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-06T17:33:48.155160Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "16ebc356": {
+      "marker": "16ebc356",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-06T17:34:00.862678Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "18f3618b": {
+      "marker": "18f3618b",
+      "subagent_type": "",
+      "created_at": "2025-12-06T17:38:51.850293Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "da4d090b": {
+      "marker": "da4d090b",
+      "subagent_type": "",
+      "created_at": "2025-12-06T17:38:52.960223Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "ecc8c30e": {
+      "marker": "ecc8c30e",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T17:41:45.143668Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "051baf7f": {
+      "marker": "051baf7f",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T17:41:52.531607Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "45a12c74": {
+      "marker": "45a12c74",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T17:41:55.989167Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "c939bf42": {
+      "marker": "c939bf42",
+      "subagent_type": "UX/UI Expert (U1)",
+      "created_at": "2025-12-06T17:45:54.816395Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "798204c9": {
+      "marker": "798204c9",
+      "subagent_type": "UX/UI Expert (U1)",
+      "created_at": "2025-12-06T17:46:01.275307Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "6395b93c": {
+      "marker": "6395b93c",
+      "subagent_type": "UX/UI Expert (U1)",
+      "created_at": "2025-12-06T17:51:05.218295Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "1e7e250e": {
+      "marker": "1e7e250e",
+      "subagent_type": "UX/UI Expert (U1)",
+      "created_at": "2025-12-06T17:52:49.726980Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "1d89f00d": {
+      "marker": "1d89f00d",
+      "subagent_type": "",
+      "created_at": "2025-12-06T17:56:06.980259Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "dc42ce32": {
+      "marker": "dc42ce32",
+      "subagent_type": "",
+      "created_at": "2025-12-06T17:56:09.000785Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "eb438322": {
+      "marker": "eb438322",
+      "subagent_type": "",
+      "created_at": "2025-12-06T17:56:56.757172Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "7584c964": {
+      "marker": "7584c964",
+      "subagent_type": "",
+      "created_at": "2025-12-06T17:56:59.528353Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "24d2a3e8": {
+      "marker": "24d2a3e8",
+      "subagent_type": "",
+      "created_at": "2025-12-06T18:25:37.421589Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "8881d2dd": {
+      "marker": "8881d2dd",
+      "subagent_type": "",
+      "created_at": "2025-12-06T18:25:37.615419Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "5cc4d9b9": {
+      "marker": "5cc4d9b9",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T18:38:28.481695Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "dc0badec": {
+      "marker": "dc0badec",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T18:38:40.859880Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "d254eabe": {
+      "marker": "d254eabe",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T18:38:47.926146Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "f2a63d36": {
+      "marker": "f2a63d36",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T18:38:56.622107Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "48317eeb": {
+      "marker": "48317eeb",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T18:39:02.956453Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "e86d59e0": {
+      "marker": "e86d59e0",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T18:39:06.824107Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "1bc3fd7d": {
+      "marker": "1bc3fd7d",
+      "subagent_type": "",
+      "created_at": "2025-12-06T18:40:28.945992Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "0b6d0a36": {
+      "marker": "0b6d0a36",
+      "subagent_type": "",
+      "created_at": "2025-12-06T18:40:32.454459Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "1615efe9": {
+      "marker": "1615efe9",
+      "subagent_type": "claude-code-guide",
+      "created_at": "2025-12-06T18:55:37.147741Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "e8dce1c4": {
+      "marker": "e8dce1c4",
+      "subagent_type": "",
+      "created_at": "2025-12-06T19:13:50.879365Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "8601821e": {
+      "marker": "8601821e",
+      "subagent_type": "",
+      "created_at": "2025-12-06T19:13:53.847655Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "1483defe": {
+      "marker": "1483defe",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T19:15:29.533276Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "3c04e8de": {
+      "marker": "3c04e8de",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T19:15:47.105909Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "953429a9": {
+      "marker": "953429a9",
+      "subagent_type": "",
+      "created_at": "2025-12-06T19:15:51.378519Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "8412ccb0": {
+      "marker": "8412ccb0",
+      "subagent_type": "",
+      "created_at": "2025-12-06T19:15:54.520670Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "08add343": {
+      "marker": "08add343",
+      "subagent_type": "general-purpose",
+      "created_at": "2025-12-06T19:16:51.091459Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "1605f550": {
+      "marker": "1605f550",
+      "subagent_type": "general-purpose",
+      "created_at": "2025-12-06T19:16:54.731611Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "281a93be": {
+      "marker": "281a93be",
+      "subagent_type": "general-purpose",
+      "created_at": "2025-12-06T19:16:59.022521Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
     }
   },
   "config": {
@@ -260,8 +1140,8 @@
     "avg_resume_tokens": 5000
   },
   "stats": {
-    "total_agents": 25,
+    "total_agents": 113,
     "total_resumes": 0,
-    "total_tokens_tracked": 75000
+    "total_tokens_tracked": 339000
   }
 }
