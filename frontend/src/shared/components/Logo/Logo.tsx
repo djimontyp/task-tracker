@@ -41,7 +41,11 @@ export function Logo({
   return (
     <Link
       to="/"
-      className={cn('flex items-center gap-2', className)}
+      className={cn(
+        'flex items-center gap-2 rounded-md',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        className
+      )}
       aria-label={`${appName} home`}
       data-testid="sidebar-logo"
     >
