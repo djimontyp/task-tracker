@@ -13,7 +13,7 @@ description: |-
   - User research → Product Designer (P2)
   - IA design → Product Designer (P2)
   - React implementation → React Frontend Expert (F1)
-model: haiku
+model: opus
 color: pink
 ---
 

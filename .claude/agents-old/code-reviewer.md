@@ -12,7 +12,7 @@ description: |-
   - Domain-specific review → fastapi-backend-expert, React Frontend Expert (F1)
   - Code cleanup → Code Cleaner (C1)
   - Testing → Pytest Master (T1)
-model: haiku
+model: sonnet
 color: red
 ---
 

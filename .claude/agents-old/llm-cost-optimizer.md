@@ -12,7 +12,7 @@ description: |-
   - Quality optimization → Prompt Engineer (P1)
   - Model architecture → llm-ml-engineer
   - Backend integration → fastapi-backend-expert
-model: haiku
+model: opus
 color: green
 ---
 

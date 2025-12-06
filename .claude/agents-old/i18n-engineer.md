@@ -13,7 +13,7 @@ description: |-
   - Content writing → Docs Expert (D2)
   - UI design для language switcher → UX/UI Expert (U1)
   - Backend implementation → fastapi-backend-expert
-model: haiku
+model: sonnet
 color: purple
 ---
 
