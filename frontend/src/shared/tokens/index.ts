@@ -55,9 +55,12 @@ export {
   avatars,
   focus,
   transitions,
-  // New layout patterns
+  // Layout patterns
   spacingMap,
   pageLayouts,
+  // Status indicators
+  statusIndicators,
   type SpacingMapToken,
   type PageLayoutVariant,
+  type StatusIndicatorVariant,
 } from './patterns';
