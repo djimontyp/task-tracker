@@ -72,7 +72,7 @@ export const Warning: Story = {
 // Status badges with icons (WCAG compliant)
 export const StatusConnected: Story = {
   render: () => (
-    <Badge variant="outline" className="gap-2.5 border-status-connected text-status-connected">
+    <Badge variant="outline" className="gap-2 border-status-connected text-status-connected">
       <CheckCircle className="h-3.5 w-3.5" />
       Connected
     </Badge>
@@ -88,7 +88,7 @@ export const StatusConnected: Story = {
 
 export const StatusError: Story = {
   render: () => (
-    <Badge variant="outline" className="gap-2.5 border-status-error text-status-error">
+    <Badge variant="outline" className="gap-2 border-status-error text-status-error">
       <XCircle className="h-3.5 w-3.5" />
       Error
     </Badge>
@@ -97,7 +97,7 @@ export const StatusError: Story = {
 
 export const StatusValidating: Story = {
   render: () => (
-    <Badge variant="outline" className="gap-2.5 border-status-validating text-status-validating">
+    <Badge variant="outline" className="gap-2 border-status-validating text-status-validating">
       <Clock className="h-3.5 w-3.5" />
       Validating
     </Badge>
@@ -106,7 +106,7 @@ export const StatusValidating: Story = {
 
 export const StatusPending: Story = {
   render: () => (
-    <Badge variant="outline" className="gap-2.5 border-status-pending text-status-pending">
+    <Badge variant="outline" className="gap-2 border-status-pending text-status-pending">
       <AlertCircle className="h-3.5 w-3.5" />
       Pending
     </Badge>
@@ -117,19 +117,19 @@ export const StatusPending: Story = {
 export const AllStatuses: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
-      <Badge variant="outline" className="gap-2.5 border-status-connected text-status-connected">
+      <Badge variant="outline" className="gap-2 border-status-connected text-status-connected">
         <CheckCircle className="h-3.5 w-3.5" />
         Connected
       </Badge>
-      <Badge variant="outline" className="gap-2.5 border-status-validating text-status-validating">
+      <Badge variant="outline" className="gap-2 border-status-validating text-status-validating">
         <Clock className="h-3.5 w-3.5" />
         Validating
       </Badge>
-      <Badge variant="outline" className="gap-2.5 border-status-pending text-status-pending">
+      <Badge variant="outline" className="gap-2 border-status-pending text-status-pending">
         <AlertCircle className="h-3.5 w-3.5" />
         Pending
       </Badge>
-      <Badge variant="outline" className="gap-2.5 border-status-error text-status-error">
+      <Badge variant="outline" className="gap-2 border-status-error text-status-error">
         <XCircle className="h-3.5 w-3.5" />
         Error
       </Badge>
@@ -167,7 +167,7 @@ export const ImportantWithGlow: Story = {
         <Badge variant="default" className="shadow-glow-sm">
           Featured
         </Badge>
-        <Badge variant="outline" className="gap-2.5 border-primary text-primary shadow-glow-sm">
+        <Badge variant="outline" className="gap-2 border-primary text-primary shadow-glow-sm">
           <CheckCircle className="h-3.5 w-3.5" />
           Important
         </Badge>

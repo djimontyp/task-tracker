@@ -68,24 +68,39 @@ export const badges = {
   /** Atom type badges */
   atom: {
     problem: cn(
+      'flex items-center gap-2',
       'border-atom-problem text-atom-problem',
       'bg-atom-problem/10'
     ),
     solution: cn(
+      'flex items-center gap-2',
       'border-atom-solution text-atom-solution',
       'bg-atom-solution/10'
     ),
     decision: cn(
+      'flex items-center gap-2',
       'border-atom-decision text-atom-decision',
       'bg-atom-decision/10'
     ),
     question: cn(
+      'flex items-center gap-2',
       'border-atom-question text-atom-question',
       'bg-atom-question/10'
     ),
     insight: cn(
+      'flex items-center gap-2',
       'border-atom-insight text-atom-insight',
       'bg-atom-insight/10'
+    ),
+    pattern: cn(
+      'flex items-center gap-2',
+      'border-atom-pattern text-atom-pattern',
+      'bg-atom-pattern/10'
+    ),
+    requirement: cn(
+      'flex items-center gap-2',
+      'border-atom-requirement text-atom-requirement',
+      'bg-atom-requirement/10'
     ),
   },
 } as const;
@@ -289,3 +304,75 @@ export const transitions = {
   /** Color transitions only */
   colors: 'transition-colors duration-200',
 } as const;
+
+// ═══════════════════════════════════════════════════════════════
+// SPACING TOKEN MAPPINGS (for primitives)
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Spacing token to Tailwind class value mapping
+ * Used internally by layout primitives (Box, Stack, Inline)
+ *
+ * All values follow 4px grid system:
+ * - xs: 4px, sm: 8px, md: 16px, lg: 24px, xl: 32px, 2xl: 48px
+ */
+export const spacingMap = {
+  none: '0',
+  xs: '1', // 4px
+  sm: '2', // 8px
+  md: '4', // 16px
+  lg: '6', // 24px
+  xl: '8', // 32px
+  '2xl': '12', // 48px
+} as const;
+
+export type SpacingMapToken = keyof typeof spacingMap;
+
+// ═══════════════════════════════════════════════════════════════
+// PAGE LAYOUT PATTERNS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Page-level layout patterns for consistent wrapper styling.
+ * These map to PageWrapper variants.
+ *
+ * @example
+ * // With PageWrapper component
+ * <PageWrapper variant="fullWidth">
+ *
+ * // Raw classes (if needed)
+ * <div className={pageLayouts.fullWidth}>
+ */
+export const pageLayouts = {
+  /** Dashboard, Messages, Topics - full width with vertical spacing */
+  fullWidth: cn(
+    'space-y-4 sm:space-y-6 md:space-y-6',
+    'max-w-full overflow-hidden',
+    'animate-fade-in'
+  ),
+  /** Settings, Forms - centered with max-width constraint */
+  centered: cn(
+    'mx-auto max-w-3xl',
+    'space-y-6',
+    'p-4 md:p-6 lg:p-8'
+  ),
+  /** Detail pages - wider max-width for content-heavy pages */
+  wide: cn(
+    'mx-auto max-w-5xl',
+    'space-y-6'
+  ),
+  /** Onboarding, Wizards - tight max-width for focused flows */
+  narrow: cn(
+    'mx-auto max-w-2xl',
+    'space-y-6',
+    'p-4 md:p-6'
+  ),
+  /** Search page - centered with generous padding */
+  search: cn(
+    'mx-auto max-w-7xl',
+    'py-6 md:py-12',
+    'px-4 md:px-6'
+  ),
+} as const;
+
+export type PageLayoutVariant = keyof typeof pageLayouts;

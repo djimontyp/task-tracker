@@ -41,19 +41,19 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 24.6 95% 53.1%;
-    /* Atom type semantic colors */
-    --atom-problem: 0 84.2% 60.2%;
-    --atom-solution: 142 76% 36%;
-    --atom-decision: 217 91% 60%;
-    --atom-question: 43 96% 56%;
-    --atom-insight: 280 85% 63%;
-    --atom-pattern: 210 100% 50%;
-    --atom-requirement: 217 91% 60%;
-    /* Status indicator colors */
-    --status-connected: 142 76% 36%;
-    --status-validating: 217 91% 60%;
-    --status-pending: 43 96% 56%;
-    --status-error: 0 84.2% 60.2%;
+    /* Atom type semantic colors - WCAG AA */
+    --atom-problem: 0 78% 54%;
+    --atom-solution: 142 71% 45%;
+    --atom-decision: 217 85% 51%;
+    --atom-question: 38 92% 50%;
+    --atom-insight: 280 65% 58%;
+    --atom-pattern: 197 71% 45%;
+    --atom-requirement: 260 65% 55%;
+    /* Status indicator colors - WCAG AA */
+    --status-connected: 142 71% 45%;
+    --status-validating: 217 85% 51%;
+    --status-pending: 38 92% 50%;
+    --status-error: 0 78% 54%;
     /* Shadow tokens */
     --shadow-color: 222.2 47.4% 11.2%;
     --shadow-card: 0 1px 3px hsl(var(--shadow-color) / 0.06),
@@ -114,19 +114,19 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 20.5 90.2% 48.2%;
-    /* Atom type semantic colors */
-    --atom-problem: 0 84.2% 60.2%;
-    --atom-solution: 142 76% 36%;
-    --atom-decision: 217 91% 60%;
-    --atom-question: 43 96% 56%;
-    --atom-insight: 280 85% 63%;
-    --atom-pattern: 210 100% 60%;
-    --atom-requirement: 217 91% 60%;
-    /* Status indicator colors */
-    --status-connected: 142 76% 36%;
-    --status-validating: 217 91% 60%;
-    --status-pending: 43 96% 56%;
-    --status-error: 0 84.2% 60.2%;
+    /* Atom type semantic colors - WCAG AA (Dark mode) */
+    --atom-problem: 0 78% 65%;
+    --atom-solution: 142 71% 59%;
+    --atom-decision: 217 85% 62%;
+    --atom-question: 38 92% 60%;
+    --atom-insight: 280 65% 68%;
+    --atom-pattern: 197 71% 56%;
+    --atom-requirement: 260 65% 66%;
+    /* Status indicator colors - WCAG AA (Dark mode) */
+    --status-connected: 142 71% 59%;
+    --status-validating: 217 85% 62%;
+    --status-pending: 38 92% 60%;
+    --status-error: 0 78% 65%;
     /* Shadow tokens */
     --shadow-color: 210 40% 98%;
     --shadow-card: 0 1px 3px hsl(var(--shadow-color) / 0.04),

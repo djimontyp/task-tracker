@@ -55,4 +55,9 @@ export {
   avatars,
   focus,
   transitions,
+  // New layout patterns
+  spacingMap,
+  pageLayouts,
+  type SpacingMapToken,
+  type PageLayoutVariant,
 } from './patterns';
