@@ -54,6 +54,13 @@ module.exports = {
     // Local rule: Заборона Heroicons (використовуй lucide-react)
     'local-rules/no-heroicons': 'error',
 
+    // Local rule: Заборона raw page wrappers (використовуй PageWrapper)
+    // Warning level during migration, will become error after all pages migrated
+    'local-rules/no-raw-page-wrapper': ['warn', {
+      // Primitives can use raw classes (they are the source)
+      allowedFiles: ['**/primitives/**'],
+    }],
+
     // ═══════════════════════════════════════════════════════════════
     // TYPESCRIPT
     // ═══════════════════════════════════════════════════════════════
