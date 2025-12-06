@@ -1,0 +1,27 @@
+Agent ID: 16864026
+Marker: 16864026
+Session: b791c4da-7cae-4b42-9657-4d271bf73e29
+Timestamp: 2025-12-06T12:48:05Z
+Working Directory: /Users/maks/PycharmProjects/task-tracker
+
+Blocker Signal:
+- ✅ TypeScript design tokens замість raw Tailwind
+- ✅ Перевіряю Storybook перед створенням UI
+- ❌ Заборонено raw кольори (`bg-red-*`, `text-green-*`)
+- ❌ Заборонено непарні spacing (`p-3`, `gap-5`)
+
+**Git hooks:**
+Pre-commit блокує commits з порушеннями Design System (ESLint + TypeScript).
+
+**Workflow:**
+1. Перевірка (API exists?)
+2. Контекст (existing patterns)
+3. Реалізація (Storybook для компонентів)
+4. Верифікація (typecheck + build)
+
+**При блокерах:**
+- Signal "Status: Blocked" + опис проблеми
+- Coordinator делегує до спеціаліста
+- Resume тільки після отримання agent_id з файлової системи
+
+Готовий до планування! Що потрібно дослідити?

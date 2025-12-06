@@ -389,6 +389,36 @@
       "estimated_tokens": 3000,
       "status": "active",
       "warnings": []
+    },
+    "3db76c46": {
+      "marker": "3db76c46",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T17:28:37.368220Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "b067b0a5": {
+      "marker": "b067b0a5",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-06T17:33:48.155063Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "16ebc356": {
+      "marker": "16ebc356",
+      "subagent_type": "React Frontend Expert (F1)",
+      "created_at": "2025-12-06T17:34:00.862615Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
     }
   },
   "config": {
@@ -400,8 +430,8 @@
     "avg_resume_tokens": 5000
   },
   "stats": {
-    "total_agents": 39,
+    "total_agents": 42,
     "total_resumes": 0,
-    "total_tokens_tracked": 117000
+    "total_tokens_tracked": 126000
   }
 }
