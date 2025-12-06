@@ -6,16 +6,26 @@ import {
   MessageSquare,
   List,
   Folder,
+  Settings,
+  PanelLeft,
 } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useUiStore } from '@/shared/store/uiStore'
 import { logger } from '@/shared/utils/logger'
 import {
   Sidebar,
   SidebarContent,
+  SidebarHeader,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  useSidebar,
 } from '@/shared/ui/sidebar'
+import { Separator } from '@/shared/ui/separator'
 import { statsService, type SidebarCounts } from '@/shared/api/statsService'
+import { Logo } from '@/shared/components/Logo'
 import { NavMain } from './NavMain'
 import type { NavGroup } from './types'
 
@@ -64,6 +74,7 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
   const location = useLocation()
   const queryClient = useQueryClient()
   const { expandedGroups, setExpandedGroup } = useUiStore()
+  const { state, toggleSidebar } = useSidebar() // For logo collapsed state + toggle
 
   useEffect(() => {
     groups.forEach((group) => {
@@ -168,7 +179,17 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
   }
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" data-testid="app-sidebar">
+      {/* Logo Header - full-height sidebar pattern */}
+      <SidebarHeader className="h-14 border-b border-sidebar-border flex items-center justify-center group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
+        <Logo
+          collapsed={state === 'collapsed'}
+          size="sm"
+          animated
+          className="group-data-[collapsible=icon]:mx-auto"
+        />
+      </SidebarHeader>
+
       <SidebarContent>
         <NavMain groups={groups} />
         {/* DORMANT: AI Operations + Extract Knowledge button приховано
@@ -192,6 +213,36 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
         )}
         */}
       </SidebarContent>
+
+      {/* Footer with Settings link + Collapse toggle */}
+      <SidebarFooter className="group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:items-center">
+        <Separator className="mb-2 group-data-[collapsible=icon]:hidden" />
+        <SidebarMenu className="group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-2">
+          <SidebarMenuItem className="group-data-[collapsible=icon]:w-auto">
+            <SidebarMenuButton
+              asChild
+              tooltip="Settings"
+              className="group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+            >
+              <Link to="/settings" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                <span className="group-data-[collapsible=icon]:hidden">Settings</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          {/* Collapse toggle - moved from Navbar */}
+          <SidebarMenuItem className="group-data-[collapsible=icon]:w-auto">
+            <SidebarMenuButton
+              tooltip="Toggle sidebar"
+              onClick={toggleSidebar}
+              className="group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+            >
+              <PanelLeft className="h-4 w-4" />
+              <span className="group-data-[collapsible=icon]:hidden">Toggle Sidebar</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }
