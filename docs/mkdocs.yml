@@ -1,27 +1,19 @@
-site_name: Task Tracker Documentation
-site_description: Internal documentation for the Task Tracker project
-docs_dir: content
+site_name: Pulse Radar
+site_description: AI-система збору знань з комунікаційних каналів
+docs_dir: .
 
 theme:
   name: material
-  language: en
+  language: uk
   features:
-    # Navigation
     - navigation.tabs
-    - navigation.tabs.sticky
     - navigation.sections
     - navigation.expand
     - navigation.top
-    - navigation.tracking
-    # Search
     - search.highlight
     - search.suggest
-    - search.share
-    # Content
     - content.code.copy
-    - content.code.annotate
     - content.tabs.link
-    # Table of Contents
     - toc.follow
   palette:
     - scheme: default
@@ -29,137 +21,43 @@ theme:
       accent: orange
       toggle:
         icon: material/brightness-7
-        name: Switch to dark mode
+        name: Темна тема
     - scheme: slate
       primary: deep orange
       accent: orange
       toggle:
         icon: material/brightness-4
-        name: Switch to light mode
+        name: Світла тема
   font:
     text: Inter
-    code: Roboto Mono
-  icon:
-    repo: fontawesome/brands/github
+    code: JetBrains Mono
 
 nav:
-  - User Guide:
-    - Home: index.md
-    - Context Spaces (Topics): topics.md
-    - Knowledge Extraction: knowledge-extraction.md
-    - Event Flow & Sequencing: event-flow.md
-    - Auto-Save Feature: auto-save.md
-  - User Guides:
-    - Topics Search & Pagination: guides/topics-search-pagination.md
-    - Keyboard Navigation: guides/keyboard-navigation.md
-  - Automation Guides:
-    - Quickstart: guides/automation-quickstart.md
-    - Configuration Reference: guides/automation-configuration.md
-    - Troubleshooting: guides/automation-troubleshooting.md
-    - Best Practices: guides/automation-best-practices.md
-    - Video Tutorial Script: guides/automation-video-tutorial-script.md
-  - Architecture:
-    - Overview: architecture/overview.md
-    - System Diagrams: architecture/diagrams.md
-    - Database Models: architecture/models.md
-    - LLM Architecture: architecture/llm-architecture.md
-    - Backend Services: architecture/backend-services.md
-    - Background Tasks: architecture/background-tasks.md
-    - Versioning System: architecture/versioning-system.md
-    - Agent System: architecture/agent-system.md
-    - AnalysisRun State Machine: architecture/analysis-run-state-machine.md
-    - Classification Experiments: architecture/classification-experiments.md
-    - Noise Filtering: architecture/noise-filtering.md
-    - Analysis System: architecture/analysis-system.md
-    - Knowledge Extraction: architecture/knowledge-extraction.md
-    - Vector Database: architecture/vector-database.md
-  - Features:
-    - Automation-First Version Management: features/automation-version-management.md
+  - Головна: index.md
+  - Продукт:
+    - Огляд: product/overview.md
+    - User Journeys: product/user-journeys.md
+    - Сторінки:
+      - Dashboard: product/pages/dashboard.md
+      - Insights: product/pages/insights.md
+      - Search: product/pages/search.md
+      - Messages: product/pages/messages.md
+  - Гайди:
+    - Швидкий старт: guides/quickstart.md
+    - Telegram: guides/telegram-setup.md
+    - AI налаштування: guides/ai-settings.md
+  - Архітектура:
+    - Огляд: architecture/OVERVIEW.md
+    - Workflows: architecture/WORKFLOWS.md
+    - Моделі: architecture/models.md
+    - API: architecture/api.md
+  - Changelog: changelog.md
 
 plugins:
   - search:
-      lang:
-        - en
-        - uk
-      separator: '[\s\-,:!=\[\]()"/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
-  - i18n:
-      docs_structure: folder
-      languages:
-        - locale: en
-          default: true
-          name: English
-          site_name: Task Tracker Documentation
-          nav_translations:
-            User Guide: User Guide
-            Home: Home
-            Context Spaces (Topics): Context Spaces (Topics)
-            Knowledge Extraction: Knowledge Extraction
-            Event Flow & Sequencing: Event Flow & Sequencing
-            Auto-Save Feature: Auto-Save Feature
-            User Guides: User Guides
-            Topics Search & Pagination: Topics Search & Pagination
-            Keyboard Navigation: Keyboard Navigation
-            Automation Guides: Automation Guides
-            Quickstart: Quickstart
-            Configuration Reference: Configuration Reference
-            Troubleshooting: Troubleshooting
-            Best Practices: Best Practices
-            Video Tutorial Script: Video Tutorial Script
-            Architecture: Architecture
-            Overview: Overview
-            System Diagrams: System Diagrams
-            Database Models: Database Models
-            LLM Architecture: LLM Architecture
-            Backend Services: Backend Services
-            Background Tasks: Background Tasks
-            Versioning System: Versioning System
-            Agent System: Agent System
-            AnalysisRun State Machine: AnalysisRun State Machine
-            Classification Experiments: Classification Experiments
-            Noise Filtering: Noise Filtering
-            Analysis System: Analysis System
-            Vector Database: Vector Database
-            Features: Features
-            Automation-First Version Management: Automation-First Version Management
-        - locale: uk
-          name: Українська
-          site_name: Документація Task Tracker
-          nav_translations:
-            User Guide: Посібник користувача
-            Home: Головна
-            Context Spaces (Topics): Контекстні простори (Топіки)
-            Knowledge Extraction: Витягування знань
-            Event Flow & Sequencing: Потік подій та послідовність
-            Auto-Save Feature: Функція автозбереження
-            User Guides: Посібники користувача
-            Topics Search & Pagination: Пошук та пагінація топіків
-            Keyboard Navigation: Навігація клавіатурою
-            Automation Guides: Посібники автоматизації
-            Quickstart: Швидкий старт
-            Configuration Reference: Довідник конфігурації
-            Troubleshooting: Усування неполадок
-            Best Practices: Найкращі практики
-            Video Tutorial Script: Сценарій відео-навчання
-            Architecture: Архітектура
-            Overview: Огляд
-            System Diagrams: Діаграми системи
-            Database Models: Моделі бази даних
-            LLM Architecture: Архітектура LLM
-            Backend Services: Бекенд-сервіси
-            Background Tasks: Фонові завдання
-            Versioning System: Система версіонування
-            Agent System: Система агентів
-            AnalysisRun State Machine: Машина станів AnalysisRun
-            Classification Experiments: Експерименти з класифікацією
-            Noise Filtering: Фільтрація шуму
-            Analysis System: Система аналізу
-            Vector Database: Векторна база даних
-            Features: Функції
-            Automation-First Version Management: Автоматизоване керування версіями
+      lang: uk
 
 markdown_extensions:
-  # Python Markdown
-  - abbr
   - admonition
   - attr_list
   - def_list
@@ -167,27 +65,10 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
-      permalink_title: Link to this section
-      slugify: !!python/object/apply:pymdownx.slugs.slugify
-        kwds:
-          case: lower
-
-  # PyMdown Extensions
-  - pymdownx.betterem:
-      smart_enable: all
-  - pymdownx.caret
   - pymdownx.details
-  - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
       anchor_linenums: true
-      line_spans: __span
-      pygments_lang_class: true
   - pymdownx.inlinehilite
-  - pymdownx.keys
-  - pymdownx.mark
-  - pymdownx.smartsymbols
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -197,12 +78,3 @@ markdown_extensions:
       alternate_style: true
   - pymdownx.tasklist:
       custom_checkbox: true
-  - pymdownx.tilde
-
-extra:
-  social:
-    - icon: fontawesome/brands/github
-      link: https://github.com/djimontyp/task-tracker
-
-extra_css:
-  - stylesheets/custom.css
