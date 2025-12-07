@@ -94,7 +94,7 @@ export const Center = forwardRef<HTMLElement, CenterProps>(
         inline ? 'inline-flex' : 'flex',
         'items-center',
         'justify-center',
-        fullHeight && 'h-full min-h-screen',
+        fullHeight && 'w-full h-full min-h-screen',
         maxWidth && maxWidthMap[maxWidth],
       ],
       // Custom classes

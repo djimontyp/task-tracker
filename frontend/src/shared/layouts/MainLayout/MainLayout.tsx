@@ -45,7 +45,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
       {isDesktop ? (
         // Desktop: Grid layout (full-height sidebar + navbar offset)
-        <div className="grid grid-cols-[auto_1fr] h-screen overflow-hidden">
+        <div className="grid grid-cols-[auto_1fr] w-full h-screen overflow-hidden">
           {/* Column 1: Sidebar (auto width: 256px expanded or 56px collapsed) */}
           <AppSidebar />
 
