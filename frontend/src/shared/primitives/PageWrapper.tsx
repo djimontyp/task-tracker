@@ -86,7 +86,7 @@ const variantStyles = {
   ),
   search: cn(
     // Container-like behavior without using 'container'
-    'mx-auto max-w-7xl',
+    'w-full mx-auto max-w-7xl',
     // Generous vertical padding
     'py-6 md:py-12',
     // Horizontal padding

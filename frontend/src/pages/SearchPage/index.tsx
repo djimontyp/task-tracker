@@ -37,8 +37,8 @@ const SearchPage = () => {
   if (!query.trim()) {
     return (
       <PageWrapper variant="search">
-        <Center maxWidth="2xl" className="text-center">
-          <Stack gap="sm" align="center">
+        <Center fullHeight className="min-h-[50vh]">
+          <Stack gap="sm" align="center" className="text-center max-w-2xl">
             <div className="relative inline-block mb-4">
               <SearchIcon className="h-16 w-16 text-muted-foreground" aria-hidden="true" />
               <Sparkles className="h-6 w-6 text-primary absolute -top-2 -right-2" aria-hidden="true" />
@@ -73,10 +73,10 @@ const SearchPage = () => {
   if (error) {
     return (
       <PageWrapper variant="search">
-        <Center maxWidth="2xl" className="text-center">
+        <Center fullHeight className="min-h-[50vh] text-center">
           <Stack gap="sm" align="center">
             <h1 className="text-2xl font-bold text-destructive">Search Error</h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground max-w-md">
               {error instanceof Error ? error.message : 'An error occurred while searching'}
             </p>
           </Stack>

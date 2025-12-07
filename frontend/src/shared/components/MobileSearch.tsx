@@ -22,7 +22,7 @@ export const MobileSearch = ({ open, onOpenChange }: MobileSearchProps) => {
         <SheetHeader>
           <SheetTitle className="sr-only">Search</SheetTitle>
         </SheetHeader>
-        <div className="pt-4 pb-2">
+        <div className="py-4">
           <SearchBar />
         </div>
       </SheetContent>
