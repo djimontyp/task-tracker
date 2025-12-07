@@ -1339,6 +1339,116 @@
       "estimated_tokens": 3000,
       "status": "active",
       "warnings": []
+    },
+    "7dd69071": {
+      "marker": "7dd69071",
+      "subagent_type": "",
+      "created_at": "2025-12-06T21:29:54.340065Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "8e951c16": {
+      "marker": "8e951c16",
+      "subagent_type": "",
+      "created_at": "2025-12-06T21:29:54.885240Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "8108b48e": {
+      "marker": "8108b48e",
+      "subagent_type": "",
+      "created_at": "2025-12-06T21:33:56.938812Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "996aa6d5": {
+      "marker": "996aa6d5",
+      "subagent_type": "",
+      "created_at": "2025-12-06T21:33:59.505744Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "53babf18": {
+      "marker": "53babf18",
+      "subagent_type": "Explore",
+      "created_at": "2025-12-06T21:34:39.506093Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "9cb15c96": {
+      "marker": "9cb15c96",
+      "subagent_type": "",
+      "created_at": "2025-12-06T21:39:52.253953Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "5e675cb9": {
+      "marker": "5e675cb9",
+      "subagent_type": "",
+      "created_at": "2025-12-06T21:39:53.832593Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "82d1857b": {
+      "marker": "82d1857b",
+      "subagent_type": "",
+      "created_at": "2025-12-06T21:41:38.282746Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "20060fdb": {
+      "marker": "20060fdb",
+      "subagent_type": "",
+      "created_at": "2025-12-06T21:41:38.623204Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "400b421a": {
+      "marker": "400b421a",
+      "subagent_type": "",
+      "created_at": "2025-12-06T21:43:39.805348Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
+    },
+    "2b7ba979": {
+      "marker": "2b7ba979",
+      "subagent_type": "",
+      "created_at": "2025-12-06T21:43:40.027361Z",
+      "last_resumed_at": null,
+      "resume_count": 0,
+      "estimated_tokens": 3000,
+      "status": "active",
+      "warnings": []
     }
   },
   "config": {
@@ -1350,8 +1460,8 @@
     "avg_resume_tokens": 5000
   },
   "stats": {
-    "total_agents": 134,
+    "total_agents": 145,
     "total_resumes": 0,
-    "total_tokens_tracked": 402000
+    "total_tokens_tracked": 435000
   }
 }

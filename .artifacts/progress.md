@@ -288,7 +288,7 @@ Dormant: █████ 5 features (17%)
 **План:** `~/.claude/plans/frolicking-forging-clarke.md`
 **Координатор:** Claude (Opus 4.5)
 **Агенти:** U1 (UX/UI Expert), F1 (React Frontend Expert)
-**Скіли:** project-stabilizer, agent-coordinator, frontend
+**Скіли:** project-stabilizer, frontend
 
 **Мета:** Повна синхронізація фронтенду з Design System документацією
 
@@ -330,7 +330,7 @@ Dormant: █████ 5 features (17%)
 **⏸️ PAUSED:** 2025-12-04
 
 **Resume інструкції:**
-1. Активувати скіли: `project-stabilizer`, `agent-coordinator`
+1. Активувати скіли: `project-stabilizer`, `frontend`
 2. Продовжити план: `~/.claude/plans/frolicking-forging-clarke.md`
 3. Запустити Phase 1 (U1) + Phase 2 (F1) паралельно
 
