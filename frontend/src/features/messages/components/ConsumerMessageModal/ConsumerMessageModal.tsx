@@ -113,7 +113,7 @@ export function ConsumerMessageModal({ messageId, onClose }: ConsumerMessageModa
                     <img
                       src={messageData.message.avatar_url}
                       alt={messageData.message.author_name || messageData.message.author}
-                      className="h-12 w-12 rounded-full flex-shrink-0"
+                      className="h-12 w-12 rounded-full flex-shrink-0 object-cover"
                     />
                   ) : (
                     <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">

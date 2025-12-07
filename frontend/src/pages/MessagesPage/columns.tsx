@@ -85,7 +85,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       return (
         <div className="flex items-center space-x-2">
           {avatarUrl ? (
-            <img src={avatarUrl} alt={authorName} className="h-6 w-6 rounded-full" />
+            <img src={avatarUrl} alt={authorName} className="h-6 w-6 rounded-full object-cover" />
           ) : (
             <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
               <User className="h-4 w-4 text-muted-foreground" />

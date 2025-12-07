@@ -54,7 +54,7 @@ export const MessageCard: React.FC<MessageCardProps> = ({
               <img
                 src={message.avatar_url}
                 alt={message.author_name || message.author}
-                className="h-8 w-8 rounded-full flex-shrink-0"
+                className="h-8 w-8 rounded-full flex-shrink-0 object-cover"
               />
             ) : (
               <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
