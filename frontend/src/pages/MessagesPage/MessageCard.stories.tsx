@@ -15,7 +15,7 @@ import type { Message } from '@/shared/types';
  * - Interactive: Hover effects, selection state, click handlers
  */
 const meta: Meta<typeof MessageCard> = {
-  title: 'Features/MessageCard',
+  title: 'Features/Messages/MessageCard',
   component: MessageCard,
   tags: ['autodocs'],
   argTypes: {

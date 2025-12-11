@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { Logo } from './Logo'
 
 const meta: Meta<typeof Logo> = {
-  title: 'Shared/Logo',
+  title: 'Patterns/Logo',
   component: Logo,
   tags: ['autodocs'],
   decorators: [

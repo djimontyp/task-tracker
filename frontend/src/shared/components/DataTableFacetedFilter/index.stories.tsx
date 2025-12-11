@@ -61,7 +61,7 @@ const roleOptions = [
 ]
 
 const meta: Meta<typeof DataTableFacetedFilter> = {
-  title: 'Components/DataTableFacetedFilter',
+  title: 'Patterns/DataTable/FacetedFilter',
   component: DataTableFacetedFilter,
   tags: ['autodocs'],
   parameters: {

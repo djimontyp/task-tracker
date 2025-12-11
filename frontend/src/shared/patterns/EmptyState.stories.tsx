@@ -11,7 +11,7 @@ import { EmptyState, IllustratedEmptyState, LoadingEmptyState } from './EmptySta
 import { Button } from '@/shared/ui/button';
 
 const meta: Meta<typeof EmptyState> = {
-  title: 'Design System/Patterns/EmptyState',
+  title: 'Patterns/EmptyState',
   component: EmptyState,
   tags: ['autodocs'],
   parameters: {

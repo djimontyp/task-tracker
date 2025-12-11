@@ -3,7 +3,7 @@ import { Stack, type AlignToken } from './Stack';
 import { type SpacingToken } from './Box';
 
 const meta: Meta<typeof Stack> = {
-  title: 'Design System/Primitives/Stack',
+  title: 'Layout/Stack',
   component: Stack,
   tags: ['autodocs'],
   parameters: {

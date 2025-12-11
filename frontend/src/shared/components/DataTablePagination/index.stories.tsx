@@ -36,7 +36,7 @@ const columns: ColumnDef<SampleData>[] = [
 ]
 
 const meta: Meta<typeof DataTablePagination> = {
-  title: 'Shared/DataTablePagination',
+  title: 'Patterns/DataTable/Pagination',
   component: DataTablePagination,
   tags: ['autodocs'],
   parameters: {

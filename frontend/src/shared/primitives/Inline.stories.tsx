@@ -4,7 +4,7 @@ import { type SpacingToken } from './Box';
 import { Check, X, Settings, User, Mail } from 'lucide-react';
 
 const meta: Meta<typeof Inline> = {
-  title: 'Design System/Primitives/Inline',
+  title: 'Layout/Inline',
   component: Inline,
   tags: ['autodocs'],
   parameters: {

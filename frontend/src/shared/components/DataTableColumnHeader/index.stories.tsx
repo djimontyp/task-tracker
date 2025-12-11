@@ -35,7 +35,7 @@ const sampleData: SampleData[] = [
 ]
 
 const meta: Meta<typeof DataTableColumnHeader> = {
-  title: 'Components/DataTableColumnHeader',
+  title: 'Patterns/DataTable/ColumnHeader',
   component: DataTableColumnHeader,
   tags: ['autodocs'],
   parameters: {

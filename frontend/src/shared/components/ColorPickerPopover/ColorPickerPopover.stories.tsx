@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ColorPickerPopover } from './index';
 
 const meta: Meta<typeof ColorPickerPopover> = {
-  title: 'Components/ColorPickerPopover',
+  title: 'Patterns/ColorPickerPopover',
   component: ColorPickerPopover,
   tags: ['autodocs'],
   parameters: {

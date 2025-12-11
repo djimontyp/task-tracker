@@ -13,7 +13,7 @@ import { Label } from './label';
  * - Include placeholder text for context
  */
 const meta: Meta<typeof Input> = {
-  title: 'UI/Forms/Input',
+  title: 'Primitives/Input',
   component: Input,
   tags: ['autodocs'],
   argTypes: {

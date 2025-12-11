@@ -3,7 +3,7 @@ import { PageWrapper, type PageVariant } from './PageWrapper';
 import { Stack } from './Stack';
 
 const meta: Meta<typeof PageWrapper> = {
-  title: 'Design System/Primitives/PageWrapper',
+  title: 'Layout/PageWrapper',
   component: PageWrapper,
   tags: ['autodocs'],
   parameters: {

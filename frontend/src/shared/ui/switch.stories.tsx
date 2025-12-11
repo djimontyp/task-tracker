@@ -12,7 +12,7 @@ import { Label } from './label';
  * - Include aria-label if no visible label
  */
 const meta: Meta<typeof Switch> = {
-  title: 'UI/Forms/Switch',
+  title: 'Primitives/Switch',
   component: Switch,
   tags: ['autodocs'],
   argTypes: {

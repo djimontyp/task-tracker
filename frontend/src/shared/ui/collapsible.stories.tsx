@@ -14,7 +14,7 @@ import { Button } from './button';
  * - Content animates smoothly using Radix UI data-state attributes
  */
 const meta: Meta<typeof Collapsible> = {
-  title: 'UI/Layout/Collapsible',
+  title: 'Primitives/Collapsible',
   component: Collapsible,
   tags: ['autodocs'],
   parameters: {

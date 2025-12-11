@@ -10,7 +10,7 @@ import { SaveStatusIndicator } from './SaveStatusIndicator'
  * - Animated transitions for state changes
  */
 const meta: Meta<typeof SaveStatusIndicator> = {
-  title: 'Shared/SaveStatusIndicator',
+  title: 'Patterns/SaveStatusIndicator',
   component: SaveStatusIndicator,
   tags: ['autodocs'],
   argTypes: {

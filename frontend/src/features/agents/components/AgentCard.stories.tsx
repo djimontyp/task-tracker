@@ -12,7 +12,7 @@ import type { AgentConfig } from '@/features/agents/types';
  * - Responsive card layout with hover shadow effect
  */
 const meta: Meta<typeof AgentCard> = {
-  title: 'Features/AgentCard',
+  title: 'Features/Agents/AgentCard',
   component: AgentCard,
   tags: ['autodocs'],
   argTypes: {

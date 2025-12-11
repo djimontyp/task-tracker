@@ -24,7 +24,7 @@ import {
  * @see @/shared/tokens
  */
 const meta: Meta = {
-  title: 'Design System/Tokens Usage',
+  title: 'Patterns/DesignTokensExample',
   parameters: {
     docs: {
       description: {

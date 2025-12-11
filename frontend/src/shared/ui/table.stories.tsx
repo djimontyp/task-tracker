@@ -22,7 +22,7 @@ import { Badge } from './badge';
  * - Row hover states for better UX
  */
 const meta: Meta<typeof Table> = {
-  title: 'UI/Table',
+  title: 'Primitives/Table',
   component: Table,
   tags: ['autodocs'],
   parameters: {

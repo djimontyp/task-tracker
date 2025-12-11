@@ -13,7 +13,7 @@ import { Label } from './label';
  * - Include character counter for limited input
  */
 const meta: Meta<typeof Textarea> = {
-  title: 'UI/Forms/Textarea',
+  title: 'Primitives/Textarea',
   component: Textarea,
   tags: ['autodocs'],
   argTypes: {

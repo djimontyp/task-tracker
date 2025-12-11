@@ -11,7 +11,7 @@ import { AdminBadge } from './AdminBadge'
  * - 44px minimum touch target when interactive
  */
 const meta: Meta<typeof AdminBadge> = {
-  title: 'Shared/AdminBadge',
+  title: 'Patterns/AdminBadge',
   component: AdminBadge,
   tags: ['autodocs'],
   argTypes: {

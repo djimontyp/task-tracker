@@ -3,7 +3,7 @@ import { NotificationBadge } from './notification-badge';
 import { Bell } from 'lucide-react';
 
 const meta: Meta<typeof NotificationBadge> = {
-  title: 'UI/NotificationBadge',
+  title: 'Primitives/NotificationBadge',
   component: NotificationBadge,
   tags: ['autodocs'],
   parameters: {

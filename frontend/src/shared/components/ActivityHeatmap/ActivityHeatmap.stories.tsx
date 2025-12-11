@@ -12,7 +12,7 @@ import ActivityHeatmap from './ActivityHeatmap'
  * - Period toggle (week/month view)
  */
 const meta: Meta<typeof ActivityHeatmap> = {
-  title: 'Shared/ActivityHeatmap',
+  title: 'Patterns/ActivityHeatmap',
   component: ActivityHeatmap,
   tags: ['autodocs'],
   argTypes: {

@@ -20,7 +20,7 @@ import {
  * - Separator is aria-hidden for screen readers
  */
 const meta: Meta<typeof Breadcrumb> = {
-  title: 'UI/Navigation/Breadcrumb',
+  title: 'Primitives/Breadcrumb',
   component: Breadcrumb,
   tags: ['autodocs'],
   parameters: {

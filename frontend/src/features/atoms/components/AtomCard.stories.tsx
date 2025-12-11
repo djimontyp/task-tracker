@@ -14,7 +14,7 @@ import { AtomType, type Atom } from '../types';
  * - Interactive: Hover effects, WebSocket real-time updates
  */
 const meta: Meta<typeof AtomCard> = {
-  title: 'Features/AtomCard',
+  title: 'Features/Atoms/AtomCard',
   component: AtomCard,
   tags: ['autodocs'],
   parameters: {

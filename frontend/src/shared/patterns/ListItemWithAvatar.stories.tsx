@@ -22,7 +22,7 @@ import {
  * - Recent items
  */
 const meta: Meta<typeof ListItemWithAvatar> = {
-  title: 'Design System/Patterns/ListItemWithAvatar',
+  title: 'Patterns/ListItemWithAvatar',
   component: ListItemWithAvatar,
   tags: ['autodocs'],
   argTypes: {

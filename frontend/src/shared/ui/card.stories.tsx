@@ -13,7 +13,7 @@ import { Badge } from './badge';
  * - For compact cards, override with className="pb-2" on CardHeader
  */
 const meta: Meta<typeof Card> = {
-  title: 'UI/Card',
+  title: 'Primitives/Card',
   component: Card,
   tags: ['autodocs'],
   parameters: {

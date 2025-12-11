@@ -11,7 +11,7 @@ import { Separator } from './separator';
  * - Decorative: true by default (aria-hidden for screen readers)
  */
 const meta: Meta<typeof Separator> = {
-  title: 'UI/Layout/Separator',
+  title: 'Primitives/Separator',
   component: Separator,
   tags: ['autodocs'],
   argTypes: {
