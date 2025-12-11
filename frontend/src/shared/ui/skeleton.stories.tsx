@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader } from './card';
  * - Loading states improve perceived performance
  */
 const meta: Meta<typeof Skeleton> = {
-  title: 'UI/Skeleton',
+  title: 'Primitives/Skeleton',
   component: Skeleton,
   tags: ['autodocs'],
   parameters: {

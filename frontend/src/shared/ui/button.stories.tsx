@@ -11,7 +11,7 @@ import { Button } from './button';
  * - Use semantic variants: `destructive` for delete, `default` for primary actions
  */
 const meta: Meta<typeof Button> = {
-  title: 'UI/Button',
+  title: 'Primitives/Button',
   component: Button,
   tags: ['autodocs'],
   argTypes: {

@@ -19,7 +19,7 @@ import {
  * - Previous/Next buttons have aria-label for screen readers
  */
 const meta: Meta<typeof Pagination> = {
-  title: 'UI/Navigation/Pagination',
+  title: 'Primitives/Pagination',
   component: Pagination,
   tags: ['autodocs'],
   parameters: {

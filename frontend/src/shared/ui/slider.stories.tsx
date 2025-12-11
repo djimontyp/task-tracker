@@ -13,7 +13,7 @@ import { Label } from './label';
  * - Include min/max indicators for context
  */
 const meta: Meta<typeof Slider> = {
-  title: 'UI/Forms/Slider',
+  title: 'Primitives/Slider',
   component: Slider,
   tags: ['autodocs'],
   argTypes: {

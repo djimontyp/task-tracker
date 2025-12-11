@@ -11,7 +11,7 @@ import { Badge } from './badge';
  * - For custom status colors, use outline variant with semantic border/text colors
  */
 const meta: Meta<typeof Badge> = {
-  title: 'UI/Badge',
+  title: 'Primitives/Badge',
   component: Badge,
   tags: ['autodocs'],
   argTypes: {

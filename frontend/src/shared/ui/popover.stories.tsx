@@ -13,7 +13,7 @@ import { Button } from './button';
  * - Use for contextual actions, filters, or additional info
  */
 const meta: Meta<typeof Popover> = {
-  title: 'UI/Popover',
+  title: 'Primitives/Popover',
   component: Popover,
   tags: ['autodocs'],
   argTypes: {

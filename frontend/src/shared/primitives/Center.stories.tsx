@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Center, type MaxWidthToken } from './Center';
 
 const meta: Meta<typeof Center> = {
-  title: 'Design System/Primitives/Center',
+  title: 'Layout/Center',
   component: Center,
   tags: ['autodocs'],
   parameters: {

@@ -11,7 +11,7 @@ import type { RuleFormData } from './ruleFormSchema';
  * - Rule editing forms
  */
 const meta: Meta<typeof RuleConditions> = {
-  title: 'Automation/RuleConditions',
+  title: 'Features/Automation/RuleConditions',
   component: RuleConditions,
   tags: ['autodocs'],
   parameters: {

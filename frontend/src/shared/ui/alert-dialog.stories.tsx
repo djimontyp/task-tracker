@@ -23,7 +23,7 @@ import { Button } from './button';
  * - Action button uses semantic variants (destructive for delete)
  */
 const meta: Meta<typeof AlertDialog> = {
-  title: 'UI/AlertDialog',
+  title: 'Primitives/AlertDialog',
   component: AlertDialog,
   tags: ['autodocs'],
   parameters: {

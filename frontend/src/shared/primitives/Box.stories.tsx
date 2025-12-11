@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Box, type SpacingToken, type BackgroundToken, type RoundedToken } from './Box';
 
 const meta: Meta<typeof Box> = {
-  title: 'Design System/Primitives/Box',
+  title: 'Layout/Box',
   component: Box,
   tags: ['autodocs'],
   parameters: {

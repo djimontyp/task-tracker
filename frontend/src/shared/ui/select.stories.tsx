@@ -21,7 +21,7 @@ import { Label } from './label';
  * - Include SelectLabel for group headings
  */
 const meta: Meta<typeof Select> = {
-  title: 'UI/Forms/Select',
+  title: 'Primitives/Select',
   component: Select,
   tags: ['autodocs'],
   parameters: {

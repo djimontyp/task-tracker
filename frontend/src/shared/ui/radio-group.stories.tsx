@@ -12,7 +12,7 @@ import { Label } from './label';
  * - Default gap-2 (8px) between items
  */
 const meta: Meta<typeof RadioGroup> = {
-  title: 'UI/Forms/RadioGroup',
+  title: 'Primitives/RadioGroup',
   component: RadioGroup,
   tags: ['autodocs'],
   argTypes: {

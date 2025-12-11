@@ -7,7 +7,7 @@ import { ProjectForm } from './ProjectForm'
 import type { ProjectConfig } from '../types'
 
 const meta: Meta<typeof ProjectForm> = {
-  title: 'Features/ProjectForm',
+  title: 'Features/Projects/ProjectForm',
   component: ProjectForm,
   tags: ['autodocs'],
   parameters: {

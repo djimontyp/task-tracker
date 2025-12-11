@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './avatar';
  * - Uses semantic colors: `bg-muted` for fallback background
  */
 const meta: Meta<typeof Avatar> = {
-  title: 'UI/Avatar',
+  title: 'Primitives/Avatar',
   component: Avatar,
   tags: ['autodocs'],
   parameters: {

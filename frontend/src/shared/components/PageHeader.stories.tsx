@@ -12,7 +12,7 @@ import { Button } from '@/shared/ui/button'
  * - Actions area full-width on mobile, auto-width on desktop
  */
 const meta: Meta<typeof PageHeader> = {
-  title: 'Shared/PageHeader',
+  title: 'Patterns/PageHeader',
   component: PageHeader,
   tags: ['autodocs'],
   argTypes: {

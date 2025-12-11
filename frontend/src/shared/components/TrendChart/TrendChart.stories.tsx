@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import TrendChart from './TrendChart';
 
 const meta: Meta<typeof TrendChart> = {
-  title: 'Components/TrendChart',
+  title: 'Patterns/TrendChart',
   component: TrendChart,
   tags: ['autodocs'],
   parameters: {

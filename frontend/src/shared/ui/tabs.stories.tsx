@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
  * - Focus visible: Ring offset follows design system focus patterns
  */
 const meta: Meta<typeof Tabs> = {
-  title: 'UI/Navigation/Tabs',
+  title: 'Primitives/Tabs',
   component: Tabs,
   tags: ['autodocs'],
   parameters: {

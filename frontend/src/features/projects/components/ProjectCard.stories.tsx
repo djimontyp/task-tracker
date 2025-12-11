@@ -7,7 +7,7 @@ import { ProjectCard } from './ProjectCard'
 import type { ProjectConfig } from '../types'
 
 const meta: Meta<typeof ProjectCard> = {
-  title: 'Features/ProjectCard',
+  title: 'Features/Projects/ProjectCard',
   component: ProjectCard,
   tags: ['autodocs'],
   parameters: {

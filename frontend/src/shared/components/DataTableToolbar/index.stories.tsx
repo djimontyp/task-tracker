@@ -45,7 +45,7 @@ const columns: ColumnDef<SampleData>[] = [
 ]
 
 const meta: Meta<typeof DataTableToolbar> = {
-  title: 'Shared/DataTableToolbar',
+  title: 'Patterns/DataTable/Toolbar',
   component: DataTableToolbar,
   tags: ['autodocs'],
   parameters: {

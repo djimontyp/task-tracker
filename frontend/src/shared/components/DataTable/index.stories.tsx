@@ -107,7 +107,7 @@ const columns: ColumnDef<SampleData>[] = [
 ]
 
 const meta: Meta<typeof DataTable> = {
-  title: 'Shared/DataTable',
+  title: 'Patterns/DataTable/DataTable',
   component: DataTable,
   tags: ['autodocs'],
   parameters: {

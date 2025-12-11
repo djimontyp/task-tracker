@@ -19,7 +19,7 @@ import { CardWithStatus, StatusBadge, StatusDot } from './CardWithStatus';
  * - Service status displays
  */
 const meta: Meta<typeof CardWithStatus> = {
-  title: 'Design System/Patterns/CardWithStatus',
+  title: 'Patterns/CardWithStatus',
   component: CardWithStatus,
   tags: ['autodocs'],
   argTypes: {

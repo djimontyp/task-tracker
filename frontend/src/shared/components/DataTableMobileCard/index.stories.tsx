@@ -17,7 +17,7 @@ import { Button } from '@/shared/ui/button'
  */
 
 const meta: Meta<typeof DataTableMobileCard> = {
-  title: 'Components/DataTableMobileCard',
+  title: 'Patterns/DataTable/MobileCard',
   component: DataTableMobileCard,
   tags: ['autodocs'],
   parameters: {

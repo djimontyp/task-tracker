@@ -12,7 +12,7 @@ import MetricCard from './MetricCard'
  * - Trend indicators with semantic colors (green=up, red=down)
  */
 const meta: Meta<typeof MetricCard> = {
-  title: 'Shared/MetricCard',
+  title: 'Patterns/MetricCard',
   component: MetricCard,
   tags: ['autodocs'],
   argTypes: {

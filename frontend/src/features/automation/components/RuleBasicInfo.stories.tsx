@@ -12,7 +12,7 @@ import type { RuleFormData } from './ruleFormSchema';
  * - Rule editing forms
  */
 const meta: Meta<typeof RuleBasicInfo> = {
-  title: 'Automation/RuleBasicInfo',
+  title: 'Features/Automation/RuleBasicInfo',
   component: RuleBasicInfo,
   tags: ['autodocs'],
   parameters: {

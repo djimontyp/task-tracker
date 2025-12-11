@@ -27,7 +27,7 @@ import {
  * - Required field indicators
  */
 const meta: Meta<typeof FormField> = {
-  title: 'Design System/Patterns/FormField',
+  title: 'Patterns/FormField',
   component: FormField,
   tags: ['autodocs'],
   argTypes: {

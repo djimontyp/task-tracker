@@ -22,7 +22,7 @@ import { Button } from './button';
  * - Always provide DialogTitle for screen readers
  */
 const meta: Meta<typeof Dialog> = {
-  title: 'UI/Dialog',
+  title: 'Primitives/Dialog',
   component: Dialog,
   tags: ['autodocs'],
   parameters: {

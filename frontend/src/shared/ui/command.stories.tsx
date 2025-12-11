@@ -29,7 +29,7 @@ import {
  * - WCAG AA keyboard navigation support
  */
 const meta: Meta<typeof Command> = {
-  title: 'UI/Command',
+  title: 'Primitives/Command',
   component: Command,
   tags: ['autodocs'],
   parameters: {

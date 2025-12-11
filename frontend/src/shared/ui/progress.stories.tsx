@@ -11,7 +11,7 @@ import { Progress } from './progress';
  * - Smooth transitions (300ms) for value changes
  */
 const meta: Meta<typeof Progress> = {
-  title: 'UI/Progress',
+  title: 'Primitives/Progress',
   component: Progress,
   tags: ['autodocs'],
   argTypes: {

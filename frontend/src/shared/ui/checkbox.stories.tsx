@@ -12,7 +12,7 @@ import { Label } from './label';
  * - Include aria-label if no visible label
  */
 const meta: Meta<typeof Checkbox> = {
-  title: 'UI/Forms/Checkbox',
+  title: 'Primitives/Checkbox',
   component: Checkbox,
   tags: ['autodocs'],
   argTypes: {

@@ -14,7 +14,7 @@ import { TooltipIconButton } from './index';
  */
 
 const meta: Meta<typeof TooltipIconButton> = {
-  title: 'Components/TooltipIconButton',
+  title: 'Patterns/TooltipIconButton',
   component: TooltipIconButton,
   tags: ['autodocs'],
   decorators: [

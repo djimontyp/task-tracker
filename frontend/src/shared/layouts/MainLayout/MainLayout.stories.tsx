@@ -11,7 +11,8 @@ import Navbar from './Navbar';
  * MainLayout composition story showing Sidebar + Navbar harmony.
  *
  * Use this to verify:
- * - Logo placement (navbar only)
+ * - Logo placement in sidebar header (expanded: left-aligned, collapsed: centered)
+ * - Logo also appears in mobile navbar
  * - Sidebar collapsed/expanded states
  * - Desktop vs mobile behavior
  * - Dark/light mode consistency
@@ -115,13 +116,13 @@ const meta: Meta = {
 ## Sidebar + Navbar Harmony
 
 Shows the complete layout with:
-- **Navbar**: Contains logo (Radar icon 20px, matching sidebar icons), sidebar toggle, search, breadcrumb, user
-- **Sidebar**: Navigation only, NO header/logo (removed for clarity)
+- **Sidebar**: Logo in header (left-aligned expanded, centered collapsed) + navigation
+- **Navbar** (mobile): Logo + hamburger menu + actions
 
 ### Key Design Decisions
-1. Logo appears ONLY in navbar (always visible)
-2. Sidebar starts immediately with navigation items
-3. Sidebar collapses to icon-only mode
+1. Logo in sidebar header: left-aligned when expanded, centered when collapsed
+2. Mobile navbar has 2 rows: row1 (logo+menu+actions), row2 (breadcrumbs)
+3. Sidebar collapses to icon-only mode with centered logo
 4. Uses semantic color tokens
         `,
       },
@@ -201,7 +202,8 @@ export const Mobile: Story = {
           <SidebarProvider defaultOpen={false}>
             <div className="min-h-screen bg-background">
               <Navbar isDesktop={false} />
-              <main className="pt-14 p-4">
+              {/* pt-[104px]: navbar row1 (56px) + row2 breadcrumbs (~48px) */}
+              <main className="pt-[104px] p-4">
                 <SampleContent />
               </main>
             </div>
@@ -214,7 +216,7 @@ export const Mobile: Story = {
     viewport: { defaultViewport: 'xs' },
     docs: {
       description: {
-        story: 'Mobile view. Sidebar hidden, hamburger menu in navbar. Collapse button NOT visible (sidebar is Sheet on mobile).',
+        story: 'Mobile view. Sidebar hidden, hamburger menu in navbar. Two-row navbar: row1 (logo+menu+actions), row2 (breadcrumbs).',
       },
     },
   },
@@ -264,8 +266,8 @@ export const SidebarOnly: Story = {
             <AppSidebar />
             <div className="flex-1 p-4 bg-muted/30">
               <p className="text-muted-foreground">
-                Sidebar starts immediately with navigation items.
-                No header, no logo - clean and focused.
+                Sidebar with Logo header (left-aligned) + navigation groups.
+                Logo is animated on hover.
               </p>
             </div>
           </div>
@@ -276,7 +278,7 @@ export const SidebarOnly: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Sidebar in isolation. Notice: no header/logo, navigation starts immediately.',
+        story: 'Sidebar expanded: Logo left-aligned in header, navigation groups below.',
       },
     },
   },
@@ -295,7 +297,7 @@ export const SidebarCollapsed: Story = {
             <div className="flex-1 p-4 bg-muted/30">
               <p className="text-muted-foreground">
                 Sidebar in collapsed (icon-only) mode.
-                Hover over icons to see tooltips.
+                Logo is centered, text hidden. Hover over icons to see tooltips.
               </p>
             </div>
           </div>
@@ -306,7 +308,7 @@ export const SidebarCollapsed: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Sidebar collapsed to icons. Clean, minimal, functional.',
+        story: 'Sidebar collapsed: Logo icon centered, navigation icons below with tooltips.',
       },
     },
   },
