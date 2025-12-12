@@ -181,12 +181,11 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
   return (
     <Sidebar collapsible="icon" data-testid="app-sidebar">
       {/* Logo Header - full-height sidebar pattern */}
-      <SidebarHeader className="h-14 border-b border-sidebar-border flex items-center justify-center group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
+      <SidebarHeader className="h-14 border-b border-sidebar-border flex items-center group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
         <Logo
           collapsed={state === 'collapsed'}
           size="sm"
           animated
-          className="group-data-[collapsible=icon]:mx-auto"
         />
       </SidebarHeader>
 

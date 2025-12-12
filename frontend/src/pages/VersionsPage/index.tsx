@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { PageHeader } from '@/shared/components'
 import { Input, Button, Badge, Spinner } from '@/shared/ui'
 import { Card } from '@/shared/components'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
@@ -170,11 +169,6 @@ const VersionsPage = () => {
 
   return (
     <PageWrapper variant="fullWidth">
-      <PageHeader
-        title="Version Management"
-        description="Review and approve pending knowledge versions"
-      />
-
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">

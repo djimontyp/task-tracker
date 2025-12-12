@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, CheckCircle, CloudUpload, AlertCircle, Plus, Clock, Sparkles } from 'lucide-react'
-import { Card, Input, Textarea, Button, Skeleton, Switch, Label, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Badge, Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/shared/ui'
-import { ColorPickerPopover, PageHeader } from '@/shared/components'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, Input, Textarea, Button, Skeleton, Switch, Label, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Badge, Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/shared/ui'
+import { ColorPickerPopover } from '@/shared/components'
 import { FormField } from '@/shared/patterns'
 import { PageWrapper } from '@/shared/primitives'
 import { topicService } from '@/features/topics/api/topicService'
@@ -353,11 +353,39 @@ const TopicDetailPage = () => {
         </div>
       </div>
 
-      <PageHeader
-        title={topic.name}
-        description="Detailed view of topic messages, atoms, knowledge insights, and related content with full context and version history"
-        actions={
-          <>
+
+      {!autoSaveEnabled && hasUnsavedChanges && (
+        <div className="flex items-center justify-end gap-4 pb-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (topic) {
+                setName(topic.name)
+                setDescription(topic.description)
+                setHasUnsavedChanges(false)
+              }
+            }}
+          >
+            Discard Changes
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleManualSave}
+            disabled={updateMutation.isPending || !hasUnsavedChanges}
+          >
+            {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
+      )}
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <div>
+            <CardTitle className="text-lg">Topic Details</CardTitle>
+            <CardDescription>Edit topic information and manage knowledge</CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
             <Sheet open={showVersionHistory} onOpenChange={setShowVersionHistory}>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm" aria-label="View version history">
@@ -414,38 +442,9 @@ const TopicDetailPage = () => {
                 />
               </DialogContent>
             </Dialog>
-          </>
-        }
-      />
-
-      {!autoSaveEnabled && hasUnsavedChanges && (
-        <div className="flex items-center justify-end gap-4 pb-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              if (topic) {
-                setName(topic.name)
-                setDescription(topic.description)
-                setHasUnsavedChanges(false)
-              }
-            }}
-          >
-            Discard Changes
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleManualSave}
-            disabled={updateMutation.isPending || !hasUnsavedChanges}
-          >
-            {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
-          </Button>
-        </div>
-      )}
-
-      <Card className="p-8">
-        <div className="space-y-6">
-
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
           <div className="flex items-start gap-6">
             <div className="flex-shrink-0">
               <div className="w-20 h-20 rounded-2xl bg-primary/5 flex items-center justify-center">
@@ -515,7 +514,7 @@ const TopicDetailPage = () => {
               </div>
             </div>
           </div>
-        </div>
+        </CardContent>
       </Card>
 
       <div className="space-y-6">

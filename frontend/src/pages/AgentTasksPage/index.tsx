@@ -12,7 +12,6 @@ import { TaskConfig, TaskConfigCreate, TaskConfigUpdate } from '@/features/agent
 import { toast } from 'sonner'
 import { Pencil, Trash2, Plus } from 'lucide-react'
 import { TaskForm } from '@/features/agents/components'
-import { PageHeader } from '@/shared/components'
 import { PageWrapper } from '@/shared/primitives'
 
 const AgentTasksPage = () => {
@@ -96,16 +95,13 @@ const AgentTasksPage = () => {
 
   return (
     <PageWrapper variant="fullWidth">
-      <PageHeader
-        title="Task Templates"
-        description="Manage reusable task templates for agent automation workflows"
-        actions={
-          <Button onClick={handleCreate} size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Task
-          </Button>
-        }
-      />
+      {/* Actions toolbar */}
+      <div className="flex justify-end mb-4">
+        <Button onClick={handleCreate} size="sm">
+          <Plus className="mr-2 h-4 w-4" />
+          Add Task
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {tasks?.length === 0 ? (

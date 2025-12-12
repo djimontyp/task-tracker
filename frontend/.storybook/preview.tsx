@@ -10,7 +10,18 @@ import '../src/index.css';
  * - Dark mode toggle
  * - Responsive viewports (mobile-first)
  * - WCAG 2.1 AA accessibility testing
+ * - Chromatic visual regression testing
  */
+
+// Viewport definitions matching tailwind.config.js
+const viewports = {
+  xs: { name: 'XS Phone (375px)', styles: { width: '375px', height: '667px' } },
+  sm: { name: 'SM Phone (640px)', styles: { width: '640px', height: '800px' } },
+  md: { name: 'MD Tablet (768px)', styles: { width: '768px', height: '1024px' } },
+  lg: { name: 'LG Laptop (1024px)', styles: { width: '1024px', height: '768px' } },
+  xl: { name: 'XL Desktop (1280px)', styles: { width: '1280px', height: '900px' } },
+  '2xl': { name: '2XL Large (1536px)', styles: { width: '1536px', height: '960px' } },
+};
 
 const preview: Preview = {
   parameters: {
@@ -20,16 +31,9 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
-    // Responsive viewports matching tailwind.config.js
+    // Responsive viewports
     viewport: {
-      viewports: {
-        xs: { name: 'XS Phone (375px)', styles: { width: '375px', height: '667px' } },
-        sm: { name: 'SM Phone (640px)', styles: { width: '640px', height: '800px' } },
-        md: { name: 'MD Tablet (768px)', styles: { width: '768px', height: '1024px' } },
-        lg: { name: 'LG Laptop (1024px)', styles: { width: '1024px', height: '768px' } },
-        xl: { name: 'XL Desktop (1280px)', styles: { width: '1280px', height: '900px' } },
-        '2xl': { name: '2XL Large (1536px)', styles: { width: '1536px', height: '960px' } },
-      },
+      viewports,
       defaultViewport: 'lg',
     },
     // Background colors matching design system
@@ -54,6 +58,18 @@ const preview: Preview = {
           { id: 'button-name', enabled: true },
           { id: 'image-alt', enabled: true },
         ],
+      },
+    },
+    // Chromatic configuration
+    chromatic: {
+      // Capture at multiple viewports for visual regression
+      viewports: [375, 768, 1280],
+      // Disable animations for consistent snapshots
+      pauseAnimationAtEnd: true,
+      // Modes for theme testing
+      modes: {
+        light: { theme: 'light' },
+        dark: { theme: 'dark', className: 'dark' },
       },
     },
   },

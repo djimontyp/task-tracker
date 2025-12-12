@@ -5,7 +5,6 @@ import {
   Card,
   Skeleton,
 } from '@/shared/ui'
-import { PageHeader } from '@/shared/components/PageHeader'
 import { EmptyState } from '@/shared/patterns'
 import { PageWrapper } from '@/shared/primitives'
 import { apiClient } from '@/shared/lib/api/client'
@@ -462,29 +461,20 @@ const MessagesPage = () => {
 
   return (
     <PageWrapper variant="fullWidth" className="w-full min-w-0 overflow-x-hidden">
-      <div className="w-full min-w-0">
-        <PageHeader
-          title="Messages"
-          description="View and manage all incoming messages with importance scores, noise filtering, and real-time updates from Telegram"
-          actions={
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto min-w-0">
-              <Button onClick={handleRefreshMessages} size="sm" variant="outline" className="w-full sm:w-auto justify-center">
-                <RotateCw className="mr-2 h-4 w-4" />
-                Refresh
-              </Button>
-              <Button onClick={handleUpdateAuthors} size="sm" variant="outline" className="w-full sm:w-auto justify-center">
-                <User className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Update Authors</span>
-                <span className="sm:hidden">Authors</span>
-              </Button>
-              <Button onClick={handleIngestMessages} size="sm" className="w-full sm:w-auto justify-center">
-                <Download className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Ingest Messages</span>
-                <span className="sm:hidden">Ingest</span>
-              </Button>
-            </div>
-          }
-        />
+      {/* Actions toolbar */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <Button onClick={handleRefreshMessages} size="sm" variant="outline">
+          <RotateCw className="mr-2 h-4 w-4" />
+          Refresh
+        </Button>
+        <Button onClick={handleUpdateAuthors} size="sm" variant="outline">
+          <User className="mr-2 h-4 w-4" />
+          Update Authors
+        </Button>
+        <Button onClick={handleIngestMessages} size="sm">
+          <Download className="mr-2 h-4 w-4" />
+          Ingest Messages
+        </Button>
       </div>
 
       <div className="min-h-[60px] w-full min-w-0">
