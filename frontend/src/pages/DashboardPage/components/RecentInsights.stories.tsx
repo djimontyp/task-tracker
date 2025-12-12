@@ -51,7 +51,7 @@ export const AllTypes: Story = {
       },
       {
         id: '2',
-        type: 'TASK',
+        type: 'SOLUTION',
         title: 'Оновити React до версії 19',
         content: 'Потрібно оновити залежності та перевірити сумісність.',
         author: 'maria',
@@ -61,7 +61,7 @@ export const AllTypes: Story = {
       },
       {
         id: '3',
-        type: 'IDEA',
+        type: 'INSIGHT',
         title: 'Додати темну тему',
         content: 'Користувачі просять dark mode для роботи ввечері.',
         author: 'olena',

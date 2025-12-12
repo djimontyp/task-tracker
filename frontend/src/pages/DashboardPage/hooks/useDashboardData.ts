@@ -2,11 +2,12 @@
  * Dashboard Data Hook
  *
  * Centralized data fetching for dashboard components.
- * Uses mock data by default, toggle USE_MOCK_DATA to switch to real API.
+ * Uses real API by default for Daily Review Epic.
  */
 
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/shared/lib/api/client'
+import { dashboardService, type DashboardMetricsResponse } from '@/shared/api/dashboard'
 import type {
   DashboardMetricsData,
   TrendsResponse,
@@ -14,17 +15,7 @@ import type {
   TopTopic,
   DashboardPeriod,
 } from '../types'
-import {
-  delay,
-  createMockMetrics,
-  createMockTrends,
-  createMockInsights,
-  createMockTopics,
-  isEmptyDashboard,
-} from '../mocks/dashboardMocks'
-
-// Toggle this to switch between mock and real API data
-const USE_MOCK_DATA = true
+import { isEmptyDashboard } from '../mocks/dashboardMocks'
 
 // Query keys for cache invalidation
 export const dashboardKeys = {
@@ -36,22 +27,40 @@ export const dashboardKeys = {
 }
 
 /**
+ * Transform backend response to frontend metrics format
+ */
+function transformMetricsResponse(response: DashboardMetricsResponse): DashboardMetricsData {
+  const { atoms, trends } = response
+
+  // Map atom types to frontend metric categories
+  const problems = atoms.by_type.problem || 0
+  const ideas = (atoms.by_type.insight || 0) + (atoms.by_type.pattern || 0)
+  const decisions = atoms.by_type.decision || 0
+  const questions = atoms.by_type.question || 0
+
+  // Calculate deltas from trends
+  const atomsTrend = trends.atoms || { current: 0, previous: 0, change_percent: 0, direction: 'neutral' }
+  const delta = atomsTrend.direction === 'up' ? Math.round(atomsTrend.change_percent) :
+                atomsTrend.direction === 'down' ? -Math.round(atomsTrend.change_percent) : 0
+
+  return {
+    critical: { count: problems, delta: delta },
+    ideas: { count: ideas, delta: 0 },
+    decisions: { count: decisions, delta: 0 },
+    questions: { count: questions, delta: 0 },
+  }
+}
+
+/**
  * Fetch dashboard metrics (critical, ideas, decisions counts)
  */
 export function useDashboardMetrics(period: DashboardPeriod = 'today') {
   return useQuery({
     queryKey: dashboardKeys.metrics(period),
     queryFn: async (): Promise<DashboardMetricsData> => {
-      if (USE_MOCK_DATA) {
-        await delay(400)
-        return createMockMetrics()
-      }
-
-      // Real API (when endpoint is ready)
-      const response = await apiClient.get('/api/v1/dashboard/metrics', {
-        params: { period },
-      })
-      return response.data
+      const apiPeriod = period === 'week' || period === 'month' ? 'today' : period
+      const response = await dashboardService.getMetrics(apiPeriod)
+      return transformMetricsResponse(response)
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
@@ -64,18 +73,14 @@ export function useDashboardTrends(period: DashboardPeriod = 'week', limit = 5) 
   return useQuery({
     queryKey: dashboardKeys.trends(period),
     queryFn: async (): Promise<TrendsResponse> => {
-      if (USE_MOCK_DATA) {
-        await delay(300)
-        return createMockTrends(limit, period)
-      }
-
-      // Real API (when endpoint is ready)
       const response = await apiClient.get('/api/v1/dashboard/trends', {
         params: { period, limit },
       })
       return response.data
     },
     staleTime: 5 * 60 * 1000,
+    // Trends endpoint not implemented yet - will show error state
+    retry: false,
   })
 }
 
@@ -86,17 +91,10 @@ export function useDashboardInsights(limit = 5) {
   return useQuery({
     queryKey: dashboardKeys.insights(),
     queryFn: async (): Promise<RecentInsight[]> => {
-      if (USE_MOCK_DATA) {
-        await delay(350)
-        return createMockInsights(limit)
-      }
-
-      // Real API - can use existing atoms endpoint with filtering
       const response = await apiClient.get('/api/v1/atoms', {
         params: {
           sort: '-created_at',
           limit,
-          // importance_gte: 0.65, // When backend supports this filter
         },
       })
 
@@ -106,14 +104,14 @@ export function useDashboardInsights(limit = 5) {
         type: (atom.type as string).toUpperCase() as RecentInsight['type'],
         title: atom.title,
         content: atom.content,
-        author: 'System', // Backend doesn't have author yet
-        topicName: 'General', // Need to join with topics
+        author: 'System',
+        topicName: (atom.meta as Record<string, unknown>)?.topic_context as string || 'General',
         topicId: '',
         createdAt: atom.created_at,
         importance: atom.confidence,
       }))
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes - insights change more often
+    staleTime: 2 * 60 * 1000,
   })
 }
 
@@ -124,14 +122,9 @@ export function useDashboardTopics(limit = 5) {
   return useQuery({
     queryKey: dashboardKeys.topics(),
     queryFn: async (): Promise<TopTopic[]> => {
-      if (USE_MOCK_DATA) {
-        await delay(300)
-        return createMockTopics(limit)
-      }
-
-      // Real API - use existing topics endpoint
-      const response = await apiClient.get('/api/v1/topics/recent', {
-        params: { limit, period: 'week' },
+      // Use base topics endpoint - it returns all topics
+      const response = await apiClient.get('/api/v1/topics', {
+        params: { limit },
       })
 
       // Transform to TopTopic format
@@ -140,9 +133,9 @@ export function useDashboardTopics(limit = 5) {
         name: topic.name,
         icon: topic.icon || 'Folder',
         color: topic.color || '#6B7280',
-        atomCount: topic.atoms_count || 0,
-        messageCount: topic.message_count || 0,
-        lastActivityAt: topic.last_message_at,
+        atomCount: 0, // TODO: Add atoms_count to topics endpoint
+        messageCount: 0, // TODO: Add message_count to topics endpoint
+        lastActivityAt: topic.updated_at as string,
       }))
     },
     staleTime: 5 * 60 * 1000,

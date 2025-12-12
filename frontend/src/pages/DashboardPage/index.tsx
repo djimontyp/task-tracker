@@ -16,7 +16,7 @@ import { PageWrapper } from '@/shared/primitives'
 import { useDashboardData } from './hooks/useDashboardData'
 import {
   DashboardMetrics,
-  TrendsList,
+  // TrendsList, // Hidden until /api/v1/dashboard/trends endpoint is implemented
   RecentInsights,
   TopTopics,
 } from './components'
@@ -25,7 +25,8 @@ const DashboardPage = () => {
   const navigate = useNavigate()
   const [showOnboarding, setShowOnboarding] = useState(false)
 
-  const { metrics, trends, insights, topics, hasNoData, isAnyLoading } =
+  // Note: trends hook still called but not rendered - remove from useDashboardData when cleaning up
+  const { metrics, insights, topics, hasNoData, isAnyLoading } =
     useDashboardData('today')
 
   // Show onboarding wizard for new users
@@ -87,17 +88,17 @@ const DashboardPage = () => {
         />
       </div>
 
-      {/* Row 2: Trends */}
-      <div className="animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+      {/* Row 2: Trends - temporarily hidden until /api/v1/dashboard/trends endpoint is implemented */}
+      {/* <div className="animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
         <TrendsList
           data={trends.data}
           isLoading={trends.isLoading}
           error={trends.error}
           onShowAll={() => navigate('/search')}
         />
-      </div>
+      </div> */}
 
-      {/* Row 3: Recent Insights */}
+      {/* Row 2: Recent Insights */}
       <div className="animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>
         <RecentInsights
           data={insights.data}
