@@ -171,7 +171,7 @@ typecheck-strict PATH='.':
 [group: 'Documentation']
 docs:
     @echo "Serving documentation with live reload..."
-    uv run --group docs mkdocs serve --config-file docs/mkdocs.yml --dev-addr 127.0.0.1:8081 --livereload
+    uv run --group docs mkdocs serve --config-file mkdocs.yml --dev-addr 127.0.0.1:8081 --livereload
 
 # Serve learning documentation (окрема від основної docs)
 [group: 'Documentation']
@@ -209,6 +209,18 @@ storybook-test:
 storybook-test-ci:
     @echo "🧪 Running Storybook tests (CI mode)..."
     cd frontend && npm run test:storybook:ci
+
+# Check Storybook coverage (components with missing stories)
+[group: 'Frontend']
+story-check:
+    @echo "📋 Checking Storybook coverage..."
+    cd frontend && npm run story:check:fix
+
+# Check Storybook coverage (brief output)
+[group: 'Frontend']
+story-check-brief:
+    @echo "📋 Checking Storybook coverage..."
+    cd frontend && npm run story:check
 
 # Clear all test data from database
 [group: 'Database']
@@ -391,3 +403,28 @@ front-test:
     @echo "🧪 Running frontend unit tests..."
     cd frontend && npm run test:run
     @echo "✅ Frontend tests passed!"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# API CONTRACTS
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Export OpenAPI schema from backend
+[group: 'Contracts']
+api-export:
+    @echo "📤 Exporting OpenAPI schema..."
+    cd backend && uv run python scripts/export_openapi.py
+    @echo "✅ Schema exported to contracts/openapi.json"
+
+# Generate TypeScript types from OpenAPI
+[group: 'Contracts']
+api-generate:
+    @echo "🔄 Generating TypeScript types..."
+    cd frontend && npm run generate:api
+    @echo "✅ Types generated in frontend/src/shared/api/"
+
+# Full contract sync (export + generate)
+[group: 'Contracts']
+api-sync:
+    @just api-export
+    @just api-generate
+    @echo "🎉 API contracts synchronized!"
