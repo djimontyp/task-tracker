@@ -96,6 +96,57 @@
         }
       }
     },
+    "/api/v1/dashboard/metrics": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Get dashboard metrics",
+        "description": "Get aggregated dashboard metrics.\n\nReturns:\n- **messages**: Total count, signal/noise breakdown, signal ratio\n- **atoms**: Total count, pending review, approved, by type\n- **topics**: Total count, active today count\n- **trends**: Comparison with previous period\n\nThe 'auto' period uses yesterday's data if:\n- No messages today AND\n- Current time is before noon",
+        "operationId": "get_dashboard_metrics_api_v1_dashboard_metrics_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "auto",
+                "today",
+                "yesterday"
+              ],
+              "type": "string",
+              "description": "Time period: 'auto' (detect), 'today', or 'yesterday'",
+              "default": "auto",
+              "title": "Period"
+            },
+            "description": "Time period: 'auto' (detect), 'today', or 'yesterday'"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Aggregated metrics for messages, atoms, and topics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__api__v1__schemas__dashboard__DashboardMetricsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/users": {
       "get": {
         "tags": [
@@ -3730,6 +3781,48 @@
         }
       }
     },
+    "/api/v1/atoms/bulk-reject": {
+      "post": {
+        "tags": [
+          "atoms"
+        ],
+        "summary": "Bulk reject atoms",
+        "description": "Reject multiple atoms by archiving them in a single transaction.",
+        "operationId": "bulk_reject_atoms_api_v1_atoms_bulk_reject_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkRejectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkRejectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/atoms/{atom_id}/topics/{topic_id}": {
       "post": {
         "tags": [
@@ -6155,7 +6248,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DashboardMetricsResponse"
+                  "$ref": "#/components/schemas/app__schemas__metrics__DashboardMetricsResponse"
                 }
               }
             }
@@ -7226,6 +7319,49 @@
         "title": "AtomSearchResult",
         "description": "Atom search result with similarity score."
       },
+      "AtomStats": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total",
+            "description": "Total atoms in period"
+          },
+          "pending_review": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Pending Review",
+            "description": "Atoms awaiting review (user_approved=false)"
+          },
+          "approved": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Approved",
+            "description": "Approved atoms (user_approved=true)"
+          },
+          "by_type": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "By Type",
+            "description": "Count by atom type",
+            "example": {
+              "decision": 2,
+              "problem": 5,
+              "solution": 3
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "pending_review",
+          "approved"
+        ],
+        "title": "AtomStats",
+        "description": "Atom statistics by type and status."
+      },
       "AtomUpdate": {
         "properties": {
           "type": {
@@ -8071,6 +8207,56 @@
         "title": "BulkDeleteResponse",
         "description": "Response schema for bulk delete operation."
       },
+      "BulkRejectRequest": {
+        "properties": {
+          "atom_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Atom Ids",
+            "description": "List of atom IDs to reject (UUID strings)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "atom_ids"
+        ],
+        "title": "BulkRejectRequest",
+        "description": "Request schema for bulk rejecting atoms (sets archived=true)."
+      },
+      "BulkRejectResponse": {
+        "properties": {
+          "rejected_count": {
+            "type": "integer",
+            "title": "Rejected Count",
+            "description": "Number of atoms successfully rejected"
+          },
+          "failed_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Failed Ids",
+            "description": "List of atom IDs that failed to reject"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "Error messages for failed rejections"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rejected_count"
+        ],
+        "title": "BulkRejectResponse",
+        "description": "Response schema for bulk reject operation."
+      },
       "BulkVersionRequest": {
         "properties": {
           "version_ids": {
@@ -8235,79 +8421,6 @@
           "apiBaseUrl"
         ],
         "title": "ConfigResponse"
-      },
-      "DashboardMetricsResponse": {
-        "properties": {
-          "topicQualityScore": {
-            "type": "number",
-            "maximum": 100.0,
-            "minimum": 0.0,
-            "title": "Topicqualityscore",
-            "description": "Average topic quality score (0-100)"
-          },
-          "noiseRatio": {
-            "type": "number",
-            "maximum": 100.0,
-            "minimum": 0.0,
-            "title": "Noiseratio",
-            "description": "Percentage of messages filtered as noise"
-          },
-          "classificationAccuracy": {
-            "type": "number",
-            "maximum": 100.0,
-            "minimum": 0.0,
-            "title": "Classificationaccuracy",
-            "description": "Classification model accuracy (0-100)"
-          },
-          "activeAnalysisRuns": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Activeanalysisruns",
-            "description": "Number of currently active analysis runs"
-          },
-          "trends": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/MetricTrend"
-            },
-            "type": "object",
-            "title": "Trends",
-            "description": "Trend data for each metric"
-          }
-        },
-        "type": "object",
-        "required": [
-          "topicQualityScore",
-          "noiseRatio",
-          "classificationAccuracy",
-          "activeAnalysisRuns",
-          "trends"
-        ],
-        "title": "DashboardMetricsResponse",
-        "description": "Response model for dashboard metrics.",
-        "example": {
-          "activeAnalysisRuns": 9,
-          "classificationAccuracy": 92.3,
-          "noiseRatio": 18.5,
-          "topicQualityScore": 85.0,
-          "trends": {
-            "activeAnalysisRuns": {
-              "change": 0.0,
-              "direction": "stable"
-            },
-            "classificationAccuracy": {
-              "change": 1.5,
-              "direction": "up"
-            },
-            "noiseRatio": {
-              "change": 2.1,
-              "direction": "down"
-            },
-            "topicQualityScore": {
-              "change": 3.2,
-              "direction": "up"
-            }
-          }
-        }
       },
       "EmbedRequest": {
         "properties": {
@@ -9348,6 +9461,44 @@
         ],
         "title": "MessageResponse",
         "description": "Response schema for message"
+      },
+      "MessageStats": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total",
+            "description": "Total messages in period"
+          },
+          "signal_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Signal Count",
+            "description": "Messages classified as signal"
+          },
+          "noise_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Noise Count",
+            "description": "Messages classified as noise"
+          },
+          "signal_ratio": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Signal Ratio",
+            "description": "Signal count / total ratio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "signal_count",
+          "noise_count",
+          "signal_ratio"
+        ],
+        "title": "MessageStats",
+        "description": "Message statistics for dashboard."
       },
       "MetricTrend": {
         "properties": {
@@ -11415,6 +11566,29 @@
         "title": "TopicPublic",
         "description": "Public schema for topic responses."
       },
+      "TopicStats": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total",
+            "description": "Total topics count"
+          },
+          "active_today": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Active Today",
+            "description": "Topics with activity in period"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "active_today"
+        ],
+        "title": "TopicStats",
+        "description": "Topic activity summary."
+      },
       "TopicUpdate": {
         "properties": {
           "name": {
@@ -11542,6 +11716,44 @@
           "created_at"
         ],
         "title": "TopicVersionResponse"
+      },
+      "TrendData": {
+        "properties": {
+          "current": {
+            "type": "integer",
+            "title": "Current",
+            "description": "Current period count"
+          },
+          "previous": {
+            "type": "integer",
+            "title": "Previous",
+            "description": "Previous period count"
+          },
+          "change_percent": {
+            "type": "number",
+            "title": "Change Percent",
+            "description": "Absolute percentage change"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down",
+              "neutral"
+            ],
+            "title": "Direction",
+            "description": "Trend direction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current",
+          "previous",
+          "change_percent",
+          "direction"
+        ],
+        "title": "TrendData",
+        "description": "Comparison with previous period."
       },
       "UpdateTelegramGroupIdsRequest": {
         "properties": {
@@ -11872,6 +12084,59 @@
         "title": "WebhookConfigResponse",
         "description": "Response schema for webhook configuration"
       },
+      "app__api__v1__schemas__dashboard__DashboardMetricsResponse": {
+        "properties": {
+          "period": {
+            "type": "string",
+            "enum": [
+              "today",
+              "yesterday"
+            ],
+            "title": "Period",
+            "description": "Actual period used for metrics"
+          },
+          "period_label": {
+            "type": "string",
+            "title": "Period Label",
+            "description": "Localized period label for UI",
+            "example": "Дані за сьогодні"
+          },
+          "messages": {
+            "$ref": "#/components/schemas/MessageStats"
+          },
+          "atoms": {
+            "$ref": "#/components/schemas/AtomStats"
+          },
+          "topics": {
+            "$ref": "#/components/schemas/TopicStats"
+          },
+          "trends": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TrendData"
+            },
+            "type": "object",
+            "title": "Trends",
+            "description": "Trends for messages, atoms, topics"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At",
+            "description": "When metrics were generated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period",
+          "period_label",
+          "messages",
+          "atoms",
+          "topics",
+          "generated_at"
+        ],
+        "title": "DashboardMetricsResponse",
+        "description": "Complete dashboard metrics response."
+      },
       "app__api__v1__search__MessageSearchResult": {
         "properties": {
           "id": {
@@ -12006,6 +12271,79 @@
         ],
         "title": "TopicSearchResult",
         "description": "Topic search result with similarity score."
+      },
+      "app__schemas__metrics__DashboardMetricsResponse": {
+        "properties": {
+          "topicQualityScore": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Topicqualityscore",
+            "description": "Average topic quality score (0-100)"
+          },
+          "noiseRatio": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Noiseratio",
+            "description": "Percentage of messages filtered as noise"
+          },
+          "classificationAccuracy": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Classificationaccuracy",
+            "description": "Classification model accuracy (0-100)"
+          },
+          "activeAnalysisRuns": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Activeanalysisruns",
+            "description": "Number of currently active analysis runs"
+          },
+          "trends": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/MetricTrend"
+            },
+            "type": "object",
+            "title": "Trends",
+            "description": "Trend data for each metric"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topicQualityScore",
+          "noiseRatio",
+          "classificationAccuracy",
+          "activeAnalysisRuns",
+          "trends"
+        ],
+        "title": "DashboardMetricsResponse",
+        "description": "Response model for dashboard metrics.",
+        "example": {
+          "activeAnalysisRuns": 9,
+          "classificationAccuracy": 92.3,
+          "noiseRatio": 18.5,
+          "topicQualityScore": 85.0,
+          "trends": {
+            "activeAnalysisRuns": {
+              "change": 0.0,
+              "direction": "stable"
+            },
+            "classificationAccuracy": {
+              "change": 1.5,
+              "direction": "up"
+            },
+            "noiseRatio": {
+              "change": 2.1,
+              "direction": "down"
+            },
+            "topicQualityScore": {
+              "change": 3.2,
+              "direction": "up"
+            }
+          }
+        }
       }
     }
   },

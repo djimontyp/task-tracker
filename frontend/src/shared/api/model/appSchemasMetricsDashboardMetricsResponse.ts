@@ -5,12 +5,12 @@
  * Feel the heartbeat of your projects
  * OpenAPI spec version: 1.0.0
  */
-import type { DashboardMetricsResponseTrends } from './dashboardMetricsResponseTrends';
+import type { AppSchemasMetricsDashboardMetricsResponseTrends } from './appSchemasMetricsDashboardMetricsResponseTrends';
 
 /**
  * Response model for dashboard metrics.
  */
-export interface DashboardMetricsResponse {
+export interface AppSchemasMetricsDashboardMetricsResponse {
   /**
    * Average topic quality score (0-100)
    * @minimum 0
@@ -35,5 +35,5 @@ export interface DashboardMetricsResponse {
    */
   activeAnalysisRuns: number;
   /** Trend data for each metric */
-  trends: DashboardMetricsResponseTrends;
+  trends: AppSchemasMetricsDashboardMetricsResponseTrends;
 }
