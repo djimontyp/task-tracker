@@ -8,6 +8,7 @@ import {
   Folder,
   Settings,
   PanelLeft,
+  Atom,
 } from 'lucide-react'
 import { useLocation, Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -39,6 +40,7 @@ const navGroups: NavGroup[] = [
     items: [
       { path: '/dashboard', label: 'Overview', icon: LayoutGrid },
       { path: '/messages', label: 'Messages', icon: Mail },
+      { path: '/atoms', label: 'Atoms', icon: Atom },
       { path: '/topics', label: 'Topics', icon: MessageSquare },
     ],
   },

@@ -4,6 +4,7 @@ import { MainLayout } from '@/shared/layouts'
 import Spinner from '@/shared/ui/Spinner'
 
 const DashboardPage = lazy(() => import('@pages/DashboardPage'))
+const AtomsPage = lazy(() => import('@pages/AtomsPage'))
 const TopicsPage = lazy(() => import('@pages/TopicsPage'))
 const TopicDetailPage = lazy(() => import('@pages/TopicDetailPage'))
 const MessagesPage = lazy(() => import('@pages/MessagesPage'))
@@ -34,6 +35,7 @@ const AppRoutes = () => {
         <Route element={<MainLayout><SearchPage /></MainLayout>} path="/search" />
         <Route element={<MainLayout><MessagesPage /></MainLayout>} path="/messages" />
         <Route element={<MainLayout><VersionsPage /></MainLayout>} path="/versions" />
+        <Route element={<MainLayout><AtomsPage /></MainLayout>} path="/atoms" />
         <Route element={<MainLayout><TopicsPage /></MainLayout>} path="/topics" />
         <Route element={<MainLayout><TopicDetailPage /></MainLayout>} path="/topics/:topicId" />
         <Route element={<MainLayout><AgentsPage /></MainLayout>} path="/agents" />
