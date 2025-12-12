@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useSearchParams } from 'react-router-dom'
 import {
   Button,
   Card,
   Skeleton,
+  Badge,
 } from '@/shared/ui'
 import { EmptyState } from '@/shared/patterns'
 import { PageWrapper } from '@/shared/primitives'
@@ -36,7 +38,7 @@ import { BulkActionsToolbar } from '@/shared/components/AdminPanel/BulkActionsTo
 import { useMultiSelect } from '@/shared/hooks'
 import { useAdminMode } from '@/shared/hooks/useAdminMode'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
-import { Download, RotateCw, User, Mail } from 'lucide-react'
+import { Download, RotateCw, User, Mail, Signal, Volume2 } from 'lucide-react'
 import { IngestionModal } from './IngestionModal'
 import { MessageInspectModal } from '@/features/messages/components/MessageInspectModal'
 import { ConsumerMessageModal } from '@/features/messages/components/ConsumerMessageModal'
@@ -59,6 +61,7 @@ interface PaginatedResponse {
 
 const MessagesPage = () => {
   const queryClient = useQueryClient()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [modalOpen, setModalOpen] = useState(false)
   const [inspectingMessageId, setInspectingMessageId] = useState<string | null>(null)
   const [viewingMessageId, setViewingMessageId] = useState<string | null>(null)
@@ -67,11 +70,18 @@ const MessagesPage = () => {
   const [pageSize, setPageSize] = useState(25)
   const isDesktop = useMediaQuery('(min-width: 1280px)')
 
+  // Signal filter mode from URL (default: signal only)
+  const filterMode = searchParams.get('filter') || 'signal'
+  const showAllMessages = filterMode === 'all'
+
   // Data table state
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'sent_at', desc: true }
   ])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  // Initialize with Signal filter if not showing all
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    showAllMessages ? [] : [{ id: 'noise_classification', value: ['signal'] }]
+  )
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
     id: false,
     sent_at: false,
@@ -290,6 +300,27 @@ const MessagesPage = () => {
 
   const selectedRowsCount = Object.keys(rowSelection).length
 
+  // Calculate signal/noise ratio
+  const signalNoiseStats = useMemo(() => {
+    const items = paginatedData?.items ?? []
+    const signalCount = items.filter(m => m.noise_classification === 'signal').length
+    const noiseCount = items.filter(m => m.noise_classification === 'noise' || m.noise_classification === 'weak_signal').length
+    const total = items.length
+    const ratio = total > 0 ? Math.round((signalCount / total) * 100) : 0
+    return { signalCount, noiseCount, total, ratio }
+  }, [paginatedData?.items])
+
+  // Toggle between Signal Only and Show All
+  const toggleSignalFilter = useCallback(() => {
+    if (showAllMessages) {
+      setSearchParams({ filter: 'signal' })
+      setColumnFilters([{ id: 'noise_classification', value: ['signal'] }])
+    } else {
+      setSearchParams({ filter: 'all' })
+      setColumnFilters([])
+    }
+  }, [showAllMessages, setSearchParams])
+
   const handleBulkApprove = useCallback(async () => {
     const count = Object.keys(table.getState().rowSelection).length
     if (count === 0) return
@@ -461,20 +492,46 @@ const MessagesPage = () => {
 
   return (
     <PageWrapper variant="fullWidth" className="w-full min-w-0 overflow-x-hidden">
-      {/* Actions toolbar */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        <Button onClick={handleRefreshMessages} size="sm" variant="outline">
-          <RotateCw className="mr-2 h-4 w-4" />
-          Refresh
+      {/* Signal/Noise Header with Stats */}
+      <div className="flex flex-wrap items-center gap-4 mb-4">
+        {/* Signal/Noise Toggle */}
+        <Button
+          onClick={toggleSignalFilter}
+          size="sm"
+          variant={showAllMessages ? 'outline' : 'default'}
+          className="gap-2"
+        >
+          <Signal className="h-4 w-4" />
+          {showAllMessages ? 'Show Signal Only' : 'Signal Only'}
         </Button>
-        <Button onClick={handleUpdateAuthors} size="sm" variant="outline">
-          <User className="mr-2 h-4 w-4" />
-          Update Authors
-        </Button>
-        <Button onClick={handleIngestMessages} size="sm">
-          <Download className="mr-2 h-4 w-4" />
-          Ingest Messages
-        </Button>
+
+        {/* Signal/Noise Ratio Badge */}
+        <Badge variant="secondary" className="gap-2 px-4 py-2">
+          <Signal className="h-3.5 w-3.5 text-status-connected" />
+          <span className="font-medium">{signalNoiseStats.ratio}%</span>
+          <span className="text-muted-foreground">signal</span>
+          <span className="mx-2 text-muted-foreground">|</span>
+          <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-muted-foreground">{signalNoiseStats.noiseCount}</span>
+        </Badge>
+
+        <div className="flex-1" />
+
+        {/* Actions toolbar */}
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={handleRefreshMessages} size="sm" variant="outline">
+            <RotateCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+          <Button onClick={handleUpdateAuthors} size="sm" variant="outline">
+            <User className="mr-2 h-4 w-4" />
+            Update Authors
+          </Button>
+          <Button onClick={handleIngestMessages} size="sm">
+            <Download className="mr-2 h-4 w-4" />
+            Ingest Messages
+          </Button>
+        </div>
       </div>
 
       <div className="min-h-[60px] w-full min-w-0">
