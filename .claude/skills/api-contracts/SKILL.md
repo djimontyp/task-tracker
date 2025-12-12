@@ -135,3 +135,102 @@ cd frontend && npx tsc --noEmit
 - Згенеровані файли комітяться в git
 - Hooks використовують `customInstance` з `lib/api/mutator.ts`
 - Query keys автоматично генеруються з endpoint paths
+
+---
+
+## Token-Efficient OpenAPI Access
+
+**Файл:** `contracts/openapi.json` (~12k рядків, 99 endpoints, 132 schemas)
+
+Для економії контексту рекомендовано витягувати тільки потрібну інформацію через Python.
+
+### OpenAPI 3.0 Структура
+
+```
+openapi.json
+├── openapi: "3.0.2"              # версія специфікації
+├── info                          # метадані API
+│   ├── title
+│   ├── version
+│   └── description
+├── paths                         # 🎯 ENDPOINTS (dict: path → methods)
+│   └── /api/v1/topics
+│       ├── get
+│       │   ├── summary
+│       │   ├── tags: []
+│       │   ├── parameters: []    # query/path params
+│       │   └── responses
+│       │       └── 200
+│       │           └── content.application/json.schema.$ref
+│       └── post
+│           ├── requestBody       # body schema
+│           │   └── content.application/json.schema.$ref
+│           └── responses
+├── components                    # 🎯 REUSABLE DEFINITIONS
+│   └── schemas                   # TypeScript types живуть тут
+│       └── TopicPublic
+│           ├── type: "object"
+│           ├── properties        # поля
+│           │   ├── id: {type: "string"}
+│           │   └── name: {type: "string"}
+│           └── required: []
+└── tags                          # групування endpoints
+    └── [{name: "topics", description: "..."}]
+```
+
+### Навігація по дереву
+
+```python
+spec = json.load(open('contracts/openapi.json'))
+
+# Рівень 1: Корінь
+spec.keys()  # ['openapi', 'info', 'paths', 'components', 'tags']
+
+# Рівень 2: Endpoints
+spec['paths'].keys()  # всі шляхи API
+
+# Рівень 3: Methods
+spec['paths']['/api/v1/topics'].keys()  # ['get', 'post', ...]
+
+# Рівень 4: Деталі endpoint
+spec['paths']['/api/v1/topics']['get'].keys()  # ['summary', 'tags', 'parameters', 'responses']
+
+# Рівень 2: Schemas
+spec['components']['schemas'].keys()  # всі типи
+
+# Рівень 3: Schema definition
+spec['components']['schemas']['TopicPublic'].keys()  # ['type', 'properties', 'required']
+```
+
+### Приклади (адаптуй під задачу)
+
+```python
+import json
+spec = json.load(open('contracts/openapi.json'))
+
+# Список всіх endpoints
+for p, ms in spec['paths'].items():
+    for m in ms:
+        if m in ('get','post','put','patch','delete'):
+            print(f'{m.upper():6} {p}')
+
+# Список schemas
+for name in spec['components']['schemas']: print(name)
+
+# Пошук endpoints по keyword
+kw = 'topic'
+[print(f'{m.upper():6} {p}') for p,ms in spec['paths'].items() for m in ms if kw in p and m in ('get','post','put','delete')]
+
+# Деталі endpoint
+print(json.dumps(spec['paths']['/api/v1/topics']['get'], indent=2))
+
+# Деталі schema
+print(json.dumps(spec['components']['schemas']['TopicPublic'], indent=2))
+
+# Тільки поля schema
+print(list(spec['components']['schemas']['TopicPublic'].get('properties', {}).keys()))
+
+# Endpoints з певним tag
+tag = 'topics'
+[print(f"{m.upper():6} {p}") for p,ms in spec['paths'].items() for m,d in ms.items() if m in ('get','post','put','delete') and tag in d.get('tags',[])]
+```
