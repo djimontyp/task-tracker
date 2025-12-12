@@ -10,4 +10,4 @@ import type { MetricTrend } from './metricTrend';
 /**
  * Trend data for each metric
  */
-export type DashboardMetricsResponseTrends = {[key: string]: MetricTrend};
+export type AppSchemasMetricsDashboardMetricsResponseTrends = {[key: string]: MetricTrend};

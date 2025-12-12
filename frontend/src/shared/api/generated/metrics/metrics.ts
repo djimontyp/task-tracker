@@ -21,7 +21,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  DashboardMetricsResponse
+  AppSchemasMetricsDashboardMetricsResponse
 } from '../../model';
 
 import { customInstance } from '../../../lib/api/mutator';
@@ -59,7 +59,7 @@ export const getDashboardMetricsApiV1MetricsDashboardGet = (
 ) => {
       
       
-      return customInstance<DashboardMetricsResponse>(
+      return customInstance<AppSchemasMetricsDashboardMetricsResponse>(
       {url: `/api/v1/metrics/dashboard`, method: 'GET', signal
     },
       );

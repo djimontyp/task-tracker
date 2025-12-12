@@ -35,6 +35,8 @@ import type {
   BulkArchiveResponse,
   BulkDeleteRequest,
   BulkDeleteResponse,
+  BulkRejectRequest,
+  BulkRejectResponse,
   HTTPValidationError,
   LinkAtomToTopicApiV1AtomsAtomIdTopicsTopicIdPost201,
   LinkAtomToTopicApiV1AtomsAtomIdTopicsTopicIdPostParams,
@@ -615,6 +617,71 @@ export const useBulkDeleteAtomsApiV1AtomsBulkDeletePost = <TError = HTTPValidati
       > => {
 
       const mutationOptions = getBulkDeleteAtomsApiV1AtomsBulkDeletePostMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * Reject multiple atoms by archiving them in a single transaction.
+ * @summary Bulk reject atoms
+ */
+export const bulkRejectAtomsApiV1AtomsBulkRejectPost = (
+    bulkRejectRequest: BulkRejectRequest,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<BulkRejectResponse>(
+      {url: `/api/v1/atoms/bulk-reject`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: bulkRejectRequest, signal
+    },
+      );
+    }
+  
+
+
+export const getBulkRejectAtomsApiV1AtomsBulkRejectPostMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bulkRejectAtomsApiV1AtomsBulkRejectPost>>, TError,{data: BulkRejectRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof bulkRejectAtomsApiV1AtomsBulkRejectPost>>, TError,{data: BulkRejectRequest}, TContext> => {
+
+const mutationKey = ['bulkRejectAtomsApiV1AtomsBulkRejectPost'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof bulkRejectAtomsApiV1AtomsBulkRejectPost>>, {data: BulkRejectRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  bulkRejectAtomsApiV1AtomsBulkRejectPost(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BulkRejectAtomsApiV1AtomsBulkRejectPostMutationResult = NonNullable<Awaited<ReturnType<typeof bulkRejectAtomsApiV1AtomsBulkRejectPost>>>
+    export type BulkRejectAtomsApiV1AtomsBulkRejectPostMutationBody = BulkRejectRequest
+    export type BulkRejectAtomsApiV1AtomsBulkRejectPostMutationError = HTTPValidationError
+
+    /**
+ * @summary Bulk reject atoms
+ */
+export const useBulkRejectAtomsApiV1AtomsBulkRejectPost = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bulkRejectAtomsApiV1AtomsBulkRejectPost>>, TError,{data: BulkRejectRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof bulkRejectAtomsApiV1AtomsBulkRejectPost>>,
+        TError,
+        {data: BulkRejectRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getBulkRejectAtomsApiV1AtomsBulkRejectPostMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
