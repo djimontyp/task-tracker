@@ -8,7 +8,6 @@ import {
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Badge, Skeleton, Button } from '@/shared/ui'
-import { PageHeader } from '@/shared/components/PageHeader'
 import MetricCard from '@/shared/components/MetricCard'
 import { noiseService } from '@/features/noise/api/noiseService'
 import type { NoiseStats } from '@/features/noise/types'
@@ -136,20 +135,16 @@ const NoiseFilteringDashboard = () => {
 
   return (
     <PageWrapper variant="fullWidth">
-      <PageHeader
-        title="Noise Filtering"
-        description="Message scoring statistics, signal-to-noise ratio, quality metrics, and filtering effectiveness over time"
-        actions={
-          <Button
-            onClick={() => scoreBatchMutation.mutate(batchScoringLimit)}
-            disabled={scoreBatchMutation.isPending}
-            size="sm"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${scoreBatchMutation.isPending ? 'animate-spin' : ''}`} />
-            Score Unscored Messages
-          </Button>
-        }
-      />
+      <div className="flex justify-end mb-4">
+        <Button
+          onClick={() => scoreBatchMutation.mutate(batchScoringLimit)}
+          disabled={scoreBatchMutation.isPending}
+          size="sm"
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${scoreBatchMutation.isPending ? 'animate-spin' : ''}`} />
+          Score Unscored Messages
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-4 md:gap-6 animate-fade-in-up">
         {statsLoading ? (

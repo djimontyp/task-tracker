@@ -10,7 +10,6 @@ import { ProjectCard, ProjectForm } from '@/features/projects/components'
 import type { ProjectConfig, ProjectListResponse } from '@/features/projects/types'
 import { toast } from 'sonner'
 import { Plus, Search, Folder } from 'lucide-react'
-import { PageHeader } from '@/shared/components'
 import { EmptyState } from '@/shared/patterns'
 import { PageWrapper } from '@/shared/primitives'
 
@@ -170,16 +169,13 @@ const ProjectsPage = () => {
 
   return (
     <PageWrapper variant="fullWidth">
-      <PageHeader
-        title="Projects"
-        description="Manage projects with keyword-based message filtering and classification rules"
-        actions={
-          <Button onClick={handleCreate} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Project
-          </Button>
-        }
-      />
+      {/* Actions toolbar */}
+      <div className="flex justify-end mb-4">
+        <Button onClick={handleCreate} size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Create Project
+        </Button>
+      </div>
 
       {/* Search */}
       <Card className="p-4">

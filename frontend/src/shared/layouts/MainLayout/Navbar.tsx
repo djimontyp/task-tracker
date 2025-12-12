@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Menu } from 'lucide-react';
+import { Search, Menu, HelpCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { Logo } from '@/shared/components/Logo';
 import { Button } from '@/shared/ui/button';
@@ -37,7 +37,7 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
   const { indicator } = useServiceStatus();
   const { isAdminMode, toggleAdminMode } = useAdminMode();
   const location = useLocation();
-  const crumbs = useBreadcrumbs(location.pathname);
+  const { crumbs, tooltip } = useBreadcrumbs(location.pathname);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const cycleTheme = () => {
@@ -75,8 +75,13 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
     >
       {/* Desktop: Single row with 3 zones */}
       <div className="hidden md:flex items-center h-14 px-4 lg:px-6 gap-4">
-        {/* CONTEXT ZONE: Breadcrumbs (left, flex-1) */}
-        <div className="flex-1 min-w-0">
+        {/* CONTEXT ZONE: Help + Breadcrumbs (left, flex-1) */}
+        <div className="flex-1 min-w-0 flex items-center gap-2">
+          <TooltipIconButton
+            icon={<HelpCircle className="h-4 w-4" />}
+            label="Page info"
+            tooltip={tooltip}
+          />
           <NavBreadcrumbs crumbs={crumbs} variant="desktop" />
         </div>
 
@@ -158,8 +163,13 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
           </div>
         </div>
 
-        {/* Row 2: Breadcrumbs (full width) */}
-        <div className="px-2 sm:px-4 pb-2 border-t border-border">
+        {/* Row 2: Help + Breadcrumbs (full width) */}
+        <div className="px-2 sm:px-4 pb-2 border-t border-border flex items-center gap-2">
+          <TooltipIconButton
+            icon={<HelpCircle className="h-4 w-4" />}
+            label="Page info"
+            tooltip={tooltip}
+          />
           <NavBreadcrumbs crumbs={crumbs} variant="mobile" />
         </div>
       </div>

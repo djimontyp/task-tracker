@@ -86,7 +86,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             </SheetContent>
           </Sheet>
 
-          <div className="flex flex-col min-h-screen pt-14 md:pt-16 overflow-x-hidden">
+          {/* pt-[104px]: navbar row1 (56px) + row2 breadcrumbs (~48px) */}
+          <div className="flex flex-col min-h-screen pt-[104px] md:pt-16 overflow-x-hidden">
             <main id="main-content" className="flex flex-1 flex-col gap-4 p-2 md:p-4 max-w-full">
               {children}
             </main>

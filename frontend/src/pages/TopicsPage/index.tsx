@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { PageHeader } from '@/shared/components'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card, ColorPickerPopover } from '@/shared/components'
@@ -165,22 +164,6 @@ const TopicsPage = () => {
 
   return (
     <PageWrapper variant="fullWidth">
-      <PageHeader
-        title="Topics"
-        description="Manage classification topics for task organization with custom icons and colors"
-        actions={
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-            >
-              {viewMode === 'grid' ? <List className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
-            </Button>
-          </div>
-        }
-      />
-
       <div className="flex gap-4 items-center flex-wrap">
         <div className="flex-1 max-w-md relative">
           <Search className="absolute left-4 top-2/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />

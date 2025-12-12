@@ -53,6 +53,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "generate:api": "orval",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx --max-warnings 50",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
@@ -69,12 +70,17 @@
     "build-storybook": "storybook build",
     "test:storybook": "test-storybook",
     "test:storybook:ci": "test-storybook --ci",
+    "story:check": "npx tsx scripts/check-story-coverage.ts",
+    "story:check:fix": "npx tsx scripts/check-story-coverage.ts --fix",
     "prepare": "husky"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix --max-warnings 0",
       "bash -c 'tsc --noEmit'"
+    ],
+    "src/shared/**/*.tsx": [
+      "npx tsx scripts/check-story-coverage.ts --staged-only"
     ]
   },
   "browserslist": {
@@ -119,6 +125,7 @@
     "husky": "^9.1.7",
     "jsdom": "^27.1.0",
     "lint-staged": "^16.2.7",
+    "orval": "^7.13.2",
     "playwright": "^1.57.0",
     "remark-gfm": "^4.0.1",
     "shadcn": "^3.3.1",

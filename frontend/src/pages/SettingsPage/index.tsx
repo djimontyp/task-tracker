@@ -3,7 +3,6 @@ import GeneralTab from './components/GeneralTab'
 import SourcesTab from './components/SourcesTab'
 import ProvidersTab from './components/ProvidersTab'
 import PromptTuningTab from './components/PromptTuningTab'
-import { PageHeader } from '@/shared/components'
 import { useAdminMode } from '@/shared/hooks'
 import { PageWrapper } from '@/shared/primitives'
 
@@ -12,11 +11,6 @@ const SettingsPage = () => {
 
   return (
     <PageWrapper variant="fullWidth">
-      <PageHeader
-        title="Settings"
-        description="Configure application preferences and integrations"
-      />
-
       <Tabs defaultValue="general" className="w-full">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
