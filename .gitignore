@@ -196,3 +196,4 @@ storybook-static
 # Playwright generated
 playwright-report/
 test-results/
+.obsidian/
