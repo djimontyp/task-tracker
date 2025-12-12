@@ -84,7 +84,7 @@ const INSIGHT_SAMPLES: Array<{
     topicName: 'Mobile App Development',
   },
   {
-    type: 'IDEA',
+    type: 'INSIGHT',
     title: 'Додати dark mode в налаштування',
     content: 'Багато користувачів просять темну тему, особливо для роботи ввечері.',
     author: 'maria',
@@ -98,7 +98,7 @@ const INSIGHT_SAMPLES: Array<{
     topicName: 'Backend API',
   },
   {
-    type: 'TASK',
+    type: 'SOLUTION',
     title: 'Оновити залежності до React 19',
     content: 'Потрібно оновити React та перевірити сумісність всіх бібліотек.',
     author: 'olena',

@@ -5,8 +5,15 @@
  * Used with mock data initially, then real API endpoints.
  */
 
-// Atom types matching backend enum
-export type AtomType = 'TASK' | 'IDEA' | 'DECISION' | 'PROBLEM' | 'QUESTION' | 'INSIGHT'
+// Atom types matching backend AtomType enum (backend/app/models/atom.py)
+export type AtomType =
+  | 'PROBLEM'
+  | 'SOLUTION'
+  | 'DECISION'
+  | 'QUESTION'
+  | 'INSIGHT'
+  | 'PATTERN'
+  | 'REQUIREMENT'
 
 // Time period for filtering
 export type DashboardPeriod = 'today' | 'yesterday' | 'week' | 'month'

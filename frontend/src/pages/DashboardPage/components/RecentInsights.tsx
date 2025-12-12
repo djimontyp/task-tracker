@@ -11,7 +11,6 @@ import { useNavigate } from 'react-router-dom'
 import {
   Sparkles,
   AlertTriangle,
-  Lightbulb,
   CheckCircle,
   CircleDot,
   HelpCircle,
@@ -25,35 +24,29 @@ import { Skeleton } from '@/shared/ui/skeleton'
 import { cn } from '@/shared/lib'
 import { atom, semantic } from '@/shared/tokens/colors'
 import { formatMessageDate } from '@/shared/utils/date'
-import type { RecentInsightsProps, RecentInsight, AtomType } from '../types'
+import type { RecentInsightsProps, RecentInsight } from '../types'
 
-// Atom type configuration
-const ATOM_CONFIG: Record<
-  AtomType,
-  {
-    icon: typeof AlertTriangle
-    label: string
-    dotBg: string
-    textColor: string
-  }
-> = {
+// Atom type configuration with fallback
+type AtomConfigItem = {
+  icon: typeof AlertTriangle
+  label: string
+  dotBg: string
+  textColor: string
+}
+
+// Atom type configuration matching backend AtomType enum
+const ATOM_CONFIG: Record<string, AtomConfigItem> = {
   PROBLEM: {
     icon: AlertTriangle,
     label: 'Проблема',
     dotBg: atom.problem.bg,
     textColor: atom.problem.text,
   },
-  TASK: {
-    icon: CircleDot,
-    label: 'Задача',
-    dotBg: semantic.error.bg,
-    textColor: semantic.error.text,
-  },
-  IDEA: {
-    icon: Lightbulb,
-    label: 'Ідея',
-    dotBg: semantic.warning.bg,
-    textColor: semantic.warning.text,
+  SOLUTION: {
+    icon: CheckCircle,
+    label: 'Рішення',
+    dotBg: atom.decision.bg,
+    textColor: atom.decision.text,
   },
   DECISION: {
     icon: CheckCircle,
@@ -73,6 +66,26 @@ const ATOM_CONFIG: Record<
     dotBg: atom.insight.bg,
     textColor: atom.insight.text,
   },
+  PATTERN: {
+    icon: Gem,
+    label: 'Патерн',
+    dotBg: atom.insight.bg,
+    textColor: atom.insight.text,
+  },
+  REQUIREMENT: {
+    icon: CircleDot,
+    label: 'Вимога',
+    dotBg: semantic.info.bg,
+    textColor: semantic.info.text,
+  },
+}
+
+// Fallback for unknown types
+const DEFAULT_CONFIG: AtomConfigItem = {
+  icon: CircleDot,
+  label: 'Атом',
+  dotBg: 'bg-muted',
+  textColor: 'text-muted-foreground',
 }
 
 const TimelineItem = ({
@@ -84,7 +97,7 @@ const TimelineItem = ({
   isLast: boolean
   onClick?: () => void
 }) => {
-  const config = ATOM_CONFIG[insight.type]
+  const config = ATOM_CONFIG[insight.type] || DEFAULT_CONFIG
   const Icon = config.icon
 
   return (
