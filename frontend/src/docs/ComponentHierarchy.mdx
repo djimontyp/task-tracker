@@ -1,0 +1,203 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Design System/Component Hierarchy" />
+
+# Component Hierarchy
+
+> **Understanding how components are organized and when to use each category**
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Features                              │
+│     Domain-specific components (AgentCard, AtomCard...)     │
+├─────────────────────────────────────────────────────────────┤
+│                        Layout                                │
+│     Page structure (MainLayout, Navbar, Sidebar)            │
+├─────────────────────────────────────────────────────────────┤
+│                        Patterns                              │
+│     Composite UI (EmptyState, MetricCard, FormField)        │
+├─────────────────────────────────────────────────────────────┤
+│                       Primitives                             │
+│     Base components (Button, Input, Card, Badge, Dialog)    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 1. Primitives
+
+**Location:** `src/shared/ui/` and `src/shared/primitives/`
+
+Base UI building blocks from shadcn/ui. These are the atomic elements.
+
+### Form Controls
+| Component | Purpose | Key Props |
+|-----------|---------|-----------|
+| Button | Actions and submissions | `variant`, `size`, `loading` |
+| Input | Text entry | `type`, `placeholder` |
+| Textarea | Multi-line text | `rows` |
+| Select | Single selection dropdown | `options` |
+| Checkbox | Boolean toggle | `checked`, `onCheckedChange` |
+| Switch | On/off toggle | `checked` |
+| Slider | Range selection | `min`, `max`, `step` |
+| Radio Group | Single selection from list | `value`, `onValueChange` |
+
+### Display
+| Component | Purpose | Key Props |
+|-----------|---------|-----------|
+| Badge | Labels and status | `variant` |
+| Card | Content containers | `className` |
+| Alert | Feedback messages | `variant` |
+| Avatar | User/entity images | `src`, `fallback` |
+| Progress | Loading/completion | `value` |
+| Skeleton | Loading placeholders | `className` |
+| Table | Data grids | children |
+
+### Overlays
+| Component | Purpose | Key Props |
+|-----------|---------|-----------|
+| Dialog | Modal windows | `open`, `onOpenChange` |
+| Sheet | Side panels | `side`, `open` |
+| Popover | Contextual content | `open`, `onOpenChange` |
+| Tooltip | Hover hints | `content` |
+| Alert Dialog | Confirmations | `open`, `onOpenChange` |
+| Dropdown Menu | Action menus | `open`, `onOpenChange` |
+| Command | Command palette | `open` |
+
+### Navigation
+| Component | Purpose | Key Props |
+|-----------|---------|-----------|
+| Tabs | Tabbed content | `value`, `onValueChange` |
+| Breadcrumb | Navigation path | children |
+| Pagination | Page navigation | `page`, `total` |
+| Collapsible | Expandable sections | `open` |
+
+### Layout Primitives
+| Component | Purpose | Use Case |
+|-----------|---------|----------|
+| Stack | Vertical spacing | Form fields, list items |
+| Inline | Horizontal spacing | Tags, buttons |
+| Box | Generic container | Padding, backgrounds |
+| Center | Centered content | Empty states, modals |
+| PageWrapper | Page container | Route components |
+
+## 2. Patterns
+
+**Location:** `src/shared/patterns/` and `src/shared/components/`
+
+Composite components combining primitives with business logic.
+
+### Status & Feedback
+| Pattern | Purpose | When to Use |
+|---------|---------|-------------|
+| EmptyState | No data messaging | Empty lists, search results |
+| CardWithStatus | Cards with status indicator | Provider cards, agent cards |
+| StatusBadge | Status with icon | Connection states |
+
+### Data Display
+| Pattern | Purpose | When to Use |
+|---------|---------|-------------|
+| MetricCard | KPI display | Dashboard metrics |
+| TrendChart | Trend visualization | Time series data |
+| ActivityHeatmap | Activity visualization | Contribution charts |
+| DataTable | Sortable/filterable tables | List views |
+
+### Forms
+| Pattern | Purpose | When to Use |
+|---------|---------|-------------|
+| FormField | Label + input + error | All form inputs |
+| ColorPickerPopover | Color selection | Theme customization |
+
+### Lists
+| Pattern | Purpose | When to Use |
+|---------|---------|-------------|
+| ListItemWithAvatar | Avatar + content | User lists, message lists |
+| DataTableMobileCard | Mobile table view | Responsive tables |
+
+## 3. Layout
+
+**Location:** `src/shared/layouts/`
+
+Page structure and navigation components.
+
+| Component | Purpose | Props |
+|-----------|---------|-------|
+| MainLayout | App shell | `children` |
+| Navbar | Top navigation | - |
+| AppSidebar | Side navigation | - |
+| NavBreadcrumbs | Page breadcrumbs | - |
+| ServiceStatusIndicator | Backend status | - |
+
+### Usage
+
+```tsx
+// All pages are wrapped in MainLayout via router
+<MainLayout>
+  <YourPage />
+</MainLayout>
+```
+
+## 4. Features
+
+**Location:** `src/features/*/components/` and `src/pages/*/components/`
+
+Domain-specific components tied to business logic.
+
+### By Domain
+
+| Domain | Components | Purpose |
+|--------|------------|---------|
+| **Agents** | AgentCard | AI agent display |
+| **Atoms** | AtomCard | Knowledge atom display |
+| **Topics** | HexColorPicker | Topic color selection |
+| **Providers** | ValidationStatus | LLM provider status |
+| **Search** | SearchBar | Global search |
+| **Automation** | RuleActions, RuleConditions | Rule builder |
+| **Dashboard** | DashboardMetrics, TopTopics | Dashboard widgets |
+| **Projects** | ProjectCard, ProjectForm | Project CRUD |
+| **Messages** | MessageCard | Message display |
+
+## When to Use What
+
+### Decision Tree
+
+```
+Is it a basic HTML element with styling?
+  → Primitives (Button, Input, Card)
+
+Does it combine multiple primitives for a common pattern?
+  → Patterns (EmptyState, FormField, MetricCard)
+
+Is it part of the page structure?
+  → Layout (MainLayout, Navbar)
+
+Is it specific to a business domain?
+  → Features (AgentCard, AtomCard)
+```
+
+### Examples
+
+| Need | Category | Component |
+|------|----------|-----------|
+| "I need a button" | Primitive | `Button` |
+| "I need a form input with label and error" | Pattern | `FormField` |
+| "I need to show 'no results'" | Pattern | `EmptyState` |
+| "I need to display an AI agent" | Feature | `AgentCard` |
+| "I need the app sidebar" | Layout | `AppSidebar` |
+
+## Creating New Components
+
+### Primitive (rare)
+1. Add via shadcn CLI: `npx shadcn add [component]`
+2. Customize in `src/shared/ui/`
+3. Add story with `title: 'Primitives/[Name]'`
+
+### Pattern
+1. Create in `src/shared/patterns/` or `src/shared/components/`
+2. Compose from existing primitives
+3. Add story with `title: 'Patterns/[Name]'`
+
+### Feature
+1. Create in `src/features/[domain]/components/`
+2. Import patterns and primitives
+3. Add story with `title: 'Features/[Domain]/[Name]'`

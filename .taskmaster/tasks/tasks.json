@@ -1,0 +1,357 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Day 1: Migrate Primitives (~28 story files)",
+        "description": "Migrate all shadcn/ui base components from UI/ to Primitives/ category. Consolidate variant stories using argTypes pattern instead of separate exports.",
+        "details": "## Goals\n- Create branch `refactor/storybook-restructure`\n- Rename title prefix: `UI/*` → `Primitives/*`\n- Consolidate variant stories (Default, Secondary, Destructive → argTypes select)\n- Remove mock data noise stories\n\n## Files to migrate (~28)\n- button.stories.tsx\n- badge.stories.tsx\n- card.stories.tsx\n- input.stories.tsx\n- select.stories.tsx\n- checkbox.stories.tsx\n- switch.stories.tsx\n- slider.stories.tsx\n- dialog.stories.tsx\n- sheet.stories.tsx\n- popover.stories.tsx\n- tooltip.stories.tsx\n- tabs.stories.tsx\n- alert.stories.tsx\n- alert-dialog.stories.tsx\n- avatar.stories.tsx\n- progress.stories.tsx\n- skeleton.stories.tsx\n- separator.stories.tsx\n- breadcrumb.stories.tsx\n- pagination.stories.tsx\n- table.stories.tsx\n- command.stories.tsx\n- dropdown-menu.stories.tsx\n- collapsible.stories.tsx\n- radio-group.stories.tsx\n- textarea.stories.tsx\n- notification-badge.stories.tsx\n\n## Consolidation Pattern\n```tsx\n// BEFORE: 6 separate stories\nexport const Default, Secondary, Destructive...\n\n// AFTER: argTypes + AllVariants\nconst meta = {\n  argTypes: {\n    variant: { control: 'select', options: [...] }\n  }\n};\nexport const Default: Story = {};\nexport const AllVariants: Story = { render: () => <Grid>...</Grid> };\n```\n\n## Expected Result\n- ~40% reduction in story count for primitives\n- All stories under Primitives/ category in sidebar",
+        "testStrategy": "Run `npm run storybook` and verify: 1) All primitives under Primitives/ category 2) Controls panel works for variants 3) No console errors",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create git branch refactor/storybook-restructure",
+            "description": "Initialize new feature branch for Storybook restructuring work to isolate changes from main branch",
+            "dependencies": [],
+            "details": "Create and checkout new branch 'refactor/storybook-restructure' from current docs-product-pages branch. This branch will contain all Day 1 Primitives migration work. Verify branch creation with git status before proceeding.",
+            "status": "done",
+            "testStrategy": "Run `git branch` to confirm branch exists and `git status` to verify we're on correct branch",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Migrate button.stories.tsx as consolidation template",
+            "description": "Refactor button.stories.tsx to use argTypes pattern and rename title from 'UI/Button' to 'Primitives/Button'. This serves as the reference implementation for all other primitives.",
+            "dependencies": [
+              1
+            ],
+            "details": "Current button.stories.tsx (220 lines) has separate exports for Default, Secondary, Destructive, etc. Consolidate using argTypes with variant control. Keep AllVariants story as visual showcase. Update meta.title from 'UI/Button' to 'Primitives/Button'. File location: frontend/src/shared/ui/button.stories.tsx. Expected reduction: ~20-30% story count while maintaining coverage.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify: 1) Button appears under Primitives/ category 2) Controls panel shows variant dropdown 3) AllVariants story renders grid of all variants",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Migrate form primitives stories (8 files)",
+            "description": "Migrate input, select, checkbox, switch, slider, textarea, radio-group stories from UI/Forms/ to Primitives/ category with consolidated variants",
+            "dependencies": [
+              2
+            ],
+            "details": "Files to migrate:\n- frontend/src/shared/ui/input.stories.tsx (UI/Forms/Input → Primitives/Input)\n- frontend/src/shared/ui/select.stories.tsx (UI/Forms/Select → Primitives/Select)\n- frontend/src/shared/ui/checkbox.stories.tsx (UI/Forms/Checkbox → Primitives/Checkbox)\n- frontend/src/shared/ui/switch.stories.tsx (UI/Forms/Switch → Primitives/Switch)\n- frontend/src/shared/ui/slider.stories.tsx (UI/Forms/Slider → Primitives/Slider)\n- frontend/src/shared/ui/textarea.stories.tsx (UI/Forms/Textarea → Primitives/Textarea)\n- frontend/src/shared/ui/radio-group.stories.tsx (UI/Forms/RadioGroup → Primitives/RadioGroup)\nFollow button.stories.tsx consolidation pattern: add argTypes for variants, remove redundant separate exports, keep meaningful examples like disabled/loading states.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify: 1) All 7 components under Primitives/ not UI/Forms/ 2) Controls panel functional for each 3) No console errors on story load",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Migrate overlay primitives stories (7 files)",
+            "description": "Migrate dialog, sheet, popover, tooltip, alert-dialog, dropdown-menu, command stories from UI/ to Primitives/ with consolidated variants",
+            "dependencies": [
+              2
+            ],
+            "details": "Files to migrate:\n- frontend/src/shared/ui/dialog.stories.tsx (UI/Dialog → Primitives/Dialog)\n- frontend/src/shared/ui/sheet.stories.tsx (UI/Sheet → Primitives/Sheet)\n- frontend/src/shared/ui/popover.stories.tsx (UI/Popover → Primitives/Popover)\n- frontend/src/shared/ui/tooltip.stories.tsx (UI/Tooltip → Primitives/Tooltip)\n- frontend/src/shared/ui/alert-dialog.stories.tsx (UI/AlertDialog → Primitives/AlertDialog)\n- frontend/src/shared/ui/dropdown-menu.stories.tsx (UI/DropdownMenu → Primitives/DropdownMenu)\n- frontend/src/shared/ui/command.stories.tsx (UI/Command → Primitives/Command)\nThese overlays require ThemeProvider and MemoryRouter wrappers in stories. Consolidate size/position variants using argTypes where applicable.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify: 1) All 7 components under Primitives/ 2) Overlays open/close correctly 3) Provider wrappers don't cause errors",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.105Z"
+          },
+          {
+            "id": 5,
+            "title": "Migrate data/feedback primitives stories (7 files)",
+            "description": "Migrate badge, card, alert, avatar, progress, skeleton, table stories from UI/ to Primitives/ with variant consolidation",
+            "dependencies": [
+              2
+            ],
+            "details": "Files to migrate:\n- frontend/src/shared/ui/badge.stories.tsx (UI/Badge → Primitives/Badge)\n- frontend/src/shared/ui/card.stories.tsx (UI/Card → Primitives/Card)\n- frontend/src/shared/ui/alert.stories.tsx (UI/Alert → Primitives/Alert)\n- frontend/src/shared/ui/avatar.stories.tsx (UI/Avatar → Primitives/Avatar)\n- frontend/src/shared/ui/progress.stories.tsx (UI/Progress → Primitives/Progress)\n- frontend/src/shared/ui/skeleton.stories.tsx (UI/Skeleton → Primitives/Skeleton)\n- frontend/src/shared/ui/table.stories.tsx (UI/Table → Primitives/Table)\nBadge has multiple variants (default, secondary, destructive, outline) - perfect for argTypes consolidation. Table story has mock data - keep it minimal, remove noisy examples.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify: 1) All 7 components under Primitives/ 2) Badge variant controls work 3) Table renders without mock data errors",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.106Z"
+          },
+          {
+            "id": 6,
+            "title": "Migrate navigation primitives stories (6 files)",
+            "description": "Migrate tabs, breadcrumb, pagination, separator, collapsible, notification-badge stories from UI/Navigation or UI/Layout to Primitives/",
+            "dependencies": [
+              2
+            ],
+            "details": "Files to migrate:\n- frontend/src/shared/ui/tabs.stories.tsx (UI/Navigation/Tabs → Primitives/Tabs)\n- frontend/src/shared/ui/breadcrumb.stories.tsx (UI/Navigation/Breadcrumb → Primitives/Breadcrumb)\n- frontend/src/shared/ui/pagination.stories.tsx (UI/Navigation/Pagination → Primitives/Pagination)\n- frontend/src/shared/ui/separator.stories.tsx (UI/Layout/Separator → Primitives/Separator)\n- frontend/src/shared/ui/collapsible.stories.tsx (UI/Layout/Collapsible → Primitives/Collapsible)\n- frontend/src/shared/ui/notification-badge.stories.tsx (UI/NotificationBadge → Primitives/NotificationBadge)\nBreadcrumb and Pagination may need MemoryRouter wrapper. Consolidate orientation/size variants using argTypes. After completion, verify no UI/ top-level category remains in Storybook sidebar.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify: 1) All 6 components under Primitives/ 2) No UI/ category in sidebar 3) Breadcrumb navigation works 4) Run `npm run build-storybook` to ensure no build errors",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.108Z"
+          }
+        ],
+        "updatedAt": "2025-12-11T21:01:29.108Z"
+      },
+      {
+        "id": "2",
+        "title": "Day 2: Migrate Patterns (~16 story files)",
+        "description": "Migrate composite/reusable components from Shared/, Components/, Design System/Patterns/ to unified Patterns/ category.",
+        "details": "## Goals\n- Rename title prefix: `Shared/*`, `Components/*`, `Design System/Patterns/*` → `Patterns/*`\n- Add composition examples where missing\n- Consolidate overlapping components\n\n## Files to migrate (~16)\n- CardWithStatus.stories.tsx\n- EmptyState.stories.tsx\n- FormField.stories.tsx\n- ListItemWithAvatar.stories.tsx\n- DataTable/index.stories.tsx\n- DataTableColumnHeader/index.stories.tsx\n- DataTableFacetedFilter/index.stories.tsx\n- DataTableMobileCard/index.stories.tsx\n- DataTablePagination/index.stories.tsx\n- DataTableToolbar/index.stories.tsx\n- MetricCard/MetricCard.stories.tsx\n- TrendChart/TrendChart.stories.tsx\n- ActivityHeatmap/ActivityHeatmap.stories.tsx\n- PageHeader.stories.tsx\n- SaveStatusIndicator.stories.tsx\n- TooltipIconButton/TooltipIconButton.stories.tsx\n- ColorPickerPopover/ColorPickerPopover.stories.tsx\n- AdminBadge/AdminBadge.stories.tsx\n- Logo/Logo.stories.tsx\n- ExampleTokenUsage.stories.tsx\n\n## Naming Changes\n- `Shared/DataTable` → `Patterns/DataTable`\n- `Components/TrendChart` → `Patterns/TrendChart`\n- `Design System/Patterns/EmptyState` → `Patterns/EmptyState`\n\n## Expected Result\n- All reusable composite components under Patterns/\n- Clear separation from atomic Primitives/",
+        "testStrategy": "Run `npm run storybook` and verify: 1) All patterns under Patterns/ category 2) DataTable stories work correctly 3) No broken imports",
+        "status": "done",
+        "dependencies": [
+          "1"
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Migrate Design System patterns to Patterns/ category",
+            "description": "Rename story titles for CardWithStatus, EmptyState, FormField, and ListItemWithAvatar from 'Design System/Patterns/*' to 'Patterns/*' prefix.",
+            "dependencies": [],
+            "details": "Update the `title` field in the meta object for 4 story files:\n\n1. `frontend/src/shared/patterns/CardWithStatus.stories.tsx`: Change title from 'Design System/Patterns/CardWithStatus' to 'Patterns/CardWithStatus'\n2. `frontend/src/shared/patterns/EmptyState.stories.tsx`: Change title from 'Design System/Patterns/EmptyState' to 'Patterns/EmptyState'\n3. `frontend/src/shared/patterns/FormField.stories.tsx`: Change title from 'Design System/Patterns/FormField' to 'Patterns/FormField'\n4. `frontend/src/shared/patterns/ListItemWithAvatar.stories.tsx`: Change title from 'Design System/Patterns/ListItemWithAvatar' to 'Patterns/ListItemWithAvatar'\n\nEach file already has good composition examples and documentation. Just update the title field and verify no imports break.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify all 4 stories appear under Patterns/ category in sidebar. Check that examples render correctly and no console errors appear.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.149Z"
+          },
+          {
+            "id": 2,
+            "title": "Migrate DataTable family to Patterns/DataTable/",
+            "description": "Migrate 6 DataTable-related stories from 'Shared/' and 'Components/' to 'Patterns/DataTable/' category with proper sub-organization.",
+            "dependencies": [
+              1
+            ],
+            "details": "Update title fields for 6 DataTable story files:\n\n1. `frontend/src/shared/components/DataTable/index.stories.tsx`: 'Shared/DataTable' → 'Patterns/DataTable/DataTable'\n2. `frontend/src/shared/components/DataTableToolbar/index.stories.tsx`: 'Shared/DataTableToolbar' → 'Patterns/DataTable/Toolbar'\n3. `frontend/src/shared/components/DataTablePagination/index.stories.tsx`: 'Shared/DataTablePagination' → 'Patterns/DataTable/Pagination'\n4. `frontend/src/shared/components/DataTableColumnHeader/index.stories.tsx`: 'Components/DataTableColumnHeader' → 'Patterns/DataTable/ColumnHeader'\n5. `frontend/src/shared/components/DataTableFacetedFilter/index.stories.tsx`: 'Components/DataTableFacetedFilter' → 'Patterns/DataTable/FacetedFilter'\n6. `frontend/src/shared/components/DataTableMobileCard/index.stories.tsx`: 'Components/DataTableMobileCard' → 'Patterns/DataTable/MobileCard'\n\nThis creates a nested structure under Patterns/DataTable/ grouping all related components.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify Patterns/DataTable/ folder appears with 6 subcomponents. Test interactive features like column resizing, pagination, and mobile responsive layout.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.151Z"
+          },
+          {
+            "id": 3,
+            "title": "Migrate visualization and layout patterns",
+            "description": "Migrate MetricCard, TrendChart, ActivityHeatmap, and PageHeader from 'Shared/'/'Components/' to 'Patterns/' category.",
+            "dependencies": [
+              2
+            ],
+            "details": "Update title fields for 4 visualization/layout story files:\n\n1. `frontend/src/shared/components/MetricCard/MetricCard.stories.tsx`: 'Shared/MetricCard' → 'Patterns/MetricCard'\n2. `frontend/src/shared/components/TrendChart/TrendChart.stories.tsx`: 'Components/TrendChart' → 'Patterns/TrendChart'\n3. `frontend/src/shared/components/ActivityHeatmap/ActivityHeatmap.stories.tsx`: 'Shared/ActivityHeatmap' → 'Patterns/ActivityHeatmap'\n4. `frontend/src/shared/components/PageHeader.stories.tsx`: 'Shared/PageHeader' → 'Patterns/PageHeader'\n\nThese are composite components used across multiple features for data visualization and page layout. MetricCard has 15+ variants showcasing different metric types.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify 4 stories appear under Patterns/. Test MetricCard variants (positive/negative trends, different statuses), TrendChart with different data, ActivityHeatmap responsiveness, and PageHeader with breadcrumbs.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.152Z"
+          },
+          {
+            "id": 4,
+            "title": "Migrate utility patterns and design tokens example",
+            "description": "Migrate remaining utility components (SaveStatusIndicator, TooltipIconButton, ColorPickerPopover, AdminBadge, Logo, ExampleTokenUsage) to Patterns/ category.",
+            "dependencies": [
+              3
+            ],
+            "details": "Update title fields for 6 utility pattern story files:\n\n1. `frontend/src/shared/components/SaveStatusIndicator.stories.tsx`: 'Shared/SaveStatusIndicator' → 'Patterns/SaveStatusIndicator'\n2. `frontend/src/shared/components/TooltipIconButton/TooltipIconButton.stories.tsx`: 'Components/TooltipIconButton' → 'Patterns/TooltipIconButton'\n3. `frontend/src/shared/components/ColorPickerPopover/ColorPickerPopover.stories.tsx`: 'Components/ColorPickerPopover' → 'Patterns/ColorPickerPopover'\n4. `frontend/src/shared/components/AdminBadge/AdminBadge.stories.tsx`: 'Shared/AdminBadge' → 'Patterns/AdminBadge'\n5. `frontend/src/shared/components/Logo/Logo.stories.tsx`: 'Shared/Logo' → 'Patterns/Logo'\n6. `frontend/src/shared/components/ExampleTokenUsage.stories.tsx`: 'Design System/Tokens Usage' → 'Patterns/DesignTokensExample'\n\nThese are smaller utility components and the design tokens showcase. ExampleTokenUsage demonstrates semantic color tokens and spacing patterns.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify all 6 stories appear under Patterns/. Test SaveStatusIndicator states (saving/saved/error), TooltipIconButton hover behavior, ColorPickerPopover interaction, AdminBadge rendering, Logo variants, and ExampleTokenUsage token demonstrations. Verify total Patterns/ count is ~20 stories.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.153Z"
+          }
+        ],
+        "updatedAt": "2025-12-11T21:01:29.153Z"
+      },
+      {
+        "id": "3",
+        "title": "Day 3: Migrate Layout + Features Part 1 (~18 files)",
+        "description": "Migrate layout primitives to Layout/ and start Features/ migration for Messages, Atoms, Topics, Agents domains.",
+        "details": "## Goals\n- Migrate `Design System/Primitives/*` → `Layout/*`\n- Migrate layout components → `Layout/*`\n- Start Features migration with domain subfolders\n\n## Files - Layout (~9)\n- Box.stories.tsx → Layout/Box\n- Stack.stories.tsx → Layout/Stack\n- Inline.stories.tsx → Layout/Inline\n- Center.stories.tsx → Layout/Center\n- PageWrapper.stories.tsx → Layout/PageWrapper\n- MainLayout.stories.tsx → Layout/MainLayout\n- Navbar.stories.tsx → Layout/Navbar\n- NavBreadcrumbs.stories.tsx → Layout/NavBreadcrumbs\n- ServiceStatusIndicator.stories.tsx → Layout/ServiceStatusIndicator\n\n## Files - Features Part 1 (~9)\n- MessageCard.stories.tsx → Features/Messages/MessageCard\n- AtomCard.stories.tsx → Features/Atoms/AtomCard\n- HexColorPicker.stories.tsx → Features/Topics/HexColorPicker\n- AgentCard.stories.tsx → Features/Agents/AgentCard\n- ValidationStatus.stories.tsx → Features/Providers/ValidationStatus\n\n## Naming Convention\n- Max 3 levels for Features: `Features/{Domain}/{Component}`\n- Max 2 levels for Layout: `Layout/{Component}`\n\n## Expected Result\n- Layout primitives grouped logically\n- Feature components organized by domain",
+        "testStrategy": "Run `npm run storybook` and verify: 1) Layout/ category with 9 components 2) Features/ with domain subfolders 3) MainLayout story renders correctly",
+        "status": "done",
+        "dependencies": [
+          "2"
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Migrate layout primitives to Layout/ category",
+            "description": "Update story titles for Box, Stack, Inline, Center, and PageWrapper components from 'Design System/Primitives/*' to 'Layout/*'. These are foundational layout building blocks that follow the 4px grid system and semantic token patterns.",
+            "dependencies": [],
+            "details": "Change story title in each file:\n- Box.stories.tsx: 'Design System/Primitives/Box' → 'Layout/Box'\n- Stack.stories.tsx: 'Design System/Primitives/Stack' → 'Layout/Stack'\n- Inline.stories.tsx: 'Design System/Primitives/Inline' → 'Layout/Inline'\n- Center.stories.tsx: 'Design System/Primitives/Center' → 'Layout/Center'\n- PageWrapper.stories.tsx: 'Design System/Primitives/PageWrapper' → 'Layout/PageWrapper'\n\nLocation: frontend/src/shared/primitives/*.stories.tsx\n\nEdit only the `title` property in each meta object - do NOT modify component code, argTypes, or stories. Maintain existing documentation and patterns. Total: 5 files.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify Layout/ category exists in sidebar with 5 primitive components. Confirm stories render correctly and documentation is preserved. Check that Box spacing showcase, Stack variants, and other interactive stories work.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.199Z"
+          },
+          {
+            "id": 2,
+            "title": "Migrate layout chrome components to Layout/ category",
+            "description": "Update story titles for MainLayout, Navbar, NavBreadcrumbs, and ServiceStatusIndicator from their current locations to unified 'Layout/*' category. These components form the application shell and navigation chrome.",
+            "dependencies": [
+              1
+            ],
+            "details": "Change story titles:\n- MainLayout.stories.tsx: 'Layout/MainLayout' → already correct, verify only\n- Navbar.stories.tsx: 'Layout/Navbar' → already correct, verify only\n- NavBreadcrumbs.stories.tsx: current title → 'Layout/NavBreadcrumbs'\n- ServiceStatusIndicator.stories.tsx: current title → 'Layout/ServiceStatusIndicator'\n\nLocation: frontend/src/shared/layouts/MainLayout/*.stories.tsx\n\nVerify all providers (QueryClientProvider, ThemeProvider, MemoryRouter, SidebarProvider) remain intact. MainLayout has viewport-specific stories (DesktopExpanded, DesktopCollapsed, Mobile, LargeScreen2K, LargeScreen4K) that must continue working. Total: 4 files.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify Layout/ category shows 9 total components (5 primitives + 4 chrome). Test MainLayout stories at different viewport sizes. Verify Navbar 3-zone architecture (breadcrumbs, search, actions) renders correctly. Check ServiceStatusIndicator dot indicators work.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.200Z"
+          },
+          {
+            "id": 3,
+            "title": "Migrate Features/Messages and Features/Atoms domain components",
+            "description": "Migrate MessageCard and AtomCard stories from current locations to Features/ category with domain-specific subfolders. These are feature-specific components that use semantic color tokens and follow Design System rules.",
+            "dependencies": [
+              2
+            ],
+            "details": "Change story titles:\n- MessageCard.stories.tsx: 'Features/MessageCard' → already correct (verify location is pages/MessagesPage/)\n- AtomCard.stories.tsx: 'Features/AtomCard' → already correct (verify location is features/atoms/components/)\n\nBoth stories already use correct 'Features/*' naming. Verify they follow max 3-level convention: Features/{Domain}/{Component}.\n\nLocation: \n- frontend/src/pages/MessagesPage/MessageCard.stories.tsx\n- frontend/src/features/atoms/components/AtomCard.stories.tsx\n\nEnsure semantic color usage is correct: MessageCard uses status badges with semantic tokens, AtomCard uses bg-semantic-error (problem), bg-semantic-success (solution). Total: 2 files.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify Features/ category exists with Messages/ and Atoms/ subfolders. Test MessageCard interactive states (Default, Selected, HighImportance, Noise, Spam). Test AtomCard type variations (Problem, Solution, Decision, Question, Insight). Verify WebSocket integration story for pending versions.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.202Z"
+          },
+          {
+            "id": 4,
+            "title": "Migrate Features/Topics, Features/Agents, Features/Providers domain components",
+            "description": "Migrate HexColorPicker, AgentCard, and ValidationStatus stories to Features/ category with domain subfolders. Complete the Features Part 1 migration by organizing remaining domain-specific components.",
+            "dependencies": [
+              3
+            ],
+            "details": "Change story titles:\n- HexColorPicker.stories.tsx: 'Features/Topics/HexColorPicker' → already correct\n- AgentCard.stories.tsx: current title → 'Features/Agents/AgentCard'\n- ValidationStatus.stories.tsx: current title → 'Features/Providers/ValidationStatus'\n\nLocation:\n- frontend/src/features/topics/components/HexColorPicker.stories.tsx\n- frontend/src/features/agents/components/AgentCard.stories.tsx\n- frontend/src/features/providers/components/ValidationStatus.stories.tsx\n\nHexColorPicker has 19 preset colors with 44px touch targets (WCAG compliant). ValidationStatus shows provider connection states. Total: 3 files.\n\nFinal verification: Day 3 complete with ~18 story files migrated (5 layout primitives + 4 layout chrome + 9 feature components).",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify Features/ has 5 domain subfolders: Messages/, Atoms/, Topics/, Agents/, Providers/. Test HexColorPicker Interactive story with color state updates. Verify preset color grid shows 19 colors. Test AgentCard and ValidationStatus render correctly. Run full story count check - should show Layout/ (9) and Features/ (9) categories as primary sections.",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.203Z"
+          }
+        ],
+        "updatedAt": "2025-12-11T21:01:29.203Z"
+      },
+      {
+        "id": "4",
+        "title": "Day 4: Migrate Features Part 2 + Dashboard (~14 files)",
+        "description": "Complete Features migration for Providers, Projects, Automation, Search domains. Migrate Pages/ to Features/Dashboard/.",
+        "details": "## Goals\n- Complete Features migration\n- Move Pages/Dashboard/* → Features/Dashboard/*\n- Remove Pages/ category entirely\n\n## Files - Features Part 2 (~6)\n- ProjectCard.stories.tsx → Features/Projects/ProjectCard\n- ProjectForm.stories.tsx → Features/Projects/ProjectForm\n- RuleActions.stories.tsx → Features/Automation/RuleActions\n- RuleBasicInfo.stories.tsx → Features/Automation/RuleBasicInfo\n- RuleConditions.stories.tsx → Features/Automation/RuleConditions\n- SearchBar.stories.tsx → Features/Search/SearchBar\n\n## Files - Dashboard (~4)\n- DashboardMetrics.stories.tsx → Features/Dashboard/DashboardMetrics\n- TrendsList.stories.tsx → Features/Dashboard/TrendsList\n- TopTopics.stories.tsx → Features/Dashboard/TopTopics\n- RecentInsights.stories.tsx → Features/Dashboard/RecentInsights\n\n## Cleanup\n- Remove `Automation/` top-level (now under Features/)\n- Remove `Pages/` category entirely\n- Verify no orphan stories\n\n## Expected Result\n- All feature components under Features/{Domain}/\n- Clean 5-category sidebar: Docs, Primitives, Patterns, Layout, Features",
+        "testStrategy": "Run `npm run storybook` and verify: 1) Only 5 top-level categories 2) All Dashboard components under Features/Dashboard/ 3) No Pages/ or Automation/ top-level",
+        "status": "done",
+        "dependencies": [
+          "3"
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Migrate Features/Projects and Features/Providers stories",
+            "description": "Update title prefix for ProjectCard, ProjectForm from 'Features/ProjectCard' to 'Features/Projects/ProjectCard'. Verify SearchBar already uses correct 'Features/Search/SearchBar' pattern.",
+            "dependencies": [],
+            "details": "Files to update:\n- frontend/src/features/projects/components/ProjectCard.stories.tsx: Change title from 'Features/ProjectCard' to 'Features/Projects/ProjectCard'\n- frontend/src/features/projects/components/ProjectForm.stories.tsx: Change title from 'Features/ProjectForm' to 'Features/Projects/ProjectForm'\n- frontend/src/features/providers/components/ValidationStatus.stories.tsx: Verify title is 'Features/Providers/ValidationStatus'\n- frontend/src/features/search/components/SearchBar.stories.tsx: Already correct at 'Features/Search/SearchBar' - no changes needed\n\nPattern to follow: Only change the 'title' property in the meta object, do not modify component imports or code.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify: 1) Features/Projects/ subfolder appears with ProjectCard and ProjectForm, 2) Features/Search/ shows SearchBar, 3) Features/Providers/ shows ValidationStatus, 4) No stories appear directly under Features/ top-level",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.373Z"
+          },
+          {
+            "id": 2,
+            "title": "Migrate Automation stories from top-level to Features/Automation/",
+            "description": "Move RuleActions, RuleBasicInfo, RuleConditions from 'Automation/*' top-level category to 'Features/Automation/*' to consolidate all feature components under Features/.",
+            "dependencies": [
+              1
+            ],
+            "details": "Files to update:\n- frontend/src/features/automation/components/RuleActions.stories.tsx: Change title from 'Automation/RuleActions' to 'Features/Automation/RuleActions'\n- frontend/src/features/automation/components/RuleBasicInfo.stories.tsx: Change title from 'Automation/RuleBasicInfo' to 'Features/Automation/RuleBasicInfo'\n- frontend/src/features/automation/components/RuleConditions.stories.tsx: Change title from 'Automation/RuleConditions' to 'Features/Automation/RuleConditions'\n\nThis removes the 'Automation/' top-level category and consolidates under Features/ as per the 5-category structure (Docs, Primitives, Patterns, Layout, Features).",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify: 1) No 'Automation/' top-level category exists, 2) Features/Automation/ subfolder contains RuleActions, RuleBasicInfo, RuleConditions, 3) All three stories render correctly",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.374Z"
+          },
+          {
+            "id": 3,
+            "title": "Migrate Dashboard stories from Pages/ to Features/Dashboard/",
+            "description": "Move DashboardMetrics, TrendsList, TopTopics, RecentInsights from 'Pages/Dashboard/*' to 'Features/Dashboard/*' and remove Pages/ category entirely.",
+            "dependencies": [
+              2
+            ],
+            "details": "Files to update:\n- frontend/src/pages/DashboardPage/components/DashboardMetrics.stories.tsx: Change title from 'Pages/Dashboard/DashboardMetrics' to 'Features/Dashboard/DashboardMetrics'\n- frontend/src/pages/DashboardPage/components/TrendsList.stories.tsx: Change title from 'Pages/Dashboard/TrendsList' to 'Features/Dashboard/TrendsList'\n- frontend/src/pages/DashboardPage/components/TopTopics.stories.tsx: Change title from 'Pages/Dashboard/TopTopics' to 'Features/Dashboard/TopTopics'\n- frontend/src/pages/DashboardPage/components/RecentInsights.stories.tsx: Change title from 'Pages/Dashboard/RecentInsights' to 'Features/Dashboard/RecentInsights'\n\nFinal verification: Ensure no orphan stories remain under Pages/ or Automation/ top-level categories. The sidebar should show only 5 top-level categories: Docs, Primitives, Patterns, Layout, Features.",
+            "status": "done",
+            "testStrategy": "Run `npm run storybook` and verify: 1) No 'Pages/' top-level category exists, 2) Features/Dashboard/ contains all 4 components (DashboardMetrics, TrendsList, TopTopics, RecentInsights), 3) Sidebar shows exactly 5 top-level categories, 4) All Dashboard stories render with correct data and layouts",
+            "parentId": "undefined",
+            "updatedAt": "2025-12-11T21:01:29.376Z"
+          }
+        ],
+        "updatedAt": "2025-12-11T21:01:29.376Z"
+      },
+      {
+        "id": "5",
+        "title": "Day 5: Documentation + Chromatic Setup + Final Verification",
+        "description": "Update MDX documentation, configure Chromatic for visual regression testing, run final verification and create PR.",
+        "details": "## Goals\n- Update MDX docs with new structure references\n- Configure Chromatic visual regression\n- Run full verification\n- Create PR\n\n## Documentation Updates\n- Update Introduction.mdx with new category structure\n- Update any navigation references in docs\n- Add Storybook structure documentation to CLAUDE.md\n\n## Chromatic Setup\n1. Create Chromatic project: `npx chromatic --project-token=<token>`\n2. Add GitHub Action `.github/workflows/chromatic.yml`:\n```yaml\nname: Chromatic\non: push\njobs:\n  chromatic:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          fetch-depth: 0\n      - uses: actions/setup-node@v4\n      - run: npm ci\n        working-directory: frontend\n      - uses: chromaui/action@latest\n        with:\n          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}\n          workingDir: frontend\n```\n3. Configure preview.tsx:\n```tsx\nchromatic: {\n  viewports: [375, 768, 1280],\n  modes: { light: {}, dark: {} }\n}\n```\n4. Run initial baseline: `npx chromatic`\n\n## Final Verification Checklist\n- [ ] All stories load without errors\n- [ ] Sidebar has exactly 5 categories\n- [ ] Autodocs generate correctly\n- [ ] Theme switching works\n- [ ] Controls panel functional\n- [ ] `npm run build-storybook` succeeds\n- [ ] Chromatic baseline captured\n\n## Expected Result\n- ~350-400 stories (down from 603)\n- 1 naming convention (down from 10+)\n- 5 top-level categories (down from 13+)\n- Chromatic visual regression active",
+        "testStrategy": "1) `npm run build-storybook` must succeed 2) `npx chromatic` must capture baseline 3) PR review with before/after story count",
+        "status": "pending",
+        "dependencies": [
+          "4"
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update MDX documentation with new Storybook structure",
+            "description": "Update Introduction.mdx to reflect the new 5-category structure (Primitives, Patterns, Layout, Features, Design System) and add Storybook structure documentation to CLAUDE.md.",
+            "dependencies": [],
+            "details": "1. Update `/frontend/src/docs/Introduction.mdx`:\n   - Change navigation section from old categories (UI, Components, Shared) to new structure\n   - Update sidebar navigation description: 'Primitives', 'Patterns', 'Layout', 'Features', 'Design System'\n   - Add examples of where to find specific components in new structure\n   - Update Quick Start section if needed\n\n2. Update `/CLAUDE.md` Storybook section (line 708+):\n   - Add new section '### Storybook Structure (Post-Refactor)'\n   - Document 5 top-level categories with descriptions:\n     * Primitives/ — shadcn/ui base components (Button, Badge, Card, Input, etc.)\n     * Patterns/ — Composite components (DataTable, CardWithStatus, EmptyState, etc.)\n     * Layout/ — Layout primitives (Box, Stack, PageWrapper, MainLayout, etc.)\n     * Features/ — Domain-specific components organized by feature (Messages/, Atoms/, Topics/, etc.)\n     * Design System/ — Documentation pages (Introduction, Colors, Spacing, Tokens, etc.)\n   - Add naming convention rules\n   - Update story count expectation (~350-400 stories)\n\n3. Verify all cross-references in CLAUDE.md still accurate\n\nFiles to modify:\n- `/frontend/src/docs/Introduction.mdx`\n- `/CLAUDE.md` (Storybook section)",
+            "status": "pending",
+            "testStrategy": "Read both files and verify: 1) Introduction.mdx navigation matches new structure 2) CLAUDE.md has complete Storybook structure documentation 3) No broken internal links",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Configure Chromatic project and obtain project token",
+            "description": "Sign up for Chromatic account, create new project for Pulse Radar Storybook, and obtain project token for visual regression testing.",
+            "dependencies": [
+              1
+            ],
+            "details": "1. Visit https://www.chromatic.com and sign up/login\n   - Use GitHub OAuth for authentication\n   - Link to task-tracker repository\n\n2. Create new Chromatic project:\n   - Project name: 'Pulse Radar Design System'\n   - Select repository: task-tracker\n   - Choose plan: Free tier (5000 snapshots/month)\n\n3. Obtain project token:\n   - Copy project token from Chromatic dashboard\n   - Store as GitHub secret: `CHROMATIC_PROJECT_TOKEN`\n   - Document token location in project notes\n\n4. Test connection (manual first run):\n   ```bash\n   cd frontend\n   npx chromatic --project-token=<token>\n   ```\n   - This will build Storybook and upload to Chromatic\n   - Verify baseline snapshots are created\n   - Check Chromatic dashboard for initial build\n\n5. Document Chromatic configuration in CLAUDE.md:\n   - Add URL: https://www.chromatic.com/builds?appId=<app-id>\n   - Add section on visual regression testing workflow\n\nExpected output:\n- Chromatic project created\n- Project token stored in GitHub secrets\n- Initial baseline snapshots captured (~350-400 stories)\n- Chromatic dashboard accessible",
+            "status": "pending",
+            "testStrategy": "1) Verify Chromatic project exists in dashboard 2) Confirm project token is valid 3) Check GitHub secret CHROMATIC_PROJECT_TOKEN is set 4) Verify initial baseline has all stories",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Create GitHub Action workflow for Chromatic visual regression",
+            "description": "Add GitHub Actions workflow file that runs Chromatic visual regression tests on every push to track visual changes automatically.",
+            "dependencies": [
+              2
+            ],
+            "details": "1. Create workflow file: `/.github/workflows/chromatic.yml`\n\nContent:\n```yaml\nname: Chromatic Visual Regression\n\non:\n  push:\n    branches: [main, refactor/storybook-restructure]\n    paths:\n      - 'frontend/src/**/*.tsx'\n      - 'frontend/src/**/*.stories.tsx'\n      - 'frontend/.storybook/**'\n  pull_request:\n    branches: [main]\n    paths:\n      - 'frontend/src/**/*.tsx'\n      - 'frontend/src/**/*.stories.tsx'\n      - 'frontend/.storybook/**'\n  workflow_dispatch:\n\nenv:\n  NODE_VERSION: '20'\n  WORKING_DIR: ./frontend\n\njobs:\n  chromatic:\n    name: Visual Regression Tests\n    runs-on: ubuntu-latest\n    timeout-minutes: 20\n\n    steps:\n      - name: Checkout repository\n        uses: actions/checkout@v4\n        with:\n          fetch-depth: 0  # Required for Chromatic\n\n      - name: Setup Node.js\n        uses: actions/setup-node@v4\n        with:\n          node-version: ${{ env.NODE_VERSION }}\n          cache: 'npm'\n          cache-dependency-path: frontend/package-lock.json\n\n      - name: Install dependencies\n        working-directory: ${{ env.WORKING_DIR }}\n        run: npm ci\n\n      - name: Run Chromatic\n        uses: chromaui/action@latest\n        with:\n          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}\n          workingDir: frontend\n          buildScriptName: build-storybook\n          exitZeroOnChanges: true  # Don't fail PR on visual changes\n          exitOnceUploaded: true   # Speed up CI\n          onlyChanged: true        # Only test changed stories\n```\n\n2. Verify workflow syntax:\n   ```bash\n   gh workflow view chromatic.yml\n   ```\n\n3. Test workflow:\n   - Push to refactor/storybook-restructure branch\n   - Check GitHub Actions tab for workflow run\n   - Verify Chromatic link appears in PR\n\nExpected result:\n- Workflow triggers on story file changes\n- Chromatic runs automatically on push/PR\n- Visual diff links posted to PR comments",
+            "status": "pending",
+            "testStrategy": "1) Validate YAML syntax with `gh workflow view` 2) Push test commit and verify workflow runs 3) Check Chromatic dashboard shows build from GHA 4) Verify PR comment has Chromatic link",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Configure preview.tsx with Chromatic viewports and modes",
+            "description": "Update Storybook preview.tsx configuration to include Chromatic-specific settings for multi-viewport and theme mode snapshot testing.",
+            "dependencies": [
+              2
+            ],
+            "details": "1. Update `/frontend/.storybook/preview.tsx`:\n\nAdd Chromatic configuration after existing parameters:\n\n```typescript\nconst preview: Preview = {\n  parameters: {\n    // ... existing parameters ...\n    \n    // Chromatic configuration\n    chromatic: {\n      // Capture snapshots at key breakpoints\n      viewports: [375, 768, 1280],\n      \n      // Test both light and dark themes\n      modes: {\n        light: { theme: 'light' },\n        dark: { theme: 'dark' },\n      },\n      \n      // Delay to ensure animations complete\n      delay: 300,\n      \n      // Disable animations for consistent snapshots\n      disableSnapshot: false,\n      \n      // Pause animations during capture\n      pauseAnimationAtEnd: true,\n    },\n  },\n  \n  // ... existing decorators ...\n};\n```\n\n2. Add Chromatic-specific story parameters example to Introduction.mdx:\n\n```tsx\n// Disable Chromatic for non-visual stories\nexport const DataFetchingExample: Story = {\n  parameters: {\n    chromatic: { disableSnapshot: true },\n  },\n};\n```\n\n3. Document in CLAUDE.md:\n   - Chromatic captures 3 viewports × 2 themes = 6 snapshots per story\n   - Total snapshots: ~350 stories × 6 = ~2,100 snapshots\n   - Add guidelines for when to disable snapshots (data-heavy, time-dependent stories)\n\n4. Test configuration:\n   ```bash\n   cd frontend\n   npm run build-storybook\n   npx chromatic --dry-run\n   ```\n   - Verify no configuration errors\n   - Check snapshot count estimate\n\nExpected result:\n- Chromatic captures responsive + theme variants automatically\n- Configuration documented for future reference",
+            "status": "pending",
+            "testStrategy": "1) Run `npm run build-storybook` - must succeed 2) Run `npx chromatic --dry-run` - verify 6 modes detected 3) Check Chromatic dashboard shows viewport/theme matrix",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Run final verification and create pull request",
+            "description": "Execute complete verification checklist including Storybook build, Chromatic baseline capture, and create PR with before/after comparison.",
+            "dependencies": [
+              1,
+              3,
+              4
+            ],
+            "details": "## Final Verification Checklist\n\n1. **Storybook Build Test:**\n   ```bash\n   cd frontend\n   npm run build-storybook\n   ```\n   - Must complete without errors\n   - Check output: `storybook-static/` directory created\n   - Verify index.html exists and is valid\n\n2. **Story Count Verification:**\n   ```bash\n   npm run storybook\n   ```\n   - Open http://localhost:6006\n   - Verify sidebar has exactly 5 top-level categories:\n     * Primitives/ (~28 components)\n     * Patterns/ (~16 components)\n     * Layout/ (~9 components)\n     * Features/ (~18 components with subfolders)\n     * Design System/ (5 doc pages)\n   - Verify no duplicate categories\n   - Check all stories load without console errors\n\n3. **Theme & Controls Test:**\n   - Toggle light/dark theme - all stories should render correctly\n   - Test Controls panel on primitive components\n   - Verify autodocs generate for tagged stories\n\n4. **Chromatic Baseline Capture:**\n   ```bash\n   npx chromatic --project-token=$CHROMATIC_PROJECT_TOKEN\n   ```\n   - Wait for upload to complete\n   - Check Chromatic dashboard for build status\n   - Verify snapshot count: ~350-400 stories × 6 modes = ~2,100-2,400 snapshots\n   - Accept all baselines in Chromatic UI\n\n5. **Create Pull Request:**\n   ```bash\n   git add -A\n   git commit -m \"docs: update Storybook documentation and configure Chromatic\n   \n   - Update Introduction.mdx with new 5-category structure\n   - Add Storybook structure docs to CLAUDE.md\n   - Configure Chromatic visual regression testing\n   - Add GitHub Action workflow for automated Chromatic runs\n   - Configure preview.tsx with viewports and theme modes\n   \n   Story count: ~350-400 (down from 603)\n   Categories: 5 (down from 13+)\n   Chromatic snapshots: ~2,100-2,400\n   \n   🤖 Generated with Claude Code\"\n   \n   git push origin refactor/storybook-restructure\n   gh pr create --title \"feat: Storybook restructure + Chromatic visual regression\" \\\n     --body \"## Summary\n   \n   Complete Storybook restructure with documentation updates and Chromatic integration.\n   \n   ## Changes\n   - 📚 Updated Introduction.mdx with new category structure\n   - 📝 Added Storybook structure documentation to CLAUDE.md\n   - 🎨 Configured Chromatic for visual regression testing\n   - 🤖 Added GitHub Action workflow for automated Chromatic runs\n   - ⚙️ Configured preview.tsx with responsive viewports and theme modes\n   \n   ## Metrics\n   - **Before:** 603 stories, 13+ categories, 10+ naming patterns\n   - **After:** ~350-400 stories, 5 categories, 1 naming convention\n   \n   ## Verification\n   - [x] All stories load without errors\n   - [x] 5 top-level categories only\n   - [x] Theme switching works\n   - [x] Autodocs generate correctly\n   - [x] build-storybook succeeds\n   - [x] Chromatic baseline captured\n   \n   ## Chromatic\n   - Snapshots: ~2,100-2,400 (350-400 stories × 6 modes)\n   - Viewports: 375px, 768px, 1280px\n   - Themes: light, dark\n   \n   Chromatic Dashboard: [View Build](link-will-be-auto-added)\"\n   ```\n\n6. **PR Review Checklist:**\n   - Verify Chromatic status check appears\n   - Review visual changes in Chromatic UI\n   - Check all GitHub Action workflows pass\n   - Request review from team\n\nExpected PR outcome:\n- All CI checks green\n- Chromatic visual regression baseline established\n- Documentation complete and accurate\n- Ready for merge to main",
+            "status": "pending",
+            "testStrategy": "1) `npm run build-storybook` exits 0 2) Storybook has exactly 5 categories 3) Chromatic baseline shows ~2,100-2,400 snapshots 4) PR created with all checks passing 5) No console errors in Storybook",
+            "parentId": "undefined"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2025-12-11T21:01:29.376Z",
+      "taskCount": 5,
+      "completedCount": 4,
+      "tags": [
+        "master"
+      ]
+    }
+  }
+}

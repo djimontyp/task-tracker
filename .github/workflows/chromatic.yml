@@ -1,0 +1,91 @@
+# Chromatic Visual Regression Testing
+#
+# Publishes Storybook to Chromatic for visual regression testing
+# and component documentation.
+#
+# Setup:
+# 1. Create project at https://www.chromatic.com/
+# 2. Get project token from project settings
+# 3. Add CHROMATIC_PROJECT_TOKEN to GitHub secrets
+#
+# Features:
+# - Visual snapshots on every push
+# - Visual diff detection on PRs
+# - Component library documentation
+
+name: Chromatic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/chromatic.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/chromatic.yml'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  WORKING_DIR: ./frontend
+
+jobs:
+  chromatic:
+    name: Visual Regression Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for Chromatic to detect changes
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKING_DIR }}
+        run: npm ci
+
+      - name: Publish to Chromatic
+        uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          workingDir: frontend
+          buildScriptName: build-storybook
+          exitZeroOnChanges: true # Don't fail on visual changes, just report
+          exitOnceUploaded: true # Speed up by not waiting for build
+          onlyChanged: true # Only test changed stories
+          externals: 'public/**' # Don't hash public assets
+
+      - name: Comment PR with Chromatic link
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const chromaticComment = comments.find(c =>
+              c.body.includes('Chromatic') && c.user.type === 'Bot'
+            );
+
+            if (!chromaticComment) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: '## Chromatic Build\n\nVisual regression tests have been published. Check the Chromatic build status above for visual changes.'
+              });
+            }
