@@ -452,3 +452,28 @@ class BulkDeleteResponse(SQLModel):
         default_factory=list,
         description="Error messages for failed deletions",
     )
+
+
+class BulkRejectRequest(SQLModel):
+    """Request schema for bulk rejecting atoms (sets archived=true)."""
+
+    atom_ids: list[str] = Field(
+        min_length=1,
+        description="List of atom IDs to reject (UUID strings)",
+    )
+
+
+class BulkRejectResponse(SQLModel):
+    """Response schema for bulk reject operation."""
+
+    rejected_count: int = Field(
+        description="Number of atoms successfully rejected",
+    )
+    failed_ids: list[str] = Field(
+        default_factory=list,
+        description="List of atom IDs that failed to reject",
+    )
+    errors: list[str] = Field(
+        default_factory=list,
+        description="Error messages for failed rejections",
+    )

@@ -25,6 +25,8 @@ export interface Atom {
   content: string
   confidence: number | null
   user_approved: boolean
+  archived: boolean
+  archived_at: string | null
   meta: Record<string, any> | null
   created_at: string
   updated_at: string
