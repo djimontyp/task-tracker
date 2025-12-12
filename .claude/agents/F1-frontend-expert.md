@@ -6,6 +6,7 @@ color: green
 skills:
   - frontend
   - design-tokens
+  - storybook
 ---
 
 # Frontend Expert (F1)

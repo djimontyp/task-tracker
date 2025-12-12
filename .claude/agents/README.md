@@ -71,7 +71,8 @@
 
 | Agent | Skills |
 |-------|--------|
-| F1 Frontend | frontend, design-tokens |
+| A1 Business Analyst | ba |
+| F1 Frontend | frontend, design-tokens, storybook |
 | B1 Backend | backend |
 | V1 Visual | design-tokens |
 | U1 UX | frontend, design-tokens |
