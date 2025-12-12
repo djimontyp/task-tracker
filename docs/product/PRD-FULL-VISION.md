@@ -35,7 +35,7 @@
 | Онбординг             | DONE   | Wizard, мінімум для старту                  |
 | Глосарій              | DONE   | Per-project, структурований, AI пропонує    |
 | Універсальність       | DONE   | Не тільки IT - агро, медицина, B2B          |
-| Ролі                  | DONE   | Admin (all) / User (view per-project)       |
+| Ролі                  | DONE   | MVP: всі рівні; v2: Admin/User per-project  |
 | AI екстракція         | DONE   | Auto + rules + manual, RAG enabled          |
 | Хостинг               | DONE   | Self-hosted Hostinger - SaaS                |
 | Безпека               | DONE   | Криптографія + бекапи                       |
@@ -1025,6 +1025,8 @@ Human-in-the-loop (approve/edit)
 
 ## Epic 4: Адміністрування та налаштування
 
+> **MVP Note:** User Stories з "Як Admin" описують повну візію. Для MVP всі користувачі мають однакові права — роль "Admin" читати як "користувач".
+
 ### US-030: Запрошення користувачів [Must] [L]
 
 **Як** Admin,
@@ -1345,7 +1347,7 @@ Not Ready → Ready → In Progress → Done
 | API key encryption | Fernet |
 | Протокол | HTTPS only |
 | Автентифікація | Обов'язкова |
-| Авторизація | Admin/User roles |
+| Авторизація | MVP: всі рівні; v2: Admin/User roles |
 | Аудит | Лог sensitive дій |
 
 ## 14.5 Підтримка браузерів
@@ -1645,10 +1647,12 @@ Not Ready → Ready → In Progress → Done
 
 ## 19.1 Ролі (v1)
 
-| Роль | Хто | Права |
-|------|-----|-------|
-| **Admin** | Ти, PM, CEO | Все: налаштування, апрув, view |
-| **User** | Інші | View only (дозволені проекти) |
+> **MVP Decision (2025-12-13):** Для MVP всі користувачі мають однакові права (без ролей). Команди 1-5 осіб не потребують розмежування. Ролі буде додано у v2.
+
+| Роль | Хто | Права | Статус |
+|------|-----|-------|--------|
+| **Admin** | Ти, PM, CEO | Все: налаштування, апрув, view | post-MVP |
+| **User** | Інші | View only (дозволені проекти) | post-MVP |
 
 ## 19.2 Дозволи (v2+)
 

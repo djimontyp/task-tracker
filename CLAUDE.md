@@ -353,6 +353,7 @@ git commit -m "test"
 **Дивись:** `frontend/src/test-violations.tsx` — приклад файлу який блокується
 
 ## Active Technologies
+- Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, SQLModel 0.0.24, React 18.3.1, TanStack Query 5.90, Zustand 5.0, shadcn/ui (001-daily-review-epic)
 
 **Backend:**
 - Python 3.12, FastAPI 0.117.1, SQLModel 0.0.24
@@ -855,3 +856,6 @@ const StoryWrapper = ({ children }) => (
 1. **Переглянь референси** — `docs/design-system/references/`
 2. **Зрозумій патерни** — що спільного між референсами?
 3. **Реалізуй в Storybook** — референси інформують, Storybook реалізує
+
+## Recent Changes
+- 001-daily-review-epic: Added Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, SQLModel 0.0.24, React 18.3.1, TanStack Query 5.90, Zustand 5.0, shadcn/ui
