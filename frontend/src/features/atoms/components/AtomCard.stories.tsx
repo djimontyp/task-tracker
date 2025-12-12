@@ -38,6 +38,8 @@ const baseAtom: Atom = {
   type: AtomType.Problem,
   confidence: 0.87,
   user_approved: false,
+  archived: false,
+  archived_at: null,
   meta: null,
   created_at: '2025-12-04T10:00:00Z',
   updated_at: '2025-12-04T10:00:00Z',

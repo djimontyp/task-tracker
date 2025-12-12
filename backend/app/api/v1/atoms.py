@@ -23,6 +23,8 @@ from app.models.atom import (
     BulkArchiveResponse,
     BulkDeleteRequest,
     BulkDeleteResponse,
+    BulkRejectRequest,
+    BulkRejectResponse,
 )
 from app.models.topic import Topic
 from app.services import AtomCRUD
@@ -362,6 +364,60 @@ async def bulk_delete_atoms(
         )
 
     return result
+
+
+@router.post(
+    "/bulk-reject",
+    response_model=BulkRejectResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Bulk reject atoms",
+    description="Reject multiple atoms by archiving them in a single transaction.",
+)
+async def bulk_reject_atoms(
+    request: BulkRejectRequest,
+    session: AsyncSession = Depends(get_session),
+) -> BulkRejectResponse:
+    """Bulk reject multiple atoms in a single operation.
+
+    Rejection sets archived=true for all specified atoms. This removes them
+    from the active review queue while preserving them for audit purposes.
+
+    Args:
+        request: Request containing list of atom IDs to reject
+        session: Database session
+
+    Returns:
+        Response with rejected count, failed IDs, and error messages
+
+    Raises:
+        HTTPException: 400 if atom_ids list is empty
+        HTTPException: 500 on database transaction errors
+
+    Notes:
+        - Idempotent: re-rejecting already archived atoms is safe
+        - Uses bulk_archive_atoms internally (rejection = archiving)
+    """
+    if not request.atom_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="atom_ids list cannot be empty",
+        )
+
+    crud = AtomCRUD(session)
+
+    try:
+        archive_result = await crud.bulk_archive_atoms(request.atom_ids)
+        return BulkRejectResponse(
+            rejected_count=archive_result.archived_count,
+            failed_ids=archive_result.failed_ids,
+            errors=archive_result.errors,
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error in bulk reject: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during bulk reject operation",
+        )
 
 
 @router.post(
