@@ -1,0 +1,671 @@
+# OpenAPI Contracts: Daily Review Epic
+# Branch: 001-daily-review-epic
+# Date: 2025-12-13
+
+openapi: 3.1.0
+info:
+  title: Daily Review Epic API Contracts
+  description: |
+    API contracts for Daily Review Epic feature.
+    Includes new endpoints and extensions to existing endpoints.
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: API v1
+
+tags:
+  - name: dashboard
+    description: Dashboard metrics endpoints (NEW)
+  - name: atoms
+    description: Atoms management (EXTENDED)
+  - name: messages
+    description: Messages with Signal/Noise filter (EXISTING)
+  - name: topics
+    description: Topics navigation (EXISTING)
+
+paths:
+  # ============================================================
+  # NEW: Dashboard Metrics
+  # ============================================================
+  /dashboard/metrics:
+    get:
+      operationId: getDashboardMetrics
+      tags:
+        - dashboard
+      summary: Get dashboard metrics
+      description: |
+        Returns aggregated metrics for the dashboard including:
+        - Message counts (total, signal, noise)
+        - Atom counts by type and approval status
+        - Active topics count
+        - Trends comparing with previous period
+
+        Auto-detects period: uses "yesterday" if no messages today (before noon).
+      parameters:
+        - name: period
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [auto, today, yesterday]
+            default: auto
+          description: |
+            Time period for metrics:
+            - auto: automatically detect based on data availability
+            - today: current day only
+            - yesterday: previous day only
+      responses:
+        '200':
+          description: Dashboard metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardMetricsResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ============================================================
+  # EXTENDED: Atoms Bulk Operations
+  # ============================================================
+  /atoms/bulk-reject:
+    post:
+      operationId: bulkRejectAtoms
+      tags:
+        - atoms
+      summary: Bulk reject atoms
+      description: |
+        Reject multiple atoms in a single transaction.
+        Sets archived=true for all specified atoms.
+        Uses partial success strategy.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkRejectRequest'
+      responses:
+        '200':
+          description: Bulk reject result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkRejectResponse'
+        '400':
+          description: Empty atom_ids list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ============================================================
+  # EXISTING: Messages (documented for reference)
+  # ============================================================
+  /messages:
+    get:
+      operationId: getMessages
+      tags:
+        - messages
+      summary: Get messages with Signal/Noise filter
+      description: |
+        Retrieve messages with pagination and filtering.
+        For Daily Review, use classification=signal for default view.
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 50
+        - name: classification
+          in: query
+          description: Filter by noise classification (signal, noise, spam)
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [signal, noise, spam, low_quality, high_quality]
+        - name: topic_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Paginated messages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMessagesResponse'
+
+  # ============================================================
+  # EXISTING: Atoms (documented for reference)
+  # ============================================================
+  /atoms:
+    get:
+      operationId: listAtoms
+      tags:
+        - atoms
+      summary: List atoms with pagination
+      description: Returns atoms sorted by creation date (newest first)
+      parameters:
+        - name: skip
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+      responses:
+        '200':
+          description: Paginated atoms
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AtomListResponse'
+
+  /atoms/bulk-approve:
+    post:
+      operationId: bulkApproveAtoms
+      tags:
+        - atoms
+      summary: Bulk approve atoms (EXISTING)
+      description: Sets user_approved=true for all specified atoms
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkApproveRequest'
+      responses:
+        '200':
+          description: Bulk approve result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkApproveResponse'
+
+  # ============================================================
+  # EXISTING: Topics (documented for reference)
+  # ============================================================
+  /topics/recent:
+    get:
+      operationId: getRecentTopics
+      tags:
+        - topics
+      summary: Get recent topics with activity metrics
+      description: Returns topics ordered by last message activity
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [today, yesterday, week, month]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Recent topics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecentTopicsResponse'
+
+  /topics/{topic_id}/atoms:
+    get:
+      operationId: getTopicAtoms
+      tags:
+        - topics
+      summary: Get atoms for topic
+      parameters:
+        - name: topic_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Atoms for topic
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AtomPublic'
+        '404':
+          description: Topic not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    # ============================================================
+    # NEW: Dashboard Schemas
+    # ============================================================
+    DashboardMetricsResponse:
+      type: object
+      required:
+        - period
+        - period_label
+        - messages
+        - atoms
+        - topics
+        - trends
+        - generated_at
+      properties:
+        period:
+          type: string
+          enum: [today, yesterday]
+          description: Actual period used for metrics
+        period_label:
+          type: string
+          description: Localized period label for UI
+          example: "Дані за сьогодні"
+        messages:
+          $ref: '#/components/schemas/MessageStats'
+        atoms:
+          $ref: '#/components/schemas/AtomStats'
+        topics:
+          $ref: '#/components/schemas/TopicStats'
+        trends:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TrendData'
+          description: Trends for messages, atoms, topics
+        generated_at:
+          type: string
+          format: date-time
+          description: When metrics were generated
+
+    MessageStats:
+      type: object
+      required:
+        - total
+        - signal_count
+        - noise_count
+        - signal_ratio
+      properties:
+        total:
+          type: integer
+          minimum: 0
+          description: Total messages in period
+        signal_count:
+          type: integer
+          minimum: 0
+          description: Messages classified as signal
+        noise_count:
+          type: integer
+          minimum: 0
+          description: Messages classified as noise
+        signal_ratio:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Signal count / total ratio
+
+    AtomStats:
+      type: object
+      required:
+        - total
+        - pending_review
+        - approved
+        - by_type
+      properties:
+        total:
+          type: integer
+          minimum: 0
+          description: Total atoms in period
+        pending_review:
+          type: integer
+          minimum: 0
+          description: Atoms awaiting review (user_approved=false)
+        approved:
+          type: integer
+          minimum: 0
+          description: Approved atoms (user_approved=true)
+        by_type:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count by atom type
+          example:
+            problem: 5
+            solution: 3
+            decision: 2
+
+    TopicStats:
+      type: object
+      required:
+        - total
+        - active_today
+      properties:
+        total:
+          type: integer
+          minimum: 0
+          description: Total topics count
+        active_today:
+          type: integer
+          minimum: 0
+          description: Topics with activity in period
+
+    TrendData:
+      type: object
+      required:
+        - current
+        - previous
+        - change_percent
+        - direction
+      properties:
+        current:
+          type: integer
+          description: Current period count
+        previous:
+          type: integer
+          description: Previous period count
+        change_percent:
+          type: number
+          format: float
+          description: Absolute percentage change
+        direction:
+          type: string
+          enum: [up, down, neutral]
+          description: Trend direction
+
+    # ============================================================
+    # NEW: Bulk Reject Schemas
+    # ============================================================
+    BulkRejectRequest:
+      type: object
+      required:
+        - atom_ids
+      properties:
+        atom_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+          description: List of atom IDs to reject
+
+    BulkRejectResponse:
+      type: object
+      required:
+        - rejected_count
+        - failed_ids
+        - errors
+      properties:
+        rejected_count:
+          type: integer
+          minimum: 0
+          description: Number of successfully rejected atoms
+        failed_ids:
+          type: array
+          items:
+            type: string
+          description: IDs that failed to reject
+        errors:
+          type: array
+          items:
+            type: string
+          description: Error messages
+
+    # ============================================================
+    # EXISTING: Referenced Schemas
+    # ============================================================
+    BulkApproveRequest:
+      type: object
+      required:
+        - atom_ids
+      properties:
+        atom_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+
+    BulkApproveResponse:
+      type: object
+      required:
+        - approved_count
+        - failed_ids
+        - errors
+      properties:
+        approved_count:
+          type: integer
+        failed_ids:
+          type: array
+          items:
+            type: string
+        errors:
+          type: array
+          items:
+            type: string
+
+    AtomPublic:
+      type: object
+      required:
+        - id
+        - type
+        - title
+        - content
+        - user_approved
+        - archived
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [problem, solution, decision, question, insight, pattern, requirement]
+        title:
+          type: string
+        content:
+          type: string
+        confidence:
+          type: number
+          nullable: true
+        user_approved:
+          type: boolean
+        archived:
+          type: boolean
+        archived_at:
+          type: string
+          format: date-time
+          nullable: true
+        meta:
+          type: object
+          nullable: true
+        has_embedding:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AtomListResponse:
+      type: object
+      required:
+        - items
+        - total
+        - page
+        - page_size
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AtomPublic'
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+
+    PaginatedMessagesResponse:
+      type: object
+      required:
+        - items
+        - total
+        - page
+        - page_size
+        - total_pages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageResponse'
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+
+    MessageResponse:
+      type: object
+      required:
+        - id
+        - content
+        - sent_at
+        - source_id
+        - source_name
+        - author_id
+        - author_name
+      properties:
+        id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        sent_at:
+          type: string
+          format: date-time
+        source_id:
+          type: integer
+        source_name:
+          type: string
+        author_id:
+          type: integer
+        author_name:
+          type: string
+        avatar_url:
+          type: string
+          nullable: true
+        topic_id:
+          type: string
+          format: uuid
+          nullable: true
+        topic_name:
+          type: string
+          nullable: true
+        noise_classification:
+          type: string
+          enum: [signal, noise, spam, low_quality, high_quality]
+          nullable: true
+        importance_score:
+          type: number
+          minimum: 0
+          maximum: 1
+          nullable: true
+
+    RecentTopicsResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecentTopicItem'
+        total:
+          type: integer
+
+    RecentTopicItem:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - last_message_at
+        - message_count
+        - atoms_count
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+          nullable: true
+        color:
+          type: string
+          nullable: true
+        last_message_at:
+          type: string
+          format: date-time
+        message_count:
+          type: integer
+        atoms_count:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
