@@ -1,0 +1,243 @@
+openapi: 3.1.0
+info:
+  title: Pulse Radar Search API
+  version: 1.0.0
+  description: Keyword search API using PostgreSQL Full-Text Search
+
+servers:
+  - url: /api/v1
+    description: API v1
+
+paths:
+  /search:
+    get:
+      summary: Search topics, messages, and atoms
+      description: |
+        Search across topics, messages, and atoms using PostgreSQL Full-Text Search.
+        Returns results grouped by type, ranked by relevance.
+        Snippets include highlighted matches using `<mark>` tags.
+      operationId: search
+      tags:
+        - search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query string (1-256 characters)
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+          example: "authentication"
+        - name: limit
+          in: query
+          required: false
+          description: Maximum results per group (default 10)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+          example: 5
+      responses:
+        '200':
+          description: Search results grouped by type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResultsResponse'
+              example:
+                topics:
+                  - id: "f79ec7f2-c057-45f7-bc8b-463a0b6f58c7"
+                    name: "User Authentication"
+                    description: "OAuth2 and JWT implementation"
+                    match_snippet: "User <mark>Authentication</mark> - OAuth2 and JWT implementation"
+                    rank: 0.85
+                messages:
+                  - id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    content_snippet: "We need to fix the <mark>authentication</mark> bug in production"
+                    author: "John Doe"
+                    timestamp: "2025-12-13T10:30:00Z"
+                    topic:
+                      id: "f79ec7f2-c057-45f7-bc8b-463a0b6f58c7"
+                      name: "User Authentication"
+                    rank: 0.92
+                atoms:
+                  - id: "b2c3d4e5-f6a7-8901-bcde-f23456789012"
+                    type: "decision"
+                    title: "Use JWT for authentication"
+                    content_snippet: "Decision: Use JWT for <mark>authentication</mark> with 24h expiry..."
+                    user_approved: true
+                    rank: 0.88
+                total_results: 3
+                query: "authentication"
+        '400':
+          description: Invalid query (empty or too long)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Search query cannot be empty"
+
+components:
+  schemas:
+    SearchResultsResponse:
+      type: object
+      required:
+        - topics
+        - messages
+        - atoms
+        - total_results
+        - query
+      properties:
+        topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicSearchResult'
+          description: Topic search results
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageSearchResult'
+          description: Message search results
+        atoms:
+          type: array
+          items:
+            $ref: '#/components/schemas/AtomSearchResult'
+          description: Atom search results
+        total_results:
+          type: integer
+          description: Total count of all results
+          example: 15
+        query:
+          type: string
+          description: The search query (sanitized)
+          example: "authentication"
+
+    TopicSearchResult:
+      type: object
+      required:
+        - id
+        - name
+        - match_snippet
+        - rank
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Topic UUID
+        name:
+          type: string
+          description: Topic name
+        description:
+          type: string
+          nullable: true
+          description: Topic description
+        match_snippet:
+          type: string
+          description: Highlighted match snippet (HTML with <mark> tags)
+        rank:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Relevance rank score
+
+    MessageSearchResult:
+      type: object
+      required:
+        - id
+        - content_snippet
+        - author
+        - timestamp
+        - rank
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Message UUID
+        content_snippet:
+          type: string
+          description: Content snippet with highlighted match (max 200 chars, HTML)
+        author:
+          type: string
+          description: Author display name
+        timestamp:
+          type: string
+          format: date-time
+          description: When message was sent
+        topic:
+          $ref: '#/components/schemas/TopicBrief'
+          nullable: true
+          description: Linked topic if available
+        rank:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Relevance rank score
+
+    AtomSearchResult:
+      type: object
+      required:
+        - id
+        - type
+        - title
+        - content_snippet
+        - user_approved
+        - rank
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Atom UUID
+        type:
+          type: string
+          enum:
+            - problem
+            - solution
+            - decision
+            - question
+            - insight
+            - pattern
+            - requirement
+          description: Atom type
+        title:
+          type: string
+          description: Atom title
+        content_snippet:
+          type: string
+          description: Content snippet with highlighted match (max 200 chars, HTML)
+        user_approved:
+          type: boolean
+          description: Whether atom is user-approved
+        rank:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Relevance rank score
+
+    TopicBrief:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Topic UUID
+        name:
+          type: string
+          description: Topic name
+
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
