@@ -131,6 +131,7 @@ export const useTelegramSettings = () => {
   const [webhookBaseUrl, setWebhookBaseUrl] = useState('')
   const [serverWebhookUrl, setServerWebhookUrl] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(false)
+  const [realWebhookUrl, setRealWebhookUrl] = useState<string | null>(null) // From Telegram API
   const [lastSetAt, setLastSetAt] = useState<string | null>(null)
   const [defaultBaseUrl, setDefaultBaseUrl] = useState('')
   const [groups, setGroups] = useState<TelegramGroupInfo[]>([])
@@ -146,43 +147,81 @@ export const useTelegramSettings = () => {
   )
   const isValidBaseUrl = Boolean(host)
 
+  // Check real webhook status from Telegram API
+  const checkRealStatus = useCallback(async () => {
+    try {
+      const { data } = await apiClient.get<{
+        success: boolean
+        webhook_info?: { url?: string }
+        error?: string
+      }>(API_ENDPOINTS.telegramWebhook.info)
+
+      if (data.success && data.webhook_info) {
+        const url = data.webhook_info.url || null
+        setRealWebhookUrl(url)
+        // Real status is based on actual Telegram webhook URL
+        setIsActive(Boolean(url))
+        return url
+      }
+      setRealWebhookUrl(null)
+      setIsActive(false)
+      return null
+    } catch {
+      // If check fails, don't change status
+      return null
+    }
+  }, [])
+
   const loadConfig = useCallback(async () => {
     setIsLoadingConfig(true)
     try {
       const response = await apiClient.get<WebhookConfigResponseDto>(API_ENDPOINTS.webhookSettings)
       const data = response.data
 
+      // Backend is the source of truth for webhook URL
       const backendBaseUrl = buildBaseUrl(
         data.telegram?.protocol || data.default_protocol,
         data.telegram?.host || data.default_host || ''
       )
 
-      const localConfig = readLocalConfig()
-      const resolvedBaseUrl = localConfig || backendBaseUrl
+      // Use backend URL, fallback to localStorage only if backend has no config
+      const resolvedBaseUrl = backendBaseUrl || readLocalConfig()
 
       setDefaultBaseUrl(buildBaseUrl(data.default_protocol, data.default_host))
       setWebhookBaseUrl(resolvedBaseUrl)
       setServerWebhookUrl(data.telegram?.webhook_url || null)
-      setIsActive(Boolean(data.telegram?.is_active))
       setLastSetAt(data.telegram?.last_set_at || null)
 
       const loadedGroups = data.telegram?.groups || []
       setGroups(loadedGroups)
 
-      if (resolvedBaseUrl) {
-        writeLocalConfig(resolvedBaseUrl)
+      // Sync localStorage with backend
+      if (backendBaseUrl) {
+        writeLocalConfig(backendBaseUrl)
       }
+
+      // Check real status from Telegram API (determines isActive)
+      await checkRealStatus()
     } catch (error) {
       toast.error(`Failed to load webhook settings: ${extractErrorMessage(error)}`)
     } finally {
       setIsLoadingConfig(false)
     }
-  }, [])
+  }, [checkRealStatus])
 
   useEffect(() => {
     loadConfig()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Re-check status when user returns to tab
+  useEffect(() => {
+    const onVisible = () => {
+      if (!document.hidden) checkRealStatus()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [checkRealStatus])
 
   const handleSave = async () => {
     if (!isValidBaseUrl) {
@@ -227,6 +266,12 @@ export const useTelegramSettings = () => {
       return
     }
 
+    // HTTPS validation for production webhooks (Telegram requires HTTPS)
+    if (effectiveProtocol !== 'https') {
+      toast.error('HTTPS is required for Telegram webhooks. Please use a secure URL.')
+      return
+    }
+
     setIsSettingWebhook(true)
     try {
       const { data } = await apiClient.post<SetWebhookResponseDto>(
@@ -254,6 +299,12 @@ export const useTelegramSettings = () => {
   const handleUpdateWebhook = async () => {
     if (!isValidBaseUrl) {
       toast.error('Webhook URL must not be empty')
+      return
+    }
+
+    // HTTPS validation for production webhooks (Telegram requires HTTPS)
+    if (protocol !== 'https') {
+      toast.error('HTTPS is required for Telegram webhooks. Please use a secure URL.')
       return
     }
 
@@ -379,6 +430,54 @@ export const useTelegramSettings = () => {
     }
   }
 
+  interface TelegramWebhookInfoResult {
+    url?: string
+    has_custom_certificate?: boolean
+    pending_update_count?: number
+    last_error_date?: number
+    last_error_message?: string
+  }
+
+  interface TelegramWebhookInfoResponse {
+    success: boolean
+    webhook_info?: TelegramWebhookInfoResult
+    error?: string
+  }
+
+  const handleTestConnection = async () => {
+    try {
+      const { data } = await apiClient.get<TelegramWebhookInfoResponse>(
+        API_ENDPOINTS.telegramWebhook.info
+      )
+
+      if (data.success && data.webhook_info) {
+        const info = data.webhook_info
+        return {
+          success: Boolean(info.url),
+          webhookUrl: info.url || null,
+          pendingUpdateCount: info.pending_update_count,
+          lastErrorDate: info.last_error_date
+            ? new Date(info.last_error_date * 1000).toISOString()
+            : null,
+          lastErrorMessage: info.last_error_message || null,
+          message: info.url
+            ? 'Webhook is active and responding'
+            : 'No webhook URL configured in Telegram',
+        }
+      }
+
+      return {
+        success: false,
+        message: data.error || 'Failed to get webhook info from Telegram',
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: extractErrorMessage(error),
+      }
+    }
+  }
+
   return {
     isLoadingConfig,
     isSaving,
@@ -387,6 +486,7 @@ export const useTelegramSettings = () => {
     webhookBaseUrl,
     setWebhookBaseUrl,
     serverWebhookUrl,
+    realWebhookUrl,
     isActive,
     lastSetAt,
     defaultBaseUrl,
@@ -405,6 +505,8 @@ export const useTelegramSettings = () => {
     handleAddGroup,
     handleRemoveGroup,
     handleRefreshNames,
+    handleTestConnection,
+    checkRealStatus,
     loadConfig,
     parseGroupInput,
     convertToLongFormat,

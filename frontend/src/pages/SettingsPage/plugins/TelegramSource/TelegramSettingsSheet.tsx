@@ -11,18 +11,31 @@ import {
   SheetHeader,
   SheetTitle,
   SheetFooter,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/shared/ui'
 import {
   Check,
+  CheckCircle,
   Clipboard,
   MessageSquare,
   X,
   Trash2,
+  AlertTriangle,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/utils'
 import { useTelegramSettings } from './useTelegramSettings'
 import { FormField } from '@/shared/patterns'
+import { BotInfoCard } from './components/BotInfoCard'
+import { InstructionsCard } from './components/InstructionsCard'
+import { TestConnectionButton } from './components/TestConnectionButton'
 
 interface TelegramSettingsSheetProps {
   open: boolean
@@ -41,6 +54,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
     setWebhookBaseUrl,
     serverWebhookUrl,
     isActive,
+    lastSetAt,
     defaultBaseUrl,
     computedWebhookUrl,
     isValidBaseUrl,
@@ -55,11 +69,21 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
     handleAddGroup,
     handleRemoveGroup,
     handleRefreshNames,
+    handleTestConnection,
     isValidGroupId,
   } = useTelegramSettings()
 
   const [copiedWebhookUrl, setCopiedWebhookUrl] = useState(false)
   const [inputValidation, setInputValidation] = useState<'valid' | 'invalid' | null>(null)
+  const [hostValidationError, setHostValidationError] = useState<string | null>(null)
+  const [showUpdateConfirm, setShowUpdateConfirm] = useState(false)
+
+  // Auto-strip protocol prefix when pasting URL
+  const handleHostChange = (value: string) => {
+    const cleanedValue = value.replace(/^https?:\/\//i, '')
+    setHostValidationError(null)
+    setWebhookBaseUrl(cleanedValue)
+  }
 
   const handleCopyWebhookUrl = async () => {
     const urlToCopy = serverWebhookUrl || computedWebhookUrl
@@ -111,6 +135,14 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
         </SheetHeader>
 
         <div className="space-y-8 mt-6">
+          {/* Bot Info Card - always visible */}
+          <BotInfoCard />
+
+          {/* Instructions Card - shown for first-time setup */}
+          {!isActive && !isLoadingConfig && (
+            <InstructionsCard />
+          )}
+
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-4">Webhook URL</h3>
@@ -124,20 +156,29 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
             ) : (
               <div className="space-y-6">
                 <FormField
-                  label="Webhook Base URL"
+                  label="Webhook Host"
                   id="webhook-base-url"
-                  description={`Auto-appends ${WEBHOOK_PATH}`}
+                  description={`HTTPS required. Auto-appends ${WEBHOOK_PATH}`}
+                  error={hostValidationError || undefined}
                 >
                   <div className="flex items-center gap-2">
-                    <Input
-                      id="webhook-base-url"
-                      placeholder={defaultBaseUrl || 'your-domain.ngrok.io'}
-                      value={webhookBaseUrl}
-                      onChange={(event) => setWebhookBaseUrl(event.target.value)}
-                      autoComplete="off"
-                      aria-label="Webhook base URL"
-                      className="flex-1 text-xs sm:text-sm"
-                    />
+                    <div className="flex items-center gap-0 flex-1">
+                      <span className="inline-flex items-center px-4 h-10 text-sm text-muted-foreground bg-muted border border-r-0 rounded-l-md">
+                        https://
+                      </span>
+                      <Input
+                        id="webhook-base-url"
+                        placeholder={defaultBaseUrl?.replace(/^https?:\/\//, '') || 'your-domain.ngrok.io'}
+                        value={webhookBaseUrl.replace(/^https?:\/\//, '')}
+                        onChange={(event) => handleHostChange(event.target.value)}
+                        autoComplete="off"
+                        aria-label="Webhook host domain"
+                        className={cn(
+                          'flex-1 text-xs sm:text-sm rounded-l-none',
+                          hostValidationError && 'border-semantic-error focus-visible:ring-semantic-error'
+                        )}
+                      />
+                    </div>
                     <Button
                       type="button"
                       variant="ghost"
@@ -157,17 +198,74 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                   </div>
                 </FormField>
 
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    variant="default"
-                    onClick={handleUpdateWebhook}
-                    disabled={isSaving || isSettingWebhook || !isValidBaseUrl}
-                    aria-label="Update and activate webhook"
-                  >
-                    {isSaving || isSettingWebhook ? 'Updating...' : 'Update Webhook'}
-                  </Button>
+                {/* HTTPS requirement notice */}
+                {!isActive && (
+                  <div className="flex items-start gap-2 p-4 rounded-md bg-semantic-warning/10 border border-semantic-warning/20">
+                    <AlertTriangle className="h-4 w-4 text-semantic-warning flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-muted-foreground">
+                      Telegram requires HTTPS for webhook URLs. Use a service like ngrok for local development.
+                    </p>
+                  </div>
+                )}
+
+                {/* Current webhook info when active */}
+                {isActive && serverWebhookUrl && (
+                  <div className="space-y-2 p-4 rounded-md bg-muted/50 border">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Current Webhook URL</span>
+                      <Badge variant="outline" className="gap-2 border-status-connected text-status-connected">
+                        <CheckCircle className="h-3 w-3" />
+                        Active
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground break-all font-mono">
+                      {serverWebhookUrl}
+                    </p>
+                    {lastSetAt && (
+                      <p className="text-xs text-muted-foreground">
+                        Configured: {new Date(lastSetAt).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2">
+                  {/* Show confirmation dialog for active webhook updates */}
+                  {isActive && (
+                    <Button
+                      type="button"
+                      variant="default"
+                      onClick={() => setShowUpdateConfirm(true)}
+                      disabled={isSaving || isSettingWebhook || !isValidBaseUrl || !!hostValidationError || webhookBaseUrl === serverWebhookUrl?.replace('/webhook/telegram', '').replace('https://', '')}
+                      aria-label="Update webhook configuration"
+                    >
+                      {isSaving || isSettingWebhook ? 'Updating...' : 'Update Webhook'}
+                    </Button>
+                  )}
+                  {/* Direct update for new setup */}
+                  {!isActive && (
+                    <Button
+                      type="button"
+                      variant="default"
+                      onClick={handleUpdateWebhook}
+                      disabled={isSaving || isSettingWebhook || !isValidBaseUrl || !!hostValidationError}
+                      aria-label="Activate webhook"
+                    >
+                      {isSaving || isSettingWebhook ? 'Activating...' : 'Activate Webhook'}
+                    </Button>
+                  )}
                 </div>
+
+                {/* Test Connection - shown when webhook is active */}
+                {isActive && (
+                  <div className="pt-4 border-t">
+                    <h4 className="text-sm font-medium mb-4">Connection Test</h4>
+                    <TestConnectionButton
+                      onTest={handleTestConnection}
+                      disabled={!isActive}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -311,6 +409,44 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
           </Button>
         </SheetFooter>
       </SheetContent>
+
+      {/* Confirmation dialog for webhook URL update */}
+      <AlertDialog open={showUpdateConfirm} onOpenChange={setShowUpdateConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Update Webhook URL?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4">
+                <p>This will change your Telegram webhook configuration:</p>
+                <div className="space-y-2 text-sm">
+                  <div className="p-2 bg-muted rounded-md">
+                    <span className="text-muted-foreground">From: </span>
+                    <span className="font-mono text-xs break-all">{serverWebhookUrl}</span>
+                  </div>
+                  <div className="p-2 bg-muted rounded-md">
+                    <span className="text-muted-foreground">To: </span>
+                    <span className="font-mono text-xs break-all">{computedWebhookUrl}</span>
+                  </div>
+                </div>
+                <p className="text-muted-foreground">
+                  Messages will be sent to the new URL immediately after the change.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowUpdateConfirm(false)
+                handleUpdateWebhook()
+              }}
+            >
+              Update Webhook
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sheet>
   )
 }
