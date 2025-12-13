@@ -7,6 +7,7 @@ from app.api.v1 import (
     automation,
     dashboard,
     embeddings,
+    executive_summary,
     health,
     ingestion,
     knowledge,
@@ -31,6 +32,7 @@ api_router = APIRouter(prefix="/api/v1")
 
 api_router.include_router(health.router)
 api_router.include_router(dashboard.router)
+api_router.include_router(executive_summary.router)
 api_router.include_router(users.router)
 api_router.include_router(messages.router)
 api_router.include_router(stats.router)
