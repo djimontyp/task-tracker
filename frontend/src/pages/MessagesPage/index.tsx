@@ -70,6 +70,9 @@ const MessagesPage = () => {
   const [pageSize, setPageSize] = useState(25)
   const isDesktop = useMediaQuery('(min-width: 1280px)')
 
+  // URL param for highlighting message from search
+  const highlightMessageId = searchParams.get('highlight')
+
   // Signal filter mode from URL (default: signal only)
   const filterMode = searchParams.get('filter') || 'signal'
   const showAllMessages = filterMode === 'all'
@@ -153,6 +156,22 @@ const MessagesPage = () => {
       ws.close()
     }
   }, [queryClient])
+
+  // Handle highlight param from search navigation
+  useEffect(() => {
+    if (highlightMessageId) {
+      // Open the message modal for the highlighted message
+      if (isAdminMode) {
+        setInspectingMessageId(highlightMessageId)
+      } else {
+        setViewingMessageId(highlightMessageId)
+      }
+      // Clear the highlight param from URL
+      const newParams = new URLSearchParams(searchParams)
+      newParams.delete('highlight')
+      setSearchParams(newParams, { replace: true })
+    }
+  }, [highlightMessageId, isAdminMode, searchParams, setSearchParams])
 
 
   const hasActiveFilters = React.useMemo(() => {

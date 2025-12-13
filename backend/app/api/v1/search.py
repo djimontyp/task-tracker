@@ -1,7 +1,8 @@
-"""Search API endpoint for topics and messages using PostgreSQL Full-Text Search."""
+"""Search API endpoint for topics, messages, and atoms using PostgreSQL Full-Text Search."""
 
 import uuid
 from datetime import datetime
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -10,6 +11,9 @@ from sqlalchemy import text
 from app.dependencies import DatabaseDep
 
 router = APIRouter(prefix="/search", tags=["search"])
+
+# Atom type literal for type safety
+AtomType = Literal["problem", "solution", "decision", "question", "insight", "pattern", "requirement"]
 
 
 class TopicBrief(BaseModel):
@@ -40,11 +44,23 @@ class MessageSearchResult(BaseModel):
     rank: float = Field(description="Relevance rank score")
 
 
+class AtomSearchResult(BaseModel):
+    """Search result for an atom."""
+
+    id: uuid.UUID
+    type: AtomType = Field(description="Atom type: problem, solution, decision, etc.")
+    title: str
+    content_snippet: str = Field(description="Content snippet with highlighted match (max 200 chars)")
+    user_approved: bool
+    rank: float = Field(description="Relevance rank score")
+
+
 class SearchResultsResponse(BaseModel):
     """Search results response."""
 
     topics: list[TopicSearchResult]
     messages: list[MessageSearchResult]
+    atoms: list[AtomSearchResult]
     total_results: int
     query: str
 
@@ -52,29 +68,32 @@ class SearchResultsResponse(BaseModel):
 @router.get(
     "",
     response_model=SearchResultsResponse,
-    summary="Search topics and messages",
-    description="Search across topics and messages using PostgreSQL Full-Text Search with ranked results.",
+    summary="Search topics, messages, and atoms",
+    description="Search across topics, messages, and atoms using PostgreSQL Full-Text Search with ranked results.",
 )
 async def search(
-    q: str = Query(..., min_length=1, max_length=500, description="Search query string"),
+    q: str = Query(..., min_length=1, max_length=256, description="Search query string (1-256 characters)"),
+    limit: int = Query(default=10, ge=1, le=50, description="Maximum results per group (default 10)"),
     db: DatabaseDep = None,  # type: ignore[assignment]
 ) -> SearchResultsResponse:
     """
-    Search topics and messages using PostgreSQL Full-Text Search.
+    Search topics, messages, and atoms using PostgreSQL Full-Text Search.
 
     Searches across:
     - Topic names and descriptions
     - Message content
+    - Atom titles and content
 
-    Returns top 10 topics and top 10 messages, ranked by relevance using ts_rank.
-    Snippets include highlighted matches using ts_headline for better UX.
+    Returns top N results per category, ranked by relevance using ts_rank.
+    Snippets include highlighted matches using ts_headline with <mark> tags.
 
     Args:
-        q: Search query string (1-500 characters)
+        q: Search query string (1-256 characters)
+        limit: Maximum results per group (1-50, default 10)
         db: Database session (injected)
 
     Returns:
-        SearchResultsResponse with topics, messages, and total count
+        SearchResultsResponse with topics, messages, atoms, and total count
 
     Raises:
         HTTPException: 400 if query is empty or invalid
@@ -106,11 +125,13 @@ async def search(
             OR name ILIKE :like_query
             OR description ILIKE :like_query
         ORDER BY rank DESC
-        LIMIT 10
+        LIMIT :limit
         """
     )
 
-    topic_result = await db.execute(topic_query, {"tsquery": tsquery_formatted, "like_query": f"%{query}%"})
+    topic_result = await db.execute(
+        topic_query, {"tsquery": tsquery_formatted, "like_query": f"%{query}%", "limit": limit}
+    )
     topics_data = topic_result.all()
 
     topics = [
@@ -124,7 +145,7 @@ async def search(
         for row in topics_data
     ]
 
-    # Search messages with author join - use raw SQL for complex FTS queries
+    # Search messages with author join
     message_query = text(
         """
         SELECT
@@ -146,11 +167,13 @@ async def search(
             to_tsvector('simple', m.content) @@ to_tsquery('simple', :tsquery)
             OR m.content ILIKE :like_query
         ORDER BY rank DESC
-        LIMIT 10
+        LIMIT :limit
         """
     )
 
-    message_result = await db.execute(message_query, {"tsquery": tsquery_formatted, "like_query": f"%{query}%"})
+    message_result = await db.execute(
+        message_query, {"tsquery": tsquery_formatted, "like_query": f"%{query}%", "limit": limit}
+    )
     messages_data = message_result.all()
 
     messages = [
@@ -165,11 +188,56 @@ async def search(
         for row in messages_data
     ]
 
-    total_results = len(topics) + len(messages)
+    # Search atoms by title and content
+    atom_query = text(
+        """
+        SELECT
+            id,
+            type,
+            title,
+            content,
+            user_approved,
+            ts_rank(to_tsvector('simple', title || ' ' || content),
+                    to_tsquery('simple', :tsquery)) as rank,
+            ts_headline('simple', title || ' ' || content,
+                       to_tsquery('simple', :tsquery),
+                       'MaxWords=50, MinWords=20, StartSel=<mark>, StopSel=</mark>') as snippet
+        FROM atoms
+        WHERE
+            archived = false
+            AND (
+                to_tsvector('simple', title || ' ' || content) @@ to_tsquery('simple', :tsquery)
+                OR title ILIKE :like_query
+                OR content ILIKE :like_query
+            )
+        ORDER BY rank DESC
+        LIMIT :limit
+        """
+    )
+
+    atom_result = await db.execute(
+        atom_query, {"tsquery": tsquery_formatted, "like_query": f"%{query}%", "limit": limit}
+    )
+    atoms_data = atom_result.all()
+
+    atoms = [
+        AtomSearchResult(
+            id=row.id,
+            type=row.type,
+            title=row.title,
+            content_snippet=row.snippet[:200],
+            user_approved=row.user_approved,
+            rank=float(row.rank),
+        )
+        for row in atoms_data
+    ]
+
+    total_results = len(topics) + len(messages) + len(atoms)
 
     return SearchResultsResponse(
         topics=topics,
         messages=messages,
+        atoms=atoms,
         total_results=total_results,
         query=query,
     )

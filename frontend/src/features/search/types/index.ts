@@ -1,3 +1,6 @@
+// FTS (Full-Text Search) types
+export * from './fts'
+
 // Message data structure from backend
 export interface Message {
   id: number
