@@ -50,6 +50,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         onClick={(event) => {
+          event.stopPropagation()
           if (callbacks?.onCheckboxClick) {
             callbacks.onCheckboxClick(row.id, event)
           }

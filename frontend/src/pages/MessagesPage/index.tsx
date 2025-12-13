@@ -534,19 +534,17 @@ const MessagesPage = () => {
         </div>
       </div>
 
-      <div className="min-h-[60px] w-full min-w-0">
-        {selectedRowsCount > 0 && (
-          <BulkActionsToolbar
-            selectedCount={selectedRowsCount}
-            totalCount={paginatedData?.total || 0}
-            onSelectAll={multiSelect.handleSelectAll}
-            onClearSelection={multiSelect.handleClearSelection}
-            onApprove={handleBulkApprove}
-            onArchive={handleBulkArchive}
-            onDelete={handleBulkDelete}
-          />
-        )}
-      </div>
+      {selectedRowsCount > 0 && (
+        <BulkActionsToolbar
+          selectedCount={selectedRowsCount}
+          totalCount={paginatedData?.total || 0}
+          onSelectAll={multiSelect.handleSelectAll}
+          onClearSelection={multiSelect.handleClearSelection}
+          onApprove={handleBulkApprove}
+          onArchive={handleBulkArchive}
+          onDelete={handleBulkDelete}
+        />
+      )}
 
       <div className="w-full min-w-0">
         <DataTableToolbar
@@ -619,7 +617,7 @@ const MessagesPage = () => {
           )
         ) : (
           <div className="space-y-4 w-full min-w-0">
-            {(paginatedData?.items ?? []).length === 0 ? (
+            {table.getRowModel().rows.length === 0 ? (
               <EmptyState
                 variant="compact"
                 icon={Mail}
@@ -633,30 +631,21 @@ const MessagesPage = () => {
                 }
               />
             ) : (
-              (paginatedData?.items ?? []).map((message: Message) => {
-                const isSelected = (rowSelection as Record<string, boolean>)[String(message.id)] || false
-
-                return (
-                  <MessageCard
-                    key={message.id}
-                    message={message}
-                    isSelected={isSelected}
-                    onSelect={(checked) => {
-                      setRowSelection(prev => ({
-                        ...prev,
-                        [String(message.id)]: !!checked
-                      }))
-                    }}
-                    onClick={() => {
-                      if (isAdminMode) {
-                        setInspectingMessageId(String(message.id))
-                      } else {
-                        setViewingMessageId(String(message.id))
-                      }
-                    }}
-                  />
-                )
-              })
+              table.getRowModel().rows.map((row) => (
+                <MessageCard
+                  key={row.original.id}
+                  message={row.original}
+                  isSelected={row.getIsSelected()}
+                  onSelect={(checked) => row.toggleSelected(!!checked)}
+                  onClick={() => {
+                    if (isAdminMode) {
+                      setInspectingMessageId(String(row.original.id))
+                    } else {
+                      setViewingMessageId(String(row.original.id))
+                    }
+                  }}
+                />
+              ))
             )}
           </div>
         )}
