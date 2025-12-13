@@ -19,6 +19,7 @@ const AutomationRulesPage = lazy(() => import('@pages/AutomationRulesPage'))
 const SchedulerPage = lazy(() => import('@pages/SchedulerPage'))
 const SearchPage = lazy(() => import('@pages/SearchPage'))
 const VersionsPage = lazy(() => import('@pages/VersionsPage'))
+const ExecutiveSummaryPage = lazy(() => import('@pages/ExecutiveSummaryPage'))
 
 const AppRoutes = () => {
   return (
@@ -32,6 +33,7 @@ const AppRoutes = () => {
       <Routes>
         <Route element={<Navigate to="/dashboard" replace />} path="/" />
         <Route element={<MainLayout><DashboardPage /></MainLayout>} path="/dashboard" />
+        <Route element={<MainLayout><ExecutiveSummaryPage /></MainLayout>} path="/executive-summary" />
         <Route element={<MainLayout><SearchPage /></MainLayout>} path="/search" />
         <Route element={<MainLayout><MessagesPage /></MainLayout>} path="/messages" />
         <Route element={<MainLayout><VersionsPage /></MainLayout>} path="/versions" />
