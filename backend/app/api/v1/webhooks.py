@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
@@ -161,7 +162,7 @@ async def delete_telegram_webhook(db: DatabaseDep) -> SetWebhookResponse:
     summary="Get Telegram webhook info",
     response_description="Current webhook information from Telegram API",
 )
-async def get_telegram_webhook_info() -> dict[str, bool | dict[str, str] | str]:
+async def get_telegram_webhook_info() -> dict[str, Any]:
     """
     Get current webhook information from Telegram Bot API.
 
