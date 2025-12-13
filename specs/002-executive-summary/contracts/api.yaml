@@ -1,0 +1,429 @@
+openapi: 3.1.0
+info:
+  title: Executive Summary API
+  description: |
+    API endpoints for Executive Summary Epic.
+    Provides weekly/bi-weekly/monthly summaries of decisions and blockers.
+  version: 1.0.0
+  contact:
+    name: Pulse Radar Team
+
+servers:
+  - url: /api/v1
+    description: API v1
+
+tags:
+  - name: executive-summary
+    description: Executive summary endpoints
+
+paths:
+  /executive-summary:
+    get:
+      operationId: getExecutiveSummary
+      summary: Get executive summary
+      description: |
+        Returns aggregated executive summary with decisions and blockers
+        for the specified period, grouped by topics.
+
+        **Filters applied:**
+        - Only `user_approved=true` atoms
+        - Only `archived=false` atoms
+        - Only types: `decision`, `blocker` (per PRD Частина 6.1)
+        - Created within period_days from now
+      tags:
+        - executive-summary
+      parameters:
+        - name: period_days
+          in: query
+          description: Number of days to include in summary
+          required: false
+          schema:
+            type: integer
+            enum: [7, 14, 30]
+            default: 7
+        - name: topic_id
+          in: query
+          description: Filter by specific topic (optional)
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Executive summary data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutiveSummaryResponse'
+              example:
+                period_days: 7
+                period_start: "2025-12-07T00:00:00Z"
+                period_end: "2025-12-14T00:00:00Z"
+                period_label: "7 грудня - 14 грудня 2025"
+                stats:
+                  decisions_count: 12
+                  blockers_count: 3
+                  active_topics_count: 5
+                  stale_blockers_count: 1
+                blockers:
+                  - id: "550e8400-e29b-41d4-a716-446655440000"
+                    type: "problem"
+                    title: "API latency exceeds threshold"
+                    content: "Response times increased to 500ms+..."
+                    created_at: "2025-11-28T10:30:00Z"
+                    topic:
+                      id: "660e8400-e29b-41d4-a716-446655440001"
+                      name: "Mobile App Development"
+                      icon: "CodeBracketIcon"
+                      color: "#8B5CF6"
+                    days_old: 16
+                    is_stale: true
+                    source_message_id: null
+                decisions_by_topic:
+                  - topic:
+                      id: "660e8400-e29b-41d4-a716-446655440001"
+                      name: "Mobile App Development"
+                      icon: "CodeBracketIcon"
+                      color: "#8B5CF6"
+                    decisions:
+                      - id: "770e8400-e29b-41d4-a716-446655440002"
+                        type: "decision"
+                        title: "Adopted React Native"
+                        content: "Team decided to use React Native..."
+                        created_at: "2025-12-10T14:00:00Z"
+                        topic:
+                          id: "660e8400-e29b-41d4-a716-446655440001"
+                          name: "Mobile App Development"
+                          icon: "CodeBracketIcon"
+                          color: "#8B5CF6"
+                        days_old: 4
+                        is_stale: false
+                        source_message_id: "880e8400-e29b-41d4-a716-446655440003"
+                    count: 1
+                uncategorized_decisions: []
+                generated_at: "2025-12-14T12:00:00Z"
+        '400':
+          description: Invalid period parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Period must be 7, 14, or 30 days"
+
+  /executive-summary/export:
+    post:
+      operationId: exportExecutiveSummary
+      summary: Export executive summary
+      description: |
+        Generates a formatted report of the executive summary
+        in the specified format (markdown or plain text).
+      tags:
+        - executive-summary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportRequest'
+            example:
+              period_days: 7
+              format: "markdown"
+              include_stats: true
+              include_blockers: true
+              include_decisions: true
+      responses:
+        '200':
+          description: Exported report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportResponse'
+              example:
+                content: |
+                  # Executive Summary: 7-14 грудня 2025
+
+                  ## Статистика
+                  - Рішень: 12
+                  - Блокерів: 3
+                  - Активних топіків: 5
+
+                  ## Блокери (потребують уваги)
+
+                  ### Mobile App Development
+                  - **[BLOCKER]** API latency exceeds threshold
+                    _Дата: 28 листопада | 16 днів тому_
+                format: "markdown"
+                filename: "executive-summary-2025-12-14.md"
+                generated_at: "2025-12-14T12:00:00Z"
+        '400':
+          description: Invalid export configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /executive-summary/stats:
+    get:
+      operationId: getExecutiveSummaryStats
+      summary: Get summary statistics only
+      description: |
+        Lightweight endpoint returning only aggregate statistics
+        without full atom data. Useful for dashboard widgets.
+      tags:
+        - executive-summary
+      parameters:
+        - name: period_days
+          in: query
+          description: Number of days to include
+          required: false
+          schema:
+            type: integer
+            enum: [7, 14, 30]
+            default: 7
+      responses:
+        '200':
+          description: Summary statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutiveSummaryStatsResponse'
+              example:
+                period_days: 7
+                period_label: "7 грудня - 14 грудня 2025"
+                stats:
+                  decisions_count: 12
+                  blockers_count: 3
+                  active_topics_count: 5
+                  stale_blockers_count: 1
+                generated_at: "2025-12-14T12:00:00Z"
+
+components:
+  schemas:
+    TopicBrief:
+      type: object
+      description: Minimal topic information
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 100
+        icon:
+          type: string
+          maxLength: 50
+          nullable: true
+          description: Lucide icon name
+        color:
+          type: string
+          maxLength: 7
+          nullable: true
+          description: Hex color code (#RRGGBB)
+
+    ExecutiveSummaryAtom:
+      type: object
+      description: Atom with executive summary context
+      required:
+        - id
+        - type
+        - title
+        - content
+        - created_at
+        - days_old
+        - is_stale
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [decision, blocker]
+        title:
+          type: string
+          maxLength: 200
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        topic:
+          $ref: '#/components/schemas/TopicBrief'
+          nullable: true
+        days_old:
+          type: integer
+          minimum: 0
+          description: Days since creation
+        is_stale:
+          type: boolean
+          description: True if blocker and >14 days old
+        source_message_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Original message ID if extracted
+
+    ExecutiveSummaryStats:
+      type: object
+      description: Aggregate summary statistics
+      required:
+        - decisions_count
+        - blockers_count
+        - active_topics_count
+      properties:
+        decisions_count:
+          type: integer
+          minimum: 0
+        blockers_count:
+          type: integer
+          minimum: 0
+        active_topics_count:
+          type: integer
+          minimum: 0
+        stale_blockers_count:
+          type: integer
+          minimum: 0
+          default: 0
+
+    TopicDecisions:
+      type: object
+      description: Decisions grouped under a topic
+      required:
+        - topic
+        - decisions
+        - count
+      properties:
+        topic:
+          $ref: '#/components/schemas/TopicBrief'
+        decisions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutiveSummaryAtom'
+        count:
+          type: integer
+          minimum: 0
+
+    ExecutiveSummaryResponse:
+      type: object
+      description: Complete executive summary
+      required:
+        - period_days
+        - period_start
+        - period_end
+        - period_label
+        - stats
+        - blockers
+        - decisions_by_topic
+        - generated_at
+      properties:
+        period_days:
+          type: integer
+          enum: [7, 14, 30]
+        period_start:
+          type: string
+          format: date-time
+        period_end:
+          type: string
+          format: date-time
+        period_label:
+          type: string
+          description: Human-readable period label
+          example: "7 грудня - 14 грудня 2025"
+        stats:
+          $ref: '#/components/schemas/ExecutiveSummaryStats'
+        blockers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutiveSummaryAtom'
+          description: PROBLEM atoms sorted by staleness and date
+        decisions_by_topic:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicDecisions'
+          description: Decisions organized by topic
+        uncategorized_decisions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutiveSummaryAtom'
+          default: []
+          description: Decisions without topic association
+        generated_at:
+          type: string
+          format: date-time
+
+    ExecutiveSummaryStatsResponse:
+      type: object
+      description: Lightweight stats-only response
+      required:
+        - period_days
+        - period_label
+        - stats
+        - generated_at
+      properties:
+        period_days:
+          type: integer
+          enum: [7, 14, 30]
+        period_label:
+          type: string
+        stats:
+          $ref: '#/components/schemas/ExecutiveSummaryStats'
+        generated_at:
+          type: string
+          format: date-time
+
+    ExportRequest:
+      type: object
+      description: Export configuration
+      properties:
+        period_days:
+          type: integer
+          enum: [7, 14, 30]
+          default: 7
+        format:
+          type: string
+          enum: [markdown, plain_text]
+          default: markdown
+        include_stats:
+          type: boolean
+          default: true
+        include_blockers:
+          type: boolean
+          default: true
+        include_decisions:
+          type: boolean
+          default: true
+
+    ExportResponse:
+      type: object
+      description: Export result
+      required:
+        - content
+        - format
+        - filename
+        - generated_at
+      properties:
+        content:
+          type: string
+          description: Formatted report content
+        format:
+          type: string
+          enum: [markdown, plain_text]
+        filename:
+          type: string
+          description: Suggested filename
+          example: "executive-summary-2025-12-14.md"
+        generated_at:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
