@@ -1,3 +1,7 @@
 export { SearchBar } from './SearchBar'
 export { MessageSearchCard } from './MessageSearchCard'
 export { TopicSearchCard } from './TopicSearchCard'
+export { SearchDropdown } from './SearchDropdown'
+export { MessageSearchItem } from './MessageSearchItem'
+export { AtomSearchItem } from './AtomSearchItem'
+export { TopicSearchItem } from './TopicSearchItem'
