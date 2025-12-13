@@ -354,6 +354,8 @@ git commit -m "test"
 
 ## Active Technologies
 - Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, SQLModel 0.0.24, React 18.3.1, TanStack Query 5.90, Zustand 5.0, shadcn/ui (001-daily-review-epic)
+- Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, SQLModel 0.0.24, React 18.3.1, TanStack Query 5.90, shadcn/ui (002-executive-summary)
+- PostgreSQL 15 (existing atoms, topics, topic_atoms tables) (002-executive-summary)
 
 **Backend:**
 - Python 3.12, FastAPI 0.117.1, SQLModel 0.0.24
@@ -858,4 +860,5 @@ const StoryWrapper = ({ children }) => (
 3. **Реалізуй в Storybook** — референси інформують, Storybook реалізує
 
 ## Recent Changes
+- 002-executive-summary: Added Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, SQLModel 0.0.24, React 18.3.1, TanStack Query 5.90, shadcn/ui
 - 001-daily-review-epic: Added Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, SQLModel 0.0.24, React 18.3.1, TanStack Query 5.90, Zustand 5.0, shadcn/ui
