@@ -5,8 +5,9 @@
  * Part of the Daily Review workflow for knowledge management.
  */
 
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useSearchParams } from 'react-router-dom'
 import {
   CheckCircle,
   XCircle,
@@ -40,7 +41,13 @@ const atomTypeConfig: Record<AtomType, { icon: React.ComponentType<{ className?:
 
 const AtomsPage: React.FC = () => {
   const queryClient = useQueryClient()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [selectedAtoms, setSelectedAtoms] = useState<Set<string>>(new Set())
+  const [expandedAtomId, setExpandedAtomId] = useState<string | null>(null)
+  const atomRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+
+  // URL param for expanding atom from search
+  const expandAtomId = searchParams.get('expand')
 
   // Fetch atoms
   const { data: atomsData, isLoading } = useQuery({
@@ -56,6 +63,32 @@ const AtomsPage: React.FC = () => {
   })
 
   const atoms = atomsData?.items ?? []
+
+  // Handle expand param from search navigation
+  useEffect(() => {
+    if (expandAtomId && atoms.length > 0) {
+      // Expand and scroll to the atom
+      setExpandedAtomId(expandAtomId)
+
+      // Wait for DOM to update, then scroll
+      requestAnimationFrame(() => {
+        const atomElement = atomRefs.current.get(expandAtomId)
+        if (atomElement) {
+          atomElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          // Add a temporary highlight effect
+          atomElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2')
+          setTimeout(() => {
+            atomElement.classList.remove('ring-2', 'ring-primary', 'ring-offset-2')
+          }, 2000)
+        }
+      })
+
+      // Clear the expand param from URL
+      const newParams = new URLSearchParams(searchParams)
+      newParams.delete('expand')
+      setSearchParams(newParams, { replace: true })
+    }
+  }, [expandAtomId, atoms, searchParams, setSearchParams])
 
   // Group atoms by type
   const groupedAtoms = useMemo(() => {
@@ -291,7 +324,16 @@ const AtomsPage: React.FC = () => {
               <CardContent className="pt-2">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {groupAtoms.map(atom => (
-                    <div key={atom.id} className="relative">
+                    <div
+                      key={atom.id}
+                      ref={(el) => {
+                        if (el) atomRefs.current.set(String(atom.id), el)
+                        else atomRefs.current.delete(String(atom.id))
+                      }}
+                      className={`relative transition-all duration-300 ${
+                        expandedAtomId === String(atom.id) ? 'scale-[1.02]' : ''
+                      }`}
+                    >
                       {/* Selection checkbox */}
                       <div className="absolute top-2 right-2 z-10">
                         <Checkbox
