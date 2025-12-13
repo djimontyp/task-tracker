@@ -354,6 +354,7 @@ git commit -m "test"
 
 ## Active Technologies
 - Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, SQLModel 0.0.24, React 18.3.1, TanStack Query 5.90, Zustand 5.0, shadcn/ui (001-daily-review-epic)
+- Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, SQLModel 0.0.24, React 18.3.1, TanStack Query 5.90, shadcn/ui (002-executive-summary)
 - Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, SQLModel 0.0.24, React 18.3.1, TanStack Query 5.90, shadcn/ui (003-search)
 - PostgreSQL 15 with `to_tsvector`/`to_tsquery` for FTS (003-search)
 
@@ -861,4 +862,5 @@ const StoryWrapper = ({ children }) => (
 
 ## Recent Changes
 - 003-search: Added Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, SQLModel 0.0.24, React 18.3.1, TanStack Query 5.90, shadcn/ui
+- 002-executive-summary: Added Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, SQLModel 0.0.24, React 18.3.1, TanStack Query 5.90, shadcn/ui
 - 001-daily-review-epic: Added Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, SQLModel 0.0.24, React 18.3.1, TanStack Query 5.90, Zustand 5.0, shadcn/ui

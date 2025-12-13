@@ -230,7 +230,7 @@ const AtomsPage: React.FC = () => {
   return (
     <PageWrapper>
       {/* Header with bulk actions */}
-      <div className="flex flex-wrap items-center gap-4 mb-6">
+      <div className="flex flex-wrap items-center gap-4">
         <h1 className="text-2xl font-bold">Atoms Review</h1>
         <Badge variant="secondary" className="text-sm">
           {atoms.length} pending

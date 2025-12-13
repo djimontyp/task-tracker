@@ -13,15 +13,27 @@ from .base import TimestampMixin
 
 
 class AtomType(str, Enum):
-    """Types of atomic knowledge units."""
+    """Types of atomic knowledge units.
 
+    PRD-defined types (Частина 6.1):
+    - Core: decision, problem, solution, question
+    - Knowledge: insight, idea
+    - PM: blocker, risk, requirement
+    """
+
+    # Core types
     problem = "problem"
     solution = "solution"
     decision = "decision"
     question = "question"
+    # Knowledge types
     insight = "insight"
-    pattern = "pattern"
+    idea = "idea"  # T002: Added per PRD
+    # PM types
+    blocker = "blocker"  # T001: Added per PRD - Critical for Executive Summary
+    risk = "risk"  # T003: Added per PRD
     requirement = "requirement"
+    # NOTE: T004 - 'pattern' removed as it's not in PRD
 
 
 class LinkType(str, Enum):
