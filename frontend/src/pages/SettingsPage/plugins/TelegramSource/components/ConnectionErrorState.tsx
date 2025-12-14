@@ -29,15 +29,15 @@ export function ConnectionErrorState({
         </p>
 
         <div className="space-y-2 text-sm">
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5">
             <span className="font-medium">URL:</span>
-            <code className="block bg-destructive/10 px-2 py-1 rounded text-xs break-all">
+            <code className="block bg-destructive/10 px-2 py-0.5 rounded text-xs break-all">
               {webhookUrl}
             </code>
           </div>
 
           {errorMessage && (
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-0.5">
               <span className="font-medium">Error:</span>
               <span className="text-destructive-foreground/80">{errorMessage}</span>
             </div>

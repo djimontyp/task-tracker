@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { TestConnectionButton } from './TestConnectionButton'
 
 const meta: Meta<typeof TestConnectionButton> = {

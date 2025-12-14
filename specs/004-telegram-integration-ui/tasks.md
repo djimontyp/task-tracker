@@ -155,10 +155,10 @@
 - [X] T033 [P] Create Storybook story for StatusDisplay in `frontend/src/pages/SettingsPage/plugins/TelegramSource/components/StatusDisplay.stories.tsx`
 - [X] T034 [P] Create Storybook story for TestConnectionButton in `frontend/src/pages/SettingsPage/plugins/TelegramSource/components/TestConnectionButton.stories.tsx`
 - [X] T035 [P] Create Storybook story for ChannelList in `frontend/src/pages/SettingsPage/plugins/TelegramSource/components/ChannelList.stories.tsx`
-- [ ] T036 [P] Create Storybook story for SetupWizard (all steps) in `frontend/src/pages/SettingsPage/plugins/TelegramSource/components/SetupWizard.stories.tsx`
+- [X] T036 [P] Create Storybook story for SetupWizard (all steps) in `frontend/src/pages/SettingsPage/plugins/TelegramSource/components/SetupWizard.stories.tsx`
 - [X] T037 Run TypeScript check: `cd frontend && npx tsc --noEmit` ✅ PASSED
 - [X] T038 Run ESLint: `cd frontend && npm run lint` ✅ PASSED
-- [ ] T039 Run quickstart.md validation (manual testing checklist)
+- [X] T039 Run quickstart.md validation (manual testing checklist)
 - [X] T040 Verify Design System compliance (semantic tokens, 4px grid, icon+text statuses) ✅ PASSED
 
 ---

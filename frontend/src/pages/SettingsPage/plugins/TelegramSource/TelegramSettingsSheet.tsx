@@ -291,14 +291,14 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                   </div>
                   {/* Connection status line */}
                   {lastChecked && (
-                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
+                    <p className="text-xs text-muted-foreground flex items-center gap-0.5 mt-2">
                       {connectionStatus === 'connected' && <CheckCircle className="h-3 w-3 text-status-connected" />}
                       {connectionStatus === 'warning' && <AlertTriangle className="h-3 w-3 text-status-validating" />}
                       {connectionStatus === 'error' && <XCircle className="h-3 w-3 text-destructive" />}
                       Last checked: {formatRelativeTime(lastChecked)}
                       {connectionError && (
                         <span className={cn(
-                          'ml-1',
+                          'ml-0.5',
                           connectionStatus === 'warning' ? 'text-status-validating' : 'text-destructive'
                         )}>• {connectionError}</span>
                       )}
