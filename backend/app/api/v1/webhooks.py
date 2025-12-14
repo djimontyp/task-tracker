@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, HTTPException
 
 from app.api.deps import DatabaseDep
@@ -179,6 +180,90 @@ async def get_telegram_webhook_info() -> dict[str, Any]:
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get webhook info: {str(e)}")
+
+
+@router.post(
+    "/telegram/ping",
+    summary="Ping Telegram webhook URL",
+    response_description="Result of pinging the webhook URL",
+)
+async def ping_telegram_webhook(db: DatabaseDep) -> dict[str, Any]:
+    """
+    Actively ping the configured webhook URL to verify it's reachable.
+
+    This is different from /telegram/info which only queries Telegram API.
+    This endpoint makes an actual HTTP request to the webhook URL.
+    """
+    config = await webhook_settings_service.get_telegram_config(db)
+
+    if not config or not config.webhook_url:
+        return {
+            "success": False,
+            "reachable": False,
+            "error": "No webhook URL configured",
+        }
+
+    webhook_url = config.webhook_url
+
+    try:
+        async with httpx.AsyncClient() as client:
+            # Send a HEAD request to check if URL is reachable
+            # Use short timeout since we just want to check connectivity
+            response = await client.head(webhook_url, timeout=5.0, follow_redirects=True)
+
+            # Check for ngrok tunnel errors (tunnel not found/expired)
+            ngrok_error = response.headers.get("ngrok-error-code")
+            if ngrok_error:
+                logger.warning(f"ngrok tunnel error: {ngrok_error}")
+                return {
+                    "success": True,
+                    "reachable": False,
+                    "error": f"ngrok tunnel not active (error: {ngrok_error})",
+                    "url": webhook_url,
+                }
+
+            # Check for server errors (5xx)
+            if response.status_code >= 500:
+                return {
+                    "success": True,
+                    "reachable": False,
+                    "error": f"Server error: {response.status_code}",
+                    "url": webhook_url,
+                }
+
+            # Any 2xx/3xx/4xx response means the server is reachable
+            # Our webhook endpoint returns 405 for HEAD, which is fine
+            return {
+                "success": True,
+                "reachable": True,
+                "status_code": response.status_code,
+                "url": webhook_url,
+            }
+
+    except httpx.ConnectError as e:
+        logger.warning(f"Webhook URL unreachable: {webhook_url} - {e}")
+        return {
+            "success": True,
+            "reachable": False,
+            "error": "Connection refused - server not running or URL incorrect",
+            "url": webhook_url,
+        }
+    except httpx.TimeoutException:
+        logger.warning(f"Webhook URL timeout: {webhook_url}")
+        return {
+            "success": True,
+            "reachable": False,
+            "error": "Connection timeout - server not responding",
+            "url": webhook_url,
+        }
+    except Exception as e:
+        logger.error(f"Error pinging webhook: {e}")
+        return {
+            "success": False,
+            "reachable": False,
+            "error": str(e),
+            "url": webhook_url,
+        }
 
 
 @router.put("/telegram/group-ids", response_model=TelegramWebhookConfig)

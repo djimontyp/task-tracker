@@ -52,7 +52,7 @@ class TelegramWebhookService:
             return {"success": False, "error": f"Request failed: {str(e)}"}
         except Exception as e:
             logger.error(f"Unexpected error setting webhook: {e}")
-            return {"success": False, "error": f"Unexpected error getting chat info: {str(e)}"}
+            return {"success": False, "error": f"Unexpected error setting webhook: {str(e)}"}
 
     async def get_user_avatar_url(self, user_id: int) -> str | None:
         """Fetch Telegram user avatar URL using Bot API."""
@@ -341,7 +341,11 @@ class WebhookSettingsService:
                     if is_active:
                         config["telegram"]["last_set_at"] = datetime.utcnow().isoformat()
                     else:
+                        # Clear webhook URL when deactivating (delete)
                         config["telegram"]["last_set_at"] = None
+                        config["telegram"]["webhook_url"] = None
+                        config["telegram"]["host"] = ""
+                        config["telegram"]["protocol"] = "https"
 
                     # Preserve groups if they exist
                     if "groups" not in config["telegram"]:
