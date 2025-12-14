@@ -10,6 +10,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
   SheetFooter,
   AlertDialog,
   AlertDialogAction,
@@ -23,11 +24,15 @@ import {
 import {
   Check,
   CheckCircle,
-  Clipboard,
+  ClipboardPaste,
   MessageSquare,
-  X,
   Trash2,
   AlertTriangle,
+  RefreshCw,
+  Loader2,
+  XCircle,
+  Circle,
+  Save,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/utils'
@@ -35,14 +40,12 @@ import { useTelegramSettings } from './useTelegramSettings'
 import { FormField } from '@/shared/patterns'
 import { BotInfoCard } from './components/BotInfoCard'
 import { InstructionsCard } from './components/InstructionsCard'
-import { TestConnectionButton } from './components/TestConnectionButton'
+import { ConnectionErrorState } from './components/ConnectionErrorState'
 
 interface TelegramSettingsSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
-
-const WEBHOOK_PATH = '/webhook/telegram'
 
 const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProps) => {
   const {
@@ -54,8 +57,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
     setWebhookBaseUrl,
     serverWebhookUrl,
     isActive,
-    lastSetAt,
-    defaultBaseUrl,
+    hasWebhookConfig,
     computedWebhookUrl,
     isValidBaseUrl,
     groups,
@@ -64,6 +66,11 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
     isAddingGroup,
     isRefreshingNames,
     removingGroupIds,
+    // Connection status
+    connectionStatus,
+    lastChecked,
+    connectionError,
+    // Actions
     handleUpdateWebhook,
     handleDeleteWebhook,
     handleAddGroup,
@@ -73,10 +80,16 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
     isValidGroupId,
   } = useTelegramSettings()
 
-  const [copiedWebhookUrl, setCopiedWebhookUrl] = useState(false)
+  // Track if connection check is in progress (needed before narrowing)
+  const isCheckingConnection = connectionStatus === 'checking'
+
+  // Show connection error state when webhook was configured but is now unreachable
+  const showConnectionError = connectionStatus === 'error' && hasWebhookConfig && !isLoadingConfig
+
   const [inputValidation, setInputValidation] = useState<'valid' | 'invalid' | null>(null)
   const [hostValidationError, setHostValidationError] = useState<string | null>(null)
   const [showUpdateConfirm, setShowUpdateConfirm] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Auto-strip protocol prefix when pasting URL
   const handleHostChange = (value: string) => {
@@ -85,18 +98,50 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
     setWebhookBaseUrl(cleanedValue)
   }
 
-  const handleCopyWebhookUrl = async () => {
-    const urlToCopy = serverWebhookUrl || computedWebhookUrl
-    if (!urlToCopy) return
-
+  // Paste from clipboard, auto-apply, and test connection
+  const handlePasteAndApply = async () => {
     try {
-      await navigator.clipboard.writeText(urlToCopy)
-      setCopiedWebhookUrl(true)
-      toast.success('Webhook URL copied to clipboard')
-      setTimeout(() => setCopiedWebhookUrl(false), 2000)
-    } catch {
-      toast.error('Failed to copy URL')
+      // Check if clipboard API is available
+      if (!navigator.clipboard?.readText) {
+        toast.error('Clipboard API not available in this browser')
+        return
+      }
+
+      const text = await navigator.clipboard.readText()
+
+      // Parse URL: strip protocol and path
+      const parsed = text.replace(/^https?:\/\//i, '').split('/')[0].trim()
+      if (!parsed) {
+        toast.error('Clipboard is empty or contains invalid URL')
+        return
+      }
+
+      setWebhookBaseUrl(parsed)
+      toast.info(`Pasted: ${parsed}`)
+
+      // Auto-apply with the parsed URL directly (don't rely on state update)
+      await handleUpdateWebhook(parsed)
+      // Auto-test
+      await handleTestConnection()
+    } catch (error) {
+      // Clipboard permission denied or other error
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      if (message.includes('denied') || message.includes('permission')) {
+        toast.error('Clipboard access denied. Please allow clipboard permissions or paste manually.')
+      } else {
+        toast.error(`Failed to read clipboard: ${message}`)
+      }
     }
+  }
+
+  // Format relative time
+  const formatRelativeTime = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
+    if (seconds < 60) return 'just now'
+    const minutes = Math.floor(seconds / 60)
+    if (minutes < 60) return `${minutes}m ago`
+    const hours = Math.floor(minutes / 60)
+    return `${hours}h ago`
   }
 
   const handleGroupInputChange = (value: string) => {
@@ -112,42 +157,60 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-2xl overflow-y-auto" aria-describedby="telegram-sheet-description">
+      <SheetContent className="sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <div className="flex items-center justify-between">
             <SheetTitle>Telegram Integration</SheetTitle>
             {!isLoadingConfig && (
               <Badge
-                variant={isActive ? 'default' : 'secondary'}
+                variant="outline"
                 className={cn(
                   'flex items-center gap-2',
-                  isActive && 'bg-status-connected hover:bg-status-connected/90 text-white border-status-connected'
+                  connectionStatus === 'connected' && 'border-status-connected text-status-connected',
+                  connectionStatus === 'warning' && 'border-status-validating text-status-validating',
+                  connectionStatus === 'error' && 'border-destructive text-destructive',
+                  connectionStatus === 'checking' && 'border-status-validating text-status-validating',
+                  connectionStatus === 'unknown' && 'border-muted text-muted-foreground'
                 )}
               >
-                <div className={cn('h-2 w-2 rounded-full', isActive ? 'bg-white' : 'bg-muted-foreground')} />
-                {isActive ? 'Active' : 'Inactive'}
+                {connectionStatus === 'checking' && <Loader2 className="h-3 w-3 animate-spin" />}
+                {connectionStatus === 'connected' && <CheckCircle className="h-3 w-3" />}
+                {connectionStatus === 'warning' && <AlertTriangle className="h-3 w-3" />}
+                {connectionStatus === 'error' && <XCircle className="h-3 w-3" />}
+                {connectionStatus === 'unknown' && <Circle className="h-3 w-3" />}
+                {connectionStatus === 'connected' ? 'Connected' :
+                 connectionStatus === 'warning' ? 'Pending' :
+                 connectionStatus === 'error' ? 'Error' :
+                 connectionStatus === 'checking' ? 'Checking...' : 'Unknown'}
               </Badge>
             )}
           </div>
-          <p id="telegram-sheet-description" className="text-sm text-muted-foreground mt-2">
+          <SheetDescription>
             Configure your Telegram bot webhook URL and manage monitored groups for message tracking
-          </p>
+          </SheetDescription>
         </SheetHeader>
 
         <div className="space-y-8 mt-6">
           {/* Bot Info Card - always visible */}
           <BotInfoCard />
 
-          {/* Instructions Card - shown for first-time setup */}
-          {!isActive && !isLoadingConfig && (
+          {/* Connection Error State - shown when configured but unreachable */}
+          {showConnectionError && (
+            <ConnectionErrorState
+              webhookUrl={serverWebhookUrl || computedWebhookUrl}
+              errorMessage={connectionError}
+              onRetry={handleTestConnection}
+              isRetrying={isCheckingConnection}
+            />
+          )}
+
+          {/* Instructions Card - shown for first-time setup (never configured) */}
+          {!isActive && !hasWebhookConfig && !isLoadingConfig && (
             <InstructionsCard />
           )}
 
+          {/* Webhook configuration form - always visible so user can fix URL */}
           <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Webhook URL</h3>
-            </div>
-
             {isLoadingConfig ? (
               <div className="space-y-4">
                 <Skeleton className="h-10 w-full" />
@@ -158,7 +221,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                 <FormField
                   label="Webhook Host"
                   id="webhook-base-url"
-                  description={`HTTPS required. Auto-appends ${WEBHOOK_PATH}`}
+                  description={computedWebhookUrl || 'Enter host to see full webhook URL'}
                   error={hostValidationError || undefined}
                 >
                   <div className="flex items-center gap-2">
@@ -168,7 +231,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                       </span>
                       <Input
                         id="webhook-base-url"
-                        placeholder={defaultBaseUrl?.replace(/^https?:\/\//, '') || 'your-domain.ngrok.io'}
+                        placeholder="abc123.ngrok-free.app"
                         value={webhookBaseUrl.replace(/^https?:\/\//, '')}
                         onChange={(event) => handleHostChange(event.target.value)}
                         autoComplete="off"
@@ -179,23 +242,68 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                         )}
                       />
                     </div>
+                    {/* Save/Update button */}
                     <Button
                       type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleCopyWebhookUrl}
-                      disabled={!serverWebhookUrl && !computedWebhookUrl}
-                      className="shrink-0"
-                      aria-label={copiedWebhookUrl ? 'Webhook URL copied' : 'Copy webhook URL to clipboard'}
-                      title={copiedWebhookUrl ? 'Copied!' : 'Copy to clipboard'}
+                      variant="default"
+                      size="icon"
+                      onClick={isActive ? () => setShowUpdateConfirm(true) : () => handleUpdateWebhook()}
+                      disabled={isSaving || isSettingWebhook || !isValidBaseUrl || !!hostValidationError}
+                      className="shrink-0 h-10 w-10"
+                      aria-label={isActive ? "Update webhook" : "Activate webhook"}
+                      title={isActive ? "Update webhook" : "Activate webhook"}
                     >
-                      {copiedWebhookUrl ? (
-                        <Check className="h-4 w-4" />
+                      {isSaving || isSettingWebhook ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Clipboard className="h-4 w-4" />
+                        <Save className="h-4 w-4" />
                       )}
                     </Button>
+                    {/* Test connection button */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={handleTestConnection}
+                      disabled={connectionStatus === 'checking'}
+                      className="shrink-0 h-10 w-10"
+                      aria-label="Test webhook connection"
+                      title="Test connection"
+                    >
+                      {connectionStatus === 'checking' ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4" />
+                      )}
+                    </Button>
+                    {/* Paste URL button */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={handlePasteAndApply}
+                      className="shrink-0 h-10 w-10"
+                      aria-label="Paste URL from clipboard and apply"
+                      title="Paste URL"
+                    >
+                      <ClipboardPaste className="h-4 w-4" />
+                    </Button>
                   </div>
+                  {/* Connection status line */}
+                  {lastChecked && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
+                      {connectionStatus === 'connected' && <CheckCircle className="h-3 w-3 text-status-connected" />}
+                      {connectionStatus === 'warning' && <AlertTriangle className="h-3 w-3 text-status-validating" />}
+                      {connectionStatus === 'error' && <XCircle className="h-3 w-3 text-destructive" />}
+                      Last checked: {formatRelativeTime(lastChecked)}
+                      {connectionError && (
+                        <span className={cn(
+                          'ml-1',
+                          connectionStatus === 'warning' ? 'text-status-validating' : 'text-destructive'
+                        )}>• {connectionError}</span>
+                      )}
+                    </p>
+                  )}
                 </FormField>
 
                 {/* HTTPS requirement notice */}
@@ -207,74 +315,17 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                     </p>
                   </div>
                 )}
-
-                {/* Current webhook info when active */}
-                {isActive && serverWebhookUrl && (
-                  <div className="space-y-2 p-4 rounded-md bg-muted/50 border">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Current Webhook URL</span>
-                      <Badge variant="outline" className="gap-2 border-status-connected text-status-connected">
-                        <CheckCircle className="h-3 w-3" />
-                        Active
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground break-all font-mono">
-                      {serverWebhookUrl}
-                    </p>
-                    {lastSetAt && (
-                      <p className="text-xs text-muted-foreground">
-                        Configured: {new Date(lastSetAt).toLocaleString()}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex justify-end gap-2">
-                  {/* Show confirmation dialog for active webhook updates */}
-                  {isActive && (
-                    <Button
-                      type="button"
-                      variant="default"
-                      onClick={() => setShowUpdateConfirm(true)}
-                      disabled={isSaving || isSettingWebhook || !isValidBaseUrl || !!hostValidationError || webhookBaseUrl === serverWebhookUrl?.replace('/webhook/telegram', '').replace('https://', '')}
-                      aria-label="Update webhook configuration"
-                    >
-                      {isSaving || isSettingWebhook ? 'Updating...' : 'Update Webhook'}
-                    </Button>
-                  )}
-                  {/* Direct update for new setup */}
-                  {!isActive && (
-                    <Button
-                      type="button"
-                      variant="default"
-                      onClick={handleUpdateWebhook}
-                      disabled={isSaving || isSettingWebhook || !isValidBaseUrl || !!hostValidationError}
-                      aria-label="Activate webhook"
-                    >
-                      {isSaving || isSettingWebhook ? 'Activating...' : 'Activate Webhook'}
-                    </Button>
-                  )}
-                </div>
-
-                {/* Test Connection - shown when webhook is active */}
-                {isActive && (
-                  <div className="pt-4 border-t">
-                    <h4 className="text-sm font-medium mb-4">Connection Test</h4>
-                    <TestConnectionButton
-                      onTest={handleTestConnection}
-                      disabled={!isActive}
-                    />
-                  </div>
-                )}
               </div>
             )}
           </div>
 
-          <Separator />
+          {/* Groups section - always visible */}
+          <>
+            <Separator />
 
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Groups ({groups.length})</h3>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Groups ({groups.length})</h3>
               <Button
                 type="button"
                 variant="outline"
@@ -336,40 +387,30 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
             </FormField>
 
             {groups.length > 0 ? (
-              <div className="space-y-4">
-                {groups.map(group => (
-                  <Card key={group.id} className="p-4 hover:shadow-md transition-shadow">
+              <div className="space-y-2">
+                {groups.map((group, index) => (
+                  <Card key={group.id} className="p-4">
                     <div className="flex items-center gap-4">
-                      <div className="text-2xl shrink-0">🔵</div>
+                      <span className="text-sm text-muted-foreground w-6 shrink-0">{index + 1}.</span>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <p className="text-sm font-medium text-foreground break-words">
-                            {group.name || `Group ${group.id}`}
-                          </p>
-                          {!group.name && (
-                            <Badge variant="outline" className="text-xs shrink-0">Name Pending</Badge>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Active • Messages being monitored
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {group.name || `Group ${group.id}`}
                         </p>
                       </div>
+                      <Badge variant="outline" className="text-xs shrink-0">Active</Badge>
                       <Button
                         type="button"
                         variant="ghost"
-                        size="sm"
+                        size="icon"
                         onClick={() => handleRemoveGroup(group.id)}
                         disabled={removingGroupIds.has(group.id)}
-                        className="text-destructive hover:text-destructive/90 hover:bg-destructive/10 shrink-0"
+                        className="h-8 w-8 shrink-0"
                         aria-label={`Remove ${group.name || 'group'} from monitoring list`}
                       >
                         {removingGroupIds.has(group.id) ? (
-                          'Removing…'
+                          <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          <>
-                            <X className="h-4 w-4 mr-2" />
-                            Remove
-                          </>
+                          <Trash2 className="h-4 w-4 text-destructive" />
                         )}
                       </Button>
                     </div>
@@ -392,17 +433,18 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                 </p>
               </div>
             )}
-          </div>
+              </div>
+            </>
         </div>
 
         <SheetFooter className="mt-6 pt-6 border-t">
           <Button
             type="button"
-            variant="destructive"
-            onClick={handleDeleteWebhook}
-            disabled={isDeletingWebhook || !isActive}
+            variant="ghost"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={isDeletingWebhook || !hasWebhookConfig}
             aria-label="Delete webhook from Telegram"
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <Trash2 className="h-4 w-4 mr-2" />
             {isDeletingWebhook ? 'Deleting...' : 'Delete Webhook'}
@@ -443,6 +485,31 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
               }}
             >
               Update Webhook
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmation dialog for webhook deletion */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Webhook?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the webhook from Telegram and stop receiving messages.
+              You can re-configure it anytime.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowDeleteConfirm(false)
+                handleDeleteWebhook()
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Webhook
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
