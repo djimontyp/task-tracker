@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { BotInfoCard } from './BotInfoCard'
 
 const meta: Meta<typeof BotInfoCard> = {
