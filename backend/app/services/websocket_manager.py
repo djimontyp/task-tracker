@@ -109,7 +109,8 @@ class WebSocketManager:
                     self._connections[topic] = {}
                 self._connections[topic][conn_id] = conn_info
 
-        logger.info(f"🔌 Connection {conn_id} established, topics: {topics}")
+        total_connections = len(self._conn_by_id)
+        logger.info(f"🔌 Connection {conn_id} established, topics: {topics}, total: {total_connections}")
         return conn_id
 
     async def disconnect(self, websocket: WebSocket | None = None, conn_id: str | None = None) -> None:
@@ -297,13 +298,15 @@ class WebSocketManager:
         while True:
             try:
                 await asyncio.sleep(self.PING_INTERVAL)
+                conn_count = len(self._conn_by_id)
+                logger.debug(f"[Heartbeat] Tick - {conn_count} connections")
                 await self._send_pings()
                 await self._cleanup_stale_connections()
             except asyncio.CancelledError:
                 logger.info("Heartbeat loop cancelled")
                 raise
             except Exception as e:
-                logger.error(f"Error in heartbeat loop: {e}")
+                logger.exception(f"[Heartbeat] Error (continuing): {e}")
 
     async def _send_pings(self) -> None:
         """Send ping message to all connections."""
@@ -317,9 +320,11 @@ class WebSocketManager:
             conn_infos = list(self._conn_by_id.values())
 
         if not conn_infos:
+            logger.debug("[Heartbeat] No connections to ping")
             return
 
-        logger.debug(f"Sending ping to {len(conn_infos)} connections")
+        conn_ids = [c.id[:8] for c in conn_infos]  # Short IDs for readability
+        logger.debug(f"[Heartbeat] Sending ping to {len(conn_infos)} connections: {conn_ids}")
 
         disconnected_ids: list[str] = []
         for conn_info in conn_infos:
