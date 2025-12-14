@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 import { logger } from '@/shared/utils/logger'
+import { useTelegramStore } from './useTelegramStore'
 
 type ProtocolOption = 'http' | 'https'
 
@@ -78,6 +79,11 @@ const writeLocalConfig = (baseUrl: string) => {
   localStorage.setItem(LOCAL_STORAGE_KEY, normalizeInputUrl(baseUrl))
 }
 
+const clearLocalConfig = () => {
+  if (typeof window === 'undefined') return
+  localStorage.removeItem(LOCAL_STORAGE_KEY)
+}
+
 const extractErrorMessage = (error: unknown) => {
   const fallback = 'Unexpected error. Please try again.'
   if (!error || typeof error !== 'object') return fallback
@@ -133,6 +139,21 @@ export const useTelegramSettings = () => {
   const [isActive, setIsActive] = useState(false)
   const [realWebhookUrl, setRealWebhookUrl] = useState<string | null>(null) // From Telegram API
   const [lastSetAt, setLastSetAt] = useState<string | null>(null)
+
+  // Connection status from Zustand store (shared with TelegramCard)
+  const {
+    connectionStatus,
+    lastChecked,
+    connectionError,
+    isOperationPending,
+    setConnectionStatus,
+    setLastChecked,
+    setConnectionError,
+    setOperationPending,
+  } = useTelegramStore()
+
+  // AbortController to cancel pending checkRealStatus requests
+  const abortControllerRef = useRef<AbortController | null>(null)
   const [defaultBaseUrl, setDefaultBaseUrl] = useState('')
   const [groups, setGroups] = useState<TelegramGroupInfo[]>([])
   const [newGroupId, setNewGroupId] = useState('')
@@ -147,30 +168,107 @@ export const useTelegramSettings = () => {
   )
   const isValidBaseUrl = Boolean(host)
 
-  // Check real webhook status from Telegram API
+  // Indicates whether a webhook URL was previously configured (for distinguishing
+  // "never configured" from "configured but currently unreachable")
+  const hasWebhookConfig = Boolean(serverWebhookUrl || realWebhookUrl)
+
+  // Check real webhook status by pinging URL and querying Telegram API
   const checkRealStatus = useCallback(async () => {
+    // Skip if an operation (delete/set webhook) is in progress
+    if (isOperationPending) {
+      return null
+    }
+
+    // Cancel any pending request
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = new AbortController()
+
     try {
+      // Step 1: Get Telegram API info first to check if webhook is configured
       const { data } = await apiClient.get<{
         success: boolean
-        webhook_info?: { url?: string }
+        webhook_info?: {
+          url?: string
+          last_error_date?: number
+          last_error_message?: string
+          pending_update_count?: number
+        }
         error?: string
-      }>(API_ENDPOINTS.telegramWebhook.info)
+      }>(API_ENDPOINTS.telegramWebhook.info, {
+        signal: abortControllerRef.current.signal,
+      })
 
       if (data.success && data.webhook_info) {
         const url = data.webhook_info.url || null
         setRealWebhookUrl(url)
-        // Real status is based on actual Telegram webhook URL
-        setIsActive(Boolean(url))
+
+        // If no URL configured, show error immediately
+        if (!url) {
+          setIsActive(false)
+          setConnectionStatus('error')
+          setConnectionError('No webhook URL configured')
+          setLastChecked(new Date())
+          return null
+        }
+
+        // Step 2: Ping the webhook URL to check if it's reachable
+        const { data: pingData } = await apiClient.post<{
+          success: boolean
+          reachable: boolean
+          error?: string
+        }>(API_ENDPOINTS.telegramWebhook.ping, null, {
+          signal: abortControllerRef.current.signal,
+        })
+
+        // If URL is not reachable, show error
+        if (!pingData.reachable) {
+          setIsActive(false)
+          setConnectionStatus('error')
+          setConnectionError(pingData.error || 'Webhook URL is not reachable')
+          setLastChecked(new Date())
+          return url
+        }
+
+        // Check if Telegram reports recent errors (within last 5 minutes)
+        const hasRecentError = data.webhook_info.last_error_date &&
+          (Date.now() / 1000 - data.webhook_info.last_error_date) < 300
+
+        // Check if there are pending updates (indicates delivery issues)
+        const hasPendingUpdates = (data.webhook_info.pending_update_count ?? 0) > 0
+
+        // Determine status: connected (green), warning (yellow), error (red)
+        const status = hasRecentError ? 'error' :
+          hasPendingUpdates ? 'warning' :
+          'connected'
+
+        setIsActive(status === 'connected')
+        setConnectionStatus(status)
+        setConnectionError(
+          hasRecentError ? data.webhook_info.last_error_message || 'Connection error' :
+          hasPendingUpdates ? `${data.webhook_info.pending_update_count} pending updates` :
+          null
+        )
+        setLastChecked(new Date())
         return url
       }
       setRealWebhookUrl(null)
       setIsActive(false)
+      setConnectionStatus('error')
+      setConnectionError('No webhook URL configured')
+      setLastChecked(new Date())
       return null
-    } catch {
-      // If check fails, don't change status
+    } catch (error) {
+      // Ignore cancelled requests
+      if (error instanceof Error && error.name === 'CanceledError') {
+        return null
+      }
+      // If check fails, mark as error
+      setConnectionStatus('error')
+      setConnectionError('Failed to check webhook status')
+      setLastChecked(new Date())
       return null
     }
-  }, [])
+  }, [isOperationPending, setConnectionStatus, setConnectionError, setLastChecked])
 
   const loadConfig = useCallback(async () => {
     setIsLoadingConfig(true)
@@ -179,10 +277,13 @@ export const useTelegramSettings = () => {
       const data = response.data
 
       // Backend is the source of truth for webhook URL
-      const backendBaseUrl = buildBaseUrl(
-        data.telegram?.protocol || data.default_protocol,
-        data.telegram?.host || data.default_host || ''
-      )
+      // Only use default_host if telegram config doesn't exist at all
+      // Empty string host means "not configured" - don't fallback to default
+      const telegramHost = data.telegram?.host
+      const hasExplicitHost = telegramHost !== undefined && telegramHost !== null
+      const backendBaseUrl = hasExplicitHost && telegramHost
+        ? buildBaseUrl(data.telegram?.protocol || 'https', telegramHost)
+        : ''
 
       // Use backend URL, fallback to localStorage only if backend has no config
       const resolvedBaseUrl = backendBaseUrl || readLocalConfig()
@@ -214,14 +315,24 @@ export const useTelegramSettings = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Re-check status when user returns to tab
+  // Re-check status when user returns to tab (debounced to prevent race conditions)
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>
+
     const onVisible = () => {
-      if (!document.hidden) checkRealStatus()
+      if (!document.hidden && !isOperationPending) {
+        // Debounce to prevent rapid re-checks
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => checkRealStatus(), 300)
+      }
     }
+
     document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
-  }, [checkRealStatus])
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      clearTimeout(timeoutId)
+    }
+  }, [checkRealStatus, isOperationPending])
 
   const handleSave = async () => {
     if (!isValidBaseUrl) {
@@ -272,7 +383,10 @@ export const useTelegramSettings = () => {
       return
     }
 
+    // Lock to prevent checkRealStatus from running during operation
+    setOperationPending(true)
     setIsSettingWebhook(true)
+
     try {
       const { data } = await apiClient.post<SetWebhookResponseDto>(
         API_ENDPOINTS.telegramWebhook.set,
@@ -285,6 +399,8 @@ export const useTelegramSettings = () => {
       if (data.success) {
         toast.success(data.message || 'Webhook activated')
         writeLocalConfig(buildBaseUrl(effectiveProtocol, effectiveHost))
+        // Unlock before loadConfig so checkRealStatus can run
+        setOperationPending(false)
         await loadConfig()
       } else {
         toast.error(data.error || data.message || 'Failed to activate webhook')
@@ -293,28 +409,37 @@ export const useTelegramSettings = () => {
       toast.error(`Failed to activate webhook: ${extractErrorMessage(error)}`)
     } finally {
       setIsSettingWebhook(false)
+      // Ensure unlock even if loadConfig wasn't reached
+      setOperationPending(false)
     }
   }
 
-  const handleUpdateWebhook = async () => {
-    if (!isValidBaseUrl) {
+  const handleUpdateWebhook = async (overrideUrl?: string) => {
+    // Use override URL if provided (for paste-and-apply), otherwise use current state
+    const effectiveUrl = overrideUrl ?? webhookBaseUrl
+    const { protocol: effectiveProtocol, host: effectiveHost } = parseBaseUrl(effectiveUrl)
+    const effectiveIsValid = Boolean(effectiveHost)
+
+    if (!effectiveIsValid) {
       toast.error('Webhook URL must not be empty')
       return
     }
 
     // HTTPS validation for production webhooks (Telegram requires HTTPS)
-    if (protocol !== 'https') {
+    if (effectiveProtocol !== 'https') {
       toast.error('HTTPS is required for Telegram webhooks. Please use a secure URL.')
       return
     }
 
+    // Lock to prevent checkRealStatus from running during operation
+    setOperationPending(true)
     setIsSaving(true)
     setIsSettingWebhook(true)
 
     try {
       const { data: savedConfig } = await apiClient.post<TelegramWebhookConfigDto>(
         API_ENDPOINTS.webhookSettings,
-        { protocol, host }
+        { protocol: effectiveProtocol, host: effectiveHost }
       )
 
       const updatedBaseUrl = buildBaseUrl(savedConfig.protocol, savedConfig.host)
@@ -329,6 +454,8 @@ export const useTelegramSettings = () => {
 
       if (activateResult.success) {
         toast.success('Webhook updated and activated successfully')
+        // Unlock before loadConfig so checkRealStatus can run
+        setOperationPending(false)
         await loadConfig()
       } else {
         toast.error(activateResult.error || 'Failed to activate webhook')
@@ -338,19 +465,33 @@ export const useTelegramSettings = () => {
     } finally {
       setIsSaving(false)
       setIsSettingWebhook(false)
+      // Ensure unlock even if loadConfig wasn't reached
+      setOperationPending(false)
     }
   }
 
   const handleDeleteWebhook = async () => {
+    // Lock to prevent checkRealStatus from overwriting status
+    setOperationPending(true)
     setIsDeletingWebhook(true)
+
     try {
       const { data } = await apiClient.delete<SetWebhookResponseDto>(
         API_ENDPOINTS.telegramWebhook.delete
       )
 
       if (data.success) {
+        // Immediately update local state to reflect disabled webhook
+        setIsActive(false)
+        // Set error state with "not configured" message - this maps to "Not configured" in TelegramCard
+        setConnectionStatus('error')
+        setConnectionError('No webhook URL configured')
+        setRealWebhookUrl(null)
+        setServerWebhookUrl(null)
+        setWebhookBaseUrl('')
+        clearLocalConfig()
+
         toast.success(data.message || 'Webhook deleted')
-        await loadConfig()
       } else {
         toast.error(data.error || data.message || 'Failed to delete webhook')
       }
@@ -358,6 +499,8 @@ export const useTelegramSettings = () => {
       toast.error(`Failed to delete webhook: ${extractErrorMessage(error)}`)
     } finally {
       setIsDeletingWebhook(false)
+      // Delay unlock to prevent immediate checkRealStatus from overwriting
+      setTimeout(() => setOperationPending(false), 500)
     }
   }
 
@@ -445,35 +588,99 @@ export const useTelegramSettings = () => {
   }
 
   const handleTestConnection = async () => {
+    setConnectionStatus('checking')
+    setConnectionError(null)
+
     try {
+      // Step 1: Actively ping the webhook URL to check if it's reachable
+      const { data: pingData } = await apiClient.post<{
+        success: boolean
+        reachable: boolean
+        error?: string
+        url?: string
+        status_code?: number
+      }>(API_ENDPOINTS.telegramWebhook.ping)
+
+      setLastChecked(new Date())
+
+      // If ping failed or URL is not reachable, show error immediately
+      if (!pingData.success || !pingData.reachable) {
+        setConnectionStatus('error')
+        const errorMsg = pingData.error || 'Webhook URL is not reachable'
+        setConnectionError(errorMsg)
+
+        return {
+          success: false,
+          message: errorMsg,
+          webhookUrl: pingData.url || null,
+        }
+      }
+
+      // Step 2: If URL is reachable, also check Telegram API for additional info
       const { data } = await apiClient.get<TelegramWebhookInfoResponse>(
         API_ENDPOINTS.telegramWebhook.info
       )
 
       if (data.success && data.webhook_info) {
         const info = data.webhook_info
+        const hasUrl = Boolean(info.url)
+
+        // Check if Telegram reports recent errors (within last 5 minutes)
+        const hasRecentError = info.last_error_date &&
+          (Date.now() / 1000 - info.last_error_date) < 300
+
+        // Check if there are pending updates (indicates delivery issues)
+        const hasPendingUpdates = (info.pending_update_count ?? 0) > 0
+
+        // Determine status: connected (green), warning (yellow), error (red)
+        const status = !hasUrl ? 'error' :
+          hasRecentError ? 'error' :
+          hasPendingUpdates ? 'warning' :
+          'connected'
+
+        setConnectionStatus(status)
+        setConnectionError(
+          !hasUrl ? 'No webhook URL configured' :
+          hasRecentError ? info.last_error_message || 'Connection error' :
+          hasPendingUpdates ? `${info.pending_update_count} pending updates` :
+          null
+        )
+
         return {
-          success: Boolean(info.url),
+          success: status === 'connected',
           webhookUrl: info.url || null,
           pendingUpdateCount: info.pending_update_count,
           lastErrorDate: info.last_error_date
             ? new Date(info.last_error_date * 1000).toISOString()
             : null,
           lastErrorMessage: info.last_error_message || null,
-          message: info.url
-            ? 'Webhook is active and responding'
-            : 'No webhook URL configured in Telegram',
+          message: !hasUrl
+            ? 'No webhook URL configured in Telegram'
+            : hasRecentError
+              ? `Webhook error: ${info.last_error_message || 'Connection failed'}`
+              : hasPendingUpdates
+                ? `${info.pending_update_count} pending updates`
+                : 'Webhook is active and responding',
         }
       }
 
+      setConnectionStatus('error')
+      const errorMsg = data.error || 'Failed to get webhook info'
+      setConnectionError(errorMsg)
+
       return {
         success: false,
-        message: data.error || 'Failed to get webhook info from Telegram',
+        message: errorMsg,
       }
     } catch (error) {
+      setConnectionStatus('error')
+      const errorMsg = extractErrorMessage(error)
+      setConnectionError(errorMsg)
+      setLastChecked(new Date())
+
       return {
         success: false,
-        message: extractErrorMessage(error),
+        message: errorMsg,
       }
     }
   }
@@ -488,6 +695,7 @@ export const useTelegramSettings = () => {
     serverWebhookUrl,
     realWebhookUrl,
     isActive,
+    hasWebhookConfig,
     lastSetAt,
     defaultBaseUrl,
     computedWebhookUrl,
@@ -498,6 +706,11 @@ export const useTelegramSettings = () => {
     isAddingGroup,
     isRefreshingNames,
     removingGroupIds,
+    // Connection status
+    connectionStatus,
+    lastChecked,
+    connectionError,
+    // Actions
     handleSave,
     handleSetWebhook,
     handleUpdateWebhook,
