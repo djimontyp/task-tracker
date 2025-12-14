@@ -1,12 +1,18 @@
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Response
 
 from app.services.websocket_manager import websocket_manager
 from app.tasks import save_telegram_message
 from app.webhook_service import telegram_webhook_service
 
 router = APIRouter(prefix="/webhook", tags=["webhooks"])
+
+
+@router.head("/telegram")
+async def telegram_webhook_health() -> Response:
+    """Health check endpoint for Telegram webhook URL verification."""
+    return Response(status_code=200)
 
 
 @router.post("/telegram")
