@@ -1,12 +1,12 @@
 import { Badge, Button, Card, CardContent, CardFooter, CardHeader, Separator, Switch } from '@/shared/ui'
-import { CheckCircle, AlertCircle, Clock } from 'lucide-react'
+import { CheckCircle, AlertCircle, Clock, XCircle } from 'lucide-react'
 import type { ComponentType } from 'react'
 
 export interface SourceCardProps {
   icon: ComponentType<{ className?: string }>
   name: string
   description: string
-  status: 'active' | 'inactive' | 'not-configured'
+  status: 'active' | 'inactive' | 'not-configured' | 'error'
   statusLabel?: string
   enabled: boolean
   onToggle: () => void
@@ -28,6 +28,11 @@ const statusConfig = {
     icon: Clock,
     color: 'text-status-pending',
     badge: 'border-status-pending bg-status-pending/10 text-status-pending',
+  },
+  error: {
+    icon: XCircle,
+    color: 'text-destructive',
+    badge: 'border-destructive bg-destructive/10 text-destructive',
   },
 } as const
 

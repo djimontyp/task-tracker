@@ -24,6 +24,8 @@ export const API_ENDPOINTS = {
   telegramWebhook: {
     set: buildApiPath('webhook-settings/telegram/set'),
     delete: buildApiPath('webhook-settings/telegram'),
+    info: buildApiPath('webhook-settings/telegram/info'),
+    ping: buildApiPath('webhook-settings/telegram/ping'),
     groups: buildApiPath('webhook-settings/telegram/groups'),
     group: (groupId: string | number) => buildApiPath(`webhook-settings/telegram/groups/${groupId}`),
     refreshNames: buildApiPath('webhook-settings/telegram/groups/refresh-names'),
