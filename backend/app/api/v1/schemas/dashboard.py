@@ -44,6 +44,24 @@ class TrendData(BaseModel):
     direction: Literal["up", "down", "neutral"] = Field(description="Trend direction")
 
 
+class TrendItem(BaseModel):
+    """Single trend item for trending keywords/topics."""
+
+    keyword: str = Field(description="Trending keyword or topic name")
+    count: int = Field(ge=0, description="Number of occurrences in period")
+    delta: int = Field(description="Change vs previous period (+/-)")
+    related_problems: int | None = Field(
+        default=None, description="Optional: problems mentioning this keyword"
+    )
+
+
+class TrendsResponse(BaseModel):
+    """Trending keywords response."""
+
+    trends: list[TrendItem] = Field(default_factory=list, description="List of trending keywords")
+    period: Literal["today", "week", "month"] = Field(description="Time period for trends")
+
+
 class DashboardMetricsResponse(BaseModel):
     """Complete dashboard metrics response."""
 
