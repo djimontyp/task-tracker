@@ -6,6 +6,7 @@ import { AdminPanel } from '@/shared/components/AdminPanel'
 import { useUiStore } from '@/shared/store/uiStore'
 import { useAdminMode, useKeyboardShortcut, useMediaQuery } from '@/shared/hooks'
 import { toast } from 'sonner'
+import { SearchContainer } from '@/features/search/components'
 import Navbar from './Navbar'
 
 interface MainLayoutProps {
@@ -38,7 +39,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     >
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-4"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-modal focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-4"
       >
         Skip to main content
       </a>
@@ -52,7 +53,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           {/* Column 2: Navbar + Content */}
           <div className="grid grid-rows-[56px_1fr] overflow-hidden">
             {/* Row 1: Navbar (fixed height 56px) */}
-            <Navbar isDesktop={true} />
+            <Navbar isDesktop={true} searchComponent={<SearchContainer />} />
 
             {/* Row 2: Main content (fills remaining space, full-width per design system) */}
             <SidebarInset className="overflow-auto">
@@ -78,6 +79,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           <Navbar
             onMobileSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
             isDesktop={false}
+            searchComponent={<SearchContainer />}
           />
 
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>

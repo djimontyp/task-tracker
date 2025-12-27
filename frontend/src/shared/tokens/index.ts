@@ -43,6 +43,15 @@ export {
   type SpacingDirection,
 } from './spacing';
 
+// Z-Index
+export {
+  zIndex,
+  zIndexClasses,
+  getZIndex,
+  type ZIndexToken,
+  type ZIndexValue,
+} from './zindex';
+
 // Patterns
 export {
   badges,

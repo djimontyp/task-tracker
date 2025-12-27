@@ -109,7 +109,7 @@ export const WithIcon: Story = {
 
 export const InButton: Story = {
   render: (args) => (
-    <button className="relative inline-flex items-center justify-center p-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+    <button className="relative inline-flex items-center justify-center p-4 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
       <Bell className="h-5 w-5" />
       <span className="absolute -top-1 -right-1">
         <NotificationBadge {...args} className="min-w-5 h-5 text-[10px]" />
@@ -131,24 +131,24 @@ export const InButton: Story = {
 export const MultipleStates: Story = {
   render: () => (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <span className="w-24 text-sm">No notifications:</span>
         <NotificationBadge count={0} />
         <span className="text-xs text-muted-foreground">(hidden)</span>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <span className="w-24 text-sm">Low count:</span>
         <NotificationBadge count={5} />
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <span className="w-24 text-sm">Medium count:</span>
         <NotificationBadge count={42} />
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <span className="w-24 text-sm">High count:</span>
         <NotificationBadge count={156} />
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <span className="w-24 text-sm">Max count:</span>
         <NotificationBadge count={9999} />
       </div>

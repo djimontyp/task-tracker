@@ -1,7 +1,4 @@
 import { useMemo } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { topicService } from '@/features/topics/api/topicService'
-import type { Topic } from '@/features/topics/types'
 
 export interface BreadcrumbSegment {
   label: string
@@ -16,6 +13,15 @@ export interface BreadcrumbConfig {
 interface RouteConfig {
   crumbs: BreadcrumbSegment[]
   tooltip: string
+}
+
+/**
+ * Dynamic label overrides for routes with parameters.
+ * Key format: 'routePattern:paramId' (e.g., 'topics:abc-123')
+ */
+export interface DynamicLabels {
+  /** Label for topic detail page (e.g., topic name) */
+  topicName?: string
 }
 
 const breadcrumbMap: Record<string, RouteConfig> = {
@@ -108,28 +114,29 @@ const breadcrumbMap: Record<string, RouteConfig> = {
 const DEFAULT_TOOLTIP = 'Інформація про цю сторінку'
 const TOPIC_DETAIL_TOOLTIP = 'Детальний перегляд теми: пов\'язані повідомлення, атоми знань та історія'
 
-export function useBreadcrumbs(pathname: string): BreadcrumbConfig {
-  const queryClient = useQueryClient()
+/**
+ * Generates breadcrumb configuration based on the current pathname.
+ *
+ * This hook is pure and does not fetch any data - dynamic labels must be
+ * provided by the caller. This keeps the shared layer independent from
+ * feature-specific API services.
+ *
+ * @param pathname - Current route pathname
+ * @param dynamicLabels - Optional labels for dynamic routes (e.g., topic name)
+ */
+export function useBreadcrumbs(
+  pathname: string,
+  dynamicLabels?: DynamicLabels
+): BreadcrumbConfig {
   const topicDetailMatch = pathname.match(/^\/topics\/([a-f0-9-]+)$/)
   const topicIdFromUrl = topicDetailMatch ? topicDetailMatch[1] : null
-
-  const { data: topicData } = useQuery<Topic>({
-    queryKey: ['topic', topicIdFromUrl],
-    queryFn: () => topicService.getTopicById(topicIdFromUrl!),
-    enabled: topicIdFromUrl !== null,
-    staleTime: 5 * 60 * 1000,
-    initialData: () => {
-      if (topicIdFromUrl === null) return undefined
-      return queryClient.getQueryData<Topic>(['topic', topicIdFromUrl])
-    },
-  })
 
   const config = useMemo((): BreadcrumbConfig => {
     if (topicDetailMatch && topicIdFromUrl) {
       return {
         crumbs: [
           { label: 'Topics', href: '/topics' },
-          { label: topicData?.name || 'Topic' },
+          { label: dynamicLabels?.topicName || 'Topic' },
         ],
         tooltip: TOPIC_DETAIL_TOOLTIP,
       }
@@ -150,7 +157,7 @@ export function useBreadcrumbs(pathname: string): BreadcrumbConfig {
     }
 
     return routeConfig
-  }, [pathname, topicDetailMatch, topicIdFromUrl, topicData])
+  }, [pathname, topicDetailMatch, topicIdFromUrl, dynamicLabels?.topicName])
 
   return config
 }

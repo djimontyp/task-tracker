@@ -13,14 +13,11 @@ vi.mock('@/shared/components/ThemeProvider', () => ({
   })),
 }));
 
-vi.mock('@/features/websocket/hooks/useServiceStatus', () => ({
+vi.mock('@/shared/hooks', () => ({
   useServiceStatus: vi.fn(() => ({
     indicator: 'healthy',
     isConnected: true,
   })),
-}));
-
-vi.mock('@/shared/hooks', () => ({
   useAdminMode: vi.fn(() => ({
     isAdminMode: false,
     toggleAdminMode: vi.fn(),
@@ -28,10 +25,13 @@ vi.mock('@/shared/hooks', () => ({
 }));
 
 vi.mock('./useBreadcrumbs', () => ({
-  useBreadcrumbs: vi.fn(() => [
-    { label: 'Dashboard', href: '/' },
-    { label: 'Current Page' },
-  ]),
+  useBreadcrumbs: vi.fn(() => ({
+    crumbs: [
+      { label: 'Dashboard', href: '/' },
+      { label: 'Current Page' },
+    ],
+    tooltip: 'Mock page tooltip',
+  })),
 }));
 
 // Mock components that require complex setup
@@ -162,9 +162,7 @@ describe('Navbar', () => {
   });
 
   test('shows healthy status indicator (green)', async () => {
-    const { useServiceStatus } = await import(
-      '@/features/websocket/hooks/useServiceStatus'
-    );
+    const { useServiceStatus } = await import('@/shared/hooks');
     vi.mocked(useServiceStatus).mockReturnValue({
       indicator: 'healthy',
       isConnected: true,
@@ -178,9 +176,7 @@ describe('Navbar', () => {
   });
 
   test('shows warning status indicator (yellow + pulse)', async () => {
-    const { useServiceStatus } = await import(
-      '@/features/websocket/hooks/useServiceStatus'
-    );
+    const { useServiceStatus } = await import('@/shared/hooks');
     vi.mocked(useServiceStatus).mockReturnValue({
       indicator: 'warning',
       isConnected: true,
@@ -194,9 +190,7 @@ describe('Navbar', () => {
   });
 
   test('shows error status indicator (red + pulse)', async () => {
-    const { useServiceStatus } = await import(
-      '@/features/websocket/hooks/useServiceStatus'
-    );
+    const { useServiceStatus } = await import('@/shared/hooks');
     vi.mocked(useServiceStatus).mockReturnValue({
       indicator: 'error',
       isConnected: false,
