@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card, ColorPickerPopover } from '@/shared/components'
@@ -22,6 +23,7 @@ import { PageWrapper } from '@/shared/primitives'
 type ViewMode = 'grid' | 'list'
 
 const TopicsPage = () => {
+  const { t } = useTranslation('topics')
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -124,11 +126,11 @@ const TopicsPage = () => {
   }
 
   const sortOptions = [
-    { label: 'Newest First', value: 'created_desc' },
-    { label: 'Oldest First', value: 'created_asc' },
-    { label: 'Name A-Z', value: 'name_asc' },
-    { label: 'Name Z-A', value: 'name_desc' },
-    { label: 'Recently Updated', value: 'updated_desc' },
+    { label: t('sort.newestFirst', 'Newest First'), value: 'created_desc' },
+    { label: t('sort.oldestFirst', 'Oldest First'), value: 'created_asc' },
+    { label: t('sort.nameAZ', 'Name A-Z'), value: 'name_asc' },
+    { label: t('sort.nameZA', 'Name Z-A'), value: 'name_desc' },
+    { label: t('sort.recentlyUpdated', 'Recently Updated'), value: 'updated_desc' },
   ]
 
   const totalPages = Math.ceil((topics?.total || 0) / pageSize)
@@ -146,14 +148,14 @@ const TopicsPage = () => {
   if (error) {
     return (
       <div className="p-6 space-y-6">
-        <h1 className="text-3xl font-bold">Topics</h1>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
         <Card className="p-6 border-destructive">
           <div className="flex items-start gap-4">
             <div className="text-destructive text-lg">⚠️</div>
             <div>
-              <p className="font-semibold text-destructive mb-2">Error loading data</p>
+              <p className="font-semibold text-destructive mb-2">{t('error.loading', 'Error loading data')}</p>
               <p className="text-sm text-muted-foreground">
-                {error instanceof Error ? error.message : 'Unknown error'}
+                {error instanceof Error ? error.message : t('error.unknown', 'Unknown error')}
               </p>
             </div>
           </div>
@@ -169,7 +171,7 @@ const TopicsPage = () => {
           <Search className="absolute left-4 top-2/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             ref={searchInputRef}
-            placeholder="Search topics by name or description..."
+            placeholder={t('filters.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-10"
@@ -180,7 +182,7 @@ const TopicsPage = () => {
               size="icon"
               onClick={() => setSearchQuery('')}
               className="absolute right-2 top-2/2 -translate-y-1/2"
-              aria-label="Clear search"
+              aria-label={t('filters.clearSearch', 'Clear search')}
             >
               <X className="h-5 w-5" />
             </Button>
@@ -206,26 +208,26 @@ const TopicsPage = () => {
             size="sm"
             onClick={() => setViewMode('grid')}
             className="h-9"
-            aria-label="Switch to grid view"
+            aria-label={t('view.grid', 'Switch to grid view')}
           >
             <LayoutGrid className="h-4 w-4" />
-            <span className="sr-only md:not-sr-only md:ml-2">Grid</span>
+            <span className="sr-only md:not-sr-only md:ml-2">{t('view.gridLabel', 'Grid')}</span>
           </Button>
           <Button
             variant={viewMode === 'list' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setViewMode('list')}
             className="h-9"
-            aria-label="Switch to list view"
+            aria-label={t('view.list', 'Switch to list view')}
           >
             <List className="h-4 w-4" />
-            <span className="sr-only md:not-sr-only md:ml-2">List</span>
+            <span className="sr-only md:not-sr-only md:ml-2">{t('view.listLabel', 'List')}</span>
           </Button>
         </div>
 
         {debouncedSearch && topics && (
           <span className="text-sm text-muted-foreground whitespace-nowrap">
-            Found {topics.total} topics
+            {t('search.found', 'Found {{count}} topics', { count: topics.total })}
           </span>
         )}
       </div>
@@ -258,7 +260,7 @@ const TopicsPage = () => {
                   <p className="text-sm text-muted-foreground mb-4">{topic.description}</p>
 
                   <div className="text-xs text-muted-foreground">
-                    ID: {topic.id} | Created: {new Date(topic.created_at).toLocaleDateString()}
+                    ID: {topic.id} | {t('detail.created')}: {new Date(topic.created_at).toLocaleDateString()}
                   </div>
                 </Card>
               ))}
@@ -303,7 +305,7 @@ const TopicsPage = () => {
           {topics.total > pageSize && (
             <div className="flex flex-col items-center gap-4 mt-6">
               <p className="text-sm text-muted-foreground">
-                Showing {startIndex}-{endIndex} of {topics.total} topics
+                {t('pagination.showing', 'Showing {{start}}-{{end}} of {{total}} topics', { start: startIndex, end: endIndex, total: topics.total })}
               </p>
 
               <Pagination>
@@ -375,33 +377,33 @@ const TopicsPage = () => {
               )}
             </div>
             <h3 className="text-lg font-semibold mb-2">
-              {debouncedSearch ? 'No matching topics' : 'No Topics Yet'}
+              {debouncedSearch ? t('search.noResults', 'No matching topics') : t('list.empty')}
             </h3>
             <p className="text-muted-foreground mb-6 max-w-md">
               {debouncedSearch ? (
                 <>
-                  No topics found matching <strong>&quot;{debouncedSearch}&quot;</strong>.
+                  {t('search.noResultsFor', 'No topics found matching')} <strong>&quot;{debouncedSearch}&quot;</strong>.
                   <br />
-                  Try searching with different keywords or clear the search to see all topics.
+                  {t('search.tryClear', 'Try searching with different keywords or clear the search to see all topics.')}
                 </>
               ) : (
-                'Topics help organize messages by theme. They are automatically created during AI analysis of your messages.'
+                t('list.emptyDescription')
               )}
             </p>
             <div className="flex gap-4 flex-wrap justify-center">
               {debouncedSearch ? (
                 <Button onClick={() => setSearchQuery('')} variant="outline">
                   <X className="mr-2 h-5 w-5" />
-                  Clear search
+                  {t('filters.clearSearch', 'Clear search')}
                 </Button>
               ) : (
                 <>
                   <Button onClick={() => navigate('/messages')}>
                     <MessageSquare className="mr-2 h-5 w-5" />
-                    View Messages
+                    {t('actions.viewMessages', 'View Messages')}
                   </Button>
                   <Button onClick={() => navigate('/analysis')} variant="outline">
-                    Run Analysis
+                    {t('actions.runAnalysis', 'Run Analysis')}
                   </Button>
                 </>
               )}

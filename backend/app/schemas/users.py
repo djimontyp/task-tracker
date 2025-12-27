@@ -17,6 +17,7 @@ class UserResponse(BaseModel):
     avatar_url: str | None
     is_active: bool
     is_bot: bool
+    ui_language: str  # ISO 639-1 code: uk, en
     created_at: datetime | None
     updated_at: datetime | None
 
@@ -29,6 +30,18 @@ class UserCreateRequest(BaseModel):
     email: EmailStr | None = None
     phone: str | None = None
     avatar_url: str | None = None
+    ui_language: str = "uk"
+
+
+class UserUpdateRequest(BaseModel):
+    """Request schema for updating User"""
+
+    first_name: str | None = None
+    last_name: str | None = None
+    email: EmailStr | None = None
+    phone: str | None = None
+    avatar_url: str | None = None
+    ui_language: str | None = None
 
 
 class TelegramProfileResponse(BaseModel):

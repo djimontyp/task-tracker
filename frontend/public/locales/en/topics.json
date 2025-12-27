@@ -1,0 +1,55 @@
+{
+  "title": "Topics",
+  "subtitle": "Organize knowledge by topics",
+  "list": {
+    "title": "Topic List",
+    "empty": "No topics",
+    "emptyDescription": "Create your first topic to organize atoms"
+  },
+  "detail": {
+    "title": "Topic Details",
+    "description": "Description",
+    "atoms": "Atoms in Topic",
+    "messages": "Messages",
+    "created": "Created",
+    "updated": "Updated"
+  },
+  "filters": {
+    "all": "All",
+    "active": "Active",
+    "archived": "Archived",
+    "search": "Search topics..."
+  },
+  "actions": {
+    "create": "Create Topic",
+    "edit": "Edit",
+    "delete": "Delete",
+    "archive": "Archive",
+    "unarchive": "Unarchive"
+  },
+  "form": {
+    "name": "Topic Name",
+    "namePlaceholder": "Enter topic name",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe the topic",
+    "keywords": "Keywords",
+    "keywordsPlaceholder": "Add keywords",
+    "icon": "Icon",
+    "color": "Color"
+  },
+  "messages": {
+    "created": "Topic created successfully",
+    "updated": "Topic updated",
+    "deleted": "Topic deleted",
+    "archived": "Topic archived"
+  },
+  "plurals": {
+    "topic_one": "{{count}} topic",
+    "topic_other": "{{count}} topics"
+  },
+  "card": {
+    "atoms": "Atoms",
+    "messages": "Messages",
+    "lastActivity": "Last Activity"
+  }
+}

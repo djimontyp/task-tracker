@@ -8,6 +8,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   CheckCircle,
   XCircle,
@@ -40,6 +41,7 @@ const atomTypeConfig: Record<AtomType, { icon: React.ComponentType<{ className?:
 }
 
 const AtomsPage: React.FC = () => {
+  const { t } = useTranslation('atoms')
   const queryClient = useQueryClient()
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedAtoms, setSelectedAtoms] = useState<Set<string>>(new Set())
@@ -113,13 +115,13 @@ const AtomsPage: React.FC = () => {
       if (!response.ok) throw new Error('Failed to approve atoms')
       return response.json()
     },
-    onSuccess: (data) => {
-      toast.success(`Approved ${data.approved_count} atoms`)
+    onSuccess: () => {
+      toast.success(t('messages.approved'))
       setSelectedAtoms(new Set())
       queryClient.invalidateQueries({ queryKey: ['atoms'] })
     },
     onError: () => {
-      toast.error('Failed to approve atoms')
+      toast.error(t('messages.approveError', 'Failed to approve atoms'))
     },
   })
 
@@ -134,13 +136,13 @@ const AtomsPage: React.FC = () => {
       if (!response.ok) throw new Error('Failed to reject atoms')
       return response.json()
     },
-    onSuccess: (data) => {
-      toast.success(`Rejected ${data.rejected_count} atoms`)
+    onSuccess: () => {
+      toast.success(t('messages.rejected'))
       setSelectedAtoms(new Set())
       queryClient.invalidateQueries({ queryKey: ['atoms'] })
     },
     onError: () => {
-      toast.error('Failed to reject atoms')
+      toast.error(t('messages.rejectError', 'Failed to reject atoms'))
     },
   })
 
@@ -220,8 +222,8 @@ const AtomsPage: React.FC = () => {
       <PageWrapper>
         <EmptyState
           icon={Inbox}
-          title="All done!"
-          description="No pending atoms to review. Great job keeping up with your knowledge base."
+          title={t('empty.title')}
+          description={t('empty.description')}
         />
       </PageWrapper>
     )
@@ -231,9 +233,9 @@ const AtomsPage: React.FC = () => {
     <PageWrapper>
       {/* Header with bulk actions */}
       <div className="flex flex-wrap items-center gap-4">
-        <h1 className="text-2xl font-bold">Atoms Review</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
         <Badge variant="secondary" className="text-sm">
-          {atoms.length} pending
+          {t('plurals.atom', { count: atoms.length })}
         </Badge>
 
         <div className="flex-1" />
@@ -241,14 +243,14 @@ const AtomsPage: React.FC = () => {
         {selectedAtoms.size > 0 ? (
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">
-              {selectedAtoms.size} selected
+              {t('actions.selected', { count: selectedAtoms.size })}
             </span>
             <Button
               size="sm"
               variant="outline"
               onClick={clearSelection}
             >
-              Clear
+              {t('actions.clear', 'Clear')}
             </Button>
             <Button
               size="sm"
@@ -257,7 +259,7 @@ const AtomsPage: React.FC = () => {
               className="gap-2"
             >
               <CheckCircle className="h-4 w-4" />
-              Approve Selected
+              {t('actions.approveSelected', 'Approve Selected')}
             </Button>
             <Button
               size="sm"
@@ -267,7 +269,7 @@ const AtomsPage: React.FC = () => {
               className="gap-2"
             >
               <XCircle className="h-4 w-4" />
-              Reject Selected
+              {t('actions.rejectSelected', 'Reject Selected')}
             </Button>
           </div>
         ) : (
@@ -279,7 +281,7 @@ const AtomsPage: React.FC = () => {
               className="gap-2"
             >
               <CheckCircle className="h-4 w-4" />
-              Approve All
+              {t('actions.approveAll', 'Approve All')}
             </Button>
             <Button
               size="sm"
@@ -289,7 +291,7 @@ const AtomsPage: React.FC = () => {
               className="gap-2"
             >
               <XCircle className="h-4 w-4" />
-              Reject All
+              {t('actions.rejectAll', 'Reject All')}
             </Button>
           </div>
         )}
@@ -317,7 +319,7 @@ const AtomsPage: React.FC = () => {
                     variant="ghost"
                     onClick={() => selectAllInGroup(groupAtoms)}
                   >
-                    Select All
+                    {t('actions.selectAll', 'Select All')}
                   </Button>
                 </div>
               </CardHeader>
@@ -357,7 +359,7 @@ const AtomsPage: React.FC = () => {
                           className="h-8 gap-2 text-semantic-success hover:text-semantic-success hover:bg-semantic-success/10"
                         >
                           <CheckCircle className="h-4 w-4" />
-                          Approve
+                          {t('actions.approve')}
                         </Button>
                         <Button
                           size="sm"
@@ -366,7 +368,7 @@ const AtomsPage: React.FC = () => {
                           className="h-8 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           <XCircle className="h-4 w-4" />
-                          Reject
+                          {t('actions.reject')}
                         </Button>
                       </div>
                     </div>

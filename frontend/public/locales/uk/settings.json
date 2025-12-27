@@ -1,0 +1,57 @@
+{
+  "tabs": {
+    "general": "Загальні",
+    "sources": "Джерела",
+    "providers": "Провайдери",
+    "prompts": "Промпти"
+  },
+  "general": {
+    "title": "Загальні налаштування",
+    "appearance": {
+      "title": "Зовнішній вигляд",
+      "description": "Налаштуйте вигляд інтерфейсу",
+      "theme": "Тема",
+      "light": "Світла",
+      "dark": "Темна",
+      "system": "Системна"
+    },
+    "language": {
+      "title": "Мова інтерфейсу",
+      "description": "Оберіть мову для відображення інтерфейсу"
+    },
+    "admin": {
+      "title": "Режим адміністратора",
+      "description": "Увімкніть для доступу до розширених функцій",
+      "enable": "Увімкнути режим адміністратора",
+      "shortcut": "Швидкий доступ: Ctrl+Shift+A"
+    }
+  },
+  "sources": {
+    "title": "Джерела даних",
+    "description": "Налаштування інтеграцій та джерел повідомлень",
+    "telegram": {
+      "title": "Telegram",
+      "description": "Інтеграція з Telegram чатами та каналами",
+      "connected": "Підключено",
+      "disconnected": "Відключено",
+      "connect": "Підключити",
+      "disconnect": "Відключити",
+      "webhook": "Webhook URL",
+      "copyWebhook": "Скопіювати URL"
+    }
+  },
+  "providers": {
+    "title": "LLM Провайдери",
+    "description": "Налаштування AI моделей для аналізу",
+    "add": "Додати провайдера",
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "test": "Тестувати",
+    "status": {
+      "connected": "Підключено",
+      "error": "Помилка",
+      "validating": "Перевірка...",
+      "pending": "Очікування"
+    }
+  }
+}

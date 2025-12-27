@@ -1,0 +1,67 @@
+{
+  "title": "Дашборд",
+  "welcome": "Ласкаво просимо до Pulse Radar",
+  "greeting": {
+    "morning": "Доброго ранку",
+    "afternoon": "Доброго дня",
+    "evening": "Доброго вечора"
+  },
+  "metrics": {
+    "title": "Метрики",
+    "messages": "Повідомлень",
+    "atoms": "Атомів",
+    "topics": "Тем",
+    "tasks": "Задач",
+    "today": "Сьогодні",
+    "thisWeek": "Цього тижня",
+    "thisMonth": "Цього місяця",
+    "total": "Всього",
+    "active": "Активних",
+    "pending": "Очікують"
+  },
+  "charts": {
+    "messageFlow": "Потік повідомлень",
+    "atomTypes": "Типи атомів",
+    "topicDistribution": "Розподіл тем",
+    "activityHeatmap": "Теплова карта активності"
+  },
+  "heatmap": {
+    "tabs": {
+      "week": "Тиждень",
+      "month": "Місяць"
+    },
+    "days": {
+      "mon": "Пн",
+      "tue": "Вт",
+      "wed": "Ср",
+      "thu": "Чт",
+      "fri": "Пт",
+      "sat": "Сб",
+      "sun": "Нд"
+    },
+    "legend": {
+      "less": "Менше",
+      "more": "Більше"
+    }
+  },
+  "recentActivity": {
+    "title": "Остання активність",
+    "noActivity": "Немає активності",
+    "viewAll": "Переглянути все"
+  },
+  "topTopics": {
+    "title": "Топ топіки",
+    "noTopics": "Немає топіків",
+    "viewAll": "Переглянути все",
+    "loadError": "Не вдалось завантажити топіки",
+    "emptyDescription": "Топіки з'являться після аналізу повідомлень",
+    "ariaLabel": "Топ топіки за кількістю атомів",
+    "itemAriaLabel": "Перейти до топіка {{name}} з {{atomCount}} атомами"
+  },
+  "quickActions": {
+    "title": "Швидкі дії",
+    "analyzeMessages": "Аналізувати повідомлення",
+    "createAtom": "Створити атом",
+    "runExtraction": "Запустити екстракцію"
+  }
+}

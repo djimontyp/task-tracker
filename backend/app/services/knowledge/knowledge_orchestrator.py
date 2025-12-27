@@ -1,13 +1,19 @@
 """High-level orchestration for knowledge extraction workflow."""
 
+from __future__ import annotations
+
 import logging
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING
 
 from pydantic_ai import Agent as PydanticAgent
 from pydantic_ai.settings import ModelSettings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+if TYPE_CHECKING:
+    from pydantic_ai.models.openai import OpenAIChatModel
 
 from app.config.ai_config import ai_config
 from app.models import AgentConfig, Atom, AtomLink, LLMProvider, Message, Topic, TopicAtom
@@ -19,7 +25,12 @@ from app.services.knowledge.knowledge_schemas import (
     KnowledgeExtractionOutput,
     PeriodType,
 )
-from app.services.knowledge.llm_agents import build_model_instance
+from app.services.knowledge.llm_agents import (
+    build_model_instance,
+    get_extraction_prompt,
+    get_strengthened_prompt,
+    validate_output_language,
+)
 from app.services.versioning import VersioningService
 
 logger = logging.getLogger(__name__)
@@ -33,15 +44,22 @@ class KnowledgeOrchestrator:
     automatically creating database entities and establishing relationships.
     """
 
-    def __init__(self, agent_config: AgentConfig, provider: LLMProvider):
+    def __init__(
+        self,
+        agent_config: AgentConfig,
+        provider: LLMProvider,
+        language: str = "uk",
+    ):
         """Initialize knowledge extraction service.
 
         Args:
             agent_config: Agent configuration with system prompt and model settings
             provider: LLM provider configuration (must be Ollama or OpenAI)
+            language: ISO 639-1 language code for AI output (default: 'uk')
         """
         self.agent_config = agent_config
         self.provider = provider
+        self.language = language
         self.encryptor = CredentialEncryption()
 
     async def extract_knowledge(
@@ -49,6 +67,9 @@ class KnowledgeOrchestrator:
         messages: Sequence[Message],
     ) -> KnowledgeExtractionOutput:
         """Extract topics and atoms from message batch using LLM.
+
+        Uses language-specific prompts and validates output language.
+        Retries once with strengthened prompt if language mismatch detected.
 
         Args:
             messages: Sequence of messages to analyze (10-50 recommended)
@@ -62,7 +83,8 @@ class KnowledgeOrchestrator:
         """
         logger.info(
             f"Starting knowledge extraction for {len(messages)} messages "
-            f"using agent '{self.agent_config.name}' (model: {self.agent_config.model_name})"
+            f"using agent '{self.agent_config.name}' (model: {self.agent_config.model_name}), "
+            f"language: {self.language}"
         )
 
         if len(messages) == 0:
@@ -80,9 +102,64 @@ class KnowledgeOrchestrator:
 
         model = build_model_instance(self.agent_config, self.provider, api_key)
 
+        # Use language-specific system prompt
+        system_prompt = get_extraction_prompt(self.language)
+
+        extraction_output = await self._run_extraction(
+            model=model,
+            system_prompt=system_prompt,
+            prompt=prompt,
+        )
+
+        # Validate output language
+        if not self._validate_extraction_language(extraction_output):
+            logger.warning(
+                f"Language mismatch detected in extraction output, "
+                f"retrying with strengthened prompt for '{self.language}'"
+            )
+            # Retry with strengthened prompt (max 1 retry)
+            strengthened_prompt = get_strengthened_prompt(self.language)
+            extraction_output = await self._run_extraction(
+                model=model,
+                system_prompt=strengthened_prompt,
+                prompt=prompt,
+            )
+
+            # Log if still mismatched after retry
+            if not self._validate_extraction_language(extraction_output):
+                logger.warning(
+                    "Language mismatch persists after retry, proceeding with current output"
+                )
+
+        logger.info(
+            f"Extraction completed: {len(extraction_output.topics)} topics, "
+            f"{len(extraction_output.atoms)} atoms extracted"
+        )
+
+        return extraction_output
+
+    async def _run_extraction(
+        self,
+        model: "OpenAIChatModel",
+        system_prompt: str,
+        prompt: str,
+    ) -> KnowledgeExtractionOutput:
+        """Run single extraction attempt with given prompt.
+
+        Args:
+            model: Configured LLM model
+            system_prompt: System prompt for extraction
+            prompt: User prompt with messages
+
+        Returns:
+            Extraction output
+
+        Raises:
+            Exception: If LLM request fails
+        """
         agent = PydanticAgent(
             model=model,
-            system_prompt=self.agent_config.system_prompt,
+            system_prompt=system_prompt,
             output_type=KnowledgeExtractionOutput,
             output_retries=5,
         )
@@ -97,14 +174,7 @@ class KnowledgeOrchestrator:
 
         try:
             result = await agent.run(prompt, model_settings=model_settings_obj)
-            extraction_output: KnowledgeExtractionOutput = result.output
-
-            logger.info(
-                f"Extraction completed: {len(extraction_output.topics)} topics, "
-                f"{len(extraction_output.atoms)} atoms extracted"
-            )
-
-            return extraction_output
+            return result.output
 
         except Exception as e:
             logger.error(
@@ -116,7 +186,6 @@ class KnowledgeOrchestrator:
             error_details.append(f"Agent: {self.agent_config.name}")
             error_details.append(f"Model: {self.agent_config.model_name}")
             error_details.append(f"Provider type: {self.provider.type}")
-            error_details.append(f"Messages analyzed: {len(messages)}")
 
             logger.error(f"Exception type: {type(e).__name__}")
             logger.error(f"Exception details: {repr(e)}")
@@ -132,6 +201,39 @@ class KnowledgeOrchestrator:
 
             logger.error(" | ".join(error_details))
             raise Exception(f"Knowledge extraction failed: {str(e)}. Check provider configuration.") from e
+
+    def _validate_extraction_language(self, output: KnowledgeExtractionOutput) -> bool:
+        """Validate that extraction output is in expected language.
+
+        Checks topic names/descriptions and atom titles/content.
+
+        Args:
+            output: Extraction output to validate
+
+        Returns:
+            True if language matches or no text to validate, False if mismatch
+        """
+        # Collect text samples for validation
+        texts_to_check: list[str] = []
+
+        for topic in output.topics:
+            if topic.name:
+                texts_to_check.append(topic.name)
+            if topic.description:
+                texts_to_check.append(topic.description)
+
+        for atom in output.atoms:
+            if atom.title:
+                texts_to_check.append(atom.title)
+            if atom.content:
+                texts_to_check.append(atom.content)
+
+        if not texts_to_check:
+            return True
+
+        # Combine texts for more reliable detection
+        combined_text = " ".join(texts_to_check)
+        return validate_output_language(combined_text, self.language)
 
     async def save_topics(
         self,

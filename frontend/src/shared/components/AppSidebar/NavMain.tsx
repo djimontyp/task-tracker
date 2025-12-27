@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ChevronRight } from 'lucide-react'
 import { Fragment } from 'react'
 import { cn } from '@/shared/lib/utils'
@@ -26,6 +27,7 @@ interface NavMainProps {
 }
 
 export function NavMain({ groups }: NavMainProps) {
+  const { t } = useTranslation('common')
   const location = useLocation()
   const { expandedGroups, setExpandedGroup } = useUiStore()
 
@@ -33,17 +35,17 @@ export function NavMain({ groups }: NavMainProps) {
     <>
       {groups.map((group, groupIndex) => {
         const hasNestedRoutes = group.items.length > 1 && group.items.some((item) => item.path !== '/')
-        const isGroupExpanded = expandedGroups[group.label] ?? false
+        const isGroupExpanded = expandedGroups[group.labelKey] ?? false
         const hasActiveItem = group.items.some((item) =>
           item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
         )
 
         if (hasNestedRoutes) {
           return (
-            <Fragment key={group.label}>
+            <Fragment key={group.labelKey}>
               <Collapsible
                 open={isGroupExpanded}
-                onOpenChange={(open) => setExpandedGroup(group.label, open)}
+                onOpenChange={(open) => setExpandedGroup(group.labelKey, open)}
                 className="group/collapsible"
               >
                 <SidebarGroup className="group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
@@ -58,7 +60,7 @@ export function NavMain({ groups }: NavMainProps) {
                         hasActiveItem && 'font-bold'
                       )}
                     >
-                      <span>{group.label}</span>
+                      <span>{t(group.labelKey)}</span>
                       <ChevronRight
                         className={cn(
                           'h-4 w-4 transition-transform duration-200 group-data-[collapsible=icon]:hidden',
@@ -81,7 +83,7 @@ export function NavMain({ groups }: NavMainProps) {
                               <SidebarMenuButton
                                 asChild
                                 isActive={isActive}
-                                tooltip={item.label}
+                                tooltip={t(item.labelKey)}
                                 className={cn(
                                   'relative transition-all duration-300',
                                   'data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:font-semibold',
@@ -91,7 +93,7 @@ export function NavMain({ groups }: NavMainProps) {
                               >
                                 <Link to={item.path} className="flex items-center gap-2">
                                   <item.icon className="size-5" />
-                                  <span>{item.label}</span>
+                                  <span>{t(item.labelKey)}</span>
                                 </Link>
                               </SidebarMenuButton>
                             </SidebarMenuItem>
@@ -116,7 +118,7 @@ export function NavMain({ groups }: NavMainProps) {
                             <SidebarMenuButton
                               asChild
                               isActive={isActive}
-                              tooltip={item.label}
+                              tooltip={t(item.labelKey)}
                               className={cn(
                                 'relative transition-all duration-300',
                                 'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold',
@@ -126,7 +128,7 @@ export function NavMain({ groups }: NavMainProps) {
                             >
                               <Link to={item.path} className="flex items-center gap-2">
                                 <item.icon className="size-5" />
-                                <span className="group-data-[collapsible=icon]:sr-only">{item.label}</span>
+                                <span className="group-data-[collapsible=icon]:sr-only">{t(item.labelKey)}</span>
                               </Link>
                             </SidebarMenuButton>
                           </SidebarMenuItem>
@@ -147,7 +149,7 @@ export function NavMain({ groups }: NavMainProps) {
         }
 
         return (
-          <Fragment key={group.label}>
+          <Fragment key={t(group.labelKey)}>
             <SidebarGroup>
               <SidebarGroupLabel
                 className={cn(
@@ -156,7 +158,7 @@ export function NavMain({ groups }: NavMainProps) {
                   hasActiveItem && 'font-bold'
                 )}
               >
-                {group.label}
+                {t(group.labelKey)}
               </SidebarGroupLabel>
               <SidebarGroupContent className="group-data-[collapsible=icon]:p-0">
                 <SidebarMenu className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-2">
@@ -171,7 +173,7 @@ export function NavMain({ groups }: NavMainProps) {
                         <SidebarMenuButton
                           asChild
                           isActive={isActive}
-                          tooltip={item.label}
+                          tooltip={t(item.labelKey)}
                           className={cn(
                             'relative transition-all duration-300',
                             'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold',
@@ -182,7 +184,7 @@ export function NavMain({ groups }: NavMainProps) {
                         >
                           <Link to={item.path} className="flex items-center gap-2">
                             <item.icon className="size-5" />
-                            <span className="group-data-[collapsible=icon]:sr-only">{item.label}</span>
+                            <span className="group-data-[collapsible=icon]:sr-only">{t(item.labelKey)}</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>

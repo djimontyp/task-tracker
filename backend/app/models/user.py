@@ -37,6 +37,13 @@ class User(IDMixin, TimestampMixin, SQLModel, table=True):
     is_active: bool = Field(default=True, description="Whether user is active")
     is_bot: bool = Field(default=False, description="Whether this is a bot/system user")
 
+    # Localization
+    ui_language: str = Field(
+        default="uk",
+        max_length=10,
+        description="UI language preference (ISO 639-1 code: uk, en)",
+    )
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def full_name(self) -> str:

@@ -75,6 +75,13 @@ class ProjectConfig(SQLModel, table=True):
         description="Semantic version (e.g., 1.0.0)",
     )
 
+    # Localization
+    language: str = Field(
+        default="uk",
+        max_length=10,
+        description="Language for AI-generated content (ISO 639-1 code: uk, en)",
+    )
+
     # Timestamps
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
@@ -127,6 +134,7 @@ class ProjectConfigCreate(SQLModel):
     is_active: bool = True
     priority_rules: dict = {}
     version: str = "1.0.0"
+    language: str = "uk"
 
 
 class ProjectConfigUpdate(SQLModel):
@@ -142,6 +150,7 @@ class ProjectConfigUpdate(SQLModel):
     is_active: bool | None = None
     priority_rules: dict | None = None
     version: str | None = None
+    language: str | None = None
 
 
 class ProjectConfigPublic(SQLModel):
@@ -157,6 +166,7 @@ class ProjectConfigPublic(SQLModel):
     is_active: bool
     priority_rules: dict
     version: str
+    language: str
     created_at: datetime
     updated_at: datetime
 

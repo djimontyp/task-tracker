@@ -1,0 +1,62 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome to Pulse Radar",
+  "metrics": {
+    "title": "Metrics",
+    "messages": "Messages",
+    "atoms": "Atoms",
+    "topics": "Topics",
+    "tasks": "Tasks",
+    "today": "Today",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "total": "Total",
+    "active": "Active",
+    "pending": "Pending"
+  },
+  "charts": {
+    "messageFlow": "Message Flow",
+    "atomTypes": "Atom Types",
+    "topicDistribution": "Topic Distribution",
+    "activityHeatmap": "Activity Heatmap"
+  },
+  "heatmap": {
+    "tabs": {
+      "week": "Week",
+      "month": "Month"
+    },
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "legend": {
+      "less": "Less",
+      "more": "More"
+    }
+  },
+  "recentActivity": {
+    "title": "Recent Activity",
+    "noActivity": "No activity",
+    "viewAll": "View All"
+  },
+  "topTopics": {
+    "title": "Top Topics",
+    "noTopics": "No topics",
+    "viewAll": "View All",
+    "loadError": "Failed to load topics",
+    "emptyDescription": "Topics will appear after message analysis",
+    "ariaLabel": "Top topics by atom count",
+    "itemAriaLabel": "Go to topic {{name}} with {{atomCount}} atoms"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "analyzeMessages": "Analyze Messages",
+    "createAtom": "Create Atom",
+    "runExtraction": "Run Extraction"
+  }
+}

@@ -105,7 +105,10 @@ async def embed_atoms_batch_task(atom_ids: list[uuid.UUID], provider_id: str) ->
 
 @nats_broker.task
 async def extract_knowledge_from_messages_task(
-    message_ids: list[uuid.UUID], agent_config_id: str, created_by: str | None = None
+    message_ids: list[uuid.UUID],
+    agent_config_id: str,
+    created_by: str | None = None,
+    language: str = "uk",
 ) -> dict[str, int]:
     """Background task for extracting knowledge (topics and atoms) from message batches.
 
@@ -113,10 +116,14 @@ async def extract_knowledge_from_messages_task(
     (problems, solutions, decisions, insights). Automatically creates database entities
     and establishes relationships between atoms and topics.
 
+    Uses language-specific prompts and validates output language with langdetect.
+    Retries once with strengthened prompt if language mismatch detected.
+
     Args:
         message_ids: IDs of messages to analyze (10-50 recommended for best results)
         agent_config_id: AgentConfig UUID as string
         created_by: User ID who triggered extraction (default: "system")
+        language: ISO 639-1 language code for AI output (default: "uk" for Ukrainian)
 
     Returns:
         Statistics dictionary with:
@@ -167,7 +174,9 @@ async def extract_knowledge_from_messages_task(
             },
         )
 
-        service = KnowledgeExtractionService(agent_config=agent_config, provider=provider)
+        service = KnowledgeExtractionService(
+            agent_config=agent_config, provider=provider, language=language
+        )
 
         extraction_output = await service.extract_knowledge(messages)
 

@@ -7,15 +7,18 @@
 
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Inbox, Settings } from 'lucide-react'
 import { OnboardingWizard } from '@/features/onboarding'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
-import ActivityHeatmap from '@/shared/components/ActivityHeatmap'
+
 import { PageWrapper } from '@/shared/primitives'
 import { useDashboardData } from './hooks/useDashboardData'
 import {
   DashboardMetrics,
+  ActivityHeatmap,
+  TrendChart,
   // TrendsList, // Hidden until /api/v1/dashboard/trends endpoint is implemented
   RecentInsights,
   TopTopics,
@@ -23,6 +26,7 @@ import {
 
 const DashboardPage = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation(['dashboard', 'common'])
   const [showOnboarding, setShowOnboarding] = useState(false)
 
   // Note: trends hook still called but not rendered - remove from useDashboardData when cleaning up
@@ -79,6 +83,28 @@ const DashboardPage = () => {
         </Card>
       )}
 
+      <div className="flex items-center justify-between mb-8 animate-fade-in-up">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {(() => {
+              const hour = new Date().getHours()
+              if (hour < 12) return t('greeting.morning')
+              if (hour < 18) return t('greeting.afternoon')
+              return t('greeting.evening')
+            })()}, Макс! 👋
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Ось що відбувається у вашому проєкті сьогодні.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => navigate('/settings')}>
+            <Settings className="w-4 h-4 mr-2" />
+            Налаштування
+          </Button>
+        </div>
+      </div>
+
       {/* Row 1: Metrics (3 cards) */}
       <div className="animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
         <DashboardMetrics
@@ -88,15 +114,10 @@ const DashboardPage = () => {
         />
       </div>
 
-      {/* Row 2: Trends - temporarily hidden until /api/v1/dashboard/trends endpoint is implemented */}
-      {/* <div className="animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
-        <TrendsList
-          data={trends.data}
-          isLoading={trends.isLoading}
-          error={trends.error}
-          onShowAll={() => navigate('/search')}
-        />
-      </div> */}
+      {/* Row 2: Trends Chart */}
+      <div className="animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
+        <TrendChart />
+      </div>
 
       {/* Row 2: Recent Insights */}
       <div className="animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>
@@ -113,11 +134,7 @@ const DashboardPage = () => {
         className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-up"
         style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}
       >
-        <ActivityHeatmap
-          title="Активність (7 днів)"
-          period="week"
-          enabledSources={['telegram'] as ('telegram' | 'slack' | 'email')[]}
-        />
+        <ActivityHeatmap />
         <TopTopics
           data={topics.data}
           isLoading={topics.isLoading}

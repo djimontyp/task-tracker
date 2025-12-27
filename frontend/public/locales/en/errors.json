@@ -1,0 +1,41 @@
+{
+  "general": {
+    "unknown": "Unknown error",
+    "network": "Network error. Check your internet connection.",
+    "server": "Server error. Please try again later.",
+    "notFound": "Resource not found",
+    "forbidden": "Access forbidden",
+    "unauthorized": "Authorization required",
+    "timeout": "Request timed out",
+    "badRequest": "Bad request"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Invalid email format",
+    "phone": "Invalid phone format",
+    "url": "Invalid URL format",
+    "minLength": "Minimum length: {{min}} characters",
+    "maxLength": "Maximum length: {{max}} characters",
+    "min": "Minimum value: {{min}}",
+    "max": "Maximum value: {{max}}",
+    "pattern": "Invalid format",
+    "unique": "This value is already in use"
+  },
+  "api": {
+    "fetchFailed": "Failed to fetch data",
+    "saveFailed": "Failed to save data",
+    "deleteFailed": "Failed to delete",
+    "updateFailed": "Failed to update",
+    "createFailed": "Failed to create"
+  },
+  "auth": {
+    "loginFailed": "Login failed",
+    "sessionExpired": "Session expired. Please log in again.",
+    "invalidCredentials": "Invalid credentials"
+  },
+  "file": {
+    "uploadFailed": "Failed to upload file",
+    "tooLarge": "File is too large",
+    "invalidType": "Invalid file type"
+  }
+}

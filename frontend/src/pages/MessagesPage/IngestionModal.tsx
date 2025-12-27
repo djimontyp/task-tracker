@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ interface IngestionModalProps {
 }
 
 export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps) {
+  const { t } = useTranslation('messages')
   const [groups, setGroups] = useState<TelegramGroup[]>([])
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set())
   const [limit, setLimit] = useState(1000)
@@ -126,18 +128,18 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-xl lg:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Ingest Messages from Telegram</DialogTitle>
+          <DialogTitle>{t('ingestion.title')}</DialogTitle>
           <DialogDescription>
-            Select groups to fetch historical messages from. Messages will be checked for duplicates.
+            {t('ingestion.description')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           {fetchingGroups ? (
-            <div className="text-center py-4">Loading groups...</div>
+            <div className="text-center py-4">{t('ingestion.loading', 'Loading groups...')}</div>
           ) : groups.length === 0 ? (
             <div className="text-center py-4 text-muted-foreground">
-              No groups configured. Please add groups in Settings → Telegram Settings first.
+              {t('ingestion.noGroups', 'No groups configured. Please add groups in Settings first.')}
             </div>
           ) : (
             <>
@@ -149,7 +151,7 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
                     onCheckedChange={toggleAll}
                   />
                   <Label htmlFor="select-all" className="font-medium cursor-pointer">
-                    Select All ({groups.length} groups)
+                    {t('ingestion.selectAll', 'Select All')} ({groups.length} {t('ingestion.groups', 'groups')})
                   </Label>
                 </div>
 
@@ -173,8 +175,8 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
               </div>
 
               <FormField
-                label="Messages limit per group"
-                description="Maximum number of messages to fetch from each group (1-10000)"
+                label={t('ingestion.limitLabel', 'Messages limit per group')}
+                description={t('ingestion.limitDescription', 'Maximum number of messages to fetch from each group (1-10000)')}
               >
                 <Input
                   id="limit"
@@ -191,13 +193,13 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Cancel
+            {t('modal.close')}
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={loading || selectedGroups.size === 0 || groups.length === 0}
           >
-            {loading ? 'Starting...' : `Ingest from ${selectedGroups.size} group(s)`}
+            {loading ? t('ingestion.starting', 'Starting...') : t('ingestion.submit')}
           </Button>
         </DialogFooter>
       </DialogContent>

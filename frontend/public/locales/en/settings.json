@@ -1,0 +1,57 @@
+{
+  "tabs": {
+    "general": "General",
+    "sources": "Sources",
+    "providers": "Providers",
+    "prompts": "Prompts"
+  },
+  "general": {
+    "title": "General Settings",
+    "appearance": {
+      "title": "Appearance",
+      "description": "Customize the interface look and feel",
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "title": "Interface Language",
+      "description": "Select the language for the interface"
+    },
+    "admin": {
+      "title": "Administrator Mode",
+      "description": "Enable to access advanced features",
+      "enable": "Enable administrator mode",
+      "shortcut": "Shortcut: Ctrl+Shift+A"
+    }
+  },
+  "sources": {
+    "title": "Data Sources",
+    "description": "Integration and message source settings",
+    "telegram": {
+      "title": "Telegram",
+      "description": "Integration with Telegram chats and channels",
+      "connected": "Connected",
+      "disconnected": "Disconnected",
+      "connect": "Connect",
+      "disconnect": "Disconnect",
+      "webhook": "Webhook URL",
+      "copyWebhook": "Copy URL"
+    }
+  },
+  "providers": {
+    "title": "LLM Providers",
+    "description": "AI model settings for analysis",
+    "add": "Add Provider",
+    "edit": "Edit",
+    "delete": "Delete",
+    "test": "Test",
+    "status": {
+      "connected": "Connected",
+      "error": "Error",
+      "validating": "Validating...",
+      "pending": "Pending"
+    }
+  }
+}

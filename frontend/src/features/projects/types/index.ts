@@ -28,6 +28,7 @@ export interface ProjectConfig {
   is_active: boolean
   priority_rules: PriorityRules
   version: string
+  language: string // ISO 639-1 code: 'uk' | 'en'
   created_at: string
   updated_at: string
 }
@@ -43,6 +44,7 @@ export interface CreateProjectConfig {
   is_active?: boolean
   priority_rules?: PriorityRules
   version?: string
+  language?: string // ISO 639-1 code: 'uk' | 'en', defaults to 'uk'
 }
 
 export interface UpdateProjectConfig {
@@ -56,6 +58,7 @@ export interface UpdateProjectConfig {
   is_active?: boolean
   priority_rules?: PriorityRules
   version?: string
+  language?: string // ISO 639-1 code: 'uk' | 'en'
 }
 
 export interface ProjectListResponse {

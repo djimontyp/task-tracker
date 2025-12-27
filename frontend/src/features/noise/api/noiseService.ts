@@ -1,7 +1,7 @@
 import { API_ENDPOINTS } from '@/shared/config/api'
 import type { NoiseStats } from '../types'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 class NoiseService {
   async getNoiseStats(): Promise<NoiseStats> {

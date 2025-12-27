@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, Badge, Button } from '@/shared/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import {
@@ -14,6 +15,8 @@ import {
 import { versioningService } from '@/features/knowledge/api/versioningService'
 import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
 import { VersionHistoryList } from '@/features/knowledge/components/VersionHistoryList'
+import { LanguageMismatchBadge } from '@/shared/components/LanguageMismatchBadge'
+import { useProjectLanguage } from '@/shared/hooks/useProjectLanguage'
 import { badges } from '@/shared/tokens/patterns'
 import type { Atom, AtomType } from '../types'
 
@@ -32,19 +35,26 @@ const atomTypeIcons: Record<AtomType, React.ComponentType<{ className?: string }
   requirement: FileText,
 }
 
-const atomTypeLabels: Record<AtomType, string> = {
-  problem: 'Problem',
-  solution: 'Solution',
-  decision: 'Decision',
-  question: 'Question',
-  insight: 'Insight',
-  pattern: 'Pattern',
-  requirement: 'Requirement',
-}
-
 const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
+  const { t } = useTranslation('atoms')
+  const { projectLanguage } = useProjectLanguage()
   const [pendingVersionsCount, setPendingVersionsCount] = useState(0)
   const [showVersionHistory, setShowVersionHistory] = useState(false)
+
+  // Map atom types to translation keys where available, fallback to capitalized type
+  const getTypeLabel = (type: AtomType): string => {
+    const typeKeyMap: Partial<Record<AtomType, string>> = {
+      decision: 'type.decision',
+      question: 'type.question',
+      insight: 'type.insight',
+    }
+    const key = typeKeyMap[type]
+    if (key) {
+      return t(key)
+    }
+    // Fallback for types not in translation file
+    return type.charAt(0).toUpperCase() + type.slice(1)
+  }
 
   const loadPendingVersions = React.useCallback(async () => {
     try {
@@ -89,10 +99,16 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
     >
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-2">
-          <Badge variant="outline" className={badges.atom[atom.type]}>
-            {React.createElement(atomTypeIcons[atom.type], { className: 'h-3.5 w-3.5' })}
-            {atomTypeLabels[atom.type]}
-          </Badge>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="outline" className={badges.atom[atom.type]}>
+              {React.createElement(atomTypeIcons[atom.type], { className: 'h-3.5 w-3.5' })}
+              {getTypeLabel(atom.type)}
+            </Badge>
+            <LanguageMismatchBadge
+              detectedLanguage={atom.detected_language ?? undefined}
+              expectedLanguage={projectLanguage}
+            />
+          </div>
           {atom.confidence !== null && (
             <span className="text-xs text-muted-foreground">
               {Math.round(atom.confidence * 100)}%
@@ -114,14 +130,14 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
                 clipRule="evenodd"
               />
             </svg>
-            <span className="text-xs font-medium">Approved</span>
+            <span className="text-xs font-medium">{t('status.approved')}</span>
           </div>
         )}
 
         {pendingVersionsCount > 0 && (
           <div className="flex items-center gap-2 pt-2 border-t border-border">
             <Badge className="text-xs bg-semantic-warning text-white hover:bg-semantic-warning/90">
-              {pendingVersionsCount} pending version{pendingVersionsCount > 1 ? 's' : ''}
+              {t('card.pendingVersions', { count: pendingVersionsCount, defaultValue: `${pendingVersionsCount} pending version${pendingVersionsCount > 1 ? 's' : ''}` })}
             </Badge>
             <Button
               variant="ghost"
@@ -131,10 +147,10 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
                 e.stopPropagation()
                 setShowVersionHistory(true)
               }}
-              aria-label="View version history"
+              aria-label={t('card.viewHistory', 'View version history')}
             >
               <Clock className="h-3 w-3 mr-2" />
-              View History
+              {t('card.viewHistory', 'View History')}
             </Button>
           </div>
         )}
@@ -143,7 +159,7 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
       <Dialog open={showVersionHistory} onOpenChange={setShowVersionHistory}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Version History - {atom.title}</DialogTitle>
+            <DialogTitle>{t('card.versionHistoryTitle', { title: atom.title, defaultValue: `Version History - ${atom.title}` })}</DialogTitle>
           </DialogHeader>
           <VersionHistoryList
             entityType="atom"
