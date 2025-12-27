@@ -8,4 +8,5 @@ module.exports = {
   'no-heroicons': require('./no-heroicons'),
   'no-raw-page-wrapper': require('./no-raw-page-wrapper'),
   'stories-require-autodocs': require('./stories-require-autodocs'),
+  'no-raw-zindex': require('./no-raw-zindex'),
 };

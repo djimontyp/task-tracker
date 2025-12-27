@@ -99,6 +99,9 @@ module.exports = {
     // Local rule: Заборона Heroicons (використовуй lucide-react)
     'local-rules/no-heroicons': 'error',
 
+    // Local rule: Заборона raw z-index (використовуй z-dropdown, z-modal, тощо)
+    'local-rules/no-raw-zindex': 'error',
+
     // Local rule: Заборона raw page wrappers (використовуй PageWrapper)
     // Warning level during migration, will become error after all pages migrated
     'local-rules/no-raw-page-wrapper': ['warn', {
@@ -175,6 +178,7 @@ module.exports = {
         'no-console': 'off',
         'local-rules/no-raw-tailwind-colors': 'off',
         'local-rules/no-odd-spacing': 'off',
+        'local-rules/no-raw-zindex': 'off',
       },
     },
     // Storybook files - relaxed rules for story render functions
@@ -183,6 +187,7 @@ module.exports = {
       rules: {
         'local-rules/no-odd-spacing': 'off',
         'local-rules/no-raw-tailwind-colors': 'off',
+        'local-rules/no-raw-zindex': 'off',
         'react-hooks/rules-of-hooks': 'off', // Storybook render functions use hooks
         'react/no-unescaped-entities': 'off',
         'no-console': 'off',
