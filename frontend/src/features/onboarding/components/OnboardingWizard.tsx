@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent } from '@/shared/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { Progress } from '@/shared/ui/progress'
 import { Check, Rocket, MessageSquare, Cpu, FileDown } from 'lucide-react'
@@ -97,6 +97,7 @@ export function OnboardingWizard({ open: controlledOpen, onClose, onComplete }: 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl">
+        <DialogTitle className="sr-only">Onboarding Wizard - {step.title}</DialogTitle>
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <p className="text-sm text-muted-foreground">

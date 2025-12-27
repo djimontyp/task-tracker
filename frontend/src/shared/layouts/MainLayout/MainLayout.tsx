@@ -18,17 +18,29 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const { isAdminMode, toggleAdminMode } = useAdminMode()
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
+  // Admin Mode toggle: Cmd+Shift+A (macOS) / Ctrl+Shift+A (Win/Linux)
+  const handleAdminToggle = () => {
+    toggleAdminMode()
+    toast.success(
+      isAdminMode ? 'Admin Mode Disabled' : 'Admin Mode Enabled',
+      { duration: 2000 }
+    )
+  }
+
+  // macOS: Cmd+Shift+A
   useKeyboardShortcut({
     key: 'a',
     metaKey: true,
     shiftKey: true,
-    callback: () => {
-      toggleAdminMode()
-      toast.success(
-        isAdminMode ? 'Admin Mode Disabled' : 'Admin Mode Enabled',
-        { duration: 2000 }
-      )
-    },
+    callback: handleAdminToggle,
+  })
+
+  // Windows/Linux: Ctrl+Shift+A
+  useKeyboardShortcut({
+    key: 'a',
+    ctrlKey: true,
+    shiftKey: true,
+    callback: handleAdminToggle,
   })
 
   return (
