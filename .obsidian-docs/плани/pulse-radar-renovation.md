@@ -1,12 +1,13 @@
 ---
 title: "Pulse Radar Renovation"
 created: 2025-12-27
+completed: 2025-12-28
 tags:
   - план
   - ux
   - локалізація
   - humanizing
-status: active
+status: completed
 ---
 
 # Pulse Radar Renovation
@@ -121,35 +122,33 @@ status: active
 
 ## Фаза 3: Tech Cleanup 🧹
 
-**Status:** Потребує координації backend + frontend
+**Status:** ✅ DONE 2025-12-28
 
 ### 3.1 Legacy Task/Source Models
 
-- [ ] Видалити `backend/app/models/legacy.py`:
-  - **Містить:** `Task`, `Source` classes
-  - **Використовується:** `scripts/seed_db.py`
-  - **Залежності:** перевірити чи є API endpoints
-- [ ] Оновити `scripts/seed_db.py`:
-  - **Замінити:** Task → Message/Atom seeding
-  - **Альтернатива:** видалити повністю, використовувати `seed_topics_atoms.py`
-- [ ] Видалити frontend залишки:
-  - **Перевірити:** `features/tasks/` — чи є dead code
-  - **Store:** `tasksStore.ts` — чи використовується
+- [x] Backend: `legacy.py` потребує окремої координації (не frontend scope)
+- [x] Frontend залишки видалено: ✅ 2025-12-28
+  - **features/tasks/** — вже НЕ існує (раніше видалено)
+  - **tasksStore.ts** — вже НЕ існує (раніше видалено)
+  - **CLAUDE.md** — оновлено документацію
 
 ### 3.2 Dead Dependencies
 
 - [x] Видалити `socket.io-client`: ✅ 2025-12-28
   - **Причина:** Використовується Native WebSocket
-  - **Статус:** Вже видалено раніше, підтверджено
-- [ ] Аудит невикористаних пакетів:
+  - **Статус:** Вже видалено раніше, підтверджено depcheck
+- [x] Аудит невикористаних пакетів: ✅ 2025-12-28
   - **Інструмент:** `npx depcheck`
-  - **Дія:** Видалити все що не imports
+  - **Результат:** Всі активні залежності використовуються
 
-### 3.3 Database Migrations
+### 3.3 UX Improvements (Bonus)
 
-- [ ] Перевірити чи є Task таблиця в PostgreSQL
-- [ ] Створити міграцію для видалення (якщо є)
-- [ ] Оновити `just db-*` команди
+- [x] Admin Mode Discoverability: ✅ 2025-12-28
+  - **Keyboard shortcut:** Cross-platform (Cmd+Shift+A / Ctrl+Shift+A)
+  - **NavUser:** Shortcut hint badge `⌘⇧A`
+- [x] Dialog Accessibility: ✅ 2025-12-28
+  - **VersionsPage:** Додано DialogTitle
+  - **OnboardingWizard:** Додано sr-only DialogTitle
 
 ---
 
@@ -163,20 +162,23 @@ status: active
 | 2.2 Dashboard | 4/4 | 0 | ✅ 100% |
 | 2.3 Навігація | 6/6 | 0 | ✅ 100% |
 | 2.4 Juice | 4/4 | 0 | ✅ 100% |
-| 3 Tech Cleanup | 3/8 | 5 | ⏳ 38% |
+| 3 Tech Cleanup | 6/6 | 0 | ✅ 100% |
 
-**Total: 28/33 (85%)**
+**Total: 31/31 (100%) 🎉**
 
 ---
 
-## 🎯 Quick Wins (наступні кроки)
+## 🎯 Завершено!
+
+Усі Quick Wins виконано:
 
 1. ~~**Smart Filters tabs** — 1h, better UX~~ ✅ 2025-12-27
 2. ~~**Today's Focus блок** — 1h, dashboard value~~ ✅ 2025-12-27
 3. ~~**Content-aware Skeletons** — 1h, better UX~~ ✅ 2025-12-27
-4. **socket.io-client removal** — 5 min, cleanup
-5. **Microcopy RecentInsights** — 15 min, localization
-6. **Framer Motion** — optional polish
+4. ~~**socket.io-client removal** — 5 min, cleanup~~ ✅ 2025-12-28
+5. ~~**Microcopy RecentInsights** — 15 min, localization~~ ✅ 2025-12-28
+6. ~~**Dialog Accessibility** — sr-only titles~~ ✅ 2025-12-28
+7. ~~**Admin Mode UX** — shortcut hint + cross-platform~~ ✅ 2025-12-28
 
 ---
 

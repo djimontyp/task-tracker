@@ -51,7 +51,6 @@ src/
 |---------|---------|---------|
 | **react-router-dom** | 7.9.3 | Client-side routing with lazy loading |
 | **axios** | 1.12.2 | HTTP client for API calls |
-| ~~socket.io-client~~ | ~~4.8.1~~ | **DEAD DEPENDENCY** (remove - native WebSocket used) |
 
 ### UI Components (Radix UI)
 16 packages: dialog, dropdown-menu, select, tabs, tooltip, checkbox, switch, popover, etc.
@@ -78,7 +77,7 @@ src/
 ### Other UI
 - **lucide-react** - Icon library (SVG icons)
 - **react-colorful** 5.6.1 - Color picker
-- **react-hot-toast** 2.6.0 / **sonner** 2.0.7 - Toast notifications
+- **sonner** 2.0.7 - Toast notifications
 - **next-themes** 0.4.6 - Theme switching
 
 ---
@@ -100,11 +99,10 @@ src/
 | 9 | **projects** | Project CRUD, keyword management | ProjectCard, ProjectForm (5 files) |
 | 10 | **proposals** | Task proposal review, batch actions | ProposalCard, RejectProposalDialog (5 files) |
 | 11 | **providers** | LLM provider config, Ollama models | ValidationStatus, useOllamaModels (8 files) |
-| 12 | **tasks** | Task state management | tasksStore.ts (1 file) |
-| 13 | **topics** | Topic management (icons, colors) | HexColorPicker, renderIcon (6 files) |
-| 14 | **websocket** | WebSocket connection, service status | useWebSocket, useServiceStatus (2 files) |
+| 12 | **topics** | Topic management (icons, colors) | HexColorPicker, renderIcon (6 files) |
+| 13 | **websocket** | WebSocket connection, service status | useWebSocket, useServiceStatus (2 files) |
 
-**Total**: 14 modules (87 files)
+**Total**: 13 modules
 
 ---
 
@@ -136,17 +134,16 @@ src/
 
 ## State Management
 
-### Zustand Stores (3 total)
+### Zustand Stores (2 total)
 
 **Pattern**: Feature-scoped stores with immutable updates
 
 | Store | Location | Purpose | Key State |
 |-------|----------|---------|-----------|
-| **tasksStore** | `/features/tasks/store/` | Task state | `tasks[]`, `selectedTask`, `filterStatus`, loading/error |
 | **messagesStore** | `/features/messages/store/` | Message feed | (feature-specific) |
 | **uiStore** | `/shared/store/` | UI state | `sidebarOpen`, `theme` (light/dark) |
 
-**Pattern**: Store created with Zustand's create function, defining state properties (tasks array, selectedTask, loading/error flags) and actions (setTasks, addTask, updateTask) using immutable updates with spread syntax.
+**Pattern**: Store created with Zustand's create function using immutable updates with spread syntax.
 
 ### TanStack Query (Server State)
 
@@ -406,9 +403,8 @@ SETTINGS
 
 ## Known Issues
 
-1. **Socket.IO Client**: Installed but not used - remove from package.json
-2. **Mixed API Pattern**: Some services use axios, others use fetch API
-3. **Environment Variables**: Document all VITE_* vars in .env.example
+1. **Mixed API Pattern**: Some services use axios, others use fetch API
+2. **Environment Variables**: Document all VITE_* vars in .env.example
 
 ---
 
