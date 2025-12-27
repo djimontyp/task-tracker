@@ -98,6 +98,9 @@ export function NavUser({
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Admin Mode</span>
+                <kbd className="ml-1 text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">
+                  ⌘⇧A
+                </kbd>
               </div>
               <Switch
                 checked={isAdminMode}

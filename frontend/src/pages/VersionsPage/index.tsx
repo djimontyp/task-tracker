@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Input, Button, Badge, Spinner } from '@/shared/ui'
 import { Card } from '@/shared/components'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
-import { Dialog, DialogContent } from '@/shared/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import { Search, X } from 'lucide-react'
 import { topicService } from '@/features/topics/api/topicService'
 import { versioningService } from '@/features/knowledge/api/versioningService'
@@ -284,6 +284,9 @@ const VersionsPage = () => {
       {dialogVersion && (
         <Dialog open={!!dialogVersion} onOpenChange={() => setDialogVersion(null)}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Version Comparison - {dialogVersion.entityName}</DialogTitle>
+            </DialogHeader>
             <VersionDiffViewer
               entityType={dialogVersion.entityType}
               entityId={dialogVersion.entityId}
