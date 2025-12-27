@@ -8,6 +8,7 @@
  */
 
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   Sparkles,
   AlertTriangle,
@@ -29,7 +30,7 @@ import type { RecentInsightsProps, RecentInsight } from '../types'
 // Atom type configuration with fallback
 type AtomConfigItem = {
   icon: typeof AlertTriangle
-  label: string
+  labelKey: string
   dotBg: string
   textColor: string
 }
@@ -38,43 +39,43 @@ type AtomConfigItem = {
 const ATOM_CONFIG: Record<string, AtomConfigItem> = {
   PROBLEM: {
     icon: AlertTriangle,
-    label: 'Проблема',
+    labelKey: 'problem',
     dotBg: atom.problem.bg,
     textColor: atom.problem.text,
   },
   SOLUTION: {
     icon: CheckCircle,
-    label: 'Рішення',
+    labelKey: 'solution',
     dotBg: atom.decision.bg,
     textColor: atom.decision.text,
   },
   DECISION: {
     icon: CheckCircle,
-    label: 'Рішення',
+    labelKey: 'decision',
     dotBg: atom.decision.bg,
     textColor: atom.decision.text,
   },
   QUESTION: {
     icon: HelpCircle,
-    label: 'Питання',
+    labelKey: 'question',
     dotBg: atom.question.bg,
     textColor: atom.question.text,
   },
   INSIGHT: {
     icon: Gem,
-    label: 'Інсайт',
+    labelKey: 'insight',
     dotBg: atom.insight.bg,
     textColor: atom.insight.text,
   },
   PATTERN: {
     icon: Gem,
-    label: 'Патерн',
+    labelKey: 'pattern',
     dotBg: atom.insight.bg,
     textColor: atom.insight.text,
   },
   REQUIREMENT: {
     icon: CircleDot,
-    label: 'Вимога',
+    labelKey: 'requirement',
     dotBg: semantic.info.bg,
     textColor: semantic.info.text,
   },
@@ -83,7 +84,7 @@ const ATOM_CONFIG: Record<string, AtomConfigItem> = {
 // Fallback for unknown types
 const DEFAULT_CONFIG: AtomConfigItem = {
   icon: CircleDot,
-  label: 'Атом',
+  labelKey: 'atom',
   dotBg: 'bg-muted',
   textColor: 'text-muted-foreground',
 }
@@ -92,13 +93,16 @@ const TimelineItem = ({
   insight,
   isLast,
   onClick,
+  getLabel,
 }: {
   insight: RecentInsight
   isLast: boolean
   onClick?: () => void
+  getLabel: (key: string) => string
 }) => {
   const config = ATOM_CONFIG[insight.type] || DEFAULT_CONFIG
   const Icon = config.icon
+  const label = getLabel(config.labelKey)
 
   return (
     <div className="relative flex gap-4">
@@ -107,7 +111,7 @@ const TimelineItem = ({
         {/* Dot with icon */}
         <div
           className={cn(
-            'relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
+            'relative z-dropdown flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
             'ring-4 ring-background',
             config.dotBg
           )}
@@ -143,12 +147,12 @@ const TimelineItem = ({
           }}
           tabIndex={0}
           role="button"
-          aria-label={`${config.label}: ${insight.title}`}
+          aria-label={`${label}: ${insight.title}`}
         >
           {/* Header: Type + Time */}
           <div className="flex items-center justify-between mb-2">
             <span className={cn('text-xs font-semibold uppercase tracking-wide', config.textColor)}>
-              {config.label}
+              {label}
             </span>
             <span className="text-xs text-muted-foreground">
               {formatMessageDate(insight.createdAt)}
@@ -156,7 +160,7 @@ const TimelineItem = ({
           </div>
 
           {/* Title */}
-          <h4 className="text-sm font-semibold text-foreground mb-1 line-clamp-2 group-hover:text-primary transition-colors">
+          <h4 className="text-sm font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
             {insight.title}
           </h4>
 
@@ -168,7 +172,7 @@ const TimelineItem = ({
           )}
 
           {/* Topic */}
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Hash className="h-3 w-3" aria-hidden="true" />
             {insight.topicName}
           </div>
@@ -202,16 +206,16 @@ const TimelineSkeleton = () => (
   </div>
 )
 
-const TimelineEmpty = () => (
+const TimelineEmpty = ({ t }: { t: (key: string) => string }) => (
   <div className="flex flex-col items-center justify-center py-12 text-center">
     <div className="rounded-full bg-muted p-4 mb-4">
       <Sparkles className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
     </div>
-    <h3 className="text-sm font-medium text-foreground mb-1">
-      Поки немає insights
+    <h3 className="text-sm font-medium text-foreground mb-2">
+      {t('recentInsights.empty')}
     </h3>
     <p className="text-sm text-muted-foreground max-w-xs">
-      AI витягне знання після аналізу повідомлень
+      {t('recentInsights.emptyDescription')}
     </p>
   </div>
 )
@@ -224,6 +228,9 @@ const RecentInsights = ({
   onInsightClick,
 }: RecentInsightsProps) => {
   const navigate = useNavigate()
+  const { t } = useTranslation('dashboard')
+
+  const getAtomLabel = (key: string) => t(`recentInsights.atomTypes.${key}`)
 
   const handleInsightClick = (insight: RecentInsight) => {
     if (onInsightClick) {
@@ -239,16 +246,16 @@ const RecentInsights = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" aria-hidden="true" />
-            Останні важливі
+            {t('recentInsights.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <p className="text-sm text-muted-foreground mb-4">
-              Не вдалось завантажити
+              {t('recentInsights.loadError')}
             </p>
             <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-              Спробувати знову
+              {t('recentInsights.retry')}
             </Button>
           </div>
         </CardContent>
@@ -262,11 +269,11 @@ const RecentInsights = ({
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" aria-hidden="true" />
-            Останні важливі
+            {t('recentInsights.title')}
           </CardTitle>
           {onViewAll && data && data.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={onViewAll} className="gap-1">
-              Всі
+            <Button variant="ghost" size="sm" onClick={onViewAll} className="gap-2">
+              {t('recentInsights.viewAll')}
               <ChevronRight className="h-4 w-4" aria-hidden="true" />
             </Button>
           )}
@@ -276,15 +283,16 @@ const RecentInsights = ({
         {isLoading ? (
           <TimelineSkeleton />
         ) : !data || data.length === 0 ? (
-          <TimelineEmpty />
+          <TimelineEmpty t={t} />
         ) : (
-          <div role="feed" aria-label="Останні важливі insights">
+          <div role="feed" aria-label={t('recentInsights.ariaLabel')}>
             {data.map((insight, index) => (
               <TimelineItem
                 key={insight.id}
                 insight={insight}
                 isLast={index === data.length - 1}
                 onClick={() => handleInsightClick(insight)}
+                getLabel={getAtomLabel}
               />
             ))}
           </div>

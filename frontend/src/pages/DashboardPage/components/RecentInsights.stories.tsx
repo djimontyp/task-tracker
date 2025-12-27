@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { MemoryRouter } from 'react-router-dom'
 import RecentInsights from './RecentInsights'
 import { createMockInsights, EMPTY_INSIGHTS } from '../mocks/dashboardMocks'
