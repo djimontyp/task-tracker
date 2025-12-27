@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { MemoryRouter } from 'react-router-dom'
 import TopTopics from './TopTopics'
 import { createMockTopics, EMPTY_TOPICS } from '../mocks/dashboardMocks'

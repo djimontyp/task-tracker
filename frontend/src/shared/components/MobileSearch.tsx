@@ -1,17 +1,18 @@
+import type { ReactNode } from 'react'
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from '@/shared/ui/sheet'
-import { SearchBar } from '@/features/search/components'
 
 interface MobileSearchProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  children: ReactNode
 }
 
-export const MobileSearch = ({ open, onOpenChange }: MobileSearchProps) => {
+export const MobileSearch = ({ open, onOpenChange, children }: MobileSearchProps) => {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -23,7 +24,7 @@ export const MobileSearch = ({ open, onOpenChange }: MobileSearchProps) => {
           <SheetTitle className="sr-only">Search</SheetTitle>
         </SheetHeader>
         <div className="py-4">
-          <SearchBar />
+          {children}
         </div>
       </SheetContent>
     </Sheet>

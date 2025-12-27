@@ -38,14 +38,14 @@ const TrendItem = ({ trend, index }: { trend: Trend; index: number }) => {
 
       {/* Keyword and meta */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-2 mb-2">
           <span className="font-medium text-foreground truncate">
             {trend.keyword}
           </span>
           {trend.relatedProblems && trend.relatedProblems > 0 && (
             <Badge
               variant="outline"
-              className="gap-1 border-semantic-error/50 text-semantic-error bg-semantic-error/10"
+              className="gap-2 border-semantic-error/50 text-semantic-error bg-semantic-error/10"
             >
               <AlertCircle className="h-3 w-3" aria-hidden="true" />
               {trend.relatedProblems} {trend.relatedProblems === 1 ? 'проблема' : 'проблеми'}
@@ -59,7 +59,7 @@ const TrendItem = ({ trend, index }: { trend: Trend; index: number }) => {
 
       {/* Delta indicator */}
       <div
-        className={cn('flex items-center gap-1 text-sm font-medium', getDeltaColor())}
+        className={cn('flex items-center gap-2 text-sm font-medium', getDeltaColor())}
         aria-label={`${trend.delta > 0 ? 'Збільшення' : trend.delta < 0 ? 'Зменшення' : 'Без змін'} на ${Math.abs(trend.delta)}`}
       >
         {getDeltaIcon()}
@@ -92,7 +92,7 @@ const TrendsListEmpty = () => (
     <div className="rounded-full bg-muted p-4 mb-4">
       <TrendingUp className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
     </div>
-    <h3 className="text-sm font-medium text-foreground mb-1">
+    <h3 className="text-sm font-medium text-foreground mb-2">
       Немає трендів
     </h3>
     <p className="text-sm text-muted-foreground max-w-xs">

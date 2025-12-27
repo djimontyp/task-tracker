@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import DashboardMetrics from './DashboardMetrics'
 import { createMockMetrics, EMPTY_METRICS } from '../mocks/dashboardMocks'
 

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import TrendsList from './TrendsList'
 import { createMockTrends, EMPTY_TRENDS } from '../mocks/dashboardMocks'
 
