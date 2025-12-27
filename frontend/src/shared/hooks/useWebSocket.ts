@@ -54,9 +54,9 @@ const resolveWebSocketUrl = (topics?: string[]) => {
   return url
 }
 
-type WebSocketState = 'connecting' | 'connected' | 'reconnecting' | 'disconnected'
+export type WebSocketState = 'connecting' | 'connected' | 'reconnecting' | 'disconnected'
 
-interface UseWebSocketOptions {
+export interface UseWebSocketOptions {
   topics?: string[]
   onMessage?: (data: unknown) => void
   onConnect?: () => void
