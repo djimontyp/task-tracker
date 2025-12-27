@@ -110,6 +110,16 @@ module.exports = {
         topic: {
           default: "hsl(var(--topic-default))",
         },
+        highlight: {
+          DEFAULT: "hsl(var(--highlight))",
+        },
+        heatmap: {
+          "level-0": "hsl(var(--heatmap-level-0))",
+          "level-1": "hsl(var(--heatmap-level-1))",
+          "level-2": "hsl(var(--heatmap-level-2))",
+          "level-3": "hsl(var(--heatmap-level-3))",
+          "level-4": "hsl(var(--heatmap-level-4))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -147,6 +157,20 @@ module.exports = {
         "fade-in": "fade-in 0.3s ease-out",
         "fade-in-up": "fade-in-up 0.4s ease-out",
         "spin-slow": "spin 2s linear infinite",
+      },
+      zIndex: {
+        // Design System z-index tokens
+        // See: frontend/src/shared/tokens/zindex.ts
+        'base': '0',
+        'dropdown': '10',
+        'sticky': '20',
+        'fixed': '30',
+        'modal-backdrop': '40',
+        'modal': '50',
+        'popover': '60',
+        'tooltip': '70',
+        'toast': '80',
+        'max': '9999',
       },
     },
   },

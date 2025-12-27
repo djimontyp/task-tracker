@@ -75,6 +75,14 @@
     --brand-telegram: 200 80% 50%;
     /* Topic Default */
     --topic-default: 231 65% 61%;
+    /* Search Highlight */
+    --highlight: 43 96% 72%;
+    /* Heatmap Activity Levels (5 levels: 0-4) */
+    --heatmap-level-0: 0 0% 93%;
+    --heatmap-level-1: 142 76% 80%;
+    --heatmap-level-2: 142 76% 60%;
+    --heatmap-level-3: 142 76% 45%;
+    --heatmap-level-4: 142 76% 35%;
   }
 
   .dark {
@@ -148,6 +156,14 @@
     --brand-telegram: 200 80% 60%;
     /* Topic Default - lighter for dark mode */
     --topic-default: 231 65% 71%;
+    /* Search Highlight - darker bg for dark mode readability */
+    --highlight: 43 96% 35%;
+    /* Heatmap Activity Levels (5 levels: 0-4) - adjusted for dark mode */
+    --heatmap-level-0: 0 0% 18%;
+    --heatmap-level-1: 142 50% 25%;
+    --heatmap-level-2: 142 60% 35%;
+    --heatmap-level-3: 142 70% 45%;
+    --heatmap-level-4: 142 76% 55%;
   }
 }
 
