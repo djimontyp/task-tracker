@@ -22,7 +22,7 @@ import {
 import { Sparkles } from 'lucide-react';
 import { TimeWindowSelector } from '@/features/analysis/components/TimeWindowSelector';
 import { knowledgeService } from '../api/knowledgeService';
-import { useWebSocket } from '@/features/websocket/hooks/useWebSocket';
+import { useWebSocket } from '@/shared/hooks';
 import { agentService } from '@/features/agents/api/agentService';
 import type { AgentConfig } from '@/features/agents/types/agent';
 import type { ExtractionProgress, PeriodType, PeriodRequest } from '../types';

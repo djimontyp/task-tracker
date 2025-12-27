@@ -66,7 +66,7 @@ export function ImportanceScoreFilter<TData, TValue>({
         <Button
           variant="outline"
           size="sm"
-          className="h-8 border-dashed"
+          className="border-dashed"
         >
           <Filter className="mr-2 h-4 w-4" />
           {title}

@@ -19,7 +19,7 @@ import { metricsService } from '../api/metricsService'
 import { QualityScoreDisplay } from './QualityScoreDisplay'
 import { NoiseStatsDisplay } from './NoiseStatsDisplay'
 import { useAdminMode } from '@/shared/hooks/useAdminMode'
-import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
+import { useWebSocket } from '@/shared/hooks'
 import { cn } from '@/shared/lib'
 import { toast } from 'sonner'
 
@@ -232,7 +232,7 @@ export const MetricsDashboard = () => {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">System Metrics</h2>
+        <h2 className="text-xl font-semibold">System metrics</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(4)].map((_, i) => (
             <Card key={i}>
@@ -289,7 +289,7 @@ export const MetricsDashboard = () => {
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <h2 className="text-xl font-semibold">System Metrics</h2>
+          <h2 className="text-xl font-semibold">System metrics</h2>
           <AdminFeatureBadge variant="inline" size="sm" />
         </div>
         <div className="flex items-center gap-4">

@@ -13,7 +13,7 @@ import {
   FileText
 } from 'lucide-react'
 import { versioningService } from '@/features/knowledge/api/versioningService'
-import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
+import { useWebSocket } from '@/shared/hooks'
 import { VersionHistoryList } from '@/features/knowledge/components/VersionHistoryList'
 import { LanguageMismatchBadge } from '@/shared/components/LanguageMismatchBadge'
 import { useProjectLanguage } from '@/shared/hooks/useProjectLanguage'

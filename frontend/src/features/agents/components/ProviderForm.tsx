@@ -94,7 +94,7 @@ const ProviderForm = ({
             />
           </FormField>
 
-          <FormField label="Provider Type" id="type" required>
+          <FormField label="Provider type" id="type" required>
             <Select
               value={formData.type}
               onValueChange={(value) => handleTypeChange(value as ProviderType)}

@@ -206,7 +206,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle>Vector Embedding</CardTitle>
+              <CardTitle>Vector embedding</CardTitle>
               <CardDescription>
                 {data.embedding?.length || 0} dimensions
               </CardDescription>

@@ -262,7 +262,7 @@ const AgentForm = ({
                 />
               </FormField>
 
-              <FormField label="Max Tokens" id="max_tokens">
+              <FormField label="Max tokens" id="max_tokens">
                 <Input
                   id="max_tokens"
                   type="number"

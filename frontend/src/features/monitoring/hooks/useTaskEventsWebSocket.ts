@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
+import { useWebSocket } from '@/shared/hooks'
 import { logger } from '@/shared/utils/logger'
 import { TaskStatus, type TaskExecutionLog } from '../types'
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/shared/ui/badge';
-import { useWebSocket } from '@/features/websocket/hooks/useWebSocket';
+import { useWebSocket } from '@/shared/hooks';
 import { versioningService } from '../api/versioningService';
 import type { PendingVersionsCount } from '../types';
 

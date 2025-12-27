@@ -328,7 +328,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     size: 140,
     minSize: 100,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Sent At" />
+      <DataTableColumnHeader column={column} title="Sent at" />
     ),
     cell: ({ row }) => {
       const d = row.getValue<string>('sent_at')
@@ -350,9 +350,9 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
         return (
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={callbacks.onReset}
-            className="h-8 w-8 p-0 hover:bg-destructive/10"
+            className="hover:bg-destructive/10"
           >
             <X className="h-4 w-4 text-destructive/70 hover:text-destructive" />
             <span className="sr-only">Reset filters</span>
