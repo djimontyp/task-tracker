@@ -1,9 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Command, CommandList, CommandGroup } from '@/shared/ui/command'
-import { MessageSearchItem } from './MessageSearchItem'
-import { AtomSearchItem } from './AtomSearchItem'
-import { TopicSearchItem } from './TopicSearchItem'
-import type { FTSMessageResult, FTSAtomResult, FTSTopicResult } from '../types/fts'
+import { MessageSearchItem } from '@/shared/components/SearchBar/MessageSearchItem'
+import { AtomSearchItem } from '@/shared/components/SearchBar/AtomSearchItem'
+import { TopicSearchItem } from '@/shared/components/SearchBar/TopicSearchItem'
+import type { FTSMessageResult, FTSAtomResult, FTSTopicResult } from '@/shared/components/SearchBar/types/fts'
 
 // Wrapper for Command items
 const CommandWrapper = ({ children }: { children: React.ReactNode }) => (

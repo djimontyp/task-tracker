@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react'
-import { SearchDropdown } from './SearchDropdown'
-import type { FTSSearchResultsResponse } from '../types/fts'
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { SearchDropdown } from '@/shared/components/SearchBar/SearchDropdown'
+import type { FTSSearchResultsResponse } from '@/shared/components/SearchBar/types/fts'
 
 const meta: Meta<typeof SearchDropdown> = {
   title: 'Features/Search/SearchDropdown',
