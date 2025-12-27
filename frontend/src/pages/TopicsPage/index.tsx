@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -19,6 +19,8 @@ import type { TopicListResponse, TopicSortBy } from '@/features/topics/types'
 import { renderTopicIcon } from '@/features/topics/utils/renderIcon'
 import { Folder, MessageSquare, Search, X, LayoutGrid, List, ChevronRight } from 'lucide-react'
 import { PageWrapper } from '@/shared/primitives'
+import { TopicsSmartFilters } from './TopicsSmartFilters'
+import { useTopicFilterParams } from './useTopicFilterParams'
 
 type ViewMode = 'grid' | 'list'
 
@@ -26,6 +28,7 @@ const TopicsPage = () => {
   const { t } = useTranslation('topics')
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { filterMode, setFilterMode } = useTopicFilterParams()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -50,7 +53,7 @@ const TopicsPage = () => {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [debouncedSearch, sortBy])
+  }, [debouncedSearch, sortBy, filterMode])
 
   const { data: topics, isLoading, error } = useQuery<TopicListResponse>({
     queryKey: ['topics', {
@@ -71,6 +74,31 @@ const TopicsPage = () => {
       searchInputRef.current.focus()
     }
   }, [topics, debouncedSearch])
+
+  // Calculate filter counts from topics
+  // Note: Backend doesn't have archived field yet, so all topics are treated as active
+  // When backend adds archived support, update Topic type and filter logic
+  const filterCounts = useMemo(() => {
+    const total = topics?.total || 0
+    // TODO: When backend adds archived field, use: topics?.items.filter(t => t.archived).length
+    const archivedCount = 0
+    return {
+      all: total,
+      active: total - archivedCount,
+      archived: archivedCount,
+    }
+  }, [topics])
+
+  // Filter topics based on filterMode
+  // Note: Currently all topics are active since backend doesn't have archived field
+  const filteredTopics = useMemo(() => {
+    if (!topics?.items) return []
+    // TODO: When backend adds archived field:
+    // if (filterMode === 'active') return topics.items.filter(t => !t.archived)
+    // if (filterMode === 'archived') return topics.items.filter(t => t.archived)
+    if (filterMode === 'archived') return []
+    return topics.items
+  }, [topics?.items, filterMode])
 
   const updateColorMutation = useMutation({
     mutationFn: ({ topicId, color }: { topicId: string; color: string }) =>
@@ -166,6 +194,13 @@ const TopicsPage = () => {
 
   return (
     <PageWrapper variant="fullWidth">
+      {/* Smart Filters */}
+      <TopicsSmartFilters
+        counts={filterCounts}
+        activeFilter={filterMode}
+        onFilterChange={setFilterMode}
+      />
+
       <div className="flex gap-4 items-center flex-wrap">
         <div className="flex-1 max-w-md relative">
           <Search className="absolute left-4 top-2/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -227,16 +262,16 @@ const TopicsPage = () => {
 
         {debouncedSearch && topics && (
           <span className="text-sm text-muted-foreground whitespace-nowrap">
-            {t('search.found', 'Found {{count}} topics', { count: topics.total })}
+            {t('search.found', 'Found {{count}} topics', { count: filteredTopics.length })}
           </span>
         )}
       </div>
 
-      {topics && topics.items.length > 0 ? (
+      {filteredTopics.length > 0 ? (
         <>
           {viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {topics.items.map((topic) => (
+              {filteredTopics.map((topic) => (
                 <Card
                   key={topic.id}
                   className="p-4 sm:p-4 md:p-6 transition-all duration-200 hover:shadow-lg hover:scale-[1.01] cursor-pointer"
@@ -267,7 +302,7 @@ const TopicsPage = () => {
             </div>
           ) : (
             <Card className="divide-y">
-              {topics.items.map((topic) => (
+              {filteredTopics.map((topic) => (
                 <div
                   key={topic.id}
                   className="flex items-center gap-4 p-4 hover:bg-accent/5 cursor-pointer transition-colors"
@@ -302,10 +337,10 @@ const TopicsPage = () => {
             </Card>
           )}
 
-          {topics.total > pageSize && (
+          {topics && topics.total > pageSize && (
             <div className="flex flex-col items-center gap-4 mt-6">
               <p className="text-sm text-muted-foreground">
-                {t('pagination.showing', 'Showing {{start}}-{{end}} of {{total}} topics', { start: startIndex, end: endIndex, total: topics.total })}
+                {t('pagination.showing', 'Showing {{start}}-{{end}} of {{total}} topics', { start: startIndex, end: endIndex, total: topics?.total ?? 0 })}
               </p>
 
               <Pagination>

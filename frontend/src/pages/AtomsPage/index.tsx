@@ -29,6 +29,8 @@ import { atomService } from '@/features/atoms/api/atomService'
 import AtomCard from '@/features/atoms/components/AtomCard'
 import type { Atom, AtomType } from '@/features/atoms/types'
 import { API_BASE_PATH } from '@/shared/config/api'
+import { AtomsSmartFilters, type AtomCounts } from './AtomsSmartFilters'
+import { useAtomFilterParams } from './useAtomFilterParams'
 
 const atomTypeConfig: Record<AtomType, { icon: React.ComponentType<{ className?: string }>; label: string; color: string }> = {
   problem: { icon: AlertCircle, label: 'Problems', color: 'text-semantic-error' },
@@ -48,23 +50,51 @@ const AtomsPage: React.FC = () => {
   const [expandedAtomId, setExpandedAtomId] = useState<string | null>(null)
   const atomRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
+  // Smart Filters - URL-synchronized status filter
+  const { statusFilter, setStatusFilter } = useAtomFilterParams()
+
   // URL param for expanding atom from search
   const expandAtomId = searchParams.get('expand')
 
-  // Fetch atoms
+  // Fetch all atoms (no server-side filtering)
   const { data: atomsData, isLoading } = useQuery({
-    queryKey: ['atoms', 'pending'],
+    queryKey: ['atoms', 'all'],
     queryFn: async () => {
       const response = await atomService.listAtoms(0, 200)
-      // Filter to only pending review (not approved, not archived)
-      return {
-        ...response,
-        items: response.items.filter(a => !a.user_approved && !a.archived)
-      }
+      return response
     },
   })
 
-  const atoms = atomsData?.items ?? []
+  // Memoize allAtoms to prevent unnecessary recalculations
+  const allAtoms = useMemo(() => atomsData?.items ?? [], [atomsData?.items])
+
+  // Calculate counts for all statuses from the full list
+  const counts: AtomCounts = useMemo(() => {
+    const pending = allAtoms.filter(a => !a.user_approved && !a.archived).length
+    const approved = allAtoms.filter(a => a.user_approved === true).length
+    const rejected = allAtoms.filter(a => a.archived === true).length
+    return {
+      all: allAtoms.length,
+      pending,
+      approved,
+      rejected,
+    }
+  }, [allAtoms])
+
+  // Filter atoms based on current status filter
+  const atoms = useMemo(() => {
+    switch (statusFilter) {
+      case 'pending':
+        return allAtoms.filter(a => !a.user_approved && !a.archived)
+      case 'approved':
+        return allAtoms.filter(a => a.user_approved === true)
+      case 'rejected':
+        return allAtoms.filter(a => a.archived === true)
+      case 'all':
+      default:
+        return allAtoms
+    }
+  }, [allAtoms, statusFilter])
 
   // Handle expand param from search navigation
   useEffect(() => {
@@ -217,7 +247,7 @@ const AtomsPage: React.FC = () => {
     )
   }
 
-  if (atoms.length === 0) {
+  if (allAtoms.length === 0) {
     return (
       <PageWrapper>
         <EmptyState
@@ -231,9 +261,22 @@ const AtomsPage: React.FC = () => {
 
   return (
     <PageWrapper>
-      {/* Header with bulk actions */}
+      {/* Header with title */}
       <div className="flex flex-wrap items-center gap-4">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
+      </div>
+
+      {/* Smart Filters */}
+      <div className="mt-4">
+        <AtomsSmartFilters
+          counts={counts}
+          activeFilter={statusFilter}
+          onFilterChange={setStatusFilter}
+        />
+      </div>
+
+      {/* Bulk actions toolbar */}
+      <div className="mt-4 flex flex-wrap items-center gap-4">
         <Badge variant="secondary" className="text-sm">
           {t('plurals.atom', { count: atoms.length })}
         </Badge>
@@ -297,8 +340,20 @@ const AtomsPage: React.FC = () => {
         )}
       </div>
 
+      {/* Empty state for filtered results */}
+      {atoms.length === 0 && (
+        <div className="mt-6">
+          <EmptyState
+            icon={statusFilter === 'pending' ? Inbox : statusFilter === 'approved' ? CheckCircle : XCircle}
+            title={t(`smartFilters.empty.${statusFilter}.title`, `No ${statusFilter} atoms`)}
+            description={t(`smartFilters.empty.${statusFilter}.description`, `There are no ${statusFilter} atoms at the moment`)}
+          />
+        </div>
+      )}
+
       {/* Grouped atoms */}
-      <div className="space-y-6">
+      {atoms.length > 0 && (
+      <div className="space-y-6 mt-6">
         {Object.entries(groupedAtoms).map(([type, groupAtoms]) => {
           const config = atomTypeConfig[type as AtomType]
           const Icon = config?.icon || AlertCircle
@@ -337,7 +392,7 @@ const AtomsPage: React.FC = () => {
                       }`}
                     >
                       {/* Selection checkbox */}
-                      <div className="absolute top-2 right-2 z-10">
+                      <div className="absolute top-2 right-2 z-dropdown">
                         <Checkbox
                           checked={selectedAtoms.has(String(atom.id))}
                           onCheckedChange={() => toggleSelection(String(atom.id))}
@@ -379,6 +434,7 @@ const AtomsPage: React.FC = () => {
           )
         })}
       </div>
+      )}
     </PageWrapper>
   )
 }
