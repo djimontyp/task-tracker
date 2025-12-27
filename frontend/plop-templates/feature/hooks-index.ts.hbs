@@ -1,0 +1,18 @@
+/**
+ * {{pascalCase name}} Feature Hooks
+ * {{description}}
+ *
+ * Export feature-specific hooks here.
+ * API hooks are in ./api/{{camelCase name}}Service.ts
+ */
+
+// Re-export API hooks for convenience
+export {
+  use{{pascalCase name}}List,
+  use{{pascalCase name}},
+  useCreate{{pascalCase name}},
+  useUpdate{{pascalCase name}},
+  useDelete{{pascalCase name}},
+} from '../api/{{camelCase name}}Service';
+
+// Add custom hooks as you create them

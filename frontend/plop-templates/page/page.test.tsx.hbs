@@ -1,0 +1,36 @@
+/**
+ * {{pascalCase name}} Page Tests
+ */
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
+import {{pascalCase name}}Page from './index';
+
+// Wrapper with required providers
+function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <MemoryRouter>
+      {ui}
+    </MemoryRouter>
+  );
+}
+
+describe('{{pascalCase name}}Page', () => {
+  it('renders page title', () => {
+    renderWithProviders(<{{pascalCase name}}Page />);
+
+    expect(screen.getByText('{{pascalCase name}}')).toBeInTheDocument();
+  });
+
+  it('renders page description', () => {
+    renderWithProviders(<{{pascalCase name}}Page />);
+
+    expect(screen.getByText('{{description}}')).toBeInTheDocument();
+  });
+
+  it('renders page content area', () => {
+    renderWithProviders(<{{pascalCase name}}Page />);
+
+    expect(screen.getByText(/page content goes here/i)).toBeInTheDocument();
+  });
+});

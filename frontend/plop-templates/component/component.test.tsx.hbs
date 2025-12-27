@@ -1,0 +1,27 @@
+/**
+ * {{pascalCase name}} Component Tests
+ */
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { {{pascalCase name}} } from './index';
+
+describe('{{pascalCase name}}', () => {
+  it('renders children correctly', () => {
+    render(<{{pascalCase name}}>Test content</{{pascalCase name}}>);
+
+    expect(screen.getByText('Test content')).toBeInTheDocument();
+  });
+
+  it('applies custom className', () => {
+    render(<{{pascalCase name}} className="custom-class">Content</{{pascalCase name}}>);
+
+    const element = screen.getByText('Content');
+    expect(element).toHaveClass('custom-class');
+  });
+
+  it('renders without children', () => {
+    const { container } = render(<{{pascalCase name}} />);
+
+    expect(container.firstChild).toBeInTheDocument();
+  });
+});

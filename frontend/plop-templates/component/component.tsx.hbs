@@ -1,0 +1,30 @@
+/**
+ * {{pascalCase name}} Component
+ * {{description}}
+ */
+import { cn } from '@/shared/lib/utils';
+
+export interface {{pascalCase name}}Props {
+  /** Additional CSS classes */
+  className?: string;
+  /** Component children */
+  children?: React.ReactNode;
+}
+
+/**
+ * {{description}}
+ *
+ * @example
+ * ```tsx
+ * <{{pascalCase name}}>
+ *   Content here
+ * </{{pascalCase name}}>
+ * ```
+ */
+export function {{pascalCase name}}({ className, children }: {{pascalCase name}}Props) {
+  return (
+    <div className={cn('', className)}>
+      {children}
+    </div>
+  );
+}

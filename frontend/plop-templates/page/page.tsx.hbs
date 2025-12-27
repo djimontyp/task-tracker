@@ -1,0 +1,26 @@
+/**
+ * {{pascalCase name}} Page
+ * {{description}}
+ * Route: {{route}}
+ */
+import { PageHeader } from '@/shared/components/PageHeader';
+
+/**
+ * {{description}}
+ */
+export default function {{pascalCase name}}Page() {
+  return (
+    <div className="flex flex-col gap-6 p-6">
+      <PageHeader
+        title="{{pascalCase name}}"
+        description="{{description}}"
+      />
+
+      <div className="rounded-lg border bg-card p-6">
+        <p className="text-muted-foreground">
+          {{pascalCase name}} page content goes here.
+        </p>
+      </div>
+    </div>
+  );
+}

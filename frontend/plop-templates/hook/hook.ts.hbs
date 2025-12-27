@@ -1,0 +1,46 @@
+/**
+ * use{{pascalCase name}} Hook
+ * {{description}}
+ */
+import { useState, useCallback } from 'react';
+
+export interface Use{{pascalCase name}}Options {
+  /** Initial value */
+  initialValue?: unknown;
+}
+
+export interface Use{{pascalCase name}}Return {
+  /** Current value */
+  value: unknown;
+  /** Update the value */
+  setValue: (newValue: unknown) => void;
+  /** Reset to initial value */
+  reset: () => void;
+}
+
+/**
+ * {{description}}
+ *
+ * @example
+ * ```tsx
+ * const { value, setValue, reset } = use{{pascalCase name}}({ initialValue: null });
+ * ```
+ */
+export function use{{pascalCase name}}(options: Use{{pascalCase name}}Options = {}): Use{{pascalCase name}}Return {
+  const { initialValue = null } = options;
+  const [value, setValueInternal] = useState(initialValue);
+
+  const setValue = useCallback((newValue: unknown) => {
+    setValueInternal(newValue);
+  }, []);
+
+  const reset = useCallback(() => {
+    setValueInternal(initialValue);
+  }, [initialValue]);
+
+  return {
+    value,
+    setValue,
+    reset,
+  };
+}
