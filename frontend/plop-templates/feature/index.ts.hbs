@@ -1,0 +1,29 @@
+/**
+ * {{pascalCase name}} Feature Module
+ * {{description}}
+ *
+ * This is the public API of the {{kebabCase name}} feature.
+ * Import from this file to access feature functionality.
+ */
+
+// Types
+export type {
+  {{pascalCase name}},
+  Create{{pascalCase name}}Input,
+  Update{{pascalCase name}}Input,
+  {{pascalCase name}}Filters,
+} from './types';
+
+// API service and hooks
+export {
+  {{camelCase name}}Service,
+  {{camelCase name}}Keys,
+  use{{pascalCase name}}List,
+  use{{pascalCase name}},
+  useCreate{{pascalCase name}},
+  useUpdate{{pascalCase name}},
+  useDelete{{pascalCase name}},
+} from './api/{{camelCase name}}Service';
+
+// Components (add exports as you create them)
+// export { {{pascalCase name}}Card, {{pascalCase name}}List } from './components';

@@ -1,0 +1,100 @@
+/**
+ * {{pascalCase name}} Store
+ * {{description}}
+ */
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+
+export interface {{pascalCase name}}Item {
+  id: string;
+  // Add item fields here
+}
+
+export interface {{pascalCase name}}State {
+  // Data
+  items: {{pascalCase name}}Item[];
+  selectedId: string | null;
+  isLoading: boolean;
+  error: string | null;
+
+  // Actions
+  setItems: (items: {{pascalCase name}}Item[]) => void;
+  addItem: (item: {{pascalCase name}}Item) => void;
+  updateItem: (id: string, updates: Partial<{{pascalCase name}}Item>) => void;
+  removeItem: (id: string) => void;
+  selectItem: (id: string | null) => void;
+  setLoading: (isLoading: boolean) => void;
+  setError: (error: string | null) => void;
+  reset: () => void;
+}
+
+const initialState = {
+  items: [] as {{pascalCase name}}Item[],
+  selectedId: null as string | null,
+  isLoading: false,
+  error: null as string | null,
+};
+
+/**
+ * {{description}}
+ *
+ * @example
+ * ```tsx
+ * const { items, addItem, selectItem } = use{{pascalCase name}}Store();
+ * ```
+ */
+export const use{{pascalCase name}}Store = create<{{pascalCase name}}State>()(
+  devtools(
+    (set) => ({
+      ...initialState,
+
+      setItems: (items) => set({ items }, false, 'setItems'),
+
+      addItem: (item) =>
+        set(
+          (state) => ({ items: [...state.items, item] }),
+          false,
+          'addItem'
+        ),
+
+      updateItem: (id, updates) =>
+        set(
+          (state) => ({
+            items: state.items.map((item) =>
+              item.id === id ? { ...item, ...updates } : item
+            ),
+          }),
+          false,
+          'updateItem'
+        ),
+
+      removeItem: (id) =>
+        set(
+          (state) => ({
+            items: state.items.filter((item) => item.id !== id),
+            selectedId: state.selectedId === id ? null : state.selectedId,
+          }),
+          false,
+          'removeItem'
+        ),
+
+      selectItem: (id) => set({ selectedId: id }, false, 'selectItem'),
+
+      setLoading: (isLoading) => set({ isLoading }, false, 'setLoading'),
+
+      setError: (error) => set({ error }, false, 'setError'),
+
+      reset: () => set(initialState, false, 'reset'),
+    }),
+    { name: '{{camelCase name}}Store' }
+  )
+);
+
+// Selectors for optimized subscriptions
+export const {{camelCase name}}Selectors = {
+  items: (state: {{pascalCase name}}State) => state.items,
+  selectedItem: (state: {{pascalCase name}}State) =>
+    state.items.find((item) => item.id === state.selectedId),
+  isLoading: (state: {{pascalCase name}}State) => state.isLoading,
+  error: (state: {{pascalCase name}}State) => state.error,
+};

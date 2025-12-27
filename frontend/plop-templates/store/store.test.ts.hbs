@@ -1,0 +1,117 @@
+/**
+ * {{pascalCase name}} Store Tests
+ */
+import { describe, it, expect, beforeEach } from 'vitest';
+import { act } from '@testing-library/react';
+import { use{{pascalCase name}}Store } from './{{camelCase name}}Store';
+
+describe('use{{pascalCase name}}Store', () => {
+  beforeEach(() => {
+    // Reset store before each test
+    act(() => {
+      use{{pascalCase name}}Store.getState().reset();
+    });
+  });
+
+  describe('initial state', () => {
+    it('has empty items array', () => {
+      expect(use{{pascalCase name}}Store.getState().items).toEqual([]);
+    });
+
+    it('has null selectedId', () => {
+      expect(use{{pascalCase name}}Store.getState().selectedId).toBeNull();
+    });
+
+    it('is not loading', () => {
+      expect(use{{pascalCase name}}Store.getState().isLoading).toBe(false);
+    });
+
+    it('has no error', () => {
+      expect(use{{pascalCase name}}Store.getState().error).toBeNull();
+    });
+  });
+
+  describe('setItems', () => {
+    it('sets items array', () => {
+      const items = [{ id: '1' }, { id: '2' }];
+
+      act(() => {
+        use{{pascalCase name}}Store.getState().setItems(items);
+      });
+
+      expect(use{{pascalCase name}}Store.getState().items).toEqual(items);
+    });
+  });
+
+  describe('addItem', () => {
+    it('adds item to array', () => {
+      const item = { id: '1' };
+
+      act(() => {
+        use{{pascalCase name}}Store.getState().addItem(item);
+      });
+
+      expect(use{{pascalCase name}}Store.getState().items).toContainEqual(item);
+    });
+  });
+
+  describe('updateItem', () => {
+    it('updates existing item', () => {
+      const item = { id: '1' };
+
+      act(() => {
+        use{{pascalCase name}}Store.getState().addItem(item);
+        use{{pascalCase name}}Store.getState().updateItem('1', { id: '1' });
+      });
+
+      expect(use{{pascalCase name}}Store.getState().items[0]).toEqual({ id: '1' });
+    });
+  });
+
+  describe('removeItem', () => {
+    it('removes item from array', () => {
+      act(() => {
+        use{{pascalCase name}}Store.getState().addItem({ id: '1' });
+        use{{pascalCase name}}Store.getState().removeItem('1');
+      });
+
+      expect(use{{pascalCase name}}Store.getState().items).toHaveLength(0);
+    });
+
+    it('clears selectedId if removed item was selected', () => {
+      act(() => {
+        use{{pascalCase name}}Store.getState().addItem({ id: '1' });
+        use{{pascalCase name}}Store.getState().selectItem('1');
+        use{{pascalCase name}}Store.getState().removeItem('1');
+      });
+
+      expect(use{{pascalCase name}}Store.getState().selectedId).toBeNull();
+    });
+  });
+
+  describe('selectItem', () => {
+    it('sets selectedId', () => {
+      act(() => {
+        use{{pascalCase name}}Store.getState().selectItem('1');
+      });
+
+      expect(use{{pascalCase name}}Store.getState().selectedId).toBe('1');
+    });
+  });
+
+  describe('reset', () => {
+    it('resets to initial state', () => {
+      act(() => {
+        use{{pascalCase name}}Store.getState().addItem({ id: '1' });
+        use{{pascalCase name}}Store.getState().setLoading(true);
+        use{{pascalCase name}}Store.getState().setError('error');
+        use{{pascalCase name}}Store.getState().reset();
+      });
+
+      const state = use{{pascalCase name}}Store.getState();
+      expect(state.items).toEqual([]);
+      expect(state.isLoading).toBe(false);
+      expect(state.error).toBeNull();
+    });
+  });
+});

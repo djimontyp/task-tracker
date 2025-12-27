@@ -1,0 +1,118 @@
+/**
+ * {{pascalCase name}} API Service
+ * {{description}}
+ */
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/shared/lib/api/client';
+import type { {{pascalCase name}}, Create{{pascalCase name}}Input, Update{{pascalCase name}}Input } from '../types';
+
+// Query keys for cache management
+export const {{camelCase name}}Keys = {
+  all: ['{{kebabCase name}}'] as const,
+  lists: () => [...{{camelCase name}}Keys.all, 'list'] as const,
+  list: (filters: Record<string, unknown>) => [...{{camelCase name}}Keys.lists(), filters] as const,
+  details: () => [...{{camelCase name}}Keys.all, 'detail'] as const,
+  detail: (id: string) => [...{{camelCase name}}Keys.details(), id] as const,
+};
+
+// API endpoints
+const ENDPOINTS = {
+  list: '/api/v1/{{kebabCase name}}',
+  detail: (id: string) => `/api/v1/{{kebabCase name}}/${id}`,
+};
+
+// Service class with typed methods
+class {{pascalCase name}}Service {
+  async getAll(): Promise<{{pascalCase name}}[]> {
+    const response = await apiClient.get<{{pascalCase name}}[]>(ENDPOINTS.list);
+    return response.data;
+  }
+
+  async getById(id: string): Promise<{{pascalCase name}}> {
+    const response = await apiClient.get<{{pascalCase name}}>(ENDPOINTS.detail(id));
+    return response.data;
+  }
+
+  async create(data: Create{{pascalCase name}}Input): Promise<{{pascalCase name}}> {
+    const response = await apiClient.post<{{pascalCase name}}>(ENDPOINTS.list, data);
+    return response.data;
+  }
+
+  async update(id: string, data: Update{{pascalCase name}}Input): Promise<{{pascalCase name}}> {
+    const response = await apiClient.patch<{{pascalCase name}}>(ENDPOINTS.detail(id), data);
+    return response.data;
+  }
+
+  async delete(id: string): Promise<void> {
+    await apiClient.delete(ENDPOINTS.detail(id));
+  }
+}
+
+export const {{camelCase name}}Service = new {{pascalCase name}}Service();
+
+// TanStack Query hooks
+
+/**
+ * Fetch all {{camelCase name}} items
+ */
+export function use{{pascalCase name}}List() {
+  return useQuery({
+    queryKey: {{camelCase name}}Keys.lists(),
+    queryFn: () => {{camelCase name}}Service.getAll(),
+  });
+}
+
+/**
+ * Fetch single {{camelCase name}} by ID
+ */
+export function use{{pascalCase name}}(id: string) {
+  return useQuery({
+    queryKey: {{camelCase name}}Keys.detail(id),
+    queryFn: () => {{camelCase name}}Service.getById(id),
+    enabled: !!id,
+  });
+}
+
+/**
+ * Create new {{camelCase name}}
+ */
+export function useCreate{{pascalCase name}}() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Create{{pascalCase name}}Input) => {{camelCase name}}Service.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: {{camelCase name}}Keys.lists() });
+    },
+  });
+}
+
+/**
+ * Update existing {{camelCase name}}
+ */
+export function useUpdate{{pascalCase name}}() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Update{{pascalCase name}}Input }) =>
+      {{camelCase name}}Service.update(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: {{camelCase name}}Keys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: {{camelCase name}}Keys.lists() });
+    },
+  });
+}
+
+/**
+ * Delete {{camelCase name}}
+ */
+export function useDelete{{pascalCase name}}() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => {{camelCase name}}Service.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: {{camelCase name}}Keys.lists() });
+    },
+  });
+}

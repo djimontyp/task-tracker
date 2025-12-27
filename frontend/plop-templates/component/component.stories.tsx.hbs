@@ -1,0 +1,53 @@
+/**
+ * {{pascalCase name}} Component Stories
+ */
+import type { Meta, StoryObj } from '@storybook/react';
+import { {{pascalCase name}} } from './index';
+
+const meta: Meta<typeof {{pascalCase name}}> = {
+  title: 'Components/{{pascalCase name}}',
+  component: {{pascalCase name}},
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'centered',
+  },
+  argTypes: {
+    className: {
+      control: 'text',
+      description: 'Additional CSS classes',
+    },
+    children: {
+      control: 'text',
+      description: 'Component children',
+    },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof {{pascalCase name}}>;
+
+/**
+ * Default state of the component
+ */
+export const Default: Story = {
+  args: {
+    children: '{{pascalCase name}} content',
+  },
+};
+
+/**
+ * With custom styling
+ */
+export const WithCustomClass: Story = {
+  args: {
+    className: 'p-4 bg-muted rounded-lg',
+    children: 'Styled {{pascalCase name}}',
+  },
+};
+
+/**
+ * Empty state (no children)
+ */
+export const Empty: Story = {
+  args: {},
+};
