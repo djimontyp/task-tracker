@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/shared/lib/utils'
 import { NotificationBadge } from '@/shared/ui'
 import {
@@ -16,6 +17,7 @@ interface NavNotificationsProps {
 }
 
 export function NavNotifications({ item, counts }: NavNotificationsProps) {
+  const { t } = useTranslation('common')
   const location = useLocation()
   const isActive =
     item.path === '/'
@@ -43,7 +45,7 @@ export function NavNotifications({ item, counts }: NavNotificationsProps) {
         <SidebarMenuButton
           asChild
           isActive={isActive}
-          tooltip={item.label}
+          tooltip={t(item.labelKey)}
           className={cn(
             'flex-1 relative transition-all duration-300',
             'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold',
@@ -53,7 +55,7 @@ export function NavNotifications({ item, counts }: NavNotificationsProps) {
         >
           <Link to={item.path}>
             <item.icon className="size-5" />
-            <span className="group-data-[collapsible=icon]:sr-only">{item.label}</span>
+            <span className="group-data-[collapsible=icon]:sr-only">{t(item.labelKey)}</span>
           </Link>
         </SidebarMenuButton>
         <NotificationBadge

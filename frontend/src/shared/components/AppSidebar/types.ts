@@ -1,11 +1,11 @@
 export interface NavItem {
   path: string;
-  label: string;
+  labelKey: string; // i18n key like 'sidebar.items.overview'
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
 export interface NavGroup {
-  label: string;
+  labelKey: string; // i18n key like 'sidebar.groups.dataManagement'
   items: NavItem[];
   action?: boolean;
 }

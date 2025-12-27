@@ -7,7 +7,13 @@ from app.services.knowledge.knowledge_schemas import (
     KnowledgeExtractionOutput,
     PeriodType,
 )
-from app.services.knowledge.llm_agents import KNOWLEDGE_EXTRACTION_SYSTEM_PROMPT, build_model_instance
+from app.services.knowledge.llm_agents import (
+    KNOWLEDGE_EXTRACTION_SYSTEM_PROMPT,
+    build_model_instance,
+    get_extraction_prompt,
+    get_strengthened_prompt,
+    validate_output_language,
+)
 
 __all__ = [
     "KnowledgeOrchestrator",
@@ -18,4 +24,7 @@ __all__ = [
     "PeriodType",
     "KNOWLEDGE_EXTRACTION_SYSTEM_PROMPT",
     "build_model_instance",
+    "get_extraction_prompt",
+    "get_strengthened_prompt",
+    "validate_output_language",
 ]

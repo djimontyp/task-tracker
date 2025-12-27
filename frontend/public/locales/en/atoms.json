@@ -1,0 +1,52 @@
+{
+  "title": "Knowledge Atoms",
+  "subtitle": "Extracted knowledge from messages",
+  "type": {
+    "task": "Task",
+    "idea": "Idea",
+    "question": "Question",
+    "decision": "Decision",
+    "insight": "Insight"
+  },
+  "status": {
+    "draft": "Draft",
+    "pending_review": "Pending Review",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "actions": {
+    "create": "Create Atom",
+    "edit": "Edit",
+    "delete": "Delete",
+    "approve": "Approve",
+    "reject": "Reject",
+    "archive": "Archive",
+    "viewSource": "View Source"
+  },
+  "messages": {
+    "created": "Atom created successfully",
+    "updated": "Atom updated",
+    "deleted": "Atom deleted",
+    "approved": "Atom approved",
+    "rejected": "Atom rejected"
+  },
+  "plurals": {
+    "atom_one": "{{count}} atom",
+    "atom_other": "{{count}} atoms"
+  },
+  "filters": {
+    "allTypes": "All Types",
+    "allStatuses": "All Statuses",
+    "search": "Search atoms..."
+  },
+  "card": {
+    "source": "Source",
+    "topic": "Topic",
+    "created": "Created",
+    "confidence": "Confidence"
+  },
+  "empty": {
+    "title": "No atoms",
+    "description": "Atoms will appear after processing messages"
+  }
+}

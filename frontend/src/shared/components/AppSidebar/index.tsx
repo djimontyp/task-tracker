@@ -1,4 +1,5 @@
 import { useMemo, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   LayoutGrid,
   Cpu,
@@ -15,6 +16,7 @@ import { useLocation, Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useUiStore } from '@/shared/store/uiStore'
 import { logger } from '@/shared/utils/logger'
+import { getWebSocketUrl } from '@/shared/utils/websocket'
 import {
   Sidebar,
   SidebarContent,
@@ -37,43 +39,44 @@ interface AppSidebarProps {
 
 const navGroups: NavGroup[] = [
   {
-    label: 'Data Management',
+    labelKey: 'sidebar.groups.dataManagement',
     items: [
-      { path: '/dashboard', label: 'Overview', icon: LayoutGrid },
-      { path: '/executive-summary', label: 'Executive Summary', icon: ClipboardList },
-      { path: '/messages', label: 'Messages', icon: Mail },
-      { path: '/atoms', label: 'Atoms', icon: Atom },
-      { path: '/topics', label: 'Topics', icon: MessageSquare },
+      { path: '/dashboard', labelKey: 'sidebar.items.overview', icon: LayoutGrid },
+      { path: '/executive-summary', labelKey: 'sidebar.items.executiveSummary', icon: ClipboardList },
+      { path: '/messages', labelKey: 'sidebar.items.messages', icon: Mail },
+      { path: '/atoms', labelKey: 'sidebar.items.atoms', icon: Atom },
+      { path: '/topics', labelKey: 'sidebar.items.topics', icon: MessageSquare },
     ],
   },
   // DORMANT: AI Operations (F014 Noise Filtering) - приховано до v1.1+
   // {
-  //   label: 'AI Operations',
+  //   labelKey: 'sidebar.groups.aiOperations',
   //   items: [
-  //     { path: '/noise-filtering', label: 'Noise Filtering', icon: FunnelIcon },
+  //     { path: '/noise-filtering', labelKey: 'sidebar.items.noiseFiltering', icon: FunnelIcon },
   //   ],
   //   action: true,
   // },
   {
-    label: 'AI Setup',
+    labelKey: 'sidebar.groups.aiSetup',
     items: [
-      { path: '/agents', label: 'Agents', icon: Cpu },
-      { path: '/agent-tasks', label: 'Task Templates', icon: List },
-      { path: '/projects', label: 'Projects', icon: Folder },
+      { path: '/agents', labelKey: 'sidebar.items.agents', icon: Cpu },
+      { path: '/agent-tasks', labelKey: 'sidebar.items.taskTemplates', icon: List },
+      { path: '/projects', labelKey: 'sidebar.items.projects', icon: Folder },
     ],
   },
   // DORMANT: Automation (F015, F016) - приховано до v1.2+
   // {
-  //   label: 'Automation',
+  //   labelKey: 'sidebar.groups.automation',
   //   items: [
-  //     { path: '/automation/dashboard', label: 'Overview', icon: SparklesIcon },
-  //     { path: '/automation/rules', label: 'Rules', icon: Cog6ToothIcon },
-  //     { path: '/automation/scheduler', label: 'Scheduler', icon: CalendarIcon },
+  //     { path: '/automation/dashboard', labelKey: 'sidebar.items.overview', icon: SparklesIcon },
+  //     { path: '/automation/rules', labelKey: 'sidebar.items.rules', icon: Cog6ToothIcon },
+  //     { path: '/automation/scheduler', labelKey: 'sidebar.items.scheduler', icon: CalendarIcon },
   //   ],
   // },
 ]
 
 export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
+  const { t } = useTranslation('common')
   const groups = useMemo(() => navGroups, [])
   const location = useLocation()
   const queryClient = useQueryClient()
@@ -86,8 +89,8 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
         item.path === '/dashboard' ? location.pathname === '/dashboard' : location.pathname.startsWith(item.path)
       )
 
-      if (hasActiveItem && expandedGroups[group.label] === undefined) {
-        setExpandedGroup(group.label, true)
+      if (hasActiveItem && expandedGroups[group.labelKey] === undefined) {
+        setExpandedGroup(group.labelKey, true)
       }
     })
   }, [location.pathname, groups, expandedGroups, setExpandedGroup])
@@ -99,8 +102,8 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
   })
 
   useEffect(() => {
-    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost/ws'
-    const ws = new WebSocket(`${wsUrl}?topics=analysis,proposals,noise_filtering`)
+    const wsUrl = getWebSocketUrl(['analysis', 'proposals', 'noise_filtering'])
+    const ws = new WebSocket(wsUrl)
 
     ws.onopen = () => {
       logger.debug('[Sidebar] WebSocket connected for counts')
@@ -224,24 +227,24 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
           <SidebarMenuItem className="group-data-[collapsible=icon]:w-auto">
             <SidebarMenuButton
               asChild
-              tooltip="Settings"
+              tooltip={t('sidebar.items.settings')}
               className="group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
             >
               <Link to="/settings" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
-                <span className="group-data-[collapsible=icon]:hidden">Settings</span>
+                <span className="group-data-[collapsible=icon]:hidden">{t('sidebar.items.settings')}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           {/* Collapse toggle - moved from Navbar */}
           <SidebarMenuItem className="group-data-[collapsible=icon]:w-auto">
             <SidebarMenuButton
-              tooltip="Toggle sidebar"
+              tooltip={t('sidebar.items.toggleSidebar')}
               onClick={toggleSidebar}
               className="group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
             >
               <PanelLeft className="h-4 w-4" />
-              <span className="group-data-[collapsible=icon]:hidden">Toggle Sidebar</span>
+              <span className="group-data-[collapsible=icon]:hidden">{t('sidebar.items.toggleSidebar')}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

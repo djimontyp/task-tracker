@@ -1,0 +1,53 @@
+{
+  "title": "Атоми знань",
+  "subtitle": "Екстраговані знання з повідомлень",
+  "type": {
+    "task": "Задача",
+    "idea": "Ідея",
+    "question": "Питання",
+    "decision": "Рішення",
+    "insight": "Інсайт"
+  },
+  "status": {
+    "draft": "Чернетка",
+    "pending_review": "На перевірці",
+    "approved": "Затверджено",
+    "rejected": "Відхилено"
+  },
+  "actions": {
+    "create": "Створити атом",
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "approve": "Затвердити",
+    "reject": "Відхилити",
+    "archive": "Архівувати",
+    "viewSource": "Переглянути джерело"
+  },
+  "messages": {
+    "created": "Атом успішно створено",
+    "updated": "Атом оновлено",
+    "deleted": "Атом видалено",
+    "approved": "Атом затверджено",
+    "rejected": "Атом відхилено"
+  },
+  "plurals": {
+    "atom_one": "{{count}} атом",
+    "atom_few": "{{count}} атоми",
+    "atom_many": "{{count}} атомів"
+  },
+  "filters": {
+    "allTypes": "Всі типи",
+    "allStatuses": "Всі статуси",
+    "search": "Пошук атомів..."
+  },
+  "card": {
+    "source": "Джерело",
+    "topic": "Тема",
+    "created": "Створено",
+    "confidence": "Впевненість"
+  },
+  "empty": {
+    "title": "Немає атомів",
+    "description": "Атоми з'являться після обробки повідомлень"
+  }
+}

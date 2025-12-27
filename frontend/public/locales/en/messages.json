@@ -1,0 +1,56 @@
+{
+  "title": "Messages",
+  "subtitle": "Manage incoming messages from all sources",
+  "list": {
+    "title": "Message List",
+    "empty": "No messages",
+    "emptyDescription": "Messages will appear here after connecting sources"
+  },
+  "filters": {
+    "title": "Filters",
+    "all": "All",
+    "unread": "Unread",
+    "starred": "Starred",
+    "archived": "Archived",
+    "source": "Source",
+    "dateRange": "Date Range",
+    "importance": "Importance",
+    "classification": "Classification",
+    "signal": "Signal",
+    "noise": "Noise",
+    "clear": "Clear Filters"
+  },
+  "card": {
+    "author": "Author",
+    "source": "Source",
+    "time": "Time",
+    "importance": "Importance",
+    "atoms": "Atoms",
+    "viewDetails": "View Details"
+  },
+  "modal": {
+    "title": "Message Details",
+    "content": "Content",
+    "metadata": "Metadata",
+    "analysis": "Analysis",
+    "atoms": "Related Atoms",
+    "history": "History",
+    "close": "Close"
+  },
+  "actions": {
+    "analyze": "Analyze",
+    "archive": "Archive",
+    "delete": "Delete",
+    "star": "Star",
+    "unstar": "Unstar",
+    "markAsRead": "Mark as Read",
+    "markAsUnread": "Mark as Unread"
+  },
+  "ingestion": {
+    "title": "Import Messages",
+    "description": "Import messages from a file or paste text",
+    "paste": "Paste Text",
+    "upload": "Upload File",
+    "submit": "Import"
+  }
+}

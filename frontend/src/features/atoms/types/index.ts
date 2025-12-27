@@ -28,6 +28,8 @@ export interface Atom {
   archived: boolean
   archived_at: string | null
   meta: Record<string, any> | null
+  /** AI-detected language of content (ISO 639-1). Used for language mismatch warnings. */
+  detected_language?: string | null
   created_at: string
   updated_at: string
 }

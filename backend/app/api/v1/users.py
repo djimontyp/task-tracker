@@ -12,10 +12,94 @@ from app.schemas.users import (
     TelegramProfileResponse,
     UserCreateRequest,
     UserResponse,
+    UserUpdateRequest,
 )
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/users", tags=["users"])
+
+# MVP: Use first non-bot user as "current user"
+# TODO: Replace with proper auth when implemented
+DEFAULT_USER_ID = 1
+
+
+def _user_to_response(user: User) -> UserResponse:
+    """Convert User model to UserResponse."""
+    assert user.id is not None
+    return UserResponse(
+        id=user.id,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        full_name=user.full_name,
+        email=user.email,
+        phone=user.phone,
+        avatar_url=user.avatar_url,
+        is_active=user.is_active,
+        is_bot=user.is_bot,
+        ui_language=user.ui_language,
+        created_at=user.created_at,
+        updated_at=user.updated_at,
+    )
+
+
+@router.get(
+    "/me",
+    response_model=UserResponse,
+    summary="Get current user",
+    response_description="Current user details",
+    responses={404: {"description": "User not found"}},
+)
+async def get_current_user(db: DatabaseDep) -> UserResponse:
+    """
+    Retrieve current user profile.
+
+    MVP: Returns first non-bot user. Will use proper auth in future.
+    """
+    statement = select(User).where(User.is_bot == False).order_by(User.id)  # noqa: E712
+    result = await db.execute(statement)
+    user = result.scalars().first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="No user found")
+
+    return _user_to_response(user)
+
+
+@router.patch(
+    "/me",
+    response_model=UserResponse,
+    summary="Update current user",
+    response_description="Updated user details",
+    responses={404: {"description": "User not found"}},
+)
+async def update_current_user(
+    user_data: UserUpdateRequest,
+    db: DatabaseDep,
+) -> UserResponse:
+    """
+    Update current user profile.
+
+    Supports partial updates. Only provided fields are updated.
+    MVP: Updates first non-bot user. Will use proper auth in future.
+    """
+    statement = select(User).where(User.is_bot == False).order_by(User.id)  # noqa: E712
+    result = await db.execute(statement)
+    user = result.scalars().first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="No user found")
+
+    # Apply updates
+    update_data = user_data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(user, field, value)
+
+    await db.commit()
+    await db.refresh(user)
+
+    logger.info(f"Updated user {user.id} with fields: {list(update_data.keys())}")
+
+    return _user_to_response(user)
 
 
 @router.get(
@@ -36,22 +120,7 @@ async def get_users(db: DatabaseDep) -> list[UserResponse]:
     result = await db.execute(statement)
     users = result.scalars().all()
 
-    return [
-        UserResponse(
-            id=user.id,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            full_name=user.full_name,  # computed field
-            email=user.email,
-            phone=user.phone,
-            avatar_url=user.avatar_url,
-            is_active=user.is_active,
-            is_bot=user.is_bot,
-            created_at=user.created_at,
-            updated_at=user.updated_at,
-        )
-        for user in users
-    ]
+    return [_user_to_response(user) for user in users]
 
 
 @router.get(
@@ -71,21 +140,7 @@ async def get_user(user_id: int, db: DatabaseDep) -> UserResponse:
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    assert user.id is not None
-
-    return UserResponse(
-        id=user.id,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        full_name=user.full_name,
-        email=user.email,
-        phone=user.phone,
-        avatar_url=user.avatar_url,
-        is_active=user.is_active,
-        is_bot=user.is_bot,
-        created_at=user.created_at,
-        updated_at=user.updated_at,
-    )
+    return _user_to_response(user)
 
 
 @router.post(
@@ -107,6 +162,7 @@ async def create_user(user_data: UserCreateRequest, db: DatabaseDep) -> UserResp
         email=user_data.email,
         phone=user_data.phone,
         avatar_url=user_data.avatar_url,
+        ui_language=user_data.ui_language,
         is_active=True,
         is_bot=False,
     )
@@ -115,21 +171,7 @@ async def create_user(user_data: UserCreateRequest, db: DatabaseDep) -> UserResp
     await db.commit()
     await db.refresh(user)
 
-    assert user.id is not None
-
-    return UserResponse(
-        id=user.id,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        full_name=user.full_name,
-        email=user.email,
-        phone=user.phone,
-        avatar_url=user.avatar_url,
-        is_active=user.is_active,
-        is_bot=user.is_bot,
-        created_at=user.created_at,
-        updated_at=user.updated_at,
-    )
+    return _user_to_response(user)
 
 
 @router.get(

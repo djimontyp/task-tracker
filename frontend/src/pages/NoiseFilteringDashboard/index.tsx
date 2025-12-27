@@ -13,6 +13,7 @@ import { noiseService } from '@/features/noise/api/noiseService'
 import type { NoiseStats } from '@/features/noise/types'
 import { toast } from 'sonner'
 import { logger } from '@/shared/utils/logger'
+import { getWebSocketUrl } from '@/shared/utils/websocket'
 import {
   LineChart,
   Line,
@@ -36,8 +37,8 @@ const NoiseFilteringDashboard = () => {
   })
 
   useEffect(() => {
-    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost/ws'
-    const ws = new WebSocket(`${wsUrl}?topics=noise_filtering`)
+    const wsUrl = getWebSocketUrl(['noise_filtering'])
+    const ws = new WebSocket(wsUrl)
 
     ws.onopen = () => {
       logger.debug('[NoiseFilteringDashboard] WebSocket connected')

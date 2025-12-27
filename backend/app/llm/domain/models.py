@@ -25,6 +25,10 @@ class AgentConfig(BaseModel):
     name: str = Field(description="Agent name (for logging and identification)")
     model_name: str = Field(description="Model identifier (e.g., 'llama3', 'gpt-4')")
     system_prompt: str | None = Field(default=None, description="System prompt for agent behavior")
+    prompt_variants: dict[str, str] | None = Field(
+        default=None,
+        description="Language-specific system prompts: {'uk': '...', 'en': '...'}",
+    )
     output_type: type | None = Field(
         default=None,
         description="Expected output type for structured responses (e.g., Pydantic model class)",
@@ -41,6 +45,19 @@ class AgentConfig(BaseModel):
     )
     max_tokens: int | None = Field(default=None, gt=0, description="Maximum tokens in response")
     tools: list["ToolDefinition"] | None = Field(default=None, description="Tools available to agent")
+
+    def get_system_prompt(self, language: str = "uk") -> str:
+        """Get system prompt for specified language.
+
+        Args:
+            language: ISO 639-1 language code (default: 'uk' for Ukrainian)
+
+        Returns:
+            Language-specific prompt if available, falls back to default system_prompt
+        """
+        if self.prompt_variants and language in self.prompt_variants:
+            return self.prompt_variants[language]
+        return self.system_prompt or ""
 
 
 class UsageInfo(BaseModel):

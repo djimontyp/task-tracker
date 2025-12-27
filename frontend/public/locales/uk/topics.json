@@ -1,0 +1,56 @@
+{
+  "title": "Теми",
+  "subtitle": "Організуйте знання за темами",
+  "list": {
+    "title": "Список тем",
+    "empty": "Немає тем",
+    "emptyDescription": "Створіть першу тему для організації атомів"
+  },
+  "detail": {
+    "title": "Деталі теми",
+    "description": "Опис",
+    "atoms": "Атоми в темі",
+    "messages": "Повідомлення",
+    "created": "Створено",
+    "updated": "Оновлено"
+  },
+  "filters": {
+    "all": "Всі",
+    "active": "Активні",
+    "archived": "Архівовані",
+    "search": "Пошук тем..."
+  },
+  "actions": {
+    "create": "Створити тему",
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "archive": "Архівувати",
+    "unarchive": "Розархівувати"
+  },
+  "form": {
+    "name": "Назва теми",
+    "namePlaceholder": "Введіть назву теми",
+    "description": "Опис",
+    "descriptionPlaceholder": "Опишіть тему",
+    "keywords": "Ключові слова",
+    "keywordsPlaceholder": "Додайте ключові слова",
+    "icon": "Іконка",
+    "color": "Колір"
+  },
+  "messages": {
+    "created": "Тему успішно створено",
+    "updated": "Тему оновлено",
+    "deleted": "Тему видалено",
+    "archived": "Тему архівовано"
+  },
+  "plurals": {
+    "topic_one": "{{count}} тема",
+    "topic_few": "{{count}} теми",
+    "topic_many": "{{count}} тем"
+  },
+  "card": {
+    "atoms": "Атомів",
+    "messages": "Повідомлень",
+    "lastActivity": "Остання активність"
+  }
+}

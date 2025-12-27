@@ -6,6 +6,8 @@
  */
 
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { Trophy, Flame } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Skeleton } from '@/shared/ui/skeleton'
@@ -17,10 +19,12 @@ const TopicItem = ({
   topic,
   index,
   onClick,
+  t,
 }: {
   topic: TopTopic
   index: number
   onClick: () => void
+  t: TFunction
 }) => {
   const renderIcon = (iconName?: string) => {
     if (!iconName) return <Flame className="h-4 w-4" aria-hidden="true" />
@@ -47,7 +51,7 @@ const TopicItem = ({
           onClick()
         }
       }}
-      aria-label={`Перейти до топіка ${topic.name} з ${topic.atomCount} атомами`}
+      aria-label={t('dashboard:topTopics.itemAriaLabel', { name: topic.name, atomCount: topic.atomCount })}
     >
       {/* Topic icon with color */}
       <div
@@ -69,8 +73,8 @@ const TopicItem = ({
           </h3>
         </div>
         <p className="text-xs text-muted-foreground leading-tight tabular-nums">
-          {topic.atomCount} {topic.atomCount === 1 ? 'атом' : 'атомів'} ·{' '}
-          {topic.messageCount} {topic.messageCount === 1 ? 'msg' : 'msgs'}
+          {topic.atomCount} {t('common:units.atom', { count: topic.atomCount })} ·{' '}
+          {topic.messageCount} {t('common:units.message', { count: topic.messageCount })}
         </p>
       </div>
     </div>
@@ -91,7 +95,7 @@ const TopTopicsSkeleton = () => (
   </div>
 )
 
-const TopTopicsEmpty = () => (
+const TopTopicsEmpty = ({ t }: { t: TFunction }) => (
   <div className="text-center py-8 space-y-4">
     <div className="flex justify-center">
       <div className="rounded-full bg-muted p-4">
@@ -99,9 +103,9 @@ const TopTopicsEmpty = () => (
       </div>
     </div>
     <div className="space-y-2">
-      <h3 className="font-medium text-sm text-foreground">Немає топіків</h3>
+      <h3 className="font-medium text-sm text-foreground">{t('dashboard:topTopics.noTopics')}</h3>
       <p className="text-muted-foreground text-xs max-w-xs mx-auto">
-        Топіки з&apos;являться після аналізу повідомлень
+        {t('dashboard:topTopics.emptyDescription')}
       </p>
     </div>
   </div>
@@ -109,6 +113,7 @@ const TopTopicsEmpty = () => (
 
 const TopTopics = ({ data, isLoading, error, limit = 5 }: TopTopicsProps) => {
   const navigate = useNavigate()
+  const { t } = useTranslation(['dashboard', 'common'])
 
   if (error) {
     return (
@@ -116,21 +121,21 @@ const TopTopics = ({ data, isLoading, error, limit = 5 }: TopTopicsProps) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5" aria-hidden="true" />
-            Топ топіки
+            {t('dashboard:topTopics.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 space-y-4">
             <div className="text-sm text-muted-foreground">
-              Не вдалось завантажити топіки
+              {t('dashboard:topTopics.loadError')}
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={() => window.location.reload()}
-              aria-label="Спробувати завантажити знову"
+              aria-label={t('common:actions.retry')}
             >
-              Спробувати знову
+              {t('common:actions.retry')}
             </Button>
           </div>
         </CardContent>
@@ -145,19 +150,19 @@ const TopTopics = ({ data, isLoading, error, limit = 5 }: TopTopicsProps) => {
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <Trophy className="h-5 w-5" aria-hidden="true" />
-          Топ топіки
+          {t('dashboard:topTopics.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
         {isLoading ? (
           <TopTopicsSkeleton />
         ) : displayedTopics.length === 0 ? (
-          <TopTopicsEmpty />
+          <TopTopicsEmpty t={t} />
         ) : (
           <div
             className="space-y-2"
             role="list"
-            aria-label="Топ топіки за кількістю атомів"
+            aria-label={t('dashboard:topTopics.ariaLabel')}
           >
             {displayedTopics.map((topic, index) => (
               <TopicItem
@@ -165,6 +170,7 @@ const TopTopics = ({ data, isLoading, error, limit = 5 }: TopTopicsProps) => {
                 topic={topic}
                 index={index}
                 onClick={() => navigate(`/topics/${topic.id}`)}
+                t={t}
               />
             ))}
           </div>

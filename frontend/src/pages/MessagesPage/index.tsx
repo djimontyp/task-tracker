@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 import {
@@ -13,6 +14,7 @@ import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS, API_BASE_PATH } from '@/shared/config/api'
 import { toast } from 'sonner'
 import { logger } from '@/shared/utils/logger'
+import { getWebSocketUrl } from '@/shared/utils/websocket'
 import {
   SortingState,
   VisibilityState,
@@ -38,7 +40,7 @@ import { BulkActionsToolbar } from '@/shared/components/AdminPanel/BulkActionsTo
 import { useMultiSelect } from '@/shared/hooks'
 import { useAdminMode } from '@/shared/hooks/useAdminMode'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
-import { Download, RotateCw, User, Mail, Signal, Volume2 } from 'lucide-react'
+import { Download, RotateCw, User, Mail, Signal, Volume2, LayoutGrid, List } from 'lucide-react'
 import { IngestionModal } from './IngestionModal'
 import { MessageInspectModal } from '@/features/messages/components/MessageInspectModal'
 import { ConsumerMessageModal } from '@/features/messages/components/ConsumerMessageModal'
@@ -60,6 +62,7 @@ interface PaginatedResponse {
 }
 
 const MessagesPage = () => {
+  const { t } = useTranslation('messages')
   const queryClient = useQueryClient()
   const [searchParams, setSearchParams] = useSearchParams()
   const [modalOpen, setModalOpen] = useState(false)
@@ -68,7 +71,7 @@ const MessagesPage = () => {
   const { isAdminMode } = useAdminMode()
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
-  const isDesktop = useMediaQuery('(min-width: 1280px)')
+
 
   // URL param for highlighting message from search
   const highlightMessageId = searchParams.get('highlight')
@@ -118,8 +121,8 @@ const MessagesPage = () => {
   })
 
   useEffect(() => {
-    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost/ws'
-    const ws = new WebSocket(`${wsUrl}?topics=noise_filtering`)
+    const wsUrl = getWebSocketUrl(['noise_filtering'])
+    const ws = new WebSocket(wsUrl)
 
     ws.onopen = () => {
       logger.debug('[MessagesPage] WebSocket connected')
@@ -156,6 +159,9 @@ const MessagesPage = () => {
       ws.close()
     }
   }, [queryClient])
+
+  // Handle highlight param from search navigation
+  const [viewMode, setViewMode] = useState<'feed' | 'table'>('feed')
 
   // Handle highlight param from search navigation
   useEffect(() => {
@@ -521,14 +527,14 @@ const MessagesPage = () => {
           className="gap-2"
         >
           <Signal className="h-4 w-4" />
-          {showAllMessages ? 'Show Signal Only' : 'Signal Only'}
+          {showAllMessages ? t('filters.signal') : t('filters.signal')}
         </Button>
 
         {/* Signal/Noise Ratio Badge */}
         <Badge variant="secondary" className="gap-2 px-4 py-2">
           <Signal className="h-3.5 w-3.5 text-status-connected" />
           <span className="font-medium">{signalNoiseStats.ratio}%</span>
-          <span className="text-muted-foreground">signal</span>
+          <span className="text-muted-foreground">{t('filters.signal').toLowerCase()}</span>
           <span className="mx-2 text-muted-foreground">|</span>
           <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
           <span className="text-muted-foreground">{signalNoiseStats.noiseCount}</span>
@@ -536,19 +542,38 @@ const MessagesPage = () => {
 
         <div className="flex-1" />
 
+        <div className="flex items-center gap-2 border-r pr-2 mr-2">
+          <Button
+            size="icon"
+            variant={viewMode === 'feed' ? 'secondary' : 'ghost'}
+            onClick={() => setViewMode('feed')}
+            title="Feed View"
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+            onClick={() => setViewMode('table')}
+            title="Table View"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+        </div>
+
         {/* Actions toolbar */}
         <div className="flex flex-wrap gap-2">
           <Button onClick={handleRefreshMessages} size="sm" variant="outline">
             <RotateCw className="mr-2 h-4 w-4" />
-            Refresh
+            {t('actions.refresh', 'Refresh')}
           </Button>
           <Button onClick={handleUpdateAuthors} size="sm" variant="outline">
             <User className="mr-2 h-4 w-4" />
-            Update Authors
+            {t('actions.updateAuthors', 'Update Authors')}
           </Button>
           <Button onClick={handleIngestMessages} size="sm">
             <Download className="mr-2 h-4 w-4" />
-            Ingest Messages
+            {t('ingestion.title')}
           </Button>
         </div>
       </div>
@@ -570,54 +595,54 @@ const MessagesPage = () => {
           table={table}
           globalFilter={globalFilter}
           onGlobalFilterChange={setGlobalFilter}
-          searchPlaceholder="Search messages..."
+          searchPlaceholder={t('filters.search', 'Search messages...')}
         >
-        <DataTableFacetedFilter
-          column={table.getColumn('source_name')}
-          title="Source"
-          options={Object.entries(sourceLabels).map(([value, meta]) => ({
-            value,
-            label: meta.label,
-            icon: meta.icon
-          }))}
-        />
-        <DataTableFacetedFilter
-          column={table.getColumn('analyzed')}
-          title="Status"
-          options={[
-            { value: 'analyzed', label: getMessageAnalysisBadge(true).label || 'Analyzed' },
-            { value: 'pending', label: getMessageAnalysisBadge(false).label || 'Pending' },
-          ]}
-        />
-        <DataTableFacetedFilter
-          column={table.getColumn('noise_classification')}
-          title="Classification"
-          options={(['signal', 'weak_signal', 'noise'] as NoiseClassification[]).map((value) => {
-            const config = getNoiseClassificationBadge(value)
-            return {
+          <DataTableFacetedFilter
+            column={table.getColumn('source_name')}
+            title={t('filters.source')}
+            options={Object.entries(sourceLabels).map(([value, meta]) => ({
               value,
-              label: config.label || value,
-            }
-          })}
-        />
-        <ImportanceScoreFilter
-          column={table.getColumn('importance_score')}
-          title="Importance"
-        />
-      </DataTableToolbar>
+              label: meta.label,
+              icon: meta.icon
+            }))}
+          />
+          <DataTableFacetedFilter
+            column={table.getColumn('analyzed')}
+            title={t('filters.status', 'Status')}
+            options={[
+              { value: 'analyzed', label: getMessageAnalysisBadge(true).label || 'Analyzed' },
+              { value: 'pending', label: getMessageAnalysisBadge(false).label || 'Pending' },
+            ]}
+          />
+          <DataTableFacetedFilter
+            column={table.getColumn('noise_classification')}
+            title={t('filters.classification')}
+            options={(['signal', 'weak_signal', 'noise'] as NoiseClassification[]).map((value) => {
+              const config = getNoiseClassificationBadge(value)
+              return {
+                value,
+                label: config.label || value,
+              }
+            })}
+          />
+          <ImportanceScoreFilter
+            column={table.getColumn('importance_score')}
+            title={t('filters.importance')}
+          />
+        </DataTableToolbar>
       </div>
 
       <div className="w-full min-w-0">
-        {isDesktop ? (
+        {viewMode === 'table' ? (
           (paginatedData?.items ?? []).length === 0 ? (
             <EmptyState
               icon={Mail}
-              title="No messages yet"
-              description="Messages will appear here once you ingest them from your sources."
+              title={t('list.empty')}
+              description={t('list.emptyDescription')}
               action={
                 <Button onClick={handleIngestMessages} className="mt-4">
                   <Download className="mr-2 h-4 w-4" />
-                  Ingest Messages
+                  {t('ingestion.title')}
                 </Button>
               }
             />
@@ -635,17 +660,17 @@ const MessagesPage = () => {
             />
           )
         ) : (
-          <div className="space-y-4 w-full min-w-0">
+          <div className="space-y-4 w-full min-w-0 max-w-3xl mx-auto">
             {table.getRowModel().rows.length === 0 ? (
               <EmptyState
                 variant="compact"
                 icon={Mail}
-                title="No messages yet"
-                description="Ingest messages to get started"
+                title={t('list.empty')}
+                description={t('list.emptyDescription')}
                 action={
                   <Button onClick={handleIngestMessages} size="sm">
                     <Download className="mr-2 h-4 w-4" />
-                    Ingest
+                    {t('ingestion.submit', 'Import')}
                   </Button>
                 }
               />

@@ -1,0 +1,11 @@
+{
+  "languageMismatch": {
+    "title": "Language Mismatch",
+    "description": "AI content language differs from project language",
+    "badge": "Different Language"
+  },
+  "required": "This field is required",
+  "invalidFormat": "Invalid format",
+  "tooShort": "Too short",
+  "tooLong": "Too long"
+}

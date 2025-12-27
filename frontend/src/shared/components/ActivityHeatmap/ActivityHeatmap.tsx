@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
@@ -36,9 +37,6 @@ interface ProcessedData {
   }
 }
 
-const DAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const DAYS_FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
 
 const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
@@ -53,7 +51,29 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
     },
     ref
   ) => {
+    const { t } = useTranslation('dashboard')
     const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>(period)
+
+    // Localized days
+    const DAYS_SHORT = useMemo(() => [
+      t('heatmap.days.mon'),
+      t('heatmap.days.tue'),
+      t('heatmap.days.wed'),
+      t('heatmap.days.thu'),
+      t('heatmap.days.fri'),
+      t('heatmap.days.sat'),
+      t('heatmap.days.sun'),
+    ], [t])
+
+    const DAYS_FULL = useMemo(() => [
+      t('heatmap.days.mon'),
+      t('heatmap.days.tue'),
+      t('heatmap.days.wed'),
+      t('heatmap.days.thu'),
+      t('heatmap.days.fri'),
+      t('heatmap.days.sat'),
+      t('heatmap.days.sun'),
+    ], [t])
     const [selectedSources, setSelectedSources] = useState<
       Record<'telegram' | 'slack' | 'email', boolean>
     >({
@@ -194,8 +214,8 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
           <div className="flex flex-wrap items-center gap-4">
             <Tabs value={selectedPeriod} onValueChange={(v) => setSelectedPeriod(v as 'week' | 'month')}>
               <TabsList>
-                <TabsTrigger value="week">Week</TabsTrigger>
-                <TabsTrigger value="month">Month</TabsTrigger>
+                <TabsTrigger value="week">{t('heatmap.tabs.week')}</TabsTrigger>
+                <TabsTrigger value="month">{t('heatmap.tabs.month')}</TabsTrigger>
               </TabsList>
             </Tabs>
 
@@ -351,7 +371,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
 
               <div className="mt-6 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>Less</span>
+                  <span>{t('heatmap.legend.less')}</span>
                   <div className="flex gap-2">
                     {[0, 0.25, 0.5, 0.75, 1].map((intensity, i) => (
                       <div
@@ -366,7 +386,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                       />
                     ))}
                   </div>
-                  <span>More</span>
+                  <span>{t('heatmap.legend.more')}</span>
                 </div>
 
                 <div className="flex items-center gap-4 text-xs">

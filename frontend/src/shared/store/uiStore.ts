@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+export type LanguageCode = 'uk' | 'en'
+
 interface UiStore {
   sidebarOpen: boolean
   toggleSidebar: () => void
@@ -16,6 +18,9 @@ interface UiStore {
   isAdminMode: boolean
   toggleAdminMode: () => void
   setAdminMode: (enabled: boolean) => void
+
+  language: LanguageCode
+  setLanguage: (lang: LanguageCode) => void
 }
 
 export const useUiStore = create<UiStore>()(
@@ -42,6 +47,9 @@ export const useUiStore = create<UiStore>()(
       isAdminMode: false,
       toggleAdminMode: () => set((state) => ({ isAdminMode: !state.isAdminMode })),
       setAdminMode: (enabled) => set({ isAdminMode: enabled }),
+
+      language: 'uk',
+      setLanguage: (lang) => set({ language: lang }),
     }),
     {
       name: 'ui-settings',
@@ -50,6 +58,7 @@ export const useUiStore = create<UiStore>()(
         sidebarOpen: state.sidebarOpen,
         expandedGroups: state.expandedGroups,
         isAdminMode: state.isAdminMode,
+        language: state.language,
       }),
     }
   )

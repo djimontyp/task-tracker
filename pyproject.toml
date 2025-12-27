@@ -29,6 +29,7 @@ dependencies = [
     "psycopg2-binary>=2.9.11",
     "jinja2>=3.1.6",
     "tenacity>=9.0.0",
+    "langdetect>=1.0.9",
 ]
 
 
@@ -36,6 +37,7 @@ dependencies = [
 dev = [
     "docling>=2.64.1",
     "mypy>=1.17.1",
+    "reportlab>=4.4.6",
     "ruff>=0.12.11",
 ]
 test = [

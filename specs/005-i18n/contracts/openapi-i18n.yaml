@@ -1,0 +1,354 @@
+# OpenAPI 3.0 Contract: i18n Endpoints
+# Feature: 005-i18n
+# Date: 2025-12-14
+
+openapi: 3.0.3
+info:
+  title: Pulse Radar - i18n API
+  description: API endpoints for internationalization feature
+  version: 1.0.0
+
+paths:
+  /api/v1/users/me:
+    get:
+      summary: Get current user profile
+      description: Returns current user info including language preference
+      tags: [Users]
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Unauthorized
+
+    patch:
+      summary: Update current user profile
+      description: Update user settings including UI language
+      tags: [Users]
+      operationId: updateCurrentUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Invalid request (bad language code)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+
+  /api/v1/projects:
+    post:
+      summary: Create project
+      description: Create new project with language setting
+      tags: [Projects]
+      operationId: createProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectConfigCreate'
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectConfigPublic'
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+
+  /api/v1/projects/{project_id}:
+    patch:
+      summary: Update project
+      description: Update project settings including language
+      tags: [Projects]
+      operationId: updateProject
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectConfigUpdate'
+      responses:
+        '200':
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectConfigPublic'
+        '400':
+          description: Validation error
+        '404':
+          description: Project not found
+
+components:
+  schemas:
+    # Language enum
+    LanguageCode:
+      type: string
+      enum: [uk, en]
+      default: uk
+      description: ISO 639-1 language code
+
+    # User schemas
+    UserResponse:
+      type: object
+      required:
+        - id
+        - first_name
+        - full_name
+        - is_active
+        - is_bot
+        - ui_language
+      properties:
+        id:
+          type: integer
+          description: User ID
+        first_name:
+          type: string
+          description: First name
+        last_name:
+          type: string
+          nullable: true
+          description: Last name
+        full_name:
+          type: string
+          description: Computed full name
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+        is_active:
+          type: boolean
+        is_bot:
+          type: boolean
+        ui_language:
+          $ref: '#/components/schemas/LanguageCode'
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    UserUpdateRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          maxLength: 20
+          nullable: true
+        avatar_url:
+          type: string
+          format: uri
+          maxLength: 500
+          nullable: true
+        ui_language:
+          $ref: '#/components/schemas/LanguageCode'
+
+    # Project schemas
+    ProjectConfigCreate:
+      type: object
+      required:
+        - name
+        - description
+        - keywords
+        - pm_user_id
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        glossary:
+          type: object
+          additionalProperties:
+            type: string
+          default: {}
+        components:
+          type: array
+          items:
+            type: object
+          default: []
+        default_assignee_ids:
+          type: array
+          items:
+            type: integer
+          default: []
+        pm_user_id:
+          type: integer
+        is_active:
+          type: boolean
+          default: true
+        priority_rules:
+          type: object
+          default: {}
+        version:
+          type: string
+          default: "1.0.0"
+        language:
+          $ref: '#/components/schemas/LanguageCode'
+
+    ProjectConfigUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        glossary:
+          type: object
+          additionalProperties:
+            type: string
+        components:
+          type: array
+          items:
+            type: object
+        default_assignee_ids:
+          type: array
+          items:
+            type: integer
+        pm_user_id:
+          type: integer
+        is_active:
+          type: boolean
+        priority_rules:
+          type: object
+        version:
+          type: string
+        language:
+          $ref: '#/components/schemas/LanguageCode'
+
+    ProjectConfigPublic:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - keywords
+        - glossary
+        - components
+        - default_assignee_ids
+        - is_active
+        - priority_rules
+        - version
+        - language
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        glossary:
+          type: object
+          additionalProperties:
+            type: string
+        components:
+          type: array
+          items:
+            type: object
+        default_assignee_ids:
+          type: array
+          items:
+            type: integer
+        is_active:
+          type: boolean
+        priority_rules:
+          type: object
+        version:
+          type: string
+        language:
+          $ref: '#/components/schemas/LanguageCode'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    # Error schemas
+    ValidationError:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: array
+          items:
+            type: object
+            properties:
+              loc:
+                type: array
+                items:
+                  oneOf:
+                    - type: string
+                    - type: integer
+              msg:
+                type: string
+              type:
+                type: string

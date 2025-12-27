@@ -1,5 +1,7 @@
 import type { Preview } from '@storybook/react-vite';
 import { withThemeByClassName } from '@storybook/addon-themes';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../src/i18n';
 import '../src/index.css';
 
 /**
@@ -11,6 +13,7 @@ import '../src/index.css';
  * - Responsive viewports (mobile-first)
  * - WCAG 2.1 AA accessibility testing
  * - Chromatic visual regression testing
+ * - i18n support (UK/EN)
  */
 
 // Viewport definitions matching tailwind.config.js
@@ -88,6 +91,12 @@ const preview: Preview = {
       <div className="bg-background text-foreground min-h-screen p-4">
         <Story />
       </div>
+    ),
+    // i18n provider for internationalized components
+    (Story) => (
+      <I18nextProvider i18n={i18n}>
+        <Story />
+      </I18nextProvider>
     ),
   ],
 };
