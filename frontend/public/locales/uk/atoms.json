@@ -21,7 +21,14 @@
     "approve": "Затвердити",
     "reject": "Відхилити",
     "archive": "Архівувати",
-    "viewSource": "Переглянути джерело"
+    "viewSource": "Переглянути джерело",
+    "approveAll": "Затвердити все",
+    "rejectAll": "Відхилити все",
+    "approveSelected": "Затвердити обрані",
+    "rejectSelected": "Відхилити обрані",
+    "selectAll": "Обрати все",
+    "clear": "Очистити",
+    "selected": "{{count}} обрано"
   },
   "messages": {
     "created": "Атом успішно створено",
@@ -39,6 +46,31 @@
     "allTypes": "Всі типи",
     "allStatuses": "Всі статуси",
     "search": "Пошук атомів..."
+  },
+  "smartFilters": {
+    "ariaLabel": "Фільтрувати атоми за статусом",
+    "all": "Усі",
+    "allAriaLabel": "{{count}} атомів загалом",
+    "pending": "Очікують",
+    "pendingAriaLabel": "{{count}} атомів очікують",
+    "approved": "Затверджено",
+    "approvedAriaLabel": "{{count}} затверджених атомів",
+    "rejected": "Відхилено",
+    "rejectedAriaLabel": "{{count}} відхилених атомів",
+    "empty": {
+      "pending": {
+        "title": "Немає атомів на перевірці",
+        "description": "Усі атоми перевірено. Нові атоми з'являться після обробки повідомлень."
+      },
+      "approved": {
+        "title": "Немає затверджених атомів",
+        "description": "Затверджені атоми з'являться тут після затвердження."
+      },
+      "rejected": {
+        "title": "Немає відхилених атомів",
+        "description": "Відхилені атоми з'являться тут після відхилення."
+      }
+    }
   },
   "card": {
     "source": "Джерело",

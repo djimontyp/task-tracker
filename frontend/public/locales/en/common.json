@@ -8,15 +8,15 @@
     },
     "items": {
       "overview": "Overview",
-      "executiveSummary": "Executive Summary",
+      "executiveSummary": "Executive summary",
       "messages": "Messages",
       "atoms": "Atoms",
       "topics": "Topics",
       "agents": "Agents",
-      "taskTemplates": "Task Templates",
+      "taskTemplates": "Task templates",
       "projects": "Projects",
       "settings": "Settings",
-      "toggleSidebar": "Toggle Sidebar"
+      "toggleSidebar": "Toggle sidebar"
     }
   },
   "units": {
@@ -49,11 +49,11 @@
     "remove": "Remove",
     "copy": "Copy",
     "view": "View",
-    "viewAll": "View All",
+    "viewAll": "View all",
     "apply": "Apply",
     "clear": "Clear",
     "select": "Select",
-    "selectAll": "Select All",
+    "selectAll": "Select all",
     "retry": "Retry"
   },
   "navigation": {
