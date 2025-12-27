@@ -10,7 +10,7 @@ import { Skeleton } from '@/shared/ui/skeleton'
 import { MessageSearchItem } from './MessageSearchItem'
 import { AtomSearchItem } from './AtomSearchItem'
 import { TopicSearchItem } from './TopicSearchItem'
-import type { FTSSearchResultsResponse } from '../types/fts'
+import type { FTSSearchResultsResponse } from './types/fts'
 
 interface SearchDropdownProps {
   data: FTSSearchResultsResponse | undefined
@@ -40,7 +40,7 @@ export function SearchDropdown({
       <CommandList className="max-h-[400px]">
         {/* Loading State with Skeleton */}
         {showLoading && (
-          <div className="p-2 space-y-3">
+          <div className="p-2 space-y-4">
             {/* Messages skeleton group */}
             <div className="space-y-2">
               <Skeleton className="h-4 w-24" />
@@ -75,7 +75,7 @@ export function SearchDropdown({
           <CommandEmpty className="py-6">
             <div className="flex flex-col items-center gap-2 text-center">
               <SearchX className="h-8 w-8 text-muted-foreground" />
-              <p className="text-sm font-medium">No results for "{query}"</p>
+              <p className="text-sm font-medium">No results for &quot;{query}&quot;</p>
               <p className="text-xs text-muted-foreground">
                 Try broader keywords or check spelling
               </p>
