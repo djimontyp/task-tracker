@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PageWrapper, type PageVariant } from './PageWrapper';
 import { Stack } from './Stack';
 

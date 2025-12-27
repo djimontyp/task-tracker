@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Stack, type AlignToken } from './Stack';
 import { type SpacingToken } from './Box';
 

@@ -29,13 +29,58 @@ module.exports = {
     'react',
     'react-hooks',
     'local-rules',
+    'boundaries',
   ],
   settings: {
     react: {
       version: 'detect',
     },
+    // ═══════════════════════════════════════════════════════════════
+    // IMPORT RESOLVER - Required for boundaries plugin
+    // ═══════════════════════════════════════════════════════════════
+    'import/resolver': {
+      typescript: {
+        alwaysTryTypes: true,
+        project: './tsconfig.json',
+      },
+    },
+    // ═══════════════════════════════════════════════════════════════
+    // BOUNDARIES - Layer architecture enforcement
+    // ═══════════════════════════════════════════════════════════════
+    'boundaries/elements': [
+      { type: 'shared', pattern: ['src/shared/**/*'], mode: 'full' },
+      { type: 'features', pattern: ['src/features/**/*'], mode: 'full' },
+      { type: 'pages', pattern: ['src/pages/**/*'], mode: 'full' },
+      { type: 'app', pattern: ['src/app/**/*'], mode: 'full' },
+    ],
+    'boundaries/ignore': [
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+      '**/*.stories.tsx',
+    ],
   },
   rules: {
+    // ═══════════════════════════════════════════════════════════════
+    // LAYER BOUNDARIES ENFORCEMENT
+    // ═══════════════════════════════════════════════════════════════
+
+    // Enforce layer import rules:
+    // - shared: can only import from shared
+    // - features: can import from shared and other features
+    // - pages: can import from shared, features, and other pages
+    // - app: can import from all layers
+    'boundaries/element-types': ['error', {
+      default: 'disallow',
+      rules: [
+        { from: 'shared', allow: ['shared'] },
+        { from: 'features', allow: ['shared', 'features'] },
+        { from: 'pages', allow: ['shared', 'features', 'pages'] },
+        { from: 'app', allow: ['shared', 'features', 'pages', 'app'] },
+      ],
+    }],
+
     // ═══════════════════════════════════════════════════════════════
     // DESIGN SYSTEM ENFORCEMENT
     // ═══════════════════════════════════════════════════════════════
@@ -107,6 +152,19 @@ module.exports = {
       files: ['**/HexColorPicker.tsx'],
       rules: {
         'local-rules/no-raw-tailwind-colors': 'off',
+      },
+    },
+    // Layouts - bridge between shared and features
+    // MainLayout needs to inject SearchContainer from features into Navbar
+    {
+      files: ['**/layouts/**/*.tsx'],
+      rules: {
+        'boundaries/element-types': ['error', {
+          default: 'disallow',
+          rules: [
+            { from: 'shared', allow: ['shared', 'features'] },
+          ],
+        }],
       },
     },
     // Test files - relaxed rules

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Inline, type AlignToken, type JustifyToken } from './Inline';
 import { type SpacingToken } from './Box';
 import { Check, X, Settings, User, Mail } from 'lucide-react';
