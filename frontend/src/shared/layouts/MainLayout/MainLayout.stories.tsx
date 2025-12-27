@@ -342,23 +342,23 @@ const FullWidthDemoContent = () => (
       <table className="w-full">
         <thead className="bg-muted">
           <tr>
-            <th className="text-left p-3 font-medium">Column 1</th>
-            <th className="text-left p-3 font-medium">Column 2</th>
-            <th className="text-left p-3 font-medium">Column 3</th>
-            <th className="text-left p-3 font-medium">Column 4</th>
-            <th className="text-left p-3 font-medium">Column 5</th>
-            <th className="text-left p-3 font-medium">Column 6</th>
+            <th className="text-left p-4 font-medium">Column 1</th>
+            <th className="text-left p-4 font-medium">Column 2</th>
+            <th className="text-left p-4 font-medium">Column 3</th>
+            <th className="text-left p-4 font-medium">Column 4</th>
+            <th className="text-left p-4 font-medium">Column 5</th>
+            <th className="text-left p-4 font-medium">Column 6</th>
           </tr>
         </thead>
         <tbody>
           {[1, 2, 3].map((row) => (
             <tr key={row} className="border-t">
-              <td className="p-3">Data {row}-1</td>
-              <td className="p-3">Data {row}-2</td>
-              <td className="p-3">Data {row}-3</td>
-              <td className="p-3">Data {row}-4</td>
-              <td className="p-3">Data {row}-5</td>
-              <td className="p-3">Data {row}-6</td>
+              <td className="p-4">Data {row}-1</td>
+              <td className="p-4">Data {row}-2</td>
+              <td className="p-4">Data {row}-3</td>
+              <td className="p-4">Data {row}-4</td>
+              <td className="p-4">Data {row}-5</td>
+              <td className="p-4">Data {row}-6</td>
             </tr>
           ))}
         </tbody>

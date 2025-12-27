@@ -1,23 +1,38 @@
-import { useState } from 'react';
+import { useState, useMemo, type ReactNode } from 'react';
 import { Search, Menu, HelpCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Logo } from '@/shared/components/Logo';
 import { Button } from '@/shared/ui/button';
 import { useTheme } from '@/shared/components/ThemeProvider';
-import { useServiceStatus } from '@/features/websocket/hooks/useServiceStatus';
+import { useServiceStatus, useAdminMode } from '@/shared/hooks';
 import { cn } from '@/shared/lib/utils';
 import { NavUser } from '@/shared/components/NavUser';
 import { UniversalThemeIcon, TooltipIconButton } from '@/shared/components';
-import { SearchBar } from '@/features/search/components';
 import { MobileSearch } from '@/shared/components/MobileSearch';
-import { useBreadcrumbs } from './useBreadcrumbs';
-import { useAdminMode } from '@/shared/hooks';
+import { useBreadcrumbs, type DynamicLabels } from './useBreadcrumbs';
 import { NavBreadcrumbs } from './NavBreadcrumbs';
 import { ServiceStatusIndicator } from './ServiceStatusIndicator';
+import { API_ENDPOINTS } from '@/shared/config/api';
+
+interface TopicBasic {
+  id: string;
+  name: string;
+}
+
+async function fetchTopicById(id: string): Promise<TopicBasic> {
+  const response = await fetch(`${API_ENDPOINTS.topics}/${id}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch topic: ${response.statusText}`);
+  }
+  return response.json();
+}
 
 export interface NavbarProps {
   onMobileSidebarToggle?: () => void;
   isDesktop?: boolean;
+  /** Search component to render in command zone (injected to avoid circular deps) */
+  searchComponent?: ReactNode;
 }
 
 /**
@@ -32,13 +47,39 @@ export interface NavbarProps {
  *
  * Settings and Admin Mode are accessible via NavUser dropdown.
  */
-const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
+const Navbar = ({ onMobileSidebarToggle, isDesktop = true, searchComponent }: NavbarProps) => {
   const { setTheme, theme } = useTheme();
   const { indicator } = useServiceStatus();
   const { isAdminMode, toggleAdminMode } = useAdminMode();
   const location = useLocation();
-  const { crumbs, tooltip } = useBreadcrumbs(location.pathname);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Extract topic ID from URL if on topic detail page
+  const topicDetailMatch = location.pathname.match(/^\/topics\/([a-f0-9-]+)$/);
+  const topicIdFromUrl = topicDetailMatch ? topicDetailMatch[1] : null;
+
+  // Fetch topic data for breadcrumb label (only when on topic detail page)
+  const { data: topicData } = useQuery<TopicBasic>({
+    queryKey: ['topic', topicIdFromUrl],
+    queryFn: () => fetchTopicById(topicIdFromUrl!),
+    enabled: topicIdFromUrl !== null,
+    staleTime: 5 * 60 * 1000,
+    initialData: () => {
+      if (topicIdFromUrl === null) return undefined;
+      return queryClient.getQueryData<TopicBasic>(['topic', topicIdFromUrl]);
+    },
+  });
+
+  // Prepare dynamic labels for breadcrumbs
+  const dynamicLabels = useMemo<DynamicLabels | undefined>(() => {
+    if (topicData?.name) {
+      return { topicName: topicData.name };
+    }
+    return undefined;
+  }, [topicData?.name]);
+
+  const { crumbs, tooltip } = useBreadcrumbs(location.pathname, dynamicLabels);
 
   const cycleTheme = () => {
     const themeOrder: Array<'light' | 'dark' | 'system'> = [
@@ -68,7 +109,7 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
     <nav
       aria-label="Main navigation"
       className={cn(
-        'z-50 w-full',
+        'z-modal w-full',
         'bg-card border-b border-border',
         !isDesktop && 'fixed top-0 left-0 right-0'
       )}
@@ -86,9 +127,11 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
         </div>
 
         {/* COMMAND ZONE: Search (center, max-w-80) */}
-        <div className="hidden lg:flex items-center w-64 lg:w-80 shrink-0">
-          <SearchBar />
-        </div>
+        {searchComponent && (
+          <div className="hidden lg:flex items-center w-64 lg:w-80 shrink-0">
+            {searchComponent}
+          </div>
+        )}
 
         {/* ACTIONS ZONE: Status + Theme + User (right, gap-2) */}
         <div className="flex items-center gap-2 shrink-0">
@@ -174,7 +217,9 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true }: NavbarProps) => {
         </div>
       </div>
 
-      <MobileSearch open={mobileSearchOpen} onOpenChange={setMobileSearchOpen} />
+      <MobileSearch open={mobileSearchOpen} onOpenChange={setMobileSearchOpen}>
+        {searchComponent}
+      </MobileSearch>
     </nav>
   );
 };
