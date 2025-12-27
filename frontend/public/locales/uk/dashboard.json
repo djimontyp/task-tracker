@@ -6,6 +6,13 @@
     "afternoon": "Доброго дня",
     "evening": "Доброго вечора"
   },
+  "subtitle": {
+    "loading": "Аналізую дані...",
+    "empty": "Тиша в ефірі. Підключіть джерела даних.",
+    "attention": "Є {{count}} сигналів що потребують уваги",
+    "pending": "{{count}} інсайтів очікують на розгляд",
+    "stable": "Проєкт рухається стабільно"
+  },
   "metrics": {
     "title": "Метрики",
     "messages": "Повідомлень",
@@ -63,5 +70,30 @@
     "analyzeMessages": "Аналізувати повідомлення",
     "createAtom": "Створити атом",
     "runExtraction": "Запустити екстракцію"
+  },
+  "todaysFocus": {
+    "title": "Сьогоднішній фокус",
+    "viewAll": "Дивитись все",
+    "empty": "Все оброблено!",
+    "emptyDescription": "Немає елементів, що потребують вашої уваги."
+  },
+  "recentInsights": {
+    "title": "Що нового",
+    "viewAll": "Все",
+    "empty": "Поки немає insights",
+    "emptyDescription": "AI витягне знання після аналізу повідомлень",
+    "loadError": "Не вдалось завантажити",
+    "retry": "Спробувати знову",
+    "ariaLabel": "Останні важливі insights",
+    "atomTypes": {
+      "problem": "Проблема",
+      "solution": "Рішення",
+      "decision": "Рішення",
+      "question": "Питання",
+      "insight": "Інсайт",
+      "pattern": "Патерн",
+      "requirement": "Вимога",
+      "atom": "Атом"
+    }
   }
 }

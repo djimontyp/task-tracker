@@ -2,12 +2,12 @@
   "title": "Topics",
   "subtitle": "Organize knowledge by topics",
   "list": {
-    "title": "Topic List",
+    "title": "Topic list",
     "empty": "No topics",
     "emptyDescription": "Create your first topic to organize atoms"
   },
   "detail": {
-    "title": "Topic Details",
+    "title": "Topic details",
     "description": "Description",
     "atoms": "Atoms in Topic",
     "messages": "Messages",
@@ -20,15 +20,21 @@
     "archived": "Archived",
     "search": "Search topics..."
   },
+  "smartFilters": {
+    "ariaLabel": "Topic filters",
+    "allAriaLabel": "All topics: {{count}}",
+    "activeAriaLabel": "Active topics: {{count}}",
+    "archivedAriaLabel": "Archived topics: {{count}}"
+  },
   "actions": {
-    "create": "Create Topic",
+    "create": "Create topic",
     "edit": "Edit",
     "delete": "Delete",
     "archive": "Archive",
     "unarchive": "Unarchive"
   },
   "form": {
-    "name": "Topic Name",
+    "name": "Topic name",
     "namePlaceholder": "Enter topic name",
     "description": "Description",
     "descriptionPlaceholder": "Describe the topic",
@@ -50,6 +56,6 @@
   "card": {
     "atoms": "Atoms",
     "messages": "Messages",
-    "lastActivity": "Last Activity"
+    "lastActivity": "Last activity"
   }
 }

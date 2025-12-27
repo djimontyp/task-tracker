@@ -6,7 +6,7 @@
     "prompts": "Prompts"
   },
   "general": {
-    "title": "General Settings",
+    "title": "General settings",
     "appearance": {
       "title": "Appearance",
       "description": "Customize the interface look and feel",
@@ -16,18 +16,18 @@
       "system": "System"
     },
     "language": {
-      "title": "Interface Language",
+      "title": "Interface language",
       "description": "Select the language for the interface"
     },
     "admin": {
-      "title": "Administrator Mode",
+      "title": "Administrator mode",
       "description": "Enable to access advanced features",
       "enable": "Enable administrator mode",
       "shortcut": "Shortcut: Ctrl+Shift+A"
     }
   },
   "sources": {
-    "title": "Data Sources",
+    "title": "Data sources",
     "description": "Integration and message source settings",
     "telegram": {
       "title": "Telegram",
@@ -41,9 +41,9 @@
     }
   },
   "providers": {
-    "title": "LLM Providers",
+    "title": "LLM providers",
     "description": "AI model settings for analysis",
-    "add": "Add Provider",
+    "add": "Add provider",
     "edit": "Edit",
     "delete": "Delete",
     "test": "Test",

@@ -1,10 +1,29 @@
 {
   "title": "Повідомлення",
   "subtitle": "Керуйте вхідними повідомленнями з усіх джерел",
+  "summary": {
+    "greeting": {
+      "morning": "Доброго ранку!",
+      "afternoon": "Добрий день!",
+      "evening": "Доброго вечора!"
+    },
+    "today": "Сьогодні",
+    "newSignals": "{{count}} нових сигналів",
+    "newSignals_one": "{{count}} новий сигнал",
+    "newSignals_few": "{{count}} нових сигнали",
+    "newSignals_many": "{{count}} нових сигналів",
+    "needsAttention": "{{count}} потребує уваги",
+    "needsAttention_one": "{{count}} потребує уваги",
+    "needsAttention_few": "{{count}} потребують уваги",
+    "needsAttention_many": "{{count}} потребують уваги",
+    "allClear": "Все під контролем",
+    "noMessages": "Тиша в ефірі - саме час для кави"
+  },
   "list": {
     "title": "Список повідомлень",
-    "empty": "Немає повідомлень",
-    "emptyDescription": "Повідомлення з'являться тут після підключення джерел"
+    "empty": "Тиша в ефірі",
+    "emptyDescription": "Повідомлення з'являться тут після підключення джерел. Саме час для кави",
+    "emptyHint": "Підключіть Telegram або імпортуйте повідомлення вручну"
   },
   "filters": {
     "title": "Фільтри",
@@ -26,7 +45,12 @@
     "time": "Час",
     "importance": "Важливість",
     "atoms": "Атоми",
-    "viewDetails": "Детальніше"
+    "viewDetails": "Детальніше",
+    "actions": {
+      "createAtom": "Створити атом",
+      "dismiss": "Ігнорувати",
+      "viewDetails": "Деталі"
+    }
   },
   "modal": {
     "title": "Деталі повідомлення",
@@ -52,5 +76,14 @@
     "paste": "Вставити текст",
     "upload": "Завантажити файл",
     "submit": "Імпортувати"
+  },
+  "smartFilters": {
+    "all": "Усі",
+    "signals": "Сигнали",
+    "noise": "Шум",
+    "ariaLabel": "Фільтрувати повідомлення за класифікацією",
+    "allAriaLabel": "Усі повідомлення, {{count}} загалом",
+    "signalsAriaLabel": "Сигнальні повідомлення, {{count}} елементів",
+    "noiseAriaLabel": "Шумові повідомлення, {{count}} елементів"
   }
 }

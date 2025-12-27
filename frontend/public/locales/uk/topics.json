@@ -20,6 +20,12 @@
     "archived": "Архівовані",
     "search": "Пошук тем..."
   },
+  "smartFilters": {
+    "ariaLabel": "Фільтри тем",
+    "allAriaLabel": "Всі теми: {{count}}",
+    "activeAriaLabel": "Активні теми: {{count}}",
+    "archivedAriaLabel": "Архівовані теми: {{count}}"
+  },
   "actions": {
     "create": "Створити тему",
     "edit": "Редагувати",

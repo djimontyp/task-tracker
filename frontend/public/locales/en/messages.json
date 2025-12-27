@@ -1,10 +1,27 @@
 {
   "title": "Messages",
   "subtitle": "Manage incoming messages from all sources",
+  "summary": {
+    "greeting": {
+      "morning": "Good morning!",
+      "afternoon": "Good afternoon!",
+      "evening": "Good evening!"
+    },
+    "today": "Today",
+    "newSignals": "{{count}} new signals",
+    "newSignals_one": "{{count}} new signal",
+    "newSignals_other": "{{count}} new signals",
+    "needsAttention": "{{count}} needs attention",
+    "needsAttention_one": "{{count}} needs attention",
+    "needsAttention_other": "{{count}} need attention",
+    "allClear": "All clear",
+    "noMessages": "All quiet - perfect time for coffee"
+  },
   "list": {
-    "title": "Message List",
-    "empty": "No messages",
-    "emptyDescription": "Messages will appear here after connecting sources"
+    "title": "Message list",
+    "empty": "Quiet in here",
+    "emptyDescription": "Messages will appear here once you connect sources. Time for coffee",
+    "emptyHint": "Connect Telegram or import messages manually"
   },
   "filters": {
     "title": "Filters",
@@ -13,12 +30,12 @@
     "starred": "Starred",
     "archived": "Archived",
     "source": "Source",
-    "dateRange": "Date Range",
+    "dateRange": "Date range",
     "importance": "Importance",
     "classification": "Classification",
     "signal": "Signal",
     "noise": "Noise",
-    "clear": "Clear Filters"
+    "clear": "Clear filters"
   },
   "card": {
     "author": "Author",
@@ -26,14 +43,19 @@
     "time": "Time",
     "importance": "Importance",
     "atoms": "Atoms",
-    "viewDetails": "View Details"
+    "viewDetails": "View details",
+    "actions": {
+      "createAtom": "Create atom",
+      "dismiss": "Dismiss",
+      "viewDetails": "Details"
+    }
   },
   "modal": {
-    "title": "Message Details",
+    "title": "Message details",
     "content": "Content",
     "metadata": "Metadata",
     "analysis": "Analysis",
-    "atoms": "Related Atoms",
+    "atoms": "Related atoms",
     "history": "History",
     "close": "Close"
   },
@@ -47,10 +69,19 @@
     "markAsUnread": "Mark as Unread"
   },
   "ingestion": {
-    "title": "Import Messages",
+    "title": "Import messages",
     "description": "Import messages from a file or paste text",
-    "paste": "Paste Text",
-    "upload": "Upload File",
+    "paste": "Paste text",
+    "upload": "Upload file",
     "submit": "Import"
+  },
+  "smartFilters": {
+    "all": "All",
+    "signals": "Signals",
+    "noise": "Noise",
+    "ariaLabel": "Filter messages by classification",
+    "allAriaLabel": "All messages, {{count}} total",
+    "signalsAriaLabel": "Signal messages, {{count}} items",
+    "noiseAriaLabel": "Noise messages, {{count}} items"
   }
 }

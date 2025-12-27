@@ -1,5 +1,5 @@
 {
-  "title": "Knowledge Atoms",
+  "title": "Knowledge atoms",
   "subtitle": "Extracted knowledge from messages",
   "type": {
     "task": "Task",
@@ -10,18 +10,25 @@
   },
   "status": {
     "draft": "Draft",
-    "pending_review": "Pending Review",
+    "pending_review": "Pending review",
     "approved": "Approved",
     "rejected": "Rejected"
   },
   "actions": {
-    "create": "Create Atom",
+    "create": "Create atom",
     "edit": "Edit",
     "delete": "Delete",
     "approve": "Approve",
     "reject": "Reject",
     "archive": "Archive",
-    "viewSource": "View Source"
+    "viewSource": "View source",
+    "approveAll": "Approve All",
+    "rejectAll": "Reject All",
+    "approveSelected": "Approve Selected",
+    "rejectSelected": "Reject Selected",
+    "selectAll": "Select All",
+    "clear": "Clear",
+    "selected": "{{count}} selected"
   },
   "messages": {
     "created": "Atom created successfully",
@@ -35,9 +42,34 @@
     "atom_other": "{{count}} atoms"
   },
   "filters": {
-    "allTypes": "All Types",
-    "allStatuses": "All Statuses",
+    "allTypes": "All types",
+    "allStatuses": "All statuses",
     "search": "Search atoms..."
+  },
+  "smartFilters": {
+    "ariaLabel": "Filter atoms by status",
+    "all": "All",
+    "allAriaLabel": "{{count}} atoms total",
+    "pending": "Pending",
+    "pendingAriaLabel": "{{count}} pending atoms",
+    "approved": "Approved",
+    "approvedAriaLabel": "{{count}} approved atoms",
+    "rejected": "Rejected",
+    "rejectedAriaLabel": "{{count}} rejected atoms",
+    "empty": {
+      "pending": {
+        "title": "No pending atoms",
+        "description": "All atoms have been reviewed. New atoms will appear after processing messages."
+      },
+      "approved": {
+        "title": "No approved atoms",
+        "description": "Approved atoms will appear here once you approve pending items."
+      },
+      "rejected": {
+        "title": "No rejected atoms",
+        "description": "Rejected atoms will appear here once you reject pending items."
+      }
+    }
   },
   "card": {
     "source": "Source",

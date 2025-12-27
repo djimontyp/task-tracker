@@ -1,6 +1,18 @@
 {
   "title": "Dashboard",
   "welcome": "Welcome to Pulse Radar",
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "subtitle": {
+    "loading": "Analyzing data...",
+    "empty": "All quiet. Connect your data sources.",
+    "attention": "{{count}} signals need your attention",
+    "pending": "{{count}} insights pending review",
+    "stable": "Project is moving steadily"
+  },
   "metrics": {
     "title": "Metrics",
     "messages": "Messages",
@@ -8,17 +20,17 @@
     "topics": "Topics",
     "tasks": "Tasks",
     "today": "Today",
-    "thisWeek": "This Week",
-    "thisMonth": "This Month",
+    "thisWeek": "This week",
+    "thisMonth": "This month",
     "total": "Total",
     "active": "Active",
     "pending": "Pending"
   },
   "charts": {
-    "messageFlow": "Message Flow",
-    "atomTypes": "Atom Types",
-    "topicDistribution": "Topic Distribution",
-    "activityHeatmap": "Activity Heatmap"
+    "messageFlow": "Message flow",
+    "atomTypes": "Atom types",
+    "topicDistribution": "Topic distribution",
+    "activityHeatmap": "Activity heatmap"
   },
   "heatmap": {
     "tabs": {
@@ -40,23 +52,48 @@
     }
   },
   "recentActivity": {
-    "title": "Recent Activity",
+    "title": "Recent activity",
     "noActivity": "No activity",
-    "viewAll": "View All"
+    "viewAll": "View all"
   },
   "topTopics": {
-    "title": "Top Topics",
+    "title": "Top topics",
     "noTopics": "No topics",
-    "viewAll": "View All",
+    "viewAll": "View all",
     "loadError": "Failed to load topics",
     "emptyDescription": "Topics will appear after message analysis",
     "ariaLabel": "Top topics by atom count",
     "itemAriaLabel": "Go to topic {{name}} with {{atomCount}} atoms"
   },
   "quickActions": {
-    "title": "Quick Actions",
-    "analyzeMessages": "Analyze Messages",
-    "createAtom": "Create Atom",
-    "runExtraction": "Run Extraction"
+    "title": "Quick actions",
+    "analyzeMessages": "Analyze messages",
+    "createAtom": "Create atom",
+    "runExtraction": "Run extraction"
+  },
+  "todaysFocus": {
+    "title": "Today's Focus",
+    "viewAll": "View all",
+    "empty": "All caught up!",
+    "emptyDescription": "No pending items that need your attention."
+  },
+  "recentInsights": {
+    "title": "What's New",
+    "viewAll": "All",
+    "empty": "No insights yet",
+    "emptyDescription": "AI will extract insights after analyzing messages",
+    "loadError": "Failed to load",
+    "retry": "Try again",
+    "ariaLabel": "Recent important insights",
+    "atomTypes": {
+      "problem": "Problem",
+      "solution": "Solution",
+      "decision": "Decision",
+      "question": "Question",
+      "insight": "Insight",
+      "pattern": "Pattern",
+      "requirement": "Requirement",
+      "atom": "Atom"
+    }
   }
 }
