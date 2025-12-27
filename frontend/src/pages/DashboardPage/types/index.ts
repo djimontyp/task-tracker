@@ -15,6 +15,28 @@ export type AtomType =
   | 'PATTERN'
   | 'REQUIREMENT'
 
+// Subset of atom types for Today's Focus (pending review items)
+export type FocusAtomType = 'TASK' | 'IDEA' | 'QUESTION' | 'DECISION' | 'INSIGHT'
+
+/**
+ * Focus atom for Today's Focus component
+ * Represents atoms with PENDING_REVIEW status
+ */
+export interface FocusAtom {
+  id: number
+  title: string
+  atom_type: FocusAtomType
+  created_at: string
+}
+
+/**
+ * Props for TodaysFocus component
+ */
+export interface TodaysFocusProps {
+  atoms: FocusAtom[]
+  isLoading?: boolean
+}
+
 // Time period for filtering
 export type DashboardPeriod = 'today' | 'yesterday' | 'week' | 'month'
 
@@ -121,4 +143,47 @@ export interface TopTopicsProps {
   isLoading: boolean
   error?: Error | null
   limit?: number
+}
+
+/**
+ * Props for DashboardPresenter (Container/Presenter pattern)
+ * Pure component that receives all data as props
+ */
+export interface DashboardPresenterProps {
+  // Data from useDashboardData hook
+  metrics: {
+    data: DashboardMetricsData | undefined
+    isLoading: boolean
+    error: Error | null
+  }
+  insights: {
+    data: RecentInsight[] | undefined
+    isLoading: boolean
+    error: Error | null
+  }
+  topics: {
+    data: TopTopic[] | undefined
+    isLoading: boolean
+    error: Error | null
+  }
+  focusAtoms: {
+    data: FocusAtom[] | undefined
+    isLoading: boolean
+    error: Error | null
+  }
+
+  // Derived state
+  hasNoData: boolean
+  isAnyLoading: boolean
+
+  // UI state
+  showOnboarding: boolean
+  greeting: string
+  subtitle: string // Dynamic hero subtitle based on data state
+
+  // Callbacks
+  onCloseOnboarding: () => void
+  onNavigateToSettings: () => void
+  onNavigateToMessages: () => void
+  onNavigateToTopics: () => void
 }

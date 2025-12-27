@@ -1,37 +1,106 @@
 /**
- * Dashboard Page
+ * Dashboard Page Container (Container/Presenter pattern)
  *
- * CEO/PM overview: metrics, trends, recent insights, activity heatmap, top topics.
- * Uses mock data initially, toggle USE_MOCK_DATA in useDashboardData.ts for real API.
+ * Container component - handles data fetching, state management, and navigation.
+ * Delegates rendering to DashboardPresenter (pure component).
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Inbox, Settings } from 'lucide-react'
-import { OnboardingWizard } from '@/features/onboarding'
-import { Card, CardContent } from '@/shared/ui/card'
-import { Button } from '@/shared/ui/button'
 
-import { PageWrapper } from '@/shared/primitives'
 import { useDashboardData } from './hooks/useDashboardData'
-import {
-  DashboardMetrics,
-  ActivityHeatmap,
-  TrendChart,
-  // TrendsList, // Hidden until /api/v1/dashboard/trends endpoint is implemented
-  RecentInsights,
-  TopTopics,
-} from './components'
+import { DashboardPresenter } from './DashboardPresenter'
+import type { FocusAtom } from './types'
 
+// Mock data for focusAtoms until API endpoint is ready
+// TODO: Replace with useQuery for GET /api/v1/atoms?status=pending_review&limit=3
+const mockFocusAtoms: FocusAtom[] = [
+  { id: 1, title: 'Review API rate limits', atom_type: 'TASK', created_at: new Date().toISOString() },
+  { id: 2, title: 'Add dark mode toggle', atom_type: 'IDEA', created_at: new Date().toISOString() },
+  { id: 3, title: 'What triggers the webhook?', atom_type: 'QUESTION', created_at: new Date().toISOString() },
+]
+
+/**
+ * Compute greeting based on current hour
+ */
+function useGreeting(): string {
+  const { t } = useTranslation(['dashboard'])
+
+  return useMemo(() => {
+    const hour = new Date().getHours()
+    let greetingKey: string
+    if (hour < 12) {
+      greetingKey = 'greeting.morning'
+    } else if (hour < 18) {
+      greetingKey = 'greeting.afternoon'
+    } else {
+      greetingKey = 'greeting.evening'
+    }
+    return `${t(greetingKey)}, Макс!`
+  }, [t])
+}
+
+/**
+ * Compute dynamic hero subtitle based on data state
+ */
+function useHeroSubtitle(
+  hasNoData: boolean,
+  isLoading: boolean,
+  criticalCount: number,
+  pendingCount: number
+): string {
+  const { t } = useTranslation(['dashboard'])
+
+  return useMemo(() => {
+    if (isLoading) {
+      return t('subtitle.loading', 'Аналізую дані...')
+    }
+
+    if (hasNoData) {
+      return t('subtitle.empty', 'Тиша в ефірі ☕️ Підключіть джерела даних.')
+    }
+
+    if (criticalCount > 0) {
+      return t('subtitle.attention', {
+        count: criticalCount,
+        defaultValue: `Є ${criticalCount} сигналів що потребують уваги`,
+      })
+    }
+
+    if (pendingCount > 0) {
+      return t('subtitle.pending', {
+        count: pendingCount,
+        defaultValue: `${pendingCount} інсайтів очікують на розгляд`,
+      })
+    }
+
+    return t('subtitle.stable', 'Проєкт рухається стабільно 🚀')
+  }, [t, hasNoData, isLoading, criticalCount, pendingCount])
+}
+
+/**
+ * DashboardPage - Container component
+ *
+ * Responsibilities:
+ * - Data fetching via useDashboardData hook
+ * - Onboarding state management
+ * - Navigation callbacks
+ * - Passes all data to DashboardPresenter
+ */
 const DashboardPage = () => {
   const navigate = useNavigate()
-  const { t } = useTranslation(['dashboard', 'common'])
   const [showOnboarding, setShowOnboarding] = useState(false)
 
-  // Note: trends hook still called but not rendered - remove from useDashboardData when cleaning up
+  // Data fetching
   const { metrics, insights, topics, hasNoData, isAnyLoading } =
     useDashboardData('today')
+
+  // Computed greeting and subtitle
+  const greeting = useGreeting()
+  const criticalCount = metrics.data?.critical?.count ?? 0
+  const pendingCount = insights.data?.filter((i) => i.importance && i.importance >= 0.7).length ?? 0
+  const subtitle = useHeroSubtitle(hasNoData, isAnyLoading, criticalCount, pendingCount)
 
   // Show onboarding wizard for new users
   useEffect(() => {
@@ -45,104 +114,55 @@ const DashboardPage = () => {
     }
   }, [isAnyLoading, hasNoData])
 
+  // Navigation callbacks (memoized to prevent unnecessary re-renders)
+  const handleCloseOnboarding = useCallback(() => {
+    setShowOnboarding(false)
+  }, [])
+
+  const handleNavigateToSettings = useCallback(() => {
+    navigate('/settings')
+  }, [navigate])
+
+  const handleNavigateToMessages = useCallback(() => {
+    navigate('/messages')
+  }, [navigate])
+
+  const handleNavigateToTopics = useCallback(() => {
+    navigate('/topics')
+  }, [navigate])
+
   return (
-    <PageWrapper variant="fullWidth">
-      <OnboardingWizard
-        open={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
-      />
-
-      {/* Cold Start Empty State */}
-      {hasNoData && !isAnyLoading && (
-        <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
-          <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 text-center">
-            <div className="w-16 h-16 mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <Inbox className="h-8 w-8 text-primary" aria-hidden="true" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">
-              Почніть збирати знання
-            </h3>
-            <p className="text-muted-foreground mb-6 max-w-md">
-              Підключіть Telegram, щоб AI почав аналізувати повідомлення та
-              витягувати важливу інформацію
-            </p>
-            <div className="flex gap-4 flex-wrap justify-center">
-              <Button onClick={() => navigate('/settings')} size="lg">
-                <Settings className="mr-2 h-5 w-5" aria-hidden="true" />
-                Налаштувати Telegram
-              </Button>
-              <Button
-                onClick={() => navigate('/messages')}
-                variant="outline"
-                size="lg"
-              >
-                Переглянути повідомлення
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="flex items-center justify-between mb-8 animate-fade-in-up">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {(() => {
-              const hour = new Date().getHours()
-              if (hour < 12) return t('greeting.morning')
-              if (hour < 18) return t('greeting.afternoon')
-              return t('greeting.evening')
-            })()}, Макс! 👋
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Ось що відбувається у вашому проєкті сьогодні.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => navigate('/settings')}>
-            <Settings className="w-4 h-4 mr-2" />
-            Налаштування
-          </Button>
-        </div>
-      </div>
-
-      {/* Row 1: Metrics (3 cards) */}
-      <div className="animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
-        <DashboardMetrics
-          data={metrics.data}
-          isLoading={metrics.isLoading}
-          error={metrics.error}
-        />
-      </div>
-
-      {/* Row 2: Trends Chart */}
-      <div className="animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
-        <TrendChart />
-      </div>
-
-      {/* Row 2: Recent Insights */}
-      <div className="animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>
-        <RecentInsights
-          data={insights.data}
-          isLoading={insights.isLoading}
-          error={insights.error}
-          onViewAll={() => navigate('/topics')}
-        />
-      </div>
-
-      {/* Row 4: Activity Heatmap + Top Topics (2 columns on desktop) */}
-      <div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-up"
-        style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}
-      >
-        <ActivityHeatmap />
-        <TopTopics
-          data={topics.data}
-          isLoading={topics.isLoading}
-          error={topics.error}
-          limit={5}
-        />
-      </div>
-    </PageWrapper>
+    <DashboardPresenter
+      metrics={{
+        data: metrics.data,
+        isLoading: metrics.isLoading,
+        error: metrics.error,
+      }}
+      insights={{
+        data: insights.data,
+        isLoading: insights.isLoading,
+        error: insights.error,
+      }}
+      topics={{
+        data: topics.data,
+        isLoading: topics.isLoading,
+        error: topics.error,
+      }}
+      focusAtoms={{
+        data: mockFocusAtoms,
+        isLoading: false,
+        error: null,
+      }}
+      hasNoData={hasNoData}
+      isAnyLoading={isAnyLoading}
+      showOnboarding={showOnboarding}
+      greeting={greeting}
+      subtitle={subtitle}
+      onCloseOnboarding={handleCloseOnboarding}
+      onNavigateToSettings={handleNavigateToSettings}
+      onNavigateToMessages={handleNavigateToMessages}
+      onNavigateToTopics={handleNavigateToTopics}
+    />
   )
 }
 
