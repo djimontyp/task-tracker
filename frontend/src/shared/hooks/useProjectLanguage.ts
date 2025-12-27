@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { projectService } from '@/features/projects/api/projectService';
+import { listProjects } from '@/shared/api/projectService';
 
 const DEFAULT_PROJECT_LANGUAGE = 'uk';
 
@@ -16,15 +16,18 @@ export function useProjectLanguage() {
   const { data: projectsData, isLoading } = useQuery({
     queryKey: ['projects', 'active'],
     queryFn: async () => {
-      const response = await projectService.listProjects();
+      const response = await listProjects();
       // Get the first active project (single-project architecture)
       return response.items.find((p) => p.is_active) ?? response.items[0];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes - project settings rarely change
   });
 
+  // Cast to access language field which may be added via migration
+  const project = projectsData as (typeof projectsData & { language?: string }) | undefined;
+
   return {
-    projectLanguage: projectsData?.language ?? DEFAULT_PROJECT_LANGUAGE,
+    projectLanguage: project?.language ?? DEFAULT_PROJECT_LANGUAGE,
     isLoading,
     hasProject: !!projectsData,
   };

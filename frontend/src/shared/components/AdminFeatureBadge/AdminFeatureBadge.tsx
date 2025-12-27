@@ -41,7 +41,7 @@ export const AdminFeatureBadge: React.FC<AdminFeatureBadgeProps> = ({
     'inline-flex items-center gap-2',
     'bg-semantic-warning hover:bg-semantic-warning/90 text-white border-semantic-warning',
     'font-medium shadow-sm',
-    variant === 'floating' && 'absolute top-2 right-2 z-10',
+    variant === 'floating' && 'absolute top-2 right-2 z-dropdown',
     variant === 'inline' && 'ml-2',
     sizeClasses[size],
     className

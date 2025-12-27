@@ -42,11 +42,11 @@ const generateMockData = (): ActivityDay[] => {
 
 const getLevelColor = (level: number) => {
     switch (level) {
-        case 1: return 'bg-emerald-200 dark:bg-emerald-900/50'
-        case 2: return 'bg-emerald-400 dark:bg-emerald-700/60'
-        case 3: return 'bg-emerald-500 dark:bg-emerald-600'
-        case 4: return 'bg-emerald-600 dark:bg-emerald-500'
-        default: return 'bg-secondary/50 dark:bg-secondary/30'
+        case 1: return 'bg-heatmap-level-1'
+        case 2: return 'bg-heatmap-level-2'
+        case 3: return 'bg-heatmap-level-3'
+        case 4: return 'bg-heatmap-level-4'
+        default: return 'bg-heatmap-level-0'
     }
 }
 
@@ -76,9 +76,9 @@ export const ActivityHeatmap: React.FC = () => {
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col gap-2">
-                    <div className="flex gap-1 overflow-x-auto pb-2 items-end justify-center sm:justify-start">
+                    <div className="flex gap-0.5 overflow-x-auto pb-2 items-end justify-center sm:justify-start">
                         {weeks.map((week, wIndex) => (
-                            <div key={wIndex} className="flex flex-col gap-1">
+                            <div key={wIndex} className="flex flex-col gap-0.5">
                                 {week.map((day, dIndex) => (
                                     <TooltipProvider key={dIndex}>
                                         <Tooltip>

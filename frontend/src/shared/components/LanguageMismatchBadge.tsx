@@ -33,7 +33,7 @@ export function LanguageMismatchBadge({
         <TooltipTrigger asChild>
           <Badge
             variant="outline"
-            className={`gap-1 border-semantic-warning text-semantic-warning ${className ?? ''}`}
+            className={`gap-2 border-semantic-warning text-semantic-warning ${className ?? ''}`}
           >
             <AlertTriangle className="h-3 w-3" />
             {t('languageMismatch.badge')}
