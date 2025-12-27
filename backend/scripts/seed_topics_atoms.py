@@ -321,8 +321,7 @@ async def seed_data(
             (AtomType.solution, 0.20),
             (AtomType.decision, 0.20),
             (AtomType.question, 0.15),
-            (AtomType.insight, 0.10),
-            (AtomType.pattern, 0.05),
+            (AtomType.insight, 0.15),
         ]
 
         for atom_idx in range(num_atoms):

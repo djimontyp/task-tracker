@@ -34,8 +34,18 @@ export default defineConfig({
     port: 3000,
     host: true, // Listen on all addresses (for Docker)
     strictPort: true,
+    // Allow any host (ngrok, tunnels, custom domains)
+    // Safe because we're behind nginx reverse proxy
+    allowedHosts: 'all',
     watch: {
       usePolling: true, // Required for Docker
+    },
+    // HMR configuration for reverse proxy (nginx, ngrok)
+    // Client connects via the same host/port as the page (through nginx)
+    hmr: {
+      // Use the page's origin for WebSocket connection
+      // This works for: localhost:80, ngrok:443, any reverse proxy
+      // Nginx proxies /@vite/* and / with WebSocket upgrade headers
     },
   },
 

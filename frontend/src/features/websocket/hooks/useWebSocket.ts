@@ -39,9 +39,11 @@ const resolveWebSocketUrl = (topics?: string[]) => {
   const host = resolveHost()
   const path = normalizePath(import.meta.env.VITE_WS_PATH)
 
-  const port = typeof window !== 'undefined' && window.location.port
-    ? `:${window.location.port}`
-    : ''
+  // Don't add port for standard HTTP/HTTPS ports (80/443)
+  // ngrok and production proxies don't include port in URL
+  const locationPort = typeof window !== 'undefined' ? window.location.port : ''
+  const shouldAddPort = locationPort && locationPort !== '80' && locationPort !== '443'
+  const port = shouldAddPort ? `:${locationPort}` : ''
 
   let url = `${scheme}://${host}${port}${path}`
 

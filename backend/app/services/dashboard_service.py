@@ -13,6 +13,8 @@ from app.api.v1.schemas.dashboard import (
     MessageStats,
     TopicStats,
     TrendData,
+    TrendItem,
+    TrendsResponse,
 )
 from app.models.atom import Atom
 from app.models.message import Message
@@ -189,4 +191,85 @@ class DashboardService:
             previous=previous,
             change_percent=round(change_percent, 1),
             direction=direction,  # type: ignore[arg-type]
+        )
+
+    async def get_trends(
+        self, period: str = "week", limit: int = 5
+    ) -> TrendsResponse:
+        """Get trending topics based on message activity.
+
+        Args:
+            period: Time period - "today", "week", or "month"
+            limit: Maximum number of trends to return
+
+        Returns:
+            TrendsResponse with list of trending topics
+        """
+        now = datetime.utcnow()
+        today_start = datetime.combine(now.date(), time.min)
+
+        if period == "today":
+            period_start = today_start
+            prev_start = today_start - timedelta(days=1)
+            prev_end = today_start
+        elif period == "week":
+            period_start = today_start - timedelta(days=7)
+            prev_start = period_start - timedelta(days=7)
+            prev_end = period_start
+        else:  # month
+            period_start = today_start - timedelta(days=30)
+            prev_start = period_start - timedelta(days=30)
+            prev_end = period_start
+
+        # Get topics with message counts for current period
+        topics_query = select(Topic).limit(limit * 2)
+        topics_result = await self.session.execute(topics_query)
+        topics = topics_result.scalars().all()
+
+        # Count messages per topic for current period
+        current_counts: dict[str, int] = {}
+        prev_counts: dict[str, int] = {}
+
+        for topic in topics:
+            # Current period count
+            curr_query = (
+                select(func.count())
+                .select_from(Message)
+                .where(
+                    Message.topic_id == topic.id,
+                    Message.sent_at >= period_start,  # type: ignore[arg-type]
+                )
+            )
+            curr_result = await self.session.execute(curr_query)
+            current_counts[topic.name] = curr_result.scalar() or 0
+
+            # Previous period count
+            prev_query = (
+                select(func.count())
+                .select_from(Message)
+                .where(
+                    Message.topic_id == topic.id,
+                    Message.sent_at >= prev_start,  # type: ignore[arg-type]
+                    Message.sent_at < prev_end,  # type: ignore[arg-type]
+                )
+            )
+            prev_result = await self.session.execute(prev_query)
+            prev_counts[topic.name] = prev_result.scalar() or 0
+
+        # Build trends list sorted by count
+        trends_data = [
+            (name, count, count - prev_counts.get(name, 0))
+            for name, count in current_counts.items()
+            if count > 0
+        ]
+        trends_data.sort(key=lambda x: x[1], reverse=True)
+
+        trends = [
+            TrendItem(keyword=name, count=count, delta=delta)
+            for name, count, delta in trends_data[:limit]
+        ]
+
+        return TrendsResponse(
+            trends=trends,
+            period=period,  # type: ignore[arg-type]
         )
