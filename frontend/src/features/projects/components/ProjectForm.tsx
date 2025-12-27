@@ -261,7 +261,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <FormField label="Project Name" required>
+          <FormField label="Project name" required>
             <Input
               id="name"
               value={formData.name}
@@ -281,7 +281,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             />
           </FormField>
 
-          <FormField label="Project Manager User ID" required>
+          <FormField label="Project manager user ID" required>
             <Input
               id="pm_user_id"
               type="number"
@@ -391,7 +391,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             </div>
           </div>
 
-          <FormField label="Default Assignee IDs">
+          <FormField label="Default assignee IDs">
             <div className="flex gap-2">
               <Input
                 value={assigneeInput}

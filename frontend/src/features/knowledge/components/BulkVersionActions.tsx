@@ -77,7 +77,7 @@ export function BulkVersionActions({
 
   return (
     <>
-      <div className="sticky top-0 z-10 flex items-center justify-between gap-4 rounded-lg border bg-background p-4 shadow-md">
+      <div className="sticky top-0 z-sticky flex items-center justify-between gap-4 rounded-lg border bg-background p-4 shadow-md">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-muted-foreground">
             Обрано: {selectedVersions.length} версій

@@ -14,7 +14,7 @@ import { VersionHistoryList, VersionDiffViewer, KnowledgeExtractionPanel } from 
 import { ConsumerMessageModal } from '@/features/messages/components'
 import { renderTopicIcon } from '@/features/topics/utils/renderIcon'
 import { useDebounce } from '@/shared/hooks'
-import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
+import { useWebSocket } from '@/shared/hooks'
 import type { Topic } from '@/features/topics/types'
 import type { Atom } from '@/features/atoms/types'
 import type { Message } from '@/shared/types'

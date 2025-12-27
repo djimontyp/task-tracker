@@ -152,7 +152,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
       {/* Overall Confidence Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-foreground">Overall Confidence</h3>
+          <h3 className="text-lg font-semibold text-foreground">Overall confidence</h3>
           <div className="flex items-center gap-2">
             <span className="text-2xl font-bold text-foreground">{data.confidence}%</span>
             <Badge variant={overallConfig.badgeVariant}>{overallConfig.label}</Badge>
@@ -200,7 +200,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
 
       {/* Dimension Breakdown */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-foreground">Dimension Breakdown</h3>
+        <h3 className="text-lg font-semibold text-foreground">Dimension breakdown</h3>
 
         {dimensions.map((dimension) => {
           const displayValue = dimension.inverted ? 100 - dimension.value : dimension.value
@@ -238,7 +238,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
       {/* Decision Rationale */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-foreground">Decision Rationale</h3>
+          <h3 className="text-lg font-semibold text-foreground">Decision rationale</h3>
           <Button variant="ghost" size="sm" onClick={handleCopyReasoning}>
             <Clipboard className="size-4 mr-2" />
             Copy Reasoning
@@ -300,7 +300,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
           <div className="rounded-lg border border-border bg-card">
             <CollapsibleTrigger asChild>
               <button className="flex w-full items-center justify-between p-4 hover:bg-muted transition-colors">
-                <span className="text-sm font-semibold text-foreground">Key Indicators</span>
+                <span className="text-sm font-semibold text-foreground">Key indicators</span>
                 {keyIndicatorsOpen ? (
                   <ChevronDown className="size-5 text-muted-foreground" />
                 ) : (
@@ -344,7 +344,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
       {/* Topic Assignment */}
       <div className="rounded-lg border border-border bg-muted p-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground">Assigned Topic</span>
+          <span className="text-sm font-medium text-foreground">Assigned topic</span>
           <span className="text-sm font-semibold text-foreground">{data.topic_title}</span>
         </div>
       </div>

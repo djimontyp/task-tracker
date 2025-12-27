@@ -6,7 +6,6 @@ import {
   Button,
   Card,
   Skeleton,
-  Badge,
 } from '@/shared/ui'
 import { EmptyState } from '@/shared/patterns'
 import { PageWrapper } from '@/shared/primitives'
@@ -39,12 +38,14 @@ import { ImportanceScoreFilter } from './importance-score-filter'
 import { BulkActionsToolbar } from '@/shared/components/AdminPanel/BulkActionsToolbar'
 import { useMultiSelect } from '@/shared/hooks'
 import { useAdminMode } from '@/shared/hooks/useAdminMode'
-import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
-import { Download, RotateCw, User, Mail, Signal, Volume2, LayoutGrid, List } from 'lucide-react'
+import { Download, RotateCw, User, Coffee, LayoutGrid, List } from 'lucide-react'
 import { IngestionModal } from './IngestionModal'
+import { SmartFilters } from './SmartFilters'
+import { useFilterParams, type FilterMode } from './useFilterParams'
 import { MessageInspectModal } from '@/features/messages/components/MessageInspectModal'
 import { ConsumerMessageModal } from '@/features/messages/components/ConsumerMessageModal'
 import { MessageCard } from './MessageCard'
+import { MessagesSummaryHeader } from './MessagesSummaryHeader'
 
 interface MessageQueryParams {
   page: number
@@ -76,18 +77,15 @@ const MessagesPage = () => {
   // URL param for highlighting message from search
   const highlightMessageId = searchParams.get('highlight')
 
-  // Signal filter mode from URL (default: signal only)
-  const filterMode = searchParams.get('filter') || 'signal'
-  const showAllMessages = filterMode === 'all'
+  // Smart Filters: URL-synced filter mode
+  const { filterMode, setFilterMode } = useFilterParams()
 
   // Data table state
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'sent_at', desc: true }
   ])
-  // Initialize with Signal filter if not showing all
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    showAllMessages ? [] : [{ id: 'noise_classification', value: ['signal'] }]
-  )
+  // Initialize with column filters based on filterMode
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
     id: false,
     sent_at: false,
@@ -325,7 +323,7 @@ const MessagesPage = () => {
 
   const selectedRowsCount = Object.keys(rowSelection).length
 
-  // Calculate signal/noise ratio
+  // Calculate signal/noise counts for SmartFilters
   const signalNoiseStats = useMemo(() => {
     const items = paginatedData?.items ?? []
     const signalCount = items.filter(m => m.noise_classification === 'signal').length
@@ -335,16 +333,21 @@ const MessagesPage = () => {
     return { signalCount, noiseCount, total, ratio }
   }, [paginatedData?.items])
 
-  // Toggle between Signal Only and Show All
-  const toggleSignalFilter = useCallback(() => {
-    if (showAllMessages) {
-      setSearchParams({ filter: 'signal' })
+  // Sync filterMode with column filters
+  useEffect(() => {
+    if (filterMode === 'signals') {
       setColumnFilters([{ id: 'noise_classification', value: ['signal'] }])
+    } else if (filterMode === 'noise') {
+      setColumnFilters([{ id: 'noise_classification', value: ['noise', 'weak_signal'] }])
     } else {
-      setSearchParams({ filter: 'all' })
       setColumnFilters([])
     }
-  }, [showAllMessages, setSearchParams])
+  }, [filterMode])
+
+  // Handle Smart Filter change
+  const handleFilterChange = useCallback((mode: FilterMode) => {
+    setFilterMode(mode)
+  }, [setFilterMode])
 
   const handleBulkApprove = useCallback(async () => {
     const count = Object.keys(table.getState().rowSelection).length
@@ -517,37 +520,34 @@ const MessagesPage = () => {
 
   return (
     <PageWrapper variant="fullWidth" className="w-full min-w-0 overflow-x-hidden">
-      {/* Signal/Noise Header with Stats */}
-      <div className="flex flex-wrap items-center gap-4 mb-4">
-        {/* Signal/Noise Toggle */}
-        <Button
-          onClick={toggleSignalFilter}
-          size="sm"
-          variant={showAllMessages ? 'outline' : 'default'}
-          className="gap-2"
-        >
-          <Signal className="h-4 w-4" />
-          {showAllMessages ? t('filters.signal') : t('filters.signal')}
-        </Button>
+      {/* Humanized Summary Header */}
+      <div className="mb-6">
+        <MessagesSummaryHeader stats={signalNoiseStats} />
+      </div>
 
-        {/* Signal/Noise Ratio Badge */}
-        <Badge variant="secondary" className="gap-2 px-4 py-2">
-          <Signal className="h-3.5 w-3.5 text-status-connected" />
-          <span className="font-medium">{signalNoiseStats.ratio}%</span>
-          <span className="text-muted-foreground">{t('filters.signal').toLowerCase()}</span>
-          <span className="mx-2 text-muted-foreground">|</span>
-          <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-muted-foreground">{signalNoiseStats.noiseCount}</span>
-        </Badge>
+      {/* Controls Row: Smart Filters + View Mode + Actions */}
+      <div className="flex flex-wrap items-center gap-4 mb-4">
+        {/* Smart Filters (replaces Signal Toggle + Badge) */}
+        <SmartFilters
+          counts={{
+            all: paginatedData?.total ?? 0,
+            signals: signalNoiseStats.signalCount,
+            noise: signalNoiseStats.noiseCount,
+          }}
+          activeFilter={filterMode}
+          onFilterChange={handleFilterChange}
+        />
 
         <div className="flex-1" />
 
+        {/* View Mode Switcher */}
         <div className="flex items-center gap-2 border-r pr-2 mr-2">
           <Button
             size="icon"
             variant={viewMode === 'feed' ? 'secondary' : 'ghost'}
             onClick={() => setViewMode('feed')}
             title="Feed View"
+            aria-label="Feed View"
           >
             <LayoutGrid className="h-4 w-4" />
           </Button>
@@ -556,6 +556,7 @@ const MessagesPage = () => {
             variant={viewMode === 'table' ? 'secondary' : 'ghost'}
             onClick={() => setViewMode('table')}
             title="Table View"
+            aria-label="Table View"
           >
             <List className="h-4 w-4" />
           </Button>
@@ -636,14 +637,17 @@ const MessagesPage = () => {
         {viewMode === 'table' ? (
           (paginatedData?.items ?? []).length === 0 ? (
             <EmptyState
-              icon={Mail}
+              icon={Coffee}
               title={t('list.empty')}
               description={t('list.emptyDescription')}
               action={
-                <Button onClick={handleIngestMessages} className="mt-4">
-                  <Download className="mr-2 h-4 w-4" />
-                  {t('ingestion.title')}
-                </Button>
+                <div className="flex flex-col items-center gap-2">
+                  <Button onClick={handleIngestMessages}>
+                    <Download className="mr-2 h-4 w-4" />
+                    {t('ingestion.submit', 'Import')}
+                  </Button>
+                  <span className="text-xs text-muted-foreground">{t('list.emptyHint')}</span>
+                </div>
               }
             />
           ) : (
@@ -664,14 +668,17 @@ const MessagesPage = () => {
             {table.getRowModel().rows.length === 0 ? (
               <EmptyState
                 variant="compact"
-                icon={Mail}
+                icon={Coffee}
                 title={t('list.empty')}
                 description={t('list.emptyDescription')}
                 action={
-                  <Button onClick={handleIngestMessages} size="sm">
-                    <Download className="mr-2 h-4 w-4" />
-                    {t('ingestion.submit', 'Import')}
-                  </Button>
+                  <div className="flex flex-col items-center gap-2">
+                    <Button onClick={handleIngestMessages} size="sm">
+                      <Download className="mr-2 h-4 w-4" />
+                      {t('ingestion.submit', 'Import')}
+                    </Button>
+                    <span className="text-xs text-muted-foreground">{t('list.emptyHint')}</span>
+                  </div>
                 }
               />
             ) : (

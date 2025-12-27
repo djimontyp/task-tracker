@@ -1,23 +1,29 @@
 import React from 'react'
-import { Badge, Checkbox } from '@/shared/ui'
+import { useTranslation } from 'react-i18next'
+import { Badge, Checkbox, Button } from '@/shared/ui'
 import { Message } from '@/shared/types'
 import { getMessageAnalysisBadge, getImportanceBadge, getNoiseClassificationBadge } from '@/shared/utils/statusBadges'
 import { formatFullDate } from '@/shared/utils/date'
-import { User, Mail } from 'lucide-react'
+import { User, Mail, Lightbulb, X } from 'lucide-react'
 
 interface MessageCardProps {
   message: Message
   isSelected: boolean
   onSelect: (checked: boolean) => void
   onClick: () => void
+  onCreateAtom?: () => void
+  onDismiss?: () => void
 }
 
 export const MessageCard: React.FC<MessageCardProps> = ({
   message,
   isSelected,
   onSelect,
-  onClick
+  onClick,
+  onCreateAtom,
+  onDismiss
 }) => {
+  const { t } = useTranslation('messages')
   const statusBadge = getMessageAnalysisBadge(message.analyzed || false)
   const importanceBadge = message.importance_score !== null && message.importance_score !== undefined
     ? getImportanceBadge(message.importance_score)
@@ -35,7 +41,7 @@ export const MessageCard: React.FC<MessageCardProps> = ({
   return (
     <div
       className={`
-        border rounded-lg p-4 sm:p-4 space-y-4 cursor-pointer transition-all duration-300 w-full min-w-0
+        group border rounded-lg p-4 sm:p-4 space-y-4 cursor-pointer transition-all duration-300 w-full min-w-0
         ${isSelected ? 'border-primary bg-accent/5' : 'hover:bg-accent/10'}
         ${glowClass}
       `}
@@ -99,6 +105,34 @@ export const MessageCard: React.FC<MessageCardProps> = ({
         <span className="text-xs text-muted-foreground ml-auto flex-shrink-0 whitespace-nowrap">
           {message.sent_at ? formatFullDate(message.sent_at) : '-'}
         </span>
+      </div>
+
+      {/* Action buttons - appear on hover */}
+      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2 pt-2 border-t border-border/50">
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-8"
+          onClick={(e) => {
+            e.stopPropagation()
+            onCreateAtom?.()
+          }}
+        >
+          <Lightbulb className="mr-1 h-4 w-4" />
+          {t('card.actions.createAtom')}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-8 text-muted-foreground hover:text-foreground"
+          onClick={(e) => {
+            e.stopPropagation()
+            onDismiss?.()
+          }}
+        >
+          <X className="mr-1 h-4 w-4" />
+          {t('card.actions.dismiss')}
+        </Button>
       </div>
     </div>
   )

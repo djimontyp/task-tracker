@@ -5,7 +5,7 @@ import apiClient from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 import { useMessagesStore } from '../store/messagesStore'
 import type { Message } from '@/shared/types'
-import { useWebSocket } from '@/features/websocket/hooks/useWebSocket'
+import { useWebSocket } from '@/shared/hooks'
 import { logger } from '@/shared/utils/logger'
 
 export type MessagesPeriod = '24h' | '7d' | '30d' | 'all'

@@ -163,14 +163,14 @@ const NoiseFilteringDashboard = () => {
         ) : metrics ? (
           <>
             <MetricCard
-              title="Total Messages"
+              title="Total messages"
               value={metrics.totalMessages.value}
               subtitle={metrics.totalMessages.subtitle}
               icon={MessageSquare}
               iconColor="text-primary"
             />
             <MetricCard
-              title="Signal Ratio"
+              title="Signal ratio"
               value={metrics.signalRatio.value}
               subtitle={metrics.signalRatio.subtitle}
               trend={metrics.signalRatio.trend}
@@ -178,7 +178,7 @@ const NoiseFilteringDashboard = () => {
               iconColor="text-semantic-success"
             />
             <MetricCard
-              title="Needs Review"
+              title="Needs review"
               value={metrics.needsReview.value}
               subtitle={metrics.needsReview.subtitle}
               trend={metrics.needsReview.trend}
@@ -186,7 +186,7 @@ const NoiseFilteringDashboard = () => {
               iconColor="text-semantic-warning"
             />
             <MetricCard
-              title="Top Noise Source"
+              title="Top noise source"
               value={metrics.topNoiseSource.value}
               subtitle={metrics.topNoiseSource.subtitle}
               icon={RefreshCw}

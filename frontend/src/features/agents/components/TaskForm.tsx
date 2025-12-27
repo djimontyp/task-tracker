@@ -77,7 +77,7 @@ const TaskForm = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <FormField label="Task Name" required>
+          <FormField label="Task name" required>
             <Input
               id="name"
               value={formData.name}
