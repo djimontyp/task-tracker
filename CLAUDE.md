@@ -16,6 +16,51 @@
 
 **Статус:** MVP Верифіковано (11/31 features)
 
+## Концепції (Core)
+
+> **ADR-002:** Entity Hierarchy — Topics > Atoms > Messages
+
+### Ієрархія сутностей
+
+```
+┌─────────────────────────────────────────────────────┐
+│                      TOPICS                          │
+│        (верхній рівень: Mobile, Frontend, Backend)   │
+│  ┌─────────────────────────────────────────────────┐│
+│  │                    ATOMS                        ││
+│  │    (знання: problems, decisions, insights)      ││
+│  │  ┌─────────────────────────────────────────┐   ││
+│  │  │              MESSAGES                   │   ││
+│  │  │         (raw data, hidden layer)        │   ││
+│  │  └─────────────────────────────────────────┘   ││
+│  └─────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────┘
+```
+
+| Сутність | Роль | Видимість |
+|----------|------|-----------|
+| **Topics** | Організаційні категорії (Mobile, Frontend, Backend) | Main sidebar |
+| **Atoms** | Одиниці знань (problem, solution, decision, insight) | Main sidebar, primary workflow |
+| **Messages** | Raw data з Telegram (hidden layer) | Admin only, debug |
+
+### User Journey
+
+```
+1. "Що накапало?" → Dashboard (pending atoms, new today)
+2. "Drill-down" → Topics → Atoms (звідки, коли, навіщо)
+3. "Підтвердження" → Approve/Reject atoms
+4. (Admin) → Messages debug, Providers, Prompts
+```
+
+### Ролі
+
+| Роль | Фокус | Доступ |
+|------|-------|--------|
+| **End User** | Knowledge consumption | Topics, Atoms, Dashboard, Search |
+| **Admin** | + System configuration | + Messages, Providers, Prompts |
+
+**Документація:** `.obsidian-docs/знання/концепції/`
+
 ## Команди
 
 > **ВАЖЛИВО:** Завжди віддавай перевагу `just` командам! Див. [@justfile](justfile)
