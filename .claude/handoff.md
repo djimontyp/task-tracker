@@ -1,77 +1,70 @@
 # Handoff: Pulse Radar
 
 **Гілка:** `006-knowledge-discovery`
-**Оновлено:** 2025-12-28 15:45
+**Оновлено:** 2025-12-28 16:10
 
 ---
 
-## Статус: Core Flow ПРАЦЮЄ ✅
+## Поточна задача: Unified Scoring Configuration
 
-### Результат верифікації
+### Прогрес
 
-| Stage | Статус | Результат |
-|-------|--------|-----------|
-| 1. Webhook → Message | ✅ | Messages зберігаються в БД |
-| 2. Worker Scoring | ✅ | importance_score обчислюється (0.27-0.55) |
-| 3. AI Extraction | ✅ | LLM витягує topics + atoms |
-| 4. Topic Assignment | ✅ | Topics auto-created, atoms linked |
-| 5. UI Display | ✅ | Dashboard доступний (http://localhost/dashboard) |
+| Крок | Статус | Деталі |
+|------|--------|--------|
+| Backend API endpoint | ✅ | `/api/v1/config/scoring` працює |
+| Backend importance_scorer.py | ✅ | Вже використовує ai_config |
+| Backend noise.py | 🔄 | Агент працює |
+| Frontend fetch config | 🔄 | Агент працює |
+| Frontend statusBadges.ts | 🔄 | Агент працює |
+| ADR документація | ⏳ | Очікує |
 
-### Створено в тесті
+### Що зроблено
 
-- **4 Atoms:** 2 problems, 1 solution, 1 decision
-- **4 Topics:** автоматично створені українською
-- **2 Links:** solves, supports
-- **15 Messages:** з embeddings
+1. **API endpoint:** `GET /api/v1/config/scoring`
+   ```json
+   {
+     "noise_threshold": 0.25,
+     "signal_threshold": 0.65,
+     "weights": {"content": 0.4, "author": 0.2, "temporal": 0.2, "topics": 0.2}
+   }
+   ```
 
-### Виправлені баги
-
-1. **UUID serialization bug**
-   - Файл: `backend/app/services/knowledge/knowledge_orchestrator.py`
-   - Рядки: 391, 412
-   - Фікс: `[str(mid) for mid in extracted_atom.related_message_ids]`
-   - **Статус:** Виправлено, потрібен коміт
-
----
-
-## Налаштування середовища
-
-| Компонент | Значення |
-|-----------|----------|
-| LLM Provider | Local Ollama (`http://host.docker.internal:11434/v1`) |
-| Model | qwen3:8b |
-| Agent | knowledge_extractor |
-| Extraction threshold | 10 messages |
+2. **Файли створені/змінені:**
+   - `backend/app/api/v1/config.py` — новий endpoint
+   - `backend/app/api/v1/router.py` — підключено роутер
+   - `backend/app/services/importance_scorer.py` — оновлено docstrings
 
 ---
 
-## Наступні кроки
+## Попередня задача: Core Flow Verification ✅
 
-1. **Закомітити фікс UUID** (зроблено зміни, потрібен коміт)
-2. **Перевірити UI візуально** — відкрити http://localhost/dashboard
-3. **NOISE filtering** — перевірити що NOISE messages (Ок, 👍) не створюють atoms
+Core flow працює end-to-end:
+- 4 Atoms, 4 Topics, 2 Links
+- UUID serialization bug виправлено (коміт `47f9ba7`)
 
 ---
 
-## Команди для продовження
+## Thresholds (source of truth)
+
+| Параметр | Значення | Опис |
+|----------|----------|------|
+| `noise_threshold` | 0.25 | Нижче = шум |
+| `signal_threshold` | 0.65 | Вище = сигнал |
+| `content_weight` | 0.4 | 40% |
+| `author_weight` | 0.2 | 20% |
+| `temporal_weight` | 0.2 | 20% |
+| `topics_weight` | 0.2 | 20% |
+
+**Source:** `backend/app/config/ai_config.py`
+
+---
+
+## Команди
 
 ```bash
-# Перевірити стан
-curl http://localhost/api/v1/atoms | jq '.total'
-curl http://localhost/api/v1/topics | jq '.total'
+# Перевірити config endpoint
+curl http://localhost/api/v1/config/scoring | jq .
 
-# Логи worker
-docker logs task-tracker-worker --tail 50
-
-# UI
-open http://localhost/dashboard
-```
-
----
-
-## Core Flow (verified)
-
-```
-Telegram webhook → Message → AI parsing → Atoms/Topics → UI
-         ✅           ✅         ✅           ✅        ✅
+# Messages stats
+curl http://localhost/api/v1/messages | jq '[.items[] | .noise_classification] | group_by(.) | map({classification: .[0], count: length})'
 ```
