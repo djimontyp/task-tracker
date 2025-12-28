@@ -6,10 +6,10 @@ This service calculates importance scores (0.0-1.0) for messages based on 4 fact
 3. Temporal Factor (20%): Time-based relevance (recency, activity)
 4. Topics Factor (20%): Relevance to important topics
 
-Final classification:
-- noise: score < 0.3
-- weak_signal: 0.3 <= score <= 0.7
-- signal: score > 0.7
+Final classification (thresholds from ai_config):
+- noise: score < noise_threshold (default 0.25)
+- weak_signal: noise_threshold <= score <= signal_threshold
+- signal: score > signal_threshold (default 0.65)
 """
 
 import logging
@@ -258,10 +258,10 @@ class ImportanceScorer:
         - Temporal: 20%
         - Topics: 20%
 
-        Classification thresholds:
-        - noise: < 0.3
-        - weak_signal: 0.3-0.7
-        - signal: > 0.7
+        Classification thresholds (from ai_config.message_scoring):
+        - noise: < noise_threshold (default 0.25)
+        - weak_signal: between thresholds
+        - signal: > signal_threshold (default 0.65)
 
         Args:
             message: Message to score

@@ -1,9 +1,10 @@
 """API endpoints for noise filtering statistics and scoring.
 
-Provides statistics on message classification by importance score:
-- Signal: importance_score > 0.7 (high-value messages)
-- Noise: importance_score < 0.3 (low-value messages)
-- Weak Signal: importance_score 0.3-0.7 (needs review)
+Provides statistics on message classification by importance score.
+Thresholds are configured via ai_config.message_scoring:
+- Signal: importance_score > signal_threshold (high-value messages)
+- Noise: importance_score < noise_threshold (low-value messages)
+- Weak Signal: between thresholds (needs review)
 
 Also provides endpoints for triggering background scoring tasks.
 """
@@ -15,6 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config.ai_config import ai_config
 from app.database import get_session
 from app.models.legacy import Source
 from app.models.message import Message
@@ -42,10 +44,10 @@ async def get_noise_stats(
     - 7-day trend showing daily signal/noise/weak_signal counts
     - Top 5 sources generating the most noise
 
-    Classification thresholds:
-    - Signal: importance_score > 0.7
-    - Noise: importance_score < 0.3
-    - Weak Signal: importance_score 0.3-0.7 (needs review)
+    Classification thresholds (from ai_config):
+    - Signal: importance_score > signal_threshold
+    - Noise: importance_score < noise_threshold
+    - Weak Signal: between thresholds (needs review)
 
     Args:
         session: Database session
@@ -53,24 +55,27 @@ async def get_noise_stats(
     Returns:
         Noise filtering statistics with trends and source analysis
     """
+    signal_threshold = ai_config.message_scoring.signal_threshold
+    noise_threshold = ai_config.message_scoring.noise_threshold
+
     total_messages_result = await session.execute(
         select(
             func.count(Message.id).label("total"),  # type: ignore[arg-type]
             func.count(
                 case(
-                    ((Message.importance_score.is_not(None)) & (Message.importance_score > 0.7), 1)  # type: ignore[operator,union-attr]
+                    ((Message.importance_score.is_not(None)) & (Message.importance_score > signal_threshold), 1)  # type: ignore[operator,union-attr]
                 )
             ).label("signal"),
             func.count(
                 case(
-                    ((Message.importance_score.is_not(None)) & (Message.importance_score < 0.3), 1)  # type: ignore[operator,union-attr]
+                    ((Message.importance_score.is_not(None)) & (Message.importance_score < noise_threshold), 1)  # type: ignore[operator,union-attr]
                 )
             ).label("noise"),
             func.count(
                 case((
                     (Message.importance_score.is_not(None))  # type: ignore[union-attr]
-                    & (Message.importance_score >= 0.3)  # type: ignore[operator]
-                    & (Message.importance_score <= 0.7),  # type: ignore[operator]
+                    & (Message.importance_score >= noise_threshold)  # type: ignore[operator]
+                    & (Message.importance_score <= signal_threshold),  # type: ignore[operator]
                     1,
                 ))
             ).label("weak_signal"),
@@ -95,19 +100,19 @@ async def get_noise_stats(
             func.date(Message.sent_at).label("date"),
             func.count(
                 case(
-                    ((Message.importance_score.is_not(None)) & (Message.importance_score > 0.7), 1)  # type: ignore[operator,union-attr]
+                    ((Message.importance_score.is_not(None)) & (Message.importance_score > signal_threshold), 1)  # type: ignore[operator,union-attr]
                 )
             ).label("signal"),
             func.count(
                 case(
-                    ((Message.importance_score.is_not(None)) & (Message.importance_score < 0.3), 1)  # type: ignore[operator,union-attr]
+                    ((Message.importance_score.is_not(None)) & (Message.importance_score < noise_threshold), 1)  # type: ignore[operator,union-attr]
                 )
             ).label("noise"),
             func.count(
                 case((
                     (Message.importance_score.is_not(None))  # type: ignore[union-attr]
-                    & (Message.importance_score >= 0.3)  # type: ignore[operator]
-                    & (Message.importance_score <= 0.7),  # type: ignore[operator]
+                    & (Message.importance_score >= noise_threshold)  # type: ignore[operator]
+                    & (Message.importance_score <= signal_threshold),  # type: ignore[operator]
                     1,
                 ))
             ).label("weak_signal"),
@@ -132,7 +137,7 @@ async def get_noise_stats(
     noise_sources_result = await session.execute(
         select(Source.name, func.count(Message.id).label("noise_count"))  # type: ignore[arg-type,call-overload]
         .join(Message, Message.source_id == Source.id)
-        .where((Message.importance_score.is_not(None)) & (Message.importance_score < 0.3))  # type: ignore[operator,union-attr]
+        .where((Message.importance_score.is_not(None)) & (Message.importance_score < noise_threshold))  # type: ignore[operator,union-attr]
         .group_by(Source.name)
         .order_by(func.count(Message.id).desc())  # type: ignore[arg-type]
         .limit(5)
