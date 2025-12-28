@@ -31,6 +31,7 @@ from app.services.knowledge.llm_agents import (
     get_strengthened_prompt,
     validate_output_language,
 )
+from app.services.rag_context_builder import RAGContextBuilder
 from app.services.versioning import VersioningService
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ class KnowledgeOrchestrator:
         agent_config: AgentConfig,
         provider: LLMProvider,
         language: str = "uk",
+        rag_context_builder: RAGContextBuilder | None = None,
     ):
         """Initialize knowledge extraction service.
 
@@ -56,23 +58,30 @@ class KnowledgeOrchestrator:
             agent_config: Agent configuration with system prompt and model settings
             provider: LLM provider configuration (must be Ollama or OpenAI)
             language: ISO 639-1 language code for AI output (default: 'uk')
+            rag_context_builder: Optional RAG context builder for semantic context injection
         """
         self.agent_config = agent_config
         self.provider = provider
         self.language = language
+        self.rag_context_builder = rag_context_builder
         self.encryptor = CredentialEncryption()
 
     async def extract_knowledge(
         self,
         messages: Sequence[Message],
+        session: AsyncSession | None = None,
     ) -> KnowledgeExtractionOutput:
         """Extract topics and atoms from message batch using LLM.
 
         Uses language-specific prompts and validates output language.
         Retries once with strengthened prompt if language mismatch detected.
 
+        If RAG context builder is configured and session provided, injects
+        semantic context from similar atoms and related messages.
+
         Args:
             messages: Sequence of messages to analyze (10-50 recommended)
+            session: Optional database session for RAG context lookup
 
         Returns:
             Structured extraction output with topics and atoms
@@ -91,7 +100,26 @@ class KnowledgeOrchestrator:
             logger.warning("No messages provided for extraction, returning empty result")
             return KnowledgeExtractionOutput(topics=[], atoms=[])
 
-        prompt = self._build_prompt(messages)
+        # Build RAG context if available
+        rag_context_str = ""
+        if self.rag_context_builder and session:
+            try:
+                logger.info("Building RAG context for extraction...")
+                rag_context = await self.rag_context_builder.build_context(
+                    session=session,
+                    messages=list(messages),
+                    top_k=5,
+                )
+                rag_context_str = self.rag_context_builder.format_context(rag_context)
+                logger.info(
+                    f"RAG context built: {len(rag_context.get('similar_proposals', []))} proposals, "
+                    f"{len(rag_context.get('relevant_atoms', []))} atoms, "
+                    f"{len(rag_context.get('related_messages', []))} messages"
+                )
+            except Exception as e:
+                logger.warning(f"Failed to build RAG context, proceeding without: {e}")
+
+        prompt = self._build_prompt(messages, rag_context_str)
 
         api_key = None
         if self.provider.api_key_encrypted:
@@ -553,11 +581,12 @@ class KnowledgeOrchestrator:
         logger.info(f"Updated {updated_count} messages with topic assignments")
         return updated_count
 
-    def _build_prompt(self, messages: Sequence[Message]) -> str:
-        """Build LLM prompt from message batch.
+    def _build_prompt(self, messages: Sequence[Message], rag_context: str = "") -> str:
+        """Build LLM prompt from message batch with optional RAG context.
 
         Args:
             messages: Messages to analyze
+            rag_context: Optional formatted RAG context string
 
         Returns:
             Formatted prompt string
@@ -567,12 +596,30 @@ class KnowledgeOrchestrator:
             for i, msg in enumerate(messages)
         ])
 
-        prompt = f"""Analyze the following {len(messages)} messages and extract knowledge.
+        # Build RAG context section if available
+        context_section = ""
+        if rag_context:
+            context_section = f"""
+## Historical Context (RAG)
 
-Messages:
+{rag_context}
+
+Use the above context to:
+- Avoid creating duplicate atoms (check similar existing atoms)
+- Maintain consistent naming with existing topics
+- Link new atoms to related existing knowledge
+- Reference past decisions when relevant
+
+"""
+
+        prompt = f"""Analyze the following {len(messages)} messages and extract knowledge.
+{context_section}
+## Messages to Analyze
+
 {messages_text}
 
-Instructions:
+## Instructions
+
 1. Identify 1-3 main discussion topics these messages belong to
 2. Extract atomic knowledge units (problems, solutions, decisions, insights, questions, patterns, requirements)
 3. Assign each atom to a topic

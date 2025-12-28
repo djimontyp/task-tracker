@@ -12,6 +12,8 @@ from app.database import AsyncSessionLocal, get_db_session_context
 from app.models import AgentConfig, LLMProvider, Message
 from app.services.embedding_service import EmbeddingService
 from app.services.knowledge.knowledge_orchestrator import KnowledgeOrchestrator as KnowledgeExtractionService
+from app.services.rag_context_builder import RAGContextBuilder
+from app.services.semantic_search_service import SemanticSearchService
 from app.services.websocket_manager import websocket_manager
 
 
@@ -174,11 +176,20 @@ async def extract_knowledge_from_messages_task(
             },
         )
 
+        # Build RAG context builder for semantic knowledge injection
+        embedding_service = EmbeddingService(provider)
+        search_service = SemanticSearchService(embedding_service)
+        rag_builder = RAGContextBuilder(embedding_service, search_service)
+
         service = KnowledgeExtractionService(
-            agent_config=agent_config, provider=provider, language=language
+            agent_config=agent_config,
+            provider=provider,
+            language=language,
+            rag_context_builder=rag_builder,
         )
 
-        extraction_output = await service.extract_knowledge(messages)
+        # Pass session for RAG context lookup
+        extraction_output = await service.extract_knowledge(messages, session=db)
 
         logger.info(
             f"LLM extraction completed: {len(extraction_output.topics)} topics, {len(extraction_output.atoms)} atoms"
@@ -201,13 +212,10 @@ async def extract_knowledge_from_messages_task(
             f"{len(version_created_atom_ids)} atom versions created"
         )
 
+        # Embed new atoms (messages are embedded during scoring for RAG)
         if version_created_atom_ids:
             logger.info(f"Queueing embedding generation for {len(version_created_atom_ids)} atoms")
             await embed_atoms_batch_task.kiq(atom_ids=version_created_atom_ids, provider_id=str(provider.id))
-
-        if message_ids:
-            logger.info(f"Queueing embedding generation for {len(message_ids)} messages")
-            await embed_messages_batch_task.kiq(message_ids=message_ids, provider_id=str(provider.id))
 
         await websocket_manager.broadcast(
             "knowledge",
