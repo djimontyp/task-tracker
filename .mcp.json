@@ -52,6 +52,13 @@
         "STORYBOOK_URL": "http://localhost:6006",
         "LOG_LEVEL": "info"
       }
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
     }
   }
 }
