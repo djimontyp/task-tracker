@@ -1,70 +1,69 @@
 # Handoff: Pulse Radar
 
 **Гілка:** `006-knowledge-discovery`
-**Оновлено:** 2025-12-28 16:10
+**Оновлено:** 2025-12-28 16:30
 
 ---
 
-## Поточна задача: Unified Scoring Configuration
+## Що зроблено
 
-### Прогрес
+### 1. Core Flow Verification ✅
 
-| Крок | Статус | Деталі |
-|------|--------|--------|
-| Backend API endpoint | ✅ | `/api/v1/config/scoring` працює |
-| Backend importance_scorer.py | ✅ | Вже використовує ai_config |
-| Backend noise.py | 🔄 | Агент працює |
-| Frontend fetch config | 🔄 | Агент працює |
-| Frontend statusBadges.ts | 🔄 | Агент працює |
-| ADR документація | ⏳ | Очікує |
+```
+Telegram webhook → Message → AI parsing → Atoms/Topics → UI
+       ✅            ✅          ✅           ✅        ✅
+```
 
-### Що зроблено
+- 4 Atoms, 4 Topics, 2 Links створено через LLM
+- UUID serialization bug виправлено
 
-1. **API endpoint:** `GET /api/v1/config/scoring`
-   ```json
-   {
-     "noise_threshold": 0.25,
-     "signal_threshold": 0.65,
-     "weights": {"content": 0.4, "author": 0.2, "temporal": 0.2, "topics": 0.2}
-   }
-   ```
+### 2. Unified Scoring Config ✅
 
-2. **Файли створені/змінені:**
-   - `backend/app/api/v1/config.py` — новий endpoint
-   - `backend/app/api/v1/router.py` — підключено роутер
-   - `backend/app/services/importance_scorer.py` — оновлено docstrings
+Thresholds тепер в одному місці:
+
+| Параметр | Значення |
+|----------|----------|
+| noise_threshold | 0.25 |
+| signal_threshold | 0.65 |
+
+**Коміти:**
+- `51a98d0` feat(api): add unified scoring config endpoint
+- `07d512e` feat(frontend): integrate scoring config from API
+- `cddc96f` docs: add ADR-008 unified scoring config
 
 ---
 
-## Попередня задача: Core Flow Verification ✅
+## Що далі
 
-Core flow працює end-to-end:
-- 4 Atoms, 4 Topics, 2 Links
-- UUID serialization bug виправлено (коміт `47f9ba7`)
-
----
-
-## Thresholds (source of truth)
-
-| Параметр | Значення | Опис |
-|----------|----------|------|
-| `noise_threshold` | 0.25 | Нижче = шум |
-| `signal_threshold` | 0.65 | Вище = сигнал |
-| `content_weight` | 0.4 | 40% |
-| `author_weight` | 0.2 | 20% |
-| `temporal_weight` | 0.2 | 20% |
-| `topics_weight` | 0.2 | 20% |
-
-**Source:** `backend/app/config/ai_config.py`
+1. **Перевірити UI** — http://localhost/dashboard — тепер має показувати сигнали (score > 0.65)
+2. **Re-score messages** — існуючі messages мають старі classifications, потрібно re-run scoring
+3. **NOISE filtering** — перевірити що короткі messages ("Ок", "👍") класифікуються як noise
 
 ---
 
-## Команди
+## Швидкий старт
 
 ```bash
-# Перевірити config endpoint
+# Сервіси вже running, перевір:
+docker ps | grep task-tracker
+
+# Якщо не running:
+just services
+
+# Перевірити scoring config:
 curl http://localhost/api/v1/config/scoring | jq .
 
-# Messages stats
-curl http://localhost/api/v1/messages | jq '[.items[] | .noise_classification] | group_by(.) | map({classification: .[0], count: length})'
+# Статистика messages:
+curl http://localhost/api/v1/messages | jq '[.items[] | .noise_classification] | group_by(.) | map({c: .[0], n: length})'
 ```
+
+---
+
+## Ключові файли
+
+| Файл | Що |
+|------|-----|
+| `backend/app/config/ai_config.py` | Source of truth для thresholds |
+| `backend/app/api/v1/config.py` | GET /api/v1/config/scoring |
+| `frontend/src/shared/api/scoringConfig.ts` | useScoringConfig() hook |
+| `docs/architecture/adr/008-unified-scoring-config.md` | ADR |
