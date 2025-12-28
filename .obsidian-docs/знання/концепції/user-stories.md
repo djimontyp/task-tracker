@@ -176,6 +176,78 @@ tags:
 
 ---
 
+### US-105: Telegram Channel Configuration
+
+**As an** admin
+**I want to** configure Telegram channels/groups
+**So that** knowledge extraction covers all relevant sources
+
+**Acceptance Criteria:**
+- [ ] Add/remove Telegram channels via UI
+- [ ] Test connection to channel (fetch recent messages)
+- [ ] See message count per channel (24h, 7d, 30d)
+- [ ] Enable/disable specific channels
+- [ ] Show channel metadata (name, type, last activity)
+
+**Priority:** High
+**Related:** [[roles#Admin]]
+
+---
+
+### US-106: System Health Monitoring
+
+**As an** admin
+**I want to** see system health at a glance
+**So that** I can identify issues before they affect users
+
+**Acceptance Criteria:**
+- [ ] Dashboard shows service status (API, Worker, NATS, DB)
+- [ ] Metrics: ingestion rate, extraction queue size, error rate
+- [ ] Alerts for critical issues (queue overflow, service down)
+- [ ] Historical trends (last 24h, 7d)
+- [ ] Quick actions: restart worker, clear queue
+
+**Priority:** High
+**Related:** [[roles#Admin]]
+
+---
+
+### US-107: Ingestion Troubleshooting
+
+**As an** admin
+**I want to** debug ingestion pipeline
+**So that** I can fix extraction failures
+
+**Acceptance Criteria:**
+- [ ] See failed extraction jobs with error details
+- [ ] Filter by error type (LLM timeout, parsing error, rate limit)
+- [ ] Retry individual failed jobs
+- [ ] Bulk retry by error type
+- [ ] See extraction logs with timestamps
+
+**Priority:** Medium
+**Related:** [[roles#Admin]]
+
+---
+
+### US-108: Analytics & Reports
+
+**As an** admin
+**I want to** see usage analytics
+**So that** I can understand system effectiveness
+
+**Acceptance Criteria:**
+- [ ] Extraction stats: total atoms created, by type, by topic
+- [ ] Approval rates: approved vs rejected ratio
+- [ ] Topic growth: atoms per topic over time
+- [ ] Noise filtering effectiveness: signal/noise ratio
+- [ ] Export reports as CSV/PDF
+
+**Priority:** Low
+**Related:** [[roles#Admin]]
+
+---
+
 ## Future Stories (Backlog)
 
 ### US-201: Automation Rules
@@ -219,7 +291,8 @@ End User:     US-001 Morning Check  US-002 Daily Review   US-003 Browse
               US-004 Search         US-005 Context
 
 Admin:        US-101 Debug          US-102 Providers      US-103 Prompts
-                                    US-104 Thresholds
+              US-105 Channels       US-104 Thresholds     US-108 Analytics
+              US-106 Health         US-107 Troubleshoot
 
 Future:       US-203 Export         US-201 Automation     US-202 Teams
               US-204 Notifications
