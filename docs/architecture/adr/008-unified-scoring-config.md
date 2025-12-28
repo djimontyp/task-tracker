@@ -36,12 +36,23 @@ ai_config.py (source) → GET /api/v1/config/scoring → Frontend fetch
 - `statusBadges.ts` functions accept optional config parameter
 - Default fallback values if API unavailable
 
-## Thresholds (Optimized)
+## Thresholds (Calibrated Dec 2025)
 
 | Parameter | Value | Rationale |
 |-----------|-------|-----------|
-| `noise_threshold` | 0.25 | Grid search Oct 2025: F1=85.2% (+24.3% vs 0.30) |
-| `signal_threshold` | 0.65 | Improves signal recall (92.7%) |
+| `noise_threshold` | **0.30** | Ensures "Ок", "👍" (content_score=0.1) fall below with neutral factors |
+| `signal_threshold` | **0.60** | Ensures "Критичний баг" (content_score=0.8) exceeds with neutral factors |
+
+### Threshold Calculation
+
+With weights 40/20/20/20 and content_score extremes:
+
+```
+Noise case ("Ок"): 0.1×0.4 + 0.5×0.6 = 0.04 + 0.30 = 0.34 → needs threshold ≤0.35
+Signal case ("bug"): 0.8×0.4 + 0.5×0.6 = 0.32 + 0.30 = 0.62 → needs threshold ≤0.62
+```
+
+Previous 0.25/0.65 thresholds were too tight for the weighted scoring algorithm.
 
 ## Files Changed
 

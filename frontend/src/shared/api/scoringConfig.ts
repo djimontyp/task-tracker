@@ -24,9 +24,9 @@ export interface ScoringWeights {
  * Complete scoring configuration from backend
  */
 export interface ScoringConfig {
-  /** Threshold below which messages are classified as noise (default: 0.25) */
+  /** Threshold below which messages are classified as noise (default: 0.30) */
   noise_threshold: number
-  /** Threshold above which messages are classified as signal (default: 0.65) */
+  /** Threshold above which messages are classified as signal (default: 0.60) */
   signal_threshold: number
   /** Factor weights for importance calculation */
   weights: ScoringWeights
@@ -34,10 +34,11 @@ export interface ScoringConfig {
 
 /**
  * Default scoring config used as fallback when API is unavailable
+ * Calibrated Dec 2025: 0.30/0.60 thresholds match weighted scoring algorithm
  */
 export const DEFAULT_SCORING_CONFIG: ScoringConfig = {
-  noise_threshold: 0.25,
-  signal_threshold: 0.65,
+  noise_threshold: 0.30,
+  signal_threshold: 0.60,
   weights: {
     content: 0.4,
     author: 0.2,

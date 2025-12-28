@@ -1,7 +1,7 @@
 # Handoff: Pulse Radar
 
 **Гілка:** `006-knowledge-discovery`
-**Оновлено:** 2025-12-28 16:30
+**Оновлено:** 2025-12-28 17:00
 
 ---
 
@@ -17,14 +17,22 @@ Telegram webhook → Message → AI parsing → Atoms/Topics → UI
 - 4 Atoms, 4 Topics, 2 Links створено через LLM
 - UUID serialization bug виправлено
 
-### 2. Unified Scoring Config ✅
+### 2. Unified Scoring Config ✅ (Calibrated)
 
-Thresholds тепер в одному місці:
+Thresholds **оптимізовано** під weighted scoring algorithm:
 
-| Параметр | Значення |
-|----------|----------|
-| noise_threshold | 0.25 |
-| signal_threshold | 0.65 |
+| Параметр | Старе | Нове | Причина |
+|----------|-------|------|---------|
+| noise_threshold | 0.25 | **0.30** | "Ок", "👍" (score ~0.28) мають бути noise |
+| signal_threshold | 0.65 | **0.60** | "Критичний баг" (score 0.63) має бути signal |
+
+**Результат:**
+
+| Classification | Count | Examples |
+|---------------|-------|----------|
+| signal | 1 | "Критичний баг в production" |
+| weak_signal | 20 | General messages |
+| noise | 2 | "Ок", "👍" |
 
 **Коміти:**
 - `51a98d0` feat(api): add unified scoring config endpoint
@@ -35,9 +43,9 @@ Thresholds тепер в одному місці:
 
 ## Що далі
 
-1. **Перевірити UI** — http://localhost/dashboard — тепер має показувати сигнали (score > 0.65)
-2. **Re-score messages** — існуючі messages мають старі classifications, потрібно re-run scoring
-3. **NOISE filtering** — перевірити що короткі messages ("Ок", "👍") класифікуються як noise
+1. **Verify UI** — http://localhost/dashboard — перевірити що signal/noise відображаються коректно
+2. **Add more noise patterns** — "Хто хоче каву?" (score 0.43) все ще weak_signal, можна додати patterns
+3. **Create re-score endpoint** — зараз немає способу re-score всі messages (тільки reclassify)
 
 ---
 
@@ -63,7 +71,7 @@ curl http://localhost/api/v1/messages | jq '[.items[] | .noise_classification] |
 
 | Файл | Що |
 |------|-----|
-| `backend/app/config/ai_config.py` | Source of truth для thresholds |
+| `backend/app/config/ai_config.py` | Source of truth для thresholds (0.30/0.60) |
 | `backend/app/api/v1/config.py` | GET /api/v1/config/scoring |
-| `frontend/src/shared/api/scoringConfig.ts` | useScoringConfig() hook |
-| `docs/architecture/adr/008-unified-scoring-config.md` | ADR |
+| `frontend/src/shared/api/scoringConfig.ts` | useScoringConfig() hook + fallback defaults |
+| `docs/architecture/adr/008-unified-scoring-config.md` | ADR з калібрацією |
