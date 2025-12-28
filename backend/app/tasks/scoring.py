@@ -7,9 +7,12 @@ from sqlalchemy import desc as sql_desc
 from sqlalchemy import select
 
 from app.database import get_db_session_context
+from app.llm.application.provider_resolver import ProviderResolver
 from app.models import Message
 from app.services.importance_scorer import ImportanceScorer
+from app.services.provider_crud import ProviderCRUD
 from app.services.websocket_manager import websocket_manager
+from app.tasks.knowledge import embed_messages_batch_task
 
 
 @nats_broker.task
@@ -61,6 +64,20 @@ async def score_message_task(message_id: uuid.UUID) -> dict[str, Any]:
         await db.commit()
 
         logger.info(f"Message {message_id} scored: {importance_score:.2f} ({classification})")
+
+        # Queue embedding for RAG-ready semantic search
+        try:
+            crud = ProviderCRUD(db)
+            resolver = ProviderResolver(crud)
+            provider = await resolver.resolve_active(db)
+            if provider and provider.id:
+                await embed_messages_batch_task.kiq(
+                    message_ids=[message_id], provider_id=str(provider.id)
+                )
+                logger.debug(f"Queued embedding for message {message_id}")
+        except Exception as embed_err:
+            # Non-critical: RAG will work with available embeddings
+            logger.warning(f"Failed to queue embedding for message {message_id}: {embed_err}")
 
         await websocket_manager.broadcast(
             "noise_filtering",

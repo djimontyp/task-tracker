@@ -1,7 +1,7 @@
 # Handoff: Pulse Radar
 
 **Гілка:** `006-knowledge-discovery`
-**Оновлено:** 2025-12-28 17:00
+**Оновлено:** 2025-12-28 18:30
 
 ---
 
@@ -19,50 +19,83 @@ Telegram webhook → Message → AI parsing → Atoms/Topics → UI
 
 ### 2. Unified Scoring Config ✅ (Calibrated)
 
-Thresholds **оптимізовано** під weighted scoring algorithm:
-
 | Параметр | Старе | Нове | Причина |
 |----------|-------|------|---------|
 | noise_threshold | 0.25 | **0.30** | "Ок", "👍" (score ~0.28) мають бути noise |
 | signal_threshold | 0.65 | **0.60** | "Критичний баг" (score 0.63) має бути signal |
 
-**Результат:**
+**Результат:** 2 noise, 1 signal, 20 weak_signal
 
-| Classification | Count | Examples |
-|---------------|-------|----------|
-| signal | 1 | "Критичний баг в production" |
-| weak_signal | 20 | General messages |
-| noise | 2 | "Ок", "👍" |
+### 3. RAG Integration ✅ (NEW!)
 
-**Коміти:**
-- `51a98d0` feat(api): add unified scoring config endpoint
-- `07d512e` feat(frontend): integrate scoring config from API
-- `cddc96f` docs: add ADR-008 unified scoring config
+**Phase 1: Activate RAG** — завершено!
+
+```
+БУЛО:
+  save_msg → score → extract → embed (занадто пізно!)
+                        ↓
+                    RAG ❌ порожній
+
+СТАЛО:
+  save_msg → score → embed → extract
+                        ↓      ↓
+                      готові   RAG ✅ знаходить схожі
+```
+
+**Зміни:**
+
+| Файл | Що зроблено |
+|------|-------------|
+| `scoring.py` | Додано embedding після scoring для RAG-ready search |
+| `knowledge.py` | Видалено дублювання embed_messages, додано RAGContextBuilder |
+| `knowledge_orchestrator.py` | Inject RAG context у extract_knowledge() |
+
+**Як працює:**
+1. Message scored → одразу embed for RAG
+2. При extraction → RAGContextBuilder.build_context() шукає:
+   - Similar proposals (past approved)
+   - Relevant atoms (knowledge base)
+   - Related messages (history)
+3. Context inject у LLM prompt перед extraction
 
 ---
 
 ## Що далі
 
-1. **Verify UI** — http://localhost/dashboard — перевірити що signal/noise відображаються коректно
-2. **Add more noise patterns** — "Хто хоче каву?" (score 0.43) все ще weak_signal, можна додати patterns
-3. **Create re-score endpoint** — зараз немає способу re-score всі messages (тільки reclassify)
+### Phase 2: Improve Batching (P1)
+
+- [ ] Thread detection (reply_to_message_id, time gaps)
+- [ ] Group by channel before batching
+- [ ] Language pre-filtering (uk/en separate batches)
+
+### Phase 3: Reliability (P1)
+
+- [ ] Add retry with exponential backoff
+- [ ] Dead letter queue for failed tasks
+- [ ] Deduplication before save (vector similarity > 0.9)
+
+### Phase 4: Cost Optimization (P2)
+
+- [ ] Two-tier model selection (cheap for classification, quality for extraction)
 
 ---
 
 ## Швидкий старт
 
 ```bash
-# Сервіси вже running, перевір:
+# Сервіси вже running:
 docker ps | grep task-tracker
 
 # Якщо не running:
 just services
 
-# Перевірити scoring config:
-curl http://localhost/api/v1/config/scoring | jq .
+# Перевірити RAG в логах:
+docker logs -f task-tracker-worker 2>&1 | grep -i "rag\|context"
 
-# Статистика messages:
-curl http://localhost/api/v1/messages | jq '[.items[] | .noise_classification] | group_by(.) | map({c: .[0], n: length})'
+# Trigger extraction manually:
+curl -X POST http://localhost/api/v1/analysis/extract \
+  -H "Content-Type: application/json" \
+  -d '{"period_type": "last_24h"}'
 ```
 
 ---
@@ -71,7 +104,22 @@ curl http://localhost/api/v1/messages | jq '[.items[] | .noise_classification] |
 
 | Файл | Що |
 |------|-----|
-| `backend/app/config/ai_config.py` | Source of truth для thresholds (0.30/0.60) |
-| `backend/app/api/v1/config.py` | GET /api/v1/config/scoring |
-| `frontend/src/shared/api/scoringConfig.ts` | useScoringConfig() hook + fallback defaults |
-| `docs/architecture/adr/008-unified-scoring-config.md` | ADR з калібрацією |
+| `backend/app/tasks/scoring.py` | Embed після scoring |
+| `backend/app/tasks/knowledge.py` | RAGContextBuilder integration |
+| `backend/app/services/knowledge/knowledge_orchestrator.py` | RAG injection у prompt |
+| `backend/app/services/rag_context_builder.py` | Semantic context builder |
+| `backend/app/config/ai_config.py` | Thresholds (0.30/0.60) |
+| `.obsidian-docs/плани/extraction-pipeline-improvements.md` | Full roadmap |
+
+---
+
+## Тестування RAG
+
+```python
+# В worker logs має бути:
+# "Building RAG context for extraction..."
+# "RAG context built: X proposals, Y atoms, Z messages"
+
+# Або якщо embeddings ще не готові:
+# "Failed to build RAG context, proceeding without: ..."
+```
