@@ -32,6 +32,30 @@ class Message(TimestampMixin, SQLModel, table=True):
     content: str = Field(sa_type=Text, description="Message content")
     sent_at: datetime = Field(description="When message was sent")
 
+    # Threading fields (source-agnostic: works for Telegram, Slack, Email)
+    source_channel_id: str | None = Field(
+        default=None,
+        index=True,
+        max_length=100,
+        description="Channel/chat ID: Telegram chat_id, Slack channel_id, Email folder",
+    )
+    source_thread_id: str | None = Field(
+        default=None,
+        index=True,
+        max_length=100,
+        description="Thread ID: Telegram message_thread_id, Slack thread_ts, Email thread",
+    )
+    source_parent_id: str | None = Field(
+        default=None,
+        max_length=100,
+        description="Parent message: Telegram reply_to_message_id, Email In-Reply-To",
+    )
+    detected_language: str | None = Field(
+        default=None,
+        max_length=10,
+        description="Detected language code: uk, en, ru, other, unknown",
+    )
+
     source_id: int = Field(foreign_key="sources.id", description="Source where message came from")
     author_id: int = Field(foreign_key="users.id", description="Author of the message (User.id)")
 

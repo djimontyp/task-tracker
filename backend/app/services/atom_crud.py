@@ -22,6 +22,7 @@ from app.models.atom import (
     BulkDeleteResponse,
     TopicAtom,
 )
+from app.models.atom_version import AtomVersion
 from app.services.base_crud import BaseCRUD
 
 logger = logging.getLogger(__name__)
@@ -42,11 +43,12 @@ class AtomCRUD(BaseCRUD[Atom]):
         """
         super().__init__(Atom, session)
 
-    def _to_public(self, atom: Atom) -> AtomPublic:
+    def _to_public(self, atom: Atom, pending_versions_count: int = 0) -> AtomPublic:
         """Convert Atom model to AtomPublic schema.
 
         Args:
             atom: Database atom instance
+            pending_versions_count: Number of unapproved versions
 
         Returns:
             Public atom schema
@@ -63,6 +65,8 @@ class AtomCRUD(BaseCRUD[Atom]):
             meta=atom.meta,
             embedding=atom.embedding,
             has_embedding=atom.embedding is not None,
+            pending_versions_count=pending_versions_count,
+            detected_language=getattr(atom, "detected_language", None),
             created_at=atom.created_at,
             updated_at=atom.updated_at,
         )
@@ -77,7 +81,18 @@ class AtomCRUD(BaseCRUD[Atom]):
             AtomPublic or None if not found
         """
         atom = await self.get(atom_id)
-        return self._to_public(atom) if atom else None
+        if not atom:
+            return None
+
+        # Count pending (unapproved) versions
+        count_query = select(func.count()).select_from(AtomVersion).where(
+            AtomVersion.atom_id == atom_id,
+            AtomVersion.approved == False,  # noqa: E712
+        )
+        count_result = await self.session.execute(count_query)
+        pending_count = count_result.scalar_one()
+
+        return self._to_public(atom, pending_versions_count=pending_count)
 
     async def list_atoms(
         self,
@@ -97,11 +112,29 @@ class AtomCRUD(BaseCRUD[Atom]):
         count_result = await self.session.execute(count_query)
         total = count_result.scalar_one()
 
-        query = select(Atom).offset(skip).limit(limit).order_by(desc(Atom.created_at))  # type: ignore[arg-type]
-        result = await self.session.execute(query)
-        atoms = result.scalars().all()
+        # Subquery for pending versions count per atom
+        pending_subq = (
+            select(
+                AtomVersion.atom_id,
+                func.count(AtomVersion.id).label("pending_count"),  # type: ignore[arg-type]
+            )
+            .where(AtomVersion.approved == False)  # noqa: E712
+            .group_by(AtomVersion.atom_id)  # type: ignore[arg-type]
+            .subquery()
+        )
 
-        return [self._to_public(atom) for atom in atoms], total
+        # Main query with LEFT JOIN to get pending counts
+        query = (
+            select(Atom, func.coalesce(pending_subq.c.pending_count, 0).label("pending_count"))
+            .outerjoin(pending_subq, Atom.id == pending_subq.c.atom_id)  # type: ignore[arg-type]
+            .offset(skip)
+            .limit(limit)
+            .order_by(desc(Atom.created_at))  # type: ignore[arg-type]
+        )
+        result = await self.session.execute(query)
+        rows = result.all()
+
+        return [self._to_public(row[0], pending_versions_count=row[1]) for row in rows], total
 
     async def create_atom(self, atom_data: AtomCreate) -> AtomPublic:
         """Create a new atom.
@@ -178,17 +211,29 @@ class AtomCRUD(BaseCRUD[Atom]):
         Returns:
             List of atoms belonging to the topic
         """
+        # Subquery for pending versions count per atom
+        pending_subq = (
+            select(
+                AtomVersion.atom_id,
+                func.count(AtomVersion.id).label("pending_count"),  # type: ignore[arg-type]
+            )
+            .where(AtomVersion.approved == False)  # noqa: E712
+            .group_by(AtomVersion.atom_id)  # type: ignore[arg-type]
+            .subquery()
+        )
+
         query = (
-            select(Atom)
+            select(Atom, func.coalesce(pending_subq.c.pending_count, 0).label("pending_count"))
             .join(TopicAtom, TopicAtom.atom_id == Atom.id)  # type: ignore[arg-type]
+            .outerjoin(pending_subq, Atom.id == pending_subq.c.atom_id)  # type: ignore[arg-type]
             .where(TopicAtom.topic_id == topic_id)
             .order_by(TopicAtom.position.asc().nulls_last(), desc(Atom.created_at))  # type: ignore[union-attr, arg-type]
         )
 
         result = await self.session.execute(query)
-        atoms = result.scalars().all()
+        rows = result.all()
 
-        return [self._to_public(atom) for atom in atoms]
+        return [self._to_public(row[0], pending_versions_count=row[1]) for row in rows]
 
     async def bulk_approve_atoms(self, atom_ids: list[str]) -> BulkApproveResponse:
         """Bulk approve multiple atoms in a single transaction.

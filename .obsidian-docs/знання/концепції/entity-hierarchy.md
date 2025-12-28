@@ -1,6 +1,7 @@
 ---
 type: knowledge
 created: 2025-12-28
+updated: 2025-12-29
 status: validated
 tags:
   - concept
@@ -30,6 +31,24 @@ Pulse Radar has a clear 3-layer entity hierarchy:
 │  └─────────────────────────────────────────────────┘│
 └─────────────────────────────────────────────────────┘
 ```
+
+## Entity IDs (Technical)
+
+> [!important] UUID Standard
+> All entity IDs are **string UUIDs** (not numeric).
+> Fixed 2025-12-29.
+
+| Entity | ID Type | Example |
+|--------|---------|---------|
+| Topic | `string` (UUID) | `"a1b2c3d4-e5f6-7890-..."` |
+| Atom | `string` (UUID) | `"f1e2d3c4-b5a6-7890-..."` |
+| Message | `string` (UUID) | `"1a2b3c4d-5e6f-7890-..."` |
+
+**Frontend files affected:**
+- `features/atoms/types/index.ts` — `Atom.id: string`
+- `features/atoms/api/atomService.ts` — all methods
+- `features/knowledge/api/versioningService.ts`
+- `features/knowledge/components/*`
 
 ## Topics (Top Level)
 

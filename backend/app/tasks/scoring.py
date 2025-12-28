@@ -2,6 +2,7 @@ import uuid
 from typing import Any
 
 from core.taskiq_config import nats_broker
+from langdetect import LangDetectException, detect  # type: ignore[import-untyped]
 from loguru import logger
 from sqlalchemy import desc as sql_desc
 from sqlalchemy import select
@@ -61,6 +62,15 @@ async def score_message_task(message_id: uuid.UUID) -> dict[str, Any]:
         message.importance_score = importance_score  # type: ignore[assignment]
         message.noise_classification = classification  # type: ignore[assignment]
         message.noise_factors = noise_factors  # type: ignore[assignment]
+
+        # Detect language for batching optimization
+        if message.content and not message.detected_language:
+            try:
+                detected_lang = detect(message.content)
+                message.detected_language = detected_lang if detected_lang in ("uk", "en", "ru") else "other"
+            except LangDetectException:
+                message.detected_language = "unknown"
+
         await db.commit()
 
         logger.info(f"Message {message_id} scored: {importance_score:.2f} ({classification})")

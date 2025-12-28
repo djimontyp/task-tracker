@@ -584,6 +584,8 @@ class KnowledgeOrchestrator:
     def _build_prompt(self, messages: Sequence[Message], rag_context: str = "") -> str:
         """Build LLM prompt from message batch with optional RAG context.
 
+        Groups messages by thread to preserve conversation structure.
+
         Args:
             messages: Messages to analyze
             rag_context: Optional formatted RAG context string
@@ -591,10 +593,41 @@ class KnowledgeOrchestrator:
         Returns:
             Formatted prompt string
         """
-        messages_text = "\n\n".join([
-            f"Message {i + 1} (ID: {msg.id}, Author: {msg.author_id}, Time: {msg.sent_at}):\n{msg.content}"
-            for i, msg in enumerate(messages)
-        ])
+        # Group messages by thread for better context
+        thread_groups: dict[str, list[Message]] = {}
+        for msg in messages:
+            thread_key = msg.source_thread_id or "general"
+            if thread_key not in thread_groups:
+                thread_groups[thread_key] = []
+            thread_groups[thread_key].append(msg)
+
+        # Format messages preserving thread structure
+        sections: list[str] = []
+        msg_counter = 1
+
+        for thread_id, thread_msgs in thread_groups.items():
+            # Sort by time within each thread
+            thread_msgs_sorted = sorted(thread_msgs, key=lambda m: m.sent_at)
+
+            if len(thread_groups) > 1:
+                # Multiple threads - show structure
+                thread_label = f"Thread: {thread_id}" if thread_id != "general" else "General discussion"
+                thread_text_parts = [f"### {thread_label}"]
+                for msg in thread_msgs_sorted:
+                    thread_text_parts.append(
+                        f"[{msg.sent_at.strftime('%H:%M')}] Message {msg_counter} (ID: {msg.id}, Author: {msg.author_id}):\n{msg.content}"
+                    )
+                    msg_counter += 1
+                sections.append("\n".join(thread_text_parts))
+            else:
+                # Single thread - flat format
+                for msg in thread_msgs_sorted:
+                    sections.append(
+                        f"Message {msg_counter} (ID: {msg.id}, Author: {msg.author_id}, Time: {msg.sent_at}):\n{msg.content}"
+                    )
+                    msg_counter += 1
+
+        messages_text = "\n\n".join(sections)
 
         # Build RAG context section if available
         context_section = ""

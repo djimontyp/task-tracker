@@ -9,6 +9,7 @@ from sqlalchemy import func, select
 from app.config.ai_config import ai_config
 from app.database import AsyncSessionLocal
 from app.models import AgentConfig, IngestionStatus, Message, MessageIngestionJob
+from app.services.batching_service import group_messages_by_conversation, select_conversations_for_batch
 from app.services.telegram_ingestion_service import telegram_ingestion_service
 from app.services.user_service import get_or_create_source, identify_or_create_user
 from app.services.websocket_manager import websocket_manager
@@ -60,21 +61,31 @@ async def queue_knowledge_extraction_if_needed(message_id: uuid.UUID, db: Any) -
         logger.warning("No active agent config 'knowledge_extractor' found for knowledge extraction, skipping")
         return
 
+    # Fetch all unprocessed messages for intelligent conversation-aware batching
     messages_stmt = (
-        select(Message.id)
-        .where(Message.topic_id.is_(None), Message.sent_at >= cutoff_time)  # type: ignore[union-attr]
-        .order_by(Message.sent_at)
-        .limit(ai_config.knowledge_extraction.batch_size)
+        select(Message)
+        .where(Message.topic_id.is_(None), Message.sent_at >= cutoff_time)  # type: ignore[union-attr, arg-type]
+        .order_by(Message.source_channel_id, Message.source_thread_id, Message.sent_at)  # type: ignore[arg-type]
     )
     messages_result = await db.execute(messages_stmt)
-    message_ids = [row[0] for row in messages_result.all()]
+    all_messages = list(messages_result.scalars().all())
 
-    if len(message_ids) == 0:
+    if not all_messages:
+        return
+
+    # Group by conversation (channel + thread) with time-gap fallback
+    grouped = group_messages_by_conversation(all_messages)
+
+    # Select complete conversations up to batch size
+    message_ids = select_conversations_for_batch(grouped, ai_config.knowledge_extraction.batch_size)
+
+    if not message_ids:
         return
 
     logger.info(
         f"🧠 Threshold reached ({unprocessed_count} >= {ai_config.knowledge_extraction.message_threshold}), "
-        f"queueing knowledge extraction for {len(message_ids)} messages using agent '{agent_config.name}'"
+        f"queueing knowledge extraction for {len(message_ids)} messages ({len(grouped)} conversations) "
+        f"using agent '{agent_config.name}'"
     )
 
     await extract_knowledge_from_messages_task.kiq(
@@ -139,6 +150,10 @@ async def save_telegram_message(telegram_data: dict[str, Any]) -> str:
                 except Exception as exc:
                     logger.warning(f"Failed to fetch avatar for Telegram user {telegram_user_id}: {exc}")
 
+            # Extract threading information from Telegram data
+            chat_data = message.get("chat", {})
+            reply_to = message.get("reply_to_message")
+
             # Persist message in database
             db_message = Message(
                 external_message_id=str(message["message_id"]),
@@ -149,6 +164,10 @@ async def save_telegram_message(telegram_data: dict[str, Any]) -> str:
                 telegram_profile_id=tg_profile.id,
                 avatar_url=avatar_url,
                 analyzed=False,
+                # Threading fields (source-agnostic)
+                source_channel_id=str(chat_data.get("id")) if chat_data.get("id") else None,
+                source_thread_id=str(message.get("message_thread_id")) if message.get("message_thread_id") else None,
+                source_parent_id=str(reply_to.get("message_id")) if reply_to else None,
             )
 
             db.add(db_message)

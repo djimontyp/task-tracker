@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, Badge, Button } from '@/shared/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
@@ -12,8 +12,6 @@ import {
   Cog,
   FileText
 } from 'lucide-react'
-import { versioningService } from '@/features/knowledge/api/versioningService'
-import { useWebSocket } from '@/shared/hooks'
 import { VersionHistoryList } from '@/features/knowledge/components/VersionHistoryList'
 import { LanguageMismatchBadge } from '@/shared/components/LanguageMismatchBadge'
 import { useProjectLanguage } from '@/shared/hooks/useProjectLanguage'
@@ -38,7 +36,6 @@ const atomTypeIcons: Record<AtomType, React.ComponentType<{ className?: string }
 const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
   const { t } = useTranslation('atoms')
   const { projectLanguage } = useProjectLanguage()
-  const [pendingVersionsCount, setPendingVersionsCount] = useState(0)
   const [showVersionHistory, setShowVersionHistory] = useState(false)
 
   // Map atom types to translation keys where available, fallback to capitalized type
@@ -56,34 +53,8 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
     return type.charAt(0).toUpperCase() + type.slice(1)
   }
 
-  const loadPendingVersions = React.useCallback(async () => {
-    try {
-      const versions = await versioningService.getAtomVersions(atom.id)
-      const pendingCount = versions.filter((v) => !v.approved).length
-      setPendingVersionsCount(pendingCount)
-    } catch {
-      // Silently handle error - versions may not be available
-    }
-  }, [atom.id])
-
-  useEffect(() => {
-    loadPendingVersions()
-  }, [loadPendingVersions])
-
-  useWebSocket({
-    topics: ['knowledge'],
-    onMessage: (data: unknown) => {
-      const event = data as { type?: string; data?: { entity_type?: string; entity_id?: number } }
-
-      if (
-        event.type === 'knowledge.version_created' &&
-        event.data?.entity_type === 'atom' &&
-        event.data?.entity_id === atom.id
-      ) {
-        setPendingVersionsCount((prev) => prev + 1)
-      }
-    },
-  })
+  // pending_versions_count comes from backend now (no N+1 queries!)
+  const pendingVersionsCount = atom.pending_versions_count ?? 0
 
   const isFeatured = atom.confidence !== null && atom.confidence > 0.8
   // Featured atoms: always glow + stronger on hover
