@@ -21,7 +21,7 @@ type VersionStatus = 'pending' | 'approved' | 'rejected'
 
 type UnifiedVersion = {
   id: number
-  entityId: string | number
+  entityId: string
   entityType: 'topic' | 'atom'
   entityName: string
   version: number

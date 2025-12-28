@@ -12,7 +12,7 @@ import type {
 export const versioningService = {
   async getTopicVersions(topicId: string): Promise<TopicVersion[]> {
     const response = await apiClient.get<TopicVersion[]>(
-      `/api/v1/versions/topics/${topicId}/versions`
+      `/api/v1/topics/${topicId}/versions`
     );
     return response.data;
   },
@@ -23,7 +23,7 @@ export const versioningService = {
     compareToVersion: number
   ): Promise<VersionDiff> {
     const response = await apiClient.get<VersionDiff>(
-      `/api/v1/versions/topics/${topicId}/versions/${version}/diff`,
+      `/api/v1/topics/${topicId}/versions/${version}/diff`,
       { params: { compare_to: compareToVersion } }
     );
     return response.data;
@@ -31,7 +31,7 @@ export const versioningService = {
 
   async approveTopicVersion(topicId: string, version: number): Promise<TopicVersion> {
     const response = await apiClient.post<TopicVersion>(
-      `/api/v1/versions/topics/${topicId}/versions/${version}/approve`,
+      `/api/v1/topics/${topicId}/versions/${version}/approve`,
       {}
     );
     return response.data;
@@ -39,42 +39,42 @@ export const versioningService = {
 
   async rejectTopicVersion(topicId: string, version: number): Promise<TopicVersion> {
     const response = await apiClient.post<TopicVersion>(
-      `/api/v1/versions/topics/${topicId}/versions/${version}/reject`,
+      `/api/v1/topics/${topicId}/versions/${version}/reject`,
       {}
     );
     return response.data;
   },
 
-  async getAtomVersions(atomId: number): Promise<AtomVersion[]> {
+  async getAtomVersions(atomId: string): Promise<AtomVersion[]> {
     const response = await apiClient.get<AtomVersion[]>(
-      `/api/v1/versions/atoms/${atomId}/versions`
+      `/api/v1/atoms/${atomId}/versions`
     );
     return response.data;
   },
 
   async getAtomVersionDiff(
-    atomId: number,
+    atomId: string,
     version: number,
     compareToVersion: number
   ): Promise<VersionDiff> {
     const response = await apiClient.get<VersionDiff>(
-      `/api/v1/versions/atoms/${atomId}/versions/${version}/diff`,
+      `/api/v1/atoms/${atomId}/versions/${version}/diff`,
       { params: { compare_to: compareToVersion } }
     );
     return response.data;
   },
 
-  async approveAtomVersion(atomId: number, version: number): Promise<AtomVersion> {
+  async approveAtomVersion(atomId: string, version: number): Promise<AtomVersion> {
     const response = await apiClient.post<AtomVersion>(
-      `/api/v1/versions/atoms/${atomId}/versions/${version}/approve`,
+      `/api/v1/atoms/${atomId}/versions/${version}/approve`,
       {}
     );
     return response.data;
   },
 
-  async rejectAtomVersion(atomId: number, version: number): Promise<AtomVersion> {
+  async rejectAtomVersion(atomId: string, version: number): Promise<AtomVersion> {
     const response = await apiClient.post<AtomVersion>(
-      `/api/v1/versions/atoms/${atomId}/versions/${version}/reject`,
+      `/api/v1/atoms/${atomId}/versions/${version}/reject`,
       {}
     );
     return response.data;

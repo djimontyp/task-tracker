@@ -148,6 +148,16 @@ class AnalysisSettings(BaseSettings):
         description="Max messages per batch (balance: context vs LLM cost)",
     )
 
+    group_by_thread: bool = Field(
+        default=True,
+        description="Group messages by thread before extraction (keeps conversations together)",
+    )
+
+    group_by_channel: bool = Field(
+        default=True,
+        description="Group messages by channel before extraction (separates different chat sources)",
+    )
+
 
 class VectorSearchSettings(BaseSettings):
     """Vector search thresholds for different use cases."""

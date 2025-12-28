@@ -19,7 +19,7 @@ export enum LinkType {
 }
 
 export interface Atom {
-  id: number
+  id: string
   type: AtomType
   title: string
   content: string
@@ -28,6 +28,8 @@ export interface Atom {
   archived: boolean
   archived_at: string | null
   meta: Record<string, any> | null
+  /** Number of unapproved versions (computed on backend) */
+  pending_versions_count: number
   /** AI-detected language of content (ISO 639-1). Used for language mismatch warnings. */
   detected_language?: string | null
   created_at: string
@@ -60,23 +62,23 @@ export interface AtomListResponse {
 }
 
 export interface AtomLink {
-  from_atom_id: number
-  to_atom_id: number
+  from_atom_id: string
+  to_atom_id: string
   link_type: LinkType
   strength: number | null
   created_at: string
 }
 
 export interface CreateAtomLink {
-  from_atom_id: number
-  to_atom_id: number
+  from_atom_id: string
+  to_atom_id: string
   link_type: LinkType
   strength?: number
 }
 
 export interface TopicAtom {
   topic_id: string
-  atom_id: number
+  atom_id: string
   position: number | null
   note: string | null
   created_at: string
@@ -84,7 +86,7 @@ export interface TopicAtom {
 
 export interface CreateTopicAtom {
   topic_id: string
-  atom_id: number
+  atom_id: string
   position?: number
   note?: string
 }

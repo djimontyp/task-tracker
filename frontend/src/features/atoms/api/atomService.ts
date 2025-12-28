@@ -27,7 +27,7 @@ class AtomService {
     return response.json()
   }
 
-  async getAtomById(id: number): Promise<Atom> {
+  async getAtomById(id: string): Promise<Atom> {
     const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atoms/${id}`)
 
     if (!response.ok) {
@@ -53,7 +53,7 @@ class AtomService {
     return response.json()
   }
 
-  async updateAtom(id: number, data: UpdateAtom): Promise<Atom> {
+  async updateAtom(id: string, data: UpdateAtom): Promise<Atom> {
     const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atoms/${id}`, {
       method: 'PATCH',
       headers: {
@@ -69,7 +69,7 @@ class AtomService {
     return response.json()
   }
 
-  async deleteAtom(id: number): Promise<void> {
+  async deleteAtom(id: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atoms/${id}`, {
       method: 'DELETE',
     })
@@ -90,7 +90,7 @@ class AtomService {
     return data.items || data
   }
 
-  async linkAtomToTopic(atomId: number, topicId: string, note?: string, position?: number): Promise<TopicAtom> {
+  async linkAtomToTopic(atomId: string, topicId: string, note?: string, position?: number): Promise<TopicAtom> {
     const params = new URLSearchParams()
     if (note) params.append('note', note)
     if (position !== undefined) params.append('position', position.toString())
@@ -111,7 +111,7 @@ class AtomService {
     return response.json()
   }
 
-  async unlinkAtomFromTopic(atomId: number, topicId: string): Promise<void> {
+  async unlinkAtomFromTopic(atomId: string, topicId: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/topic-atoms/${topicId}/${atomId}`, {
       method: 'DELETE',
     })
@@ -137,7 +137,7 @@ class AtomService {
     return response.json()
   }
 
-  async getAtomLinks(atomId: number): Promise<AtomLink[]> {
+  async getAtomLinks(atomId: string): Promise<AtomLink[]> {
     const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atoms/${atomId}/links`)
 
     if (!response.ok) {
@@ -148,7 +148,7 @@ class AtomService {
     return data.items || data
   }
 
-  async deleteAtomLink(fromAtomId: number, toAtomId: number): Promise<void> {
+  async deleteAtomLink(fromAtomId: string, toAtomId: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atom-links/${fromAtomId}/${toAtomId}`, {
       method: 'DELETE',
     })

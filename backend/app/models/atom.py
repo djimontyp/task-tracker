@@ -209,6 +209,8 @@ class AtomPublic(SQLModel):
     meta: dict | None
     embedding: list[float] | None = None
     has_embedding: bool = False
+    pending_versions_count: int = 0
+    detected_language: str | None = None
     created_at: datetime
     updated_at: datetime
 

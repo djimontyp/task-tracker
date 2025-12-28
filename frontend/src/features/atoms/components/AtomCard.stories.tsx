@@ -31,7 +31,7 @@ export default meta;
 type Story = StoryObj<typeof AtomCard>;
 
 const baseAtom: Atom = {
-  id: 1,
+  id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
   title: 'Database connection pooling issue',
   content:
     'Connection pool exhaustion occurs under high load, causing timeouts. Need to investigate pool configuration.',
@@ -41,6 +41,7 @@ const baseAtom: Atom = {
   archived: false,
   archived_at: null,
   meta: null,
+  pending_versions_count: 0,
   created_at: '2025-12-04T10:00:00Z',
   updated_at: '2025-12-04T10:00:00Z',
 };
@@ -62,7 +63,7 @@ export const Solution: Story = {
   args: {
     atom: {
       ...baseAtom,
-      id: 2,
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567892',
       type: AtomType.Solution,
       title: 'Increase connection pool size',
       content:
@@ -82,7 +83,7 @@ export const Decision: Story = {
   args: {
     atom: {
       ...baseAtom,
-      id: 3,
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567893',
       type: AtomType.Decision,
       title: 'Use PostgreSQL for message storage',
       content: 'After evaluating MongoDB and PostgreSQL, we chose PostgreSQL for ACID guarantees and pgvector support.',
@@ -101,7 +102,7 @@ export const Question: Story = {
   args: {
     atom: {
       ...baseAtom,
-      id: 4,
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567894',
       type: AtomType.Question,
       title: 'Should we implement rate limiting?',
       content: 'Do we need to add rate limiting for the API, or is the current load acceptable for now?',
@@ -120,7 +121,7 @@ export const Insight: Story = {
   args: {
     atom: {
       ...baseAtom,
-      id: 5,
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567895',
       type: AtomType.Insight,
       title: 'Users prefer Telegram over email',
       content: '80% of user notifications are read via Telegram within 5 minutes, vs 2 hours for email.',
@@ -139,7 +140,7 @@ export const Pattern: Story = {
   args: {
     atom: {
       ...baseAtom,
-      id: 6,
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567896',
       type: AtomType.Pattern,
       title: 'Repository pattern for data access',
       content: 'All services use repository classes to abstract database operations, making testing easier.',
@@ -158,7 +159,7 @@ export const Requirement: Story = {
   args: {
     atom: {
       ...baseAtom,
-      id: 7,
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567897',
       type: AtomType.Requirement,
       title: 'GDPR compliance for user data',
       content: 'All user data must be encrypted at rest and support right-to-erasure requests.',
@@ -241,13 +242,16 @@ export const Interactive: Story = {
 
 export const WithPendingVersions: Story = {
   args: {
-    atom: baseAtom,
+    atom: {
+      ...baseAtom,
+      pending_versions_count: 3,
+    },
   },
   parameters: {
     docs: {
       description: {
         story:
-          'Atom with pending version badge (requires WebSocket connection to backend). Shows "X pending versions" badge with "View History" button.',
+          'Atom with pending version badge. Shows "X pending versions" badge with "View History" button. Count comes from backend API (no N+1 queries).',
       },
     },
   },
