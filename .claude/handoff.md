@@ -113,13 +113,29 @@ curl -X POST http://localhost/api/v1/analysis/extract \
 
 ---
 
-## Тестування RAG
+## Тестування
 
-```python
-# В worker logs має бути:
+### E2E тести (8 tests, all pass)
+
+```bash
+cd frontend && npx playwright test tests/e2e/knowledge-extraction.spec.ts --project=chromium
+```
+
+### Worker logs
+
+```bash
+docker logs -f task-tracker-worker 2>&1 | grep -i "rag\|context"
+
+# Має бути:
 # "Building RAG context for extraction..."
 # "RAG context built: X proposals, Y atoms, Z messages"
-
-# Або якщо embeddings ще не готові:
-# "Failed to build RAG context, proceeding without: ..."
 ```
+
+---
+
+## Commits
+
+| Hash | Description |
+|------|-------------|
+| `4ca13e7` | feat(extraction): activate RAG context in knowledge extraction pipeline |
+| `5289ff4` | fix(rag): use asyncpg raw connection for pgvector queries |
