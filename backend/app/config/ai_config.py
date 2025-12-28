@@ -57,24 +57,24 @@ class MessageScoringSettings(BaseSettings):
     """Message scoring configuration with weighted importance factors."""
 
     noise_threshold: float = Field(
-        default=0.25,
+        default=0.30,
         ge=0.0,
         le=1.0,
         description=(
             "Below = noise (exclude from analysis). "
-            "Optimized via grid search validation (Oct 2025): 0.25 achieves F1=85.2% "
-            "(+24.3% vs 0.30 baseline). Lower threshold captures more weak signals."
+            "Calibrated Dec 2025: 0.30 ensures short messages ('Ок', '👍') "
+            "with content_score=0.1 fall below threshold even with neutral other factors."
         ),
     )
 
     signal_threshold: float = Field(
-        default=0.65,
+        default=0.60,
         ge=0.0,
         le=1.0,
         description=(
             "Above = signal (high priority). "
-            "Optimized via grid search validation (Oct 2025): 0.65 achieves F1=85.2% "
-            "(+24.3% vs 0.70 baseline). Lower threshold improves signal recall (92.7%)."
+            "Calibrated Dec 2025: 0.60 ensures messages with signal keywords "
+            "(content_score=0.8) exceed threshold with neutral other factors."
         ),
     )
 
