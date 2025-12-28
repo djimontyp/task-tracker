@@ -8,7 +8,6 @@ to enhance LLM proposal generation with past patterns and context.
 import logging
 from typing import TypedDict
 
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.message import Message
@@ -108,7 +107,9 @@ class RAGContextBuilder:
                 context_summary=f"Failed to generate embedding: {str(e)}",
             )
 
-        similar_proposals = await self.find_similar_proposals(session, query_embedding, top_k)
+        # NOTE: task_proposals table doesn't exist yet, skip for now
+        # similar_proposals = await self.find_similar_proposals(session, query_embedding, top_k)
+        similar_proposals: list[dict] = []
         relevant_atoms = await self.find_relevant_atoms(session, query_embedding, top_k)
 
         current_ids = [msg.id for msg in messages if msg.id is not None]
@@ -155,36 +156,33 @@ class RAGContextBuilder:
         try:
             query_vector = str(query_embedding)
 
-            sql = text("""
+            sql = """
                 SELECT DISTINCT
                     tp.id,
                     tp.proposed_title AS title,
                     tp.proposed_description AS description,
                     tp.confidence,
-                    1 - (m.embedding <=> :query_vector::vector) / 2 AS similarity
+                    1 - (m.embedding <=> $1::vector) / 2 AS similarity
                 FROM task_proposals tp
                 JOIN messages m ON m.id = ANY(tp.source_message_ids)
                 WHERE
                     m.embedding IS NOT NULL
                     AND tp.status = 'approved'
-                ORDER BY m.embedding <=> :query_vector::vector
-                LIMIT :limit
-            """)
+                ORDER BY m.embedding <=> $1::vector
+                LIMIT $2
+            """
 
-            result = await session.execute(
-                sql,
-                {"query_vector": query_vector, "limit": top_k},
-            )
-
-            rows = result.fetchall()
+            conn = await session.connection()
+            raw_conn = await conn.get_raw_connection()
+            rows = await raw_conn.driver_connection.fetch(sql, query_vector, top_k)
 
             proposals = [
                 {
-                    "id": str(row.id),
-                    "title": row.title,
-                    "description": row.description[:200] if row.description else "",
-                    "confidence": float(row.confidence) if row.confidence else None,
-                    "similarity": float(row.similarity),
+                    "id": str(row["id"]),
+                    "title": row["title"],
+                    "description": row["description"][:200] if row["description"] else "",
+                    "confidence": float(row["confidence"]) if row["confidence"] else None,
+                    "similarity": float(row["similarity"]),
                 }
                 for row in rows
             ]
@@ -222,37 +220,34 @@ class RAGContextBuilder:
         try:
             query_vector = str(query_embedding)
 
-            sql = text("""
+            sql = """
                 SELECT
                     a.id,
                     a.type,
                     a.title,
                     a.content,
                     a.confidence,
-                    1 - (a.embedding <=> :query_vector::vector) / 2 AS similarity
+                    1 - (a.embedding <=> $1::vector) / 2 AS similarity
                 FROM atoms a
                 WHERE
                     a.embedding IS NOT NULL
                     AND a.user_approved = true
-                ORDER BY a.embedding <=> :query_vector::vector
-                LIMIT :limit
-            """)
+                ORDER BY a.embedding <=> $1::vector
+                LIMIT $2
+            """
 
-            result = await session.execute(
-                sql,
-                {"query_vector": query_vector, "limit": top_k},
-            )
-
-            rows = result.fetchall()
+            conn = await session.connection()
+            raw_conn = await conn.get_raw_connection()
+            rows = await raw_conn.driver_connection.fetch(sql, query_vector, top_k)
 
             atoms = [
                 {
-                    "id": row.id,
-                    "type": row.type,
-                    "title": row.title,
-                    "content": row.content[:200] if row.content else "",
-                    "confidence": float(row.confidence) if row.confidence else None,
-                    "similarity": float(row.similarity),
+                    "id": row["id"],
+                    "type": row["type"],
+                    "title": row["title"],
+                    "content": row["content"][:200] if row["content"] else "",
+                    "confidence": float(row["confidence"]) if row["confidence"] else None,
+                    "similarity": float(row["similarity"]),
                 }
                 for row in rows
             ]
@@ -287,33 +282,30 @@ class RAGContextBuilder:
         try:
             query_vector = str(query_embedding)
 
-            sql = text("""
+            sql = """
                 SELECT
                     m.id,
                     m.content,
                     m.sent_at,
-                    1 - (m.embedding <=> :query_vector::vector) / 2 AS similarity
+                    1 - (m.embedding <=> $1::vector) / 2 AS similarity
                 FROM messages m
                 WHERE
                     m.embedding IS NOT NULL
-                    AND m.id != ALL(:exclude_ids)
-                ORDER BY m.embedding <=> :query_vector::vector
-                LIMIT :limit
-            """)
+                    AND m.id != ALL($2)
+                ORDER BY m.embedding <=> $1::vector
+                LIMIT $3
+            """
 
-            result = await session.execute(
-                sql,
-                {"query_vector": query_vector, "exclude_ids": exclude_ids, "limit": top_k},
-            )
-
-            rows = result.fetchall()
+            conn = await session.connection()
+            raw_conn = await conn.get_raw_connection()
+            rows = await raw_conn.driver_connection.fetch(sql, query_vector, exclude_ids, top_k)
 
             messages = [
                 {
-                    "id": row.id,
-                    "content": row.content[:200] if row.content else "",
-                    "sent_at": row.sent_at.isoformat(),
-                    "similarity": float(row.similarity),
+                    "id": row["id"],
+                    "content": row["content"][:200] if row["content"] else "",
+                    "sent_at": row["sent_at"].isoformat(),
+                    "similarity": float(row["similarity"]),
                 }
                 for row in rows
             ]
