@@ -29,6 +29,7 @@ import {
 } from '@tanstack/react-table'
 import { createColumns, sourceLabels } from './columns'
 import { getMessageAnalysisBadge, getNoiseClassificationBadge } from '@/shared/utils/statusBadges'
+import { useScoringConfig } from '@/shared/api/scoringConfig'
 import { Message, NoiseClassification } from '@/shared/types'
 import { DataTable } from '@/shared/components/DataTable'
 import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
@@ -72,6 +73,9 @@ const MessagesPage = () => {
   const { isAdminMode } = useAdminMode()
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
+
+  // Fetch scoring config for dynamic thresholds
+  const { data: scoringConfig } = useScoringConfig()
 
 
   // URL param for highlighting message from search
@@ -208,8 +212,9 @@ const MessagesPage = () => {
         onReset: handleReset,
         hasActiveFilters,
         onCheckboxClick: handleCheckboxClick,
+        scoringConfig,
       }),
-    [hasActiveFilters, handleReset, handleCheckboxClick]
+    [hasActiveFilters, handleReset, handleCheckboxClick, scoringConfig]
   )
 
   const table = useReactTable({

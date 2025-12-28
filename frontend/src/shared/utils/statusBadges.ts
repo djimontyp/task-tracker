@@ -13,6 +13,11 @@
 
 import type { NoiseClassification } from '@/shared/types'
 import { getStatusClasses } from '@/shared/config/statusColors'
+import type { ScoringConfig } from '@/shared/api/scoringConfig'
+import { DEFAULT_SCORING_CONFIG } from '@/shared/api/scoringConfig'
+
+// Re-export ScoringConfig type for convenience
+export type { ScoringConfig } from '@/shared/api/scoringConfig'
 
 /**
  * Badge configuration with variant and optional custom classes
@@ -108,10 +113,12 @@ export const getMessageAnalysisBadge = (analyzed: boolean): BadgeConfig => {
 /**
  * Maps noise classification to badge configuration
  *
- * Based on importance_score:
- * - signal (≥0.7): High-value message
- * - weak_signal (0.3-0.7): Needs review
- * - noise (<0.3): Low-value message
+ * Based on importance_score and configurable thresholds:
+ * - signal (>= signal_threshold): High-value message
+ * - weak_signal (>= noise_threshold AND < signal_threshold): Needs review
+ * - noise (< noise_threshold): Low-value message
+ *
+ * @param classification - The noise classification value
  */
 export const getNoiseClassificationBadge = (classification: NoiseClassification): BadgeConfig => {
   const configs: Record<NoiseClassification, BadgeConfig> = {
@@ -141,20 +148,26 @@ export const getNoiseClassificationBadge = (classification: NoiseClassification)
 /**
  * Maps importance score (0-1) to badge configuration
  *
- * Thresholds:
- * - High: ≥0.7
- * - Medium: 0.4-0.7
- * - Low: <0.4
+ * Uses configurable thresholds from ScoringConfig:
+ * - High: >= signal_threshold (default 0.65)
+ * - Medium: >= noise_threshold AND < signal_threshold (default 0.25-0.65)
+ * - Low: < noise_threshold (default 0.25)
+ *
+ * @param score - Importance score between 0 and 1
+ * @param config - Optional scoring config (uses defaults if not provided)
  */
-export const getImportanceBadge = (score: number): BadgeConfig => {
-  if (score >= 0.7) {
+export const getImportanceBadge = (
+  score: number,
+  config: ScoringConfig = DEFAULT_SCORING_CONFIG
+): BadgeConfig => {
+  if (score >= config.signal_threshold) {
     return {
       variant: 'outline',
       className: 'bg-semantic-success/10 text-semantic-success border-semantic-success/50',
       label: 'High',
     }
   }
-  if (score >= 0.4) {
+  if (score >= config.noise_threshold) {
     return {
       variant: 'outline',
       className: 'bg-semantic-warning/10 text-semantic-warning border-semantic-warning/50',
@@ -263,9 +276,20 @@ export const getTaskPriorityBadge = (priority: TaskPriority): BadgeConfig => {
 /**
  * Derives noise classification from importance score
  * Used when noise_classification field is missing
+ *
+ * Uses configurable thresholds from ScoringConfig:
+ * - noise: score < noise_threshold (default 0.25)
+ * - weak_signal: noise_threshold <= score < signal_threshold (default 0.25-0.65)
+ * - signal: score >= signal_threshold (default 0.65)
+ *
+ * @param score - Importance score between 0 and 1
+ * @param config - Optional scoring config (uses defaults if not provided)
  */
-export const getClassificationFromScore = (score: number): NoiseClassification => {
-  if (score < 0.3) return 'noise'
-  if (score < 0.7) return 'weak_signal'
+export const getClassificationFromScore = (
+  score: number,
+  config: ScoringConfig = DEFAULT_SCORING_CONFIG
+): NoiseClassification => {
+  if (score < config.noise_threshold) return 'noise'
+  if (score < config.signal_threshold) return 'weak_signal'
   return 'signal'
 }

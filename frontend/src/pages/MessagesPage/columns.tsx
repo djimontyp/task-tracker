@@ -11,11 +11,14 @@ import {
   getImportanceBadge,
   getClassificationFromScore,
 } from '@/shared/utils/statusBadges'
+import type { ScoringConfig } from '@/shared/api/scoringConfig'
 
 export interface ColumnsCallbacks {
   onReset?: () => void
   hasActiveFilters?: boolean
   onCheckboxClick?: (rowId: string, event: React.MouseEvent) => void
+  /** Scoring config for dynamic thresholds (optional, uses defaults if not provided) */
+  scoringConfig?: ScoringConfig
 }
 
 // Type for importance score filter with separate unscored toggle
@@ -199,7 +202,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       const score = row.getValue<number>('importance_score')
       if (score === undefined || score === null) return <div className="text-muted-foreground text-xs">-</div>
 
-      const config = getImportanceBadge(score)
+      const config = getImportanceBadge(score, callbacks?.scoringConfig)
       const percentage = Math.round(score * 100)
 
       return (
@@ -264,7 +267,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     ),
     cell: ({ row }) => {
       const score = row.getValue<number>('importance_score')
-      const classification = row.original.noise_classification ?? (score !== undefined ? getClassificationFromScore(score) : null)
+      const classification = row.original.noise_classification ?? (score !== undefined ? getClassificationFromScore(score, callbacks?.scoringConfig) : null)
 
       if (!classification) return <div className="text-muted-foreground text-xs">-</div>
 
@@ -282,7 +285,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     filterFn: (row, _id, filterValues: NoiseClassification[]) => {
       if (!filterValues || filterValues.length === 0) return true
       const score = row.getValue<number>('importance_score')
-      const classification = row.original.noise_classification ?? (score !== undefined ? getClassificationFromScore(score) : null)
+      const classification = row.original.noise_classification ?? (score !== undefined ? getClassificationFromScore(score, callbacks?.scoringConfig) : null)
       if (!classification) return false
       return filterValues.includes(classification)
     },

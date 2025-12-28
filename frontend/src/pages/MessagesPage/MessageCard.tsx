@@ -4,6 +4,7 @@ import { Badge, Checkbox, Button } from '@/shared/ui'
 import { Message } from '@/shared/types'
 import { getMessageAnalysisBadge, getImportanceBadge, getNoiseClassificationBadge } from '@/shared/utils/statusBadges'
 import { formatFullDate } from '@/shared/utils/date'
+import { useScoringConfig } from '@/shared/api/scoringConfig'
 import { User, Mail, Lightbulb, X } from 'lucide-react'
 
 interface MessageCardProps {
@@ -24,9 +25,11 @@ export const MessageCard: React.FC<MessageCardProps> = ({
   onDismiss
 }) => {
   const { t } = useTranslation('messages')
+  const { data: scoringConfig } = useScoringConfig()
+
   const statusBadge = getMessageAnalysisBadge(message.analyzed || false)
   const importanceBadge = message.importance_score !== null && message.importance_score !== undefined
-    ? getImportanceBadge(message.importance_score)
+    ? getImportanceBadge(message.importance_score, scoringConfig)
     : null
   const classificationBadge = message.noise_classification
     ? getNoiseClassificationBadge(message.noise_classification)
@@ -35,7 +38,9 @@ export const MessageCard: React.FC<MessageCardProps> = ({
   const content = message.content || ''
   const isEmpty = !content || content.trim() === ''
 
-  const isHighImportance = message.importance_score !== null && message.importance_score !== undefined && message.importance_score > 0.7
+  // Use dynamic threshold from config for high importance glow effect
+  const signalThreshold = scoringConfig?.signal_threshold ?? 0.65
+  const isHighImportance = message.importance_score !== null && message.importance_score !== undefined && message.importance_score >= signalThreshold
   const glowClass = isHighImportance ? 'shadow-glow-sm' : ''
 
   return (
