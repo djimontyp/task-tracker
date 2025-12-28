@@ -9,6 +9,7 @@ export function buildApiPath(endpoint: string): string {
 export const API_ENDPOINTS = {
   health: buildApiPath('health'),
   config: buildApiPath('config'),
+  configScoring: buildApiPath('config/scoring'),
 
   messages: buildApiPath('messages'),
   updateAuthors: (chatId: string) => buildApiPath(`messages/update-authors?chat_id=${chatId}`),
