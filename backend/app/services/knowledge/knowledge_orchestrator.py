@@ -388,7 +388,7 @@ class KnowledgeOrchestrator:
                     "title": extracted_atom.title,
                     "content": extracted_atom.content,
                     "confidence": extracted_atom.confidence,
-                    "meta": {"source": "llm_extraction", "message_ids": extracted_atom.related_message_ids},
+                    "meta": {"source": "llm_extraction", "message_ids": [str(mid) for mid in extracted_atom.related_message_ids]},
                 }
 
                 await versioning_service.create_atom_version(
@@ -409,7 +409,7 @@ class KnowledgeOrchestrator:
                     content=extracted_atom.content,
                     confidence=extracted_atom.confidence,
                     user_approved=False,
-                    meta={"source": "llm_extraction", "message_ids": extracted_atom.related_message_ids},
+                    meta={"source": "llm_extraction", "message_ids": [str(mid) for mid in extracted_atom.related_message_ids]},
                 )
                 session.add(new_atom)
                 await session.flush()
