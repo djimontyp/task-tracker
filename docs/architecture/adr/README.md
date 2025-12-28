@@ -105,6 +105,12 @@ cat docs/architecture/adr/001-unified-admin-approach.md
 | ID | Статус | Назва | Дата | Теги |
 |----|--------|-------|------|------|
 | [ADR-0001](./001-unified-admin-approach.md) | Accepted | Unified Admin Approach для IA | 2025-11-02 | UX, Frontend, IA |
+| [ADR-0002](./002-entity-hierarchy.md) | Accepted | Entity Hierarchy (Topics > Atoms > Messages) | 2025-12-28 | Domain, Data Model |
+| [ADR-0003](./003-dashboard-focus.md) | Accepted | Dashboard-Centric User Experience | 2025-12-28 | UX, Frontend |
+| [ADR-0004](./004-message-broker-nats.md) | Accepted | Message Broker - NATS JetStream | 2025-12-28 | Infrastructure, Backend |
+| [ADR-0005](./005-vector-storage-pgvector.md) | Accepted | Vector Storage - pgvector | 2025-12-28 | Database, AI, Search |
+| [ADR-0006](./006-llm-framework-pydantic-ai.md) | Accepted | LLM Framework - Pydantic AI | 2025-12-28 | AI, Backend |
+| [ADR-0007](./007-realtime-websocket.md) | Accepted | Real-time Communication - WebSocket | 2025-12-28 | Infrastructure, Frontend |
 
 ---
 
