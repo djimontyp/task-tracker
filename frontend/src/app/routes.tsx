@@ -20,6 +20,7 @@ const SchedulerPage = lazy(() => import('@pages/SchedulerPage'))
 const SearchPage = lazy(() => import('@pages/SearchPage'))
 const VersionsPage = lazy(() => import('@pages/VersionsPage'))
 const ExecutiveSummaryPage = lazy(() => import('@pages/ExecutiveSummaryPage'))
+const PerformancePage = lazy(() => import('@pages/PerformancePage'))
 
 const AppRoutes = () => {
   return (
@@ -50,6 +51,7 @@ const AppRoutes = () => {
         <Route element={<MainLayout><AutomationDashboardPage /></MainLayout>} path="/automation/dashboard" />
         <Route element={<MainLayout><AutomationRulesPage /></MainLayout>} path="/automation/rules" />
         <Route element={<MainLayout><SchedulerPage /></MainLayout>} path="/automation/scheduler" />
+        <Route element={<MainLayout><PerformancePage /></MainLayout>} path="/performance" />
       </Routes>
     </Suspense>
   )

@@ -11,6 +11,7 @@ import {
   PanelLeft,
   Atom,
   ClipboardList,
+  Gauge,
 } from 'lucide-react'
 import { useLocation, Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -62,6 +63,12 @@ const navGroups: NavGroup[] = [
       { path: '/agents', labelKey: 'sidebar.items.agents', icon: Cpu },
       { path: '/agent-tasks', labelKey: 'sidebar.items.taskTemplates', icon: List },
       { path: '/projects', labelKey: 'sidebar.items.projects', icon: Folder },
+    ],
+  },
+  {
+    labelKey: 'sidebar.groups.monitoring',
+    items: [
+      { path: '/performance', labelKey: 'sidebar.items.performance', icon: Gauge },
     ],
   },
   // DORMANT: Automation (F015, F016) - приховано до v1.2+

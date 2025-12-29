@@ -4,7 +4,8 @@
       "dataManagement": "КЕРУВАННЯ ДАНИМИ",
       "aiSetup": "НАЛАШТУВАННЯ AI",
       "aiOperations": "AI ОПЕРАЦІЇ",
-      "automation": "АВТОМАТИЗАЦІЯ"
+      "automation": "АВТОМАТИЗАЦІЯ",
+      "monitoring": "МОНІТОРИНГ"
     },
     "items": {
       "overview": "Огляд",
@@ -16,7 +17,8 @@
       "taskTemplates": "Шаблони задач",
       "projects": "Проєкти",
       "settings": "Налаштування",
-      "toggleSidebar": "Згорнути меню"
+      "toggleSidebar": "Згорнути меню",
+      "performance": "Продуктивність"
     }
   },
   "units": {

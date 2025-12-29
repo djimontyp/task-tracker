@@ -4,7 +4,8 @@
       "dataManagement": "DATA MANAGEMENT",
       "aiSetup": "AI SETUP",
       "aiOperations": "AI OPERATIONS",
-      "automation": "AUTOMATION"
+      "automation": "AUTOMATION",
+      "monitoring": "MONITORING"
     },
     "items": {
       "overview": "Overview",
@@ -16,7 +17,8 @@
       "taskTemplates": "Task templates",
       "projects": "Projects",
       "settings": "Settings",
-      "toggleSidebar": "Toggle sidebar"
+      "toggleSidebar": "Toggle sidebar",
+      "performance": "Performance"
     }
   },
   "units": {
