@@ -132,6 +132,25 @@ docstring-code-line-length = "dynamic"
 # Enable preview features
 preview = true
 
+[tool.coverage.run]
+source = ["app"]
+branch = true
+omit = [
+    "app/alembic/*",
+    "app/telegram_bot.py",
+]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "@abstractmethod",
+]
+
 [tool.mypy]
 python_version = "3.13"
 warn_return_any = true
