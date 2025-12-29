@@ -1,0 +1,186 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pulse-radar.dev/schemas/interactions.v2.schema.json",
+  "title": "Beads Agent Interaction Log",
+  "description": "Schema for logging AI agent interactions during development workflow",
+  "type": "object",
+  "required": ["timestamp", "task_id", "agent_type", "outcome"],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp of interaction start"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^PR-\\d+$",
+      "description": "Beads issue ID (e.g., PR-7)"
+    },
+    "parent_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^PR-\\d+$"
+      },
+      "description": "Parent hierarchy [story_id, epic_id]"
+    },
+    "agent_type": {
+      "type": "string",
+      "enum": [
+        "Frontend Expert (F1)",
+        "Backend Expert (B1)",
+        "Super QA (Q1)",
+        "Visual Designer (V1)",
+        "UX Specialist (U1)",
+        "LLM Engineer (L1)",
+        "i18n Engineer (I1)",
+        "Business Analyst (A1)",
+        "General Purpose",
+        "Explore",
+        "Plan"
+      ],
+      "description": "Type of agent that performed the work"
+    },
+    "duration_sec": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total duration in seconds"
+    },
+    "tokens_used": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Approximate tokens consumed"
+    },
+    "resume_count": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "Number of times agent was resumed"
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["success", "partial", "failed", "blocked"],
+      "description": "Final outcome of the interaction"
+    },
+    "reasoning_trace": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["step", "decision", "why"],
+        "properties": {
+          "step": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "decision": {
+            "type": "string",
+            "description": "What was decided"
+          },
+          "why": {
+            "type": "string",
+            "description": "Reasoning behind the decision"
+          }
+        }
+      },
+      "description": "Audit trail of key decisions"
+    },
+    "e2e_verification": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["browser", "api", "cli", "skip"]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "result": {
+          "type": "string",
+          "enum": ["pass", "fail", "skipped"]
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "description": "End-to-end verification details"
+    },
+    "reflection": {
+      "type": "object",
+      "properties": {
+        "worked": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "What worked well"
+        },
+        "didnt_work": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "What didn't work"
+        },
+        "learnings": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Key learnings to capture"
+        },
+        "would_do_differently": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "What would be done differently"
+        }
+      },
+      "description": "Agent reflection (Plan-Act-Reflect pattern)"
+    },
+    "quality_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Quality assessment score"
+    },
+    "files_changed": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "List of files modified"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Blockers encountered"
+    },
+    "handoff_file": {
+      "type": "string",
+      "description": "Path to handoff document if generated"
+    }
+  },
+  "examples": [
+    {
+      "timestamp": "2025-12-29T10:00:00Z",
+      "task_id": "PR-7",
+      "parent_refs": ["PR-2", "PR-1"],
+      "agent_type": "Frontend Expert (F1)",
+      "duration_sec": 1200,
+      "tokens_used": 50000,
+      "resume_count": 1,
+      "outcome": "success",
+      "reasoning_trace": [
+        {"step": 1, "decision": "Use hook pattern", "why": "Cleaner state management"},
+        {"step": 2, "decision": "Add error boundary", "why": "Prevent cascade failures"}
+      ],
+      "e2e_verification": {
+        "type": "browser",
+        "url": "http://localhost:3000/topics",
+        "result": "pass",
+        "notes": "Verified topic creation flow"
+      },
+      "reflection": {
+        "worked": ["Hook pattern cleaner than class"],
+        "didnt_work": ["Initial approach too complex"],
+        "learnings": ["Prefer composition over inheritance"],
+        "would_do_differently": ["Start with tests first"]
+      },
+      "quality_score": 0.9,
+      "files_changed": ["src/hooks/useTopics.ts", "src/components/TopicList.tsx"],
+      "blockers": []
+    }
+  ]
+}
