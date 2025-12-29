@@ -909,6 +909,79 @@ const StoryWrapper = ({ children }) => (
 2. **Зрозумій патерни** — що спільного між референсами?
 3. **Реалізуй в Storybook** — референси інформують, Storybook реалізує
 
+## 🚫 Blocker Detection Protocol
+
+> **TL;DR:** Signal blocks clearly, get unblocked fast, track everything.
+
+### When to Signal Blocker
+
+Сигналізуй блокер коли:
+- ✅ **DEPENDENCY:** Необхідний код ще не існує (API endpoint, model, component)
+- ✅ **CONTEXT:** Потрібна інформація з іншого domain (business logic, requirements)
+- ✅ **EXTERNAL:** Зовнішній сервіс недоступний (DB, API, NATS)
+- ✅ **REQUIREMENTS:** Spec неясний/неповний/суперечливий
+
+Заборонено:
+- ❌ Mock/stub data замість блокера
+- ❌ Workarounds замість сигналізації
+- ❌ Читання чужого domain коду для "обходу"
+
+### Signal Format
+
+**Повний формат:**
+```markdown
+## Status: Blocked
+
+**Category:** [DEPENDENCY|CONTEXT|EXTERNAL|REQUIREMENTS]
+**Severity:** [CRITICAL|HIGH|MEDIUM|LOW]
+**Problem:** [Що блокує прогрес]
+**Need:** [Конкретна вимога для розблокування]
+**Blocker ID:** BLK-{issue-id}-{timestamp}
+```
+
+**Мінімальний формат:**
+```markdown
+**Status:** Blocked
+**Category:** [категорія]
+**Problem:** [опис]
+**Need:** [що потрібно]
+```
+
+### Resolution Flow
+
+```
+Agent blocks → Coordinator detects → Beads update (blocked)
+                                            ↓
+                                      Route to resolver
+                                            ↓
+                    Resolver provides solution/context
+                                            ↓
+                          Resume blocked agent with context
+                                            ↓
+                            Beads update (in-progress)
+```
+
+### Beads Integration
+
+```bash
+# Blocker detected
+bd update {issue} --status blocked
+bd comments add {issue} "🚫 BLOCKED\nCategory: DEPENDENCY\n..."
+
+# Blocker resolved
+bd update {issue} --status in-progress
+bd comments add {issue} "✅ RESOLVED\nSolution: ..."
+```
+
+### Category Routing
+
+| Category | Primary Resolver | Fallback |
+|----------|------------------|----------|
+| DEPENDENCY | Domain expert | User |
+| CONTEXT | BA (A1) | Domain expert |
+| EXTERNAL | Auto-retry (3x) | User |
+| REQUIREMENTS | BA (A1) + User | User |
+
 ## Recent Changes
 - 005-i18n: Added Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, React 18.3.1, react-i18next, Zustand 5.0, langdetec
 - 004-telegram-integration-ui: Added TypeScript 5.9.3 (frontend) + React 18.3.1, TanStack Query 5.90, shadcn/ui, Zustand 5.0
