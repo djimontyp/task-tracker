@@ -34,10 +34,8 @@ vi.mock('./useBreadcrumbs', () => ({
   })),
 }));
 
-// Mock components that require complex setup
-vi.mock('@/features/search/components', () => ({
-  SearchBar: () => <div data-testid="search-bar">Search Bar</div>,
-}));
+// SearchBar mock component (passed via searchComponent prop)
+const MockSearchBar = () => <div data-testid="search-bar">Search Bar</div>;
 
 vi.mock('@/shared/components/MobileSearch', () => ({
   MobileSearch: ({ open }: { open: boolean }) =>
@@ -57,11 +55,16 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderNavbar = (props = {}) => {
+const renderNavbar = (props: Partial<Parameters<typeof Navbar>[0]> = {}) => {
+  // Always inject searchComponent for tests that need it
+  const defaultProps = {
+    searchComponent: <MockSearchBar />,
+    ...props,
+  };
   return render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
-        <Navbar {...props} />
+        <Navbar {...defaultProps} />
       </MemoryRouter>
     </QueryClientProvider>
   );
