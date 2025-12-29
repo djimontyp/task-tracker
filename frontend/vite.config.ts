@@ -28,6 +28,28 @@ export default defineConfig({
       '**/tests/e2e/**',
       '**/*.spec.ts',
     ],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      reportsDirectory: './coverage',
+      exclude: [
+        'node_modules/',
+        '**/*.stories.tsx',
+        '**/*.d.ts',
+        '**/tests/**',
+        '**/*.config.*',
+        '**/main.tsx',
+        '**/vite-env.d.ts',
+      ],
+      // Current baseline thresholds - increase as coverage improves
+      // Target: 70% across all metrics
+      thresholds: {
+        lines: 46,
+        functions: 19,
+        branches: 22,
+        statements: 46,
+      },
+    },
   },
 
   server: {
