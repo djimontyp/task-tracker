@@ -84,7 +84,48 @@ For each group of files (excluding sensitive):
 
 4. **Commit**: git commit -m "message"
 
-### 6. Behavior
+### 6. Beads Integration (Multi-level Refs)
+
+If working on a Beads issue, add `Refs:` footer with full hierarchy:
+
+```bash
+# Check if in Beads context
+bd show PR-XX --json 2>/dev/null
+```
+
+**Get issue hierarchy:**
+```bash
+# For task PR-7 with parent Story PR-2 and Epic PR-1:
+bd show PR-7 --json | jq -r '.parent_id // empty'
+# Returns: PR-2
+
+bd show PR-2 --json | jq -r '.parent_id // empty'
+# Returns: PR-1
+```
+
+**Add Refs footer:**
+```
+feat(backend): implement knowledge extraction
+
+Refs: PR-7, PR-2, PR-1
+```
+
+- First ref = current task
+- Next refs = parent hierarchy (story, epic)
+- Only add if Beads issue exists and is relevant to changes
+- Skip if no active Beads context
+
+**Commit format with refs:**
+```bash
+git commit -m "$(cat <<'EOF'
+feat(backend): implement knowledge extraction
+
+Refs: PR-7, PR-2, PR-1
+EOF
+)"
+```
+
+### 7. Behavior
 
 **Default (no user clarification requested):**
 - Automatically group and commit without asking
@@ -96,7 +137,7 @@ For each group of files (excluding sensitive):
 - Ask for approval before committing
 - Allow user to adjust grouping
 
-### 7. Intelligent Grouping Strategy
+### 8. Intelligent Grouping Strategy
 
 **Semantic relationships** (not hardcoded paths):
 
