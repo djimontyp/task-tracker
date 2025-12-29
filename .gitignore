@@ -197,3 +197,6 @@ storybook-static
 playwright-report/
 test-results/
 .obsidian/
+
+# bv (beads viewer) local config and caches
+.bv/
