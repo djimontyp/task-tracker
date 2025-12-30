@@ -8,109 +8,240 @@
 - **Storybook** (UI docs)
 - **Testing** (90% BE / 70% FE)
 - **Agents** (autonomous + evolving)
+- **Frontend Architecture** (boundaries, VRT, generators)
 
 **Plan file:** `/Users/maks/.claude/plans/nifty-gliding-kahn.md`
 
 ---
 
-## User Requirements (Confirmed)
+## 📊 Current Progress
 
-| Parameter | Value |
-|-----------|-------|
-| Beads hierarchy | Epic → Story → Task (3 levels) |
-| Agent autonomy | Full autonomy |
-| Commits | smart-commit WITHOUT Co-Authored-By |
-| Knowledge | Auto to Obsidian journal |
-| Coverage | 90% backend, 70% frontend |
+| Metric | Value |
+|--------|-------|
+| Total Issues | 48 |
+| Closed | 9 (19%) |
+| Open | 39 |
+| Blocked | 12 |
+| Ready to Work | 27 |
 
----
-
-## Execution Order
-
-```
-Phase 0 (Infrastructure) → Phase 1 (Beads) → [Phase 2,3,4 parallel] → Phase 5 (Agents)
-```
-
-### Phase 0: Infrastructure Hardening (4 tasks)
-1. **PR-0.1** Pre-flight health check script
-2. **PR-0.2** Beads-Git integration (multi-level refs)
-3. **PR-0.3** interactions.jsonl v2 schema
-4. **PR-0.4** Obsidian validation
-
-### Phase 1: Beads Setup
-Create Epic + 4 Stories + 17 Tasks (see plan file)
-
-### Phases 2-4: Parallel
-- Testing Infrastructure (7 tasks)
-- Storybook Coverage (4 tasks)
-- Obsidian Integration (3 tasks)
-
-### Phase 5: Agent Evolution (3 tasks)
+### Recently Closed:
+- ✅ Backend test coverage baseline
+- ✅ Frontend test coverage setup
+- ✅ Frontend hook tests
+- ✅ Audit missing stories
+- ✅ Add missing shared/ui stories
+- ✅ Add missing shared/components stories
+- ✅ Smart-commit audit
+- ✅ Blocker detection protocol
+- ✅ Create obsidian capture skill
 
 ---
 
-## Revised Workflow (from Anthropic Best Practices)
+## 🎯 Frontend Architecture Transformation
 
+### Dependency Chain:
 ```
-Pre-flight → Task → PLAN → Implement → Test → E2E-VERIFY → REFLECT → Commit → Knowledge → Metrics → HANDOFF
+task-tracker-8ua: Install eslint-plugin-boundaries
+         ↓
+task-tracker-b34: Configure architectural import rules
+         ↓
+    ┌────┴────┐
+    ↓         ↓
+task-tracker-j33   task-tracker-erw
+Extended ESLint    Data Layer Isolation
 ```
 
-**New steps:**
-- PLAN (propose approach before coding)
-- E2E-VERIFY (test as user would)
-- REFLECT (what worked, what didn't, learnings)
-- HANDOFF (artifacts for next session)
+### Detailed Tasks:
+
+#### 1. `task-tracker-8ua`: Install eslint-plugin-boundaries
+**Estimated:** 30min | **Blocks:** task-tracker-b34
+```bash
+npm install eslint-plugin-boundaries --save-dev
+```
+- Add to plugins array in `.eslintrc.cjs`
+- Verify `npm run lint` passes
+
+#### 2. `task-tracker-b34`: Configure architectural import rules
+**Estimated:** 1h | **Depends on:** task-tracker-8ua
+```
+Zones:
+- shared/     → can be imported anywhere
+- entities/   → only shared
+- features/   → entities + shared (NOT other features)
+- pages/      → can import all
+```
+- Configure in WARN mode (not error)
+- Document in CLAUDE.md
+
+#### 3. `task-tracker-j33`: Extended Design System ESLint rules
+**Estimated:** 2h | **Depends on:** task-tracker-b34
+
+New rules:
+- `no-raw-z-index`: Forbid `z-50`, `z-[9999]`
+- `no-arbitrary-spacing`: Forbid `p-[13px]`
+- `no-direct-fonts`: Forbid `font-['Arial']`
+
+#### 4. `task-tracker-erw`: Data Layer Isolation refactor
+**Estimated:** 1h | **Depends on:** task-tracker-b34
+- Audit confirms 0 direct API imports ✅
+- Create ESLint rule to prevent future violations
 
 ---
 
-## Key Files to Create/Modify
+## 🧪 Visual Regression Testing
 
-### New Files
-- `scripts/workflow-preflight.sh`
-- `.beads/interactions.schema.json`
-- `.claude/commands/obsidian/validate.md`
-- `.obsidian-docs/шаблони/handoff.md`
-- `.obsidian-docs/шаблони/reflect.md`
+### Parent: `task-tracker-3ai`
 
-### Modify
-- `.claude/skills/smart-commit/SKILL.md` - add multi-level refs
-- `.beads/config.yaml` - verify settings
-- `CLAUDE.md` - add workflow section
+### Sub-tasks:
+| ID | Task | Est |
+|----|------|-----|
+| `task-tracker-qz2` | Create dashboard spec file | 30min |
+| `task-tracker-o6u` | Configure viewports and themes | 30min |
+| `task-tracker-nf9` | Mock API responses | 30min |
+| `task-tracker-fux` | Generate baseline snapshots | 20min |
+| `task-tracker-ary` | Add npm scripts and CI config | 20min |
+
+### Deliverables:
+- 7 snapshots: Desktop/Tablet/Mobile × Light/Dark + Empty
+- `npm run test:visual` / `npm run test:visual:update`
+- Mocked API data for determinism
 
 ---
 
-## First Actions
+## 🛠️ Component Generator
+
+### `task-tracker-rpv`: Component generator script
+**Estimated:** 1.5h
 
 ```bash
-# 1. Read the full plan
-cat /Users/maks/.claude/plans/nifty-gliding-kahn.md
-
-# 2. Start Phase 0.1 - Pre-flight script
-# Create scripts/workflow-preflight.sh
-
-# 3. Create Beads Epic
-bd create --title "Workflow Standardization" --labels epic,priority:high
+npm run generate component MyComponent
+# Creates:
+# src/shared/components/MyComponent/
+#   ├── index.tsx
+#   ├── index.stories.tsx
+#   └── index.test.tsx
 ```
 
 ---
 
-## Critical Insights from Ultrathink
+## 📋 Remaining Tasks by Story
 
-1. **Plan-Act-Reflect** - Agent MUST reflect before marking done
-2. **E2E Verification** - Prevents "works on my machine" failures
-3. **Multi-level refs** - `Refs: PR-7, PR-2, PR-1` (task, story, epic)
-4. **Reasoning trace** - Log WHY decisions were made
-5. **Graceful degradation** - Fallback queues when services down
+### Testing Infrastructure (`task-tracker-2wn.1`)
+| ID | Task | Status |
+|----|------|--------|
+| 2wn.1.2 | Add missing backend service tests | Open |
+| 2wn.1.3 | Add missing backend API tests | Open |
+| 2wn.1.6 | Frontend component tests | Open |
+| 2wn.1.7 | E2E critical flows | Open |
+
+### Storybook Coverage (`task-tracker-2wn.2`)
+| ID | Task | Status |
+|----|------|--------|
+| 2wn.2.4 | Add interaction tests to key stories | Open |
+
+### Obsidian Integration (`task-tracker-2wn.3`)
+| ID | Task | Status |
+|----|------|--------|
+| 2wn.3.2 | Session summary automation | Open |
+| 2wn.3.3 | Knowledge graph links | Open |
+
+### Agent Improvement (`task-tracker-2wn.4`)
+| ID | Task | Status |
+|----|------|--------|
+| 2wn.4.3 | Context budget tracking | Open |
 
 ---
 
-## Sources Referenced
+## 🚀 Recommended Execution Order
+
+### Phase 1: Non-breaking (Start Here)
+```bash
+# VRT - adds safety net without breaking anything
+bd update task-tracker-qz2 --status in-progress
+# then: o6u → nf9 → fux → ary
+```
+
+### Phase 2: Formalization (Warn Mode)
+```bash
+bd update task-tracker-8ua --status in-progress
+# then: b34 (warns only, no breaks)
+```
+
+### Phase 3: Component Generator
+```bash
+bd update task-tracker-rpv --status in-progress
+```
+
+### Phase 4: Extended ESLint
+```bash
+bd update task-tracker-j33 --status in-progress
+bd update task-tracker-erw --status in-progress
+```
+
+---
+
+## 🔧 Key Commands
+
+```bash
+# See what's ready
+bd ready
+
+# Start a task
+bd update <issue-id> --status in-progress
+
+# Complete a task
+bd close <issue-id>
+
+# View task details
+bd show <issue-id>
+
+# See dependencies
+bd dep list <issue-id>
+```
+
+---
+
+## 📁 Files to Create
+
+### VRT
+- `frontend/tests/e2e/visual/dashboard-visual.spec.ts`
+
+### ESLint Rules
+- `frontend/eslint-local-rules/no-raw-z-index.js`
+- `frontend/eslint-local-rules/no-arbitrary-spacing.js`
+- `frontend/eslint-local-rules/no-direct-fonts.js`
+- `frontend/eslint-local-rules/no-direct-api-imports.js`
+
+### Generator
+- `frontend/scripts/generate-component.js`
+- `frontend/scripts/templates/component.tsx.template`
+- `frontend/scripts/templates/story.tsx.template`
+- `frontend/scripts/templates/test.tsx.template`
+
+---
+
+## 💡 Key Insights
+
+1. **Project is already well-structured!**
+   - Only 1 z-index violation
+   - 0 direct API imports
+   - Just need to formalize with ESLint
+
+2. **VRT first** - adds safety net without breaking anything
+
+3. **Boundaries in warn mode** - learn before enforce
+
+4. **Component generator** - optional but speeds up development
+
+---
+
+## Sources
 
 - [Anthropic: Building Effective Agents](https://www.anthropic.com/research/building-effective-agents)
 - [Anthropic: Effective Harnesses](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
-- [Jira Git Best Practices](https://gist.github.com/mrnabilnoh/269eb4b434b421782c371e4a1648fa6c)
+- Frontend concepts: `~/.gemini/antigravity/brain/18db5816-5beb-414d-bc38-fe7dcf73f1b3/`
 
 ---
 
-*Generated: 2025-12-29*
-*Total: 26 issues (1 Epic, 4 Stories, 17 Tasks + 4 Phase 0)*
+*Updated: 2025-12-30*
+*Total: 34 issues (1 Epic, 5 Stories, 28 Tasks)*
