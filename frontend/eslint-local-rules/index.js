@@ -9,4 +9,6 @@ module.exports = {
   'no-raw-page-wrapper': require('./no-raw-page-wrapper'),
   'stories-require-autodocs': require('./stories-require-autodocs'),
   'no-raw-zindex': require('./no-raw-zindex'),
+  'no-direct-fonts': require('./no-direct-fonts'),
+  'no-direct-api-imports': require('./no-direct-api-imports'),
 };

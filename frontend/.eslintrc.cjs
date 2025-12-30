@@ -102,6 +102,13 @@ module.exports = {
     // Local rule: Заборона raw z-index (використовуй z-dropdown, z-modal, тощо)
     'local-rules/no-raw-zindex': 'error',
 
+    // Local rule: Заборона arbitrary fonts (використовуй font-sans, font-serif, font-mono)
+    'local-rules/no-direct-fonts': 'error',
+
+    // Local rule: Заборона прямих API імпортів в UI компонентах
+    // Warning level — компоненти мають використовувати TanStack Query hooks
+    'local-rules/no-direct-api-imports': 'warn',
+
     // Local rule: Заборона raw page wrappers (використовуй PageWrapper)
     // Warning level during migration, will become error after all pages migrated
     'local-rules/no-raw-page-wrapper': ['warn', {
