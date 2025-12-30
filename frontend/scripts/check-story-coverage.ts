@@ -40,6 +40,7 @@ const IGNORE_PATTERNS = [
   /context\.tsx?$/,         // Context files
   /provider\.tsx?$/i,       // Provider files
   /README\.md$/,            // Documentation
+  /\/types\//,              // Files in types/ directories
 ];
 
 // Minimum LOC to require story (for features/)
@@ -55,9 +56,13 @@ interface MissingStory {
 function isComponentFile(filePath: string): boolean {
   // Check if file is a component (not in ignore list)
   const fileName = path.basename(filePath);
+  // Check patterns against both filename and full path (for directory patterns)
+  const matchesIgnorePattern = IGNORE_PATTERNS.some(
+    (pattern) => pattern.test(fileName) || pattern.test(filePath)
+  );
   return (
     (filePath.endsWith('.tsx') || filePath.endsWith('.ts')) &&
-    !IGNORE_PATTERNS.some((pattern) => pattern.test(fileName))
+    !matchesIgnorePattern
   );
 }
 
