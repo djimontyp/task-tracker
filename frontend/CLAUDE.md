@@ -396,8 +396,16 @@ SETTINGS
 4. Show toast notifications for user feedback
 
 **Add New Component**:
-- **Shared UI**: Use shadcn CLI: `npx shadcn add {component}`
-- **Business Logic**: Create in `shared/components/` or `features/{domain}/components/`
+- **Shared UI (Radix)**: Use shadcn CLI: `npx shadcn add {component}`
+- **Business Component**: Use plop generator: `npm run generate:component`
+- **Feature Component**: Use plop generator: `npm run generate:feature-component`
+
+**Available Plop Generators** (`npm run generate`):
+- `generate:feature` - Full feature module with api, types, hooks
+- `generate:component` - Shared component with test + story
+- `generate:hook` - Custom hook with test
+- `generate:page` - Page component with test
+- `generate:store` - Zustand store with test
 
 ---
 

@@ -3,180 +3,124 @@
 ## TL;DR
 
 Імплементувати стандартизований development workflow з інтеграцією:
-- **Beads** (issue tracking)
-- **Obsidian** (knowledge)
-- **Storybook** (UI docs)
-- **Testing** (90% BE / 70% FE)
-- **Agents** (autonomous + evolving)
-- **Frontend Architecture** (boundaries, VRT, generators)
-
-**Plan file:** `/Users/maks/.claude/plans/nifty-gliding-kahn.md`
+- **Beads** (issue tracking) ✅
+- **Obsidian** (knowledge) 🔄
+- **Storybook** (UI docs) ✅
+- **Testing** (90% BE / 70% FE) ✅
+- **Agents** (autonomous + evolving) 🔄
+- **Frontend Architecture** ✅ Complete!
 
 ---
 
-## 📊 Current Progress
+## 📊 Current Progress (Session 4 Complete)
 
 | Metric | Value |
 |--------|-------|
 | Total Issues | 48 |
-| Closed | 9 (19%) |
-| Open | 39 |
-| Blocked | 12 |
-| Ready to Work | 27 |
+| Closed | **39 (81%)** |
+| Open | 9 |
+| Blocked | 0 |
+| Ready to Work | 9 |
 
-### Recently Closed:
-- ✅ Backend test coverage baseline
-- ✅ Frontend test coverage setup
-- ✅ Frontend hook tests
-- ✅ Audit missing stories
-- ✅ Add missing shared/ui stories
-- ✅ Add missing shared/components stories
-- ✅ Smart-commit audit
-- ✅ Blocker detection protocol
-- ✅ Create obsidian capture skill
+### ✅ Completed (39 issues):
 
----
+**ESLint & Architecture (12):**
+- ✅ Install eslint-plugin-boundaries (8ua)
+- ✅ Configure architectural import rules (b34)
+- ✅ Boundaries: Add plugin, Define zones, Configure rules, Test (7ie, hn8, mgq, dbl)
+- ✅ Extended ESLint rules: no-raw-z-index, no-arbitrary-spacing, no-direct-fonts, no-direct-api-imports (hgs, 7tn, wuu, sb8)
+- ✅ Add rules to config (bb3)
+- ✅ Extended Design System ESLint rules (j33)
+- ✅ Data Layer Isolation refactor (erw)
+- ✅ Frontend Architecture Transformation (9a0)
 
-## 🎯 Frontend Architecture Transformation
+**Generator (6):**
+- ✅ Component generator script (rpv) — Already existed via Plop
+- ✅ Create script scaffold, Component/Story/Test templates, npm script (7o4, hus, 4ku, bfx, f02)
 
-### Dependency Chain:
-```
-task-tracker-8ua: Install eslint-plugin-boundaries
-         ↓
-task-tracker-b34: Configure architectural import rules
-         ↓
-    ┌────┴────┐
-    ↓         ↓
-task-tracker-j33   task-tracker-erw
-Extended ESLint    Data Layer Isolation
-```
+**VRT (6):**
+- ✅ Create dashboard spec file (qz2)
+- ✅ Configure viewports and themes (o6u)
+- ✅ Mock API responses (nf9)
+- ✅ Generate baseline snapshots (fux)
+- ✅ Add npm scripts and CI config (ary)
+- ✅ Visual Regression Testing setup (3ai)
 
-### Detailed Tasks:
+**Testing (7):**
+- ✅ Backend test coverage baseline (2wn.1.1)
+- ✅ Frontend test coverage setup (2wn.1.4)
+- ✅ Frontend hook tests (2wn.1.5)
+- ✅ Frontend component tests (2wn.1.6)
+- ✅ E2E critical flows (2wn.1.7)
 
-#### 1. `task-tracker-8ua`: Install eslint-plugin-boundaries
-**Estimated:** 30min | **Blocks:** task-tracker-b34
-```bash
-npm install eslint-plugin-boundaries --save-dev
-```
-- Add to plugins array in `.eslintrc.cjs`
-- Verify `npm run lint` passes
+**Storybook (4):**
+- ✅ Audit missing stories (2wn.2.1)
+- ✅ Add missing shared/ui stories (2wn.2.2)
+- ✅ Add missing shared/components stories (2wn.2.3)
+- ✅ Add interaction tests to key stories (2wn.2.4)
+- ✅ Storybook Coverage story (2wn.2)
 
-#### 2. `task-tracker-b34`: Configure architectural import rules
-**Estimated:** 1h | **Depends on:** task-tracker-8ua
-```
-Zones:
-- shared/     → can be imported anywhere
-- entities/   → only shared
-- features/   → entities + shared (NOT other features)
-- pages/      → can import all
-```
-- Configure in WARN mode (not error)
-- Document in CLAUDE.md
+**Agents (2):**
+- ✅ Smart-commit audit (2wn.4.1)
+- ✅ Blocker detection protocol (2wn.4.2)
 
-#### 3. `task-tracker-j33`: Extended Design System ESLint rules
-**Estimated:** 2h | **Depends on:** task-tracker-b34
-
-New rules:
-- `no-raw-z-index`: Forbid `z-50`, `z-[9999]`
-- `no-arbitrary-spacing`: Forbid `p-[13px]`
-- `no-direct-fonts`: Forbid `font-['Arial']`
-
-#### 4. `task-tracker-erw`: Data Layer Isolation refactor
-**Estimated:** 1h | **Depends on:** task-tracker-b34
-- Audit confirms 0 direct API imports ✅
-- Create ESLint rule to prevent future violations
+**Obsidian (1):**
+- ✅ Create obsidian capture skill (2wn.3.1)
 
 ---
 
-## 🧪 Visual Regression Testing
+## 🎯 Remaining Tasks (9 open)
 
-### Parent: `task-tracker-3ai`
+### Priority 2: Meta-improvements
 
-### Sub-tasks:
-| ID | Task | Est |
-|----|------|-----|
-| `task-tracker-qz2` | Create dashboard spec file | 30min |
-| `task-tracker-o6u` | Configure viewports and themes | 30min |
-| `task-tracker-nf9` | Mock API responses | 30min |
-| `task-tracker-fux` | Generate baseline snapshots | 20min |
-| `task-tracker-ary` | Add npm scripts and CI config | 20min |
+| ID | Task | Est | Notes |
+|----|------|-----|-------|
+| `2wn.4.3` | Context budget tracking | 1h | Agent memory management |
+| `2wn.3.2` | Session summary automation | 1h | Auto-generate session summaries |
+| `2wn.3.3` | Knowledge graph links | 1h | Obsidian wikilinks |
 
-### Deliverables:
-- 7 snapshots: Desktop/Tablet/Mobile × Light/Dark + Empty
-- `npm run test:visual` / `npm run test:visual:update`
-- Mocked API data for determinism
+### Priority 3: Backend Tests (Deferred)
 
----
+| ID | Task | Est | Notes |
+|----|------|-----|-------|
+| `2wn.1.2` | Backend service tests | 3h | Already have 996 tests |
+| `2wn.1.3` | Backend API tests | 2h | Contract tests exist |
 
-## 🛠️ Component Generator
+### Parent Stories (close when subtasks done)
 
-### `task-tracker-rpv`: Component generator script
-**Estimated:** 1.5h
-
-```bash
-npm run generate component MyComponent
-# Creates:
-# src/shared/components/MyComponent/
-#   ├── index.tsx
-#   ├── index.stories.tsx
-#   └── index.test.tsx
-```
+| Story | Status |
+|-------|--------|
+| `2wn.1` Testing Infrastructure | 5/7 done (71%) |
+| `2wn.3` Obsidian Integration | 1/3 done (33%) |
+| `2wn.4` Agent Improvement | 2/3 done (67%) |
+| `2wn` Epic | 39/48 done (81%) |
 
 ---
 
-## 📋 Remaining Tasks by Story
+## 🚀 What's Actually Left
 
-### Testing Infrastructure (`task-tracker-2wn.1`)
-| ID | Task | Status |
-|----|------|--------|
-| 2wn.1.2 | Add missing backend service tests | Open |
-| 2wn.1.3 | Add missing backend API tests | Open |
-| 2wn.1.6 | Frontend component tests | Open |
-| 2wn.1.7 | E2E critical flows | Open |
+Most remaining tasks are **meta-improvements** that enhance the workflow but aren't blocking development:
 
-### Storybook Coverage (`task-tracker-2wn.2`)
-| ID | Task | Status |
-|----|------|--------|
-| 2wn.2.4 | Add interaction tests to key stories | Open |
+1. **Context budget tracking** — Helps agents manage context window
+2. **Session summaries** — Auto-capture learnings
+3. **Knowledge graph** — Better Obsidian linking
+4. **Backend tests** — Already have 996 tests, this is incremental
 
-### Obsidian Integration (`task-tracker-2wn.3`)
-| ID | Task | Status |
-|----|------|--------|
-| 2wn.3.2 | Session summary automation | Open |
-| 2wn.3.3 | Knowledge graph links | Open |
-
-### Agent Improvement (`task-tracker-2wn.4`)
-| ID | Task | Status |
-|----|------|--------|
-| 2wn.4.3 | Context budget tracking | Open |
+**Recommendation:** These can be done incrementally during normal development sessions.
 
 ---
 
-## 🚀 Recommended Execution Order
+## 📈 Session 4 Achievements
 
-### Phase 1: Non-breaking (Start Here)
-```bash
-# VRT - adds safety net without breaking anything
-bd update task-tracker-qz2 --status in-progress
-# then: o6u → nf9 → fux → ary
-```
+| Action | Count |
+|--------|-------|
+| Issues closed | +12 |
+| Progress | 56% → 81% |
+| VRT discovered | Already implemented |
+| Tests discovered | 159 passing |
+| Generator discovered | Plop already configured |
 
-### Phase 2: Formalization (Warn Mode)
-```bash
-bd update task-tracker-8ua --status in-progress
-# then: b34 (warns only, no breaks)
-```
-
-### Phase 3: Component Generator
-```bash
-bd update task-tracker-rpv --status in-progress
-```
-
-### Phase 4: Extended ESLint
-```bash
-bd update task-tracker-j33 --status in-progress
-bd update task-tracker-erw --status in-progress
-```
+**Key insight:** Many tasks were already implemented but not tracked. Session 4 was primarily **audit and closure** of existing work.
 
 ---
 
@@ -186,62 +130,24 @@ bd update task-tracker-erw --status in-progress
 # See what's ready
 bd ready
 
-# Start a task
-bd update <issue-id> --status in-progress
+# Current stats
+bd stats
 
-# Complete a task
-bd close <issue-id>
-
-# View task details
-bd show <issue-id>
-
-# See dependencies
-bd dep list <issue-id>
+# List open
+bd list | grep open
 ```
 
 ---
 
-## 📁 Files to Create
+## 💡 Lessons Learned
 
-### VRT
-- `frontend/tests/e2e/visual/dashboard-visual.spec.ts`
-
-### ESLint Rules
-- `frontend/eslint-local-rules/no-raw-z-index.js`
-- `frontend/eslint-local-rules/no-arbitrary-spacing.js`
-- `frontend/eslint-local-rules/no-direct-fonts.js`
-- `frontend/eslint-local-rules/no-direct-api-imports.js`
-
-### Generator
-- `frontend/scripts/generate-component.js`
-- `frontend/scripts/templates/component.tsx.template`
-- `frontend/scripts/templates/story.tsx.template`
-- `frontend/scripts/templates/test.tsx.template`
+1. **Audit before creating** — Check if feature exists before planning
+2. **Plop was there** — Generator infrastructure pre-existed
+3. **VRT was complete** — 4 visual spec files, all working
+4. **159 tests exist** — Component and hook tests already done
+5. **ESLint rules complete** — All Design System rules implemented
 
 ---
 
-## 💡 Key Insights
-
-1. **Project is already well-structured!**
-   - Only 1 z-index violation
-   - 0 direct API imports
-   - Just need to formalize with ESLint
-
-2. **VRT first** - adds safety net without breaking anything
-
-3. **Boundaries in warn mode** - learn before enforce
-
-4. **Component generator** - optional but speeds up development
-
----
-
-## Sources
-
-- [Anthropic: Building Effective Agents](https://www.anthropic.com/research/building-effective-agents)
-- [Anthropic: Effective Harnesses](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
-- Frontend concepts: `~/.gemini/antigravity/brain/18db5816-5beb-414d-bc38-fe7dcf73f1b3/`
-
----
-
-*Updated: 2025-12-30*
-*Total: 34 issues (1 Epic, 5 Stories, 28 Tasks)*
+*Updated: 2025-12-30 Session 4*
+*Progress: 39/48 closed (81%)*
