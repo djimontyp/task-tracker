@@ -266,6 +266,6 @@ Retro report includes capture stats in "Knowledge Activity" section.
 
 ### With Beads
 ```bash
-/beads:close PR-123 --comment "Fixed N+1"
+bd close PR-123 -r "Fixed N+1"
 /obsidian:capture --task PR-123  # extracts learnings
 ```
