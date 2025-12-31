@@ -153,7 +153,7 @@ function PeriodCard({ option, selected, onSelect }: PeriodCardProps) {
       <span className={cn('text-sm font-medium', selected ? 'text-primary' : 'text-foreground')}>
         {option.label}
       </span>
-      <kbd className="absolute top-1 right-1 text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">
+      <kbd className="absolute top-2 right-2 text-[10px] text-muted-foreground bg-muted px-2.5 py-0.5 rounded font-mono">
         {option.shortcut}
       </kbd>
     </button>
@@ -309,7 +309,7 @@ export function ExtractionSheet({
         className="w-full sm:max-w-lg overflow-y-auto"
         aria-describedby="extraction-sheet-description"
       >
-        <SheetHeader className="space-y-1 pb-6">
+        <SheetHeader className="space-y-2 pb-6">
           <div className="flex items-center gap-2">
             <div className="rounded-full bg-primary/10 p-2">
               <Sparkles className="h-5 w-5 text-primary" />
@@ -357,7 +357,7 @@ export function ExtractionSheet({
                   <SelectItem
                     key={option.value}
                     value={option.value}
-                    className="py-3"
+                    className="py-4"
                   >
                     <div className="flex flex-col">
                       <span className="font-medium">{option.label}</span>
@@ -386,17 +386,17 @@ export function ExtractionSheet({
                   <SelectItem
                     key={option.value}
                     value={option.value}
-                    className="py-3"
+                    className="py-4"
                   >
                     <div className="flex items-center justify-between w-full gap-4">
                       <span className="font-medium">{option.label}</span>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
-                          <Zap className="h-3 w-3 mr-1" />
+                          <Zap className="h-3 w-3 mr-2" />
                           {option.speed}
                         </Badge>
                         <Badge variant="outline" className="text-xs">
-                          <DollarSign className="h-3 w-3 mr-1" />
+                          <DollarSign className="h-3 w-3 mr-2" />
                           {option.cost}
                         </Badge>
                       </div>
@@ -427,9 +427,9 @@ export function ExtractionSheet({
                   preview.confidence === 'low' && badges.status.pending
                 )}
               >
-                {preview.confidence === 'high' && <CheckCircle className="h-3 w-3 mr-1" />}
-                {preview.confidence === 'medium' && <AlertTriangle className="h-3 w-3 mr-1" />}
-                {preview.confidence === 'low' && <AlertTriangle className="h-3 w-3 mr-1" />}
+                {preview.confidence === 'high' && <CheckCircle className="h-3 w-3 mr-2" />}
+                {preview.confidence === 'medium' && <AlertTriangle className="h-3 w-3 mr-2" />}
+                {preview.confidence === 'low' && <AlertTriangle className="h-3 w-3 mr-2" />}
                 {preview.confidence} confidence
               </Badge>
             </div>
@@ -487,12 +487,12 @@ export function ExtractionSheet({
         <SheetFooter className="mt-8 pt-6 border-t flex-col gap-4">
           {/* Keyboard shortcuts hint */}
           <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <Keyboard className="h-3 w-3" />
               <span>1-4 for period</span>
             </div>
-            <div className="flex items-center gap-1">
-              <kbd className="bg-muted px-1.5 py-0.5 rounded font-mono text-[10px]">
+            <div className="flex items-center gap-2">
+              <kbd className="bg-muted px-2.5 py-0.5 rounded font-mono text-[10px]">
                 {navigator.platform.includes('Mac') ? 'Cmd' : 'Ctrl'}+Enter
               </kbd>
               <span>to start</span>

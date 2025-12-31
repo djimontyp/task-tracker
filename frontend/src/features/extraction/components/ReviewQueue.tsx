@@ -176,7 +176,7 @@ function AtomCard({ atom, isActive, isSelected, onSelect, onFocus, innerRef }: A
       )}
     >
       {/* Selection checkbox */}
-      <div className="absolute left-3 top-3">
+      <div className="absolute left-4 top-4">
         <Checkbox
           checked={isSelected}
           onCheckedChange={() => onSelect(atom.id, false)}
@@ -187,15 +187,15 @@ function AtomCard({ atom, isActive, isSelected, onSelect, onFocus, innerRef }: A
 
       {/* Status indicator */}
       {atom.status !== 'pending' && (
-        <div className="absolute right-3 top-3">
+        <div className="absolute right-4 top-4">
           {atom.status === 'approved' ? (
             <Badge className={badges.semantic.success}>
-              <CheckCircle className="h-3 w-3 mr-1" />
+              <CheckCircle className="h-3 w-3 mr-2" />
               Approved
             </Badge>
           ) : (
             <Badge className={badges.semantic.error}>
-              <XCircle className="h-3 w-3 mr-1" />
+              <XCircle className="h-3 w-3 mr-2" />
               Rejected
             </Badge>
           )}
@@ -203,14 +203,14 @@ function AtomCard({ atom, isActive, isSelected, onSelect, onFocus, innerRef }: A
       )}
 
       {/* Content */}
-      <div className="ml-8 space-y-3">
+      <div className="ml-8 space-y-4">
         {/* Header */}
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-4">
           <div className={cn('rounded-full bg-muted p-2', config.colorClass)}>
             <Icon className="h-4 w-4" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-2">
               <Badge variant="outline" className="text-xs">
                 {config.label}
               </Badge>
@@ -227,10 +227,10 @@ function AtomCard({ atom, isActive, isSelected, onSelect, onFocus, innerRef }: A
 
         {/* Tags */}
         {atom.tags.length > 0 && (
-          <div className="flex items-center gap-1 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             <Tag className="h-3 w-3 text-muted-foreground" />
             {atom.tags.slice(0, 3).map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs px-1.5 py-0">
+              <Badge key={tag} variant="secondary" className="text-xs px-2.5 py-0">
                 {tag}
               </Badge>
             ))}
@@ -270,12 +270,12 @@ function ContextPanel({ atom }: ContextPanelProps) {
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="p-6 border-b">
-        <div className="flex items-center gap-3 mb-4">
-          <div className={cn('rounded-full bg-muted p-3', config.colorClass)}>
+        <div className="flex items-center gap-4 mb-4">
+          <div className={cn('rounded-full bg-muted p-4', config.colorClass)}>
             <Icon className="h-6 w-6" />
           </div>
           <div>
-            <Badge variant="outline" className="mb-1">
+            <Badge variant="outline" className="mb-2">
               {config.label}
             </Badge>
             <h3 className="text-lg font-semibold">{atom.title}</h3>
@@ -286,7 +286,7 @@ function ContextPanel({ atom }: ContextPanelProps) {
 
       {/* Source message */}
       <div className="p-6 border-b">
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
           Source Message
         </h4>
         <div className="bg-muted/30 rounded-lg p-4">
@@ -306,7 +306,7 @@ function ContextPanel({ atom }: ContextPanelProps) {
 
       {/* AI Reasoning */}
       <div className="p-6 flex-1 overflow-auto">
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
           <Sparkles className="h-3 w-3" />
           Why this is important
         </h4>
@@ -340,7 +340,7 @@ function ShortcutsHelp({ isOpen, onClose }: ShortcutsHelpProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+      className="fixed inset-0 z-modal flex items-center justify-center bg-background/80 backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -357,14 +357,14 @@ function ShortcutsHelp({ isOpen, onClose }: ShortcutsHelpProps) {
           {KEYBOARD_SHORTCUTS.map((shortcut) => (
             <div key={shortcut.key} className="flex items-center justify-between py-2">
               <span className="text-sm text-muted-foreground">{shortcut.action}</span>
-              <kbd className="bg-muted px-2 py-1 rounded text-xs font-mono">
+              <kbd className="bg-muted px-2 py-2 rounded text-xs font-mono">
                 {shortcut.key}
               </kbd>
             </div>
           ))}
           <Separator className="my-4" />
           <p className="text-xs text-muted-foreground text-center">
-            Press <kbd className="bg-muted px-1.5 py-0.5 rounded font-mono">?</kbd> to toggle this help
+            Press <kbd className="bg-muted px-2.5 py-0.5 rounded font-mono">?</kbd> to toggle this help
           </p>
         </CardContent>
       </Card>
@@ -577,11 +577,11 @@ export function ReviewQueue({
         </p>
         <div className="flex items-center gap-4 text-sm">
           <Badge className={badges.semantic.success}>
-            <CheckCircle className="h-3 w-3 mr-1" />
+            <CheckCircle className="h-3 w-3 mr-2" />
             {atoms.filter((a) => a.status === 'approved').length} approved
           </Badge>
           <Badge className={badges.semantic.error}>
-            <XCircle className="h-3 w-3 mr-1" />
+            <XCircle className="h-3 w-3 mr-2" />
             {atoms.filter((a) => a.status === 'rejected').length} rejected
           </Badge>
         </div>
@@ -633,7 +633,7 @@ export function ReviewQueue({
 
           {/* Batch actions */}
           {selectedIds.size > 0 && (
-            <div className="mt-4 flex items-center gap-2 p-3 bg-muted/50 rounded-lg animate-in fade-in-50 slide-in-from-top-2">
+            <div className="mt-4 flex items-center gap-2 p-4 bg-muted/50 rounded-lg animate-in fade-in-50 slide-in-from-top-2">
               <span className="text-sm font-medium">{selectedIds.size} selected</span>
               <div className="flex-1" />
               <Button
@@ -649,14 +649,14 @@ export function ReviewQueue({
                 onClick={handleBatchReject}
                 className="text-destructive hover:text-destructive"
               >
-                <XCircle className="h-4 w-4 mr-1" />
+                <XCircle className="h-4 w-4 mr-2" />
                 Reject All
               </Button>
               <Button
                 size="sm"
                 onClick={handleBatchApprove}
               >
-                <CheckCircle className="h-4 w-4 mr-1" />
+                <CheckCircle className="h-4 w-4 mr-2" />
                 Approve All
               </Button>
             </div>

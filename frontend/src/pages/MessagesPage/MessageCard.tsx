@@ -123,7 +123,7 @@ export const MessageCard: React.FC<MessageCardProps> = ({
             onCreateAtom?.()
           }}
         >
-          <Lightbulb className="mr-1 h-4 w-4" />
+          <Lightbulb className="mr-2 h-4 w-4" />
           {t('card.actions.createAtom')}
         </Button>
         <Button
@@ -135,7 +135,7 @@ export const MessageCard: React.FC<MessageCardProps> = ({
             onDismiss?.()
           }}
         >
-          <X className="mr-1 h-4 w-4" />
+          <X className="mr-2 h-4 w-4" />
           {t('card.actions.dismiss')}
         </Button>
       </div>

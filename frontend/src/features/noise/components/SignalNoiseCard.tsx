@@ -101,12 +101,12 @@ const CardHeaderContent = ({
       </div>
 
       {/* Message metadata */}
-      <div className="flex-1 min-w-0 space-y-1">
+      <div className="flex-1 min-w-0 space-y-2">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold text-sm">{message.author}</span>
           <ScoreIndicator score={message.score} size="sm" />
           {message.isReviewed && (
-            <Badge variant="outline" className="text-xs gap-1">
+            <Badge variant="outline" className="text-xs gap-2">
               <Check className="h-3 w-3" />
               Reviewed
             </Badge>
@@ -215,12 +215,12 @@ export const SignalCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                 >
                   {expanded ? (
                     <>
-                      <ChevronUp className="h-3 w-3 mr-1" />
+                      <ChevronUp className="h-3 w-3 mr-2" />
                       Less
                     </>
                   ) : (
                     <>
-                      <ChevronDown className="h-3 w-3 mr-1" />
+                      <ChevronDown className="h-3 w-3 mr-2" />
                       More
                     </>
                   )}
@@ -236,7 +236,7 @@ export const SignalCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                   onClick={() => onReject(message.id)}
                   className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
-                  <X className="h-3 w-3 mr-1" />
+                  <X className="h-3 w-3 mr-2" />
                   Reject
                 </Button>
               )}
@@ -247,7 +247,7 @@ export const SignalCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                   onClick={() => onApprove(message.id)}
                   className="h-8 text-xs"
                 >
-                  <Check className="h-3 w-3 mr-1" />
+                  <Check className="h-3 w-3 mr-2" />
                   Approve
                 </Button>
               )}
@@ -324,12 +324,12 @@ export const NoiseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                 >
                   {expanded ? (
                     <>
-                      <ChevronUp className="h-3 w-3 mr-1" />
+                      <ChevronUp className="h-3 w-3 mr-2" />
                       Less
                     </>
                   ) : (
                     <>
-                      <ChevronDown className="h-3 w-3 mr-1" />
+                      <ChevronDown className="h-3 w-3 mr-2" />
                       More
                     </>
                   )}
