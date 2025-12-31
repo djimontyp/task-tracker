@@ -1,8 +1,21 @@
 import type { Preview } from '@storybook/react-vite';
 import { withThemeByClassName } from '@storybook/addon-themes';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../src/i18n';
 import '../src/index.css';
+
+// QueryClient configured for Storybook environment
+// - retry: false - don't retry failed queries in stories
+// - staleTime: Infinity - data never becomes stale (no background refetches)
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      staleTime: Infinity,
+    },
+  },
+});
 
 /**
  * Storybook Preview Configuration
@@ -78,6 +91,12 @@ const preview: Preview = {
   },
   // Global decorators
   decorators: [
+    // QueryClient provider (MUST be first/outermost for useQuery to work)
+    (Story) => (
+      <QueryClientProvider client={queryClient}>
+        <Story />
+      </QueryClientProvider>
+    ),
     // Theme switching via addon-themes (adds 'dark' class to document)
     withThemeByClassName({
       themes: {
