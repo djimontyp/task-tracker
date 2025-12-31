@@ -873,6 +873,8 @@ const StoryWrapper = ({ children }) => (
 
 ## Документація
 
+- **Frontend:** [@frontend/CLAUDE.md](frontend/CLAUDE.md) — архітектура, state management, patterns
+- **Frontend AI Rules:** [@frontend/AGENTS.md](frontend/AGENTS.md) — правила для AI (tokens, do/don't)
 - `docs/design-system/` — **Design System** (colors, spacing, components)
 - `docs/design-system/references/` — **Референси** (натхнення, не для реалізації!)
 - `docs/architecture/OVERVIEW.md` — системна архітектура
