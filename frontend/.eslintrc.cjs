@@ -113,6 +113,28 @@ module.exports = {
     // Використовуй API_ENDPOINTS з @/shared/config/api
     'local-rules/no-hardcoded-api-paths': 'error',
 
+    // Local rule: Заборона data fetching в presenter компонентах
+    // shared/components та shared/patterns мають бути портативними (CDD)
+    // Дозволені виключення: файли з Provider або Layout в імені
+    'local-rules/no-data-in-presenters': 'error',
+
+    // Local rule: Заборона default exports (використовуй named exports)
+    // Named exports краще для tree-shaking та рефакторингу
+    // Виключення: pages (React.lazy), config files, stories (Storybook meta)
+    'local-rules/no-default-export': ['error', {
+      allowedPatterns: [
+        '**/pages/**',
+        '*.config.*',
+        'vite.config.ts',
+        'vitest.config.ts',
+        'playwright.config.ts',
+        'storybook/**',
+        '.storybook/**',
+        '*.stories.tsx',
+        '*.stories.ts',
+      ],
+    }],
+
     // Local rule: Заборона raw page wrappers (використовуй PageWrapper)
     // Warning level during migration, will become error after all pages migrated
     'local-rules/no-raw-page-wrapper': ['warn', {
@@ -127,6 +149,10 @@ module.exports = {
     // Local rule: Всі story файли повинні мати tags: ['autodocs']
     // Warning спочатку, перейде в error після міграції існуючих stories
     'local-rules/stories-require-autodocs': 'warn',
+
+    // Local rule: Заборона i18n ключів в stories (labelKey, titleKey, etc.)
+    // i18n не резолвиться в Storybook — використовуй прямі значення (label, title)
+    'local-rules/stories-no-i18n-keys': 'error',
 
     // ═══════════════════════════════════════════════════════════════
     // TYPESCRIPT
