@@ -103,7 +103,7 @@ export function NavMain({ groups }: NavMainProps) {
               </Collapsible>
               {groupIndex < groups.length - 1 && (
                 <Separator
-                  className="!w-auto mx-4 my-4"
+                  className="!w-auto mx-4 my-2"
                   data-testid="group-separator"
                 />
               )}
@@ -155,7 +155,7 @@ export function NavMain({ groups }: NavMainProps) {
             </SidebarGroup>
             {groupIndex < groups.length - 1 && (
               <Separator
-                className="!w-auto mx-4 my-4"
+                className="!w-auto mx-4 my-2"
                 data-testid="group-separator"
               />
             )}
