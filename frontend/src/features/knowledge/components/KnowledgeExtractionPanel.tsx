@@ -27,6 +27,7 @@ import { agentService } from '@/features/agents/api/agentService';
 import type { AgentConfig } from '@/features/agents/types/agent';
 import type { ExtractionProgress, PeriodType, PeriodRequest } from '../types';
 import { toast } from 'sonner';
+import { isKnowledgeEvent, type KnowledgeEvent } from '@/shared/types/websocket';
 
 interface KnowledgeExtractionPanelProps {
   messageIds?: number[];
@@ -78,32 +79,33 @@ export function KnowledgeExtractionPanel({
 
   useWebSocket({
     topics: ['knowledge'],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onMessage: (data: any) => {
-      if (!data?.type) return;
+    onMessage: (data: unknown) => {
+      if (!isKnowledgeEvent(data as KnowledgeEvent)) return;
 
-      if (data.type === 'knowledge.extraction_started') {
+      const event = data as KnowledgeEvent;
+
+      if (event.type === 'knowledge.extraction_started') {
         setProgress((prev) => ({ ...prev, status: 'running' }));
-        toast.success(`Knowledge extraction started for ${data.data?.message_count || 0} messages`);
-      } else if (data.type === 'knowledge.topic_created') {
+        toast.success(`Knowledge extraction started for ${event.data?.message_count || 0} messages`);
+      } else if (event.type === 'knowledge.topic_created') {
         setProgress((prev) => ({
           ...prev,
           topics_created: prev.topics_created + 1,
         }));
-      } else if (data.type === 'knowledge.atom_created') {
+      } else if (event.type === 'knowledge.atom_created') {
         setProgress((prev) => ({
           ...prev,
           atoms_created: prev.atoms_created + 1,
         }));
-      } else if (data.type === 'knowledge.version_created') {
+      } else if (event.type === 'knowledge.version_created') {
         setProgress((prev) => ({
           ...prev,
           versions_created: prev.versions_created + 1,
         }));
-      } else if (data.type === 'knowledge.extraction_completed') {
+      } else if (event.type === 'knowledge.extraction_completed') {
         setProgress((prev) => ({ ...prev, status: 'completed' }));
         setExtracting(false);
-        const stats = data.data || {};
+        const stats = event.data || {};
 
         // Enhanced notification with CTA to review versions
         const versionsCreated = stats.versions_created || 0;
@@ -122,14 +124,14 @@ export function KnowledgeExtractionPanel({
           }
         );
         onComplete?.();
-      } else if (data.type === 'knowledge.extraction_failed') {
+      } else if (event.type === 'knowledge.extraction_failed') {
         setProgress((prev) => ({
           ...prev,
           status: 'failed',
-          error: data.data?.error || 'Unknown error',
+          error: event.data?.error || 'Unknown error',
         }));
         setExtracting(false);
-        toast.error(`Extraction failed: ${data.data?.error || 'Unknown error'}`);
+        toast.error(`Extraction failed: ${event.data?.error || 'Unknown error'}`);
       }
     },
   });

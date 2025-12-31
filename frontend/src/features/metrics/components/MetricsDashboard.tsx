@@ -22,6 +22,7 @@ import { useAdminMode } from '@/shared/hooks/useAdminMode'
 import { useWebSocket } from '@/shared/hooks'
 import { cn } from '@/shared/lib'
 import { toast } from 'sonner'
+import { isMetricsEvent, type MetricsUpdateEvent } from '@/shared/types/websocket'
 
 const POLLING_FALLBACK_INTERVAL = 30000
 
@@ -139,10 +140,12 @@ export const MetricsDashboard = () => {
   // WebSocket connection for real-time updates
   const { isConnected: isWsConnected, connectionState } = useWebSocket({
     topics: ['metrics'],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onMessage: (data: any) => {
-      if (data.type === 'metrics:update' && data.data) {
-        queryClient.setQueryData(['metrics', 'dashboard'], data.data)
+    onMessage: (data: unknown) => {
+      if (isMetricsEvent(data as MetricsUpdateEvent)) {
+        const event = data as MetricsUpdateEvent
+        if (event.data) {
+          queryClient.setQueryData(['metrics', 'dashboard'], event.data)
+        }
       }
     },
     onConnect: () => {

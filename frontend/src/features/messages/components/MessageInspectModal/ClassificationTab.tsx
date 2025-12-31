@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui
 import { Button } from '@/shared/ui/button'
 import { cn } from '@/shared/lib/utils'
 import { toast } from 'sonner'
-import type { MessageInspectData } from './types'
+import type { MessageInspectData } from '@/features/messages/types'
 
 interface ClassificationTabProps {
   data: MessageInspectData['classification']
