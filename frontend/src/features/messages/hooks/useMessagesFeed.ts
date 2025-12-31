@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import apiClient from '@/shared/lib/api/client'
@@ -98,14 +99,13 @@ const toUpdatedPayload = (value: unknown): MessageUpdatedPayload | null => {
 }
 
 export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => {
+  const queryClient = useQueryClient()
   const [period, setPeriod] = useState<MessagesPeriod>('all')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const messages = useMessagesStore((state) => state.messages)
   const hydrate = useMessagesStore((state) => state.hydrate)
-  const upsertMessage = useMessagesStore((state) => state.upsertMessage)
-  const markPersisted = useMessagesStore((state) => state.markPersisted)
   const statusByExternalId = useMessagesStore((state) => state.statusByExternalId)
   const isHydrated = useMessagesStore((state) => state.isHydrated)
 
@@ -130,7 +130,7 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
         setIsLoading(false)
       }
     },
-    [hydrate, limit, logger]
+    [hydrate, limit]
   )
 
   useEffect(() => {
@@ -149,28 +149,26 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
       const { type, data } = payload as MessageEventPayload
       logger.debug('Message type:', type, 'data:', data)
 
+      // FIX: Race condition - invalidate TanStack Query cache instead of Zustand mutations
+      // This triggers a background refetch, ensuring UI stays in sync with server
       if ((type === 'message.new' || type === 'message') && isMessageData(data)) {
-        logger.debug('Adding new message to store')
-        upsertMessage({ ...data, persisted: data.persisted ?? false })
+        logger.debug('New message received, invalidating queries')
+        queryClient.invalidateQueries({ queryKey: ['messages'] })
         return
       }
 
       if (type === 'message.updated') {
-        logger.debug('Updating message in store')
+        logger.debug('Message updated, invalidating queries')
         const updated = toUpdatedPayload(data)
         if (updated?.external_message_id) {
-          markPersisted(updated.external_message_id, {
-            avatar_url: updated.avatar_url ?? undefined,
-            author_name: updated.author_name ?? undefined,
-            persisted: updated.persisted ?? true,
-          })
+          queryClient.invalidateQueries({ queryKey: ['messages'] })
         }
         return
       }
 
       logger.debug('Message type not handled:', type)
     },
-    [markPersisted, upsertMessage]
+    [queryClient]
   )
 
   const { connectionState, isConnected } = useWebSocket({
