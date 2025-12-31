@@ -77,6 +77,7 @@ module.exports = {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+          "active-indicator": "hsl(var(--sidebar-active-indicator))",
         },
         atom: {
           problem: "hsl(var(--atom-problem))",
