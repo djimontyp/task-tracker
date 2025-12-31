@@ -73,19 +73,22 @@ type Story = StoryObj<typeof NavNotifications>;
 
 const analysisItem: NavItem = {
   path: '/analysis',
-  labelKey: 'sidebar.items.analysis',
+  
+  label: 'Analysis Runs',
   icon: BarChart,
 };
 
 const proposalsItem: NavItem = {
   path: '/proposals',
-  labelKey: 'sidebar.items.proposals',
+  
+  label: 'Proposals',
   icon: FileText,
 };
 
 export const WithAnalysisCount: Story = {
   args: {
     item: analysisItem,
+    currentPath: '/',
     counts: {
       unclosed_runs: 3,
       pending_proposals: 0,
@@ -103,6 +106,7 @@ export const WithAnalysisCount: Story = {
 export const WithProposalsCount: Story = {
   args: {
     item: proposalsItem,
+    currentPath: '/',
     counts: {
       unclosed_runs: 0,
       pending_proposals: 12,
@@ -120,6 +124,7 @@ export const WithProposalsCount: Story = {
 export const WithSingleCount: Story = {
   args: {
     item: analysisItem,
+    currentPath: '/',
     counts: {
       unclosed_runs: 1,
       pending_proposals: 0,
@@ -137,6 +142,7 @@ export const WithSingleCount: Story = {
 export const NoCounts: Story = {
   args: {
     item: analysisItem,
+    currentPath: '/',
     counts: {
       unclosed_runs: 0,
       pending_proposals: 0,
@@ -154,6 +160,7 @@ export const NoCounts: Story = {
 export const WithoutCounts: Story = {
   args: {
     item: analysisItem,
+    currentPath: '/',
     counts: undefined,
   },
   parameters: {
@@ -168,18 +175,12 @@ export const WithoutCounts: Story = {
 export const ActiveState: Story = {
   args: {
     item: analysisItem,
+    currentPath: '/analysis',
     counts: {
       unclosed_runs: 5,
       pending_proposals: 0,
     } as SidebarCounts,
   },
-  decorators: [
-    (Story) => (
-      <StoryWrapper initialPath="/analysis">
-        <Story />
-      </StoryWrapper>
-    ),
-  ],
   parameters: {
     docs: {
       description: {
@@ -198,8 +199,8 @@ export const MultipleItems: Story = {
 
     return (
       <>
-        <NavNotifications item={analysisItem} counts={counts} />
-        <NavNotifications item={proposalsItem} counts={counts} />
+        <NavNotifications item={analysisItem} currentPath="/" counts={counts} />
+        <NavNotifications item={proposalsItem} currentPath="/" counts={counts} />
       </>
     );
   },

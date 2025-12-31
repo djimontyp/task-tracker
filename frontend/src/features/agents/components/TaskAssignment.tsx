@@ -150,4 +150,4 @@ const TaskAssignment = ({ agent, open, onClose }: TaskAssignmentProps) => {
   )
 }
 
-export default TaskAssignment
+export { TaskAssignment }

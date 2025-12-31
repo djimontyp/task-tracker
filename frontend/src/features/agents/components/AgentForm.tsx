@@ -304,4 +304,4 @@ const AgentForm = ({
   )
 }
 
-export default AgentForm
+export { AgentForm }

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import HexColorPickerComponent from './HexColorPicker';
+import { HexColorPickerComponent } from './HexColorPicker';
 
 const meta: Meta<typeof HexColorPickerComponent> = {
   title: 'Features/Topics/HexColorPicker',

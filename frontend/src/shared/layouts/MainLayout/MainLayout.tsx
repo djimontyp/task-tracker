@@ -1,12 +1,15 @@
 import { ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { SidebarProvider, SidebarInset } from '@/shared/ui/sidebar'
 import { Sheet, SheetContent } from '@/shared/ui/sheet'
 import { AppSidebar } from '@/shared/components/AppSidebar'
 import { AdminPanel } from '@/shared/components/AdminPanel'
 import { useUiStore } from '@/shared/store/uiStore'
-import { useAdminMode, useKeyboardShortcut, useMediaQuery } from '@/shared/hooks'
+import { useAdminMode, useKeyboardShortcut, useMediaQuery, useWebSocket } from '@/shared/hooks'
 import { toast } from 'sonner'
 import { SearchContainer } from '@/features/search/components'
+import { statsService, type SidebarCounts } from '@/shared/api/statsService'
 import Navbar from './Navbar'
 
 interface MainLayoutProps {
@@ -17,6 +20,35 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const { sidebarOpen, setSidebarOpen } = useUiStore()
   const { isAdminMode, toggleAdminMode } = useAdminMode()
   const isDesktop = useMediaQuery('(min-width: 768px)')
+  const location = useLocation()
+  const queryClient = useQueryClient()
+
+  // Sidebar counts data fetching (moved from AppSidebar for portability)
+  const { data: sidebarCounts } = useQuery<SidebarCounts>({
+    queryKey: ['sidebar-counts'],
+    queryFn: () => statsService.getSidebarCounts(),
+    refetchInterval: 30000,
+  })
+
+  // WebSocket for sidebar counts updates
+  useWebSocket({
+    topics: ['analysis', 'proposals', 'noise_filtering'],
+    onMessage: (data) => {
+      const message = data as { topic: string; event: string }
+      const { topic, event: eventType } = message
+
+      if (topic === 'analysis' && ['run_created', 'run_closed', 'run_failed'].includes(eventType)) {
+        queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
+      }
+      if (topic === 'proposals' && ['proposal_created', 'proposal_approved', 'proposal_rejected'].includes(eventType)) {
+        queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
+      }
+      if (topic === 'noise_filtering' && ['message_scored', 'batch_scored'].includes(eventType)) {
+        queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
+      }
+    },
+    reconnect: true,
+  })
 
   // Admin Mode toggle: Cmd+Shift+A (macOS) / Ctrl+Shift+A (Win/Linux)
   const handleAdminToggle = () => {
@@ -60,7 +92,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         // Desktop: Grid layout (full-height sidebar + navbar offset)
         <div className="grid grid-cols-[auto_1fr] w-full h-screen overflow-hidden">
           {/* Column 1: Sidebar (auto width: 256px expanded or 56px collapsed) */}
-          <AppSidebar />
+          <AppSidebar counts={sidebarCounts} currentPath={location.pathname} />
 
           {/* Column 2: Navbar + Content */}
           <div className="grid grid-rows-[56px_1fr] overflow-hidden">
@@ -96,7 +128,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetContent side="left" className="p-0 w-[280px]">
-              <AppSidebar mobile />
+              <AppSidebar mobile counts={sidebarCounts} currentPath={location.pathname} />
             </SheetContent>
           </Sheet>
 

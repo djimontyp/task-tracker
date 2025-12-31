@@ -448,7 +448,7 @@ export function OnboardingWelcomeCompact({
             <Button
               variant="ghost"
               size="icon"
-              className="shrink-0 h-8 w-8"
+              className="shrink-0 h-11 w-11"
               onClick={onDismiss}
               aria-label="Dismiss"
             >
@@ -460,5 +460,3 @@ export function OnboardingWelcomeCompact({
     </Card>
   );
 }
-
-export default OnboardingWelcome;

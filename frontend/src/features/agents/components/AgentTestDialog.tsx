@@ -220,4 +220,4 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
   )
 }
 
-export default AgentTestDialog
+export { AgentTestDialog }

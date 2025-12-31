@@ -1,8 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import ActivityHeatmap from './ActivityHeatmap'
+import { ActivityHeatmap, type ActivityDataPoint } from './ActivityHeatmap'
 
 /**
  * ActivityHeatmap visualizes message activity patterns across days and hours.
+ *
+ * ## Portability
+ * This is a **portable presenter** component - it receives all data via props
+ * and works in Storybook without QueryClient or API mocking.
  *
  * ## Design System Rules
  * - Uses semantic heatmap colors from design tokens
@@ -10,12 +14,59 @@ import ActivityHeatmap from './ActivityHeatmap'
  * - Tooltips show exact counts and timestamps
  * - Source filters with checkboxes (Telegram active, Slack/Email disabled)
  * - Period toggle (week/month view)
+ *
+ * ## Usage
+ * ```tsx
+ * // In page/feature - fetch data externally
+ * const { data, isLoading } = useQuery({ queryKey: ['activity'], queryFn: fetchActivity })
+ * <ActivityHeatmap data={data} isLoading={isLoading} />
+ * ```
  */
+
+// Mock data generator for stories
+const generateMockData = (days: number = 7): ActivityDataPoint[] => {
+  const data: ActivityDataPoint[] = []
+  const now = new Date()
+
+  for (let d = 0; d < days; d++) {
+    const date = new Date(now)
+    date.setDate(date.getDate() - d)
+
+    // Generate 5-15 messages per day
+    const messagesPerDay = Math.floor(Math.random() * 10) + 5
+    for (let m = 0; m < messagesPerDay; m++) {
+      const hour = Math.floor(Math.random() * 24)
+      date.setHours(hour, Math.floor(Math.random() * 60))
+      data.push({
+        timestamp: date.toISOString(),
+        source: 'telegram',
+        count: Math.floor(Math.random() * 5) + 1,
+      })
+    }
+  }
+
+  return data
+}
+
+// Pre-generated mock data
+const weekData = generateMockData(7)
+const monthData = generateMockData(30)
+const highActivityData = generateMockData(7).concat(generateMockData(7)).concat(generateMockData(7))
+const emptyData: ActivityDataPoint[] = []
+
 const meta: Meta<typeof ActivityHeatmap> = {
   title: 'Patterns/ActivityHeatmap',
   component: ActivityHeatmap,
   tags: ['autodocs'],
   argTypes: {
+    data: {
+      control: 'object',
+      description: 'Activity data points array',
+    },
+    isLoading: {
+      control: 'boolean',
+      description: 'Loading state - shows skeleton',
+    },
     title: {
       control: 'text',
       description: 'Heatmap title (editable on click)',
@@ -34,7 +85,7 @@ const meta: Meta<typeof ActivityHeatmap> = {
     docs: {
       description: {
         component:
-          'A heatmap component showing message activity patterns with configurable time periods and sources.',
+          'A **portable** heatmap component showing message activity patterns. Receives data via props - no internal data fetching.',
       },
     },
   },
@@ -43,16 +94,65 @@ const meta: Meta<typeof ActivityHeatmap> = {
 export default meta
 type Story = StoryObj<typeof ActivityHeatmap>
 
+/**
+ * Default story with mock week data.
+ * Demonstrates the portable pattern - data passed via props.
+ */
 export const Default: Story = {
   args: {
+    data: weekData,
     title: 'Message Activity Heatmap',
     period: 'week',
     enabledSources: ['telegram'],
   },
 }
 
+/**
+ * Loading state - shows skeleton while data is being fetched.
+ */
+export const Loading: Story = {
+  args: {
+    data: [],
+    isLoading: true,
+    title: 'Loading Activity...',
+    period: 'week',
+    enabledSources: ['telegram'],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Skeleton loading state while data is being fetched.',
+      },
+    },
+  },
+}
+
+/**
+ * Empty state - no activity data.
+ */
+export const Empty: Story = {
+  args: {
+    data: emptyData,
+    isLoading: false,
+    title: 'No Activity Yet',
+    period: 'week',
+    enabledSources: ['telegram'],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Empty heatmap when no activity data is available.',
+      },
+    },
+  },
+}
+
+/**
+ * Month view with 30 days of data.
+ */
 export const MonthView: Story = {
   args: {
+    data: monthData,
     title: 'Monthly Activity Overview',
     period: 'month',
     enabledSources: ['telegram'],
@@ -66,12 +166,16 @@ export const MonthView: Story = {
   },
 }
 
+/**
+ * Editable title with callback.
+ */
 export const CustomTitle: Story = {
   args: {
+    data: weekData,
     title: 'Team Communication Patterns',
     period: 'week',
     enabledSources: ['telegram'],
-    onTitleChange: (newTitle) => console.log('Title changed to:', newTitle),
+    onTitleChange: (newTitle: string) => console.log('Title changed to:', newTitle),
   },
   parameters: {
     docs: {
@@ -82,40 +186,15 @@ export const CustomTitle: Story = {
   },
 }
 
-export const MultipleSourcesEnabled: Story = {
-  args: {
-    title: 'All Sources Activity',
-    period: 'week',
-    enabledSources: ['telegram', 'slack', 'email'],
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Multiple sources enabled (Slack and Email are currently disabled in UI).',
-      },
-    },
-  },
-}
-
-// Real-world examples
-export const LowActivity: Story = {
-  render: () => {
-    return <ActivityHeatmap title="Low Activity Week" period="week" enabledSources={['telegram']} />
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Heatmap with sparse activity (mostly empty cells).',
-      },
-    },
-  },
-}
-
+/**
+ * High activity week with lots of messages.
+ */
 export const HighActivity: Story = {
-  render: () => {
-    return (
-      <ActivityHeatmap title="High Activity Week" period="week" enabledSources={['telegram']} />
-    )
+  args: {
+    data: highActivityData,
+    title: 'High Activity Week',
+    period: 'week',
+    enabledSources: ['telegram'],
   },
   parameters: {
     docs: {
@@ -126,28 +205,12 @@ export const HighActivity: Story = {
   },
 }
 
-export const WorkHoursPattern: Story = {
-  render: () => {
-    return (
-      <ActivityHeatmap
-        title="Work Hours Activity (9-5)"
-        period="week"
-        enabledSources={['telegram']}
-      />
-    )
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Typical work hours pattern: high activity 9 AM - 5 PM, low activity nights/weekends.',
-      },
-    },
-  },
-}
-
-// Mobile responsive
+/**
+ * Mobile responsive layout.
+ */
 export const MobileLayout: Story = {
   args: {
+    data: weekData,
     title: 'Mobile Heatmap',
     period: 'week',
     enabledSources: ['telegram'],
@@ -164,9 +227,12 @@ export const MobileLayout: Story = {
   },
 }
 
-// Dark mode
+/**
+ * Dark mode theme.
+ */
 export const DarkMode: Story = {
   args: {
+    data: weekData,
     title: 'Dark Mode Heatmap',
     period: 'week',
     enabledSources: ['telegram'],
@@ -181,11 +247,14 @@ export const DarkMode: Story = {
   },
 }
 
-// Interactive demo
+/**
+ * Interactive demo with period switching.
+ */
 export const InteractiveDemo: Story = {
-  render: () => {
+  render: function InteractiveDemoStory() {
     const [period, setPeriod] = React.useState<'week' | 'month'>('week')
     const [title, setTitle] = React.useState('Interactive Heatmap Demo')
+    const data = period === 'week' ? weekData : monthData
 
     return (
       <div className="space-y-4">
@@ -204,6 +273,7 @@ export const InteractiveDemo: Story = {
           </button>
         </div>
         <ActivityHeatmap
+          data={data}
           title={title}
           period={period}
           enabledSources={['telegram']}

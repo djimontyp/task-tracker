@@ -217,4 +217,4 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
   )
 }
 
-export default SchemaEditor
+export { SchemaEditor }

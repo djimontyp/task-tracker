@@ -523,5 +523,3 @@ export function ExtractionSheet({
     </Sheet>
   );
 }
-
-export default ExtractionSheet;

@@ -146,4 +146,4 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
   )
 }
 
-export default AtomCard
+export { AtomCard }

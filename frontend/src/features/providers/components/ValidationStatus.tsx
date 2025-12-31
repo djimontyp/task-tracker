@@ -50,4 +50,4 @@ const ValidationStatus = ({ status, error }: ValidationStatusProps) => {
   )
 }
 
-export default ValidationStatus
+export { ValidationStatus }

@@ -94,8 +94,9 @@ describe('SearchBar', () => {
     renderSearchBar(createMockProps({ query: 'test' }));
 
     const clearButton = screen.getByLabelText('Clear search');
-    expect(clearButton).toHaveClass('absolute', 'right-2', 'top-1/2', '-translate-y-1/2');
-    expect(clearButton).toHaveClass('h-6', 'w-6');
+    // Updated to match WCAG 44px touch target (h-11 w-11) and right-1 positioning
+    expect(clearButton).toHaveClass('absolute', 'right-1', 'top-1/2', '-translate-y-1/2');
+    expect(clearButton).toHaveClass('h-11', 'w-11');
   });
 
   // LOADING INDICATOR TESTS

@@ -1,13 +1,11 @@
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { Tabs, TabsList, TabsTrigger, Checkbox, Label } from '@/shared/ui'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
+import { Skeleton } from '@/shared/ui/skeleton'
 import { cn } from '@/shared/lib'
-import { apiClient } from '@/shared/lib/api/client'
-import { API_ENDPOINTS } from '@/shared/config/api'
 
 export interface ActivityDataPoint {
   timestamp: string
@@ -16,9 +14,17 @@ export interface ActivityDataPoint {
 }
 
 export interface ActivityHeatmapProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Activity data points to display */
+  data?: ActivityDataPoint[]
+  /** Loading state - shows skeleton when true */
+  isLoading?: boolean
+  /** Heatmap title (editable on click) */
   title?: string
+  /** Time period to display */
   period?: 'week' | 'month'
+  /** Array of enabled message sources */
   enabledSources?: ('telegram' | 'slack' | 'email')[]
+  /** Callback when title is edited */
   onTitleChange?: (title: string) => void
 }
 
@@ -42,6 +48,8 @@ const HOURS = Array.from({ length: 24 }, (_, i) => i)
 const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
   (
     {
+      data = [],
+      isLoading = false,
       title = 'Message Activity Heatmap',
       period = 'week',
       enabledSources = ['telegram'],
@@ -86,20 +94,6 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
     const [isEditingTitle, setIsEditingTitle] = useState(false)
     const [editedTitle, setEditedTitle] = useState(title)
 
-    // Fetch activity data
-    const { data: activityResponse } = useQuery<{ data: ActivityDataPoint[] }>({
-      queryKey: ['activity', selectedPeriod, selectedMonth, selectedYear],
-      queryFn: async () => {
-        const params = new URLSearchParams({ period: selectedPeriod })
-        if (selectedPeriod === 'month') {
-          params.append('month', selectedMonth.toString())
-          params.append('year', selectedYear.toString())
-        }
-        const response = await apiClient.get(`${API_ENDPOINTS.activity}?${params}`)
-        return response.data
-      },
-    })
-
     // Get active sources - memoize separately as it's used in rendering
     const activeSources = useMemo(
       () =>
@@ -110,7 +104,6 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
     )
 
     const processedData = useMemo(() => {
-      const data = activityResponse?.data || []
       const dataMap: ProcessedData = {}
 
       data.forEach((point) => {
@@ -143,7 +136,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
       })
 
       return dataMap
-    }, [activityResponse?.data, activeSources, selectedPeriod, selectedMonth, selectedYear])
+    }, [data, activeSources, selectedPeriod, selectedMonth, selectedYear])
 
     const daysInMonth = useMemo(() => {
       return new Date(selectedYear, selectedMonth + 1, 0).getDate()
@@ -185,6 +178,33 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
     const handleTitleSave = () => {
       setIsEditingTitle(false)
       onTitleChange?.(editedTitle)
+    }
+
+    // Loading skeleton
+    if (isLoading) {
+      return (
+        <Card ref={ref} className={cn('w-full', className)} {...props}>
+          <CardHeader className="space-y-4 pb-4">
+            <Skeleton className="h-7 w-48" />
+            <div className="flex gap-4">
+              <Skeleton className="h-9 w-32" />
+              <Skeleton className="h-9 w-24" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="flex gap-0.5">
+                  <Skeleton className="h-4 w-12" />
+                  {Array.from({ length: 7 }).map((_, j) => (
+                    <Skeleton key={j} className="h-6 flex-1" />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )
     }
 
     return (
@@ -413,4 +433,4 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
 
 ActivityHeatmap.displayName = 'ActivityHeatmap'
 
-export default ActivityHeatmap
+export { ActivityHeatmap }

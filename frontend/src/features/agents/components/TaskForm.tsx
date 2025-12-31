@@ -17,7 +17,7 @@ import {
 import { FormField } from '@/shared/patterns'
 import { Info } from 'lucide-react'
 import { TaskConfigCreate, TaskConfigUpdate, JsonSchema } from '@/features/agents/types'
-import SchemaEditor from './SchemaEditor'
+import { SchemaEditor } from './SchemaEditor'
 
 interface TaskFormProps {
   open: boolean
@@ -152,4 +152,4 @@ const TaskForm = ({
   )
 }
 
-export default TaskForm
+export { TaskForm }

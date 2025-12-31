@@ -1,1 +1,1 @@
-export { default as ValidationStatus } from './ValidationStatus'
+export { ValidationStatus } from './ValidationStatus'

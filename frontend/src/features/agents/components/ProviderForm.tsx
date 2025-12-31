@@ -166,4 +166,4 @@ const ProviderForm = ({
   )
 }
 
-export default ProviderForm
+export { ProviderForm }

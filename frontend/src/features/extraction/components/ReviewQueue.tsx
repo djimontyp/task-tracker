@@ -794,5 +794,3 @@ export function ReviewQueue({
     </TooltipProvider>
   );
 }
-
-export default ReviewQueue;
