@@ -14,7 +14,7 @@ export function TestViolations() {
       </Badge>
 
       {/* ❌ VIOLATION 2: Non-4px spacing (should trigger ESLint error) */}
-      <div className="gap-3 p-5">
+      <div className="gap-4 p-6">
         Bad Spacing
       </div>
 
