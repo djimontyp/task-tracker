@@ -36,9 +36,6 @@ export function NavMain({ groups }: NavMainProps) {
       {groups.map((group, groupIndex) => {
         const hasNestedRoutes = group.items.length > 1 && group.items.some((item) => item.path !== '/')
         const isGroupExpanded = expandedGroups[group.labelKey] ?? false
-        const hasActiveItem = group.items.some((item) =>
-          item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
-        )
 
         if (hasNestedRoutes) {
           return (
@@ -48,28 +45,29 @@ export function NavMain({ groups }: NavMainProps) {
                 onOpenChange={(open) => setExpandedGroup(group.labelKey, open)}
                 className="group/collapsible"
               >
-                <SidebarGroup className="group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
+                <SidebarGroup>
                   <SidebarGroupLabel
                     asChild
                     className="px-2 text-xs font-semibold uppercase tracking-wider"
                   >
                     <CollapsibleTrigger
+                      aria-expanded={isGroupExpanded}
                       className={cn(
                         'flex w-full items-center justify-between rounded-md transition-colors',
-                        'text-accent hover:text-accent-light',
-                        hasActiveItem && 'font-bold'
+                        'text-muted-foreground hover:text-foreground',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                       )}
                     >
                       <span>{t(group.labelKey)}</span>
                       <ChevronRight
                         className={cn(
-                          'h-4 w-4 transition-transform duration-200 group-data-[collapsible=icon]:hidden',
+                          'size-5 transition-transform duration-200',
                           isGroupExpanded && 'rotate-90'
                         )}
                       />
                     </CollapsibleTrigger>
                   </SidebarGroupLabel>
-                  <CollapsibleContent className="group-data-[collapsible=icon]:hidden justify-center">
+                  <CollapsibleContent>
                     <SidebarGroupContent>
                       <SidebarMenu>
                         {group.items.map((item) => {
@@ -85,9 +83,8 @@ export function NavMain({ groups }: NavMainProps) {
                                 isActive={isActive}
                                 tooltip={t(item.labelKey)}
                                 className={cn(
-                                  'relative transition-all duration-300',
-                                  'data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:font-semibold',
-                                  'data-[active=true]:shadow-glow-sm data-[active=true]:border-l-2 data-[active=true]:border-accent',
+                                  'relative transition-all duration-200',
+                                  'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium',
                                   !isActive && HOVER_CLASSES
                                 )}
                               >
@@ -102,40 +99,6 @@ export function NavMain({ groups }: NavMainProps) {
                       </SidebarMenu>
                     </SidebarGroupContent>
                   </CollapsibleContent>
-                  <SidebarGroupContent className="hidden group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
-                    <SidebarMenu className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-2">
-                      {group.items.map((item) => {
-                        const isActive =
-                          item.path === '/'
-                            ? location.pathname === '/'
-                            : location.pathname.startsWith(item.path)
-
-                        return (
-                          <SidebarMenuItem
-                            key={`collapsed-${item.path}`}
-                            className="group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:flex-none"
-                          >
-                            <SidebarMenuButton
-                              asChild
-                              isActive={isActive}
-                              tooltip={t(item.labelKey)}
-                              className={cn(
-                                'relative transition-all duration-300',
-                                'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold',
-                                'group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0',
-                                !isActive && HOVER_CLASSES
-                              )}
-                            >
-                              <Link to={item.path} className="flex items-center gap-2">
-                                <item.icon className="size-5" />
-                                <span className="group-data-[collapsible=icon]:sr-only">{t(item.labelKey)}</span>
-                              </Link>
-                            </SidebarMenuButton>
-                          </SidebarMenuItem>
-                        )
-                      })}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
                 </SidebarGroup>
               </Collapsible>
               {groupIndex < groups.length - 1 && (
@@ -154,14 +117,13 @@ export function NavMain({ groups }: NavMainProps) {
               <SidebarGroupLabel
                 className={cn(
                   'px-2 text-xs font-semibold uppercase tracking-wider',
-                  'text-accent',
-                  hasActiveItem && 'font-bold'
+                  'text-muted-foreground'
                 )}
               >
                 {t(group.labelKey)}
               </SidebarGroupLabel>
-              <SidebarGroupContent className="group-data-[collapsible=icon]:p-0">
-                <SidebarMenu className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-2">
+              <SidebarGroupContent>
+                <SidebarMenu>
                   {group.items.map((item) => {
                     const isActive =
                       item.path === '/'
@@ -175,16 +137,14 @@ export function NavMain({ groups }: NavMainProps) {
                           isActive={isActive}
                           tooltip={t(item.labelKey)}
                           className={cn(
-                            'relative transition-all duration-300',
-                            'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold',
-                            'data-[active=true]:shadow-glow-sm',
-                            'group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0',
+                            'relative transition-all duration-200',
+                            'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium',
                             !isActive && HOVER_CLASSES
                           )}
                         >
                           <Link to={item.path} className="flex items-center gap-2">
                             <item.icon className="size-5" />
-                            <span className="group-data-[collapsible=icon]:sr-only">{t(item.labelKey)}</span>
+                            <span>{t(item.labelKey)}</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
