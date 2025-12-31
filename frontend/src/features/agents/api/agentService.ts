@@ -133,7 +133,7 @@ class AgentService {
     skip?: number
     limit?: number
   }): Promise<AgentTaskAssignmentWithDetails[]> {
-    const response = await apiClient.get<AgentTaskAssignmentWithDetails[]>('/api/v1/assignments', {
+    const response = await apiClient.get<AgentTaskAssignmentWithDetails[]>(API_ENDPOINTS.assignments, {
       params: {
         active_only: params?.active_only || undefined,
         skip: params?.skip,

@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
 import type { MessageSearchResult, AtomSearchResult, TopicSearchResult } from '../types'
 import type { FTSSearchResultsResponse } from '../types/fts'
 
@@ -12,7 +13,7 @@ export const searchService = {
    * Use for quick keyword-based search in dropdown.
    */
   searchFTS: async (query: string, limit: number = 10): Promise<FTSSearchResultsResponse> => {
-    const { data } = await apiClient.get<FTSSearchResultsResponse>('/api/v1/search', {
+    const { data } = await apiClient.get<FTSSearchResultsResponse>(API_ENDPOINTS.search.fts, {
       params: { q: query, limit },
     })
     return data
@@ -27,7 +28,7 @@ export const searchService = {
     limit: number = 10,
     threshold: number = 0.7
   ): Promise<MessageSearchResult[]> => {
-    const { data } = await apiClient.get<MessageSearchResult[]>('/api/v1/search/messages', {
+    const { data } = await apiClient.get<MessageSearchResult[]>(API_ENDPOINTS.search.messages, {
       params: {
         query,
         provider_id: OLLAMA_PROVIDER_ID,
@@ -47,7 +48,7 @@ export const searchService = {
     limit: number = 10,
     threshold: number = 0.7
   ): Promise<AtomSearchResult[]> => {
-    const { data } = await apiClient.get<AtomSearchResult[]>('/api/v1/search/atoms', {
+    const { data } = await apiClient.get<AtomSearchResult[]>(API_ENDPOINTS.search.atoms, {
       params: {
         query,
         provider_id: OLLAMA_PROVIDER_ID,
@@ -67,7 +68,7 @@ export const searchService = {
     limit: number = 10,
     threshold: number = 0.7
   ): Promise<TopicSearchResult[]> => {
-    const { data } = await apiClient.get<TopicSearchResult[]>('/api/v1/search/topics', {
+    const { data } = await apiClient.get<TopicSearchResult[]>(API_ENDPOINTS.search.topics, {
       params: {
         query,
         provider_id: OLLAMA_PROVIDER_ID,

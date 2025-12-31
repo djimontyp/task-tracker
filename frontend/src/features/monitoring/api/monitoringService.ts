@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
 import type {
   MonitoringMetricsResponse,
   TaskHistoryResponse,
@@ -9,7 +10,7 @@ import type {
 class MonitoringService {
   async fetchMetrics(timeWindowHours: number = 24): Promise<MonitoringMetricsResponse> {
     const response = await apiClient.get<MonitoringMetricsResponse>(
-      '/api/v1/monitoring/metrics',
+      API_ENDPOINTS.monitoring.metrics,
       {
         params: { time_window: timeWindowHours },
       }
@@ -19,7 +20,7 @@ class MonitoringService {
 
   async fetchHistory(filters: HistoryFilters = {}): Promise<TaskHistoryResponse> {
     const response = await apiClient.get<TaskHistoryResponse>(
-      '/api/v1/monitoring/history',
+      API_ENDPOINTS.monitoring.history,
       {
         params: {
           task_name: filters.task_name,
@@ -36,7 +37,7 @@ class MonitoringService {
 
   async fetchScoringAccuracy(): Promise<ScoringAccuracyResponse> {
     const response = await apiClient.get<ScoringAccuracyResponse>(
-      '/api/v1/monitoring/scoring-accuracy'
+      API_ENDPOINTS.monitoring.scoringAccuracy
     )
     return response.data
   }

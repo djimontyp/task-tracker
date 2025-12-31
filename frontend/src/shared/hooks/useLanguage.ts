@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUiStore, type LanguageCode } from '@/shared/store/uiStore';
 import { apiClient } from '@/shared/lib/api/client';
+import { API_ENDPOINTS } from '@/shared/config/api';
 
 const AVAILABLE_LANGUAGES: readonly { code: LanguageCode; label: string; nativeLabel: string }[] = [
   { code: 'uk', label: 'Ukrainian', nativeLabel: 'Українська' },
@@ -32,7 +33,7 @@ export function useLanguage() {
   // Debounced backend sync
   const syncToBackend = useCallback(async (lang: LanguageCode) => {
     try {
-      await apiClient.patch('/api/v1/users/me', { ui_language: lang });
+      await apiClient.patch(API_ENDPOINTS.users.me, { ui_language: lang });
     } catch (error) {
       console.error('Failed to sync language preference to backend:', error);
     }

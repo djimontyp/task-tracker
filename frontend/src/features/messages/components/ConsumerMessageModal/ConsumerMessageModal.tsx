@@ -13,6 +13,7 @@ import { User, Clock, Tag } from 'lucide-react'
 import type { ConsumerMessageModalProps, ConsumerMessageData } from './types'
 import { toast } from 'sonner'
 import { formatFullDate } from '@/shared/utils/date'
+import { API_ENDPOINTS } from '@/shared/config/api'
 
 export function ConsumerMessageModal({ messageId, onClose }: ConsumerMessageModalProps) {
   const [isLoading, setIsLoading] = useState(true)
@@ -25,7 +26,7 @@ export function ConsumerMessageModal({ messageId, onClose }: ConsumerMessageModa
       setError(null)
 
       try {
-        const response = await fetch(`/api/v1/messages/${messageId}`)
+        const response = await fetch(API_ENDPOINTS.message(Number(messageId)))
 
         if (!response.ok) {
           throw new Error(`Failed to fetch message details: ${response.statusText}`)

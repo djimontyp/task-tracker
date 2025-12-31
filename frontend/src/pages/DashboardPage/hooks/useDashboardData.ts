@@ -7,6 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
 import { dashboardService, type DashboardMetricsResponse } from '@/shared/api/dashboard'
 import type {
   DashboardMetricsData,
@@ -73,7 +74,7 @@ export function useDashboardTrends(period: DashboardPeriod = 'week', limit = 5) 
   return useQuery({
     queryKey: dashboardKeys.trends(period),
     queryFn: async (): Promise<TrendsResponse> => {
-      const response = await apiClient.get('/api/v1/dashboard/trends', {
+      const response = await apiClient.get(API_ENDPOINTS.dashboard.trends, {
         params: { period, limit },
       })
       return response.data
@@ -91,7 +92,7 @@ export function useDashboardInsights(limit = 5) {
   return useQuery({
     queryKey: dashboardKeys.insights(),
     queryFn: async (): Promise<RecentInsight[]> => {
-      const response = await apiClient.get('/api/v1/atoms', {
+      const response = await apiClient.get(API_ENDPOINTS.atoms, {
         params: {
           sort: '-created_at',
           limit,
@@ -123,7 +124,7 @@ export function useDashboardTopics(limit = 5) {
     queryKey: dashboardKeys.topics(),
     queryFn: async (): Promise<TopTopic[]> => {
       // Use base topics endpoint - it returns all topics
-      const response = await apiClient.get('/api/v1/topics', {
+      const response = await apiClient.get(API_ENDPOINTS.topics, {
         params: { limit },
       })
 

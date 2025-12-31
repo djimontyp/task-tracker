@@ -14,6 +14,7 @@ import { AtomsTab } from './AtomsTab'
 import { HistoryTab } from './HistoryTab'
 import type { MessageInspectModalProps, MessageInspectData, TabValue } from '@/features/messages/types'
 import { toast } from 'sonner'
+import { API_ENDPOINTS } from '@/shared/config/api'
 
 export function MessageInspectModal({ messageId, onClose }: MessageInspectModalProps) {
   const [activeTab, setActiveTab] = useState<TabValue>('classification')
@@ -27,7 +28,7 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
       setError(null)
 
       try {
-        const response = await fetch(`/api/v1/messages/${messageId}/inspect`)
+        const response = await fetch(API_ENDPOINTS.messageInspect(Number(messageId)))
 
         if (!response.ok) {
           throw new Error(`Failed to fetch message details: ${response.statusText}`)
