@@ -6,6 +6,7 @@
  */
 
 import { apiClient } from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
 
 /**
  * Backend API Response Types (matches OpenAPI contract)
@@ -57,7 +58,7 @@ class DashboardService {
    * @returns Dashboard metrics with trends
    */
   async getMetrics(period: 'auto' | 'today' | 'yesterday' = 'auto'): Promise<DashboardMetricsResponse> {
-    const { data } = await apiClient.get<DashboardMetricsResponse>('/api/v1/dashboard/metrics', {
+    const { data } = await apiClient.get<DashboardMetricsResponse>(API_ENDPOINTS.dashboard.metrics, {
       params: { period },
     })
     return data

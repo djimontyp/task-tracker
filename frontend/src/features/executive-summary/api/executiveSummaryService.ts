@@ -5,6 +5,7 @@
  */
 
 import { apiClient } from '@/shared/lib/api/client';
+import { API_ENDPOINTS } from '@/shared/config/api';
 import type {
   ExecutiveSummaryResponse,
   ExecutiveSummaryStatsResponse,
@@ -30,7 +31,7 @@ class ExecutiveSummaryService {
     }
 
     const response = await apiClient.get<ExecutiveSummaryResponse>(
-      `/api/v1/executive-summary?${params.toString()}`
+      `${API_ENDPOINTS.executiveSummary.get}?${params.toString()}`
     );
     return response.data;
   }
@@ -41,7 +42,7 @@ class ExecutiveSummaryService {
    */
   async getSummaryStats(periodDays: SummaryPeriod = 7): Promise<ExecutiveSummaryStatsResponse> {
     const response = await apiClient.get<ExecutiveSummaryStatsResponse>(
-      `/api/v1/executive-summary/stats?period_days=${periodDays}`
+      API_ENDPOINTS.executiveSummary.stats(periodDays)
     );
     return response.data;
   }
@@ -52,7 +53,7 @@ class ExecutiveSummaryService {
    */
   async exportSummary(request: ExportRequest = {}): Promise<ExportResponse> {
     const response = await apiClient.post<ExportResponse>(
-      '/api/v1/executive-summary/export',
+      API_ENDPOINTS.executiveSummary.export,
       request
     );
     return response.data;

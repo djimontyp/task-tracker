@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/lib/api/client';
+import { API_ENDPOINTS } from '@/shared/config/api';
 import type { KnowledgeExtractionRequest, KnowledgeExtractionResponse, PeriodRequest } from '../types';
 
 export const knowledgeService = {
@@ -6,7 +7,7 @@ export const knowledgeService = {
     request: KnowledgeExtractionRequest
   ): Promise<KnowledgeExtractionResponse> {
     const response = await apiClient.post<KnowledgeExtractionResponse>(
-      '/api/v1/knowledge/extract',
+      API_ENDPOINTS.knowledge.extract,
       request
     );
     return response.data;

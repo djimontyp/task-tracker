@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
 import type {
   PromptConfig,
   PromptListResponse,
@@ -10,22 +11,22 @@ import type {
 
 class PromptsService {
   async listPrompts(): Promise<PromptListResponse> {
-    const response = await apiClient.get<PromptListResponse>('/api/v1/prompts')
+    const response = await apiClient.get<PromptListResponse>(API_ENDPOINTS.prompts.list)
     return response.data
   }
 
   async getPrompt(promptType: PromptType): Promise<PromptConfig> {
-    const response = await apiClient.get<PromptConfig>(`/api/v1/prompts/${promptType}`)
+    const response = await apiClient.get<PromptConfig>(API_ENDPOINTS.prompts.get(promptType))
     return response.data
   }
 
   async validatePrompt(request: PromptValidationRequest): Promise<PromptValidationResponse> {
-    const response = await apiClient.post<PromptValidationResponse>('/api/v1/prompts/validate', request)
+    const response = await apiClient.post<PromptValidationResponse>(API_ENDPOINTS.prompts.validate, request)
     return response.data
   }
 
   async updatePrompt(promptType: PromptType, request: PromptUpdateRequest): Promise<PromptConfig> {
-    const response = await apiClient.put<PromptConfig>(`/api/v1/prompts/${promptType}`, request)
+    const response = await apiClient.put<PromptConfig>(API_ENDPOINTS.prompts.update(promptType), request)
     return response.data
   }
 }

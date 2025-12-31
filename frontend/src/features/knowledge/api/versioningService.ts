@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/lib/api/client';
+import { API_ENDPOINTS } from '@/shared/config/api';
 import type {
   TopicVersion,
   AtomVersion,
@@ -12,7 +13,7 @@ import type {
 export const versioningService = {
   async getTopicVersions(topicId: string): Promise<TopicVersion[]> {
     const response = await apiClient.get<TopicVersion[]>(
-      `/api/v1/topics/${topicId}/versions`
+      API_ENDPOINTS.versions.topicVersions(topicId)
     );
     return response.data;
   },
@@ -23,7 +24,7 @@ export const versioningService = {
     compareToVersion: number
   ): Promise<VersionDiff> {
     const response = await apiClient.get<VersionDiff>(
-      `/api/v1/topics/${topicId}/versions/${version}/diff`,
+      API_ENDPOINTS.versions.topicVersionDiff(topicId, version),
       { params: { compare_to: compareToVersion } }
     );
     return response.data;
@@ -31,7 +32,7 @@ export const versioningService = {
 
   async approveTopicVersion(topicId: string, version: number): Promise<TopicVersion> {
     const response = await apiClient.post<TopicVersion>(
-      `/api/v1/topics/${topicId}/versions/${version}/approve`,
+      API_ENDPOINTS.versions.topicVersionApprove(topicId, version),
       {}
     );
     return response.data;
@@ -39,7 +40,7 @@ export const versioningService = {
 
   async rejectTopicVersion(topicId: string, version: number): Promise<TopicVersion> {
     const response = await apiClient.post<TopicVersion>(
-      `/api/v1/topics/${topicId}/versions/${version}/reject`,
+      API_ENDPOINTS.versions.topicVersionReject(topicId, version),
       {}
     );
     return response.data;
@@ -47,7 +48,7 @@ export const versioningService = {
 
   async getAtomVersions(atomId: string): Promise<AtomVersion[]> {
     const response = await apiClient.get<AtomVersion[]>(
-      `/api/v1/atoms/${atomId}/versions`
+      API_ENDPOINTS.versions.atomVersions(atomId)
     );
     return response.data;
   },
@@ -58,7 +59,7 @@ export const versioningService = {
     compareToVersion: number
   ): Promise<VersionDiff> {
     const response = await apiClient.get<VersionDiff>(
-      `/api/v1/atoms/${atomId}/versions/${version}/diff`,
+      API_ENDPOINTS.versions.atomVersionDiff(atomId, version),
       { params: { compare_to: compareToVersion } }
     );
     return response.data;
@@ -66,7 +67,7 @@ export const versioningService = {
 
   async approveAtomVersion(atomId: string, version: number): Promise<AtomVersion> {
     const response = await apiClient.post<AtomVersion>(
-      `/api/v1/atoms/${atomId}/versions/${version}/approve`,
+      API_ENDPOINTS.versions.atomVersionApprove(atomId, version),
       {}
     );
     return response.data;
@@ -74,7 +75,7 @@ export const versioningService = {
 
   async rejectAtomVersion(atomId: string, version: number): Promise<AtomVersion> {
     const response = await apiClient.post<AtomVersion>(
-      `/api/v1/atoms/${atomId}/versions/${version}/reject`,
+      API_ENDPOINTS.versions.atomVersionReject(atomId, version),
       {}
     );
     return response.data;
@@ -82,7 +83,7 @@ export const versioningService = {
 
   async bulkApproveVersions(request: BulkVersionActionRequest): Promise<BulkVersionActionResponse> {
     const response = await apiClient.post<BulkVersionActionResponse>(
-      '/api/v1/versions/bulk-approve',
+      API_ENDPOINTS.versions.bulkApprove,
       request
     );
     return response.data;
@@ -90,7 +91,7 @@ export const versioningService = {
 
   async bulkRejectVersions(request: BulkVersionActionRequest): Promise<BulkVersionActionResponse> {
     const response = await apiClient.post<BulkVersionActionResponse>(
-      '/api/v1/versions/bulk-reject',
+      API_ENDPOINTS.versions.bulkReject,
       request
     );
     return response.data;
@@ -98,14 +99,14 @@ export const versioningService = {
 
   async getAutoApprovalRule(): Promise<AutoApprovalRule> {
     const response = await apiClient.get<AutoApprovalRule>(
-      '/api/v1/approval-rules'
+      API_ENDPOINTS.approvalRules.list
     );
     return response.data;
   },
 
   async updateAutoApprovalRule(rule: AutoApprovalRule): Promise<AutoApprovalRule> {
     const response = await apiClient.post<AutoApprovalRule>(
-      '/api/v1/approval-rules',
+      API_ENDPOINTS.approvalRules.create,
       rule
     );
     return response.data;
@@ -113,14 +114,14 @@ export const versioningService = {
 
   async getPendingVersionsCount(): Promise<PendingVersionsCount> {
     const response = await apiClient.get<PendingVersionsCount>(
-      '/api/v1/versions/pending-count'
+      API_ENDPOINTS.versions.pendingCount
     );
     return response.data;
   },
 
   async previewAutoApprovalImpact(rule: AutoApprovalRule): Promise<{ affected_count: number }> {
     const response = await apiClient.post<{ affected_count: number }>(
-      '/api/v1/approval-rules/preview',
+      API_ENDPOINTS.approvalRules.preview,
       rule
     );
     return response.data;
