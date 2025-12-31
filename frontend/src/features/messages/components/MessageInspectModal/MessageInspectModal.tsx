@@ -12,7 +12,7 @@ import { Badge } from '@/shared/ui/badge'
 import { ClassificationTab } from './ClassificationTab'
 import { AtomsTab } from './AtomsTab'
 import { HistoryTab } from './HistoryTab'
-import type { MessageInspectModalProps, MessageInspectData, TabValue } from './types'
+import type { MessageInspectModalProps, MessageInspectData, TabValue } from '@/features/messages/types'
 import { toast } from 'sonner'
 
 export function MessageInspectModal({ messageId, onClose }: MessageInspectModalProps) {

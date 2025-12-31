@@ -6,26 +6,30 @@ import { AutomationTrendsChart } from '@/features/automation/components/Automati
 import { RulePerformanceTable } from '@/features/automation/components/RulePerformanceTable'
 import { JobStatusWidget } from '@/features/automation/components/JobStatusWidget'
 import { useWebSocket } from '@/shared/hooks'
+import { isAutomationEvent, type AutomationEvent } from '@/shared/types/websocket'
 
 export default function AutomationDashboardPage() {
   const queryClient = useQueryClient()
 
   const { connectionState } = useWebSocket({
     topics: ['scheduler', 'automation'],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onMessage: (data: any) => {
-      if (data.event === 'job_completed') {
+    onMessage: (data: unknown) => {
+      if (!isAutomationEvent(data)) return
+
+      const event = data as AutomationEvent
+
+      if (event.event === 'job_completed') {
         queryClient.invalidateQueries({ queryKey: ['automation-stats'] })
         queryClient.invalidateQueries({ queryKey: ['scheduler-jobs'] })
         toast.success('Scheduler job completed')
       }
 
-      if (data.event === 'rule_triggered') {
+      if (event.event === 'rule_triggered') {
         queryClient.invalidateQueries({ queryKey: ['automation-stats'] })
         queryClient.invalidateQueries({ queryKey: ['automation-rules'] })
       }
 
-      if (data.event === 'approval_processed') {
+      if (event.event === 'approval_processed') {
         queryClient.invalidateQueries({ queryKey: ['automation-stats'] })
         queryClient.invalidateQueries({ queryKey: ['automation-trends'] })
       }
