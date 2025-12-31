@@ -92,11 +92,11 @@ export const BulkActionBar = React.forwardRef<HTMLDivElement, BulkActionBarProps
             <div className="flex items-center gap-4">
               <Badge
                 variant="secondary"
-                className="h-8 px-3 text-sm font-semibold tabular-nums"
+                className="h-8 px-4 text-sm font-semibold tabular-nums"
               >
                 {selectedCount} selected
                 {totalCount && (
-                  <span className="text-muted-foreground font-normal ml-1">
+                  <span className="text-muted-foreground font-normal ml-2">
                     / {totalCount}
                   </span>
                 )}

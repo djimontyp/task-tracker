@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { SignalCard, NoiseCard, MessageCard, type MessageData } from './SignalNoiseCard';
 

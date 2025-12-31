@@ -127,7 +127,7 @@ function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
             {index < steps.length - 1 && (
               <div
                 className={cn(
-                  'h-0.5 w-8 mx-1 transition-colors duration-300',
+                  'h-0.5 w-8 mx-2 transition-colors duration-300',
                   index < currentIndex ? 'bg-primary' : 'bg-muted'
                 )}
                 aria-hidden="true"
@@ -159,11 +159,11 @@ function ValuePropCard({ icon: Icon, title, description, delay }: ValuePropCardP
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="rounded-lg bg-primary/10 p-3 shrink-0">
+      <div className="rounded-lg bg-primary/10 p-4 shrink-0">
         <Icon className="h-6 w-6 text-primary" />
       </div>
       <div>
-        <h3 className="font-semibold text-sm mb-1">{title}</h3>
+        <h3 className="font-semibold text-sm mb-2">{title}</h3>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
     </div>
@@ -184,7 +184,7 @@ function StatBadge({ from, to, label }: StatBadgeProps) {
         <ArrowRight className="h-5 w-5 text-primary" />
         <span className="text-primary">{to}</span>
       </div>
-      <p className="text-xs text-muted-foreground mt-1">{label}</p>
+      <p className="text-xs text-muted-foreground mt-2">{label}</p>
     </div>
   );
 }
@@ -342,7 +342,7 @@ export function OnboardingWelcome({
                 touchTarget.min,
                 focus.ring,
                 transitions.default,
-                'bg-[#0088cc] hover:bg-[#0088cc]/90 text-white'
+                'bg-brand-telegram hover:bg-brand-telegram/90 text-white'
               )}
               onClick={handleConnect}
               onMouseEnter={() => setIsHoveredConnect(true)}
@@ -389,10 +389,10 @@ export function OnboardingWelcome({
       {/* Footer with keyboard hint */}
       <footer className="flex-shrink-0 py-4 text-center">
         <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
-          <kbd className="bg-muted px-1.5 py-0.5 rounded font-mono text-[10px]">Enter</kbd>
+          <kbd className="bg-muted px-2.5 py-0.5 rounded font-mono text-[10px]">Enter</kbd>
           <span>to continue with Telegram</span>
           <span className="text-muted-foreground/50">|</span>
-          <kbd className="bg-muted px-1.5 py-0.5 rounded font-mono text-[10px]">D</kbd>
+          <kbd className="bg-muted px-2.5 py-0.5 rounded font-mono text-[10px]">D</kbd>
           <span>for demo</span>
         </p>
       </footer>
@@ -420,24 +420,24 @@ export function OnboardingWelcomeCompact({
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           {/* Icon */}
-          <div className="rounded-xl bg-primary/10 p-3 shrink-0">
+          <div className="rounded-xl bg-primary/10 p-4 shrink-0">
             <Sparkles className="h-6 w-6 text-primary" />
           </div>
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold mb-1">Get started with Pulse Radar</h3>
+            <h3 className="font-semibold mb-2">Get started with Pulse Radar</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Connect Telegram to start extracting knowledge, or try the demo first.
             </p>
 
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={onTryDemo}>
-                <Play className="h-4 w-4 mr-1" />
+                <Play className="h-4 w-4 mr-2" />
                 Try Demo
               </Button>
               <Button size="sm" onClick={onConnectTelegram}>
-                <Send className="h-4 w-4 mr-1" />
+                <Send className="h-4 w-4 mr-2" />
                 Connect
               </Button>
             </div>

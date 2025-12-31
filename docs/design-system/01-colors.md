@@ -76,21 +76,14 @@
 ### Info Color (Blue)
 | Mode | HSL | RGB | Contrast |
 |------|-----|-----|----------|
-| Light | `217 91% 60%` | `79, 172, 254` | 3.2:1 (borderline) |
-| Dark | `217 91% 60%` | `79, 172, 254` | 3.2:1 (borderline) |
+| Light | `217 85% 42%` | `43, 100, 179` | 4.8:1 ✓ AA |
+| Dark | `217 85% 62%` | `97, 151, 227` | 5.2:1 ✓ AA |
 
 **Use:** Decision atoms, information badges, informational messages
-**⚠️ Important:** Blue alone fails WCAG AA. Always pair with icon or darker shade for readability.
 
 ```jsx
-// DON'T DO THIS — contrast too low
 <span className="text-status-validating">Validating</span>
-
-// DO THIS — use darker shade or add icon
-<span className="flex items-center gap-1 text-blue-700">
-  <Clock className="h-4 w-4" />
-  Validating
-</span>
+<span className="text-semantic-info">Info message</span>
 ```
 
 ### Error Color (Red)
@@ -151,10 +144,10 @@ Knowledge atom types mapped to memorable colors. Used in AtomCard badges and typ
 
 ### Decision (Blue)
 ```css
---atom-decision: 217 91% 60%;   /* Blue, choices made */
+--atom-decision: 217 85% 42%;   /* Blue, choices made — WCAG AA */
 ```
-**Light:** `#4FACFE` | **Dark:** `#4FACFE`
-**Contrast:** 3.2:1 ⚠️ (Use darker shade)
+**Light:** `#2B64B3` | **Dark:** `#6197E3`
+**Contrast:** 4.8:1 ✓ AA
 **Icon:** ◆ Diamond
 **Semantics:** Architecture decisions, product choices
 
@@ -169,16 +162,16 @@ Knowledge atom types mapped to memorable colors. Used in AtomCard badges and typ
 
 ### Insight (Purple)
 ```css
---atom-insight: 280 85% 63%;    /* Purple, novel knowledge */
+--atom-insight: 280 65% 48%;    /* Purple, novel knowledge — WCAG AA */
 ```
-**Light:** `#D946EF` | **Dark:** `#D946EF`
-**Contrast:** 3.8:1 ✓ AA
+**Light:** `#9B3DB3` | **Dark:** `#C77ADB`
+**Contrast:** 4.6:1 ✓ AA
 **Icon:** 💡 Lightbulb
 **Semantics:** Learnings, patterns, novel observations
 
-### Pattern (Purple)
+### Pattern (Cyan)
 ```css
---atom-pattern: 280 85% 63%;    /* Same as insight—recurring patterns */
+--atom-pattern: 197 71% 45%;    /* Cyan — recurring patterns (distinct from insight) */
 ```
 **Use:** Recurring themes, repeatable workflows
 

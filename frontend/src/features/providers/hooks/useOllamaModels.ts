@@ -32,7 +32,6 @@ export const useOllamaModels = (host: string, enabled: boolean = true): UseOllam
     }
 
     const controller = new AbortController()
-    let timeoutId: NodeJS.Timeout
 
     const fetchModels = async () => {
       setIsLoading(true)
@@ -57,7 +56,7 @@ export const useOllamaModels = (host: string, enabled: boolean = true): UseOllam
       }
     }
 
-    timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       fetchModels()
     }, 500)
 

@@ -65,21 +65,21 @@ export function MessagesSummaryHeader({ stats }: MessagesSummaryHeaderProps) {
         <span className="text-muted-foreground">{t('summary.today')}:</span>
 
         {hasSignals && (
-          <Badge variant="secondary" className="gap-1.5">
+          <Badge variant="secondary" className="gap-2.5">
             <Signal className="h-3.5 w-3.5 text-status-connected" />
             <span>{t('summary.newSignals', { count: stats.signalCount })}</span>
           </Badge>
         )}
 
         {hasAttention && (
-          <Badge variant="outline" className="gap-1.5 border-semantic-warning text-semantic-warning">
+          <Badge variant="outline" className="gap-2.5 border-semantic-warning text-semantic-warning">
             <AlertCircle className="h-3.5 w-3.5" />
             <span>{t('summary.needsAttention', { count: needsAttention })}</span>
           </Badge>
         )}
 
         {!hasSignals && !hasAttention && (
-          <Badge variant="secondary" className="gap-1.5">
+          <Badge variant="secondary" className="gap-2.5">
             <Sparkles className="h-3.5 w-3.5 text-status-connected" />
             <span>{t('summary.allClear')}</span>
             <span role="img" aria-label="sparkles">

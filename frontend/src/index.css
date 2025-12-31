@@ -4,9 +4,23 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* ═══════════════════════════════════════════════════════════════
+       BASE COLORS (Source of Truth) - Light Mode
+       ═══════════════════════════════════════════════════════════════ */
+    --color-green: 142 71% 45%;
+    --color-red: 0 78% 54%;
+    --color-blue: 217 85% 42%;      /* WCAG AA compliant (was 51%) */
+    --color-amber: 38 92% 50%;
+    --color-purple: 280 65% 48%;    /* WCAG AA compliant (was 58%) */
+    --color-cyan: 197 71% 45%;
+    --color-violet: 260 65% 55%;
+
+    /* ═══════════════════════════════════════════════════════════════
+       LIGHT THEME - Elevation & Structure
+       ═══════════════════════════════════════════════════════════════ */
+    --background: 220 14% 96%;      /* Soft cool gray (was pure #FFF) */
     --foreground: 20 14.3% 4.1%;
-    --card: 0 0% 100%;
+    --card: 0 0% 100%;              /* Pure white for elevation */
     --card-foreground: 20 14.3% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 14.3% 4.1%;
@@ -24,8 +38,8 @@
     --accent-glow: 38 51% 50% / 0.45;
     --destructive: 0 84.2% 40.1%;
     --destructive-foreground: 60 9.1% 97.8%;
-    --border: 20 5.9% 90%;
-    --input: 20 5.9% 90%;
+    --border: 220 13% 82%;          /* More visible (was 90%) */
+    --input: 220 13% 82%;           /* Match border */
     --ring: 24.6 95% 53.1%;
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;
@@ -33,44 +47,53 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 220 14% 94%;  /* Differentiated (was 98%) */
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 24.6 95% 53.1%;
     --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
+    --sidebar-border: 220 13% 82%;      /* Match border */
     --sidebar-ring: 24.6 95% 53.1%;
-    /* Atom type semantic colors - WCAG AA */
-    --atom-problem: 0 78% 54%;
-    --atom-solution: 142 71% 45%;
-    --atom-decision: 217 85% 51%;
-    --atom-question: 38 92% 50%;
-    --atom-insight: 280 65% 58%;
-    --atom-pattern: 197 71% 45%;
-    --atom-requirement: 260 65% 55%;
-    /* Status indicator colors - WCAG AA */
-    --status-connected: 142 71% 45%;
-    --status-validating: 217 85% 51%;
-    --status-pending: 38 92% 50%;
-    --status-error: 0 78% 54%;
-    /* Shadow tokens */
+
+    /* ═══════════════════════════════════════════════════════════════
+       SEMANTIC COLORS (Aliases → Base)
+       ═══════════════════════════════════════════════════════════════ */
+    /* Atom type colors */
+    --atom-problem: var(--color-red);
+    --atom-solution: var(--color-green);
+    --atom-decision: var(--color-blue);
+    --atom-question: var(--color-amber);
+    --atom-insight: var(--color-purple);
+    --atom-pattern: var(--color-cyan);
+    --atom-requirement: var(--color-violet);
+    /* Status indicator colors */
+    --status-connected: var(--color-green);
+    --status-validating: var(--color-blue);
+    --status-pending: var(--color-amber);
+    --status-error: var(--color-red);
+    /* Semantic feedback colors */
+    --semantic-success: var(--color-green);
+    --semantic-warning: var(--color-amber);
+    --semantic-error: var(--color-red);
+    --semantic-info: var(--color-blue);
+
+    /* ═══════════════════════════════════════════════════════════════
+       SHADOWS & EFFECTS
+       ═══════════════════════════════════════════════════════════════ */
     --shadow-color: 222.2 47.4% 11.2%;
-    --shadow-card: 0 1px 3px hsl(var(--shadow-color) / 0.06),
-                   0 1px 2px hsl(var(--shadow-color) / 0.04);
-    /* Heatmap colors */
+    --shadow-card: 0 2px 8px hsl(var(--shadow-color) / 0.08),
+                   0 1px 3px hsl(var(--shadow-color) / 0.05);  /* Stronger */
+
+    /* ═══════════════════════════════════════════════════════════════
+       CHART & VISUALIZATION
+       ═══════════════════════════════════════════════════════════════ */
     --heatmap-telegram: 200 80% 50%;
     --heatmap-slack: 280 70% 50%;
     --heatmap-email: 140 70% 45%;
-    /* Semantic Status (for text/icons) */
-    --semantic-success: 142 76% 36%;
-    --semantic-warning: 43 96% 56%;
-    --semantic-error: 0 84.2% 60.2%;
-    --semantic-info: 217 91% 60%;
-    /* Chart Colors */
-    --chart-signal: 142 76% 36%;
-    --chart-noise: 0 84.2% 60.2%;
-    --chart-weak-signal: 43 96% 56%;
+    --chart-signal: var(--color-green);
+    --chart-noise: var(--color-red);
+    --chart-weak-signal: var(--color-amber);
     /* Brand */
     --brand-telegram: 200 80% 50%;
     /* Topic Default */
@@ -86,6 +109,20 @@
   }
 
   .dark {
+    /* ═══════════════════════════════════════════════════════════════
+       BASE COLORS (Source of Truth) - Dark Mode (brighter for dark bg)
+       ═══════════════════════════════════════════════════════════════ */
+    --color-green: 142 71% 59%;
+    --color-red: 0 78% 65%;
+    --color-blue: 217 85% 62%;
+    --color-amber: 38 92% 60%;
+    --color-purple: 280 65% 68%;
+    --color-cyan: 197 71% 56%;
+    --color-violet: 260 65% 66%;
+
+    /* ═══════════════════════════════════════════════════════════════
+       DARK THEME - Elevation & Structure
+       ═══════════════════════════════════════════════════════════════ */
     --background: 20 14.3% 4.1%;
     --foreground: 60 9.1% 97.8%;
     --card: 20 14.3% 4.1%;
@@ -122,36 +159,22 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 20.5 90.2% 48.2%;
-    /* Atom type semantic colors - WCAG AA (Dark mode) */
-    --atom-problem: 0 78% 65%;
-    --atom-solution: 142 71% 59%;
-    --atom-decision: 217 85% 62%;
-    --atom-question: 38 92% 60%;
-    --atom-insight: 280 65% 68%;
-    --atom-pattern: 197 71% 56%;
-    --atom-requirement: 260 65% 66%;
-    /* Status indicator colors - WCAG AA (Dark mode) */
-    --status-connected: 142 71% 59%;
-    --status-validating: 217 85% 62%;
-    --status-pending: 38 92% 60%;
-    --status-error: 0 78% 65%;
-    /* Shadow tokens */
+
+    /* Semantic colors inherit from base (defined above) */
+
+    /* ═══════════════════════════════════════════════════════════════
+       SHADOWS & EFFECTS - Dark Mode
+       ═══════════════════════════════════════════════════════════════ */
     --shadow-color: 210 40% 98%;
     --shadow-card: 0 1px 3px hsl(var(--shadow-color) / 0.04),
                    0 1px 2px hsl(var(--shadow-color) / 0.02);
-    /* Heatmap colors */
+
+    /* ═══════════════════════════════════════════════════════════════
+       CHART & VISUALIZATION - Dark Mode
+       ═══════════════════════════════════════════════════════════════ */
     --heatmap-telegram: 200 80% 60%;
     --heatmap-slack: 280 70% 60%;
     --heatmap-email: 140 70% 55%;
-    /* Semantic Status (for text/icons) - slightly lighter for dark mode */
-    --semantic-success: 142 76% 46%;
-    --semantic-warning: 43 96% 66%;
-    --semantic-error: 0 84.2% 70%;
-    --semantic-info: 217 91% 70%;
-    /* Chart Colors - adjusted for dark mode contrast */
-    --chart-signal: 142 76% 46%;
-    --chart-noise: 0 84.2% 70%;
-    --chart-weak-signal: 43 96% 66%;
     /* Brand */
     --brand-telegram: 200 80% 60%;
     /* Topic Default - lighter for dark mode */
