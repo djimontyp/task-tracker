@@ -4,147 +4,130 @@
  * Client for LLM provider configuration endpoints
  */
 
-import {
+import apiClient from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
+import { AxiosError } from 'axios'
+import type {
   LLMProvider,
   LLMProviderCreate,
   LLMProviderUpdate,
   OllamaModelsResponse,
-} from "../types";
-import { API_ENDPOINTS } from "@/shared/config/api";
-
-const API_BASE_URL = '';
+} from '../types'
 
 class ProviderService {
   /**
    * List all providers with optional filters
    */
   async listProviders(params?: {
-    skip?: number;
-    limit?: number;
-    active_only?: boolean;
+    skip?: number
+    limit?: number
+    active_only?: boolean
   }): Promise<LLMProvider[]> {
-    const queryParams = new URLSearchParams();
-    if (params?.skip !== undefined) queryParams.set("skip", params.skip.toString());
-    if (params?.limit !== undefined) queryParams.set("limit", params.limit.toString());
-    if (params?.active_only) queryParams.set("active_only", "true");
-
-    const response = await fetch(
-      `${API_BASE_URL}${API_ENDPOINTS.providers}?${queryParams.toString()}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch providers: ${response.statusText}`);
-    }
-
-    return response.json();
+    const response = await apiClient.get<LLMProvider[]>(API_ENDPOINTS.providers, {
+      params: {
+        skip: params?.skip,
+        limit: params?.limit,
+        active_only: params?.active_only ? 'true' : undefined,
+      },
+    })
+    return response.data
   }
 
   /**
    * Get single provider by ID
    */
   async getProvider(id: string): Promise<LLMProvider> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.providers}/${id}`);
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error("Provider not found");
+    try {
+      const response = await apiClient.get<LLMProvider>(`${API_ENDPOINTS.providers}/${id}`)
+      return response.data
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        throw new Error('Provider not found')
       }
-      throw new Error(`Failed to fetch provider: ${response.statusText}`);
+      throw error
     }
-
-    return response.json();
   }
 
   /**
    * Create new provider
    */
   async createProvider(data: LLMProviderCreate): Promise<LLMProvider> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.providers}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: response.statusText }));
-      if (response.status === 409) {
-        throw new Error("Provider name already exists");
+    try {
+      const response = await apiClient.post<LLMProvider>(API_ENDPOINTS.providers, data)
+      return response.data
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 409) {
+          throw new Error('Provider name already exists')
+        }
+        const detail = error.response?.data?.detail
+        throw new Error(detail || 'Failed to create provider')
       }
-      throw new Error(error.detail || "Failed to create provider");
+      throw error
     }
-
-    return response.json();
   }
 
   /**
    * Update existing provider
    */
-  async updateProvider(
-    id: string,
-    data: LLMProviderUpdate
-  ): Promise<LLMProvider> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.providers}/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: response.statusText }));
-      if (response.status === 404) {
-        throw new Error("Provider not found");
+  async updateProvider(id: string, data: LLMProviderUpdate): Promise<LLMProvider> {
+    try {
+      const response = await apiClient.put<LLMProvider>(`${API_ENDPOINTS.providers}/${id}`, data)
+      return response.data
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 404) {
+          throw new Error('Provider not found')
+        }
+        const detail = error.response?.data?.detail
+        throw new Error(detail || 'Failed to update provider')
       }
-      throw new Error(error.detail || "Failed to update provider");
+      throw error
     }
-
-    return response.json();
   }
 
   /**
    * Delete provider
    */
   async deleteProvider(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.providers}/${id}`, {
-      method: "DELETE",
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: response.statusText }));
-      if (response.status === 409) {
-        throw new Error("Cannot delete - provider is referenced by agents");
+    try {
+      await apiClient.delete(`${API_ENDPOINTS.providers}/${id}`)
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 409) {
+          throw new Error('Cannot delete - provider is referenced by agents')
+        }
+        if (error.response?.status === 404) {
+          throw new Error('Provider not found')
+        }
+        const detail = error.response?.data?.detail
+        throw new Error(detail || 'Failed to delete provider')
       }
-      if (response.status === 404) {
-        throw new Error("Provider not found");
-      }
-      throw new Error(error.detail || "Failed to delete provider");
+      throw error
     }
   }
 
   async fetchOllamaModels(host: string): Promise<OllamaModelsResponse> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.ollamaModels(host)}`);
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: response.statusText }));
-
-      if (response.status === 400) {
-        throw new Error("Invalid or empty Ollama host URL");
+    try {
+      const response = await apiClient.get<OllamaModelsResponse>(API_ENDPOINTS.ollamaModels(host))
+      return response.data
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 400) {
+          throw new Error('Invalid or empty Ollama host URL')
+        }
+        if (error.response?.status === 502) {
+          throw new Error('Cannot connect to Ollama server. Check if host URL is correct and Ollama is running')
+        }
+        if (error.response?.status === 504) {
+          throw new Error('Request timeout. Ollama server is not responding')
+        }
+        const detail = error.response?.data?.detail
+        throw new Error(detail || 'Failed to fetch Ollama models')
       }
-      if (response.status === 502) {
-        throw new Error("Cannot connect to Ollama server. Check if host URL is correct and Ollama is running");
-      }
-      if (response.status === 504) {
-        throw new Error("Request timeout. Ollama server is not responding");
-      }
-
-      throw new Error(error.detail || "Failed to fetch Ollama models");
+      throw error
     }
-
-    return response.json();
   }
 }
 
-export const providerService = new ProviderService();
+export const providerService = new ProviderService()

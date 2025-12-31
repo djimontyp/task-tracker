@@ -1,44 +1,42 @@
+/**
+ * Noise Filtering API Service
+ *
+ * Uses axios client for HTTP requests with automatic JSON parsing
+ */
+
+import apiClient from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 import type { NoiseStats } from '../types'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+interface BatchScoringResponse {
+  status: string
+  messages_queued: number
+  total_unscored: number
+}
+
+interface ScoreMessageResponse {
+  status: string
+  message_id: number
+}
 
 class NoiseService {
   async getNoiseStats(): Promise<NoiseStats> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.noise.stats}`)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch noise stats: ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    return data
+    const response = await apiClient.get<NoiseStats>(API_ENDPOINTS.noise.stats)
+    return response.data
   }
 
-  async triggerBatchScoring(limit: number = 100): Promise<{ status: string; messages_queued: number; total_unscored: number }> {
-    const response = await fetch(
-      `${API_BASE_URL}${API_ENDPOINTS.noise.scoreBatch}?limit=${limit}`,
-      { method: 'POST' }
+  async triggerBatchScoring(limit: number = 100): Promise<BatchScoringResponse> {
+    const response = await apiClient.post<BatchScoringResponse>(
+      `${API_ENDPOINTS.noise.scoreBatch}?limit=${limit}`
     )
-
-    if (!response.ok) {
-      throw new Error(`Failed to trigger scoring: ${response.statusText}`)
-    }
-
-    return await response.json()
+    return response.data
   }
 
-  async scoreMessage(messageId: number): Promise<{ status: string; message_id: number }> {
-    const response = await fetch(
-      `${API_BASE_URL}${API_ENDPOINTS.noise.scoreMessage(messageId)}`,
-      { method: 'POST' }
+  async scoreMessage(messageId: number): Promise<ScoreMessageResponse> {
+    const response = await apiClient.post<ScoreMessageResponse>(
+      API_ENDPOINTS.noise.scoreMessage(messageId)
     )
-
-    if (!response.ok) {
-      throw new Error(`Failed to score message ${messageId}: ${response.statusText}`)
-    }
-
-    return await response.json()
+    return response.data
   }
 }
 

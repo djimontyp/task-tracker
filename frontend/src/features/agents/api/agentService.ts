@@ -4,147 +4,93 @@
  * Client for agent configuration and task assignment endpoints
  */
 
-import {
+import apiClient from '@/shared/lib/api/client'
+import { API_ENDPOINTS } from '@/shared/config/api'
+import type {
   AgentConfig,
   AgentConfigCreate,
   AgentConfigUpdate,
-} from "../types";
-import {
   AgentTaskAssignment,
   AgentTaskAssignmentCreate,
   AgentTaskAssignmentWithDetails,
-} from "../types";
-import { API_ENDPOINTS } from "@/shared/config/api";
+} from '../types'
 
-const API_BASE_URL = '';
+interface AgentTestResponse {
+  agent_id: string
+  agent_name: string
+  prompt: string
+  response: string
+  elapsed_time: number
+  model_name: string
+  provider_name: string
+  provider_type: string
+}
 
 class AgentService {
   /**
    * List all agents with optional filters
    */
   async listAgents(params?: {
-    skip?: number;
-    limit?: number;
-    active_only?: boolean;
-    provider_id?: string;
+    skip?: number
+    limit?: number
+    active_only?: boolean
+    provider_id?: string
   }): Promise<AgentConfig[]> {
-    const queryParams = new URLSearchParams();
-    if (params?.skip !== undefined) queryParams.set("skip", params.skip.toString());
-    if (params?.limit !== undefined) queryParams.set("limit", params.limit.toString());
-    if (params?.active_only) queryParams.set("active_only", "true");
-    if (params?.provider_id) queryParams.set("provider_id", params.provider_id);
-
-    const response = await fetch(
-      `${API_BASE_URL}${API_ENDPOINTS.agents}?${queryParams.toString()}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch agents: ${response.statusText}`);
-    }
-
-    return response.json();
+    const response = await apiClient.get<AgentConfig[]>(API_ENDPOINTS.agents, {
+      params: {
+        skip: params?.skip,
+        limit: params?.limit,
+        active_only: params?.active_only || undefined,
+        provider_id: params?.provider_id,
+      },
+    })
+    return response.data
   }
 
   /**
    * Get single agent by ID
    */
   async getAgent(id: string): Promise<AgentConfig> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.agents}/${id}`);
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error("Agent not found");
-      }
-      throw new Error(`Failed to fetch agent: ${response.statusText}`);
-    }
-
-    return response.json();
+    const response = await apiClient.get<AgentConfig>(`${API_ENDPOINTS.agents}/${id}`)
+    return response.data
   }
 
   /**
    * Create new agent
    */
   async createAgent(data: AgentConfigCreate): Promise<AgentConfig> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.agents}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: response.statusText }));
-      if (response.status === 409) {
-        throw new Error(error.detail || "Agent name already exists");
-      }
-      if (response.status === 404) {
-        throw new Error(error.detail || "Provider not found");
-      }
-      throw new Error(error.detail || "Failed to create agent");
-    }
-
-    return response.json();
+    const response = await apiClient.post<AgentConfig>(API_ENDPOINTS.agents, data)
+    return response.data
   }
 
   /**
    * Update existing agent
    */
   async updateAgent(id: string, data: AgentConfigUpdate): Promise<AgentConfig> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.agents}/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: response.statusText }));
-      if (response.status === 404) {
-        throw new Error("Agent not found");
-      }
-      throw new Error(error.detail || "Failed to update agent");
-    }
-
-    return response.json();
+    const response = await apiClient.put<AgentConfig>(`${API_ENDPOINTS.agents}/${id}`, data)
+    return response.data
   }
 
   /**
    * Delete agent
    */
   async deleteAgent(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.agents}/${id}`, {
-      method: "DELETE",
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error("Agent not found");
-      }
-      throw new Error(`Failed to delete agent: ${response.statusText}`);
-    }
+    await apiClient.delete(`${API_ENDPOINTS.agents}/${id}`)
   }
 
   /**
    * Get tasks assigned to agent
    */
-  async getAgentTasks(
-    agentId: string,
-    activeOnly: boolean = false
-  ): Promise<AgentTaskAssignment[]> {
-    const queryParams = new URLSearchParams();
-    if (activeOnly) queryParams.set("active_only", "true");
-
-    const response = await fetch(
-      `${API_BASE_URL}${API_ENDPOINTS.agents}/${agentId}/tasks?${queryParams.toString()}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch agent tasks: ${response.statusText}`);
-    }
-
-    return response.json();
+  async getAgentTasks(agentId: string, activeOnly: boolean = false): Promise<AgentTaskAssignment[]> {
+    const response = await apiClient.get<AgentTaskAssignment[]>(
+      `${API_ENDPOINTS.agents}/${agentId}/tasks`,
+      {
+        params: {
+          active_only: activeOnly || undefined,
+        },
+      }
+    )
+    return response.data
   }
 
   /**
@@ -152,114 +98,50 @@ class AgentService {
    */
   async assignTask(
     agentId: string,
-    data: Omit<AgentTaskAssignmentCreate, "agent_id">
+    data: Omit<AgentTaskAssignmentCreate, 'agent_id'>
   ): Promise<AgentTaskAssignment> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.agents}/${agentId}/tasks`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...data, agent_id: agentId }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: response.statusText }));
-      if (response.status === 409) {
-        throw new Error("Task already assigned to this agent");
-      }
-      if (response.status === 404) {
-        throw new Error("Agent or task not found");
-      }
-      throw new Error(error.detail || "Failed to assign task");
-    }
-
-    return response.json();
+    const response = await apiClient.post<AgentTaskAssignment>(
+      `${API_ENDPOINTS.agents}/${agentId}/tasks`,
+      { ...data, agent_id: agentId }
+    )
+    return response.data
   }
 
   /**
    * Unassign task from agent
    */
   async unassignTask(agentId: string, taskId: string): Promise<void> {
-    const response = await fetch(
-      `${API_BASE_URL}${API_ENDPOINTS.agents}/${agentId}/tasks/${taskId}`,
-      {
-        method: "DELETE",
-      }
-    );
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error("Assignment not found");
-      }
-      throw new Error(`Failed to unassign task: ${response.statusText}`);
-    }
+    await apiClient.delete(`${API_ENDPOINTS.agents}/${agentId}/tasks/${taskId}`)
   }
 
   /**
    * Test agent with custom prompt
    */
-  async testAgent(
-    id: string,
-    prompt: string
-  ): Promise<{
-    agent_id: string;
-    agent_name: string;
-    prompt: string;
-    response: string;
-    elapsed_time: number;
-    model_name: string;
-    provider_name: string;
-    provider_type: string;
-  }> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.agents}/${id}/test`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({
-        detail: response.statusText,
-      }));
-      if (response.status === 404) {
-        throw new Error("Agent not found");
-      }
-      if (response.status === 400) {
-        throw new Error(error.detail || "Invalid prompt");
-      }
-      throw new Error(error.detail || "Failed to test agent");
-    }
-
-    return response.json();
+  async testAgent(id: string, prompt: string): Promise<AgentTestResponse> {
+    const response = await apiClient.post<AgentTestResponse>(
+      `${API_ENDPOINTS.agents}/${id}/test`,
+      { prompt }
+    )
+    return response.data
   }
 
   /**
    * List all agent-task assignments with detailed information
    */
   async listAllAssignments(params?: {
-    active_only?: boolean;
-    skip?: number;
-    limit?: number;
+    active_only?: boolean
+    skip?: number
+    limit?: number
   }): Promise<AgentTaskAssignmentWithDetails[]> {
-    const queryParams = new URLSearchParams();
-    if (params?.active_only) queryParams.set("active_only", "true");
-    if (params?.skip !== undefined)
-      queryParams.set("skip", params.skip.toString());
-    if (params?.limit !== undefined)
-      queryParams.set("limit", params.limit.toString());
-
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/assignments?${queryParams.toString()}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch assignments: ${response.statusText}`);
-    }
-
-    return response.json();
+    const response = await apiClient.get<AgentTaskAssignmentWithDetails[]>('/api/v1/assignments', {
+      params: {
+        active_only: params?.active_only || undefined,
+        skip: params?.skip,
+        limit: params?.limit,
+      },
+    })
+    return response.data
   }
 }
 
-export const agentService = new AgentService();
+export const agentService = new AgentService()

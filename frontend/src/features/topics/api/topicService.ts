@@ -1,101 +1,59 @@
+import apiClient from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 import type { ListTopicsParams, Topic, TopicListResponse, UpdateTopic } from '../types'
 
-const API_BASE_URL = ''
-
 class TopicService {
   async listTopics(params?: ListTopicsParams): Promise<TopicListResponse> {
-    const queryParams = new URLSearchParams()
+    const queryParams: Record<string, string> = {}
 
     if (params?.page && params?.page_size) {
       const skip = (params.page - 1) * params.page_size
-      queryParams.append('skip', skip.toString())
-      queryParams.append('limit', params.page_size.toString())
+      queryParams.skip = skip.toString()
+      queryParams.limit = params.page_size.toString()
     }
 
     if (params?.search) {
-      queryParams.append('search', params.search)
+      queryParams.search = params.search
     }
 
     if (params?.sort_by) {
-      queryParams.append('sort_by', params.sort_by)
+      queryParams.sort_by = params.sort_by
     }
 
-    const queryString = queryParams.toString()
-    const url = `${API_BASE_URL}${API_ENDPOINTS.topics}${queryString ? '?' + queryString : ''}`
-
-    const response = await fetch(url)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch topics: ${response.statusText}`)
-    }
-
-    return response.json()
+    const response = await apiClient.get<TopicListResponse>(API_ENDPOINTS.topics, {
+      params: queryParams,
+    })
+    return response.data
   }
 
   async getTopicById(id: string): Promise<Topic> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/${id}`)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch topic: ${response.statusText}`)
-    }
-
-    return response.json()
+    const response = await apiClient.get<Topic>(`${API_ENDPOINTS.topics}/${id}`)
+    return response.data
   }
 
   async getAvailableColors(): Promise<{ colors: string[] }> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/colors`)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch colors: ${response.statusText}`)
-    }
-
-    return response.json()
+    const response = await apiClient.get<{ colors: string[] }>(`${API_ENDPOINTS.topics}/colors`)
+    return response.data
   }
 
   async updateTopic(id: string, data: UpdateTopic): Promise<Topic> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to update topic: ${response.statusText}`)
-    }
-
-    return response.json()
+    const response = await apiClient.patch<Topic>(`${API_ENDPOINTS.topics}/${id}`, data)
+    return response.data
   }
 
   async suggestColor(topicId: string): Promise<{ topic_id: string; suggested_color: string; icon: string }> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/${topicId}/suggest-color`)
-
-    if (!response.ok) {
-      throw new Error(`Failed to suggest color: ${response.statusText}`)
-    }
-
-    return response.json()
+    const response = await apiClient.get<{ topic_id: string; suggested_color: string; icon: string }>(
+      `${API_ENDPOINTS.topics}/${topicId}/suggest-color`
+    )
+    return response.data
   }
 
   /**
    * Update topic color
    */
   async updateTopicColor(topicId: string, color: string): Promise<Topic> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.topics}/${topicId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ color }),
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to update topic color: ${response.statusText}`)
-    }
-
-    return response.json()
+    const response = await apiClient.patch<Topic>(`${API_ENDPOINTS.topics}/${topicId}`, { color })
+    return response.data
   }
 }
 
