@@ -12,4 +12,7 @@ module.exports = {
   'no-direct-fonts': require('./no-direct-fonts'),
   'no-direct-api-imports': require('./no-direct-api-imports'),
   'no-hardcoded-api-paths': require('./no-hardcoded-api-paths'),
+  'no-default-export': require('./no-default-export'),
+  'stories-no-i18n-keys': require('./stories-no-i18n-keys'),
+  'no-data-in-presenters': require('./no-data-in-presenters'),
 };
