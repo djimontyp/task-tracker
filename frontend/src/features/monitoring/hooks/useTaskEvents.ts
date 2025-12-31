@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useWebSocket } from '@/features/websocket'
+import { useWebSocket } from '@/shared/hooks'
 import type { TaskEvent } from '../types'
 import { logger } from '@/shared/utils/logger'
 

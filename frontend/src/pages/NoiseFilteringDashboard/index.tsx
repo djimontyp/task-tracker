@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   MessageSquare,
@@ -12,8 +12,7 @@ import MetricCard from '@/shared/components/MetricCard'
 import { noiseService } from '@/features/noise/api/noiseService'
 import type { NoiseStats } from '@/features/noise/types'
 import { toast } from 'sonner'
-import { logger } from '@/shared/utils/logger'
-import { getWebSocketUrl } from '@/shared/utils/websocket'
+import { useWebSocket } from '@/shared/hooks'
 import {
   LineChart,
   Line,
@@ -36,47 +35,22 @@ const NoiseFilteringDashboard = () => {
     refetchInterval: 30000,
   })
 
-  useEffect(() => {
-    const wsUrl = getWebSocketUrl(['noise_filtering'])
-    const ws = new WebSocket(wsUrl)
-
-    ws.onopen = () => {
-      logger.debug('[NoiseFilteringDashboard] WebSocket connected')
-    }
-
-    ws.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data)
-        const { topic, event: eventType, data } = message
-
-        if (topic === 'noise_filtering') {
-          if (eventType === 'message_scored') {
-            queryClient.invalidateQueries({ queryKey: ['noise-stats'] })
-          }
-
-          if (eventType === 'batch_scored') {
-            toast.success(`Scored ${data.scored} messages`)
-            queryClient.invalidateQueries({ queryKey: ['noise-stats'] })
-          }
+  useWebSocket({
+    topics: ['noise_filtering'],
+    onMessage: (data) => {
+      const message = data as { topic: string; event: string; data?: { scored: number } }
+      if (message.topic === 'noise_filtering') {
+        if (message.event === 'message_scored') {
+          queryClient.invalidateQueries({ queryKey: ['noise-stats'] })
         }
-      } catch (error) {
-        console.error('[NoiseFilteringDashboard] Error parsing WebSocket message:', error)
+        if (message.event === 'batch_scored' && message.data) {
+          toast.success(`Scored ${message.data.scored} messages`)
+          queryClient.invalidateQueries({ queryKey: ['noise-stats'] })
+        }
       }
-    }
-
-    ws.onerror = (error) => {
-      console.error('[NoiseFilteringDashboard] WebSocket error:', error)
-      toast.error('WebSocket connection failed')
-    }
-
-    ws.onclose = () => {
-      logger.debug('[NoiseFilteringDashboard] WebSocket disconnected')
-    }
-
-    return () => {
-      ws.close()
-    }
-  }, [queryClient])
+    },
+    reconnect: true,
+  })
 
   const scoreBatchMutation = useMutation({
     mutationFn: (limit: number) => noiseService.triggerBatchScoring(limit),
