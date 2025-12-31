@@ -11,4 +11,5 @@ module.exports = {
   'no-raw-zindex': require('./no-raw-zindex'),
   'no-direct-fonts': require('./no-direct-fonts'),
   'no-direct-api-imports': require('./no-direct-api-imports'),
+  'no-hardcoded-api-paths': require('./no-hardcoded-api-paths'),
 };

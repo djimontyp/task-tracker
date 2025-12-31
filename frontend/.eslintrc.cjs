@@ -109,6 +109,10 @@ module.exports = {
     // Warning level — компоненти мають використовувати TanStack Query hooks
     'local-rules/no-direct-api-imports': 'warn',
 
+    // Local rule: Заборона hardcoded /api/v1 paths
+    // Використовуй API_ENDPOINTS з @/shared/config/api
+    'local-rules/no-hardcoded-api-paths': 'error',
+
     // Local rule: Заборона raw page wrappers (використовуй PageWrapper)
     // Warning level during migration, will become error after all pages migrated
     'local-rules/no-raw-page-wrapper': ['warn', {
