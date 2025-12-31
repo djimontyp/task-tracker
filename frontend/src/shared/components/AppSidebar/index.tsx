@@ -31,6 +31,7 @@ import { Separator } from '@/shared/ui/separator'
 import { statsService, type SidebarCounts } from '@/shared/api/statsService'
 import { Logo } from '@/shared/components/Logo'
 import { NavMain } from './NavMain'
+import { NavMainCollapsed } from './NavMainCollapsed'
 import type { NavGroup } from './types'
 
 interface AppSidebarProps {
@@ -171,54 +172,38 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
       </SidebarHeader>
 
       <SidebarContent>
-        <NavMain groups={groups} />
-        {/* DORMANT: AI Operations + Extract Knowledge button приховано
-        {aiOperationsGroup && (
-          <>
-            <SidebarGroupContent className="group-data-[collapsible=icon]:p-0">
-              <SidebarMenu className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-2">
-                {aiOperationsGroup.items.map((item) => (
-                  <NavNotifications
-                    key={item.path}
-                    item={item}
-                    counts={counts}
-                  />
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-            <div className="px-2 mt-2 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
-              <GlobalKnowledgeExtractionDialog />
-            </div>
-          </>
+        {state === 'collapsed' ? (
+          <NavMainCollapsed groups={groups} />
+        ) : (
+          <NavMain groups={groups} />
         )}
-        */}
       </SidebarContent>
 
       {/* Footer with Settings link + Collapse toggle */}
-      <SidebarFooter className="group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:items-center">
+      <SidebarFooter className="group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:mt-auto">
         <Separator className="mb-2 group-data-[collapsible=icon]:hidden" />
         <SidebarMenu className="group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-2">
-          <SidebarMenuItem className="group-data-[collapsible=icon]:w-auto">
+          <SidebarMenuItem className="group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
             <SidebarMenuButton
               asChild
               tooltip={t('sidebar.items.settings')}
-              className="group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+              className="group-data-[collapsible=icon]:!size-11 group-data-[collapsible=icon]:!p-0"
             >
-              <Link to="/settings" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                <span className="group-data-[collapsible=icon]:hidden">{t('sidebar.items.settings')}</span>
+              <Link to="/settings" className="flex items-center justify-center gap-2 group-data-[collapsible=icon]:gap-0 size-full">
+                <Settings className="h-4 w-4 shrink-0" />
+                <span className="group-data-[collapsible=icon]:sr-only">{t('sidebar.items.settings')}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           {/* Collapse toggle - moved from Navbar */}
-          <SidebarMenuItem className="group-data-[collapsible=icon]:w-auto">
+          <SidebarMenuItem className="group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
             <SidebarMenuButton
               tooltip={t('sidebar.items.toggleSidebar')}
               onClick={toggleSidebar}
-              className="group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+              className="flex items-center justify-center group-data-[collapsible=icon]:!size-11 group-data-[collapsible=icon]:!p-0"
             >
-              <PanelLeft className="h-4 w-4" />
-              <span className="group-data-[collapsible=icon]:hidden">{t('sidebar.items.toggleSidebar')}</span>
+              <PanelLeft className="h-4 w-4 shrink-0" />
+              <span className="group-data-[collapsible=icon]:sr-only">{t('sidebar.items.toggleSidebar')}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
