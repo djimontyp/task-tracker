@@ -12,7 +12,7 @@ import { TaskConfig, TaskConfigCreate, TaskConfigUpdate } from '@/features/agent
 import { toast } from 'sonner'
 import { Pencil, Trash2, Plus, ClipboardList } from 'lucide-react'
 import { EmptyState } from '@/shared/patterns'
-import TaskForm from './TaskForm'
+import { TaskForm } from './TaskForm'
 
 const TaskList = () => {
   const queryClient = useQueryClient()
@@ -207,4 +207,4 @@ const TaskList = () => {
   )
 }
 
-export default TaskList
+export { TaskList }

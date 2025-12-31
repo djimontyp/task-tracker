@@ -159,7 +159,7 @@ export function SearchBar({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-11 w-11"
               onClick={handleClear}
               aria-label="Clear search"
             >

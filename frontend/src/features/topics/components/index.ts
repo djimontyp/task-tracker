@@ -1,1 +1,1 @@
-export { default as HexColorPickerComponent } from './HexColorPicker'
+export { HexColorPickerComponent } from './HexColorPicker'

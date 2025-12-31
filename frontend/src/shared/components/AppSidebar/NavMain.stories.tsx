@@ -15,6 +15,10 @@ import {
   Settings,
   Inbox,
   Bell,
+  Bot,
+  Zap,
+  MessageSquare,
+  FolderKanban,
 } from 'lucide-react';
 
 // Initialize minimal i18n for stories
@@ -27,6 +31,8 @@ if (!i18n.isInitialized) {
           'sidebar.groups.workspace': 'Workspace',
           'sidebar.groups.team': 'Team',
           'sidebar.groups.settings': 'Settings',
+          'sidebar.groups.aiAnalysis': 'AI Analysis',
+          'sidebar.groups.aiConfig': 'AI Config',
           'sidebar.items.dashboard': 'Dashboard',
           'sidebar.items.documents': 'Documents',
           'sidebar.items.members': 'Members',
@@ -34,6 +40,12 @@ if (!i18n.isInitialized) {
           'sidebar.items.inbox': 'Inbox',
           'sidebar.items.notifications': 'Notifications',
           'sidebar.items.settings': 'Settings',
+          'sidebar.items.messages': 'Messages',
+          'sidebar.items.topics': 'Topics',
+          'sidebar.items.analysisRuns': 'Analysis Runs',
+          'sidebar.items.proposals': 'Proposals',
+          'sidebar.items.agents': 'AI Agents',
+          'sidebar.items.providers': 'LLM Providers',
         },
       },
     },
@@ -46,9 +58,11 @@ if (!i18n.isInitialized) {
 const StoryWrapper = ({
   children,
   initialPath = '/',
+  defaultOpen = true,
 }: {
   children: React.ReactNode;
   initialPath?: string;
+  defaultOpen?: boolean;
 }) => {
   // Reset expanded groups on mount
   useEffect(() => {
@@ -58,9 +72,9 @@ const StoryWrapper = ({
   return (
     <I18nextProvider i18n={i18n}>
       <MemoryRouter initialEntries={[initialPath]}>
-        <SidebarProvider>
-          <Sidebar className="border-r">
-            <SidebarContent>{children}</SidebarContent>
+        <SidebarProvider defaultOpen={defaultOpen}>
+          <Sidebar className="border-r border-sidebar-border">
+            <SidebarContent className="pt-4">{children}</SidebarContent>
           </Sidebar>
         </SidebarProvider>
       </MemoryRouter>
@@ -81,10 +95,36 @@ const meta: Meta<typeof NavMain> = {
   ],
   parameters: {
     layout: 'padded',
+    backgrounds: {
+      default: 'sidebar',
+      values: [
+        { name: 'sidebar', value: 'hsl(220 14% 94%)' },
+        { name: 'dark', value: 'hsl(20 14.3% 4.1%)' },
+      ],
+    },
     docs: {
       description: {
-        component:
-          'Main navigation component for AppSidebar. Supports collapsible groups, active item highlighting, and i18n.',
+        component: `
+Main navigation component for the AppSidebar.
+
+## Features
+- **Collapsible groups** - Groups with multiple items can be expanded/collapsed
+- **Active item highlighting** - Current page shows with accent background and left indicator bar
+- **i18n support** - All labels use translation keys
+- **Keyboard navigation** - Full focus management
+- **Design System compliant** - Uses semantic color tokens and 4px spacing grid
+
+## Design Tokens Used
+- \`text-sidebar-foreground/60\` - Group labels (muted)
+- \`bg-sidebar-accent\` - Active/hover item background
+- \`bg-sidebar-primary\` - Active indicator bar
+- \`text-sidebar-primary\` - Active item icon
+
+## Spacing
+- Group padding: \`py-2\` (8px vertical)
+- Menu item gap: \`gap-1\` (4px)
+- Item height: \`h-10\` (40px - close to 44px touch target)
+        `,
       },
     },
   },
@@ -93,43 +133,105 @@ export default meta;
 
 type Story = StoryObj<typeof NavMain>;
 
+// Realistic Pulse Radar navigation structure
+const pulseRadarGroups: NavGroup[] = [
+  {
+    
+    label: 'Workspace',
+    items: [
+      { path: '/',  label: 'Dashboard', icon: Home },
+      { path: '/messages',  label: 'Messages', icon: MessageSquare },
+      { path: '/topics',  label: 'Topics', icon: FolderKanban },
+    ],
+  },
+  {
+    
+    label: 'AI Analysis',
+    items: [
+      { path: '/analysis',  label: 'Analysis Runs', icon: Zap },
+      { path: '/proposals',  label: 'Proposals', icon: FileText },
+    ],
+  },
+  {
+    
+    label: 'AI Config',
+    items: [
+      { path: '/agents',  label: 'AI Agents', icon: Bot },
+      { path: '/providers',  label: 'Providers', icon: Settings },
+    ],
+  },
+];
+
 const singleGroupItems: NavGroup[] = [
   {
-    labelKey: 'sidebar.groups.workspace',
+    
+    label: 'Workspace',
     items: [
-      { path: '/', labelKey: 'sidebar.items.dashboard', icon: Home },
-      { path: '/documents', labelKey: 'sidebar.items.documents', icon: FileText },
-      { path: '/inbox', labelKey: 'sidebar.items.inbox', icon: Inbox },
+      { path: '/',  label: 'Dashboard', icon: Home },
+      { path: '/documents',  label: 'Documents', icon: FileText },
+      { path: '/inbox',  label: 'Inbox', icon: Inbox },
     ],
   },
 ];
 
 const multiGroupItems: NavGroup[] = [
   {
-    labelKey: 'sidebar.groups.workspace',
+    
+    label: 'Workspace',
     items: [
-      { path: '/', labelKey: 'sidebar.items.dashboard', icon: Home },
-      { path: '/documents', labelKey: 'sidebar.items.documents', icon: FileText },
+      { path: '/',  label: 'Dashboard', icon: Home },
+      { path: '/documents',  label: 'Documents', icon: FileText },
     ],
   },
   {
-    labelKey: 'sidebar.groups.team',
+    
+    label: 'Team',
     items: [
-      { path: '/members', labelKey: 'sidebar.items.members', icon: Users },
-      { path: '/analytics', labelKey: 'sidebar.items.analytics', icon: BarChart },
+      { path: '/members',  label: 'Members', icon: Users },
+      { path: '/analytics',  label: 'Analytics', icon: BarChart },
     ],
   },
   {
-    labelKey: 'sidebar.groups.settings',
+    
+    label: 'Settings',
     items: [
-      { path: '/settings', labelKey: 'sidebar.items.settings', icon: Settings },
+      { path: '/settings',  label: 'Settings', icon: Settings },
     ],
   },
 ];
 
+export const Default: Story = {
+  args: {
+    groups: pulseRadarGroups,
+    currentPath: '/',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Default navigation state with Dashboard active. Shows realistic Pulse Radar navigation structure.',
+      },
+    },
+  },
+};
+
+export const WithActiveItem: Story = {
+  args: {
+    groups: pulseRadarGroups,
+    currentPath: '/messages',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Navigation with Messages page active. Note the orange indicator bar on the left side of the active item.',
+      },
+    },
+  },
+};
+
 export const SingleGroup: Story = {
   args: {
     groups: singleGroupItems,
+    currentPath: '/',
   },
   parameters: {
     docs: {
@@ -143,31 +245,12 @@ export const SingleGroup: Story = {
 export const MultipleGroups: Story = {
   args: {
     groups: multiGroupItems,
+    currentPath: '/',
   },
   parameters: {
     docs: {
       description: {
-        story: 'Navigation with multiple groups separated by dividers.',
-      },
-    },
-  },
-};
-
-export const WithActiveItem: Story = {
-  args: {
-    groups: multiGroupItems,
-  },
-  decorators: [
-    (Story) => (
-      <StoryWrapper initialPath="/documents">
-        <Story />
-      </StoryWrapper>
-    ),
-  ],
-  parameters: {
-    docs: {
-      description: {
-        story: 'Navigation with Documents page active.',
+        story: 'Navigation with multiple groups separated by subtle dividers.',
       },
     },
   },
@@ -177,20 +260,36 @@ export const CollapsibleGroup: Story = {
   args: {
     groups: [
       {
-        labelKey: 'sidebar.groups.workspace',
+        
+        label: 'Workspace',
         items: [
-          { path: '/', labelKey: 'sidebar.items.dashboard', icon: Home },
-          { path: '/documents', labelKey: 'sidebar.items.documents', icon: FileText },
-          { path: '/inbox', labelKey: 'sidebar.items.inbox', icon: Inbox },
-          { path: '/notifications', labelKey: 'sidebar.items.notifications', icon: Bell },
+          { path: '/',  label: 'Dashboard', icon: Home },
+          { path: '/documents',  label: 'Documents', icon: FileText },
+          { path: '/inbox',  label: 'Inbox', icon: Inbox },
+          { path: '/notifications',  label: 'Notifications', icon: Bell },
         ],
       },
     ],
+    currentPath: '/',
   },
   parameters: {
     docs: {
       description: {
-        story: 'Groups with multiple items are collapsible. Click the group header to expand/collapse.',
+        story: 'Groups with multiple items are collapsible. Click the group header to expand/collapse. The chevron rotates to indicate state.',
+      },
+    },
+  },
+};
+
+export const DeepActiveItem: Story = {
+  args: {
+    groups: pulseRadarGroups,
+    currentPath: '/agents',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Active item in the third group (AI Config > Agents). Demonstrates that active state works across all groups.',
       },
     },
   },
@@ -199,11 +298,12 @@ export const CollapsibleGroup: Story = {
 export const EmptyGroup: Story = {
   args: {
     groups: [],
+    currentPath: '/',
   },
   parameters: {
     docs: {
       description: {
-        story: 'Navigation with no groups (empty state).',
+        story: 'Navigation with no groups (empty state). The component renders an empty nav element.',
       },
     },
   },

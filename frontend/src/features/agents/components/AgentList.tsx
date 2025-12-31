@@ -6,10 +6,10 @@ import { AgentConfig, AgentConfigCreate, AgentConfigUpdate } from '@/features/ag
 import { toast } from 'sonner'
 import { Plus, Cpu } from 'lucide-react'
 import { EmptyState } from '@/shared/patterns'
-import AgentForm from './AgentForm'
-import AgentCard from './AgentCard'
-import TaskAssignment from './TaskAssignment'
-import AgentTestDialog from './AgentTestDialog'
+import { AgentForm } from './AgentForm'
+import { AgentCard } from './AgentCard'
+import { TaskAssignment } from './TaskAssignment'
+import { AgentTestDialog } from './AgentTestDialog'
 
 const AgentList = () => {
   const queryClient = useQueryClient()
@@ -168,4 +168,4 @@ const AgentList = () => {
   )
 }
 
-export default AgentList
+export { AgentList }

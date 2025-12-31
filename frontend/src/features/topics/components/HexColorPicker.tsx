@@ -159,4 +159,4 @@ const HexColorPickerComponent: React.FC<HexColorPickerComponentProps> = ({
   )
 }
 
-export default HexColorPickerComponent
+export { HexColorPickerComponent }

@@ -12,7 +12,7 @@ import { LLMProvider, LLMProviderCreate, LLMProviderUpdate, ValidationStatus } f
 import { toast } from 'sonner'
 import { Pencil, Trash2, Plus, Server } from 'lucide-react'
 import { EmptyState } from '@/shared/patterns'
-import ProviderForm from './ProviderForm'
+import { ProviderForm } from './ProviderForm'
 import { ValidationStatus as ValidationStatusComponent } from '@/features/providers/components'
 
 const POLLING_INTERVAL_MS = 1000
@@ -242,4 +242,4 @@ const ProviderList = () => {
   )
 }
 
-export default ProviderList
+export { ProviderList }

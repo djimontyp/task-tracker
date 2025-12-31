@@ -404,7 +404,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                         size="icon"
                         onClick={() => handleRemoveGroup(group.id)}
                         disabled={removingGroupIds.has(group.id)}
-                        className="h-8 w-8 shrink-0"
+                        className="h-11 w-11 shrink-0"
                         aria-label={`Remove ${group.name || 'group'} from monitoring list`}
                       >
                         {removingGroupIds.has(group.id) ? (

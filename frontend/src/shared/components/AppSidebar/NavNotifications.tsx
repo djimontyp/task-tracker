@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/shared/lib/utils'
 import { NotificationBadge } from '@/shared/ui'
@@ -11,18 +11,23 @@ import type { SidebarCounts } from '@/shared/api/statsService'
 
 const HOVER_CLASSES = 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
 
+// Helper to get display label (direct label or translated key)
+function getLabel(t: (key: string) => string, item: NavItem): string {
+  return item.label || (item.labelKey ? t(item.labelKey) : '')
+}
+
 interface NavNotificationsProps {
   item: NavItem;
   counts?: SidebarCounts;
+  currentPath: string;
 }
 
-export function NavNotifications({ item, counts }: NavNotificationsProps) {
+export function NavNotifications({ item, counts, currentPath }: NavNotificationsProps) {
   const { t } = useTranslation('common')
-  const location = useLocation()
   const isActive =
     item.path === '/'
-      ? location.pathname === '/'
-      : location.pathname.startsWith(item.path)
+      ? currentPath === '/'
+      : currentPath.startsWith(item.path)
 
   let badgeCount: number | undefined
   let badgeTooltip: string | undefined
@@ -45,7 +50,7 @@ export function NavNotifications({ item, counts }: NavNotificationsProps) {
         <SidebarMenuButton
           asChild
           isActive={isActive}
-          tooltip={t(item.labelKey)}
+          tooltip={getLabel(t, item)}
           className={cn(
             'flex-1 relative transition-all duration-300',
             'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold',
@@ -55,7 +60,7 @@ export function NavNotifications({ item, counts }: NavNotificationsProps) {
         >
           <Link to={item.path}>
             <item.icon className="size-5" />
-            <span className="group-data-[collapsible=icon]:sr-only">{t(item.labelKey)}</span>
+            <span className="group-data-[collapsible=icon]:sr-only">{getLabel(t, item)}</span>
           </Link>
         </SidebarMenuButton>
         <NotificationBadge

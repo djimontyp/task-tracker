@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import AtomCard from './AtomCard';
+import { AtomCard } from './AtomCard';
 import { AtomType, type Atom } from '../types';
 
 /**

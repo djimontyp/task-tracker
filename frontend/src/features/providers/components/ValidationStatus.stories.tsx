@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import ValidationStatus from './ValidationStatus';
+import { ValidationStatus } from './ValidationStatus';
 import { ValidationStatus as Status } from '@/features/providers/types';
 
 const meta: Meta<typeof ValidationStatus> = {

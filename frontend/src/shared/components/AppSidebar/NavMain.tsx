@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ChevronRight } from 'lucide-react'
 import { Fragment } from 'react'
@@ -16,52 +16,63 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
 } from '@/shared/ui/sidebar'
-import { Separator } from '@/shared/ui/separator'
 import type { NavGroup } from './types'
-
-const HOVER_CLASSES = 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
 
 interface NavMainProps {
   groups: NavGroup[];
+  currentPath: string;
 }
 
-export function NavMain({ groups }: NavMainProps) {
+// Helper to get display label (direct label or translated key)
+function getLabel(t: (key: string) => string, label?: string, labelKey?: string): string {
+  return label || (labelKey ? t(labelKey) : '')
+}
+
+// Helper to get unique key for React (prefer labelKey, fallback to label)
+function getGroupKey(group: NavGroup): string {
+  return group.labelKey || group.label || group.items[0]?.path || 'group'
+}
+
+export function NavMain({ groups, currentPath }: NavMainProps) {
   const { t } = useTranslation('common')
-  const location = useLocation()
   const { expandedGroups, setExpandedGroup } = useUiStore()
 
   return (
-    <>
+    <nav aria-label="Main navigation">
       {groups.map((group, groupIndex) => {
+        const groupKey = getGroupKey(group)
         const hasNestedRoutes = group.items.length > 1 && group.items.some((item) => item.path !== '/')
-        const isGroupExpanded = expandedGroups[group.labelKey] ?? false
+        const isGroupExpanded = expandedGroups[groupKey] ?? false
+        const isLastGroup = groupIndex === groups.length - 1
 
         if (hasNestedRoutes) {
           return (
-            <Fragment key={group.labelKey}>
+            <Fragment key={groupKey}>
               <Collapsible
                 open={isGroupExpanded}
-                onOpenChange={(open) => setExpandedGroup(group.labelKey, open)}
+                onOpenChange={(open) => setExpandedGroup(groupKey, open)}
                 className="group/collapsible"
               >
-                <SidebarGroup>
+                <SidebarGroup className="py-2">
                   <SidebarGroupLabel
                     asChild
-                    className="px-2 text-xs font-semibold uppercase tracking-wider"
+                    className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-widest text-sidebar-foreground/60"
                   >
                     <CollapsibleTrigger
                       aria-expanded={isGroupExpanded}
                       className={cn(
-                        'flex w-full items-center justify-between rounded-md transition-colors',
-                        'text-muted-foreground hover:text-foreground',
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                        'flex w-full items-center justify-between rounded-md py-0.5 transition-colors',
+                        'hover:text-sidebar-foreground',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring'
                       )}
                     >
-                      <span>{t(group.labelKey)}</span>
+                      <span>{getLabel(t, group.label, group.labelKey)}</span>
                       <ChevronRight
+                        aria-hidden="true"
                         className={cn(
-                          'size-5 transition-transform duration-200',
+                          'h-4 w-4 shrink-0 text-sidebar-foreground/40 transition-transform duration-200',
                           isGroupExpanded && 'rotate-90'
                         )}
                       />
@@ -69,28 +80,37 @@ export function NavMain({ groups }: NavMainProps) {
                   </SidebarGroupLabel>
                   <CollapsibleContent>
                     <SidebarGroupContent>
-                      <SidebarMenu>
+                      <SidebarMenu className="gap-0.5">
                         {group.items.map((item) => {
                           const isActive =
                             item.path === '/'
-                              ? location.pathname === '/'
-                              : location.pathname.startsWith(item.path)
+                              ? currentPath === '/'
+                              : currentPath.startsWith(item.path)
 
                           return (
                             <SidebarMenuItem key={item.path}>
                               <SidebarMenuButton
                                 asChild
                                 isActive={isActive}
-                                tooltip={t(item.labelKey)}
+                                tooltip={getLabel(t, item.label, item.labelKey)}
                                 className={cn(
-                                  'relative transition-all duration-200',
-                                  'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium',
-                                  !isActive && HOVER_CLASSES
+                                  'relative h-10 transition-colors duration-150',
+                                  isActive && [
+                                    'bg-sidebar-accent text-sidebar-accent-foreground font-medium',
+                                    'before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2',
+                                    'before:h-6 before:w-1 before:rounded-r-full before:bg-sidebar-primary',
+                                  ]
                                 )}
                               >
                                 <Link to={item.path} className="flex items-center gap-2">
-                                  <item.icon className="size-5" />
-                                  <span>{t(item.labelKey)}</span>
+                                  <item.icon
+                                    aria-hidden="true"
+                                    className={cn(
+                                      'h-[18px] w-[18px] shrink-0',
+                                      isActive ? 'text-sidebar-primary' : 'text-sidebar-foreground/70'
+                                    )}
+                                  />
+                                  <span className="truncate">{getLabel(t, item.label, item.labelKey)}</span>
                                 </Link>
                               </SidebarMenuButton>
                             </SidebarMenuItem>
@@ -101,9 +121,9 @@ export function NavMain({ groups }: NavMainProps) {
                   </CollapsibleContent>
                 </SidebarGroup>
               </Collapsible>
-              {groupIndex < groups.length - 1 && (
-                <Separator
-                  className="!w-auto mx-4 my-2"
+              {!isLastGroup && (
+                <SidebarSeparator
+                  className="my-2"
                   data-testid="group-separator"
                 />
               )}
@@ -112,39 +132,45 @@ export function NavMain({ groups }: NavMainProps) {
         }
 
         return (
-          <Fragment key={t(group.labelKey)}>
-            <SidebarGroup>
+          <Fragment key={groupKey}>
+            <SidebarGroup className="py-2">
               <SidebarGroupLabel
-                className={cn(
-                  'px-2 text-xs font-semibold uppercase tracking-wider',
-                  'text-muted-foreground'
-                )}
+                className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-widest text-sidebar-foreground/60"
               >
-                {t(group.labelKey)}
+                {getLabel(t, group.label, group.labelKey)}
               </SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="gap-0.5">
                   {group.items.map((item) => {
                     const isActive =
                       item.path === '/'
-                        ? location.pathname === '/'
-                        : location.pathname.startsWith(item.path)
+                        ? currentPath === '/'
+                        : currentPath.startsWith(item.path)
 
                     return (
                       <SidebarMenuItem key={item.path}>
                         <SidebarMenuButton
                           asChild
                           isActive={isActive}
-                          tooltip={t(item.labelKey)}
+                          tooltip={getLabel(t, item.label, item.labelKey)}
                           className={cn(
-                            'relative transition-all duration-200',
-                            'data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium',
-                            !isActive && HOVER_CLASSES
+                            'relative h-10 transition-colors duration-150',
+                            isActive && [
+                              'bg-sidebar-accent text-sidebar-accent-foreground font-medium',
+                              'before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2',
+                              'before:h-6 before:w-1 before:rounded-r-full before:bg-sidebar-primary',
+                            ]
                           )}
                         >
                           <Link to={item.path} className="flex items-center gap-2">
-                            <item.icon className="size-5" />
-                            <span>{t(item.labelKey)}</span>
+                            <item.icon
+                              aria-hidden="true"
+                              className={cn(
+                                'h-[18px] w-[18px] shrink-0',
+                                isActive ? 'text-sidebar-primary' : 'text-sidebar-foreground/70'
+                              )}
+                            />
+                            <span className="truncate">{getLabel(t, item.label, item.labelKey)}</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -153,15 +179,15 @@ export function NavMain({ groups }: NavMainProps) {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-            {groupIndex < groups.length - 1 && (
-              <Separator
-                className="!w-auto mx-4 my-2"
+            {!isLastGroup && (
+              <SidebarSeparator
+                className="my-2"
                 data-testid="group-separator"
               />
             )}
           </Fragment>
         )
       })}
-    </>
+    </nav>
   )
 }

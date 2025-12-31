@@ -13,10 +13,8 @@ import {
   ClipboardList,
   Gauge,
 } from 'lucide-react'
-import { useLocation, Link } from 'react-router-dom'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { useUiStore } from '@/shared/store/uiStore'
-import { useWebSocket } from '@/shared/hooks'
 import {
   Sidebar,
   SidebarContent,
@@ -28,14 +26,22 @@ import {
   useSidebar,
 } from '@/shared/ui/sidebar'
 import { Separator } from '@/shared/ui/separator'
-import { statsService, type SidebarCounts } from '@/shared/api/statsService'
+import type { SidebarCounts } from '@/shared/api/statsService'
 import { Logo } from '@/shared/components/Logo'
 import { NavMain } from './NavMain'
 import { NavMainCollapsed } from './NavMainCollapsed'
 import type { NavGroup } from './types'
 
+// Helper to get unique key for React (prefer labelKey, fallback to label)
+function getGroupKey(group: NavGroup): string {
+  return group.labelKey || group.label || group.items[0]?.path || 'group'
+}
+
 interface AppSidebarProps {
   mobile?: boolean
+  counts?: SidebarCounts
+  currentPath: string
+  className?: string
 }
 
 const navGroups: NavGroup[] = [
@@ -82,50 +88,25 @@ const navGroups: NavGroup[] = [
   // },
 ]
 
-export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
+export function AppSidebar({ mobile = false, counts: _counts, currentPath, className }: AppSidebarProps) {
   const { t } = useTranslation('common')
   const groups = useMemo(() => navGroups, [])
-  const location = useLocation()
-  const queryClient = useQueryClient()
   const { expandedGroups, setExpandedGroup } = useUiStore()
   const { state, toggleSidebar } = useSidebar() // For logo collapsed state + toggle
 
+  // Auto-expand groups containing active item
   useEffect(() => {
     groups.forEach((group) => {
+      const groupKey = getGroupKey(group)
       const hasActiveItem = group.items.some((item) =>
-        item.path === '/dashboard' ? location.pathname === '/dashboard' : location.pathname.startsWith(item.path)
+        item.path === '/dashboard' ? currentPath === '/dashboard' : currentPath.startsWith(item.path)
       )
 
-      if (hasActiveItem && expandedGroups[group.labelKey] === undefined) {
-        setExpandedGroup(group.labelKey, true)
+      if (hasActiveItem && expandedGroups[groupKey] === undefined) {
+        setExpandedGroup(groupKey, true)
       }
     })
-  }, [location.pathname, groups, expandedGroups, setExpandedGroup])
-
-  const { data: _counts } = useQuery<SidebarCounts>({
-    queryKey: ['sidebar-counts'],
-    queryFn: () => statsService.getSidebarCounts(),
-    refetchInterval: 30000,
-  })
-
-  useWebSocket({
-    topics: ['analysis', 'proposals', 'noise_filtering'],
-    onMessage: (data) => {
-      const message = data as { topic: string; event: string }
-      const { topic, event: eventType } = message
-
-      if (topic === 'analysis' && ['run_created', 'run_closed', 'run_failed'].includes(eventType)) {
-        queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
-      }
-      if (topic === 'proposals' && ['proposal_created', 'proposal_approved', 'proposal_rejected'].includes(eventType)) {
-        queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
-      }
-      if (topic === 'noise_filtering' && ['message_scored', 'batch_scored'].includes(eventType)) {
-        queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
-      }
-    },
-    reconnect: true,
-  })
+  }, [currentPath, groups, expandedGroups, setExpandedGroup])
 
   // DORMANT: AI Operations group приховано
   // const aiOperationsGroup = groups.find((g) => g.label === 'AI Operations')
@@ -134,7 +115,7 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
     return (
       <div className="flex flex-col h-full">
         <div className="flex-1 overflow-y-auto py-2">
-          <NavMain groups={groups} />
+          <NavMain groups={groups} currentPath={currentPath} />
           {/* DORMANT: AI Operations + Extract Knowledge button приховано
           {aiOperationsGroup && (
             <>
@@ -161,7 +142,7 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
   }
 
   return (
-    <Sidebar collapsible="icon" data-testid="app-sidebar">
+    <Sidebar collapsible="icon" data-testid="app-sidebar" className={className}>
       {/* Logo Header - full-height sidebar pattern */}
       <SidebarHeader className="h-14 border-b border-sidebar-border flex items-center group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
         <Logo
@@ -173,9 +154,9 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
 
       <SidebarContent>
         {state === 'collapsed' ? (
-          <NavMainCollapsed groups={groups} />
+          <NavMainCollapsed groups={groups} currentPath={currentPath} />
         ) : (
-          <NavMain groups={groups} />
+          <NavMain groups={groups} currentPath={currentPath} />
         )}
       </SidebarContent>
 

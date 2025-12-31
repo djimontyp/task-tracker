@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import AgentCard from './AgentCard';
+import { AgentCard } from './AgentCard';
 import type { AgentConfig } from '@/features/agents/types';
 
 /**

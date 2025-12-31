@@ -53,7 +53,7 @@ const LayoutWrapper = ({
           {/* Desktop Grid Layout (matches MainLayout.tsx) */}
           <div className="grid grid-cols-[auto_1fr] h-screen overflow-hidden bg-background">
             {/* Column 1: Sidebar */}
-            <AppSidebar />
+            <AppSidebar currentPath="/dashboard" />
 
             {/* Column 2: Navbar + Content */}
             <div className="grid grid-rows-[56px_1fr] overflow-hidden">
@@ -263,7 +263,7 @@ export const SidebarOnly: Story = {
       <MemoryRouter initialEntries={['/dashboard']}>
         <SidebarProvider defaultOpen={true}>
           <div className="flex min-h-[400px] border rounded-lg overflow-hidden">
-            <AppSidebar />
+            <AppSidebar currentPath="/dashboard" />
             <div className="flex-1 p-4 bg-muted/30">
               <p className="text-muted-foreground">
                 Sidebar with Logo header (left-aligned) + navigation groups.
@@ -293,7 +293,7 @@ export const SidebarCollapsed: Story = {
       <MemoryRouter initialEntries={['/dashboard']}>
         <SidebarProvider defaultOpen={false}>
           <div className="flex min-h-[400px] border rounded-lg overflow-hidden">
-            <AppSidebar />
+            <AppSidebar currentPath="/dashboard" />
             <div className="flex-1 p-4 bg-muted/30">
               <p className="text-muted-foreground">
                 Sidebar in collapsed (icon-only) mode.
@@ -444,7 +444,7 @@ export const AntiPatternContainerConstraint: Story = {
         <MemoryRouter initialEntries={['/dashboard']}>
           <SidebarProvider defaultOpen={true}>
             <div className="grid grid-cols-[auto_1fr] h-screen overflow-hidden bg-background">
-              <AppSidebar />
+              <AppSidebar currentPath="/dashboard" />
               <div className="grid grid-rows-[56px_1fr] overflow-hidden">
                 <Navbar isDesktop={true} />
                 <SidebarInset className="overflow-auto">
