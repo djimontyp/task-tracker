@@ -13,7 +13,7 @@ import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS, API_BASE_PATH } from '@/shared/config/api'
 import { toast } from 'sonner'
 import { logger } from '@/shared/utils/logger'
-import { getWebSocketUrl } from '@/shared/utils/websocket'
+import { useWebSocket } from '@/shared/hooks'
 import {
   SortingState,
   VisibilityState,
@@ -122,45 +122,19 @@ const MessagesPage = () => {
     },
   })
 
-  useEffect(() => {
-    const wsUrl = getWebSocketUrl(['noise_filtering'])
-    const ws = new WebSocket(wsUrl)
-
-    ws.onopen = () => {
-      logger.debug('[MessagesPage] WebSocket connected')
-    }
-
-    ws.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data)
-        const { topic, event: eventType } = message
-
-        if (topic === 'noise_filtering') {
-          if (eventType === 'message_scored') {
-            queryClient.invalidateQueries({ queryKey: ['messages'] })
-          }
-
-          if (eventType === 'batch_scored') {
-            queryClient.invalidateQueries({ queryKey: ['messages'] })
-          }
+  // WebSocket for real-time message scoring updates
+  useWebSocket({
+    topics: ['noise_filtering'],
+    onMessage: (data) => {
+      const message = data as { topic: string; event: string }
+      if (message.topic === 'noise_filtering') {
+        if (message.event === 'message_scored' || message.event === 'batch_scored') {
+          queryClient.invalidateQueries({ queryKey: ['messages'] })
         }
-      } catch (parseError) {
-        console.error('[MessagesPage] Error parsing WebSocket message:', parseError)
       }
-    }
-
-    ws.onerror = (error) => {
-      console.error('[MessagesPage] WebSocket error:', error)
-    }
-
-    ws.onclose = () => {
-      logger.debug('[MessagesPage] WebSocket disconnected')
-    }
-
-    return () => {
-      ws.close()
-    }
-  }, [queryClient])
+    },
+    reconnect: true,
+  })
 
   // Handle highlight param from search navigation
   const [viewMode, setViewMode] = useState<'feed' | 'table'>('feed')

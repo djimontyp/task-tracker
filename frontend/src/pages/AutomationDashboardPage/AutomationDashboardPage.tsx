@@ -5,7 +5,7 @@ import { AutomationStatsCards } from '@/features/automation/components/Automatio
 import { AutomationTrendsChart } from '@/features/automation/components/AutomationTrendsChart'
 import { RulePerformanceTable } from '@/features/automation/components/RulePerformanceTable'
 import { JobStatusWidget } from '@/features/automation/components/JobStatusWidget'
-import { useWebSocket } from '@/features/websocket'
+import { useWebSocket } from '@/shared/hooks'
 
 export default function AutomationDashboardPage() {
   const queryClient = useQueryClient()

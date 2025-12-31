@@ -16,8 +16,7 @@ import {
 import { useLocation, Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useUiStore } from '@/shared/store/uiStore'
-import { logger } from '@/shared/utils/logger'
-import { getWebSocketUrl } from '@/shared/utils/websocket'
+import { useWebSocket } from '@/shared/hooks'
 import {
   Sidebar,
   SidebarContent,
@@ -108,56 +107,24 @@ export function AppSidebar({ mobile = false }: AppSidebarProps = {}) {
     refetchInterval: 30000,
   })
 
-  useEffect(() => {
-    const wsUrl = getWebSocketUrl(['analysis', 'proposals', 'noise_filtering'])
-    const ws = new WebSocket(wsUrl)
+  useWebSocket({
+    topics: ['analysis', 'proposals', 'noise_filtering'],
+    onMessage: (data) => {
+      const message = data as { topic: string; event: string }
+      const { topic, event: eventType } = message
 
-    ws.onopen = () => {
-      logger.debug('[Sidebar] WebSocket connected for counts')
-    }
-
-    ws.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data)
-        const { topic, event: eventType } = message
-
-        if (
-          topic === 'analysis' &&
-          ['run_created', 'run_closed', 'run_failed'].includes(eventType)
-        ) {
-          queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
-        }
-
-        if (
-          topic === 'proposals' &&
-          ['proposal_created', 'proposal_approved', 'proposal_rejected'].includes(eventType)
-        ) {
-          queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
-        }
-
-        if (
-          topic === 'noise_filtering' &&
-          ['message_scored', 'batch_scored'].includes(eventType)
-        ) {
-          queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
-        }
-      } catch (error) {
-        console.error('[Sidebar] Error parsing WebSocket message:', error)
+      if (topic === 'analysis' && ['run_created', 'run_closed', 'run_failed'].includes(eventType)) {
+        queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
       }
-    }
-
-    ws.onerror = (error) => {
-      console.error('[Sidebar] WebSocket error:', error)
-    }
-
-    ws.onclose = () => {
-      logger.debug('[Sidebar] WebSocket disconnected')
-    }
-
-    return () => {
-      ws.close()
-    }
-  }, [queryClient])
+      if (topic === 'proposals' && ['proposal_created', 'proposal_approved', 'proposal_rejected'].includes(eventType)) {
+        queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
+      }
+      if (topic === 'noise_filtering' && ['message_scored', 'batch_scored'].includes(eventType)) {
+        queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
+      }
+    },
+    reconnect: true,
+  })
 
   // DORMANT: AI Operations group приховано
   // const aiOperationsGroup = groups.find((g) => g.label === 'AI Operations')
