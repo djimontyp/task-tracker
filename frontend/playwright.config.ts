@@ -37,11 +37,11 @@ export default defineConfig({
     },
   ],
 
-  // Start preview server for E2E tests (serves built files)
+  // Start static server for E2E tests (serves built files with SPA fallback)
   webServer: {
-    command: 'npm run preview',
+    command: 'npx serve dist -l 4173 -s',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: 60000,
   },
 })
