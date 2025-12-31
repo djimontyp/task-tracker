@@ -135,6 +135,21 @@ export const Controlled: Story = {
 - Duplicate stories across files
 - Use hardcoded colors (use semantic tokens)
 - Skip error/loading/empty states
+- Use i18n keys (`labelKey`) — use direct `label` props instead
+
+### i18n in Stories
+
+Stories run in isolation without real translations. **Always use direct string props:**
+
+```tsx
+// ❌ Bad — labelKey won't be translated
+const item = { labelKey: 'sidebar.dashboard', label: 'Dashboard' }
+
+// ✅ Good — direct value always works
+const item = { label: 'Dashboard' }
+```
+
+ESLint rule `stories-no-i18n-keys` enforces this automatically.
 
 ## Troubleshooting
 

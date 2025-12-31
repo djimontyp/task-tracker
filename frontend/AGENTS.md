@@ -164,8 +164,23 @@ export default function MyPage() {
 These rules run automatically:
 - `local-rules/no-raw-tailwind-colors` — blocks bg-red-500, text-green-600, etc.
 - `local-rules/no-odd-spacing` — blocks gap-3, p-5, m-7 (must be 4px grid)
+- `local-rules/stories-no-i18n-keys` — blocks i18n keys in Storybook (use direct labels)
 
 **If lint fails, fix before commit!**
+
+## Storybook + i18n
+
+Stories run in isolation without real translations. Use direct `label` prop, not `labelKey`.
+
+```tsx
+// ❌ Bad — i18n keys don't resolve in Storybook
+const item = { labelKey: 'sidebar.items.dashboard', label: 'Dashboard' }
+
+// ✅ Good — direct value works everywhere
+const item = { label: 'Dashboard' }
+```
+
+ESLint auto-fix removes redundant `labelKey` when `label` exists.
 
 ---
 

@@ -63,7 +63,7 @@
 
 ## Команди
 
-> **ВАЖЛИВО:** Завжди віддавай перевагу `just` командам! Див. [@justfile](justfile)
+> **ВАЖЛИВО:** Завжди віддавай перевагу `just` командам! Див. [justfile](justfile)
 
 ```bash
 just                  # показати всі команди
@@ -983,6 +983,169 @@ bd comments add {issue} "✅ RESOLVED\nSolution: ..."
 | CONTEXT | BA (A1) | Domain expert |
 | EXTERNAL | Auto-retry (3x) | User |
 | REQUIREMENTS | BA (A1) + User | User |
+
+## Component Portability (CDD)
+
+> **TL;DR:** Компоненти в `shared/` мають бути портативними — працювати без API, store, router.
+
+### Принцип Component-Driven Development
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  PORTABLE COMPONENT = Pure Function                         │
+│                                                             │
+│  Props → Component → UI                                     │
+│                                                             │
+│  ✅ No API calls inside (useQuery, fetch)                   │
+│  ✅ No store access inside (useUIStore)                     │
+│  ✅ No router dependencies (useNavigate)                    │
+│  ✅ Works in Storybook WITHOUT mocks                        │
+│  ✅ Works in ANY project                                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Portability Levels
+
+| Level | Критерій | Приклад |
+|-------|----------|---------|
+| **L1: Basic** | No useQuery/fetch/store in shared/ | ActivityHeatmap ❌ → ✅ |
+| **L2: Contract** | All data via props with types | `data: Topic[]` |
+| **L3: Style** | CSS variables, className prop | `className?: string` |
+| **L4: Docs** | Story exists, autodocs enabled | 95% coverage |
+| **L5: Isolation** | Unit test without providers | Pure render test |
+
+### Anti-patterns (ЗАБОРОНЕНО в shared/)
+
+```tsx
+// ❌ НЕПРАВИЛЬНО — non-portable
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/shared/lib/api'
+
+export function ActivityHeatmap() {
+  const { data } = useQuery({ queryFn: () => apiClient.get('/activity') })
+  return <Heatmap data={data} />
+}
+
+// ✅ ПРАВИЛЬНО — portable presenter
+interface ActivityHeatmapProps {
+  data: ActivityDataPoint[]
+  isLoading?: boolean
+  className?: string
+}
+
+export function ActivityHeatmap({ data, isLoading, className }: ActivityHeatmapProps) {
+  if (isLoading) return <Skeleton />
+  return <Heatmap data={data} className={className} />
+}
+```
+
+### Структура папок
+
+| Папка | Призначення | Portability |
+|-------|-------------|-------------|
+| `shared/ui/` | shadcn primitives | ✅ Required |
+| `shared/patterns/` | Composition patterns | ✅ Required |
+| `shared/components/` | Business reusable | ✅ Required |
+| `features/*/components/` | Feature-specific | ⚠️ Recommended |
+| `pages/*/components/` | Page-specific | Optional |
+
+### ESLint Rule
+
+`local-rules/no-direct-api-imports` — блокує useQuery/apiClient в shared/components.
+
+## shadcn/ui Guidelines
+
+> **TL;DR:** shadcn/ui = правильний вибір. Оптимізувати, не замінювати.
+
+### Чому shadcn/ui
+
+- ✅ **Ownership** — код наш, не залежимо від npm updates
+- ✅ **Accessibility** — Radix primitives (WCAG AA з коробки)
+- ✅ **Tailwind** — природна інтеграція з Design System
+- ✅ **Industry standard** — Supabase, Vercel використовують
+- ✅ **95% stories coverage** — добре задокументовано
+
+### Статистика використання
+
+| Tier | Components | Status |
+|------|------------|--------|
+| **Core** | Button, Card, Badge, Skeleton, Tooltip | ⭐ 55-18 imports |
+| **High** | Input, Select, Dialog, Tabs | ✅ 7-12 imports |
+| **Medium** | Switch, Checkbox, Dropdown, Progress | ✅ 5-7 imports |
+| **Low** | Sheet, Chart, Avatar, Alert | ⚠️ 2 imports |
+| **Unused** | Breadcrumb | ❌ 0 imports (видалити) |
+
+### Коли НЕ додавати новий shadcn компонент
+
+1. Існуючий компонент покриває use case
+2. Простіше написати з нуля (< 50 LOC)
+3. Компонент не буде переиспользовуватись (>2 місця)
+
+### Maintenance Policy
+
+- Ми **НЕ** оновлюємо shadcn автоматично (код стабільний)
+- Баги фіксимо локально
+- Моніторимо Radix → Base UI ситуацію
+- При критичному fix — cherry-pick вручну
+
+### Decision Tree для нових компонентів
+
+```
+ПОТРІБЕН НОВИЙ UI ЕЛЕМЕНТ?
+         │
+         ▼
+┌─────────────────────────────┐
+│ 1. Чи є в shared/ui?        │ → YES → USE IT
+└─────────────────────────────┘
+         │ NO
+         ▼
+┌─────────────────────────────┐
+│ 2. Чи є в shared/components?│ → YES → USE IT
+└─────────────────────────────┘
+         │ NO
+         ▼
+┌─────────────────────────────┐
+│ 3. Чи є в shadcn registry?  │
+│    ui.shadcn.com/docs       │
+└─────────────────────────────┘
+         │
+    YES ─┴─ NO
+     │      │
+     ▼      ▼
+ EVALUATE  BUILD in shared/components
+     │
+Fits 80%? ─┬─ YES → npx shadcn add → shared/ui
+           │
+           └─ NO → WRAP in shared/components
+```
+
+### Приклад: Додавання DatePicker
+
+```bash
+# 1. Перевірити existing
+grep -r "DatePicker\|Calendar" src/shared/
+
+# 2. Додати shadcn primitives
+npx shadcn@latest add calendar
+
+# 3. Створити composition wrapper
+# src/shared/components/DatePicker/index.tsx
+```
+
+```tsx
+import { Calendar } from '@/shared/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover'
+
+interface DatePickerProps {
+  value?: Date
+  onChange: (date: Date | undefined) => void
+  className?: string
+}
+
+export function DatePicker({ value, onChange, className }: DatePickerProps) {
+  // ... composition of shadcn primitives
+}
+```
 
 ## Recent Changes
 - 005-i18n: Added Python 3.12 (backend), TypeScript 5.9.3 (frontend) + FastAPI 0.117.1, React 18.3.1, react-i18next, Zustand 5.0, langdetec

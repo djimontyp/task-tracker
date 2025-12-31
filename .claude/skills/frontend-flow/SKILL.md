@@ -84,6 +84,146 @@ frontend/AGENTS.md
 
 **Related skills:** `/frontend`, `/design-tokens`
 
+## Phase 3.5: Component Portability (NEW!)
+
+**Trigger:** When creating/modifying components in `shared/`
+
+**Principle:** Components in shared/ must be PORTABLE — work without API, store, router.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  PORTABLE COMPONENT = Pure Function                         │
+│                                                             │
+│  Props → Component → UI                                     │
+│                                                             │
+│  ✅ No useQuery/useMutation inside                          │
+│  ✅ No apiClient/fetch calls inside                         │
+│  ✅ No useNavigate/useParams/useLocation                    │
+│  ✅ No useStore (Zustand) directly                          │
+│  ✅ All data via props                                      │
+│  ✅ Works in Storybook WITHOUT providers                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Anti-pattern (FORBIDDEN):**
+```tsx
+// ❌ NON-PORTABLE — violates CDD principles
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/shared/lib/api'
+
+export function ActivityHeatmap() {
+  const { data } = useQuery({ queryFn: () => apiClient.get('/activity') })
+  return <Heatmap data={data} />
+}
+```
+
+**Correct pattern (Presenter + Hook):**
+```tsx
+// ✅ PORTABLE PRESENTER — shared/components/
+interface ActivityHeatmapProps {
+  data: ActivityDataPoint[]
+  isLoading?: boolean
+  className?: string
+}
+
+export function ActivityHeatmap({ data, isLoading, className }: ActivityHeatmapProps) {
+  if (isLoading) return <ActivityHeatmapSkeleton />
+  return <HeatmapRenderer data={data} className={className} />
+}
+
+// Data hook — features/activity/hooks/ or page level
+export function useActivityData(timeRange: TimeRange) {
+  return useQuery({
+    queryKey: ['activity', timeRange],
+    queryFn: () => activityService.getActivity(timeRange)
+  })
+}
+
+// Page usage — composition
+function DashboardPage() {
+  const { data, isLoading } = useActivityData('week')
+  return <ActivityHeatmap data={data ?? []} isLoading={isLoading} />
+}
+```
+
+**Portability Checklist:**
+- [ ] No useQuery/useMutation in shared/components
+- [ ] No apiClient/fetch imports in shared/components
+- [ ] No useNavigate/useParams in shared/components
+- [ ] All data passed via typed props interface
+- [ ] Optional className prop for customization
+- [ ] Works in Storybook without QueryClient/Router mocks
+
+**Verification command:**
+```bash
+# Should return 0 violations
+grep -rE "useQuery|apiClient" src/shared/components --include="*.tsx" | grep -v test
+```
+
+## Phase 3.6: Component Integration Decision (NEW!)
+
+**Trigger:** When needing a new UI element
+
+**Decision Tree:**
+```
+NEED NEW UI ELEMENT?
+         │
+         ▼
+┌─────────────────────────────┐
+│ 1. Check shared/ui/         │ → EXISTS → USE IT
+└─────────────────────────────┘
+         │ NOT FOUND
+         ▼
+┌─────────────────────────────┐
+│ 2. Check shared/components/ │ → EXISTS → USE IT
+└─────────────────────────────┘
+         │ NOT FOUND
+         ▼
+┌─────────────────────────────┐
+│ 3. Check shared/patterns/   │ → EXISTS → USE IT
+└─────────────────────────────┘
+         │ NOT FOUND
+         ▼
+┌─────────────────────────────┐
+│ 4. Check shadcn registry    │
+│    ui.shadcn.com/docs       │
+└─────────────────────────────┘
+         │
+    FOUND ┴ NOT FOUND
+      │        │
+      ▼        ▼
+  EVALUATE   BUILD in shared/components
+      │
+ Fits 80%? ┬ YES → npx shadcn add → shared/ui
+           │
+           └ NO → WRAP in shared/components
+```
+
+**Where to put new component:**
+
+| Type | Location | Example |
+|------|----------|---------|
+| shadcn primitive | `shared/ui/` | Button, Dialog, Select |
+| shadcn + customize | `shared/ui/` (modify) | Badge with new variant |
+| Composition | `shared/patterns/` | CardWithStatus, FormField |
+| Business reusable | `shared/components/` | SearchBar, TopicSelector |
+| Feature-specific | `features/X/components/` | AtomCard, ProviderList |
+| Page-specific | `pages/X/components/` | DashboardStats |
+
+**Adding shadcn component example:**
+```bash
+# 1. Check if exists
+grep -r "DatePicker\|Calendar" src/shared/
+
+# 2. Add from shadcn
+npx shadcn@latest add calendar
+
+# 3. Create composition wrapper if needed
+# src/shared/components/DatePicker/index.tsx
+```
+
+**Checkpoint:** "Component location decided? Portability requirements clear?"
+
 ## Phase 4: Storybook (Component Library)
 
 **Trigger:** After creating/modifying component
