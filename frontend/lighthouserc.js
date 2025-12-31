@@ -11,8 +11,10 @@
 module.exports = {
   ci: {
     collect: {
-      // Serve built files
+      // Serve built files with SPA fallback support
       staticDistDir: './dist',
+      // Enable SPA mode - all routes serve index.html
+      isSinglePageApplication: true,
       // Number of runs per URL for more stable results
       numberOfRuns: 3,
       // URLs to test
