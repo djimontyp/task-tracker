@@ -1,7 +1,10 @@
 /**
  * Project API Service
+ *
+ * Uses axios client for HTTP requests with automatic JSON parsing
  */
 
+import apiClient from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 import type {
   ProjectConfig,
@@ -10,59 +13,29 @@ import type {
   ProjectListResponse,
 } from '../types'
 
-const API_BASE_URL = ''
-
 class ProjectService {
   /**
    * List all projects
    */
   async listProjects(): Promise<ProjectListResponse> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.projects}`)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch projects: ${response.statusText}`)
-    }
-
-    return response.json()
+    const response = await apiClient.get<ProjectListResponse>(API_ENDPOINTS.projects)
+    return response.data
   }
 
   /**
    * Get single project by ID
    */
   async getProject(projectId: string): Promise<ProjectConfig> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.projects}/${projectId}`)
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error('Project not found')
-      }
-      throw new Error(`Failed to fetch project: ${response.statusText}`)
-    }
-
-    return response.json()
+    const response = await apiClient.get<ProjectConfig>(`${API_ENDPOINTS.projects}/${projectId}`)
+    return response.data
   }
 
   /**
    * Create new project
    */
   async createProject(data: CreateProjectConfig): Promise<ProjectConfig> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.projects}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: response.statusText }))
-      if (response.status === 409) {
-        throw new Error(error.detail || 'Project name already exists')
-      }
-      throw new Error(error.detail || 'Failed to create project')
-    }
-
-    return response.json()
+    const response = await apiClient.post<ProjectConfig>(API_ENDPOINTS.projects, data)
+    return response.data
   }
 
   /**
@@ -72,39 +45,18 @@ class ProjectService {
     projectId: string,
     data: UpdateProjectConfig
   ): Promise<ProjectConfig> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.projects}/${projectId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: response.statusText }))
-      if (response.status === 404) {
-        throw new Error('Project not found')
-      }
-      throw new Error(error.detail || 'Failed to update project')
-    }
-
-    return response.json()
+    const response = await apiClient.put<ProjectConfig>(
+      `${API_ENDPOINTS.projects}/${projectId}`,
+      data
+    )
+    return response.data
   }
 
   /**
    * Delete project
    */
   async deleteProject(projectId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.projects}/${projectId}`, {
-      method: 'DELETE',
-    })
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error('Project not found')
-      }
-      throw new Error(`Failed to delete project: ${response.statusText}`)
-    }
+    await apiClient.delete(`${API_ENDPOINTS.projects}/${projectId}`)
   }
 }
 

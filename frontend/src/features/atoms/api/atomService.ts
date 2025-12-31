@@ -1,3 +1,10 @@
+/**
+ * Atom API Service
+ *
+ * Client for knowledge atoms CRUD and linking operations
+ */
+
+import apiClient from '@/shared/lib/api/client'
 import { API_BASE_PATH } from '@/shared/config/api'
 import type {
   Atom,
@@ -9,153 +16,79 @@ import type {
   TopicAtom,
 } from '../types'
 
-const API_BASE_URL = ''
-
 class AtomService {
   async listAtoms(skip: number = 0, limit: number = 50): Promise<AtomListResponse> {
-    const params = new URLSearchParams({
-      skip: skip.toString(),
-      limit: limit.toString(),
+    const response = await apiClient.get<AtomListResponse>(`${API_BASE_PATH}/atoms`, {
+      params: { skip, limit },
     })
-
-    const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atoms?${params}`)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch atoms: ${response.statusText}`)
-    }
-
-    return response.json()
+    return response.data
   }
 
   async getAtomById(id: string): Promise<Atom> {
-    const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atoms/${id}`)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch atom: ${response.statusText}`)
-    }
-
-    return response.json()
+    const response = await apiClient.get<Atom>(`${API_BASE_PATH}/atoms/${id}`)
+    return response.data
   }
 
   async createAtom(data: CreateAtom): Promise<Atom> {
-    const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atoms`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to create atom: ${response.statusText}`)
-    }
-
-    return response.json()
+    const response = await apiClient.post<Atom>(`${API_BASE_PATH}/atoms`, data)
+    return response.data
   }
 
   async updateAtom(id: string, data: UpdateAtom): Promise<Atom> {
-    const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atoms/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to update atom: ${response.statusText}`)
-    }
-
-    return response.json()
+    const response = await apiClient.patch<Atom>(`${API_BASE_PATH}/atoms/${id}`, data)
+    return response.data
   }
 
   async deleteAtom(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atoms/${id}`, {
-      method: 'DELETE',
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to delete atom: ${response.statusText}`)
-    }
+    await apiClient.delete(`${API_BASE_PATH}/atoms/${id}`)
   }
 
   async getAtomsByTopic(topicId: string): Promise<Atom[]> {
-    const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/topics/${topicId}/atoms`)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch atoms for topic: ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    return data.items || data
+    const response = await apiClient.get<{ items?: Atom[] } | Atom[]>(
+      `${API_BASE_PATH}/topics/${topicId}/atoms`
+    )
+    const data = response.data
+    return Array.isArray(data) ? data : data.items || []
   }
 
-  async linkAtomToTopic(atomId: string, topicId: string, note?: string, position?: number): Promise<TopicAtom> {
-    const params = new URLSearchParams()
-    if (note) params.append('note', note)
-    if (position !== undefined) params.append('position', position.toString())
-
-    const url = `${API_BASE_URL}${API_BASE_PATH}/atoms/${atomId}/topics/${topicId}${params.toString() ? '?' + params.toString() : ''}`
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to link atom to topic: ${response.statusText}`)
-    }
-
-    return response.json()
+  async linkAtomToTopic(
+    atomId: string,
+    topicId: string,
+    note?: string,
+    position?: number
+  ): Promise<TopicAtom> {
+    const response = await apiClient.post<TopicAtom>(
+      `${API_BASE_PATH}/atoms/${atomId}/topics/${topicId}`,
+      undefined,
+      {
+        params: {
+          note: note || undefined,
+          position: position !== undefined ? position : undefined,
+        },
+      }
+    )
+    return response.data
   }
 
   async unlinkAtomFromTopic(atomId: string, topicId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/topic-atoms/${topicId}/${atomId}`, {
-      method: 'DELETE',
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to unlink atom from topic: ${response.statusText}`)
-    }
+    await apiClient.delete(`${API_BASE_PATH}/topic-atoms/${topicId}/${atomId}`)
   }
 
   async createAtomLink(data: CreateAtomLink): Promise<AtomLink> {
-    const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atom-links`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to create atom link: ${response.statusText}`)
-    }
-
-    return response.json()
+    const response = await apiClient.post<AtomLink>(`${API_BASE_PATH}/atom-links`, data)
+    return response.data
   }
 
   async getAtomLinks(atomId: string): Promise<AtomLink[]> {
-    const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atoms/${atomId}/links`)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch atom links: ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    return data.items || data
+    const response = await apiClient.get<{ items?: AtomLink[] } | AtomLink[]>(
+      `${API_BASE_PATH}/atoms/${atomId}/links`
+    )
+    const data = response.data
+    return Array.isArray(data) ? data : data.items || []
   }
 
   async deleteAtomLink(fromAtomId: string, toAtomId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}${API_BASE_PATH}/atom-links/${fromAtomId}/${toAtomId}`, {
-      method: 'DELETE',
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to delete atom link: ${response.statusText}`)
-    }
+    await apiClient.delete(`${API_BASE_PATH}/atom-links/${fromAtomId}/${toAtomId}`)
   }
 }
 
