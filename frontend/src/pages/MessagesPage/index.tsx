@@ -10,7 +10,8 @@ import {
 import { EmptyState } from '@/shared/patterns'
 import { PageWrapper } from '@/shared/primitives'
 import { apiClient } from '@/shared/lib/api/client'
-import { API_ENDPOINTS, API_BASE_PATH } from '@/shared/config/api'
+import { API_ENDPOINTS } from '@/shared/config/api'
+import { atomService } from '@/features/atoms/api/atomService'
 import { toast } from 'sonner'
 import { logger } from '@/shared/utils/logger'
 import { useWebSocket } from '@/shared/hooks'
@@ -332,24 +333,11 @@ const MessagesPage = () => {
     const count = Object.keys(table.getState().rowSelection).length
     if (count === 0) return
 
-    const selectedIds = table.getSelectedRowModel().rows.map(row => row.original.id)
+    const selectedIds = table.getSelectedRowModel().rows.map(row => String(row.original.id))
     const toastId = toast.loading(`Approving ${count} messages...`)
 
     try {
-      const response = await fetch(`${API_BASE_PATH}/atoms/bulk-approve`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ atom_ids: selectedIds }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to approve messages: ${response.statusText}`)
-      }
-
-      const data = await response.json()
-      const { approved_count, failed_ids = [], errors = [] } = data
+      const { approved_count, failed_ids, errors } = await atomService.bulkApprove(selectedIds)
 
       if (failed_ids.length > 0) {
         toast.warning(
@@ -373,24 +361,11 @@ const MessagesPage = () => {
     const count = Object.keys(table.getState().rowSelection).length
     if (count === 0) return
 
-    const selectedIds = table.getSelectedRowModel().rows.map(row => row.original.id)
+    const selectedIds = table.getSelectedRowModel().rows.map(row => String(row.original.id))
     const toastId = toast.loading(`Archiving ${count} messages...`)
 
     try {
-      const response = await fetch(`${API_BASE_PATH}/atoms/bulk-archive`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ atom_ids: selectedIds }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to archive messages: ${response.statusText}`)
-      }
-
-      const data = await response.json()
-      const { archived_count, failed_ids = [], errors = [] } = data
+      const { archived_count, failed_ids, errors } = await atomService.bulkArchive(selectedIds)
 
       if (failed_ids.length > 0) {
         toast.warning(
@@ -417,24 +392,11 @@ const MessagesPage = () => {
     const confirmed = window.confirm(`Delete ${count} selected messages?`)
     if (!confirmed) return
 
-    const selectedIds = table.getSelectedRowModel().rows.map(row => row.original.id)
+    const selectedIds = table.getSelectedRowModel().rows.map(row => String(row.original.id))
     const toastId = toast.loading(`Deleting ${count} messages...`)
 
     try {
-      const response = await fetch(`${API_BASE_PATH}/atoms/bulk-delete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ atom_ids: selectedIds }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to delete messages: ${response.statusText}`)
-      }
-
-      const data = await response.json()
-      const { deleted_count, failed_ids = [], errors = [] } = data
+      const { deleted_count, failed_ids, errors } = await atomService.bulkDelete(selectedIds)
 
       if (failed_ids.length > 0) {
         toast.warning(

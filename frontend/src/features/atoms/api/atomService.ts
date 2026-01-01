@@ -14,6 +14,9 @@ import type {
   AtomLink,
   CreateAtomLink,
   TopicAtom,
+  BulkApproveResponse,
+  BulkArchiveResponse,
+  BulkDeleteResponse,
 } from '../types'
 
 class AtomService {
@@ -89,6 +92,30 @@ class AtomService {
 
   async deleteAtomLink(fromAtomId: string, toAtomId: string): Promise<void> {
     await apiClient.delete(`${API_BASE_PATH}/atom-links/${fromAtomId}/${toAtomId}`)
+  }
+
+  async bulkApprove(atomIds: string[]): Promise<BulkApproveResponse> {
+    const response = await apiClient.post<BulkApproveResponse>(
+      `${API_BASE_PATH}/atoms/bulk-approve`,
+      { atom_ids: atomIds }
+    )
+    return response.data
+  }
+
+  async bulkArchive(atomIds: string[]): Promise<BulkArchiveResponse> {
+    const response = await apiClient.post<BulkArchiveResponse>(
+      `${API_BASE_PATH}/atoms/bulk-archive`,
+      { atom_ids: atomIds }
+    )
+    return response.data
+  }
+
+  async bulkDelete(atomIds: string[]): Promise<BulkDeleteResponse> {
+    const response = await apiClient.post<BulkDeleteResponse>(
+      `${API_BASE_PATH}/atoms/bulk-delete`,
+      { atom_ids: atomIds }
+    )
+    return response.data
   }
 }
 

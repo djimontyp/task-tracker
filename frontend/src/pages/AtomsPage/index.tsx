@@ -28,7 +28,6 @@ import { EmptyState } from '@/shared/patterns'
 import { atomService } from '@/features/atoms/api/atomService'
 import { AtomCard } from '@/features/atoms/components/AtomCard'
 import type { Atom, AtomType } from '@/features/atoms/types'
-import { API_BASE_PATH } from '@/shared/config/api'
 import { AtomsSmartFilters, type AtomCounts } from './AtomsSmartFilters'
 import { useAtomFilterParams } from './useAtomFilterParams'
 
@@ -136,15 +135,7 @@ const AtomsPage: React.FC = () => {
 
   // Bulk approve mutation
   const bulkApproveMutation = useMutation({
-    mutationFn: async (atomIds: string[]) => {
-      const response = await fetch(`${API_BASE_PATH}/atoms/bulk-approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ atom_ids: atomIds }),
-      })
-      if (!response.ok) throw new Error('Failed to approve atoms')
-      return response.json()
-    },
+    mutationFn: (atomIds: string[]) => atomService.bulkApprove(atomIds),
     onSuccess: () => {
       toast.success(t('messages.approved'))
       setSelectedAtoms(new Set())
@@ -155,17 +146,9 @@ const AtomsPage: React.FC = () => {
     },
   })
 
-  // Bulk reject mutation
+  // Bulk reject (archive) mutation
   const bulkRejectMutation = useMutation({
-    mutationFn: async (atomIds: string[]) => {
-      const response = await fetch(`${API_BASE_PATH}/atoms/bulk-reject`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ atom_ids: atomIds }),
-      })
-      if (!response.ok) throw new Error('Failed to reject atoms')
-      return response.json()
-    },
+    mutationFn: (atomIds: string[]) => atomService.bulkArchive(atomIds),
     onSuccess: () => {
       toast.success(t('messages.rejected'))
       setSelectedAtoms(new Set())
