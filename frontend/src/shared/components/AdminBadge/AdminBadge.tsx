@@ -17,7 +17,7 @@ export const AdminBadge: React.FC<AdminBadgeProps> = ({
   return (
     <Badge
       className={cn(
-        'flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-xs font-semibold border border-border/60 bg-card/80 text-foreground transition-colors',
+        'flex items-center gap-2 whitespace-nowrap px-4 py-2 text-xs font-semibold border border-border/60 bg-card/80 text-foreground transition-colors',
         'hover:bg-accent/15 hover:text-foreground',
         isAdminMode && 'bg-semantic-warning/15 text-semantic-warning border-semantic-warning hover:bg-semantic-warning/25',
         className

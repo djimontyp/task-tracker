@@ -124,6 +124,11 @@ module.exports = {
     'local-rules/no-default-export': ['error', {
       allowedPatterns: [
         '**/pages/**',
+        '**/app/**',
+        '**/layouts/**',
+        '**/primitives/**',
+        '**/lib/**',
+        '**/ui/Spinner/**',
         '*.config.*',
         'vite.config.ts',
         'vitest.config.ts',
@@ -187,6 +192,13 @@ module.exports = {
     'no-var': 'error',
   },
   overrides: [
+    // shadcn/ui primitives - use their own spacing conventions
+    {
+      files: ['**/shared/ui/**/*.tsx'],
+      rules: {
+        'local-rules/no-odd-spacing': 'off',
+      },
+    },
     // Color picker - allowed to use raw colors
     {
       files: ['**/HexColorPicker.tsx'],

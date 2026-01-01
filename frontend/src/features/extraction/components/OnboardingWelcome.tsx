@@ -389,10 +389,10 @@ export function OnboardingWelcome({
       {/* Footer with keyboard hint */}
       <footer className="flex-shrink-0 py-4 text-center">
         <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
-          <kbd className="bg-muted px-2.5 py-0.5 rounded font-mono text-[10px]">Enter</kbd>
+          <kbd className="bg-muted px-2 py-0.5 rounded font-mono text-[10px]">Enter</kbd>
           <span>to continue with Telegram</span>
           <span className="text-muted-foreground/50">|</span>
-          <kbd className="bg-muted px-2.5 py-0.5 rounded font-mono text-[10px]">D</kbd>
+          <kbd className="bg-muted px-2 py-0.5 rounded font-mono text-[10px]">D</kbd>
           <span>for demo</span>
         </p>
       </footer>

@@ -1,66 +1,98 @@
 /**
- * ESLint rule: no-odd-spacing
+ * ESLint rule: no-odd-spacing (STRICT MODE)
  *
- * Забороняє використання непарних значень spacing (p-3, gap-5, m-7).
- * Вимагає 4px grid систему (p-2, p-4, p-6, p-8...).
+ * WHITELIST-ONLY spacing система. Дозволяє ТІЛЬКИ визначені значення.
+ * Все інше = ERROR.
  *
- * @see docs/design-system/02-spacing.md
+ * ДОЗВОЛЕНО (whitelist):
+ * - 0, 0.5, 1, 2, 3, 4, 6, 8, 12, 16, 20, 24
+ * - Pixels: 0, 2, 4, 8, 12, 16, 24, 32, 48, 64, 80, 96
+ *
+ * ЗАБОРОНЕНО (все інше):
+ * - Десяткові: 1.5, 2.5, 3.5, 4.5... (не на 4px grid)
+ * - Непопулярні: 5, 7, 9, 10, 11, 14, 18... (не в whitelist)
+ *
+ * @see docs/design-system/03-spacing.md
  */
 
-// Заборонені: 1, 3, 5, 7, 9, 11 (непарні, крім 0)
-// Дозволені: 0, 0.5, 1.5, 2, 2.5, 4, 6, 8, 10, 12, 14, 16, 20, 24...
-const FORBIDDEN_SPACING_PATTERN = /\b(p|m|gap|space-[xy]|px|py|mx|my|pt|pb|pl|pr|mt|mb|ml|mr|inset|top|right|bottom|left)-([13579]|11|13|15)(?!\d)\b/;
+// ═══════════════════════════════════════════════════════════════════════════
+// STRICT WHITELIST - тільки ці значення дозволені
+// ═══════════════════════════════════════════════════════════════════════════
 
-// Винятки - spacing що може бути непарним (дуже малі значення)
-const ALLOWED_SMALL_VALUES = ['0.5', '1.5', '2.5', '3.5'];
+const ALLOWED_VALUES = new Set([
+  '0',      // 0px - remove spacing
+  '0.5',    // 2px - micro spacing (borders, fine-tuning)
+  '1',      // 4px - compact (icons, tight text)
+  '2',      // 8px - standard small ⭐
+  '3',      // 12px - medium
+  '4',      // 16px - standard large ⭐
+  '6',      // 24px - section spacing ⭐
+  '8',      // 32px - large sections
+  '10',     // 40px - input icons offset
+  '12',     // 48px - layout spacing
+  '16',     // 64px - hero sections
+  '20',     // 80px - extra large
+  '24',     // 96px - max spacing
+]);
 
-// Whitelist - класи що виглядають як spacing але це не spacing
-// (CSS transforms, fractions, data-* attributes)
-const WHITELIST_PATTERNS = [
-  /left-1\/2/,        // CSS transform: translate-x-[-50%]
-  /right-1\/2/,       // CSS transform
-  /top-1\/2/,         // CSS transform
-  /bottom-1\/2/,      // CSS transform
-  /slide-.*-left-1\/2/,   // Animation transforms
-  /slide-.*-right-1\/2/,
-  /slide-.*-top-1\/2/,
-  /slide-.*-bottom-1\/2/,
-  /from-left-1\/2/,   // Animation from
-  /from-right-1\/2/,
-  /from-top-1\/2/,
-  /from-bottom-1\/2/,
-  /to-left-1\/2/,     // Animation to
-  /to-right-1\/2/,
-  /to-top-1\/2/,
-  /to-bottom-1\/2/,
+// Spacing properties to check
+const SPACING_PROPS = [
+  'p', 'px', 'py', 'pt', 'pb', 'pl', 'pr',  // padding
+  'm', 'mx', 'my', 'mt', 'mb', 'ml', 'mr',  // margin
+  'gap', 'gap-x', 'gap-y',                   // gap
+  'space-x', 'space-y',                      // space between
+  'inset', 'top', 'right', 'bottom', 'left', // positioning
+  'inset-x', 'inset-y',                      // positioning shortcuts
 ];
 
-const SPACING_ALTERNATIVES = {
-  '1': '0.5 або 2',
-  '3': '2 або 4',
-  '5': '4 або 6',
-  '7': '6 або 8',
-  '9': '8 або 10',
-  '11': '10 або 12',
-  '13': '12 або 14',
-  '15': '14 або 16',
+// Pattern to extract spacing classes
+const SPACING_REGEX = new RegExp(
+  `\\b(${SPACING_PROPS.join('|')})-(-?[\\d.]+)(?!\\/)\\b`,
+  'g'
+);
+
+// Whitelist patterns - not spacing (transforms, fractions, responsive)
+const WHITELIST_PATTERNS = [
+  /\/2$/,           // Fractions: left-1/2, top-1/2
+  /\/3$/,           // Fractions: w-1/3
+  /\/4$/,           // Fractions: w-3/4
+  /\[.*\]$/,        // Arbitrary values: p-[10px]
+];
+
+// Alternatives for common violations
+const ALTERNATIVES = {
+  '1.5': '1 (4px) або 2 (8px)',
+  '2.5': '2 (8px) або 3 (12px)',
+  '3.5': '3 (12px) або 4 (16px)',
+  '4.5': '4 (16px) або 6 (24px)',
+  '5': '4 (16px) або 6 (24px)',
+  '5.5': '6 (24px)',
+  '6.5': '6 (24px) або 8 (32px)',
+  '7': '6 (24px) або 8 (32px)',
+  '7.5': '8 (32px)',
+  '9': '8 (32px) або 12 (48px)',
+  '10': '8 (32px) або 12 (48px)',
+  '11': '12 (48px)',
+  '14': '12 (48px) або 16 (64px)',
+  '18': '16 (64px) або 20 (80px)',
 };
 
 module.exports = {
   meta: {
-    type: 'suggestion',
+    type: 'problem',
     docs: {
-      description: 'Disallow odd spacing values, enforce 4px grid system',
+      description: 'Enforce strict spacing whitelist (0, 0.5, 1, 2, 3, 4, 6, 8, 12, 16, 20, 24)',
       category: 'Design System',
       recommended: true,
-      url: 'docs/design-system/02-spacing.md',
+      url: 'docs/design-system/03-spacing.md',
     },
     fixable: 'code',
     messages: {
-      noOddSpacing:
-        '⚠️ Непарний spacing "{{found}}" порушує 4px grid.\n' +
-        '   Використай: {{alternatives}}\n' +
-        '   📖 See: docs/design-system/02-spacing.md',
+      invalidSpacing:
+        '❌ Spacing "{{found}}" не в whitelist.\n' +
+        '   Дозволені: 0, 0.5, 1, 2, 3, 4, 6, 8, 12, 16, 20, 24\n' +
+        '   Альтернатива: {{alternatives}}\n' +
+        '   📖 See: docs/design-system/03-spacing.md',
     },
     schema: [
       {
@@ -69,6 +101,7 @@ module.exports = {
           allowedPatterns: {
             type: 'array',
             items: { type: 'string' },
+            description: 'Additional file patterns to skip',
           },
         },
         additionalProperties: false,
@@ -78,65 +111,87 @@ module.exports = {
 
   create(context) {
     const options = context.options[0] || {};
-    const allowedPatterns = (options.allowedPatterns || []).map(p => new RegExp(p));
+    const skipPatterns = (options.allowedPatterns || []).map(p => new RegExp(p));
+    const filename = context.getFilename();
 
-    function isAllowed(className) {
-      // Check user-provided allowedPatterns
-      if (allowedPatterns.some(pattern => pattern.test(className))) {
-        return true;
-      }
-      // Check built-in whitelist (CSS transforms, fractions)
+    // Skip configured patterns
+    if (skipPatterns.some(pattern => pattern.test(filename))) {
+      return {};
+    }
+
+    function isWhitelisted(className) {
       return WHITELIST_PATTERNS.some(pattern => pattern.test(className));
     }
 
-    function extractSpacingValue(className) {
-      const match = className.match(/-(1|3|5|7|9|11|13|15)(?!\d)/);
-      return match ? match[1] : null;
+    function extractViolations(classString) {
+      if (typeof classString !== 'string') return [];
+
+      const violations = [];
+      let match;
+
+      // Reset regex
+      SPACING_REGEX.lastIndex = 0;
+
+      while ((match = SPACING_REGEX.exec(classString)) !== null) {
+        const fullMatch = match[0];
+        const value = match[2];
+
+        // Skip whitelisted patterns (fractions, arbitrary)
+        if (isWhitelisted(fullMatch)) continue;
+
+        // Check if value is in allowed set
+        if (!ALLOWED_VALUES.has(value)) {
+          violations.push({
+            className: fullMatch,
+            value: value,
+          });
+        }
+      }
+
+      return violations;
     }
 
-    function getSuggestedFix(className) {
-      // p-3 → p-4, gap-5 → gap-6
-      const value = extractSpacingValue(className);
-      if (!value) return null;
+    function getSuggestedFix(className, value) {
+      // Find closest allowed value
+      const numValue = parseFloat(value);
+      let closest = '4';
+      let minDiff = Infinity;
 
-      const numValue = parseInt(value, 10);
-      const newValue = numValue + 1; // Завжди округлюємо вгору до парного
-      return className.replace(`-${value}`, `-${newValue}`);
+      for (const allowed of ALLOWED_VALUES) {
+        const diff = Math.abs(parseFloat(allowed) - numValue);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = allowed;
+        }
+      }
+
+      return className.replace(`-${value}`, `-${closest}`);
     }
 
     function checkClassNames(node, classString, isFixable = false) {
-      if (typeof classString !== 'string') return;
+      const violations = extractViolations(classString);
 
-      const classes = classString.split(/\s+/);
+      for (const { className, value } of violations) {
+        const suggestedFix = getSuggestedFix(className, value);
 
-      for (const className of classes) {
-        if (isAllowed(className)) continue;
+        const reportObj = {
+          node,
+          messageId: 'invalidSpacing',
+          data: {
+            found: className,
+            alternatives: ALTERNATIVES[value] || suggestedFix,
+          },
+        };
 
-        if (FORBIDDEN_SPACING_PATTERN.test(className)) {
-          const spacingValue = extractSpacingValue(className);
-          const suggestedFix = getSuggestedFix(className);
-
-          const reportObj = {
-            node,
-            messageId: 'noOddSpacing',
-            data: {
-              found: className,
-              alternatives: spacingValue
-                ? SPACING_ALTERNATIVES[spacingValue] || `${parseInt(spacingValue) + 1}`
-                : 'Check design system docs',
-            },
+        // Auto-fix for simple string literals
+        if (isFixable && node.value?.type === 'Literal') {
+          reportObj.fix = function(fixer) {
+            const newValue = node.value.value.replace(className, suggestedFix);
+            return fixer.replaceText(node.value, `"${newValue}"`);
           };
-
-          // Auto-fix for simple string literals
-          if (isFixable && suggestedFix && node.value?.type === 'Literal') {
-            reportObj.fix = function(fixer) {
-              const newValue = node.value.value.replace(className, suggestedFix);
-              return fixer.replaceText(node.value, `"${newValue}"`);
-            };
-          }
-
-          context.report(reportObj);
         }
+
+        context.report(reportObj);
       }
     }
 
@@ -145,21 +200,21 @@ module.exports = {
       JSXAttribute(node) {
         if (node.name.name !== 'className') return;
 
-        // String literal: className="p-3"
+        // String literal: className="p-5"
         if (node.value?.type === 'Literal' && typeof node.value.value === 'string') {
           checkClassNames(node, node.value.value, true);
         }
 
-        // Template literal: className={`p-3 ${condition}`}
+        // Expression: className={...}
         if (node.value?.type === 'JSXExpressionContainer') {
           const expr = node.value.expression;
 
-          // Simple string in expression: className={"p-3"}
+          // String in expression: className={"p-5"}
           if (expr.type === 'Literal' && typeof expr.value === 'string') {
             checkClassNames(node, expr.value, false);
           }
 
-          // Template literal
+          // Template literal: className={`p-5 ${x}`}
           if (expr.type === 'TemplateLiteral') {
             for (const quasi of expr.quasis) {
               checkClassNames(node, quasi.value.raw, false);
@@ -177,19 +232,19 @@ module.exports = {
         }
 
         for (const arg of node.arguments) {
-          // String argument: cn("p-3", ...)
+          // String: cn("p-5", ...)
           if (arg.type === 'Literal' && typeof arg.value === 'string') {
             checkClassNames(node, arg.value, false);
           }
 
-          // Template literal: cn(`p-3 ${x}`)
+          // Template: cn(`p-5 ${x}`)
           if (arg.type === 'TemplateLiteral') {
             for (const quasi of arg.quasis) {
               checkClassNames(node, quasi.value.raw, false);
             }
           }
 
-          // Object: cn({ "p-3": condition })
+          // Object: cn({ "p-5": condition })
           if (arg.type === 'ObjectExpression') {
             for (const prop of arg.properties) {
               if (prop.key?.type === 'Literal' && typeof prop.key.value === 'string') {

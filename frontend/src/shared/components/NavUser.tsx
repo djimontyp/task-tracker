@@ -64,7 +64,7 @@ export function NavUser({
         sideOffset={4}
       >
         <DropdownMenuLabel className="p-0 font-normal">
-          <div className="flex items-center gap-2 px-2 py-2.5 text-left text-sm">
+          <div className="flex items-center gap-2 px-2 py-2 text-left text-sm">
             <Avatar className="h-8 w-8 rounded-lg">
               <AvatarImage src={user.avatar} alt={user.name} />
               <AvatarFallback className="rounded-lg">
@@ -98,7 +98,7 @@ export function NavUser({
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Admin Mode</span>
-                <kbd className="ml-2 text-[10px] text-muted-foreground bg-muted px-2.5 py-0.5 rounded font-mono">
+                <kbd className="ml-2 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded font-mono">
                   ⌘⇧A
                 </kbd>
               </div>
