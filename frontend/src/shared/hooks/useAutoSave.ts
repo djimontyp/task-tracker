@@ -6,10 +6,10 @@ export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
 interface UseAutoSaveOptions<T> {
   initialValues: T
-  onSave: (values: T) => Promise<any>
+  onSave: (values: T) => Promise<unknown>
   debounceMs?: number
   enabled?: boolean
-  onSuccess?: (data: any) => void
+  onSuccess?: (data: unknown) => void
   onError?: (error: Error) => void
 }
 
@@ -28,7 +28,7 @@ interface UseAutoSaveReturn<T> {
   reset: () => void
 }
 
-export function useAutoSave<T extends Record<string, any>>({
+export function useAutoSave<T extends Record<string, unknown>>({
   initialValues,
   onSave,
   debounceMs = 500,
@@ -50,6 +50,9 @@ export function useAutoSave<T extends Record<string, any>>({
 
   const debouncedValues = useDebounce(values, debounceMs)
 
+  // Serialize initialValues for stable dependency comparison
+  const initialValuesKey = JSON.stringify(initialValues)
+
   useEffect(() => {
     initialValuesRef.current = initialValues
     setValuesState(initialValues)
@@ -64,7 +67,8 @@ export function useAutoSave<T extends Record<string, any>>({
         isFirstRenderRef.current = false
       }, 100)
     }, 50)
-  }, [JSON.stringify(initialValues)])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValuesKey])
 
   useEffect(() => {
     if (isInitialized && initialValuesRef.current) {

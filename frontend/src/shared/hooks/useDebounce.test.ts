@@ -145,7 +145,7 @@ describe('useDebounce', () => {
 
     // Simulate rapid typing
     const values = ['ab', 'abc', 'abcd', 'abcde'];
-    values.forEach((v, i) => {
+    values.forEach((v) => {
       rerender({ value: v });
       act(() => {
         vi.advanceTimersByTime(100);

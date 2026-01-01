@@ -2,6 +2,7 @@
  * Simple logger utility that respects NODE_ENV
  * Debug logs are only shown in development mode
  */
+/* eslint-disable no-console */
 
 const IS_DEV = import.meta.env.MODE === 'development'
 
