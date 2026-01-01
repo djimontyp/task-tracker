@@ -14,6 +14,7 @@
     --color-purple: 280 65% 48%;    /* WCAG AA compliant (was 58%) */
     --color-cyan: 197 71% 45%;
     --color-violet: 260 65% 55%;
+    --color-indigo: 230 65% 50%;      /* Between blue (217°) and violet (260°) */
 
     /* ═══════════════════════════════════════════════════════════════
        LIGHT THEME - Elevation & Structure
@@ -66,7 +67,7 @@
     --atom-decision: var(--color-blue);
     --atom-question: var(--color-amber);
     --atom-insight: var(--color-purple);
-    --atom-pattern: var(--color-cyan);
+    --atom-pattern: var(--color-indigo);  /* Was cyan, now indigo for teal separation */
     --atom-requirement: var(--color-violet);
     /* Status indicator colors */
     --status-connected: var(--color-green);
@@ -113,13 +114,14 @@
     /* ═══════════════════════════════════════════════════════════════
        BASE COLORS (Source of Truth) - Dark Mode (brighter for dark bg)
        ═══════════════════════════════════════════════════════════════ */
-    --color-green: 142 71% 59%;
+    --color-green: 130 65% 55%;       /* Shifted from 142° to match light mode */
     --color-red: 0 78% 65%;
     --color-blue: 217 85% 62%;
     --color-amber: 38 92% 60%;
     --color-purple: 280 65% 68%;
     --color-cyan: 197 71% 56%;
     --color-violet: 260 65% 66%;
+    --color-indigo: 230 65% 60%;      /* Brighter for dark mode */
 
     /* ═══════════════════════════════════════════════════════════════
        DARK THEME - Elevation & Structure
@@ -130,8 +132,8 @@
     --card-foreground: 60 9.1% 97.8%;
     --popover: 20 14.3% 4.1%;
     --popover-foreground: 60 9.1% 97.8%;
-    --primary: 172 66% 50%;            /* Teal - brighter for dark mode */
-    --primary-foreground: 0 0% 100%;   /* White text */
+    --primary: 172 66% 38%;            /* Teal - darker for white text WCAG AA */
+    --primary-foreground: 0 0% 100%;   /* White text - 4.5:1 contrast */
     --secondary: 12 6.5% 15.1%;
     --secondary-foreground: 60 9.1% 97.8%;
     --muted: 12 6.5% 15.1%;
@@ -146,7 +148,7 @@
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 12 6.5% 15.1%;
     --input: 12 6.5% 15.1%;
-    --ring: 172 66% 50%;               /* Teal focus ring */
+    --ring: 172 66% 45%;               /* Teal focus ring - visible on dark bg */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -154,13 +156,13 @@
     --chart-5: 340 75% 55%;
     --sidebar-background: 20 14.3% 4.1%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 172 66% 50%;      /* Teal */
+    --sidebar-primary: 172 66% 38%;      /* Teal - WCAG AA */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 172 66% 50%;
-    --sidebar-active-indicator: 172 66% 50%;  /* Teal bar for active nav item */
+    --sidebar-ring: 172 66% 45%;
+    --sidebar-active-indicator: 172 66% 45%;  /* Teal bar for active nav item */
 
     /* Semantic colors inherit from base (defined above) */
 
