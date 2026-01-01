@@ -132,7 +132,7 @@
     --card-foreground: 60 9.1% 97.8%;
     --popover: 20 14.3% 4.1%;
     --popover-foreground: 60 9.1% 97.8%;
-    --primary: 172 66% 38%;            /* Teal - darker for white text WCAG AA */
+    --primary: 172 66% 30%;            /* Teal - much darker for white text WCAG AA */
     --primary-foreground: 0 0% 100%;   /* White text - 4.5:1 contrast */
     --secondary: 12 6.5% 15.1%;
     --secondary-foreground: 60 9.1% 97.8%;
@@ -156,7 +156,7 @@
     --chart-5: 340 75% 55%;
     --sidebar-background: 20 14.3% 4.1%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 172 66% 38%;      /* Teal - WCAG AA */
+    --sidebar-primary: 172 66% 30%;      /* Teal - WCAG AA */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
