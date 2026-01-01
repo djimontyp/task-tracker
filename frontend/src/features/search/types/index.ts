@@ -33,7 +33,7 @@ export interface Atom {
   content: string
   confidence: number | null
   user_approved: boolean
-  meta: Record<string, any> | null
+  meta: Record<string, unknown> | null
   created_at: string
   updated_at: string
 }

@@ -34,8 +34,8 @@ export interface AtomVersion {
 export interface VersionChange {
   type: string;
   path: string;
-  old_value: any;
-  new_value: any;
+  old_value: unknown;
+  new_value: unknown;
 }
 
 export interface VersionDiff {

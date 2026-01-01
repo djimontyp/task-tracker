@@ -28,7 +28,7 @@ export function formatDiffChanges(changes: VersionChange[]): {
   return { added, removed, modified };
 }
 
-function formatValue(value: any): string {
+function formatValue(value: unknown): string {
   if (typeof value === 'string') return value;
   if (typeof value === 'number') return value.toString();
   if (typeof value === 'boolean') return value ? 'true' : 'false';
