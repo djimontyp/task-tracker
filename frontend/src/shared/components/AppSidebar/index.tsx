@@ -1,5 +1,4 @@
 import { useMemo, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
 import {
   LayoutGrid,
   Cpu,
@@ -7,27 +6,20 @@ import {
   MessageSquare,
   List,
   Folder,
-  Settings,
   Atom,
   ClipboardList,
   Gauge,
 } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import { useUiStore } from '@/shared/store/uiStore'
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
-  SidebarFooter,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
   useSidebar,
 } from '@/shared/ui/sidebar'
 import type { SidebarCounts } from '@/shared/api/statsService'
 import { Logo } from '@/shared/components/Logo'
 import { NavMain } from './NavMain'
-import { NavMainCollapsed } from './NavMainCollapsed'
 import type { NavGroup } from './types'
 
 // Helper to get unique key for React (prefer labelKey, fallback to label)
@@ -87,7 +79,6 @@ const navGroups: NavGroup[] = [
 ]
 
 export function AppSidebar({ mobile = false, counts: _counts, currentPath, className }: AppSidebarProps) {
-  const { t } = useTranslation('common')
   const groups = useMemo(() => navGroups, [])
   const { expandedGroups, setExpandedGroup } = useUiStore()
   const { state } = useSidebar() // For logo collapsed state
@@ -151,30 +142,9 @@ export function AppSidebar({ mobile = false, counts: _counts, currentPath, class
       </SidebarHeader>
 
       <SidebarContent>
-        {state === 'collapsed' ? (
-          <NavMainCollapsed groups={groups} currentPath={currentPath} />
-        ) : (
-          <NavMain groups={groups} currentPath={currentPath} />
-        )}
+        <NavMain groups={groups} currentPath={currentPath} />
       </SidebarContent>
 
-      {/* Footer with Settings link */}
-      <SidebarFooter className="group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:mt-auto">
-        <SidebarMenu className="group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-2">
-          <SidebarMenuItem className="group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
-            <SidebarMenuButton
-              asChild
-              tooltip={t('sidebar.items.settings')}
-              className="group-data-[collapsible=icon]:!size-11 group-data-[collapsible=icon]:!p-0"
-            >
-              <Link to="/settings" className="flex items-center justify-center gap-2 group-data-[collapsible=icon]:gap-0 size-full">
-                <Settings className="h-4 w-4 shrink-0" />
-                <span className="group-data-[collapsible=icon]:sr-only">{t('sidebar.items.settings')}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
     </Sidebar>
   )
 }
