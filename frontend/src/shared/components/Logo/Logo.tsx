@@ -17,9 +17,8 @@ export interface LogoProps {
 /**
  * Pulse Radar Logo Component
  *
- * Radar-inspired logo with brand orange-amber gradient.
+ * Radar-inspired logo with brand teal gradient.
  * Designed for high visibility on both light and dark backgrounds.
- * Uses CSS variables for theme adaptation.
  *
  * @example
  * ```tsx
@@ -69,17 +68,17 @@ export function Logo({
           )}
           aria-hidden="true"
         >
-          {/* Gradient Definitions - Brand Orange to Amber */}
+          {/* Gradient Definitions - Brand Teal */}
           <defs>
-            {/* Primary gradient: orange (primary) to amber (accent) */}
+            {/* Primary gradient: teal dark to teal light */}
             <linearGradient id="pulseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="hsl(25, 95%, 53%)" />
-              <stop offset="100%" stopColor="hsl(38, 92%, 50%)" />
+              <stop offset="0%" stopColor="hsl(172, 66%, 35%)" />
+              <stop offset="100%" stopColor="hsl(172, 66%, 50%)" />
             </linearGradient>
             {/* Lighter variant for outer circles */}
             <linearGradient id="pulseGradientLight" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="hsl(25, 95%, 60%)" />
-              <stop offset="100%" stopColor="hsl(38, 92%, 58%)" />
+              <stop offset="0%" stopColor="hsl(172, 66%, 45%)" />
+              <stop offset="100%" stopColor="hsl(172, 66%, 55%)" />
             </linearGradient>
           </defs>
 
@@ -128,10 +127,10 @@ export function Logo({
             style={{ transformOrigin: '16px 16px' }}
           />
 
-          {/* Task dots (representing tracked items) - brand colors */}
-          <circle cx="22" cy="12" r="1.5" fill="hsl(25, 95%, 53%)" />
-          <circle cx="10" cy="20" r="1.5" fill="hsl(38, 92%, 50%)" />
-          <circle cx="24" cy="22" r="1.5" fill="hsl(25, 95%, 60%)" />
+          {/* Task dots (representing tracked items) - brand teal */}
+          <circle cx="22" cy="12" r="1.5" fill="hsl(172, 66%, 40%)" />
+          <circle cx="10" cy="20" r="1.5" fill="hsl(172, 66%, 50%)" />
+          <circle cx="24" cy="22" r="1.5" fill="hsl(172, 66%, 45%)" />
 
           {/* Center pulse dot - gradient filled */}
           <circle cx="16" cy="16" r="2.5" fill="url(#pulseGradient)" />

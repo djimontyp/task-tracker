@@ -24,8 +24,8 @@
     --card-foreground: 20 14.3% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 14.3% 4.1%;
-    --primary: 24.6 95% 53.1%;
-    --primary-foreground: 0 0% 0%;
+    --primary: 172 66% 40%;           /* Teal - radar/scanner vibe */
+    --primary-foreground: 0 0% 100%;  /* White text on teal */
     --secondary: 60 4.8% 95.9%;
     --secondary-foreground: 24 9.8% 10%;
     --muted: 60 4.8% 95.9%;
@@ -40,7 +40,7 @@
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 220 13% 82%;          /* More visible (was 90%) */
     --input: 220 13% 82%;           /* Match border */
-    --ring: 24.6 95% 53.1%;
+    --ring: 172 66% 40%;              /* Teal focus ring */
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -49,13 +49,13 @@
     --chart-5: 27 87% 67%;
     --sidebar-background: 220 14% 94%;  /* Differentiated (was 98%) */
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 24.6 95% 53.1%;
-    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-primary: 172 66% 40%;      /* Teal */
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 82%;      /* Match border */
-    --sidebar-ring: 24.6 95% 53.1%;
-    --sidebar-active-indicator: 24.6 95% 53.1%;  /* Orange bar for active nav item */
+    --sidebar-ring: 172 66% 40%;
+    --sidebar-active-indicator: 172 66% 40%;  /* Teal bar for active nav item */
 
     /* ═══════════════════════════════════════════════════════════════
        SEMANTIC COLORS (Aliases → Base)
@@ -130,8 +130,8 @@
     --card-foreground: 60 9.1% 97.8%;
     --popover: 20 14.3% 4.1%;
     --popover-foreground: 60 9.1% 97.8%;
-    --primary: 20.5 90.2% 48.2%;
-    --primary-foreground: 60 9.1% 97.8%;
+    --primary: 172 66% 50%;            /* Teal - brighter for dark mode */
+    --primary-foreground: 0 0% 100%;   /* White text */
     --secondary: 12 6.5% 15.1%;
     --secondary-foreground: 60 9.1% 97.8%;
     --muted: 12 6.5% 15.1%;
@@ -146,7 +146,7 @@
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 12 6.5% 15.1%;
     --input: 12 6.5% 15.1%;
-    --ring: 20.5 90.2% 48.2%;
+    --ring: 172 66% 50%;               /* Teal focus ring */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -154,13 +154,13 @@
     --chart-5: 340 75% 55%;
     --sidebar-background: 20 14.3% 4.1%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 20.5 90.2% 48.2%;
+    --sidebar-primary: 172 66% 50%;      /* Teal */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 20.5 90.2% 48.2%;
-    --sidebar-active-indicator: 20.5 90.2% 48.2%;  /* Orange bar for active nav item */
+    --sidebar-ring: 172 66% 50%;
+    --sidebar-active-indicator: 172 66% 50%;  /* Teal bar for active nav item */
 
     /* Semantic colors inherit from base (defined above) */
 
@@ -217,15 +217,9 @@
 }
 
 @layer components {
-  /* WCAG 2.4.7 Focus Visible - 3px outline with offset */
-  :where(button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible {
-    outline: 3px solid hsl(var(--ring));
-    outline-offset: 2px;
-  }
-
-  /* Remove default outline-none that hides focus */
-  .focus-visible\:outline-none:focus-visible {
-    outline: 3px solid hsl(var(--ring)) !important;
-    outline-offset: 2px !important;
-  }
+  /*
+   * Focus styles handled by Tailwind ring utilities in components.
+   * shadcn/ui components use focus-visible:ring-2 focus-visible:ring-ring.
+   * No global outline - prevents double focus indicators.
+   */
 }
