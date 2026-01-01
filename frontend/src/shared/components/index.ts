@@ -6,9 +6,9 @@ export { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs'
 export { Toaster } from '../ui/sonner'
 
 // Custom Components
-export { default as MetricCard } from './MetricCard'
+export { MetricCard } from './MetricCard'
 export type { MetricCardProps } from './MetricCard'
-export { default as TrendChart } from './TrendChart'
+export { TrendChart } from './TrendChart'
 export type { TrendChartProps } from './TrendChart'
 export { ActivityHeatmap } from './ActivityHeatmap'
 export type { ActivityHeatmapProps, ActivityDataPoint } from './ActivityHeatmap'

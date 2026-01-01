@@ -46,5 +46,3 @@ export function LanguageMismatchBadge({
     </TooltipProvider>
   );
 }
-
-export default LanguageMismatchBadge;

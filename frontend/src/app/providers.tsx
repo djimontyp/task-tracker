@@ -43,7 +43,7 @@ interface ProvidersProps {
   children: ReactNode
 }
 
-const Providers = ({ children }: ProvidersProps) => {
+export const Providers = ({ children }: ProvidersProps) => {
   useEffect(() => {
     initWebVitals();
   }, []);
@@ -60,5 +60,3 @@ const Providers = ({ children }: ProvidersProps) => {
     </QueryClientProvider>
   )
 }
-
-export default Providers

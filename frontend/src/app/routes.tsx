@@ -22,7 +22,7 @@ const VersionsPage = lazy(() => import('@pages/VersionsPage'))
 const ExecutiveSummaryPage = lazy(() => import('@pages/ExecutiveSummaryPage'))
 const PerformancePage = lazy(() => import('@pages/PerformancePage'))
 
-const AppRoutes = () => {
+export const AppRoutes = () => {
   return (
     <Suspense
       fallback={
@@ -56,5 +56,3 @@ const AppRoutes = () => {
     </Suspense>
   )
 }
-
-export default AppRoutes

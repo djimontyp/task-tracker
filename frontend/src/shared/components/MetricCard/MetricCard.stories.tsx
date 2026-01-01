@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { BarChart3, Users, FileText, AlertTriangle } from 'lucide-react'
-import MetricCard from './MetricCard'
+import { MetricCard } from './MetricCard'
 
 /**
  * MetricCard displays key metrics with optional trends, status badges, and click handlers.

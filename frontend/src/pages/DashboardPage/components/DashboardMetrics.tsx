@@ -9,7 +9,7 @@
  */
 
 import { AlertTriangle, Lightbulb, CheckCircle, HelpCircle } from 'lucide-react'
-import MetricCard from '@/shared/components/MetricCard'
+import { MetricCard } from '@/shared/components/MetricCard'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { Card, CardContent } from '@/shared/ui/card'
 import type { DashboardMetricsProps } from '../types'

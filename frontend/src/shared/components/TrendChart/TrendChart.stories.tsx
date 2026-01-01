@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import TrendChart from './TrendChart';
+import { TrendChart } from './TrendChart';
 
 const meta: Meta<typeof TrendChart> = {
   title: 'Patterns/TrendChart',

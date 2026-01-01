@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Badge, Skeleton, Button } from '@/shared/ui'
-import MetricCard from '@/shared/components/MetricCard'
+import { MetricCard } from '@/shared/components/MetricCard'
 import { noiseService } from '@/features/noise/api/noiseService'
 import type { NoiseStats } from '@/features/noise/types'
 import { toast } from 'sonner'
