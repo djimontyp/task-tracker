@@ -136,22 +136,20 @@ export const Mobile: Story = {
  */
 export const SizeComparison: Story = {
   render: () => (
-    <MemoryRouter>
-      <div className="flex flex-col gap-8 p-8 bg-background">
-        <div className="flex items-center gap-4">
-          <Logo size="sm" showText />
-          <span className="text-sm text-muted-foreground">Small (32px)</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Logo size="md" showText />
-          <span className="text-sm text-muted-foreground">Medium (40px)</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Logo size="lg" showText />
-          <span className="text-sm text-muted-foreground">Large (48px)</span>
-        </div>
+    <div className="flex flex-col gap-8 p-8 bg-background">
+      <div className="flex items-center gap-4">
+        <Logo size="sm" showText />
+        <span className="text-sm text-muted-foreground">Small (32px)</span>
       </div>
-    </MemoryRouter>
+      <div className="flex items-center gap-4">
+        <Logo size="md" showText />
+        <span className="text-sm text-muted-foreground">Medium (40px)</span>
+      </div>
+      <div className="flex items-center gap-4">
+        <Logo size="lg" showText />
+        <span className="text-sm text-muted-foreground">Large (48px)</span>
+      </div>
+    </div>
   ),
 }
 
@@ -161,17 +159,41 @@ export const SizeComparison: Story = {
  */
 export const CollapsedComparison: Story = {
   render: () => (
-    <MemoryRouter>
-      <div className="flex gap-12 p-8 bg-background">
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium text-muted-foreground uppercase">Expanded</span>
-          <Logo size="sm" showText collapsed={false} />
-        </div>
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium text-muted-foreground uppercase">Collapsed</span>
-          <Logo size="sm" showText collapsed={true} />
+    <div className="flex gap-12 p-8 bg-background">
+      <div className="flex flex-col gap-2">
+        <span className="text-xs font-medium text-muted-foreground uppercase">Expanded</span>
+        <Logo size="sm" showText collapsed={false} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <span className="text-xs font-medium text-muted-foreground uppercase">Collapsed</span>
+        <Logo size="sm" showText collapsed={true} />
+      </div>
+    </div>
+  ),
+}
+
+/**
+ * Theme comparison - Light vs Dark.
+ * Demonstrates logo visibility on both light and dark backgrounds.
+ * Text uses sidebar-foreground token for proper theme adaptation.
+ */
+export const ThemeComparison: Story = {
+  render: () => (
+    <div className="flex flex-col gap-0">
+      {/* Light theme simulation */}
+      <div className="p-8 bg-white" style={{ '--sidebar-foreground': '240 5.3% 26.1%' } as React.CSSProperties}>
+        <div className="flex items-center gap-4">
+          <Logo size="md" showText />
+          <span className="text-sm text-slate-500">Light mode (white background)</span>
         </div>
       </div>
-    </MemoryRouter>
+      {/* Dark theme simulation */}
+      <div className="p-8 bg-slate-950" style={{ '--sidebar-foreground': '240 4.8% 95.9%' } as React.CSSProperties}>
+        <div className="flex items-center gap-4">
+          <Logo size="md" showText />
+          <span className="text-sm text-slate-400">Dark mode (dark background)</span>
+        </div>
+      </div>
+    </div>
   ),
 }

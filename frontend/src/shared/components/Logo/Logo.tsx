@@ -17,8 +17,9 @@ export interface LogoProps {
 /**
  * Pulse Radar Logo Component
  *
- * Radar-inspired logo with blue → purple gradient.
- * Used in sidebar header and navbar (mobile).
+ * Radar-inspired logo with brand orange-amber gradient.
+ * Designed for high visibility on both light and dark backgrounds.
+ * Uses CSS variables for theme adaptation.
  *
  * @example
  * ```tsx
@@ -68,23 +69,29 @@ export function Logo({
           )}
           aria-hidden="true"
         >
-          {/* Gradient Definition */}
+          {/* Gradient Definitions - Brand Orange to Amber */}
           <defs>
+            {/* Primary gradient: orange (primary) to amber (accent) */}
             <linearGradient id="pulseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
-              <stop offset="100%" style={{ stopColor: '#8b5cf6', stopOpacity: 1 }} />
+              <stop offset="0%" stopColor="hsl(25, 95%, 53%)" />
+              <stop offset="100%" stopColor="hsl(38, 92%, 50%)" />
+            </linearGradient>
+            {/* Lighter variant for outer circles */}
+            <linearGradient id="pulseGradientLight" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="hsl(25, 95%, 60%)" />
+              <stop offset="100%" stopColor="hsl(38, 92%, 58%)" />
             </linearGradient>
           </defs>
 
-          {/* Outer radar circle */}
+          {/* Outer radar circle - higher opacity for visibility */}
           <circle
             cx="16"
             cy="16"
             r="14"
-            stroke="url(#pulseGradient)"
+            stroke="url(#pulseGradientLight)"
             strokeWidth="1.5"
             fill="none"
-            opacity="0.3"
+            opacity="0.5"
           />
 
           {/* Middle radar circle */}
@@ -95,10 +102,10 @@ export function Logo({
             stroke="url(#pulseGradient)"
             strokeWidth="1.5"
             fill="none"
-            opacity="0.5"
+            opacity="0.7"
           />
 
-          {/* Inner radar circle */}
+          {/* Inner radar circle - most visible */}
           <circle
             cx="16"
             cy="16"
@@ -106,10 +113,10 @@ export function Logo({
             stroke="url(#pulseGradient)"
             strokeWidth="1.5"
             fill="none"
-            opacity="0.7"
+            opacity="0.9"
           />
 
-          {/* Radar sweep line */}
+          {/* Radar sweep line - full opacity for emphasis */}
           <line
             x1="16"
             y1="16"
@@ -121,19 +128,19 @@ export function Logo({
             style={{ transformOrigin: '16px 16px' }}
           />
 
-          {/* Task dots (representing tracked items) */}
-          <circle cx="22" cy="12" r="1.5" fill="#3b82f6" />
-          <circle cx="10" cy="20" r="1.5" fill="#8b5cf6" />
-          <circle cx="24" cy="22" r="1.5" fill="#3b82f6" />
+          {/* Task dots (representing tracked items) - brand colors */}
+          <circle cx="22" cy="12" r="1.5" fill="hsl(25, 95%, 53%)" />
+          <circle cx="10" cy="20" r="1.5" fill="hsl(38, 92%, 50%)" />
+          <circle cx="24" cy="22" r="1.5" fill="hsl(25, 95%, 60%)" />
 
-          {/* Center pulse dot */}
-          <circle cx="16" cy="16" r="2" fill="url(#pulseGradient)" />
+          {/* Center pulse dot - gradient filled */}
+          <circle cx="16" cy="16" r="2.5" fill="url(#pulseGradient)" />
         </svg>
       </div>
 
       {/* Text Label */}
       {showText && !collapsed && (
-        <span className="font-semibold text-base whitespace-nowrap">
+        <span className="font-semibold text-base whitespace-nowrap text-sidebar-foreground">
           {appName}
         </span>
       )}
