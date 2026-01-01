@@ -59,5 +59,3 @@ export function HumanizedLoader({
     </div>
   )
 }
-
-export default HumanizedLoader

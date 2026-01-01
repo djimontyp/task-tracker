@@ -1,10 +1,10 @@
 import { Toaster } from '@/shared/ui'
-import Providers from './providers'
-import AppRoutes from './routes'
-import ErrorBoundary from './ErrorBoundary'
+import { Providers } from './providers'
+import { AppRoutes } from './routes'
+import { ErrorBoundary } from './ErrorBoundary'
 import '../index.css'
 
-const App = () => {
+export const App = () => {
   return (
     <ErrorBoundary>
       <Providers>
@@ -14,5 +14,3 @@ const App = () => {
     </ErrorBoundary>
   )
 }
-
-export default App

@@ -67,7 +67,7 @@ const getCardBorderColor = (status: MetricStatus): string => {
   }
 }
 
-const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
+export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
   ({ title, value, subtitle, trend, icon: Icon, iconColor, className, onClick, loading = false, emptyMessage, status, ...props }, ref) => {
     const getTrendIcon = () => {
       if (!trend) return null
@@ -208,5 +208,3 @@ const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
 )
 
 MetricCard.displayName = 'MetricCard'
-
-export default MetricCard

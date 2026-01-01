@@ -15,7 +15,7 @@ export interface TrendChartProps extends React.HTMLAttributes<HTMLDivElement> {
   height?: string | number
 }
 
-const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
+export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
   (
     {
       title,
@@ -78,5 +78,3 @@ const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
 )
 
 TrendChart.displayName = 'TrendChart'
-
-export default TrendChart
