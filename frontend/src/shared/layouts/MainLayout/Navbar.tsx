@@ -1,7 +1,7 @@
 import { useState, useMemo, type ReactNode } from 'react';
 import { Search, Menu, HelpCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Logo } from '@/shared/components/Logo';
 import { Button } from '@/shared/ui/button';
 import { useTheme } from '@/shared/components/ThemeProvider';
@@ -13,20 +13,7 @@ import { MobileSearch } from '@/shared/components/MobileSearch';
 import { useBreadcrumbs, type DynamicLabels } from './useBreadcrumbs';
 import { NavBreadcrumbs } from './NavBreadcrumbs';
 import { ServiceStatusIndicator } from './ServiceStatusIndicator';
-import { API_ENDPOINTS } from '@/shared/config/api';
-
-interface TopicBasic {
-  id: string;
-  name: string;
-}
-
-async function fetchTopicById(id: string): Promise<TopicBasic> {
-  const response = await fetch(`${API_ENDPOINTS.topics}/${id}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch topic: ${response.statusText}`);
-  }
-  return response.json();
-}
+import { topicService } from '@/features/topics/api/topicService';
 
 export interface NavbarProps {
   onMobileSidebarToggle?: () => void;
@@ -53,22 +40,17 @@ const Navbar = ({ onMobileSidebarToggle, isDesktop = true, searchComponent }: Na
   const { isAdminMode, toggleAdminMode } = useAdminMode();
   const location = useLocation();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const queryClient = useQueryClient();
 
   // Extract topic ID from URL if on topic detail page
   const topicDetailMatch = location.pathname.match(/^\/topics\/([a-f0-9-]+)$/);
   const topicIdFromUrl = topicDetailMatch ? topicDetailMatch[1] : null;
 
   // Fetch topic data for breadcrumb label (only when on topic detail page)
-  const { data: topicData } = useQuery<TopicBasic>({
+  const { data: topicData } = useQuery({
     queryKey: ['topic', topicIdFromUrl],
-    queryFn: () => fetchTopicById(topicIdFromUrl!),
+    queryFn: () => topicService.getTopicById(topicIdFromUrl!),
     enabled: topicIdFromUrl !== null,
     staleTime: 5 * 60 * 1000,
-    initialData: () => {
-      if (topicIdFromUrl === null) return undefined;
-      return queryClient.getQueryData<TopicBasic>(['topic', topicIdFromUrl]);
-    },
   });
 
   // Prepare dynamic labels for breadcrumbs

@@ -90,3 +90,31 @@ export interface CreateTopicAtom {
   position?: number
   note?: string
 }
+
+export interface BulkOperationResult {
+  updated_count: number
+  atom_ids: string[]
+}
+
+// Bulk operation request/response types
+export interface BulkOperationRequest {
+  atom_ids: string[]
+}
+
+export interface BulkApproveResponse {
+  approved_count: number
+  failed_ids: string[]
+  errors: string[]
+}
+
+export interface BulkArchiveResponse {
+  archived_count: number
+  failed_ids: string[]
+  errors: string[]
+}
+
+export interface BulkDeleteResponse {
+  deleted_count: number
+  failed_ids: string[]
+  errors: string[]
+}
