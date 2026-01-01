@@ -72,7 +72,7 @@ export function SearchBar({
   onSelectAtom,
   onSelectTopic,
   className,
-  placeholder = 'Search... (/)',
+  placeholder,
 }: SearchBarProps) {
   const [isOpen, setIsOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -136,7 +136,7 @@ export function SearchBar({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverAnchor asChild>
-        <div className={`relative ${className ?? ''}`}>
+        <div className={`relative w-full ${className ?? ''}`}>
           {showSpinner ? (
             <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none animate-spin" />
           ) : (
@@ -151,7 +151,7 @@ export function SearchBar({
             onChange={(e) => onQueryChange(e.target.value)}
             onKeyDown={handleKeyDown}
             onFocus={() => shouldShowDropdown && setIsOpen(true)}
-            className={`pl-10 w-64 border-0 bg-muted/50 shadow-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 focus-visible:bg-muted ${query.length > 0 ? 'pr-8' : ''}`}
+            className={`pl-10 w-full border border-border/40 bg-muted/30 shadow-none transition-colors hover:border-border/60 hover:bg-muted/50 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 focus-visible:border-border focus-visible:bg-muted/50 [&::placeholder]:text-center [&::placeholder]:text-muted-foreground/70 ${query.length > 0 ? 'pr-10 [&::placeholder]:text-left' : ''}`}
             aria-label="Search topics, messages, and atoms"
             autoComplete="off"
           />
@@ -169,7 +169,7 @@ export function SearchBar({
         </div>
       </PopoverAnchor>
       <PopoverContent
-        className="w-[400px] p-0"
+        className="w-[min(400px,calc(100vw-2rem))] p-0"
         align="start"
         sideOffset={8}
         onOpenAutoFocus={(e) => e.preventDefault()}

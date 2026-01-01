@@ -144,5 +144,13 @@
     "showing": "Showing",
     "to": "to",
     "entries": "entries"
+  },
+  "search": {
+    "placeholder": "What are you looking for? Press / to focus",
+    "placeholderShort": "Search...",
+    "label": "Search topics, messages, and atoms",
+    "clear": "Clear search",
+    "noResults": "No results found",
+    "hint": "Press / to focus"
   }
 }
