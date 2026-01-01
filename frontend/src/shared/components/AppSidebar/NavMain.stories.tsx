@@ -222,7 +222,7 @@ export const WithActiveItem: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Navigation with Messages page active. Note the orange indicator bar on the left side of the active item.',
+        story: 'Navigation with Messages page active. Note the teal indicator bar on the left side of the active item.',
       },
     },
   },
