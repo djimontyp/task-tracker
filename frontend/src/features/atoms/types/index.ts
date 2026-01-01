@@ -27,7 +27,7 @@ export interface Atom {
   user_approved: boolean
   archived: boolean
   archived_at: string | null
-  meta: Record<string, any> | null
+  meta: Record<string, unknown> | null
   /** Number of unapproved versions (computed on backend) */
   pending_versions_count: number
   /** AI-detected language of content (ISO 639-1). Used for language mismatch warnings. */
@@ -42,7 +42,7 @@ export interface CreateAtom {
   content: string
   confidence?: number
   user_approved?: boolean
-  meta?: Record<string, any>
+  meta?: Record<string, unknown>
 }
 
 export interface UpdateAtom {
@@ -51,7 +51,7 @@ export interface UpdateAtom {
   content?: string
   confidence?: number
   user_approved?: boolean
-  meta?: Record<string, any>
+  meta?: Record<string, unknown>
 }
 
 export interface AtomListResponse {

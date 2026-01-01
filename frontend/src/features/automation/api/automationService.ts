@@ -27,9 +27,13 @@ class AutomationService {
   }
 
   async getRules(): Promise<AutomationRule[]> {
+    interface RawRule extends Omit<AutomationRule, 'conditions' | 'success_rate'> {
+      conditions: string | object
+      success_count: number
+    }
     const response = await apiClient.get(API_ENDPOINTS.automation.rules)
-    const { rules } = response.data
-    return rules.map((rule: any) => ({
+    const { rules } = response.data as { rules: RawRule[] }
+    return rules.map((rule) => ({
       ...rule,
       conditions: typeof rule.conditions === 'string'
         ? JSON.parse(rule.conditions)

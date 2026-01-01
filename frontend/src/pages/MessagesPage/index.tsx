@@ -605,7 +605,7 @@ const MessagesPage = () => {
             />
           )
         ) : (
-          <div className="space-y-4 w-full min-w-0 max-w-3xl mx-auto">
+          <PageWrapper variant="centered" className="w-full min-w-0 !p-0 !space-y-4">
             {table.getRowModel().rows.length === 0 ? (
               <EmptyState
                 variant="compact"
@@ -639,7 +639,7 @@ const MessagesPage = () => {
                 />
               ))
             )}
-          </div>
+          </PageWrapper>
         )}
       </div>
 

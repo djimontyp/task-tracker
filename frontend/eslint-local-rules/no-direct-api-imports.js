@@ -26,6 +26,14 @@ const FORBIDDEN_IMPORTS = [
 const ALLOWED_FILES = [
   // Feature API modules (service classes)
   /\/features\/[\w-]+\/api\//,
+  // Shared API services (these ARE the services)
+  /\/shared\/api\//,
+  // Shared utils (may need logger, etc.)
+  /\/shared\/utils\//,
+  // Layouts (MainLayout needs services for data fetching)
+  /\/layouts\//,
+  // Pages (containers that compose features)
+  /\/pages\//,
   // Custom hooks
   /\/hooks\//,
   // Store files (Zustand)
@@ -96,6 +104,11 @@ module.exports = {
     return {
       ImportDeclaration(node) {
         const source = node.source.value;
+
+        // Allow type-only imports (import type { ... })
+        if (node.importKind === 'type') {
+          return;
+        }
 
         if (isForbiddenImport(source)) {
           context.report({
