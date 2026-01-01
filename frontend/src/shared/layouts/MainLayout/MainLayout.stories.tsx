@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { SidebarProvider, SidebarInset } from '@/shared/ui/sidebar';
 import { AppSidebar } from '@/shared/components/AppSidebar';
 import { ThemeProvider } from '@/shared/components/ThemeProvider';
-import Navbar from './Navbar';
+import { Navbar, type NavbarProps } from '@/shared/components/Navbar';
 
 /**
  * MainLayout composition story showing Sidebar + Navbar harmony.
@@ -37,6 +37,26 @@ const queryClient = new QueryClient({
   },
 });
 
+/**
+ * Default props for Navbar in stories.
+ * Since Navbar is now a pure presenter, all data must be passed via props.
+ */
+const defaultNavbarProps: Omit<NavbarProps, 'isDesktop' | 'onMobileSidebarToggle' | 'searchComponent'> = {
+  crumbs: [
+    { label: 'Dashboard' },
+  ],
+  pageTooltip: 'Dashboard - Your workspace overview',
+  theme: 'system',
+  onThemeChange: () => console.log('Theme changed'),
+  serviceStatus: 'healthy',
+  isAdminMode: false,
+  onToggleAdminMode: () => console.log('Admin mode toggled'),
+  user: {
+    name: 'User',
+    email: 'user@example.com',
+  },
+};
+
 // Wrapper with all required providers
 // Mirrors actual MainLayout structure for accurate stories
 const LayoutWrapper = ({
@@ -57,7 +77,7 @@ const LayoutWrapper = ({
 
             {/* Column 2: Navbar + Content */}
             <div className="grid grid-rows-[56px_1fr] overflow-hidden">
-              <Navbar isDesktop={true} />
+              <Navbar {...defaultNavbarProps} isDesktop={true} />
 
               {/* Main content - FULL WIDTH (no container constraint) */}
               <SidebarInset className="overflow-auto">
@@ -201,7 +221,7 @@ export const Mobile: Story = {
         <MemoryRouter initialEntries={['/dashboard']}>
           <SidebarProvider defaultOpen={false}>
             <div className="min-h-screen bg-background">
-              <Navbar isDesktop={false} />
+              <Navbar {...defaultNavbarProps} isDesktop={false} />
               {/* pt-[104px]: navbar row1 (56px) + row2 breadcrumbs (~48px) */}
               <main className="pt-[104px] p-4">
                 <SampleContent />
@@ -232,7 +252,7 @@ export const NavbarOnly: Story = {
         <MemoryRouter initialEntries={['/dashboard']}>
           <SidebarProvider defaultOpen={true}>
             <div className="bg-background">
-              <Navbar />
+              <Navbar {...defaultNavbarProps} isDesktop={true} />
               <div className="pt-14 p-4">
                 <p className="text-muted-foreground">
                   Navbar contains logo, search bar, breadcrumb, and user controls.
@@ -446,7 +466,7 @@ export const AntiPatternContainerConstraint: Story = {
             <div className="grid grid-cols-[auto_1fr] h-screen overflow-hidden bg-background">
               <AppSidebar currentPath="/dashboard" />
               <div className="grid grid-rows-[56px_1fr] overflow-hidden">
-                <Navbar isDesktop={true} />
+                <Navbar {...defaultNavbarProps} isDesktop={true} />
                 <SidebarInset className="overflow-auto">
                   {/* ❌ WRONG: container max-w-screen-2xl limits width */}
                   <main className="container max-w-screen-2xl mx-auto p-4">

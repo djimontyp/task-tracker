@@ -3,25 +3,21 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SidebarProvider } from '@/shared/ui/sidebar';
 import { ThemeProvider } from '@/shared/components/ThemeProvider';
-import { Navbar, type NavbarProps } from '@/shared/components/Navbar';
+import { Navbar, type NavbarProps } from './index';
 
 /**
- * Navbar component stories (Layout context).
- *
- * NOTE: The Navbar component is defined in @/shared/components/Navbar.
- * This file provides stories in the Layout context for MainLayout integration.
- * See also: Components/Navbar stories for the portable component.
+ * Navbar - Portable presenter component for main navigation header.
  *
  * The Navbar uses a 3-zone architecture:
  * - **CONTEXT** (left): Help button + Breadcrumbs - "Where am I?"
  * - **COMMAND** (center): Search bar - "What can I do?"
  * - **ACTIONS** (right): Status dot, Theme toggle, User menu
  *
- * Design features:
+ * ## Design Features
  * - **Borderless design**: Uses shadow-sm instead of bottom border
  * - **Dark mode shadow**: Custom shadow for dark mode visibility
- *
- * Settings and Admin Mode are accessible via User dropdown.
+ * - **44px touch targets**: All icon buttons meet WCAG 2.5.5
+ * - **Semantic colors**: Uses design system tokens
  */
 
 const queryClient = new QueryClient({
@@ -35,7 +31,7 @@ const queryClient = new QueryClient({
 
 /**
  * Default props for Navbar stories.
- * Since Navbar is now a pure presenter, all data must be passed via props.
+ * Since Navbar is a pure presenter, all data must be passed via props.
  */
 const defaultNavbarProps: Omit<NavbarProps, 'isDesktop' | 'onMobileSidebarToggle' | 'searchComponent'> = {
   crumbs: [
@@ -64,7 +60,7 @@ const NavbarDecorator = ({ children }: { children: React.ReactNode }) => (
 );
 
 const meta: Meta<typeof Navbar> = {
-  title: 'Layout/Navbar',
+  title: 'Components/Navbar',
   component: Navbar,
   tags: ['autodocs'],
   decorators: [
@@ -85,8 +81,6 @@ const meta: Meta<typeof Navbar> = {
 
 Main navigation header using **3-zone architecture** with **borderless design**.
 
-> See also: **Components/Navbar** for the portable component stories.
-
 ### Desktop Layout
 \`[CONTEXT: ? + Breadcrumbs] [COMMAND: Search] [ACTIONS: + Theme + User]\`
 
@@ -100,12 +94,6 @@ Main navigation header using **3-zone architecture** with **borderless design**.
 | **CONTEXT** | Where am I? | Help button + Breadcrumbs |
 | **COMMAND** | What can I do? | Search bar (w-80) |
 | **ACTIONS** | Quick access | Status dot, Theme, User menu |
-
-### User Menu Contains
-- Account link
-- Settings link
-- Admin Mode toggle
-- Logout
 
 ### Design System Compliance
 - **Borderless**: Uses \`shadow-sm\` instead of \`border-b\`
@@ -124,7 +112,7 @@ export default meta;
 type Story = StoryObj<typeof Navbar>;
 
 /**
- * Default desktop view with 3-zone layout.
+ * Default desktop view with 3-zone layout and borderless design.
  */
 export const Default: Story = {
   args: {
@@ -136,7 +124,7 @@ export const Default: Story = {
     docs: {
       description: {
         story:
-          'Desktop view with 3 zones: Context (breadcrumbs), Command (search), Actions (status + theme + user).',
+          'Desktop view with 3 zones: Context (help + breadcrumbs), Command (search), Actions (status + theme + user). Uses shadow-sm for borderless design.',
       },
     },
   },
@@ -156,7 +144,7 @@ export const Mobile: Story = {
     docs: {
       description: {
         story:
-          'Mobile view with hamburger menu, logo, and mobile-optimized breadcrumbs.',
+          'Mobile view with hamburger menu and mobile-optimized breadcrumbs. Fixed position with two rows.',
       },
     },
   },
@@ -220,7 +208,7 @@ export const StatusError: Story = {
 };
 
 /**
- * Navbar with admin mode toggle in user menu.
+ * Navbar with admin mode enabled.
  */
 export const WithAdminMode: Story = {
   args: {
@@ -263,43 +251,114 @@ export const WithLongBreadcrumbs: Story = {
 };
 
 /**
- * Navbar with page hint showing contextual information.
+ * Light theme variant to demonstrate borderless shadow visibility.
  */
-export const WithPageHint: Story = {
+export const LightTheme: Story = {
   args: {
     ...defaultNavbarProps,
     isDesktop: true,
-    pageHint: '12 new messages',
+    theme: 'light',
   },
+  decorators: [
+    (Story) => (
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <MemoryRouter initialEntries={['/dashboard']}>
+            <SidebarProvider defaultOpen={true}>
+              <div className="bg-background min-h-[200px]">
+                <Story />
+              </div>
+            </SidebarProvider>
+          </MemoryRouter>
+        </ThemeProvider>
+      </QueryClientProvider>
+    ),
+  ],
   parameters: {
+    backgrounds: { default: 'light' },
     docs: {
       description: {
         story:
-          'Page hint displays contextual info after breadcrumbs (e.g., "12 new messages", "3 pending tasks").',
+          'Light theme showing shadow-sm appearance. The subtle shadow provides visual separation without a hard border.',
       },
     },
   },
 };
 
 /**
- * Navbar with breadcrumbs and page hint.
+ * Dark theme variant to demonstrate custom dark mode shadow.
  */
-export const WithBreadcrumbsAndHint: Story = {
+export const DarkTheme: Story = {
   args: {
     ...defaultNavbarProps,
     isDesktop: true,
-    crumbs: [
-      { label: 'Topics', href: '/topics' },
-      { label: 'Mobile' },
-    ],
-    pageTooltip: 'Mobile topic - View atoms and related messages',
-    pageHint: '3 atoms pending review',
+    theme: 'dark',
+  },
+  decorators: [
+    (Story) => (
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <MemoryRouter initialEntries={['/dashboard']}>
+            <SidebarProvider defaultOpen={true}>
+              <div className="bg-slate-950 min-h-[200px] dark">
+                <Story />
+              </div>
+            </SidebarProvider>
+          </MemoryRouter>
+        </ThemeProvider>
+      </QueryClientProvider>
+    ),
+  ],
+  parameters: {
+    backgrounds: { default: 'dark' },
+    docs: {
+      description: {
+        story:
+          'Dark theme with custom shadow (rgba(0,0,0,0.2)) for better visibility on dark backgrounds.',
+      },
+    },
+  },
+};
+
+/**
+ * Navbar with page hint displayed after breadcrumbs.
+ */
+export const WithPageHint: Story = {
+  args: {
+    ...defaultNavbarProps,
+    isDesktop: true,
+    crumbs: [{ label: 'Messages' }],
+    pageTooltip: 'Messages - Incoming Telegram messages',
+    pageHint: '12 new messages',
   },
   parameters: {
     docs: {
       description: {
         story:
-          'Combined view showing breadcrumbs with a page hint for additional context.',
+          'Navbar with contextual page hint displayed after breadcrumbs. Useful for showing counts or status.',
+      },
+    },
+  },
+};
+
+/**
+ * Navbar with user avatar.
+ */
+export const WithUserAvatar: Story = {
+  args: {
+    ...defaultNavbarProps,
+    isDesktop: true,
+    user: {
+      name: 'John Doe',
+      email: 'john@example.com',
+      avatar: 'https://github.com/shadcn.png',
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Navbar with user avatar displayed in the NavUser component. Falls back to initials if no avatar.',
       },
     },
   },

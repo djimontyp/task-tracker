@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { SidebarProvider, SidebarInset } from '@/shared/ui/sidebar'
@@ -10,7 +10,9 @@ import { useAdminMode, useKeyboardShortcut, useMediaQuery, useWebSocket } from '
 import { toast } from 'sonner'
 import { SearchContainer } from '@/features/search/components'
 import { statsService, type SidebarCounts } from '@/shared/api/statsService'
-import Navbar from './Navbar'
+import { Navbar } from '@/shared/components/Navbar'
+import { topicService } from '@/features/topics/api/topicService'
+import { useNavbarData, type UseNavbarDataConfig } from './useNavbarData'
 
 interface MainLayoutProps {
   children: ReactNode
@@ -22,6 +24,17 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const location = useLocation()
   const queryClient = useQueryClient()
+
+  // Dependency injection config for useNavbarData
+  const navbarConfig = useMemo<UseNavbarDataConfig>(
+    () => ({
+      fetchTopicById: (id: string) => topicService.getTopicById(id),
+    }),
+    []
+  )
+
+  // Navbar data from container hook (presenter/container pattern)
+  const navbarData = useNavbarData(navbarConfig)
 
   // Sidebar counts data fetching (moved from AppSidebar for portability)
   const { data: sidebarCounts } = useQuery<SidebarCounts>({
@@ -97,7 +110,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           {/* Column 2: Navbar + Content */}
           <div className="grid grid-rows-[56px_1fr] overflow-hidden">
             {/* Row 1: Navbar (fixed height 56px) */}
-            <Navbar isDesktop={true} searchComponent={<SearchContainer />} />
+            <Navbar
+              {...navbarData}
+              isDesktop={true}
+              searchComponent={<SearchContainer />}
+            />
 
             {/* Row 2: Main content (fills remaining space, full-width per design system) */}
             <SidebarInset className="overflow-auto">
@@ -121,6 +138,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         <>
           {/* Mobile: Top navbar */}
           <Navbar
+            {...navbarData}
             onMobileSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
             isDesktop={false}
             searchComponent={<SearchContainer />}

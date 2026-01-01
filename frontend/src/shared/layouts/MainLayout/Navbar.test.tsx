@@ -3,48 +3,48 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Navbar from './Navbar';
+import { Navbar } from '@/shared/components/Navbar';
 
-// Mock hooks
-vi.mock('@/shared/components/ThemeProvider', () => ({
-  useTheme: vi.fn(() => ({
-    theme: 'light',
-    setTheme: vi.fn(),
-  })),
+// Mock NavUser to avoid complex dependencies
+vi.mock('@/shared/components/NavUser', () => ({
+  NavUser: () => <div data-testid="nav-user">User Menu</div>,
 }));
 
-vi.mock('@/shared/hooks', () => ({
-  useServiceStatus: vi.fn(() => ({
-    indicator: 'healthy',
-    isConnected: true,
-  })),
-  useAdminMode: vi.fn(() => ({
-    isAdminMode: false,
-    toggleAdminMode: vi.fn(),
-  })),
+// Mock MobileSearch
+vi.mock('@/shared/components/MobileSearch', () => ({
+  MobileSearch: ({ open, children }: { open: boolean; children?: React.ReactNode }) =>
+    open ? <div data-testid="mobile-search">{children}</div> : null,
 }));
 
-vi.mock('./useBreadcrumbs', () => ({
-  useBreadcrumbs: vi.fn(() => ({
-    crumbs: [
-      { label: 'Dashboard', href: '/' },
-      { label: 'Current Page' },
-    ],
-    tooltip: 'Mock page tooltip',
-  })),
+// Mock TooltipIconButton to avoid Radix UI tooltip complexity in tests
+vi.mock('@/shared/components/TooltipIconButton', () => ({
+  TooltipIconButton: ({ icon, label, onClick }: any) => (
+    <button aria-label={label} onClick={onClick}>
+      {icon}
+    </button>
+  ),
+}));
+
+// Mock NavBreadcrumbs
+vi.mock('@/shared/layouts/MainLayout/NavBreadcrumbs', () => ({
+  NavBreadcrumbs: ({ crumbs }: { crumbs: any[] }) => (
+    <div data-testid="breadcrumbs">
+      {crumbs.map((c, i) => (
+        <span key={i}>{c.label}</span>
+      ))}
+    </div>
+  ),
+}));
+
+// Mock ServiceStatusIndicator
+vi.mock('@/shared/layouts/MainLayout/ServiceStatusIndicator', () => ({
+  ServiceStatusIndicator: ({ status }: { status: string }) => (
+    <div data-testid="status-indicator" data-status={status} />
+  ),
 }));
 
 // SearchBar mock component (passed via searchComponent prop)
 const MockSearchBar = () => <div data-testid="search-bar">Search Bar</div>;
-
-vi.mock('@/shared/components/MobileSearch', () => ({
-  MobileSearch: ({ open }: { open: boolean }) =>
-    open ? <div data-testid="mobile-search">Mobile Search</div> : null,
-}));
-
-vi.mock('@/shared/components/NavUser', () => ({
-  NavUser: () => <div data-testid="nav-user">User Menu</div>,
-}));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,16 +55,35 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderNavbar = (props: Partial<Parameters<typeof Navbar>[0]> = {}) => {
-  // Always inject searchComponent for tests that need it
-  const defaultProps = {
-    searchComponent: <MockSearchBar />,
-    ...props,
-  };
+// Default props factory for Navbar (all required props)
+const createDefaultProps = (overrides: any = {}): any => ({
+  isDesktop: true,
+  crumbs: [
+    { label: 'Dashboard', href: '/' },
+    { label: 'Current Page' },
+  ],
+  pageTooltip: 'Mock page tooltip',
+  pageHint: undefined,
+  theme: 'light' as const,
+  onThemeChange: vi.fn(),
+  serviceStatus: 'healthy' as const,
+  isAdminMode: false,
+  onToggleAdminMode: vi.fn(),
+  user: {
+    name: 'Test User',
+    email: 'test@example.com',
+  },
+  searchComponent: <MockSearchBar />,
+  onMobileSidebarToggle: vi.fn(),
+  ...overrides,
+});
+
+const renderNavbar = (props: any = {}) => {
+  const mergedProps = createDefaultProps(props);
   return render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
-        <Navbar {...defaultProps} />
+        <Navbar {...mergedProps} />
       </MemoryRouter>
     </QueryClientProvider>
   );
@@ -95,44 +114,17 @@ describe('Navbar', () => {
     expect(screen.getByLabelText('Open search')).toBeInTheDocument();
   });
 
-  test('cycles theme: light -> dark -> system -> light', async () => {
-    const setThemeMock = vi.fn();
-    const { useTheme } = await import('@/shared/components/ThemeProvider');
-    let currentTheme = 'light';
-
-    vi.mocked(useTheme).mockImplementation(() => ({
-      theme: currentTheme as 'light' | 'dark' | 'system',
-      setTheme: (newTheme: string) => {
-        currentTheme = newTheme;
-        setThemeMock(newTheme);
-      },
-    }));
-
+  test('calls onThemeChange when theme button clicked', async () => {
+    const onThemeChange = vi.fn();
     const user = userEvent.setup();
-    const { rerender } = renderNavbar({ isDesktop: true });
 
-    // Both desktop and mobile have theme buttons, click first one
+    renderNavbar({ isDesktop: true, onThemeChange });
+
+    // Both desktop and mobile render theme buttons (mobile hidden via CSS)
     const themeButtons = screen.getAllByLabelText('Change theme');
     await user.click(themeButtons[0]);
 
-    expect(setThemeMock).toHaveBeenCalledWith('dark');
-
-    vi.mocked(useTheme).mockImplementation(() => ({
-      theme: 'dark',
-      setTheme: setThemeMock,
-    }));
-
-    rerender(
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter>
-          <Navbar isDesktop={true} />
-        </MemoryRouter>
-      </QueryClientProvider>
-    );
-
-    const themeButtonsAfter = screen.getAllByLabelText('Change theme');
-    await user.click(themeButtonsAfter[0]);
-    expect(setThemeMock).toHaveBeenCalledWith('system');
+    expect(onThemeChange).toHaveBeenCalledTimes(1);
   });
 
   test('shows mobile menu button when isDesktop=false', () => {
@@ -153,57 +145,36 @@ describe('Navbar', () => {
     expect(toggleButton?.closest('.md\\:hidden')).toBeInTheDocument();
   });
 
-  test('displays breadcrumbs from useBreadcrumbs hook', () => {
+  test('displays breadcrumbs from crumbs prop', () => {
     renderNavbar({ isDesktop: true });
 
-    // Desktop and mobile both render breadcrumbs, so we expect multiple matches
-    const dashboardLinks = screen.getAllByText('Dashboard');
-    const currentPageTexts = screen.getAllByText('Current Page');
-
-    expect(dashboardLinks.length).toBeGreaterThanOrEqual(1);
-    expect(currentPageTexts.length).toBeGreaterThanOrEqual(1);
+    // Breadcrumbs are rendered in both desktop and mobile (mobile hidden via CSS)
+    const dashboards = screen.getAllByText('Dashboard');
+    const currentPages = screen.getAllByText('Current Page');
+    expect(dashboards.length).toBeGreaterThan(0);
+    expect(currentPages.length).toBeGreaterThan(0);
   });
 
-  test('shows healthy status indicator (green)', async () => {
-    const { useServiceStatus } = await import('@/shared/hooks');
-    vi.mocked(useServiceStatus).mockReturnValue({
-      indicator: 'healthy',
-      isConnected: true,
-    });
+  test('shows healthy status indicator', () => {
+    renderNavbar({ isDesktop: true, serviceStatus: 'healthy' });
 
-    renderNavbar({ isDesktop: true });
-
-    // Both desktop and mobile have status dots
-    const statusDots = screen.getAllByTestId('status-dot');
-    expect(statusDots[0]).toHaveClass('bg-semantic-success');
+    // Both desktop and mobile render status (mobile hidden via CSS)
+    const statusIndicators = screen.getAllByTestId('status-indicator');
+    expect(statusIndicators[0]).toHaveAttribute('data-status', 'healthy');
   });
 
-  test('shows warning status indicator (yellow + pulse)', async () => {
-    const { useServiceStatus } = await import('@/shared/hooks');
-    vi.mocked(useServiceStatus).mockReturnValue({
-      indicator: 'warning',
-      isConnected: true,
-    });
+  test('shows warning status indicator', () => {
+    renderNavbar({ isDesktop: true, serviceStatus: 'warning' });
 
-    renderNavbar({ isDesktop: true });
-
-    const statusDots = screen.getAllByTestId('status-dot');
-    expect(statusDots[0]).toHaveClass('bg-semantic-warning');
-    expect(statusDots[0]).toHaveClass('animate-pulse');
+    const statusIndicators = screen.getAllByTestId('status-indicator');
+    expect(statusIndicators[0]).toHaveAttribute('data-status', 'warning');
   });
 
-  test('shows error status indicator (red + pulse)', async () => {
-    const { useServiceStatus } = await import('@/shared/hooks');
-    vi.mocked(useServiceStatus).mockReturnValue({
-      indicator: 'error',
-      isConnected: false,
-    });
+  test('shows error status indicator', () => {
+    renderNavbar({ isDesktop: true, serviceStatus: 'error' });
 
-    renderNavbar({ isDesktop: true });
-
-    const statusDots = screen.getAllByTestId('status-dot');
-    expect(statusDots[0]).toHaveClass('bg-destructive');
-    expect(statusDots[0]).toHaveClass('animate-pulse');
+    const statusIndicators = screen.getAllByTestId('status-indicator');
+    expect(statusIndicators[0]).toHaveAttribute('data-status', 'error');
   });
 
   test('calls onMobileSidebarToggle on hamburger click', async () => {
@@ -218,20 +189,12 @@ describe('Navbar', () => {
     expect(handleToggle).toHaveBeenCalledTimes(1);
   });
 
-  test('passes admin mode state to NavUser', async () => {
-    const { useAdminMode } = await import('@/shared/hooks');
-    vi.mocked(useAdminMode).mockReturnValue({
-      isAdminMode: true,
-      toggleAdminMode: vi.fn(),
-    });
-
+  test('renders NavUser component', () => {
     renderNavbar({ isDesktop: true });
 
-    // Admin Mode toggle is now in NavUser dropdown
-    // NavUser receives isAdminMode and onToggleAdminMode props
-    // Both desktop and mobile render nav-user
-    const userMenus = screen.getAllByTestId('nav-user');
-    expect(userMenus.length).toBeGreaterThan(0);
+    // NavUser is rendered in both desktop and mobile (mobile hidden via CSS)
+    const navUsers = screen.getAllByTestId('nav-user');
+    expect(navUsers.length).toBeGreaterThan(0);
   });
 
   test('keyboard navigation works (Tab through elements)', async () => {
@@ -249,12 +212,11 @@ describe('Navbar', () => {
   test('has correct aria-labels on action buttons', () => {
     renderNavbar({ isDesktop: true });
 
-    // Both desktop and mobile render theme buttons, check at least one exists
+    // Both desktop and mobile render these buttons (mobile hidden via CSS)
     const themeButtons = screen.getAllByLabelText('Change theme');
+    const pageInfoButtons = screen.getAllByLabelText('Page info');
     expect(themeButtons.length).toBeGreaterThan(0);
-    // Settings is now in NavUser dropdown, not a separate button
-    const userMenus = screen.getAllByTestId('nav-user');
-    expect(userMenus.length).toBeGreaterThan(0);
+    expect(pageInfoButtons.length).toBeGreaterThan(0);
   });
 
   test('opens mobile search when search button clicked', async () => {
