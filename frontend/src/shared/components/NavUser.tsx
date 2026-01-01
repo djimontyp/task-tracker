@@ -46,7 +46,7 @@ export function NavUser({
         <Button
           variant="ghost"
           size="icon"
-          className="h-11 w-11 rounded-lg border border-border bg-card hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-11 w-11 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="User menu"
         >
           <Avatar className="h-8 w-8 rounded-lg">

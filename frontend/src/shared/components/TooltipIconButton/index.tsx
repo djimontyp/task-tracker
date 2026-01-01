@@ -64,7 +64,8 @@ export function TooltipIconButton({
 }: TooltipIconButtonProps) {
   const baseClasses = cn(
     buttons.icon.default,
-    'aspect-square border border-border bg-card text-muted-foreground',
+    'aspect-square rounded-lg',
+    'text-muted-foreground',
     'transition-colors hover:bg-muted hover:text-foreground',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
     'shrink-0',
@@ -96,7 +97,7 @@ export function TooltipIconButton({
   );
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={400}>
       <Tooltip>
         <TooltipTrigger asChild>{content}</TooltipTrigger>
         <TooltipContent>

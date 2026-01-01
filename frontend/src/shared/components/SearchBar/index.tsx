@@ -151,7 +151,7 @@ export function SearchBar({
             onChange={(e) => onQueryChange(e.target.value)}
             onKeyDown={handleKeyDown}
             onFocus={() => shouldShowDropdown && setIsOpen(true)}
-            className={`pl-10 w-64 ${query.length > 0 ? 'pr-8' : ''}`}
+            className={`pl-10 w-64 border-0 bg-muted/50 shadow-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 focus-visible:bg-muted ${query.length > 0 ? 'pr-8' : ''}`}
             aria-label="Search topics, messages, and atoms"
             autoComplete="off"
           />

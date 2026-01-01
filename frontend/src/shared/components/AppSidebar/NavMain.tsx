@@ -16,7 +16,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from '@/shared/ui/sidebar'
 import type { NavGroup } from './types'
 
@@ -41,11 +40,10 @@ export function NavMain({ groups, currentPath }: NavMainProps) {
 
   return (
     <nav aria-label="Main navigation">
-      {groups.map((group, groupIndex) => {
+      {groups.map((group) => {
         const groupKey = getGroupKey(group)
         const hasNestedRoutes = group.items.length > 1 && group.items.some((item) => item.path !== '/')
         const isGroupExpanded = expandedGroups[groupKey] ?? false
-        const isLastGroup = groupIndex === groups.length - 1
 
         if (hasNestedRoutes) {
           return (
@@ -121,12 +119,6 @@ export function NavMain({ groups, currentPath }: NavMainProps) {
                   </CollapsibleContent>
                 </SidebarGroup>
               </Collapsible>
-              {!isLastGroup && (
-                <SidebarSeparator
-                  className="my-2"
-                  data-testid="group-separator"
-                />
-              )}
             </Fragment>
           )
         }
@@ -179,12 +171,6 @@ export function NavMain({ groups, currentPath }: NavMainProps) {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-            {!isLastGroup && (
-              <SidebarSeparator
-                className="my-2"
-                data-testid="group-separator"
-              />
-            )}
           </Fragment>
         )
       })}
