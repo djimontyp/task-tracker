@@ -39,32 +39,32 @@ describe('ServiceStatusIndicator', () => {
     await user.hover(statusElement);
 
     await waitFor(() => {
-      expect(screen.getByRole('tooltip')).toHaveTextContent('Service healthy');
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Connected');
     });
   });
 
   test('displays correct label for healthy status', () => {
     render(<ServiceStatusIndicator status="healthy" showLabel />);
 
-    expect(screen.getByText('Online')).toBeInTheDocument();
+    expect(screen.getByText('Connected')).toBeInTheDocument();
   });
 
   test('displays correct label for warning status', () => {
     render(<ServiceStatusIndicator status="warning" showLabel />);
 
-    expect(screen.getByText('Unstable')).toBeInTheDocument();
+    expect(screen.getByText('Reconnecting')).toBeInTheDocument();
   });
 
   test('displays correct label for error status', () => {
     render(<ServiceStatusIndicator status="error" showLabel />);
 
-    expect(screen.getByText('Offline')).toBeInTheDocument();
+    expect(screen.getByText('Disconnected')).toBeInTheDocument();
   });
 
   test('hides label when showLabel is false', () => {
     render(<ServiceStatusIndicator status="healthy" showLabel={false} />);
 
-    expect(screen.queryByText('Online')).not.toBeInTheDocument();
+    expect(screen.queryByText('Connected')).not.toBeInTheDocument();
   });
 
   test('applies custom className', () => {
@@ -89,19 +89,19 @@ describe('ServiceStatusIndicator', () => {
     const { rerender } = render(<ServiceStatusIndicator status="healthy" />);
     expect(screen.getByRole('status')).toHaveAttribute(
       'aria-label',
-      'Service healthy'
+      'Connected'
     );
 
     rerender(<ServiceStatusIndicator status="warning" />);
     expect(screen.getByRole('status')).toHaveAttribute(
       'aria-label',
-      'Service unstable'
+      'Reconnecting'
     );
 
     rerender(<ServiceStatusIndicator status="error" />);
     expect(screen.getByRole('status')).toHaveAttribute(
       'aria-label',
-      'Service offline'
+      'Disconnected'
     );
   });
 });

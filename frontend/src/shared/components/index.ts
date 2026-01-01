@@ -33,6 +33,10 @@ export type { SearchBarProps } from './SearchBar'
 export { HumanizedLoader } from './HumanizedLoader'
 export type { HumanizedLoaderProps, HumanizedLoaderVariant } from './HumanizedLoader'
 
+// Navbar (portable presenter component)
+export { Navbar } from './Navbar'
+export type { NavbarProps, NavbarUser, ThemeOption } from './Navbar'
+
 // Content-aware Skeletons
 export {
   // MetricCard

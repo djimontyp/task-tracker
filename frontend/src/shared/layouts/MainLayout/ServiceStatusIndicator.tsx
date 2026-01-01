@@ -1,10 +1,11 @@
+import { CheckCircle, AlertCircle, XCircle, type LucideIcon } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/shared/ui/tooltip';
-import { statusIndicators, type StatusIndicatorVariant } from '@/shared/tokens';
+import { type StatusIndicatorVariant } from '@/shared/tokens';
 
 export interface ServiceStatusIndicatorProps {
   /** Current service status */
@@ -19,11 +20,26 @@ export interface ServiceStatusIndicatorProps {
 
 const statusConfig: Record<
   StatusIndicatorVariant,
-  { title: string; label: string }
+  { title: string; label: string; Icon: LucideIcon; iconClass: string }
 > = {
-  healthy: { title: 'Service healthy', label: 'Online' },
-  warning: { title: 'Service unstable', label: 'Unstable' },
-  error: { title: 'Service offline', label: 'Offline' },
+  healthy: {
+    title: 'Connected',
+    label: 'Connected',
+    Icon: CheckCircle,
+    iconClass: 'text-semantic-success',
+  },
+  warning: {
+    title: 'Reconnecting',
+    label: 'Reconnecting',
+    Icon: AlertCircle,
+    iconClass: 'text-semantic-warning',
+  },
+  error: {
+    title: 'Disconnected',
+    label: 'Disconnected',
+    Icon: XCircle,
+    iconClass: 'text-destructive',
+  },
 };
 
 /**
@@ -44,6 +60,7 @@ export function ServiceStatusIndicator({
   className,
 }: ServiceStatusIndicatorProps) {
   const config = statusConfig[status];
+  const { Icon, iconClass } = config;
   const effectiveAriaLabel = ariaLabel ?? config.title;
 
   return (
@@ -56,10 +73,7 @@ export function ServiceStatusIndicator({
             aria-label={effectiveAriaLabel}
           >
             <div className="flex items-center gap-2 px-2 py-2 rounded-md">
-              <span
-                data-testid="status-dot"
-                className={statusIndicators[status]}
-              />
+              <Icon className={`h-4 w-4 ${iconClass}`} aria-hidden="true" />
               {showLabel && (
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {config.label}
@@ -69,7 +83,10 @@ export function ServiceStatusIndicator({
           </div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{config.title}</p>
+          <div className="flex items-center gap-2">
+            <Icon className={`h-4 w-4 ${iconClass}`} aria-hidden="true" />
+            <span>{config.title}</span>
+          </div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

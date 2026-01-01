@@ -8,7 +8,6 @@ import {
   List,
   Folder,
   Settings,
-  PanelLeft,
   Atom,
   ClipboardList,
   Gauge,
@@ -25,7 +24,6 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from '@/shared/ui/sidebar'
-import { Separator } from '@/shared/ui/separator'
 import type { SidebarCounts } from '@/shared/api/statsService'
 import { Logo } from '@/shared/components/Logo'
 import { NavMain } from './NavMain'
@@ -92,7 +90,7 @@ export function AppSidebar({ mobile = false, counts: _counts, currentPath, class
   const { t } = useTranslation('common')
   const groups = useMemo(() => navGroups, [])
   const { expandedGroups, setExpandedGroup } = useUiStore()
-  const { state, toggleSidebar } = useSidebar() // For logo collapsed state + toggle
+  const { state } = useSidebar() // For logo collapsed state
 
   // Auto-expand groups containing active item
   useEffect(() => {
@@ -144,7 +142,7 @@ export function AppSidebar({ mobile = false, counts: _counts, currentPath, class
   return (
     <Sidebar collapsible="icon" data-testid="app-sidebar" className={className}>
       {/* Logo Header - full-height sidebar pattern */}
-      <SidebarHeader className="h-14 border-b border-sidebar-border flex items-center group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
+      <SidebarHeader className="h-14 flex items-center group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
         <Logo
           collapsed={state === 'collapsed'}
           size="sm"
@@ -160,9 +158,8 @@ export function AppSidebar({ mobile = false, counts: _counts, currentPath, class
         )}
       </SidebarContent>
 
-      {/* Footer with Settings link + Collapse toggle */}
+      {/* Footer with Settings link */}
       <SidebarFooter className="group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:mt-auto">
-        <Separator className="mb-2 group-data-[collapsible=icon]:hidden" />
         <SidebarMenu className="group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-2">
           <SidebarMenuItem className="group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
             <SidebarMenuButton
@@ -174,17 +171,6 @@ export function AppSidebar({ mobile = false, counts: _counts, currentPath, class
                 <Settings className="h-4 w-4 shrink-0" />
                 <span className="group-data-[collapsible=icon]:sr-only">{t('sidebar.items.settings')}</span>
               </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          {/* Collapse toggle - moved from Navbar */}
-          <SidebarMenuItem className="group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
-            <SidebarMenuButton
-              tooltip={t('sidebar.items.toggleSidebar')}
-              onClick={toggleSidebar}
-              className="flex items-center justify-center group-data-[collapsible=icon]:!size-11 group-data-[collapsible=icon]:!p-0"
-            >
-              <PanelLeft className="h-4 w-4 shrink-0" />
-              <span className="group-data-[collapsible=icon]:sr-only">{t('sidebar.items.toggleSidebar')}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

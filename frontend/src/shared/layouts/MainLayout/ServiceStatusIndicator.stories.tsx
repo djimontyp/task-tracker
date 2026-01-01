@@ -61,7 +61,7 @@ export const Error: Story = {
   },
 };
 
-/** Healthy status with visible "Online" label. */
+/** Healthy status with visible "Connected" label. */
 export const HealthyWithLabel: Story = {
   args: {
     status: 'healthy',
@@ -69,7 +69,7 @@ export const HealthyWithLabel: Story = {
   },
 };
 
-/** Warning status with visible "Unstable" label. */
+/** Warning status with visible "Reconnecting" label. */
 export const WarningWithLabel: Story = {
   args: {
     status: 'warning',
@@ -77,7 +77,7 @@ export const WarningWithLabel: Story = {
   },
 };
 
-/** Error status with visible "Offline" label. */
+/** Error status with visible "Disconnected" label. */
 export const ErrorWithLabel: Story = {
   args: {
     status: 'error',
