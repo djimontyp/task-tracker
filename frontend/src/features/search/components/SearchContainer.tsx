@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { SearchBar } from '@/shared/components/SearchBar'
 import type { FTSSearchResultsResponse } from '@/shared/components/SearchBar/types/fts'
 import { useFTSSearch } from '../hooks/useFTSSearch'
+import { useMediaQuery } from '@/shared/hooks'
 
 const DROPDOWN_LIMIT = 5
 
@@ -59,8 +60,13 @@ export function SearchContainer({
   const [query, setQuery] = useState('')
   const navigate = useNavigate()
 
-  // Use custom placeholder or localized default
-  const placeholder = customPlaceholder ?? t('search.placeholder')
+  // Use short placeholder on narrow screens (< 1280px / xl breakpoint)
+  const isWideScreen = useMediaQuery('(min-width: 1280px)')
+
+  // Use custom placeholder or localized default based on screen width
+  const placeholder = customPlaceholder ?? (
+    isWideScreen ? t('search.placeholder') : t('search.placeholderShort')
+  )
 
   const { data, isLoading, isDebouncing } = useFTSSearch(query, DROPDOWN_LIMIT)
 
