@@ -230,7 +230,7 @@ function AtomCard({ atom, isActive, isSelected, onSelect, onFocus, innerRef }: A
           <div className="flex items-center gap-2 flex-wrap">
             <Tag className="h-3 w-3 text-muted-foreground" />
             {atom.tags.slice(0, 3).map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs px-2.5 py-0">
+              <Badge key={tag} variant="secondary" className="text-xs px-2 py-0">
                 {tag}
               </Badge>
             ))}
@@ -364,7 +364,7 @@ function ShortcutsHelp({ isOpen, onClose }: ShortcutsHelpProps) {
           ))}
           <Separator className="my-4" />
           <p className="text-xs text-muted-foreground text-center">
-            Press <kbd className="bg-muted px-2.5 py-0.5 rounded font-mono">?</kbd> to toggle this help
+            Press <kbd className="bg-muted px-2 py-0.5 rounded font-mono">?</kbd> to toggle this help
           </p>
         </CardContent>
       </Card>

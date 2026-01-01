@@ -153,7 +153,7 @@ function PeriodCard({ option, selected, onSelect }: PeriodCardProps) {
       <span className={cn('text-sm font-medium', selected ? 'text-primary' : 'text-foreground')}>
         {option.label}
       </span>
-      <kbd className="absolute top-2 right-2 text-[10px] text-muted-foreground bg-muted px-2.5 py-0.5 rounded font-mono">
+      <kbd className="absolute top-2 right-2 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded font-mono">
         {option.shortcut}
       </kbd>
     </button>
@@ -492,7 +492,7 @@ export function ExtractionSheet({
               <span>1-4 for period</span>
             </div>
             <div className="flex items-center gap-2">
-              <kbd className="bg-muted px-2.5 py-0.5 rounded font-mono text-[10px]">
+              <kbd className="bg-muted px-2 py-0.5 rounded font-mono text-[10px]">
                 {navigator.platform.includes('Mac') ? 'Cmd' : 'Ctrl'}+Enter
               </kbd>
               <span>to start</span>

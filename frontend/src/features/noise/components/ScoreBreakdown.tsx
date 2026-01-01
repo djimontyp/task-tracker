@@ -111,7 +111,7 @@ const FactorRow = ({
     return (
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <Icon className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
             <span className="text-xs font-medium">{label}</span>
           </div>
