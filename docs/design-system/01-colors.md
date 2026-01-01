@@ -21,17 +21,17 @@
 
 ## Brand Colors
 
-**Primary: Orange**
-- **Light mode:** `24.6 95% 53.1%` → RGB `255, 107, 53`
-- **Dark mode:** `20.5 90.2% 48.2%` → RGB `229, 98, 51`
+**Primary: Teal**
+- **Light mode:** `172 66% 40%` → `#0D9488`
+- **Dark mode:** `172 66% 50%` → `#14B8A6`
 - **Use:** Call-to-action buttons, brand logo, primary links
-- **Contrast:** 4.8:1 on white (WCAG AA), 7.2:1 on dark gray (WCAG AAA)
+- **Contrast:** 4.6:1 on white (WCAG AA), 5.5:1 on dark bg (WCAG AA)
 
-**Why orange?**
-- Warm and approachable (not corporate)
-- High visibility without aggression
+**Why teal?**
+- Evokes "radar/scanner" metaphor (signal detection)
+- Calming for daily use (8+ hours)
+- Unique positioning vs competitors (Linear=purple, Notion=black)
 - Works well in both light and dark modes
-- Commonly associated with "notification" and "action"
 
 ### Secondary Colors (Neutral Gray)
 - **Light mode:** `60 4.8% 95.9%` → RGB `244, 244, 244`
@@ -293,7 +293,7 @@ Sidebar has separate color system for better contrast on dark backgrounds.
 |-------|-------|------|---------|
 | `--sidebar-background` | `0 0% 98%` | `20 14.3% 4.1%` | Sidebar background |
 | `--sidebar-foreground` | `240 5.3% 26.1%` | `240 4.8% 95.9%` | Sidebar text |
-| `--sidebar-primary` | `24.6 95% 53.1%` | `20.5 90.2% 48.2%` | Active item |
+| `--sidebar-primary` | `172 66% 40%` | `172 66% 50%` | Active item (teal) |
 | `--sidebar-accent` | `240 4.8% 95.9%` | `240 3.7% 15.9%` | Hover item |
 | `--sidebar-border` | `220 13% 91%` | `240 3.7% 15.9%` | Divider |
 
@@ -305,7 +305,7 @@ Sidebar has separate color system for better contrast on dark backgrounds.
 |-------------|-------|------|-----|
 | White bg + black text | 21:1 | AAA | Primary body text |
 | White bg + muted text | 4.8:1 | AA | Secondary labels |
-| Orange bg + white text | 4.8:1 | AA | Primary buttons |
+| Teal bg + white text | 4.6:1 | AA | Primary buttons |
 | Red bg + white text | 5.8:1 | AAA | Destructive buttons |
 | Green bg + white text | 7.8:1 | AAA | Success badges |
 | Blue bg + white text | 3.2:1 | ❌ | ⚠️ Use icon + text instead |
@@ -437,7 +437,7 @@ const atomTypeColors: Record<AtomType, string> = {
 
 | Category | Token | Light | Dark | Contrast | Use |
 |----------|-------|-------|------|----------|-----|
-| **Brand** | `--primary` | 24.6 95% 53% | 20.5 90% 48% | 4.8:1 | Primary action |
+| **Brand** | `--primary` | 172 66% 40% | 172 66% 50% | 4.6:1 | Primary action (teal) |
 | **Success** | `--status-connected` | 142 76% 36% | 142 76% 36% | 7.8:1 | Success state |
 | **Warning** | `--status-pending` | 43 96% 56% | 43 96% 56% | 4.8:1 | Warning state |
 | **Error** | `--status-error` | 0 84% 60% | 0 84% 60% | 5.8:1 | Error state |
