@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { SearchBar } from '@/shared/components/SearchBar'
 import type { FTSSearchResultsResponse } from '@/shared/components/SearchBar/types/fts'
 import { useFTSSearch } from '../hooks/useFTSSearch'
@@ -52,10 +53,14 @@ export function SearchContainer({
   onSelectTopic,
   onResultsChange,
   className,
-  placeholder,
+  placeholder: customPlaceholder,
 }: SearchContainerProps) {
+  const { t } = useTranslation('common')
   const [query, setQuery] = useState('')
   const navigate = useNavigate()
+
+  // Use custom placeholder or localized default
+  const placeholder = customPlaceholder ?? t('search.placeholder')
 
   const { data, isLoading, isDebouncing } = useFTSSearch(query, DROPDOWN_LIMIT)
 
@@ -119,7 +124,7 @@ export function SearchContainer({
       onSelectMessage={handleSelectMessage}
       onSelectAtom={handleSelectAtom}
       onSelectTopic={handleSelectTopic}
-      className={className}
+      className={`w-full ${className ?? ''}`}
       placeholder={placeholder}
     />
   )

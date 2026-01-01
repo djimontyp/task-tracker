@@ -86,10 +86,10 @@ export function Navbar({
           )}
         </div>
 
-        {/* COMMAND ZONE: Search (center, flex-grow with max-width) */}
+        {/* COMMAND ZONE: Search (fills available space between context and actions) */}
         {searchComponent && (
-          <div className="hidden lg:flex flex-1 items-center justify-center max-w-lg">
-            <div className="w-full">
+          <div className="hidden lg:flex flex-1 min-w-0 items-center justify-center mx-4">
+            <div className="w-full max-w-2xl">
               {searchComponent}
             </div>
           </div>
