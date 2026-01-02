@@ -22,6 +22,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/button';
 import { Badge } from '@/shared/ui/badge';
 import { Card, CardContent, CardHeader } from '@/shared/ui/card';
@@ -101,42 +102,42 @@ export interface ReviewQueueProps {
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════
 
-const ATOM_TYPE_CONFIG: Record<AtomType, { label: string; icon: typeof Lightbulb; colorClass: string }> = {
+const ATOM_TYPE_CONFIG: Record<AtomType, { labelKey: string; icon: typeof Lightbulb; colorClass: string }> = {
   task: {
-    label: 'Task',
+    labelKey: 'reviewQueue.atomTypes.task',
     icon: CheckCircle,
     colorClass: atomColors.decision.text,
   },
   idea: {
-    label: 'Idea',
+    labelKey: 'reviewQueue.atomTypes.idea',
     icon: Lightbulb,
     colorClass: atomColors.insight.text,
   },
   question: {
-    label: 'Question',
+    labelKey: 'reviewQueue.atomTypes.question',
     icon: HelpCircle,
     colorClass: atomColors.question.text,
   },
   decision: {
-    label: 'Decision',
+    labelKey: 'reviewQueue.atomTypes.decision',
     icon: Check,
     colorClass: atomColors.decision.text,
   },
   insight: {
-    label: 'Insight',
+    labelKey: 'reviewQueue.atomTypes.insight',
     icon: Sparkles,
     colorClass: atomColors.insight.text,
   },
 };
 
 const KEYBOARD_SHORTCUTS = [
-  { key: 'j / ArrowDown', action: 'Next atom' },
-  { key: 'k / ArrowUp', action: 'Previous atom' },
-  { key: 'a', action: 'Approve current' },
-  { key: 'r', action: 'Reject current' },
-  { key: 'Space', action: 'Toggle selection' },
-  { key: 'Shift+Click', action: 'Range select' },
-  { key: 'Ctrl/Cmd+A', action: 'Select all' },
+  { key: 'j / ArrowDown', actionKey: 'reviewQueue.shortcuts.nextAtom' },
+  { key: 'k / ArrowUp', actionKey: 'reviewQueue.shortcuts.prevAtom' },
+  { key: 'a', actionKey: 'reviewQueue.shortcuts.approveCurrent' },
+  { key: 'r', actionKey: 'reviewQueue.shortcuts.rejectCurrent' },
+  { key: 'Space', actionKey: 'reviewQueue.shortcuts.toggleSelection' },
+  { key: 'Shift+Click', actionKey: 'reviewQueue.shortcuts.rangeSelect' },
+  { key: 'Ctrl/Cmd+A', actionKey: 'reviewQueue.shortcuts.selectAll' },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -153,6 +154,7 @@ interface AtomCardProps {
 }
 
 function AtomCard({ atom, isActive, isSelected, onSelect, onFocus, innerRef }: AtomCardProps) {
+  const { t } = useTranslation('extraction');
   const config = ATOM_TYPE_CONFIG[atom.type];
   const Icon = config.icon;
 
@@ -180,7 +182,7 @@ function AtomCard({ atom, isActive, isSelected, onSelect, onFocus, innerRef }: A
         <Checkbox
           checked={isSelected}
           onCheckedChange={() => onSelect(atom.id, false)}
-          aria-label={`Select ${atom.title}`}
+          aria-label={t('reviewQueue.selectAtom', { title: atom.title })}
           className="h-5 w-5"
         />
       </div>
@@ -191,12 +193,12 @@ function AtomCard({ atom, isActive, isSelected, onSelect, onFocus, innerRef }: A
           {atom.status === 'approved' ? (
             <Badge className={badges.semantic.success}>
               <CheckCircle className="h-3 w-3 mr-2" />
-              Approved
+              {t('reviewQueue.status.approved')}
             </Badge>
           ) : (
             <Badge className={badges.semantic.error}>
               <XCircle className="h-3 w-3 mr-2" />
-              Rejected
+              {t('reviewQueue.status.rejected')}
             </Badge>
           )}
         </div>
@@ -212,10 +214,10 @@ function AtomCard({ atom, isActive, isSelected, onSelect, onFocus, innerRef }: A
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="outline" className="text-xs">
-                {config.label}
+                {t(config.labelKey)}
               </Badge>
               <span className="text-xs text-muted-foreground">
-                {Math.round(atom.confidence * 100)}% confidence
+                {t('reviewQueue.confidence', { value: Math.round(atom.confidence * 100) })}
               </span>
             </div>
             <h4 className="font-medium text-sm line-clamp-1">{atom.title}</h4>
@@ -249,15 +251,17 @@ interface ContextPanelProps {
 }
 
 function ContextPanel({ atom }: ContextPanelProps) {
+  const { t } = useTranslation('extraction');
+
   if (!atom) {
     return (
       <div className={cn(emptyStateTokens.container, 'h-full')}>
         <div className={emptyStateTokens.icon}>
           <Lightbulb className="h-6 w-6 text-muted-foreground" />
         </div>
-        <p className={emptyStateTokens.title}>Select an atom</p>
+        <p className={emptyStateTokens.title}>{t('reviewQueue.contextPanel.selectAtom')}</p>
         <p className={emptyStateTokens.description}>
-          Choose an atom from the list to see details and AI reasoning
+          {t('reviewQueue.contextPanel.selectAtomDescription')}
         </p>
       </div>
     );
@@ -276,7 +280,7 @@ function ContextPanel({ atom }: ContextPanelProps) {
           </div>
           <div>
             <Badge variant="outline" className="mb-2">
-              {config.label}
+              {t(config.labelKey)}
             </Badge>
             <h3 className="text-lg font-semibold">{atom.title}</h3>
           </div>
@@ -287,7 +291,7 @@ function ContextPanel({ atom }: ContextPanelProps) {
       {/* Source message */}
       <div className="p-6 border-b">
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-          Source Message
+          {t('reviewQueue.contextPanel.sourceMessage')}
         </h4>
         <div className="bg-muted/30 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
@@ -308,7 +312,7 @@ function ContextPanel({ atom }: ContextPanelProps) {
       <div className="p-6 flex-1 overflow-auto">
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
           <Sparkles className="h-3 w-3" />
-          Why this is important
+          {t('reviewQueue.contextPanel.whyImportant')}
         </h4>
         <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
           <p className="text-sm">{atom.aiReasoning}</p>
@@ -317,7 +321,7 @@ function ContextPanel({ atom }: ContextPanelProps) {
         {/* Confidence indicator */}
         <div className="mt-6">
           <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-muted-foreground">AI Confidence</span>
+            <span className="text-muted-foreground">{t('reviewQueue.contextPanel.aiConfidence')}</span>
             <span className="font-medium">{Math.round(atom.confidence * 100)}%</span>
           </div>
           <Progress
@@ -336,6 +340,8 @@ interface ShortcutsHelpProps {
 }
 
 function ShortcutsHelp({ isOpen, onClose }: ShortcutsHelpProps) {
+  const { t } = useTranslation('extraction');
+
   if (!isOpen) return null;
 
   return (
@@ -350,13 +356,13 @@ function ShortcutsHelp({ isOpen, onClose }: ShortcutsHelpProps) {
         <CardHeader className="pb-4">
           <h2 id="shortcuts-title" className="font-semibold flex items-center gap-2">
             <Keyboard className="h-5 w-5" />
-            Keyboard Shortcuts
+            {t('reviewQueue.shortcutsModal.title')}
           </h2>
         </CardHeader>
         <CardContent className="space-y-2">
           {KEYBOARD_SHORTCUTS.map((shortcut) => (
             <div key={shortcut.key} className="flex items-center justify-between py-2">
-              <span className="text-sm text-muted-foreground">{shortcut.action}</span>
+              <span className="text-sm text-muted-foreground">{t(shortcut.actionKey)}</span>
               <kbd className="bg-muted px-2 py-2 rounded text-xs font-mono">
                 {shortcut.key}
               </kbd>
@@ -364,7 +370,7 @@ function ShortcutsHelp({ isOpen, onClose }: ShortcutsHelpProps) {
           ))}
           <Separator className="my-4" />
           <p className="text-xs text-muted-foreground text-center">
-            Press <kbd className="bg-muted px-2 py-0.5 rounded font-mono">?</kbd> to toggle this help
+            {t('reviewQueue.shortcutsModal.hint')}
           </p>
         </CardContent>
       </Card>
@@ -384,6 +390,8 @@ export function ReviewQueue({
   onComplete,
   isLoading = false,
 }: ReviewQueueProps) {
+  const { t } = useTranslation('extraction');
+
   // State
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -401,15 +409,15 @@ export function ReviewQueue({
   const progress = atoms.length > 0 ? (reviewedCount / atoms.length) * 100 : 0;
 
   // Screen reader announcement
-  const announce = useCallback((message: string) => {
+  const announce = useCallback((messageKey: string, params?: Record<string, unknown>) => {
     const el = document.createElement('div');
     el.setAttribute('role', 'status');
     el.setAttribute('aria-live', 'polite');
     el.className = 'sr-only';
-    el.textContent = message;
+    el.textContent = t(messageKey, params);
     document.body.appendChild(el);
     setTimeout(() => document.body.removeChild(el), 1000);
-  }, []);
+  }, [t]);
 
   // Navigation
   const goToNext = useCallback(() => {
@@ -453,7 +461,7 @@ export function ReviewQueue({
 
   const selectAll = useCallback(() => {
     setSelectedIds(new Set(atoms.map((a) => a.id)));
-    announce('All atoms selected');
+    announce('reviewQueue.announce.allSelected');
   }, [atoms, announce]);
 
   // Actions
@@ -461,7 +469,7 @@ export function ReviewQueue({
     const targetId = id ?? activeAtom?.id;
     if (targetId) {
       onApprove?.(targetId);
-      announce('Atom approved');
+      announce('reviewQueue.announce.atomApproved');
       goToNext();
     }
   }, [activeAtom, onApprove, goToNext, announce]);
@@ -470,7 +478,7 @@ export function ReviewQueue({
     const targetId = id ?? activeAtom?.id;
     if (targetId) {
       onReject?.(targetId);
-      announce('Atom rejected');
+      announce('reviewQueue.announce.atomRejected');
       goToNext();
     }
   }, [activeAtom, onReject, goToNext, announce]);
@@ -478,7 +486,7 @@ export function ReviewQueue({
   const handleBatchApprove = useCallback(() => {
     if (selectedIds.size > 0) {
       onBatchAction?.(Array.from(selectedIds), 'approve');
-      announce(`${selectedIds.size} atoms approved`);
+      announce('reviewQueue.announce.batchApproved', { count: selectedIds.size });
       setSelectedIds(new Set());
     }
   }, [selectedIds, onBatchAction, announce]);
@@ -486,7 +494,7 @@ export function ReviewQueue({
   const handleBatchReject = useCallback(() => {
     if (selectedIds.size > 0) {
       onBatchAction?.(Array.from(selectedIds), 'reject');
-      announce(`${selectedIds.size} atoms rejected`);
+      announce('reviewQueue.announce.batchRejected', { count: selectedIds.size });
       setSelectedIds(new Set());
     }
   }, [selectedIds, onBatchAction, announce]);
@@ -557,8 +565,8 @@ export function ReviewQueue({
     return (
       <EmptyState
         icon={Inbox}
-        title="No atoms to review"
-        description="Run an extraction to generate knowledge atoms for review"
+        title={t('reviewQueue.empty.title')}
+        description={t('reviewQueue.empty.description')}
         variant="card"
       />
     );
@@ -571,18 +579,18 @@ export function ReviewQueue({
         <div className="rounded-full bg-semantic-success/10 p-6 mb-6">
           <CheckCircle className="h-12 w-12 text-semantic-success" />
         </div>
-        <h3 className="text-xl font-semibold mb-2">Review Complete</h3>
+        <h3 className="text-xl font-semibold mb-2">{t('reviewQueue.complete.title')}</h3>
         <p className="text-muted-foreground mb-6 max-w-sm text-center">
-          You&apos;ve reviewed all {atoms.length} atoms. Great work!
+          {t('reviewQueue.complete.description', { count: atoms.length })}
         </p>
         <div className="flex items-center gap-4 text-sm">
           <Badge className={badges.semantic.success}>
             <CheckCircle className="h-3 w-3 mr-2" />
-            {atoms.filter((a) => a.status === 'approved').length} approved
+            {t('reviewQueue.complete.approved', { count: atoms.filter((a) => a.status === 'approved').length })}
           </Badge>
           <Badge className={badges.semantic.error}>
             <XCircle className="h-3 w-3 mr-2" />
-            {atoms.filter((a) => a.status === 'rejected').length} rejected
+            {t('reviewQueue.complete.rejected', { count: atoms.filter((a) => a.status === 'rejected').length })}
           </Badge>
         </div>
       </div>
@@ -598,10 +606,10 @@ export function ReviewQueue({
             <div>
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Inbox className="h-5 w-5" />
-                Review Queue
+                {t('reviewQueue.title')}
               </h2>
               <p className="text-sm text-muted-foreground">
-                {activeIndex + 1} of {atoms.length} atoms
+                {t('reviewQueue.progress', { current: activeIndex + 1, total: atoms.length })}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -612,12 +620,12 @@ export function ReviewQueue({
                     size="icon"
                     className={touchTarget.min}
                     onClick={() => setShowShortcuts(true)}
-                    aria-label="Show keyboard shortcuts"
+                    aria-label={t('reviewQueue.showShortcuts')}
                   >
                     <Keyboard className="h-5 w-5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Keyboard shortcuts (?)</TooltipContent>
+                <TooltipContent>{t('reviewQueue.shortcutsTooltip')}</TooltipContent>
               </Tooltip>
             </div>
           </div>
@@ -625,8 +633,8 @@ export function ReviewQueue({
           {/* Progress bar */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{reviewedCount} reviewed</span>
-              <span>{pendingAtoms.length} remaining</span>
+              <span>{t('reviewQueue.reviewed', { count: reviewedCount })}</span>
+              <span>{t('reviewQueue.remaining', { count: pendingAtoms.length })}</span>
             </div>
             <Progress value={progress} className="h-2" />
           </div>
@@ -634,14 +642,14 @@ export function ReviewQueue({
           {/* Batch actions */}
           {selectedIds.size > 0 && (
             <div className="mt-4 flex items-center gap-2 p-4 bg-muted/50 rounded-lg animate-in fade-in-50 slide-in-from-top-2">
-              <span className="text-sm font-medium">{selectedIds.size} selected</span>
+              <span className="text-sm font-medium">{t('reviewQueue.batch.selected', { count: selectedIds.size })}</span>
               <div className="flex-1" />
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setSelectedIds(new Set())}
               >
-                Clear
+                {t('reviewQueue.batch.clear')}
               </Button>
               <Button
                 variant="outline"
@@ -650,14 +658,14 @@ export function ReviewQueue({
                 className="text-destructive hover:text-destructive"
               >
                 <XCircle className="h-4 w-4 mr-2" />
-                Reject All
+                {t('reviewQueue.batch.rejectAll')}
               </Button>
               <Button
                 size="sm"
                 onClick={handleBatchApprove}
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Approve All
+                {t('reviewQueue.batch.approveAll')}
               </Button>
             </div>
           )}
@@ -670,7 +678,7 @@ export function ReviewQueue({
             ref={listRef}
             className="w-1/2 border-r overflow-y-auto p-4 space-y-2"
             role="listbox"
-            aria-label="Atoms to review"
+            aria-label={t('reviewQueue.atomsList')}
             aria-activedescendant={activeAtom?.id}
           >
             {atoms.map((atom, index) => (
@@ -707,12 +715,12 @@ export function ReviewQueue({
                     className={touchTarget.min}
                     onClick={goToPrev}
                     disabled={activeIndex === 0}
-                    aria-label="Previous atom (k)"
+                    aria-label={t('reviewQueue.nav.previousAriaLabel')}
                   >
                     <ChevronUp className="h-5 w-5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Previous (k)</TooltipContent>
+                <TooltipContent>{t('reviewQueue.nav.previous')}</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -722,12 +730,12 @@ export function ReviewQueue({
                     className={touchTarget.min}
                     onClick={goToNext}
                     disabled={activeIndex === atoms.length - 1}
-                    aria-label="Next atom (j)"
+                    aria-label={t('reviewQueue.nav.nextAriaLabel')}
                   >
                     <ChevronDown className="h-5 w-5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Next (j)</TooltipContent>
+                <TooltipContent>{t('reviewQueue.nav.next')}</TooltipContent>
               </Tooltip>
             </div>
 
@@ -741,13 +749,13 @@ export function ReviewQueue({
                     className={cn(touchTarget.min, 'text-destructive hover:text-destructive')}
                     onClick={() => handleReject()}
                     disabled={isLoading || !activeAtom || activeAtom.status !== 'pending'}
-                    aria-label="Reject atom (r)"
+                    aria-label={t('reviewQueue.actions.rejectAriaLabel')}
                   >
                     <X className="h-5 w-5 mr-2" />
-                    Reject
+                    {t('reviewQueue.actions.reject')}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Reject (r)</TooltipContent>
+                <TooltipContent>{t('reviewQueue.actions.rejectTooltip')}</TooltipContent>
               </Tooltip>
 
               <Tooltip>
@@ -758,14 +766,14 @@ export function ReviewQueue({
                     className={cn(touchTarget.min)}
                     onClick={() => handleApprove()}
                     disabled={isLoading || !activeAtom || activeAtom.status !== 'pending'}
-                    aria-label="Approve atom (a)"
+                    aria-label={t('reviewQueue.actions.approveAriaLabel')}
                   >
                     <Check className="h-5 w-5 mr-2" />
-                    Approve
+                    {t('reviewQueue.actions.approve')}
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Approve (a)</TooltipContent>
+                <TooltipContent>{t('reviewQueue.actions.approveTooltip')}</TooltipContent>
               </Tooltip>
             </div>
 
@@ -778,12 +786,12 @@ export function ReviewQueue({
                   className={touchTarget.min}
                   onClick={goToNext}
                   disabled={activeIndex === atoms.length - 1}
-                  aria-label="Skip to next"
+                  aria-label={t('reviewQueue.actions.skipAriaLabel')}
                 >
                   <SkipForward className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Skip</TooltipContent>
+              <TooltipContent>{t('reviewQueue.actions.skip')}</TooltipContent>
             </Tooltip>
           </div>
         </div>

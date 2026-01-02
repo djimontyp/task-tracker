@@ -13,6 +13,7 @@
  */
 
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/shared/lib/utils';
 import {
   Tooltip,
@@ -21,16 +22,16 @@ import {
   TooltipTrigger,
 } from '@/shared/ui/tooltip';
 
-// Score level configuration
+// Score level configuration - names use i18n keys
 const SCORE_LEVELS = [
-  { name: 'Critical', minScore: 0.9, dots: 5, color: 'bg-semantic-error' },
-  { name: 'High', minScore: 0.7, dots: 4, color: 'bg-semantic-warning' },
-  { name: 'Medium', minScore: 0.5, dots: 3, color: 'bg-semantic-info' },
-  { name: 'Low', minScore: 0.3, dots: 2, color: 'bg-muted-foreground' },
-  { name: 'Noise', minScore: 0, dots: 1, color: 'bg-muted-foreground/50' },
+  { id: 'critical', minScore: 0.9, dots: 5, color: 'bg-semantic-error' },
+  { id: 'high', minScore: 0.7, dots: 4, color: 'bg-semantic-warning' },
+  { id: 'medium', minScore: 0.5, dots: 3, color: 'bg-semantic-info' },
+  { id: 'low', minScore: 0.3, dots: 2, color: 'bg-muted-foreground' },
+  { id: 'noise', minScore: 0, dots: 1, color: 'bg-muted-foreground/50' },
 ] as const;
 
-type ScoreLevel = (typeof SCORE_LEVELS)[number]['name'];
+type ScoreLevelId = (typeof SCORE_LEVELS)[number]['id'];
 
 export interface ScoreIndicatorProps {
   /** Importance score from 0 to 1 */
@@ -76,9 +77,11 @@ const sizeConfig = {
 
 export const ScoreIndicator = React.forwardRef<HTMLDivElement, ScoreIndicatorProps>(
   ({ score, showLabel = false, size = 'md', className }, ref) => {
+    const { t } = useTranslation('messages');
     const level = getScoreLevel(score);
     const config = sizeConfig[size];
     const percentage = Math.round(score * 100);
+    const levelName = t(`noise.scoreIndicator.levels.${level.id}`);
 
     return (
       <TooltipProvider>
@@ -92,7 +95,7 @@ export const ScoreIndicator = React.forwardRef<HTMLDivElement, ScoreIndicatorPro
                 className
               )}
               role="meter"
-              aria-label={`Importance: ${level.name} (${percentage}%)`}
+              aria-label={t('noise.scoreIndicator.ariaLabel', { level: levelName, percentage })}
               aria-valuenow={percentage}
               aria-valuemin={0}
               aria-valuemax={100}
@@ -129,14 +132,14 @@ export const ScoreIndicator = React.forwardRef<HTMLDivElement, ScoreIndicatorPro
                         : 'text-muted-foreground'
                   )}
                 >
-                  {level.name}
+                  {levelName}
                 </span>
               )}
             </div>
           </TooltipTrigger>
           <TooltipContent side="top" className="font-mono">
             <p>
-              {level.name}: {percentage}%
+              {levelName}: {percentage}%
             </p>
           </TooltipContent>
         </Tooltip>
@@ -148,4 +151,4 @@ export const ScoreIndicator = React.forwardRef<HTMLDivElement, ScoreIndicatorPro
 ScoreIndicator.displayName = 'ScoreIndicator';
 
 export { SCORE_LEVELS, getScoreLevel };
-export type { ScoreLevel };
+export type { ScoreLevelId as ScoreLevel };

@@ -12,6 +12,7 @@
  */
 
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
 import { Badge } from '@/shared/ui/badge';
@@ -51,6 +52,7 @@ export const BulkActionBar = React.forwardRef<HTMLDivElement, BulkActionBarProps
     },
     ref
   ) => {
+    const { t } = useTranslation('messages');
     const isLoading = isApproving || isRejecting;
     const isVisible = selectedCount > 0;
 
@@ -71,7 +73,7 @@ export const BulkActionBar = React.forwardRef<HTMLDivElement, BulkActionBarProps
           className
         )}
         role="toolbar"
-        aria-label="Bulk actions"
+        aria-label={t('noise.bulkActions.ariaLabel')}
       >
         {/* Gradient fade at top - pointer-events-none to allow clicking through */}
         <div
@@ -94,7 +96,7 @@ export const BulkActionBar = React.forwardRef<HTMLDivElement, BulkActionBarProps
                 variant="secondary"
                 className="h-8 px-4 text-sm font-semibold tabular-nums"
               >
-                {selectedCount} selected
+                {t('noise.bulkActions.selected', { count: selectedCount })}
                 {totalCount && (
                   <span className="text-muted-foreground font-normal ml-2">
                     / {totalCount}
@@ -110,7 +112,7 @@ export const BulkActionBar = React.forwardRef<HTMLDivElement, BulkActionBarProps
                 className="h-10 text-muted-foreground hover:text-foreground"
               >
                 <XCircle className="h-4 w-4 mr-2" />
-                Clear
+                {t('noise.bulkActions.clear')}
               </Button>
             </div>
 
@@ -134,7 +136,7 @@ export const BulkActionBar = React.forwardRef<HTMLDivElement, BulkActionBarProps
                 ) : (
                   <X className="h-4 w-4 mr-2" />
                 )}
-                Reject
+                {t('noise.bulkActions.reject')}
               </Button>
 
               {/* Approve button */}
@@ -156,7 +158,7 @@ export const BulkActionBar = React.forwardRef<HTMLDivElement, BulkActionBarProps
                 ) : (
                   <Check className="h-4 w-4 mr-2" />
                 )}
-                Approve
+                {t('noise.bulkActions.approve')}
               </Button>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactDiffViewer from 'react-diff-viewer-continued';
 import { Button, Card, CardContent, CardHeader, CardTitle, Badge, Spinner } from '@/shared/ui';
 import { Check, X } from 'lucide-react';
@@ -23,6 +24,7 @@ export function VersionDiffViewer({
   onApprove,
   onReject,
 }: VersionDiffViewerProps) {
+  const { t } = useTranslation('atoms');
   const [diff, setDiff] = useState<VersionDiff | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -88,7 +90,7 @@ export function VersionDiffViewer({
   }
 
   if (!diff) {
-    return <div className="text-center p-4 text-muted-foreground">No diff available</div>;
+    return <div className="text-center p-4 text-muted-foreground">{t('versions.diff.noDiff')}</div>;
   }
 
   const { added, removed, modified } = formatDiffChanges(diff.changes);
@@ -98,7 +100,7 @@ export function VersionDiffViewer({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>
-            Version {compareToVersion} → Version {version}
+            {t('versions.diff.comparison', { from: compareToVersion, to: version })}
           </CardTitle>
           <div className="flex gap-2">
             <Button
@@ -108,7 +110,7 @@ export function VersionDiffViewer({
               disabled={actionLoading}
             >
               <X className="h-4 w-4 mr-2" />
-              Reject
+              {t('actions.reject')}
             </Button>
             <Button
               size="sm"
@@ -116,7 +118,7 @@ export function VersionDiffViewer({
               disabled={actionLoading}
             >
               <Check className="h-4 w-4 mr-2" />
-              Approve
+              {t('actions.approve')}
             </Button>
           </div>
         </div>
@@ -129,17 +131,17 @@ export function VersionDiffViewer({
         <div className="mb-4 flex gap-2">
           {added.length > 0 && (
             <Badge variant="default" className="bg-semantic-success hover:bg-semantic-success/90">
-              +{added.length} added
+              +{added.length} {t('versions.diff.added')}
             </Badge>
           )}
           {removed.length > 0 && (
             <Badge variant="default" className="bg-semantic-error hover:bg-semantic-error/90">
-              -{removed.length} removed
+              -{removed.length} {t('versions.diff.removed')}
             </Badge>
           )}
           {modified.length > 0 && (
             <Badge variant="default" className="bg-semantic-warning hover:bg-semantic-warning/90">
-              {modified.length} modified
+              {modified.length} {t('versions.diff.modified')}
             </Badge>
           )}
         </div>
@@ -162,7 +164,7 @@ export function VersionDiffViewer({
 
           {added.length > 0 && (
             <div className="border-l-4 border-semantic-success pl-4">
-              <h4 className="font-medium text-semantic-success mb-2">Added</h4>
+              <h4 className="font-medium text-semantic-success mb-2">{t('versions.diff.addedTitle')}</h4>
               <ul className="space-y-2">
                 {added.map((item, idx) => (
                   <li key={idx} className="text-sm">
@@ -175,7 +177,7 @@ export function VersionDiffViewer({
 
           {removed.length > 0 && (
             <div className="border-l-4 border-semantic-error pl-4">
-              <h4 className="font-medium text-semantic-error mb-2">Removed</h4>
+              <h4 className="font-medium text-semantic-error mb-2">{t('versions.diff.removedTitle')}</h4>
               <ul className="space-y-2">
                 {removed.map((item, idx) => (
                   <li key={idx} className="text-sm">

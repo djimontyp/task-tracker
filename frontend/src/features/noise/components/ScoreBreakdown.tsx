@@ -12,6 +12,7 @@
  */
 
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/shared/lib/utils';
 import {
   FileText,
@@ -21,35 +22,27 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-// Factor configuration
+// Factor configuration - labels and descriptions use i18n keys
 const SCORE_FACTORS = [
   {
     id: 'content',
-    label: 'Content',
     weight: 40,
     icon: FileText,
-    description: 'Message relevance and keywords',
   },
   {
     id: 'author',
-    label: 'Author',
     weight: 20,
     icon: User,
-    description: 'Sender authority and history',
   },
   {
     id: 'temporal',
-    label: 'Temporal',
     weight: 20,
     icon: Clock,
-    description: 'Time-based relevance',
   },
   {
     id: 'topics',
-    label: 'Topics',
     weight: 20,
     icon: Tags,
-    description: 'Topic alignment',
   },
 ] as const;
 
@@ -186,6 +179,8 @@ const FactorRow = ({
 
 export const ScoreBreakdown = React.forwardRef<HTMLDivElement, ScoreBreakdownProps>(
   ({ factors, showWeights = true, compact = false, className }, ref) => {
+    const { t } = useTranslation('messages');
+
     // Calculate total weighted score
     const totalScore = SCORE_FACTORS.reduce((sum, factor) => {
       return sum + factors[factor.id] * (factor.weight / 100);
@@ -200,17 +195,17 @@ export const ScoreBreakdown = React.forwardRef<HTMLDivElement, ScoreBreakdownPro
           className
         )}
         role="group"
-        aria-label="Score breakdown by factor"
+        aria-label={t('noise.scoreBreakdown.ariaLabel')}
       >
         {/* Header - only in non-compact mode */}
         {!compact && (
           <div className="flex items-center justify-between pb-2 border-b">
             <h4 className="text-sm font-semibold tracking-tight">
-              Score Breakdown
+              {t('noise.scoreBreakdown.title')}
             </h4>
             {showWeights && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>Total:</span>
+                <span>{t('noise.scoreBreakdown.total')}</span>
                 <span className="font-mono font-semibold text-foreground">
                   {Math.round(totalScore * 100)}%
                 </span>
@@ -224,7 +219,7 @@ export const ScoreBreakdown = React.forwardRef<HTMLDivElement, ScoreBreakdownPro
           <FactorRow
             key={factor.id}
             icon={factor.icon}
-            label={factor.label}
+            label={t(`noise.scoreBreakdown.factors.${factor.id}.label`)}
             score={factors[factor.id]}
             weight={factor.weight}
             showWeights={showWeights && !compact}
@@ -236,9 +231,12 @@ export const ScoreBreakdown = React.forwardRef<HTMLDivElement, ScoreBreakdownPro
         {showWeights && !compact && (
           <div className="pt-2 border-t">
             <p className="text-xs text-muted-foreground">
-              Weights: Content {SCORE_FACTORS[0].weight}% | Author{' '}
-              {SCORE_FACTORS[1].weight}% | Temporal {SCORE_FACTORS[2].weight}% |
-              Topics {SCORE_FACTORS[3].weight}%
+              {t('noise.scoreBreakdown.weightsLegend', {
+                content: SCORE_FACTORS[0].weight,
+                author: SCORE_FACTORS[1].weight,
+                temporal: SCORE_FACTORS[2].weight,
+                topics: SCORE_FACTORS[3].weight
+              })}
             </p>
           </div>
         )}

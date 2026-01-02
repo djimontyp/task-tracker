@@ -17,6 +17,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Sheet,
   SheetContent,
@@ -100,24 +101,24 @@ export interface ExtractionConfig {
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════
 
-const PERIOD_OPTIONS: { value: TimePeriod; label: string; shortcut: string; icon: typeof Clock }[] = [
-  { value: '1h', label: 'Last Hour', shortcut: '1', icon: Clock },
-  { value: '24h', label: 'Last 24 Hours', shortcut: '2', icon: Clock },
-  { value: '7d', label: 'Last 7 Days', shortcut: '3', icon: Calendar },
-  { value: 'custom', label: 'Custom Range', shortcut: '4', icon: Calendar },
+const PERIOD_OPTIONS: { value: TimePeriod; labelKey: string; shortcut: string; icon: typeof Clock }[] = [
+  { value: '1h', labelKey: 'sheet.periods.lastHour', shortcut: '1', icon: Clock },
+  { value: '24h', labelKey: 'sheet.periods.last24Hours', shortcut: '2', icon: Clock },
+  { value: '7d', labelKey: 'sheet.periods.last7Days', shortcut: '3', icon: Calendar },
+  { value: 'custom', labelKey: 'sheet.periods.customRange', shortcut: '4', icon: Calendar },
 ];
 
-const SCORE_OPTIONS: { value: ScoreFilter; label: string; description: string }[] = [
-  { value: 'all', label: 'All Messages', description: 'Include everything' },
-  { value: 'medium', label: 'Medium+ Priority', description: 'Score >= 0.5' },
-  { value: 'high', label: 'High Priority Only', description: 'Score >= 0.75' },
+const SCORE_OPTIONS: { value: ScoreFilter; labelKey: string; descriptionKey: string }[] = [
+  { value: 'all', labelKey: 'sheet.scores.all', descriptionKey: 'sheet.scores.allDescription' },
+  { value: 'medium', labelKey: 'sheet.scores.medium', descriptionKey: 'sheet.scores.mediumDescription' },
+  { value: 'high', labelKey: 'sheet.scores.high', descriptionKey: 'sheet.scores.highDescription' },
 ];
 
-const PROVIDER_OPTIONS: { value: Provider; label: string; speed: string; cost: string }[] = [
-  { value: 'gpt-4', label: 'GPT-4', speed: 'Slow', cost: '$$$' },
-  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', speed: 'Fast', cost: '$$' },
-  { value: 'ollama-mistral', label: 'Mistral (Local)', speed: 'Medium', cost: 'Free' },
-  { value: 'ollama-llama3', label: 'Llama 3 (Local)', speed: 'Fast', cost: 'Free' },
+const PROVIDER_OPTIONS: { value: Provider; label: string; speedKey: string; cost: string }[] = [
+  { value: 'gpt-4', label: 'GPT-4', speedKey: 'sheet.providers.speedSlow', cost: '$$$' },
+  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', speedKey: 'sheet.providers.speedFast', cost: '$$' },
+  { value: 'ollama-mistral', label: 'Mistral (Local)', speedKey: 'sheet.providers.speedMedium', cost: 'Free' },
+  { value: 'ollama-llama3', label: 'Llama 3 (Local)', speedKey: 'sheet.providers.speedFast', cost: 'Free' },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -131,7 +132,9 @@ interface PeriodCardProps {
 }
 
 function PeriodCard({ option, selected, onSelect }: PeriodCardProps) {
+  const { t } = useTranslation('extraction');
   const Icon = option.icon;
+  const label = t(option.labelKey);
 
   return (
     <button
@@ -147,11 +150,11 @@ function PeriodCard({ option, selected, onSelect }: PeriodCardProps) {
           : 'border-border bg-card hover:border-primary/50 hover:bg-accent/50'
       )}
       aria-pressed={selected}
-      aria-label={`${option.label}, keyboard shortcut ${option.shortcut}`}
+      aria-label={t('sheet.periodAriaLabel', { label, shortcut: option.shortcut })}
     >
       <Icon className={cn('h-5 w-5 mb-2', selected ? 'text-primary' : 'text-muted-foreground')} />
       <span className={cn('text-sm font-medium', selected ? 'text-primary' : 'text-foreground')}>
-        {option.label}
+        {label}
       </span>
       <kbd className="absolute top-2 right-2 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded font-mono">
         {option.shortcut}
@@ -205,6 +208,8 @@ export function ExtractionSheet({
   isExtracting = false,
   extractionProgress = 0,
 }: ExtractionSheetProps) {
+  const { t } = useTranslation('extraction');
+
   // State
   const [period, setPeriod] = useState<TimePeriod>('24h');
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>('medium');
@@ -256,7 +261,7 @@ export function ExtractionSheet({
     };
     const totalCost = filteredMessages * costPerMessage[provider];
     const estimatedCost = totalCost === 0
-      ? 'Free'
+      ? t('sheet.preview.free')
       : totalCost < 0.01
         ? '<$0.01'
         : `$${totalCost.toFixed(2)}`;
@@ -272,7 +277,7 @@ export function ExtractionSheet({
       estimatedCost,
       confidence,
     };
-  }, [period, scoreFilter, provider, totalMessages]);
+  }, [period, scoreFilter, provider, totalMessages, t]);
 
   // Keyboard shortcuts
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -315,10 +320,10 @@ export function ExtractionSheet({
             <div className="rounded-full bg-primary/10 p-2">
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
-            <SheetTitle className="text-xl">AI Extraction</SheetTitle>
+            <SheetTitle className="text-xl">{t('sheet.title')}</SheetTitle>
           </div>
           <SheetDescription id="extraction-sheet-description">
-            Extract knowledge atoms from your messages using AI analysis.
+            {t('sheet.description')}
           </SheetDescription>
         </SheetHeader>
 
@@ -327,7 +332,7 @@ export function ExtractionSheet({
           <section aria-labelledby="period-heading">
             <div className="flex items-center gap-2 mb-4">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              <h3 id="period-heading" className="text-sm font-semibold">Time Period</h3>
+              <h3 id="period-heading" className="text-sm font-semibold">{t('sheet.timePeriod')}</h3>
             </div>
             <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-labelledby="period-heading">
               {PERIOD_OPTIONS.map((option) => (
@@ -347,11 +352,11 @@ export function ExtractionSheet({
           <section aria-labelledby="score-heading">
             <div className="flex items-center gap-2 mb-4">
               <Filter className="h-4 w-4 text-muted-foreground" />
-              <h3 id="score-heading" className="text-sm font-semibold">Message Filter</h3>
+              <h3 id="score-heading" className="text-sm font-semibold">{t('sheet.messageFilter')}</h3>
             </div>
             <Select value={scoreFilter} onValueChange={(v) => setScoreFilter(v as ScoreFilter)}>
-              <SelectTrigger className="w-full h-12" aria-label="Select score filter">
-                <SelectValue placeholder="Select filter" />
+              <SelectTrigger className="w-full h-12" aria-label={t('sheet.selectScoreFilter')}>
+                <SelectValue placeholder={t('sheet.selectFilterPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {SCORE_OPTIONS.map((option) => (
@@ -361,8 +366,8 @@ export function ExtractionSheet({
                     className="py-4"
                   >
                     <div className="flex flex-col">
-                      <span className="font-medium">{option.label}</span>
-                      <span className="text-xs text-muted-foreground">{option.description}</span>
+                      <span className="font-medium">{t(option.labelKey)}</span>
+                      <span className="text-xs text-muted-foreground">{t(option.descriptionKey)}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -376,11 +381,11 @@ export function ExtractionSheet({
           <section aria-labelledby="provider-heading">
             <div className="flex items-center gap-2 mb-4">
               <Cpu className="h-4 w-4 text-muted-foreground" />
-              <h3 id="provider-heading" className="text-sm font-semibold">AI Provider</h3>
+              <h3 id="provider-heading" className="text-sm font-semibold">{t('sheet.aiProvider')}</h3>
             </div>
             <Select value={provider} onValueChange={(v) => setProvider(v as Provider)}>
-              <SelectTrigger className="w-full h-12" aria-label="Select AI provider">
-                <SelectValue placeholder="Select provider" />
+              <SelectTrigger className="w-full h-12" aria-label={t('sheet.selectAiProvider')}>
+                <SelectValue placeholder={t('sheet.selectProviderPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {PROVIDER_OPTIONS.map((option) => (
@@ -394,7 +399,7 @@ export function ExtractionSheet({
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
                           <Zap className="h-3 w-3 mr-2" />
-                          {option.speed}
+                          {t(option.speedKey)}
                         </Badge>
                         <Badge variant="outline" className="text-xs">
                           <DollarSign className="h-3 w-3 mr-2" />
@@ -418,7 +423,7 @@ export function ExtractionSheet({
             <div className="flex items-center justify-between mb-6">
               <h3 id="preview-heading" className="text-sm font-semibold flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
-                Extraction Preview
+                {t('sheet.preview.title')}
               </h3>
               <Badge
                 variant="outline"
@@ -431,42 +436,42 @@ export function ExtractionSheet({
                 {preview.confidence === 'high' && <CheckCircle className="h-3 w-3 mr-2" />}
                 {preview.confidence === 'medium' && <AlertTriangle className="h-3 w-3 mr-2" />}
                 {preview.confidence === 'low' && <AlertTriangle className="h-3 w-3 mr-2" />}
-                {preview.confidence} confidence
+                {t(`sheet.preview.confidence.${preview.confidence}`)}
               </Badge>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <PreviewMetric
                 icon={MessageSquare}
-                label="Messages Selected"
+                label={t('sheet.preview.messagesSelected')}
                 value={preview.messageCount.toLocaleString()}
-                subtext={`of ${totalMessages.toLocaleString()} total`}
+                subtext={t('sheet.preview.ofTotal', { total: totalMessages.toLocaleString() })}
               />
               <PreviewMetric
                 icon={Atom}
-                label="Expected Atoms"
+                label={t('sheet.preview.expectedAtoms')}
                 value={`~${preview.estimatedAtoms}`}
-                subtext="knowledge units"
+                subtext={t('sheet.preview.knowledgeUnits')}
                 variant="success"
               />
               <PreviewMetric
                 icon={Timer}
-                label="Estimated Time"
+                label={t('sheet.preview.estimatedTime')}
                 value={preview.estimatedTime}
               />
               <PreviewMetric
                 icon={DollarSign}
-                label="Estimated Cost"
+                label={t('sheet.preview.estimatedCost')}
                 value={preview.estimatedCost}
-                variant={preview.estimatedCost === 'Free' ? 'success' : 'default'}
+                variant={preview.estimatedCost === t('sheet.preview.free') ? 'success' : 'default'}
               />
             </div>
 
             {/* Value proposition */}
             <div className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{preview.messageCount} messages</span>
+              <span className="font-semibold text-foreground">{t('sheet.preview.messagesCount', { count: preview.messageCount })}</span>
               <ArrowRight className="h-4 w-4" />
-              <span className="font-semibold text-primary">{preview.estimatedAtoms} decisions</span>
+              <span className="font-semibold text-primary">{t('sheet.preview.decisionsCount', { count: preview.estimatedAtoms })}</span>
             </div>
           </section>
 
@@ -476,7 +481,7 @@ export function ExtractionSheet({
               <div className="flex items-center justify-between text-sm">
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Extracting knowledge...
+                  {t('sheet.extractingKnowledge')}
                 </span>
                 <span className="font-medium">{extractionProgress}%</span>
               </div>
@@ -490,13 +495,13 @@ export function ExtractionSheet({
           <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <Keyboard className="h-3 w-3" />
-              <span>1-4 for period</span>
+              <span>{t('sheet.periodShortcutHint')}</span>
             </div>
             <div className="flex items-center gap-2">
               <kbd className="bg-muted px-2 py-0.5 rounded font-mono text-[10px]">
                 {navigator.platform.includes('Mac') ? 'Cmd' : 'Ctrl'}+Enter
               </kbd>
-              <span>to start</span>
+              <span>{t('sheet.startShortcutHint')}</span>
             </div>
           </div>
 
@@ -509,12 +514,12 @@ export function ExtractionSheet({
             {isExtracting ? (
               <>
                 <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                Extracting...
+                {t('sheet.extracting')}
               </>
             ) : (
               <>
                 <Sparkles className="h-5 w-5 mr-2" />
-                Start Extraction
+                {t('sheet.startExtraction')}
                 <ChevronRight className="h-5 w-5 ml-2" />
               </>
             )}
