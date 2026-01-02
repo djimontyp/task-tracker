@@ -35,7 +35,9 @@ const ProvidersTab = () => {
   })
 
   const pollValidationStatus = async (providerId: string, action: 'created' | 'updated') => {
-    toast.success(`Provider ${action}. Validating connection...`)
+    // Use toast ID to update the same toast instead of creating multiple
+    const toastId = `provider-validation-${providerId}`
+    toast.loading(`Provider ${action}. Validating connection...`, { id: toastId })
 
     for (let attempt = 0; attempt < MAX_POLLING_ATTEMPTS; attempt++) {
       await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS))
@@ -45,22 +47,22 @@ const ProvidersTab = () => {
       const provider = providers?.find(p => p.id === providerId)
 
       if (!provider) {
-        toast.error('Provider not found')
+        toast.error('Provider not found', { id: toastId })
         return
       }
 
       if (provider.validation_status === ValidationStatusEnum.CONNECTED) {
-        toast.success('Provider validated successfully!')
+        toast.success('Provider validated successfully!', { id: toastId })
         return
       }
 
       if (provider.validation_status === ValidationStatusEnum.ERROR) {
-        toast.error(`Validation failed: ${provider.validation_error || 'Unknown error'}`)
+        toast.error(`Validation failed: ${provider.validation_error || 'Unknown error'}`, { id: toastId })
         return
       }
     }
 
-    toast.error('Validation timeout. Please check provider status.')
+    toast.error('Validation timeout. Please check provider status.', { id: toastId })
   }
 
   const createMutation = useMutation({

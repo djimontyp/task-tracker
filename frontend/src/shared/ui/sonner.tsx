@@ -6,6 +6,12 @@ import { Toaster as Sonner } from "sonner"
 
 type ToasterProps = React.ComponentProps<typeof Sonner>
 
+/**
+ * Toast duration in milliseconds.
+ * Set to 5 seconds for better readability.
+ */
+const TOAST_DURATION_MS = 5000
+
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()
 
@@ -13,6 +19,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      duration={TOAST_DURATION_MS}
       icons={{
         success: <CheckCircle className="h-5 w-5 text-semantic-success" />,
         error: <AlertCircle className="h-5 w-5 text-semantic-error" />,
@@ -29,13 +36,13 @@ const Toaster = ({ ...props }: ToasterProps) => {
           cancelButton:
             "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
           success:
-            "group-[.toaster]:border-semantic-success group-[.toaster]:bg-semantic-success/10",
+            "group-[.toaster]:border-semantic-success group-[.toaster]:bg-background",
           error:
-            "group-[.toaster]:border-semantic-error group-[.toaster]:bg-semantic-error/10",
+            "group-[.toaster]:border-semantic-error group-[.toaster]:bg-background",
           warning:
-            "group-[.toaster]:border-semantic-warning group-[.toaster]:bg-semantic-warning/10",
+            "group-[.toaster]:border-semantic-warning group-[.toaster]:bg-background",
           info:
-            "group-[.toaster]:border-semantic-info group-[.toaster]:bg-semantic-info/10",
+            "group-[.toaster]:border-semantic-info group-[.toaster]:bg-background",
         },
       }}
       {...props}
