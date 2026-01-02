@@ -1,6 +1,36 @@
 {
   "title": "Messages",
   "subtitle": "Manage incoming messages from all sources",
+  "columns": {
+    "author": "Author",
+    "content": "Content",
+    "source": "Source",
+    "status": "Status",
+    "importance": "Importance",
+    "classification": "Classification",
+    "topic": "Topic",
+    "sentAt": "Sent at",
+    "emptyMessage": "(Empty message)",
+    "factorsBreakdown": "Factors breakdown",
+    "sources": {
+      "telegram": "Telegram",
+      "api": "API",
+      "slack": "Slack"
+    },
+    "aria": {
+      "selectAll": "Select all",
+      "selectRow": "Select row",
+      "actionsFor": "Actions for message {{id}}"
+    },
+    "actions": {
+      "label": "Actions",
+      "openMenu": "Open menu",
+      "copyId": "Copy message ID",
+      "viewDetails": "View details",
+      "delete": "Delete",
+      "resetFilters": "Reset filters"
+    }
+  },
   "summary": {
     "greeting": {
       "morning": "Good morning!",
