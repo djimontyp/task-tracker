@@ -272,9 +272,9 @@ const MessagesPage = () => {
   const handleRefreshMessages = async () => {
     try {
       await refetch()
-      toast.success('Messages refreshed')
+      toast.success(t('common:toast.success.refreshed', { entity: t('common:toast.entities.messages') }))
     } catch {
-      toast.error('Failed to refresh messages')
+      toast.error(t('common:toast.error.refreshFailed', { entity: t('common:toast.entities.messages') }))
     }
   }
 
@@ -283,22 +283,22 @@ const MessagesPage = () => {
     if (!chatId) return
 
     try {
-      toast.loading('Updating message authors...', { id: 'update-authors' })
+      toast.loading(t('common:toast.info.updating', { entity: t('common:toast.entities.authors') }), { id: 'update-authors' })
 
       const response = await apiClient.post(`/api/messages/update-authors?chat_id=${chatId}`)
 
       if (response.data.success) {
         toast.success(
-          `Updated ${response.data.updated} messages successfully!`,
+          t('common:toast.success.updated', { entity: t('common:toast.entities.authors') }),
           { id: 'update-authors' }
         )
         await refetch()
       } else {
-        toast.error(response.data.message || 'Failed to update authors', { id: 'update-authors' })
+        toast.error(response.data.message || t('common:toast.error.updateFailed', { entity: t('common:toast.entities.authors') }), { id: 'update-authors' })
       }
     } catch (updateError) {
       logger.error('Update authors error:', updateError)
-      toast.error('Failed to update message authors', { id: 'update-authors' })
+      toast.error(t('common:toast.error.updateFailed', { entity: t('common:toast.entities.authors') }), { id: 'update-authors' })
     }
   }
 
@@ -335,56 +335,56 @@ const MessagesPage = () => {
     if (count === 0) return
 
     const selectedIds = table.getSelectedRowModel().rows.map(row => String(row.original.id))
-    const toastId = toast.loading(`Approving ${count} messages...`)
+    const toastId = toast.loading(t('common:toast.info.processing', { entity: t('common:toast.entities.messages') }))
 
     try {
       const { approved_count, failed_ids, errors } = await atomService.bulkApprove(selectedIds)
 
       if (failed_ids.length > 0) {
         toast.warning(
-          `Approved ${approved_count}/${count} messages. ${failed_ids.length} failed.`,
+          t('common:toast.warning.partialSuccess', { action: t('common:toast.actions.approved'), successCount: approved_count, totalCount: count, entity: t('common:toast.entities.messages'), failedCount: failed_ids.length }),
           { id: toastId }
         )
         logger.warn('Bulk approve partial failure:', { failed_ids, errors })
       } else {
-        toast.success(`Approved ${approved_count} messages`, { id: toastId })
+        toast.success(t('common:toast.success.approved', { count: approved_count, entity: t('common:toast.entities.messages') }), { id: toastId })
       }
 
       multiSelect.handleClearSelection()
       await refetch()
     } catch (approveError) {
       logger.error('Bulk approve error:', approveError)
-      toast.error('Failed to approve messages', { id: toastId })
+      toast.error(t('common:toast.error.approveFailed', { entity: t('common:toast.entities.messages') }), { id: toastId })
     }
-  }, [table, multiSelect, refetch])
+  }, [table, multiSelect, refetch, t])
 
   const handleBulkArchive = useCallback(async () => {
     const count = Object.keys(table.getState().rowSelection).length
     if (count === 0) return
 
     const selectedIds = table.getSelectedRowModel().rows.map(row => String(row.original.id))
-    const toastId = toast.loading(`Archiving ${count} messages...`)
+    const toastId = toast.loading(t('common:toast.info.processing', { entity: t('common:toast.entities.messages') }))
 
     try {
       const { archived_count, failed_ids, errors } = await atomService.bulkArchive(selectedIds)
 
       if (failed_ids.length > 0) {
         toast.warning(
-          `Archived ${archived_count}/${count} messages. ${failed_ids.length} failed.`,
+          t('common:toast.warning.partialSuccess', { action: t('common:toast.actions.archived'), successCount: archived_count, totalCount: count, entity: t('common:toast.entities.messages'), failedCount: failed_ids.length }),
           { id: toastId }
         )
         logger.warn('Bulk archive partial failure:', { failed_ids, errors })
       } else {
-        toast.success(`Archived ${archived_count} messages`, { id: toastId })
+        toast.success(t('common:toast.success.archived', { count: archived_count, entity: t('common:toast.entities.messages') }), { id: toastId })
       }
 
       multiSelect.handleClearSelection()
       await refetch()
     } catch (archiveError) {
       logger.error('Bulk archive error:', archiveError)
-      toast.error('Failed to archive messages', { id: toastId })
+      toast.error(t('common:toast.error.archiveFailed', { entity: t('common:toast.entities.messages') }), { id: toastId })
     }
-  }, [table, multiSelect, refetch])
+  }, [table, multiSelect, refetch, t])
 
   const handleBulkDelete = useCallback(async () => {
     const count = Object.keys(table.getState().rowSelection).length
@@ -394,28 +394,28 @@ const MessagesPage = () => {
     if (!confirmed) return
 
     const selectedIds = table.getSelectedRowModel().rows.map(row => String(row.original.id))
-    const toastId = toast.loading(`Deleting ${count} messages...`)
+    const toastId = toast.loading(t('common:toast.info.processing', { entity: t('common:toast.entities.messages') }))
 
     try {
       const { deleted_count, failed_ids, errors } = await atomService.bulkDelete(selectedIds)
 
       if (failed_ids.length > 0) {
         toast.warning(
-          `Deleted ${deleted_count}/${count} messages. ${failed_ids.length} failed.`,
+          t('common:toast.warning.partialSuccess', { action: t('common:toast.actions.deleted'), successCount: deleted_count, totalCount: count, entity: t('common:toast.entities.messages'), failedCount: failed_ids.length }),
           { id: toastId }
         )
         logger.warn('Bulk delete partial failure:', { failed_ids, errors })
       } else {
-        toast.success(`Deleted ${deleted_count} messages`, { id: toastId })
+        toast.success(t('common:toast.success.deleted', { entity: t('common:toast.entities.message') }), { id: toastId })
       }
 
       multiSelect.handleClearSelection()
       await refetch()
     } catch (deleteError) {
       logger.error('Bulk delete error:', deleteError)
-      toast.error('Failed to delete messages', { id: toastId })
+      toast.error(t('common:toast.error.deleteFailed', { entity: t('common:toast.entities.messages') }), { id: toastId })
     }
-  }, [table, multiSelect, refetch])
+  }, [table, multiSelect, refetch, t])
 
   if (isLoading) {
     return (

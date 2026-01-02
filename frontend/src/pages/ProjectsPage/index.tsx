@@ -3,6 +3,7 @@
  */
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Spinner, Button, Card, Input } from '@/shared/ui'
 import { projectService } from '@/features/projects/api/projectService'
@@ -14,6 +15,7 @@ import { EmptyState } from '@/shared/patterns'
 import { PageWrapper } from '@/shared/primitives'
 
 const ProjectsPage = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<ProjectConfig | undefined>(undefined)
@@ -80,12 +82,12 @@ const ProjectsPage = () => {
     mutationFn: projectService.createProject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
-      toast.success('Project created successfully')
+      toast.success(t('toast.success.created', { entity: t('toast.entities.project') }))
       setFormOpen(false)
       setSelectedProject(undefined)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to create project')
+      toast.error(error.message || t('toast.error.createFailed', { entity: t('toast.entities.project') }))
     },
   })
 
@@ -95,12 +97,12 @@ const ProjectsPage = () => {
       projectService.updateProject(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
-      toast.success('Project updated successfully')
+      toast.success(t('toast.success.updated', { entity: t('toast.entities.project') }))
       setFormOpen(false)
       setSelectedProject(undefined)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to update project')
+      toast.error(error.message || t('toast.error.updateFailed', { entity: t('toast.entities.project') }))
     },
   })
 
@@ -108,10 +110,10 @@ const ProjectsPage = () => {
     mutationFn: projectService.deleteProject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
-      toast.success('Project deleted successfully')
+      toast.success(t('toast.success.deleted', { entity: t('toast.entities.project') }))
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to delete project')
+      toast.error(error.message || t('toast.error.deleteFailed', { entity: t('toast.entities.project') }))
     },
   })
 

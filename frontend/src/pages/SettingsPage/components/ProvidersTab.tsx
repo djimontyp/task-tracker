@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Card,
@@ -19,6 +20,7 @@ const POLLING_INTERVAL_MS = 1000
 const MAX_POLLING_ATTEMPTS = 15
 
 const ProvidersTab = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingProvider, setEditingProvider] = useState<LLMProvider | null>(null)
@@ -37,7 +39,7 @@ const ProvidersTab = () => {
   const pollValidationStatus = async (providerId: string, action: 'created' | 'updated') => {
     // Use toast ID to update the same toast instead of creating multiple
     const toastId = `provider-validation-${providerId}`
-    toast.loading(`Provider ${action}. Validating connection...`, { id: toastId })
+    toast.loading(t('toast.info.validating', { entity: t('toast.entities.provider'), action: t(`toast.actions.${action}`) }), { id: toastId })
 
     for (let attempt = 0; attempt < MAX_POLLING_ATTEMPTS; attempt++) {
       await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS))
@@ -47,22 +49,22 @@ const ProvidersTab = () => {
       const provider = providers?.find(p => p.id === providerId)
 
       if (!provider) {
-        toast.error('Provider not found', { id: toastId })
+        toast.error(t('toast.error.notFound', { entity: t('toast.entities.provider') }), { id: toastId })
         return
       }
 
       if (provider.validation_status === ValidationStatusEnum.CONNECTED) {
-        toast.success('Provider validated successfully!', { id: toastId })
+        toast.success(t('toast.success.validated', { entity: t('toast.entities.provider') }), { id: toastId })
         return
       }
 
       if (provider.validation_status === ValidationStatusEnum.ERROR) {
-        toast.error(`Validation failed: ${provider.validation_error || 'Unknown error'}`, { id: toastId })
+        toast.error(t('toast.error.validationFailed', { error: provider.validation_error || t('labels.unknown') }), { id: toastId })
         return
       }
     }
 
-    toast.error('Validation timeout. Please check provider status.', { id: toastId })
+    toast.error(t('toast.error.validationTimeout', { entity: t('toast.entities.provider') }), { id: toastId })
   }
 
   const createMutation = useMutation({
@@ -73,7 +75,7 @@ const ProvidersTab = () => {
       await pollValidationStatus(createdProvider.id, 'created')
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to create provider')
+      toast.error(error.message || t('toast.error.createFailed', { entity: t('toast.entities.provider') }))
     },
   })
 
@@ -87,7 +89,7 @@ const ProvidersTab = () => {
       await pollValidationStatus(id, 'updated')
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to update provider')
+      toast.error(error.message || t('toast.error.updateFailed', { entity: t('toast.entities.provider') }))
     },
   })
 
@@ -95,10 +97,10 @@ const ProvidersTab = () => {
     mutationFn: (id: string) => providerService.deleteProvider(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['providers'] })
-      toast.success('Provider deleted successfully')
+      toast.success(t('toast.success.deleted', { entity: t('toast.entities.provider') }))
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to delete provider')
+      toast.error(error.message || t('toast.error.deleteFailed', { entity: t('toast.entities.provider') }))
     },
   })
 

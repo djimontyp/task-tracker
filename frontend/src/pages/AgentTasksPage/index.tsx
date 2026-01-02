@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Card,
@@ -15,6 +16,7 @@ import { TaskForm } from '@/features/agents/components'
 import { PageWrapper } from '@/shared/primitives'
 
 const AgentTasksPage = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<TaskConfig | null>(null)
@@ -28,11 +30,11 @@ const AgentTasksPage = () => {
     mutationFn: (data: TaskConfigCreate) => taskService.createTask(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-configs'] })
-      toast.success('Task created successfully')
+      toast.success(t('toast.success.created', { entity: t('toast.entities.task') }))
       setFormOpen(false)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to create task')
+      toast.error(error.message || t('toast.error.createFailed', { entity: t('toast.entities.task') }))
     },
   })
 
@@ -41,12 +43,12 @@ const AgentTasksPage = () => {
       taskService.updateTask(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-configs'] })
-      toast.success('Task updated successfully')
+      toast.success(t('toast.success.updated', { entity: t('toast.entities.task') }))
       setFormOpen(false)
       setEditingTask(null)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to update task')
+      toast.error(error.message || t('toast.error.updateFailed', { entity: t('toast.entities.task') }))
     },
   })
 
@@ -54,10 +56,10 @@ const AgentTasksPage = () => {
     mutationFn: (id: string) => taskService.deleteTask(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-configs'] })
-      toast.success('Task deleted successfully')
+      toast.success(t('toast.success.deleted', { entity: t('toast.entities.task') }))
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to delete task')
+      toast.error(error.message || t('toast.error.deleteFailed', { entity: t('toast.entities.task') }))
     },
   })
 

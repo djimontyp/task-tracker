@@ -19,7 +19,7 @@ const GeneralTab = () => {
 
   const handleToggleAdminMode = (checked: boolean) => {
     toggleAdminMode()
-    toast.success(checked ? 'Admin Mode Enabled' : 'Admin Mode Disabled')
+    toast.success(checked ? t('common:toast.admin.enabled') : t('common:toast.admin.disabled'))
   }
 
   return (
