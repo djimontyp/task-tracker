@@ -146,25 +146,10 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
 
           {messageData && (
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabValue)} className="h-full flex flex-col">
-              <TabsList className="w-full justify-start px-6 border-b rounded-none bg-transparent h-auto">
-                <TabsTrigger
-                  value="classification"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
-                >
-                  Classification
-                </TabsTrigger>
-                <TabsTrigger
-                  value="atoms"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
-                >
-                  Atoms
-                </TabsTrigger>
-                <TabsTrigger
-                  value="history"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
-                >
-                  History
-                </TabsTrigger>
+              <TabsList className="mx-6">
+                <TabsTrigger value="classification">Classification</TabsTrigger>
+                <TabsTrigger value="atoms">Atoms</TabsTrigger>
+                <TabsTrigger value="history">History</TabsTrigger>
               </TabsList>
 
               <div className="flex-1 overflow-y-auto">
