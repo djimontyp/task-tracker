@@ -118,6 +118,11 @@ module.exports = {
     // Дозволені виключення: файли з Provider або Layout в імені
     'local-rules/no-data-in-presenters': 'error',
 
+    // Local rule: Заборона hardcoded текстів (вимагає i18n)
+    // Всі UI тексти мають використовувати t() з react-i18next
+    // Виключення: stories, tests, code blocks, числа, пунктуація
+    'local-rules/no-hardcoded-text': 'error',
+
     // Local rule: Заборона default exports (використовуй named exports)
     // Named exports краще для tree-shaking та рефакторингу
     // Виключення: pages (React.lazy), config files, stories (Storybook meta)
@@ -228,6 +233,7 @@ module.exports = {
         'local-rules/no-raw-tailwind-colors': 'off',
         'local-rules/no-odd-spacing': 'off',
         'local-rules/no-raw-zindex': 'off',
+        'local-rules/no-hardcoded-text': 'off', // Tests use hardcoded assertions
       },
     },
     // Storybook files - relaxed rules for story render functions
@@ -237,6 +243,7 @@ module.exports = {
         'local-rules/no-odd-spacing': 'off',
         'local-rules/no-raw-tailwind-colors': 'off',
         'local-rules/no-raw-zindex': 'off',
+        'local-rules/no-hardcoded-text': 'off', // Stories use demo text
         'react-hooks/rules-of-hooks': 'off', // Storybook render functions use hooks
         'react/no-unescaped-entities': 'off',
         'no-console': 'off',
