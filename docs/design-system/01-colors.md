@@ -22,10 +22,10 @@
 ## Brand Colors
 
 **Primary: Teal**
-- **Light mode:** `172 66% 40%` → `#0D9488`
-- **Dark mode:** `172 66% 50%` → `#14B8A6`
+- **Light mode:** `172 66% 28%` → `#107D6E`
+- **Dark mode:** `172 66% 38%` → `#169280`
 - **Use:** Call-to-action buttons, brand logo, primary links
-- **Contrast:** 4.6:1 on white (WCAG AA), 5.5:1 on dark bg (WCAG AA)
+- **Contrast:** 4.5:1 on white (WCAG AA), 4.5:1 on dark bg (WCAG AA)
 
 **Why teal?**
 - Evokes "radar/scanner" metaphor (signal detection)
@@ -39,8 +39,8 @@
 
 | Mode | HSL | Hex | Use |
 |------|-----|-----|-----|
-| **Light** | `172 80% 32%` | `#107D6E` | Active tabs, sidebar selection, focus states |
-| **Dark** | `172 66% 50%` | `#14B8A6` | Active tabs, sidebar selection, focus states |
+| **Light** | `172 66% 36%` | `#1D9E8C` | Active tabs, sidebar selection, focus states |
+| **Dark** | `172 66% 45%` | `#26BBA6` | Active tabs, sidebar selection, focus states |
 
 **CSS Variable:** `--primary-bright`
 
@@ -57,11 +57,11 @@
 ```
 
 **Design principle:**
-- **Light mode:** Higher saturation (80%) + darker (32% lightness) for crisp contrast on white
-- **Dark mode:** Standard saturation (66%) + brighter (50% lightness) for visibility on dark
+- **Light mode:** 36% lightness for balanced visibility on white backgrounds
+- **Dark mode:** 45% lightness for visibility on dark backgrounds
 
 **Why separate from `--primary`?**
-- `--primary` (28-30% lightness) is for filled buttons where white text needs high contrast
+- `--primary` (28% light / 38% dark) is for filled buttons where white text needs high contrast
 - `--primary-bright` is for text/underlines on light/dark backgrounds — needs different tuning per theme
 
 ### Secondary Colors (Neutral Gray)
@@ -322,11 +322,11 @@ Sidebar has separate color system for better contrast on dark backgrounds.
 
 | Token | Light | Dark | Purpose |
 |-------|-------|------|---------|
-| `--sidebar-background` | `0 0% 98%` | `20 14.3% 4.1%` | Sidebar background |
+| `--sidebar-background` | `220 14% 94%` | `20 14.3% 4.1%` | Sidebar background |
 | `--sidebar-foreground` | `240 5.3% 26.1%` | `240 4.8% 95.9%` | Sidebar text |
-| `--sidebar-primary` | `172 66% 40%` | `172 66% 50%` | Active item (teal) |
+| `--sidebar-primary` | `172 66% 28%` | `172 66% 38%` | Active item (teal) |
 | `--sidebar-accent` | `240 4.8% 95.9%` | `240 3.7% 15.9%` | Hover item |
-| `--sidebar-border` | `220 13% 91%` | `240 3.7% 15.9%` | Divider |
+| `--sidebar-border` | `220 13% 82%` | `240 3.7% 15.9%` | Divider |
 
 ---
 
@@ -468,7 +468,7 @@ const atomTypeColors: Record<AtomType, string> = {
 
 | Category | Token | Light | Dark | Contrast | Use |
 |----------|-------|-------|------|----------|-----|
-| **Brand** | `--primary` | 172 66% 40% | 172 66% 50% | 4.6:1 | Primary action (teal) |
+| **Brand** | `--primary` | 172 66% 28% | 172 66% 38% | 4.5:1 | Primary action (teal) |
 | **Success** | `--status-connected` | 142 76% 36% | 142 76% 36% | 7.8:1 | Success state |
 | **Warning** | `--status-pending` | 43 96% 56% | 43 96% 56% | 4.8:1 | Warning state |
 | **Error** | `--status-error` | 0 84% 60% | 0 84% 60% | 5.8:1 | Error state |
