@@ -278,11 +278,12 @@ export function ExtractionSheet({
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!open) return;
 
-    // Period shortcuts (1-4)
-    if (e.key >= '1' && e.key <= '4' && !e.metaKey && !e.ctrlKey) {
-      const index = parseInt(e.key) - 1;
-      if (PERIOD_OPTIONS[index]) {
-        setPeriod(PERIOD_OPTIONS[index].value);
+    // Period shortcuts (1-4) - use e.code for layout-independent detection
+    const digitCodes = ['Digit1', 'Digit2', 'Digit3', 'Digit4'];
+    const digitIndex = digitCodes.indexOf(e.code);
+    if (digitIndex !== -1 && !e.metaKey && !e.ctrlKey) {
+      if (PERIOD_OPTIONS[digitIndex]) {
+        setPeriod(PERIOD_OPTIONS[digitIndex].value);
       }
     }
 

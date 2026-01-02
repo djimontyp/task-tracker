@@ -151,8 +151,12 @@ describe('SearchBar', () => {
 
     const input = screen.getByPlaceholderText('Search...');
 
-    // Simulate "/" key press on window directly
-    const event = new KeyboardEvent('keydown', { key: '/', bubbles: true });
+    // Simulate "/" key press on window - include code for layout-independent matching
+    const event = new KeyboardEvent('keydown', {
+      key: '/',
+      code: 'Slash',
+      bubbles: true,
+    });
     await act(async () => {
       window.dispatchEvent(event);
     });
