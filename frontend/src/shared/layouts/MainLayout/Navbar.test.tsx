@@ -5,6 +5,19 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Navbar } from '@/shared/components/Navbar';
 
+// Mock useSidebar hook to avoid SidebarProvider dependency
+vi.mock('@/shared/ui/sidebar', () => ({
+  useSidebar: () => ({
+    state: 'expanded',
+    open: true,
+    setOpen: vi.fn(),
+    openMobile: false,
+    setOpenMobile: vi.fn(),
+    isMobile: false,
+    toggleSidebar: vi.fn(),
+  }),
+}));
+
 // Mock NavUser to avoid complex dependencies
 vi.mock('@/shared/components/NavUser', () => ({
   NavUser: () => <div data-testid="nav-user">User Menu</div>,

@@ -153,11 +153,27 @@ module.exports = {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "radar-sweep": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+        "orbit": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+        "orbit-reverse": {
+          "0%": { transform: "rotate(360deg)" },
+          "100%": { transform: "rotate(0deg)" },
+        },
       },
       animation: {
         "fade-in": "fade-in 0.3s ease-out",
         "fade-in-up": "fade-in-up 0.4s ease-out",
         "spin-slow": "spin 2s linear infinite",
+        "radar-sweep": "radar-sweep 2s linear infinite",
+        "orbit-slow": "orbit 8s linear infinite",
+        "orbit-medium": "orbit 6s linear infinite",
+        "orbit-reverse": "orbit-reverse 10s linear infinite",
       },
       zIndex: {
         // Design System z-index tokens
