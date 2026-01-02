@@ -1,4 +1,5 @@
 import axios from 'axios'
+import axiosRetry from 'axios-retry'
 import { logger } from '@/shared/utils/logger'
 
 // Use empty baseURL for relative URLs - axios will use current origin
@@ -15,6 +16,24 @@ export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+  },
+})
+
+// Configure retry with exponential backoff for idempotent requests only
+// POST/PATCH are NOT retried to prevent duplicate mutations
+axiosRetry(apiClient, {
+  retries: 3,
+  retryDelay: axiosRetry.exponentialDelay,
+  retryCondition: (error) => {
+    // Only retry network errors or idempotent request errors (GET, PUT, DELETE, HEAD, OPTIONS)
+    // This explicitly excludes POST and PATCH to prevent duplicate side effects
+    return axiosRetry.isNetworkOrIdempotentRequestError(error)
+  },
+  onRetry: (retryCount, error, requestConfig) => {
+    logger.warn(`API retry ${retryCount}/3 for ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`, {
+      message: error.message,
+      code: error.code,
+    })
   },
 })
 
