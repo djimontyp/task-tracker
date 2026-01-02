@@ -1,15 +1,20 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { FileText, Settings, User } from 'lucide-react';
+import { FileText, Settings, User, Signal, Volume2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
+import { Badge } from './badge';
 
 /**
  * Tabs component for navigation between content sections.
  *
+ * ## Variants
+ * - **default (underline)**: Minimalist tabs with animated underline indicator. Best for navigation.
+ * - **pill**: Compact pill-style tabs with background. Best for filters and toggles.
+ *
  * ## Design System Rules
- * - Active tab must be visually distinct with background and shadow
- * - Keyboard navigation: Arrow keys move between tabs, Tab key focuses trigger
- * - Touch targets: TabsTrigger has adequate height (36px) for mobile interaction
- * - Focus visible: Ring offset follows design system focus patterns
+ * - Active tab uses primary color (teal) for indicator
+ * - Animated underline with 200ms ease-out transition
+ * - Keyboard navigation: Arrow keys move between tabs
+ * - Touch targets: Adequate height (40px+) for mobile interaction
  */
 const meta: Meta<typeof Tabs> = {
   title: 'Primitives/Tabs',
@@ -19,7 +24,7 @@ const meta: Meta<typeof Tabs> = {
     docs: {
       description: {
         component:
-          'Accessible tabs component built on Radix UI. Supports keyboard navigation (arrow keys) and follows WCAG 2.1 AA guidelines.',
+          'Accessible tabs component with two variants: underline (default) for navigation and pill for filters. Built on Radix UI.',
       },
     },
   },
@@ -28,36 +33,39 @@ const meta: Meta<typeof Tabs> = {
 export default meta;
 type Story = StoryObj<typeof Tabs>;
 
-// Basic tabs
+/**
+ * Default underline tabs - best for navigation between sections.
+ * Features animated teal underline indicator on active tab.
+ */
 export const Default: Story = {
   render: () => (
-    <Tabs defaultValue="account" className="w-[400px]">
+    <Tabs defaultValue="general" className="w-[400px]">
       <TabsList>
-        <TabsTrigger value="account">Account</TabsTrigger>
-        <TabsTrigger value="password">Password</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger>
+        <TabsTrigger value="general">General</TabsTrigger>
+        <TabsTrigger value="sources">Sources</TabsTrigger>
+        <TabsTrigger value="providers">Providers</TabsTrigger>
       </TabsList>
-      <TabsContent value="account">
+      <TabsContent value="general">
         <div className="p-4 border rounded-md">
-          <h3 className="font-semibold mb-2">Account Settings</h3>
+          <h3 className="font-semibold mb-2">General Settings</h3>
           <p className="text-sm text-muted-foreground">
-            Manage your account settings and preferences.
+            Configure your general application preferences.
           </p>
         </div>
       </TabsContent>
-      <TabsContent value="password">
+      <TabsContent value="sources">
         <div className="p-4 border rounded-md">
-          <h3 className="font-semibold mb-2">Password Security</h3>
+          <h3 className="font-semibold mb-2">Data Sources</h3>
           <p className="text-sm text-muted-foreground">
-            Change your password and manage security options.
+            Manage your connected data sources like Telegram.
           </p>
         </div>
       </TabsContent>
-      <TabsContent value="notifications">
+      <TabsContent value="providers">
         <div className="p-4 border rounded-md">
-          <h3 className="font-semibold mb-2">Notification Preferences</h3>
+          <h3 className="font-semibold mb-2">LLM Providers</h3>
           <p className="text-sm text-muted-foreground">
-            Control how and when you receive notifications.
+            Configure AI providers for knowledge extraction.
           </p>
         </div>
       </TabsContent>
@@ -66,13 +74,58 @@ export const Default: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Basic tabs with text content. Use arrow keys to navigate between tabs.',
+        story: 'Default underline tabs with animated indicator. Use for navigation between content sections.',
       },
     },
   },
 };
 
-// Tabs with icons
+/**
+ * Pill variant - compact tabs best for filters and toggles.
+ * Uses muted background with shadow on active state.
+ */
+export const PillVariant: Story = {
+  render: () => (
+    <Tabs defaultValue="all" className="w-[500px]">
+      <TabsList variant="pill">
+        <TabsTrigger variant="pill" value="all" className="gap-2 px-4">
+          All
+          <Badge variant="secondary">128</Badge>
+        </TabsTrigger>
+        <TabsTrigger variant="pill" value="signals" className="gap-2 px-4">
+          <Signal className="h-4 w-4" />
+          Signals
+          <Badge variant="outline" className="border-status-connected text-status-connected">42</Badge>
+        </TabsTrigger>
+        <TabsTrigger variant="pill" value="noise" className="gap-2 px-4">
+          <Volume2 className="h-4 w-4" />
+          Noise
+          <Badge variant="outline" className="text-muted-foreground">86</Badge>
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="all">
+        <div className="p-4 border rounded-md">All messages view</div>
+      </TabsContent>
+      <TabsContent value="signals">
+        <div className="p-4 border rounded-md">Important signals only</div>
+      </TabsContent>
+      <TabsContent value="noise">
+        <div className="p-4 border rounded-md">Noise messages</div>
+      </TabsContent>
+    </Tabs>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Pill variant with badges for filter counts. Use for filtering data views.',
+      },
+    },
+  },
+};
+
+/**
+ * Underline tabs with icons for better visual identification.
+ */
 export const WithIcons: Story = {
   render: () => (
     <Tabs defaultValue="profile" className="w-[500px]">
@@ -104,57 +157,56 @@ export const WithIcons: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Tabs with icons for better visual identification.',
+        story: 'Underline tabs with icons for better visual identification.',
       },
     },
   },
 };
 
-// Full width tabs
-export const FullWidth: Story = {
+/**
+ * Full-width pill tabs using CSS grid.
+ */
+export const FullWidthPill: Story = {
   render: () => (
-    <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="analytics">Analytics</TabsTrigger>
-        <TabsTrigger value="reports">Reports</TabsTrigger>
+    <Tabs defaultValue="period" className="w-full max-w-[400px]">
+      <TabsList variant="pill" className="grid w-full grid-cols-2">
+        <TabsTrigger variant="pill" value="period">By Period</TabsTrigger>
+        <TabsTrigger variant="pill" value="messages">By Messages</TabsTrigger>
       </TabsList>
-      <TabsContent value="overview">
-        <div className="p-4 border rounded-md">Dashboard overview content</div>
+      <TabsContent value="period">
+        <div className="p-4 border rounded-md">Select time period for extraction</div>
       </TabsContent>
-      <TabsContent value="analytics">
-        <div className="p-4 border rounded-md">Analytics charts and metrics</div>
-      </TabsContent>
-      <TabsContent value="reports">
-        <div className="p-4 border rounded-md">Generated reports list</div>
+      <TabsContent value="messages">
+        <div className="p-4 border rounded-md">Select specific messages</div>
       </TabsContent>
     </Tabs>
   ),
   parameters: {
     docs: {
       description: {
-        story:
-          'Full-width tabs using CSS grid. Triggers expand to fill equal space.',
+        story: 'Full-width pill tabs using CSS grid. Triggers expand to fill equal space.',
       },
     },
   },
 };
 
-// Vertical tabs (mobile-friendly)
-export const VerticalLayout: Story = {
+/**
+ * Pill variant vertical layout (responsive).
+ */
+export const VerticalPill: Story = {
   render: () => (
     <Tabs defaultValue="general" className="flex flex-col sm:flex-row gap-4 w-full">
-      <TabsList className="flex flex-row sm:flex-col h-auto sm:h-full w-full sm:w-[200px]">
-        <TabsTrigger value="general" className="justify-start">
+      <TabsList variant="pill" className="flex flex-row sm:flex-col h-auto sm:h-full w-full sm:w-[200px]">
+        <TabsTrigger variant="pill" value="general" className="justify-start">
           General
         </TabsTrigger>
-        <TabsTrigger value="security" className="justify-start">
+        <TabsTrigger variant="pill" value="security" className="justify-start">
           Security
         </TabsTrigger>
-        <TabsTrigger value="privacy" className="justify-start">
+        <TabsTrigger variant="pill" value="privacy" className="justify-start">
           Privacy
         </TabsTrigger>
-        <TabsTrigger value="advanced" className="justify-start">
+        <TabsTrigger variant="pill" value="advanced" className="justify-start">
           Advanced
         </TabsTrigger>
       </TabsList>
@@ -177,14 +229,15 @@ export const VerticalLayout: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          'Responsive layout: horizontal tabs on mobile, vertical on desktop (sm breakpoint).',
+        story: 'Responsive vertical layout: horizontal on mobile, vertical on desktop.',
       },
     },
   },
 };
 
-// Disabled tab
+/**
+ * Disabled tab state.
+ */
 export const WithDisabledTab: Story = {
   render: () => (
     <Tabs defaultValue="enabled" className="w-[400px]">
@@ -215,59 +268,51 @@ export const WithDisabledTab: Story = {
   },
 };
 
-// Real-world example: Settings panel
-export const SettingsPanel: Story = {
+/**
+ * Real-world: Settings page navigation (underline).
+ */
+export const SettingsNavigation: Story = {
   render: () => (
-    <Tabs defaultValue="profile" className="w-full max-w-[600px]">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="profile">Profile</TabsTrigger>
-        <TabsTrigger value="account">Account</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger>
+    <Tabs defaultValue="general" className="w-full max-w-[600px]">
+      <TabsList>
+        <TabsTrigger value="general">General</TabsTrigger>
+        <TabsTrigger value="sources">Sources</TabsTrigger>
+        <TabsTrigger value="providers">Providers</TabsTrigger>
+        <TabsTrigger value="prompts">Prompt Tuning</TabsTrigger>
       </TabsList>
-      <TabsContent value="profile" className="space-y-4">
+      <TabsContent value="general" className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Display Name</label>
+          <label className="text-sm font-medium">Application Name</label>
           <input
             type="text"
             className="w-full px-4 py-2 border rounded-md"
-            placeholder="Enter your name"
+            placeholder="Pulse Radar"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Bio</label>
-          <textarea
-            className="w-full px-4 py-2 border rounded-md"
-            placeholder="Tell us about yourself"
-            rows={3}
-          />
+          <label className="text-sm font-medium">Timezone</label>
+          <select className="w-full px-4 py-2 border rounded-md">
+            <option>UTC</option>
+            <option>Europe/Kyiv</option>
+          </select>
         </div>
       </TabsContent>
-      <TabsContent value="account" className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Email</label>
-          <input
-            type="email"
-            className="w-full px-4 py-2 border rounded-md"
-            placeholder="your@email.com"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Password</label>
-          <input
-            type="password"
-            className="w-full px-4 py-2 border rounded-md"
-            placeholder="••••••••"
-          />
+      <TabsContent value="sources" className="space-y-4">
+        <div className="p-4 border rounded-md">
+          <h4 className="font-medium mb-2">Telegram</h4>
+          <p className="text-sm text-muted-foreground">Configure your Telegram bot integration</p>
         </div>
       </TabsContent>
-      <TabsContent value="notifications" className="space-y-4">
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Email notifications</label>
-          <input type="checkbox" />
+      <TabsContent value="providers" className="space-y-4">
+        <div className="p-4 border rounded-md">
+          <h4 className="font-medium mb-2">LLM Providers</h4>
+          <p className="text-sm text-muted-foreground">Manage AI model providers</p>
         </div>
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Push notifications</label>
-          <input type="checkbox" />
+      </TabsContent>
+      <TabsContent value="prompts" className="space-y-4">
+        <div className="p-4 border rounded-md">
+          <h4 className="font-medium mb-2">Prompt Engineering</h4>
+          <p className="text-sm text-muted-foreground">Fine-tune extraction prompts</p>
         </div>
       </TabsContent>
     </Tabs>
@@ -275,7 +320,45 @@ export const SettingsPanel: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Real-world settings panel with form inputs across multiple tabs.',
+        story: 'Real-world settings navigation using underline tabs.',
+      },
+    },
+  },
+};
+
+/**
+ * Side-by-side comparison of both variants.
+ */
+export const VariantComparison: Story = {
+  render: () => (
+    <div className="space-y-8">
+      <div>
+        <h3 className="text-sm font-medium mb-4 text-muted-foreground">Underline (default) - Navigation</h3>
+        <Tabs defaultValue="tab1" className="w-[400px]">
+          <TabsList>
+            <TabsTrigger value="tab1">First Tab</TabsTrigger>
+            <TabsTrigger value="tab2">Second Tab</TabsTrigger>
+            <TabsTrigger value="tab3">Third Tab</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-medium mb-4 text-muted-foreground">Pill - Filters</h3>
+        <Tabs defaultValue="tab1" className="w-[400px]">
+          <TabsList variant="pill">
+            <TabsTrigger variant="pill" value="tab1">First Tab</TabsTrigger>
+            <TabsTrigger variant="pill" value="tab2">Second Tab</TabsTrigger>
+            <TabsTrigger variant="pill" value="tab3">Third Tab</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Side-by-side comparison of underline and pill variants.',
       },
     },
   },
