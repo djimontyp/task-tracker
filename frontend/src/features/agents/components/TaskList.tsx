@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Card,
@@ -15,6 +16,7 @@ import { EmptyState } from '@/shared/patterns'
 import { TaskForm } from './TaskForm'
 
 const TaskList = () => {
+  const { t } = useTranslation('agents')
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<TaskConfig | null>(null)
@@ -28,11 +30,11 @@ const TaskList = () => {
     mutationFn: (data: TaskConfigCreate) => taskService.createTask(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-configs'] })
-      toast.success('Task created successfully')
+      toast.success(t('taskList.toast.createSuccess'))
       setFormOpen(false)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to create task')
+      toast.error(error.message || t('taskList.toast.createError'))
     },
   })
 
@@ -41,12 +43,12 @@ const TaskList = () => {
       taskService.updateTask(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-configs'] })
-      toast.success('Task updated successfully')
+      toast.success(t('taskList.toast.updateSuccess'))
       setFormOpen(false)
       setEditingTask(null)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to update task')
+      toast.error(error.message || t('taskList.toast.updateError'))
     },
   })
 
@@ -54,10 +56,10 @@ const TaskList = () => {
     mutationFn: (id: string) => taskService.deleteTask(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-configs'] })
-      toast.success('Task deleted successfully')
+      toast.success(t('taskList.toast.deleteSuccess'))
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to delete task')
+      toast.error(error.message || t('taskList.toast.deleteError'))
     },
   })
 
@@ -72,7 +74,7 @@ const TaskList = () => {
   }
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
+    if (window.confirm(t('taskList.confirm.delete'))) {
       deleteMutation.mutate(id)
     }
   }
@@ -96,10 +98,10 @@ const TaskList = () => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Task Configurations</h2>
+        <h2 className="text-2xl font-bold">{t('taskList.title')}</h2>
         <Button onClick={handleCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Task
+          {t('taskList.addButton')}
         </Button>
       </div>
 
@@ -109,12 +111,12 @@ const TaskList = () => {
             <EmptyState
               variant="card"
               icon={ClipboardList}
-              title="No tasks found"
-              description="Define task configurations to structure AI agent outputs."
+              title={t('taskList.empty.title')}
+              description={t('taskList.empty.description')}
               action={
                 <Button onClick={handleCreate}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Task
+                  {t('taskList.addButton')}
                 </Button>
               }
             />
@@ -138,7 +140,7 @@ const TaskList = () => {
                         size="icon"
                         variant="ghost"
                         onClick={() => handleEdit(task)}
-                        aria-label="Edit task"
+                        aria-label={t('taskList.actions.edit')}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -146,7 +148,7 @@ const TaskList = () => {
                         size="icon"
                         variant="ghost"
                         onClick={() => handleDelete(task.id)}
-                        aria-label="Delete task"
+                        aria-label={t('taskList.actions.delete')}
                         disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -156,7 +158,7 @@ const TaskList = () => {
 
                   <div className="space-y-2 text-sm">
                     <div>
-                      <span className="text-muted-foreground">Schema Fields:</span>
+                      <span className="text-muted-foreground">{t('taskList.fields.schemaFields')}</span>
                       <div className="mt-2 space-x-2">
                         {task.response_schema?.properties ? (
                           Object.keys(task.response_schema.properties).map(
@@ -168,21 +170,21 @@ const TaskList = () => {
                           )
                         ) : (
                           <span className="text-xs text-muted-foreground">
-                            No fields
+                            {t('taskList.fields.noFields')}
                           </span>
                         )}
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
-                      <span className="text-muted-foreground">Status:</span>
+                      <span className="text-muted-foreground">{t('taskList.fields.status')}</span>
                       <Badge variant={task.is_active ? 'default' : 'secondary'}>
-                        {task.is_active ? 'Active' : 'Inactive'}
+                        {task.is_active ? t('status.active') : t('status.inactive')}
                       </Badge>
                     </div>
 
                     <div className="text-xs text-muted-foreground">
-                      Created: {new Date(task.created_at).toLocaleDateString()}
+                      {t('taskList.fields.created')} {new Date(task.created_at).toLocaleDateString()}
                     </div>
                   </div>
                 </div>

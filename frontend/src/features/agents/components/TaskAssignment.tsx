@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Dialog,
@@ -25,6 +26,7 @@ interface TaskAssignmentProps {
 }
 
 const TaskAssignment = ({ agent, open, onClose }: TaskAssignmentProps) => {
+  const { t } = useTranslation('agents')
   const queryClient = useQueryClient()
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set())
 
@@ -53,10 +55,10 @@ const TaskAssignment = ({ agent, open, onClose }: TaskAssignmentProps) => {
       agentService.assignTask(agent!.id, { task_id: taskId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agent-tasks', agent?.id] })
-      toast.success('Task assigned successfully')
+      toast.success(t('taskAssignment.toast.assignSuccess'))
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to assign task')
+      toast.error(error.message || t('taskAssignment.toast.assignError'))
     },
   })
 
@@ -64,10 +66,10 @@ const TaskAssignment = ({ agent, open, onClose }: TaskAssignmentProps) => {
     mutationFn: (taskId: string) => agentService.unassignTask(agent!.id, taskId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agent-tasks', agent?.id] })
-      toast.success('Task unassigned successfully')
+      toast.success(t('taskAssignment.toast.unassignSuccess'))
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to unassign task')
+      toast.error(error.message || t('taskAssignment.toast.unassignError'))
     },
   })
 
@@ -90,7 +92,7 @@ const TaskAssignment = ({ agent, open, onClose }: TaskAssignmentProps) => {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-lg overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Manage Tasks for {agent.name}</DialogTitle>
+          <DialogTitle>{t('taskAssignment.title', { name: agent.name })}</DialogTitle>
         </DialogHeader>
 
         {isLoading ? (
@@ -101,7 +103,7 @@ const TaskAssignment = ({ agent, open, onClose }: TaskAssignmentProps) => {
           <div className="space-y-4">
             {allTasks?.length === 0 ? (
               <p className="text-center text-muted-foreground py-4">
-                No tasks available. Create tasks first.
+                {t('taskAssignment.noTasks')}
               </p>
             ) : (
               allTasks?.map((task) => {
@@ -130,7 +132,7 @@ const TaskAssignment = ({ agent, open, onClose }: TaskAssignmentProps) => {
                         </p>
                       )}
                       <Badge variant="outline" className="mt-2">
-                        {isAssigned ? 'Assigned' : 'Not Assigned'}
+                        {isAssigned ? t('taskAssignment.assigned') : t('taskAssignment.notAssigned')}
                       </Badge>
                     </div>
                   </div>
@@ -142,7 +144,7 @@ const TaskAssignment = ({ agent, open, onClose }: TaskAssignmentProps) => {
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Close
+            {t('actions.close')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Button,
   Input,
@@ -31,19 +32,20 @@ interface SchemaEditorProps {
  * - email: EmailStr (validated email)
  * - url: HttpUrl (validated HTTP/HTTPS URL)
  */
-const FIELD_TYPE_OPTIONS = [
-  { value: 'string', label: 'String (text)' },
-  { value: 'number', label: 'Number (decimal)' },
-  { value: 'integer', label: 'Integer (whole number)' },
-  { value: 'boolean', label: 'Boolean (true/false)' },
-  { value: 'array', label: 'Array (list)' },
-  { value: 'object', label: 'Object (JSON)' },
-  { value: 'date', label: 'Date' },
-  { value: 'email', label: 'Email' },
-  { value: 'url', label: 'URL' },
+const FIELD_TYPE_VALUES = [
+  'string',
+  'number',
+  'integer',
+  'boolean',
+  'array',
+  'object',
+  'date',
+  'email',
+  'url',
 ] as const
 
 const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
+  const { t } = useTranslation('agents')
   const [fields, setFields] = useState<SchemaField[]>(() => {
     // Parse existing schema to fields
     if (value?.properties) {
@@ -110,9 +112,9 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
     <div className="space-y-4">
       {fields.length > 0 && (
         <div className="hidden md:grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground">
-          <div className="col-span-4">Field Name</div>
-          <div className="col-span-2">Type</div>
-          <div className="col-span-5">Description</div>
+          <div className="col-span-4">{t('schemaEditor.header.fieldName')}</div>
+          <div className="col-span-2">{t('schemaEditor.header.type')}</div>
+          <div className="col-span-5">{t('schemaEditor.header.description')}</div>
           <div className="col-span-1"></div>
         </div>
       )}
@@ -120,11 +122,11 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
       <div className="border rounded-md">
         {fields.length === 0 ? (
           <div className="text-center text-muted-foreground py-8 px-4">
-            <p className="mb-2">No fields defined yet</p>
+            <p className="mb-2">{t('schemaEditor.empty.title')}</p>
             <p className="text-sm">
-              Fields define what data the AI agent should return.
+              {t('schemaEditor.empty.description')}
               <br />
-              For example: &quot;summary&quot; (text), &quot;priority&quot; (number), &quot;tags&quot; (array)
+              {t('schemaEditor.empty.example')}
             </p>
           </div>
         ) : (
@@ -135,7 +137,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
             >
               <div className="w-full md:col-span-4">
                 <Label htmlFor={`field-name-${index}`} className="text-xs md:sr-only">
-                  Field Name
+                  {t('schemaEditor.header.fieldName')}
                 </Label>
                 <Input
                   id={`field-name-${index}`}
@@ -143,7 +145,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
                   onChange={(e) =>
                     handleFieldChange(index, 'name', e.target.value)
                   }
-                  placeholder="field_name"
+                  placeholder={t('schemaEditor.fields.namePlaceholder')}
                   className="w-full mt-2 md:mt-0"
                   aria-required="true"
                 />
@@ -151,7 +153,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
 
               <div className="w-full md:col-span-2">
                 <Label htmlFor={`field-type-${index}`} className="text-xs md:sr-only">
-                  Type
+                  {t('schemaEditor.header.type')}
                 </Label>
                 <Select
                   value={field.type}
@@ -163,9 +165,9 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {FIELD_TYPE_OPTIONS.map(({ value, label }) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
+                    {FIELD_TYPE_VALUES.map((typeValue) => (
+                      <SelectItem key={typeValue} value={typeValue}>
+                        {t(`schemaEditor.types.${typeValue}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -177,7 +179,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
                   htmlFor={`field-description-${index}`}
                   className="text-xs md:sr-only"
                 >
-                  Description
+                  {t('schemaEditor.header.description')}
                 </Label>
                 <Input
                   id={`field-description-${index}`}
@@ -185,7 +187,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
                   onChange={(e) =>
                     handleFieldChange(index, 'description', e.target.value)
                   }
-                  placeholder="Optional"
+                  placeholder={t('schemaEditor.fields.descriptionPlaceholder')}
                   className="w-full mt-2 md:mt-0"
                 />
               </div>
@@ -195,11 +197,11 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
                   type="button"
                   variant="outline"
                   onClick={() => handleRemoveField(index)}
-                  aria-label={`Remove ${field.name || 'field ' + (index + 1)}`}
+                  aria-label={t('schemaEditor.actions.removeFieldLabel', { name: field.name || `field ${index + 1}` })}
                   className="w-full md:w-auto min-h-[44px] md:min-h-0 md:size-9"
                 >
                   <Trash2 className="h-4 w-4 md:mr-0 mr-2" />
-                  <span className="md:hidden">Remove Field</span>
+                  <span className="md:hidden">{t('schemaEditor.actions.removeField')}</span>
                 </Button>
               </div>
             </div>
@@ -210,7 +212,7 @@ const SchemaEditor = ({ value, onChange }: SchemaEditorProps) => {
       <div className="flex justify-center pt-2">
         <Button type="button" size="sm" onClick={handleAddField} className="min-h-[44px]">
           <Plus className="h-4 w-4 mr-2" />
-          Add Field
+          {t('schemaEditor.actions.addField')}
         </Button>
       </div>
     </div>

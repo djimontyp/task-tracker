@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button, Spinner } from '@/shared/ui'
 import { agentService } from '@/features/agents/api'
@@ -12,6 +13,7 @@ import { TaskAssignment } from './TaskAssignment'
 import { AgentTestDialog } from './AgentTestDialog'
 
 const AgentList = () => {
+  const { t } = useTranslation('agents')
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingAgent, setEditingAgent] = useState<AgentConfig | null>(null)
@@ -27,11 +29,11 @@ const AgentList = () => {
     mutationFn: (data: AgentConfigCreate) => agentService.createAgent(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] })
-      toast.success('Agent created successfully')
+      toast.success(t('toast.createSuccess'))
       setFormOpen(false)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to create agent')
+      toast.error(error.message || t('toast.createError'))
     },
   })
 
@@ -40,12 +42,12 @@ const AgentList = () => {
       agentService.updateAgent(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] })
-      toast.success('Agent updated successfully')
+      toast.success(t('toast.updateSuccess'))
       setFormOpen(false)
       setEditingAgent(null)
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to update agent')
+      toast.error(error.message || t('toast.updateError'))
     },
   })
 
@@ -53,10 +55,10 @@ const AgentList = () => {
     mutationFn: (id: string) => agentService.deleteAgent(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] })
-      toast.success('Agent deleted successfully')
+      toast.success(t('toast.deleteSuccess'))
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to delete agent')
+      toast.error(error.message || t('toast.deleteError'))
     },
   })
 
@@ -71,7 +73,7 @@ const AgentList = () => {
   }
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this agent?')) {
+    if (window.confirm(t('confirm.deleteAgent'))) {
       deleteMutation.mutate(id)
     }
   }
@@ -103,10 +105,10 @@ const AgentList = () => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">AI Agents</h2>
+        <h2 className="text-2xl font-bold">{t('list.title')}</h2>
         <Button onClick={handleCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Agent
+          {t('list.addButton')}
         </Button>
       </div>
 
@@ -116,12 +118,12 @@ const AgentList = () => {
             <EmptyState
               variant="card"
               icon={Cpu}
-              title="No agents found"
-              description="Create your first AI agent to start automating tasks."
+              title={t('list.empty.title')}
+              description={t('list.empty.description')}
               action={
                 <Button onClick={handleCreate}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Agent
+                  {t('list.addButton')}
                 </Button>
               }
             />

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Card,
@@ -19,6 +20,7 @@ const POLLING_INTERVAL_MS = 1000
 const MAX_POLLING_ATTEMPTS = 15
 
 const ProviderList = () => {
+  const { t } = useTranslation('agents')
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingProvider, setEditingProvider] = useState<LLMProvider | null>(null)
@@ -35,7 +37,7 @@ const ProviderList = () => {
   })
 
   const pollValidationStatus = async (providerId: string, action: 'created' | 'updated') => {
-    toast.success(`Provider ${action}. Validating connection...`)
+    toast.success(t(`providerList.toast.${action}Validating`))
 
     for (let attempt = 0; attempt < MAX_POLLING_ATTEMPTS; attempt++) {
       await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS))
@@ -45,22 +47,22 @@ const ProviderList = () => {
       const provider = providers?.find(p => p.id === providerId)
 
       if (!provider) {
-        toast.error('Provider not found')
+        toast.error(t('providerList.toast.notFound'))
         return
       }
 
       if (provider.validation_status === ValidationStatus.CONNECTED) {
-        toast.success('Provider validated successfully!')
+        toast.success(t('providerList.toast.validationSuccess'))
         return
       }
 
       if (provider.validation_status === ValidationStatus.ERROR) {
-        toast.error(`Validation failed: ${provider.validation_error || 'Unknown error'}`)
+        toast.error(t('providerList.toast.validationFailed', { error: provider.validation_error || t('providerList.toast.unknownError') }))
         return
       }
     }
 
-    toast.error('Validation timeout. Please check provider status.')
+    toast.error(t('providerList.toast.validationTimeout'))
   }
 
   const createMutation = useMutation({
@@ -71,7 +73,7 @@ const ProviderList = () => {
       await pollValidationStatus(createdProvider.id, 'created')
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to create provider')
+      toast.error(error.message || t('providerList.toast.createError'))
     },
   })
 
@@ -85,7 +87,7 @@ const ProviderList = () => {
       await pollValidationStatus(id, 'updated')
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to update provider')
+      toast.error(error.message || t('providerList.toast.updateError'))
     },
   })
 
@@ -93,10 +95,10 @@ const ProviderList = () => {
     mutationFn: (id: string) => providerService.deleteProvider(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['providers'] })
-      toast.success('Provider deleted successfully')
+      toast.success(t('providerList.toast.deleteSuccess'))
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to delete provider')
+      toast.error(error.message || t('providerList.toast.deleteError'))
     },
   })
 
@@ -111,7 +113,7 @@ const ProviderList = () => {
   }
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this provider?')) {
+    if (window.confirm(t('providerList.confirm.delete'))) {
       deleteMutation.mutate(id)
     }
   }
@@ -135,10 +137,10 @@ const ProviderList = () => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">LLM Providers</h2>
+        <h2 className="text-2xl font-bold">{t('providerList.title')}</h2>
         <Button onClick={handleCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Provider
+          {t('providerList.addButton')}
         </Button>
       </div>
 
@@ -148,12 +150,12 @@ const ProviderList = () => {
             <EmptyState
               variant="card"
               icon={Server}
-              title="No providers found"
-              description="Add an LLM provider to enable AI-powered analysis."
+              title={t('providerList.empty.title')}
+              description={t('providerList.empty.description')}
               action={
                 <Button onClick={handleCreate}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Provider
+                  {t('providerList.addButton')}
                 </Button>
               }
             />
@@ -175,7 +177,7 @@ const ProviderList = () => {
                         size="icon"
                         variant="ghost"
                         onClick={() => handleEdit(provider)}
-                        aria-label="Edit provider"
+                        aria-label={t('providerList.actions.edit')}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -183,7 +185,7 @@ const ProviderList = () => {
                         size="icon"
                         variant="ghost"
                         onClick={() => handleDelete(provider.id)}
-                        aria-label="Delete provider"
+                        aria-label={t('providerList.actions.delete')}
                         disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -194,13 +196,13 @@ const ProviderList = () => {
                   <div className="space-y-2 text-sm">
                     {provider.base_url && (
                       <div>
-                        <span className="text-muted-foreground">Base URL:</span>
+                        <span className="text-muted-foreground">{t('providerList.fields.baseUrl')}</span>
                         <p className="font-mono text-xs break-all">{provider.base_url}</p>
                       </div>
                     )}
 
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Status:</span>
+                      <span className="text-muted-foreground">{t('providerList.fields.status')}</span>
                       <ValidationStatusComponent
                         status={provider.validation_status}
                         error={provider.validation_error}
@@ -209,14 +211,14 @@ const ProviderList = () => {
 
                     {provider.validated_at && (
                       <div className="text-xs text-muted-foreground">
-                        Validated: {new Date(provider.validated_at).toLocaleString()}
+                        {t('providerList.fields.validated')} {new Date(provider.validated_at).toLocaleString()}
                       </div>
                     )}
 
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Active:</span>
+                      <span className="text-muted-foreground">{t('providerList.fields.active')}</span>
                       <Badge variant={provider.is_active ? 'default' : 'secondary'}>
-                        {provider.is_active ? 'Yes' : 'No'}
+                        {provider.is_active ? t('common.yes') : t('common.no')}
                       </Badge>
                     </div>
                   </div>
