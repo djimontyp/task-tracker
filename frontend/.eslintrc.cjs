@@ -121,7 +121,8 @@ module.exports = {
     // Local rule: Заборона hardcoded текстів (вимагає i18n)
     // Всі UI тексти мають використовувати t() з react-i18next
     // Виключення: stories, tests, code blocks, числа, пунктуація
-    'local-rules/no-hardcoded-text': 'error',
+    // Warning level during migration — буде error після повної міграції
+    'local-rules/no-hardcoded-text': 'warn',
 
     // Local rule: Заборона default exports (використовуй named exports)
     // Named exports краще для tree-shaking та рефакторингу
