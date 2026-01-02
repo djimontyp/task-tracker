@@ -5,6 +5,7 @@
  * No data fetching, no side effects, easy to test in Storybook.
  */
 
+import { useTranslation } from 'react-i18next'
 import { Inbox, Settings } from 'lucide-react'
 import { OnboardingWizard } from '@/features/onboarding'
 import { Card, CardContent } from '@/shared/ui/card'
@@ -42,6 +43,8 @@ export function DashboardPresenter({
   onNavigateToMessages,
   onNavigateToTopics,
 }: DashboardPresenterProps) {
+  const { t } = useTranslation('dashboard')
+
   return (
     <PageWrapper variant="fullWidth">
       <OnboardingWizard open={showOnboarding} onClose={onCloseOnboarding} />
@@ -54,19 +57,18 @@ export function DashboardPresenter({
               <Inbox className="h-8 w-8 text-primary" aria-hidden="true" />
             </div>
             <h3 className="text-lg font-semibold mb-2">
-              Почніть збирати знання
+              {t('coldStart.title')}
             </h3>
             <p className="text-muted-foreground mb-6 max-w-md">
-              Підключіть Telegram, щоб AI почав аналізувати повідомлення та
-              витягувати важливу інформацію
+              {t('coldStart.description')}
             </p>
             <div className="flex gap-4 flex-wrap justify-center">
               <Button onClick={onNavigateToSettings} size="lg">
                 <Settings className="mr-2 h-5 w-5" aria-hidden="true" />
-                Налаштувати Telegram
+                {t('coldStart.setupTelegram')}
               </Button>
               <Button onClick={onNavigateToMessages} variant="outline" size="lg">
-                Переглянути повідомлення
+                {t('coldStart.viewMessages')}
               </Button>
             </div>
           </CardContent>
@@ -81,7 +83,7 @@ export function DashboardPresenter({
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={onNavigateToSettings}>
             <Settings className="w-4 h-4 mr-2" />
-            Налаштування
+            {t('settings')}
           </Button>
         </div>
       </div>

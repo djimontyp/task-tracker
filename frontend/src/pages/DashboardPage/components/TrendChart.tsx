@@ -1,17 +1,18 @@
 import React, { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/shared/ui'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { format, subDays } from 'date-fns'
-import { uk } from 'date-fns/locale'
+import { uk, enUS } from 'date-fns/locale'
 
 // Mock Data Generator
-const generateTrendData = () => {
+const generateTrendData = (locale: typeof uk | typeof enUS) => {
     const data = []
     for (let i = 14; i >= 0; i--) {
         const date = subDays(new Date(), i)
         data.push({
             date: date.toISOString(),
-            displayDate: format(date, 'd MMM', { locale: uk }),
+            displayDate: format(date, 'd MMM', { locale }),
             signal: Math.floor(Math.random() * 15) + 5, // 5-20 signals
             noise: Math.floor(Math.random() * 30) + 10,  // 10-40 noise
         })
@@ -20,13 +21,15 @@ const generateTrendData = () => {
 }
 
 export const TrendChart: React.FC = () => {
-    const data = useMemo(() => generateTrendData(), [])
+    const { t, i18n } = useTranslation('dashboard')
+    const dateLocale = i18n.language === 'uk' ? uk : enUS
+    const data = useMemo(() => generateTrendData(dateLocale), [dateLocale])
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Динаміка Повідомлень</CardTitle>
-                <CardDescription>Співвідношення корисних сигналів до шуму (14 днів)</CardDescription>
+                <CardTitle>{t('trendChart.title')}</CardTitle>
+                <CardDescription>{t('trendChart.description')}</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="h-[200px] w-full">
@@ -77,7 +80,7 @@ export const TrendChart: React.FC = () => {
                                 stackId="1"
                                 stroke="#64748b"
                                 fill="url(#colorNoise)"
-                                name="Шум"
+                                name={t('trendChart.noise')}
                                 strokeWidth={2}
                             />
                             <Area
@@ -86,7 +89,7 @@ export const TrendChart: React.FC = () => {
                                 stackId="1"
                                 stroke="#10b981"
                                 fill="url(#colorSignal)"
-                                name="Сигнал"
+                                name={t('trendChart.signal')}
                                 strokeWidth={2}
                             />
                         </AreaChart>

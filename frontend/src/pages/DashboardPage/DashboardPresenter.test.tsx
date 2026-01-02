@@ -12,27 +12,28 @@ vi.mock('@/features/onboarding', () => ({
     if (!open) return null
     return (
       <div data-testid="onboarding-wizard">
-        <button onClick={onClose}>Close Onboarding</button>
+        <button onClick={onClose} data-testid="close-onboarding-btn">X</button>
       </div>
     )
   },
 }))
 
 // Mock child components for isolation
+// Using simple markers to avoid i18n rule violations (test mocks don't need translation)
 vi.mock('./components', () => ({
   DashboardMetrics: ({ isLoading }: { isLoading: boolean }) => (
-    <div data-testid="dashboard-metrics">{isLoading ? 'Loading metrics...' : 'Metrics loaded'}</div>
+    <div data-testid="dashboard-metrics">{isLoading ? '[loading:metrics]' : '[loaded:metrics]'}</div>
   ),
-  ActivityHeatmap: () => <div data-testid="activity-heatmap">Activity Heatmap</div>,
-  TrendChart: () => <div data-testid="trend-chart">Trend Chart</div>,
+  ActivityHeatmap: () => <div data-testid="activity-heatmap" />,
+  TrendChart: () => <div data-testid="trend-chart" />,
   RecentInsights: ({ isLoading }: { isLoading: boolean }) => (
-    <div data-testid="recent-insights">{isLoading ? 'Loading insights...' : 'Insights loaded'}</div>
+    <div data-testid="recent-insights">{isLoading ? '[loading:insights]' : '[loaded:insights]'}</div>
   ),
   TopTopics: ({ isLoading }: { isLoading: boolean }) => (
-    <div data-testid="top-topics">{isLoading ? 'Loading topics...' : 'Topics loaded'}</div>
+    <div data-testid="top-topics">{isLoading ? '[loading:topics]' : '[loaded:topics]'}</div>
   ),
   TodaysFocus: ({ isLoading }: { isLoading: boolean }) => (
-    <div data-testid="todays-focus">{isLoading ? 'Loading focus...' : 'Focus loaded'}</div>
+    <div data-testid="todays-focus">{isLoading ? '[loading:focus]' : '[loaded:focus]'}</div>
   ),
 }))
 
@@ -182,10 +183,10 @@ describe('DashboardPresenter', () => {
     test('shows loading indicators when data is loading', () => {
       render(<DashboardPresenter {...createLoadingProps()} />, { wrapper: createWrapper() })
 
-      expect(screen.getByText('Loading metrics...')).toBeInTheDocument()
-      expect(screen.getByText('Loading insights...')).toBeInTheDocument()
-      expect(screen.getByText('Loading topics...')).toBeInTheDocument()
-      expect(screen.getByText('Loading focus...')).toBeInTheDocument()
+      expect(screen.getByText('[loading:metrics]')).toBeInTheDocument()
+      expect(screen.getByText('[loading:insights]')).toBeInTheDocument()
+      expect(screen.getByText('[loading:topics]')).toBeInTheDocument()
+      expect(screen.getByText('[loading:focus]')).toBeInTheDocument()
     })
   })
 
@@ -196,8 +197,8 @@ describe('DashboardPresenter', () => {
       render(<DashboardPresenter {...createLoadedProps()} />, { wrapper: createWrapper() })
 
       expect(screen.getByText('5 сигналів потребують уваги')).toBeInTheDocument()
-      expect(screen.getByText('Metrics loaded')).toBeInTheDocument()
-      expect(screen.getByText('Insights loaded')).toBeInTheDocument()
+      expect(screen.getByText('[loaded:metrics]')).toBeInTheDocument()
+      expect(screen.getByText('[loaded:insights]')).toBeInTheDocument()
     })
 
     test('does not show empty state when data exists', () => {
@@ -253,7 +254,7 @@ describe('DashboardPresenter', () => {
       const props = { ...createLoadingProps(), showOnboarding: true }
       render(<DashboardPresenter {...props} />, { wrapper: createWrapper() })
 
-      await user.click(screen.getByText('Close Onboarding'))
+      await user.click(screen.getByTestId('close-onboarding-btn'))
 
       expect(mockCallbacks.onCloseOnboarding).toHaveBeenCalledTimes(1)
     })

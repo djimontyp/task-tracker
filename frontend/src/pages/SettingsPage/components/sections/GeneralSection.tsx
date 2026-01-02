@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/select';
-import { cn } from '@/shared/lib/utils';
 import { useTheme } from '@/shared/components/ThemeProvider';
 import { useAdminMode } from '@/shared/hooks';
 import { useLanguage, AVAILABLE_LANGUAGES, type LanguageCode } from '@/shared/hooks/useLanguage';
@@ -58,8 +57,8 @@ function InlineSettingCard({
   className,
 }: InlineSettingCardProps) {
   return (
-    <Card className={cn('h-[72px]', className)}>
-      <div className="flex items-center gap-4 p-4 h-full">
+    <Card className={className}>
+      <div className="flex items-center gap-4 p-4">
         {/* Icon */}
         <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
           <Icon className="h-5 w-5 text-muted-foreground" />
@@ -67,8 +66,8 @@ function InlineSettingCard({
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="font-medium text-sm truncate">{title}</div>
-          <div className="text-xs text-muted-foreground truncate">
+          <div className="font-medium text-sm">{title}</div>
+          <div className="text-xs text-muted-foreground">
             {description}
           </div>
         </div>

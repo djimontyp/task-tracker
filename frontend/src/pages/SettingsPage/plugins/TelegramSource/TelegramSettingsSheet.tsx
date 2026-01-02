@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Button,
   Input,
@@ -48,6 +49,7 @@ interface TelegramSettingsSheetProps {
 }
 
 const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProps) => {
+  const { t } = useTranslation('settings')
   const {
     isLoadingConfig,
     isSaving,
@@ -103,7 +105,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
     try {
       // Check if clipboard API is available
       if (!navigator.clipboard?.readText) {
-        toast.error('Clipboard API not available in this browser')
+        toast.error(t('telegram.actions.clipboardUnavailable'))
         return
       }
 
@@ -112,12 +114,12 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
       // Parse URL: strip protocol and path
       const parsed = text.replace(/^https?:\/\//i, '').split('/')[0].trim()
       if (!parsed) {
-        toast.error('Clipboard is empty or contains invalid URL')
+        toast.error(t('telegram.actions.clipboardEmpty'))
         return
       }
 
       setWebhookBaseUrl(parsed)
-      toast.info(`Pasted: ${parsed}`)
+      toast.info(t('telegram.actions.pasted', { url: parsed }))
 
       // Auto-apply with the parsed URL directly (don't rely on state update)
       await handleUpdateWebhook(parsed)
@@ -127,9 +129,9 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
       // Clipboard permission denied or other error
       const message = error instanceof Error ? error.message : 'Unknown error'
       if (message.includes('denied') || message.includes('permission')) {
-        toast.error('Clipboard access denied. Please allow clipboard permissions or paste manually.')
+        toast.error(t('telegram.actions.clipboardDenied'))
       } else {
-        toast.error(`Failed to read clipboard: ${message}`)
+        toast.error(t('telegram.actions.clipboardError', { message }))
       }
     }
   }
@@ -137,11 +139,11 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
   // Format relative time
   const formatRelativeTime = (date: Date) => {
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
-    if (seconds < 60) return 'just now'
+    if (seconds < 60) return t('telegram.connection.justNow')
     const minutes = Math.floor(seconds / 60)
-    if (minutes < 60) return `${minutes}m ago`
+    if (minutes < 60) return t('telegram.connection.minutesAgo', { count: minutes })
     const hours = Math.floor(minutes / 60)
-    return `${hours}h ago`
+    return t('telegram.connection.hoursAgo', { count: hours })
   }
 
   const handleGroupInputChange = (value: string) => {
@@ -160,7 +162,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
       <SheetContent className="sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <div className="flex items-center justify-between">
-            <SheetTitle>Telegram Integration</SheetTitle>
+            <SheetTitle>{t('telegram.integration')}</SheetTitle>
             {!isLoadingConfig && (
               <Badge
                 variant="outline"
@@ -178,15 +180,15 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                 {connectionStatus === 'warning' && <AlertTriangle className="h-3 w-3" />}
                 {connectionStatus === 'error' && <XCircle className="h-3 w-3" />}
                 {connectionStatus === 'unknown' && <Circle className="h-3 w-3" />}
-                {connectionStatus === 'connected' ? 'Connected' :
-                 connectionStatus === 'warning' ? 'Pending' :
-                 connectionStatus === 'error' ? 'Error' :
-                 connectionStatus === 'checking' ? 'Checking...' : 'Unknown'}
+                {connectionStatus === 'connected' ? t('telegram.status.connected') :
+                 connectionStatus === 'warning' ? t('telegram.status.pending') :
+                 connectionStatus === 'error' ? t('telegram.status.error') :
+                 connectionStatus === 'checking' ? t('telegram.status.checking') : t('telegram.status.unknown')}
               </Badge>
             )}
           </div>
           <SheetDescription>
-            Configure your Telegram bot webhook URL and manage monitored groups for message tracking
+            {t('telegram.configureDescription')}
           </SheetDescription>
         </SheetHeader>
 
@@ -219,9 +221,9 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
             ) : (
               <div className="space-y-6">
                 <FormField
-                  label="Webhook Host"
+                  label={t('telegram.webhook.label')}
                   id="webhook-base-url"
-                  description={computedWebhookUrl || 'Enter host to see full webhook URL'}
+                  description={computedWebhookUrl || t('telegram.webhook.description')}
                   error={hostValidationError || undefined}
                 >
                   <div className="flex items-center gap-2">
@@ -231,11 +233,11 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                       </span>
                       <Input
                         id="webhook-base-url"
-                        placeholder="abc123.ngrok-free.app"
+                        placeholder={t('telegram.webhook.placeholder')}
                         value={webhookBaseUrl.replace(/^https?:\/\//, '')}
                         onChange={(event) => handleHostChange(event.target.value)}
                         autoComplete="off"
-                        aria-label="Webhook host domain"
+                        aria-label={t('telegram.webhook.label')}
                         className={cn(
                           'flex-1 text-xs sm:text-sm rounded-l-none',
                           hostValidationError && 'border-semantic-error focus-visible:ring-semantic-error'
@@ -267,8 +269,8 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                       onClick={handleTestConnection}
                       disabled={connectionStatus === 'checking'}
                       className="shrink-0 h-10 w-10"
-                      aria-label="Test webhook connection"
-                      title="Test connection"
+                      aria-label={t('telegram.actions.testConnection')}
+                      title={t('telegram.actions.testConnection')}
                     >
                       {connectionStatus === 'checking' ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -283,8 +285,8 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                       size="icon"
                       onClick={handlePasteAndApply}
                       className="shrink-0 h-10 w-10"
-                      aria-label="Paste URL from clipboard and apply"
-                      title="Paste URL"
+                      aria-label={t('telegram.actions.pasteUrl')}
+                      title={t('telegram.actions.pasteUrl')}
                     >
                       <ClipboardPaste className="h-4 w-4" />
                     </Button>
@@ -295,12 +297,12 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                       {connectionStatus === 'connected' && <CheckCircle className="h-3 w-3 text-status-connected" />}
                       {connectionStatus === 'warning' && <AlertTriangle className="h-3 w-3 text-status-validating" />}
                       {connectionStatus === 'error' && <XCircle className="h-3 w-3 text-destructive" />}
-                      Last checked: {formatRelativeTime(lastChecked)}
+                      {t('telegram.connection.lastChecked')} {formatRelativeTime(lastChecked)}
                       {connectionError && (
                         <span className={cn(
                           'ml-0.5',
                           connectionStatus === 'warning' ? 'text-status-validating' : 'text-destructive'
-                        )}>• {connectionError}</span>
+                        )}> {connectionError}</span>
                       )}
                     </p>
                   )}
@@ -311,7 +313,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                   <div className="flex items-start gap-2 p-4 rounded-md bg-semantic-warning/10 border border-semantic-warning/20">
                     <AlertTriangle className="h-4 w-4 text-semantic-warning flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-muted-foreground">
-                      Telegram requires HTTPS for webhook URLs. Use a service like ngrok for local development.
+                      {t('telegram.webhook.httpsNotice')}
                     </p>
                   </div>
                 )}
@@ -325,36 +327,36 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
 
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Groups ({groups.length})</h3>
+                  <h3 className="text-lg font-semibold">{t('telegram.groups.title', { count: groups.length })}</h3>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleRefreshNames}
                 disabled={isRefreshingNames || groups.length === 0}
-                aria-label="Refresh Telegram group names"
+                aria-label={t('telegram.groups.refreshNames')}
               >
-                {isRefreshingNames ? 'Refreshing…' : 'Refresh Names'}
+                {isRefreshingNames ? t('telegram.groups.refreshing') : t('telegram.groups.refreshNames')}
               </Button>
             </div>
 
             <FormField
-              label="Add Group"
+              label={t('telegram.groups.addGroup')}
               id="new-group-id"
               error={
                 inputValidation === 'invalid'
-                  ? 'Invalid format. Paste a Telegram group link or enter -100XXXXXXXXX'
+                  ? t('telegram.groups.invalidFormat')
                   : undefined
               }
             >
               <div className="flex gap-2">
                 <Input
                   id="new-group-id"
-                  placeholder="Paste group URL or enter -100XXXXXXXXX"
+                  placeholder={t('telegram.groups.addPlaceholder')}
                   value={newGroupId}
                   onChange={(e) => handleGroupInputChange(e.target.value)}
                   autoComplete="off"
-                  aria-label="Enter Telegram group ID or URL"
+                  aria-label={t('telegram.groups.addGroup')}
                   className={cn(
                     'flex-1',
                     inputValidation === 'valid' && 'border-semantic-success focus-visible:ring-semantic-success',
@@ -372,16 +374,16 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                   size="sm"
                   onClick={handleAddGroup}
                   disabled={isAddingGroup || !newGroupId.trim() || inputValidation === 'invalid'}
-                  aria-label="Add Telegram group to monitoring list"
+                  aria-label={t('telegram.groups.addGroup')}
                   className="shrink-0 self-start"
                 >
-                  {isAddingGroup ? 'Adding…' : '+'}
+                  {isAddingGroup ? t('telegram.groups.adding') : '+'}
                 </Button>
               </div>
               {inputValidation === 'valid' && (
                 <p className="text-xs text-semantic-success mt-2 flex items-center gap-2">
                   <Check className="h-3 w-3" />
-                  Valid group ID
+                  {t('telegram.groups.validId')}
                 </p>
               )}
             </FormField>
@@ -397,7 +399,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                           {group.name || `Group ${group.id}`}
                         </p>
                       </div>
-                      <Badge variant="outline" className="text-xs shrink-0">Active</Badge>
+                      <Badge variant="outline" className="text-xs shrink-0">{t('telegram.groups.active')}</Badge>
                       <Button
                         type="button"
                         variant="ghost"
@@ -405,7 +407,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                         onClick={() => handleRemoveGroup(group.id)}
                         disabled={removingGroupIds.has(group.id)}
                         className="h-11 w-11 shrink-0"
-                        aria-label={`Remove ${group.name || 'group'} from monitoring list`}
+                        aria-label={t('telegram.channels.remove')}
                       >
                         {removingGroupIds.has(group.id) ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -418,7 +420,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                 ))}
                 {groups.some(g => !g.name) && (
                   <p className="text-xs text-muted-foreground">
-                    Tip: Add bot as admin to group, then click &quot;Refresh Names&quot; to load names
+                    {t('telegram.groups.refreshTip')}
                   </p>
                 )}
               </div>
@@ -427,9 +429,9 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
                 <div className="w-16 h-16 mb-4 rounded-full bg-muted flex items-center justify-center">
                   <MessageSquare className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h4 className="text-sm font-medium text-foreground mb-2">No groups yet</h4>
+                <h4 className="text-sm font-medium text-foreground mb-2">{t('telegram.groups.noGroups')}</h4>
                 <p className="text-xs text-muted-foreground max-w-xs">
-                  Paste a Telegram group URL or enter a group ID to start monitoring messages
+                  {t('telegram.groups.noGroupsDescription')}
                 </p>
               </div>
             )}
@@ -443,11 +445,11 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
             variant="ghost"
             onClick={() => setShowDeleteConfirm(true)}
             disabled={isDeletingWebhook || !hasWebhookConfig}
-            aria-label="Delete webhook from Telegram"
+            aria-label={t('telegram.webhook.deleteButton')}
             className="w-full sm:w-auto text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <Trash2 className="h-4 w-4 mr-2" />
-            {isDeletingWebhook ? 'Deleting...' : 'Delete Webhook'}
+            {isDeletingWebhook ? t('telegram.webhook.deleting') : t('telegram.webhook.deleteButton')}
           </Button>
         </SheetFooter>
       </SheetContent>
@@ -456,35 +458,35 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
       <AlertDialog open={showUpdateConfirm} onOpenChange={setShowUpdateConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Update Webhook URL?</AlertDialogTitle>
+            <AlertDialogTitle>{t('telegram.webhook.updateTitle')}</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-4">
-                <p>This will change your Telegram webhook configuration:</p>
+                <p>{t('telegram.webhook.updateDescription')}</p>
                 <div className="space-y-2 text-sm">
                   <div className="p-2 bg-muted rounded-md">
-                    <span className="text-muted-foreground">From: </span>
+                    <span className="text-muted-foreground">{t('telegram.webhook.updateFrom')} </span>
                     <span className="font-mono text-xs break-all">{serverWebhookUrl}</span>
                   </div>
                   <div className="p-2 bg-muted rounded-md">
-                    <span className="text-muted-foreground">To: </span>
+                    <span className="text-muted-foreground">{t('telegram.webhook.updateTo')} </span>
                     <span className="font-mono text-xs break-all">{computedWebhookUrl}</span>
                   </div>
                 </div>
                 <p className="text-muted-foreground">
-                  Messages will be sent to the new URL immediately after the change.
+                  {t('telegram.webhook.updateNotice')}
                 </p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('telegram.actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 setShowUpdateConfirm(false)
                 handleUpdateWebhook()
               }}
             >
-              Update Webhook
+              {t('telegram.webhook.updateButton')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -494,14 +496,13 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Webhook?</AlertDialogTitle>
+            <AlertDialogTitle>{t('telegram.webhook.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove the webhook from Telegram and stop receiving messages.
-              You can re-configure it anytime.
+              {t('telegram.webhook.deleteDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('telegram.actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 setShowDeleteConfirm(false)
@@ -509,7 +510,7 @@ const TelegramSettingsSheet = ({ open, onOpenChange }: TelegramSettingsSheetProp
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete Webhook
+              {t('telegram.webhook.deleteButton')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

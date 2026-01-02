@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/shared/ui'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
 import { format, subDays, eachDayOfInterval } from 'date-fns'
-import { uk } from 'date-fns/locale'
+import { uk, enUS } from 'date-fns/locale'
 
 interface ActivityDay {
     date: Date
@@ -51,7 +52,9 @@ const getLevelColor = (level: number) => {
 }
 
 export const ActivityHeatmap: React.FC = () => {
+    const { t, i18n } = useTranslation('dashboard')
     const data = useMemo(() => generateMockData(), [])
+    const dateLocale = i18n.language === 'uk' ? uk : enUS
 
     // Calculate weeks for the grid
     const weeks = useMemo(() => {
@@ -71,8 +74,8 @@ export const ActivityHeatmap: React.FC = () => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Пульс Активності</CardTitle>
-                <CardDescription>Інтенсивність повідомлень за останні 6 місяців</CardDescription>
+                <CardTitle>{t('activityHeatmap.title')}</CardTitle>
+                <CardDescription>{t('activityHeatmap.description')}</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col gap-2">
@@ -89,7 +92,7 @@ export const ActivityHeatmap: React.FC = () => {
                                             </TooltipTrigger>
                                             <TooltipContent>
                                                 <p className="text-xs">
-                                                    {format(day.date, 'd MMMM, yyyy', { locale: uk })}: <span className="font-bold">{day.count}</span> повідомлень
+                                                    {format(day.date, 'd MMMM, yyyy', { locale: dateLocale })}: <span className="font-bold">{day.count}</span> {t('activityHeatmap.messages')}
                                                 </p>
                                             </TooltipContent>
                                         </Tooltip>
@@ -99,13 +102,13 @@ export const ActivityHeatmap: React.FC = () => {
                         ))}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground justify-end mt-2">
-                        <span>Менше</span>
+                        <span>{t('heatmap.legend.less')}</span>
                         <div className={`w-3 h-3 rounded-[2px] ${getLevelColor(0)}`} />
                         <div className={`w-3 h-3 rounded-[2px] ${getLevelColor(1)}`} />
                         <div className={`w-3 h-3 rounded-[2px] ${getLevelColor(2)}`} />
                         <div className={`w-3 h-3 rounded-[2px] ${getLevelColor(3)}`} />
                         <div className={`w-3 h-3 rounded-[2px] ${getLevelColor(4)}`} />
-                        <span>Більше</span>
+                        <span>{t('heatmap.legend.more')}</span>
                     </div>
                 </div>
             </CardContent>
