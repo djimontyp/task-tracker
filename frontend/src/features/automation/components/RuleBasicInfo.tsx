@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Controller, Control, FieldErrors } from 'react-hook-form'
 import { Input } from '@/shared/ui/input'
 import { Slider } from '@/shared/ui/slider'
@@ -17,19 +18,21 @@ export function RuleBasicInfo({
   priority,
   onPriorityChange,
 }: RuleBasicInfoProps) {
+  const { t } = useTranslation('settings')
+
   return (
-    <FormSection title="Basic Information">
+    <FormSection title={t('automation.rules.basicInfo.title')}>
       <Controller
         control={control}
         name="name"
         render={({ field }) => (
-          <FormField label="Rule Name" error={errors.name?.message} required>
-            <Input {...field} placeholder="High Confidence Auto-Approval" />
+          <FormField label={t('automation.rules.basicInfo.ruleName')} error={errors.name?.message} required>
+            <Input {...field} placeholder={t('automation.rules.basicInfo.ruleNamePlaceholder')} />
           </FormField>
         )}
       />
 
-      <FormField label="Priority (0-100)">
+      <FormField label={t('automation.rules.basicInfo.priority')}>
         <div className="flex items-center gap-4">
           <Slider
             value={[priority]}

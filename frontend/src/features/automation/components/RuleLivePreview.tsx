@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Skeleton } from '@/shared/ui/skeleton'
@@ -13,6 +14,7 @@ interface RuleLivePreviewProps {
 }
 
 export function RuleLivePreview({ conditions, action, logicOperator }: RuleLivePreviewProps) {
+  const { t } = useTranslation('settings')
   const hasValidConditions = conditions.length > 0 && conditions.every((c) => c.field && c.value)
 
   const { data: preview, isLoading } = useQuery({
@@ -43,12 +45,12 @@ export function RuleLivePreview({ conditions, action, logicOperator }: RuleLiveP
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Live Preview</CardTitle>
+        <CardTitle>{t('automation.rules.livePreview.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         {!hasValidConditions ? (
           <div className="text-sm text-muted-foreground text-center py-8">
-            Add conditions to preview impact
+            {t('automation.rules.livePreview.addConditionsPrompt')}
           </div>
         ) : isLoading ? (
           <div className="space-y-4">
@@ -60,7 +62,7 @@ export function RuleLivePreview({ conditions, action, logicOperator }: RuleLiveP
             <div>
               <div className="text-4xl font-bold">{preview.affected_count}</div>
               <p className="text-sm text-muted-foreground">
-                versions will be{' '}
+                {t('automation.rules.livePreview.versionsWillBe')}{' '}
                 <span className={`font-semibold uppercase ${getActionColor(action)}`}>
                   {action}D
                 </span>
@@ -69,7 +71,7 @@ export function RuleLivePreview({ conditions, action, logicOperator }: RuleLiveP
 
             {preview.affected_count > 0 && preview.versions.length > 0 && (
               <div>
-                <Label className="text-xs text-muted-foreground mb-2 block">Sample versions:</Label>
+                <Label className="text-xs text-muted-foreground mb-2 block">{t('automation.rules.livePreview.sampleVersions')}</Label>
                 <div className="space-y-2">
                   {preview.versions.slice(0, 5).map((version, index) => (
                     <div
@@ -83,12 +85,12 @@ export function RuleLivePreview({ conditions, action, logicOperator }: RuleLiveP
                       <div className="flex gap-2">
                         {version.confidence !== undefined && (
                           <Badge variant="outline" className="text-xs">
-                            Confidence: {version.confidence.toFixed(1)}%
+                            {t('automation.review.confidence')} {version.confidence.toFixed(1)}%
                           </Badge>
                         )}
                         {version.similarity !== undefined && (
                           <Badge variant="outline" className="text-xs">
-                            Similarity: {version.similarity.toFixed(1)}%
+                            {t('automation.review.similarity')} {version.similarity.toFixed(1)}%
                           </Badge>
                         )}
                       </div>
@@ -96,7 +98,7 @@ export function RuleLivePreview({ conditions, action, logicOperator }: RuleLiveP
                   ))}
                   {preview.affected_count > 5 && (
                     <div className="text-xs text-muted-foreground text-center">
-                      + {preview.affected_count - 5} more versions
+                      {t('automation.rules.livePreview.moreVersions', { count: preview.affected_count - 5 })}
                     </div>
                   )}
                 </div>

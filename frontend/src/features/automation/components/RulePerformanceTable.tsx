@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ interface RulePerformanceTableProps {
 }
 
 export function RulePerformanceTable({ onEdit }: RulePerformanceTableProps) {
+  const { t } = useTranslation('settings')
   const { data: rules, isLoading } = useAutomationRules()
   const deleteMutation = useDeleteRule()
 
@@ -40,13 +42,13 @@ export function RulePerformanceTable({ onEdit }: RulePerformanceTableProps) {
   const columns: ColumnDef<AutomationRule>[] = useMemo(() => [
     {
       accessorKey: 'name',
-      header: 'Rule Name',
+      header: t('automation.rules.basicInfo.ruleName'),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <span className="font-medium">{row.original.name}</span>
           {!row.original.enabled && (
             <Badge variant="outline" className="text-xs">
-              Disabled
+              {t('automation.rules.performance.disabled')}
             </Badge>
           )}
         </div>
@@ -54,12 +56,12 @@ export function RulePerformanceTable({ onEdit }: RulePerformanceTableProps) {
     },
     {
       accessorKey: 'priority',
-      header: 'Priority',
+      header: t('automation.rules.templates.priority').replace(':', ''),
       cell: ({ row }) => <span>{row.original.priority}</span>,
     },
     {
       accessorKey: 'action',
-      header: 'Action',
+      header: t('automation.rules.actionLabel'),
       cell: ({ row }) => (
         <Badge variant={getRuleActionVariant(row.original.action)}>{row.original.action}</Badge>
       ),
@@ -79,38 +81,38 @@ export function RulePerformanceTable({ onEdit }: RulePerformanceTableProps) {
     },
     {
       accessorKey: 'conditions',
-      header: 'Conditions',
+      header: t('automation.rules.conditions.title'),
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground">
-          {row.original.conditions.length} condition{row.original.conditions.length !== 1 ? 's' : ''}
+          {t('automation.rules.conditions.conditions', { count: row.original.conditions.length })}
         </span>
       ),
     },
     {
       id: 'actions',
-      header: () => <span className="sr-only">Actions</span>,
+      header: () => <span className="sr-only">{t('automation.jobs.actions')}</span>,
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label={`Rule actions for ${row.original.name}`}>
+            <Button variant="ghost" size="icon" aria-label={t('automation.rules.performance.actionsAriaLabel', { name: row.original.name })}>
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {onEdit && (
-              <DropdownMenuItem onClick={() => onEdit(row.original)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEdit(row.original)}>{t('automation.common.edit')}</DropdownMenuItem>
             )}
             <DropdownMenuItem
               onClick={() => handleDelete(row.original.id)}
               className="text-destructive"
             >
-              Delete
+              {t('automation.common.delete')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       ),
     },
-  ], [onEdit, handleDelete])
+  ], [t, onEdit, handleDelete])
 
   const table = useReactTable({
     data: rules || [],
@@ -120,7 +122,7 @@ export function RulePerformanceTable({ onEdit }: RulePerformanceTableProps) {
   })
 
   if (isLoading) {
-    return <div className="text-center py-4">Loading...</div>
+    return <div className="text-center py-4">{t('automation.common.loading')}</div>
   }
 
   return <DataTable table={table} columns={columns} />

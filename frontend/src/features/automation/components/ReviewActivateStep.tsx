@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useWizardStore } from '../store/wizardStore'
 import { Card } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
@@ -11,6 +12,7 @@ function describeCron(cron: string): string {
 }
 
 export function ReviewActivateStep() {
+  const { t } = useTranslation('settings')
   const { formData } = useWizardStore()
 
   const actionLabels = {
@@ -28,9 +30,9 @@ export function ReviewActivateStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Review & Activate</h3>
+        <h3 className="text-lg font-semibold mb-2">{t('automation.review.title')}</h3>
         <p className="text-sm text-muted-foreground">
-          Review your automation configuration before activation
+          {t('automation.review.description')}
         </p>
       </div>
 
@@ -41,7 +43,7 @@ export function ReviewActivateStep() {
               <Clock className="size-5 text-semantic-info" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-medium mb-2">Schedule</h4>
+              <h4 className="text-sm font-medium mb-2">{t('automation.review.schedule')}</h4>
               <p className="text-sm text-muted-foreground">
                 {describeCron(formData.schedule.cron_expression)}
               </p>
@@ -58,25 +60,25 @@ export function ReviewActivateStep() {
               <Settings className="size-5 text-accent-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-medium mb-2">Automation Rules</h4>
+              <h4 className="text-sm font-medium mb-2">{t('automation.review.automationRules')}</h4>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Action:</span>
+                  <span className="text-sm text-muted-foreground">{t('automation.review.action')}</span>
                   <Badge className={actionColors[formData.rules.action]}>
                     {actionLabels[formData.rules.action]}
                   </Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Confidence:</span>{' '}
+                    <span className="text-muted-foreground">{t('automation.review.confidence')}</span>{' '}
                     <span className="font-mono font-medium">
-                      ≥{formData.rules.confidence_threshold}%
+                      {t('automation.review.greaterOrEqual')}{formData.rules.confidence_threshold}%
                     </span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Similarity:</span>{' '}
+                    <span className="text-muted-foreground">{t('automation.review.similarity')}</span>{' '}
                     <span className="font-mono font-medium">
-                      ≥{formData.rules.similarity_threshold}%
+                      {t('automation.review.greaterOrEqual')}{formData.rules.similarity_threshold}%
                     </span>
                   </div>
                 </div>
@@ -89,21 +91,21 @@ export function ReviewActivateStep() {
 
       <div className="rounded-lg bg-semantic-info/10 border border-semantic-info/20 p-4">
         <h4 className="text-sm font-medium text-semantic-info mb-2">
-          What happens next?
+          {t('automation.review.whatHappensNext')}
         </h4>
         <ul className="text-sm text-semantic-info/80 space-y-2">
           <li className="flex items-start gap-2">
             <span className="shrink-0">1.</span>
-            <span>Scheduler job will be created with your configured schedule</span>
+            <span>{t('automation.review.step1')}</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="shrink-0">2.</span>
-            <span>Automation rule will be created with your thresholds</span>
+            <span>{t('automation.review.step2')}</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="shrink-0">3.</span>
             <span>
-              You can monitor and adjust everything from the Automation Dashboard
+              {t('automation.review.step3')}
             </span>
           </li>
         </ul>

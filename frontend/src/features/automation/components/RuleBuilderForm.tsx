@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -19,6 +20,7 @@ interface RuleBuilderFormProps {
 }
 
 export function RuleBuilderForm({ rule, template, onSuccess, onCancel }: RuleBuilderFormProps) {
+  const { t } = useTranslation('settings')
   const isEditing = !!rule
 
   const {
@@ -95,7 +97,7 @@ export function RuleBuilderForm({ rule, template, onSuccess, onCancel }: RuleBui
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isEditing ? 'Edit Rule' : 'Create New Rule'}</CardTitle>
+        <CardTitle>{isEditing ? t('automation.common.editRule') : t('automation.common.createNewRule')}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -119,7 +121,7 @@ export function RuleBuilderForm({ rule, template, onSuccess, onCancel }: RuleBui
           <div className="flex gap-2 pt-4">
             {onCancel && (
               <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
+                {t('automation.common.cancel')}
               </Button>
             )}
             <Button
@@ -128,10 +130,10 @@ export function RuleBuilderForm({ rule, template, onSuccess, onCancel }: RuleBui
               className="flex-1"
             >
               {createMutation.isPending || updateMutation.isPending
-                ? 'Saving...'
+                ? t('automation.common.saving')
                 : isEditing
-                  ? 'Update Rule'
-                  : 'Create Rule'}
+                  ? t('automation.common.updateRule')
+                  : t('automation.common.createRule')}
             </Button>
           </div>
         </form>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { Button } from '@/shared/ui/button'
@@ -15,20 +16,21 @@ import {
 import { useAutomationTrends } from '../api/automationService'
 
 export function AutomationTrendsChart() {
+  const { t } = useTranslation('settings')
   const [period, setPeriod] = useState<'7d' | '30d' | '90d'>('30d')
   const { data: trends, isLoading } = useAutomationTrends(period)
 
   const periodLabels = {
-    '7d': 'Last 7 Days',
-    '30d': 'Last 30 Days',
-    '90d': 'Last 90 Days',
+    '7d': t('automation.trends.periods.7d'),
+    '30d': t('automation.trends.periods.30d'),
+    '90d': t('automation.trends.periods.90d'),
   }
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Approval Trends</CardTitle>
+          <CardTitle>{t('automation.trends.title')}</CardTitle>
           <div className="flex gap-2">
             {(['7d', '30d', '90d'] as const).map((p) => (
               <Button
@@ -96,7 +98,7 @@ export function AutomationTrendsChart() {
           </ResponsiveContainer>
         ) : (
           <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
-            No trend data available
+            {t('automation.trends.noData')}
           </div>
         )}
       </CardContent>

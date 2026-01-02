@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Badge } from '@/shared/ui/badge'
@@ -10,13 +11,14 @@ interface RuleTemplatesLibraryProps {
 }
 
 export function RuleTemplatesLibrary({ onSelectTemplate }: RuleTemplatesLibraryProps) {
+  const { t } = useTranslation('settings')
   const { data: templates, isLoading } = useRuleTemplates()
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Rule Templates</CardTitle>
+          <CardTitle>{t('automation.rules.templates.title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           <Skeleton className="h-16 w-full" />
@@ -45,7 +47,7 @@ export function RuleTemplatesLibrary({ onSelectTemplate }: RuleTemplatesLibraryP
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Templates</CardTitle>
+        <CardTitle>{t('automation.rules.templates.templatesTab')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         {templates && templates.length > 0 ? (
@@ -62,15 +64,15 @@ export function RuleTemplatesLibrary({ onSelectTemplate }: RuleTemplatesLibraryP
               </div>
               <p className="text-xs text-muted-foreground text-left">{template.description}</p>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>Priority: {template.priority}</span>
+                <span>{t('automation.rules.templates.priority')} {template.priority}</span>
                 <span>•</span>
-                <span>{template.conditions.length} conditions</span>
+                <span>{t('automation.rules.conditions.conditions', { count: template.conditions.length })}</span>
               </div>
             </Button>
           ))
         ) : (
           <div className="text-sm text-muted-foreground text-center py-4">
-            No templates available
+            {t('automation.rules.templates.noTemplates')}
           </div>
         )}
       </CardContent>

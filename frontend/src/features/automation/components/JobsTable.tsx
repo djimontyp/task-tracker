@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
 import {
@@ -28,6 +29,7 @@ interface JobsTableProps {
 }
 
 export function JobsTable({ onEdit, onViewHistory }: JobsTableProps) {
+  const { t } = useTranslation('settings')
   const { data: jobs, isLoading } = useSchedulerJobs()
   const deleteMutation = useDeleteJob()
   const toggleMutation = useToggleJob()
@@ -63,42 +65,42 @@ export function JobsTable({ onEdit, onViewHistory }: JobsTableProps) {
   const columns: ColumnDef<SchedulerJob>[] = useMemo(() => [
     {
       accessorKey: 'name',
-      header: 'Job Name',
+      header: t('automation.jobs.jobName'),
       cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
     },
     {
       accessorKey: 'schedule_cron',
-      header: 'Schedule',
+      header: t('automation.review.schedule'),
       cell: ({ row }) => (
         <code className="text-sm bg-muted px-2 py-2 rounded">{row.original.schedule_cron}</code>
       ),
     },
     {
       accessorKey: 'enabled',
-      header: 'Enabled',
+      header: t('automation.rules.enabled'),
       cell: ({ row }) => (
         <Switch
           checked={row.original.enabled}
           onCheckedChange={() => handleToggle(row.original.id)}
           disabled={toggleMutation.isPending}
-          aria-label={`Toggle ${row.original.name} enabled status`}
+          aria-label={t('automation.jobs.toggleAriaLabel', { name: row.original.name })}
         />
       ),
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: t('automation.jobs.status'),
       cell: ({ row }) => (
         <Badge variant={getJobStatusVariant(row.original.status)}>{row.original.status}</Badge>
       ),
     },
     {
       accessorKey: 'next_run',
-      header: 'Next Run',
+      header: t('automation.jobs.nextRun'),
       cell: ({ row }) =>
         row.original.next_run ? (
           <span className="text-sm">
-            In {formatDistanceToNow(new Date(row.original.next_run))}
+            {t('automation.jobs.in')} {formatDistanceToNow(new Date(row.original.next_run))}
           </span>
         ) : (
           <span className="text-sm text-muted-foreground">-</span>
@@ -106,49 +108,49 @@ export function JobsTable({ onEdit, onViewHistory }: JobsTableProps) {
     },
     {
       accessorKey: 'last_run',
-      header: 'Last Run',
+      header: t('automation.jobs.lastRun'),
       cell: ({ row }) =>
         row.original.last_run ? (
           <span className="text-sm">
             {formatDistanceToNow(new Date(row.original.last_run), { addSuffix: true })}
           </span>
         ) : (
-          <span className="text-sm text-muted-foreground">Never</span>
+          <span className="text-sm text-muted-foreground">{t('automation.jobs.never')}</span>
         ),
     },
     {
       id: 'actions',
-      header: () => <span className="sr-only">Actions</span>,
+      header: () => <span className="sr-only">{t('automation.jobs.actions')}</span>,
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label={`Job actions for ${row.original.name}`}>
+            <Button variant="ghost" size="icon" aria-label={t('automation.jobs.actionsAriaLabel', { name: row.original.name })}>
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => handleTrigger(row.original.id)}>
-              Trigger Now
+              {t('automation.jobs.triggerNow')}
             </DropdownMenuItem>
             {onEdit && (
-              <DropdownMenuItem onClick={() => onEdit(row.original)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEdit(row.original)}>{t('automation.jobs.edit')}</DropdownMenuItem>
             )}
             {onViewHistory && (
               <DropdownMenuItem onClick={() => onViewHistory(row.original)}>
-                View History
+                {t('automation.jobs.viewHistory')}
               </DropdownMenuItem>
             )}
             <DropdownMenuItem
               onClick={() => handleDelete(row.original.id)}
               className="text-destructive"
             >
-              Delete
+              {t('automation.jobs.delete')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       ),
     },
-  ], [handleToggle, toggleMutation.isPending, handleTrigger, onEdit, onViewHistory, handleDelete])
+  ], [t, handleToggle, toggleMutation.isPending, handleTrigger, onEdit, onViewHistory, handleDelete])
 
   const table = useReactTable({
     data: jobs || [],
@@ -158,7 +160,7 @@ export function JobsTable({ onEdit, onViewHistory }: JobsTableProps) {
   })
 
   if (isLoading) {
-    return <div className="text-center py-4">Loading...</div>
+    return <div className="text-center py-4">{t('automation.jobs.loading')}</div>
   }
 
   return <DataTable table={table} columns={columns} />

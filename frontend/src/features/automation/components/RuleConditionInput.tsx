@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -49,6 +50,7 @@ const textOperators = [
 ]
 
 export function RuleConditionInput({ value, onChange, onRemove }: RuleConditionInputProps) {
+  const { t } = useTranslation('settings')
   const [field, setField] = useState(value.field || 'confidence')
   const [operator, setOperator] = useState(value.operator || 'gte')
   const [conditionValue, setConditionValue] = useState(value.value || '')
@@ -109,14 +111,14 @@ export function RuleConditionInput({ value, onChange, onRemove }: RuleConditionI
         type={selectedField?.type === 'number' ? 'number' : 'text'}
         value={conditionValue}
         onChange={handleValueChange}
-        placeholder="Value"
+        placeholder={t('automation.rules.conditions.valuePlaceholder')}
         className="flex-1"
         step={selectedField?.type === 'number' ? '0.01' : undefined}
         min={selectedField?.type === 'number' ? 0 : undefined}
         max={selectedField?.type === 'number' ? 100 : undefined}
       />
 
-      <Button variant="ghost" size="icon" onClick={onRemove} type="button" aria-label="Remove condition">
+      <Button variant="ghost" size="icon" onClick={onRemove} type="button" aria-label={t('automation.rules.conditions.removeCondition')}>
         <X className="h-4 w-4" />
       </Button>
     </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Input } from '@/shared/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/shared/ui/radio-group'
 import { cn } from '@/shared/lib/utils'
@@ -11,30 +12,14 @@ interface CronPickerProps {
   className?: string
 }
 
-const CRON_PRESETS = {
-  hourly: {
-    label: 'Hourly',
-    description: 'Runs at the start of every hour',
-    cron: '0 * * * *',
-  },
-  daily: {
-    label: 'Daily',
-    description: 'Runs every day at 9:00 AM UTC',
-    cron: '0 9 * * *',
-  },
-  weekly: {
-    label: 'Weekly',
-    description: 'Runs every Monday at 9:00 AM UTC',
-    cron: '0 9 * * 1',
-  },
-  custom: {
-    label: 'Custom',
-    description: 'Define your own cron expression',
-    cron: '',
-  },
+const CRON_PRESETS_CONFIG = {
+  hourly: '0 * * * *',
+  daily: '0 9 * * *',
+  weekly: '0 9 * * 1',
+  custom: '',
 }
 
-type PresetKey = keyof typeof CRON_PRESETS
+type PresetKey = keyof typeof CRON_PRESETS_CONFIG
 
 function validateCron(cron: string): boolean {
   const cronRegex = /^(\*|([0-5]?\d)) (\*|([01]?\d|2[0-3])) (\*|([12]?\d|3[01])) (\*|([1-9]|1[012])) (\*|[0-6])$/
@@ -65,13 +50,37 @@ function describeCron(cron: string): string {
 }
 
 export function CronPicker({ value, onChange, onValidate, className }: CronPickerProps) {
+  const { t } = useTranslation('settings')
   const [selectedPreset, setSelectedPreset] = useState<PresetKey>('daily')
   const [customCron, setCustomCron] = useState(value || '0 9 * * *')
   const [isValid, setIsValid] = useState(true)
 
+  const CRON_PRESETS = {
+    hourly: {
+      label: t('automation.cron.presets.hourly.label'),
+      description: t('automation.cron.presets.hourly.description'),
+      cron: CRON_PRESETS_CONFIG.hourly,
+    },
+    daily: {
+      label: t('automation.cron.presets.daily.label'),
+      description: t('automation.cron.presets.daily.description'),
+      cron: CRON_PRESETS_CONFIG.daily,
+    },
+    weekly: {
+      label: t('automation.cron.presets.weekly.label'),
+      description: t('automation.cron.presets.weekly.description'),
+      cron: CRON_PRESETS_CONFIG.weekly,
+    },
+    custom: {
+      label: t('automation.cron.presets.custom.label'),
+      description: t('automation.cron.presets.custom.description'),
+      cron: CRON_PRESETS_CONFIG.custom,
+    },
+  }
+
   useEffect(() => {
-    const preset = Object.entries(CRON_PRESETS).find(
-      ([, config]) => config.cron === value
+    const preset = Object.entries(CRON_PRESETS_CONFIG).find(
+      ([, cron]) => cron === value
     )?.[0] as PresetKey | undefined
 
     if (preset) {
@@ -92,7 +101,7 @@ export function CronPicker({ value, onChange, onValidate, className }: CronPicke
   const handlePresetChange = (preset: PresetKey) => {
     setSelectedPreset(preset)
     if (preset !== 'custom') {
-      const cronValue = CRON_PRESETS[preset].cron
+      const cronValue = CRON_PRESETS_CONFIG[preset]
       onChange(cronValue)
       setCustomCron(cronValue)
     }
@@ -105,12 +114,12 @@ export function CronPicker({ value, onChange, onValidate, className }: CronPicke
     }
   }
 
-  const currentCron = selectedPreset === 'custom' ? customCron : CRON_PRESETS[selectedPreset].cron
+  const currentCron = selectedPreset === 'custom' ? customCron : CRON_PRESETS_CONFIG[selectedPreset]
   const cronDescription = describeCron(currentCron)
 
   return (
     <div className={cn('space-y-4', className)}>
-      <FormField label="Schedule Frequency">
+      <FormField label={t('automation.cron.scheduleFrequency')}>
         <RadioGroup value={selectedPreset} onValueChange={handlePresetChange}>
           <div className="grid gap-4">
             {Object.entries(CRON_PRESETS).map(([key, config]) => (
@@ -139,7 +148,7 @@ export function CronPicker({ value, onChange, onValidate, className }: CronPicke
 
       {selectedPreset === 'custom' && (
         <FormField
-          label="Cron Expression"
+          label={t('automation.cron.cronExpression')}
           description="Format: minute hour day month weekday (0-6 = Sun-Sat)"
           error={!isValid ? 'Invalid cron expression' : undefined}
         >
@@ -157,12 +166,12 @@ export function CronPicker({ value, onChange, onValidate, className }: CronPicke
         <p className={cn('text-sm', isValid ? 'text-foreground' : 'text-destructive')}>
           {isValid ? (
             <>
-              <span className="font-medium">Preview:</span>{' '}
+              <span className="font-medium">{t('automation.cron.preview')}</span>{' '}
               <span className="text-muted-foreground">{cronDescription}</span>
             </>
           ) : (
             <>
-              <span className="font-medium">Error:</span> {cronDescription}
+              <span className="font-medium">{t('automation.cron.error')}</span> {cronDescription}
             </>
           )}
         </p>
