@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Menu, HelpCircle, PanelLeft } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { cn } from '@/shared/lib/utils';
@@ -37,19 +38,20 @@ export function Navbar({
   user,
   searchComponent,
 }: NavbarProps) {
+  const { t } = useTranslation();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const { toggleSidebar } = useSidebar();
 
   const getThemeLabel = () => {
     switch (theme) {
       case 'light':
-        return 'Light theme';
+        return t('navbar.theme.light');
       case 'dark':
-        return 'Dark theme';
+        return t('navbar.theme.dark');
       case 'system':
-        return 'System theme';
+        return t('navbar.theme.system');
       default:
-        return 'Change theme';
+        return t('navbar.theme.change');
     }
   };
 
@@ -68,13 +70,13 @@ export function Navbar({
         <div className="shrink-0 min-w-0 flex items-center gap-2">
           <TooltipIconButton
             icon={<PanelLeft className="h-4 w-4" />}
-            label="Toggle sidebar"
-            tooltip="Toggle sidebar"
+            label={t('navbar.toggleSidebar')}
+            tooltip={t('navbar.toggleSidebar')}
             onClick={toggleSidebar}
           />
           <TooltipIconButton
             icon={<HelpCircle className="h-4 w-4" />}
-            label="Page info"
+            label={t('navbar.pageInfo')}
             tooltip={pageTooltip}
           />
           <NavBreadcrumbs crumbs={crumbs} variant="desktop" />
@@ -101,7 +103,7 @@ export function Navbar({
 
           <TooltipIconButton
             icon={<UniversalThemeIcon theme={theme} className="h-5 w-5" />}
-            label="Change theme"
+            label={t('navbar.theme.change')}
             tooltip={getThemeLabel()}
             onClick={onThemeChange}
           />
@@ -125,7 +127,7 @@ export function Navbar({
               size="icon"
               onClick={onMobileSidebarToggle}
               className="h-11 w-11 shrink-0 rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label="Toggle sidebar"
+              aria-label={t('navbar.toggleSidebar')}
             >
               <Menu className="size-5" />
             </Button>
@@ -138,7 +140,7 @@ export function Navbar({
               size="icon"
               className="h-11 w-11 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               onClick={() => setMobileSearchOpen(true)}
-              aria-label="Open search"
+              aria-label={t('navbar.openSearch')}
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -147,7 +149,7 @@ export function Navbar({
 
             <TooltipIconButton
               icon={<UniversalThemeIcon theme={theme} className="h-5 w-5" />}
-              label="Change theme"
+              label={t('navbar.theme.change')}
               tooltip={getThemeLabel()}
               onClick={onThemeChange}
             />
@@ -164,7 +166,7 @@ export function Navbar({
         <div className="px-2 sm:px-4 pb-2 border-t border-border flex items-center gap-2">
           <TooltipIconButton
             icon={<HelpCircle className="h-4 w-4" />}
-            label="Page info"
+            label={t('navbar.pageInfo')}
             tooltip={pageTooltip}
           />
           <NavBreadcrumbs crumbs={crumbs} variant="mobile" />

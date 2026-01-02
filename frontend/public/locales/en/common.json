@@ -152,5 +152,48 @@
     "clear": "Clear search",
     "noResults": "No results found",
     "hint": "Press / to focus"
+  },
+  "userMenu": {
+    "ariaLabel": "User menu",
+    "account": "Account",
+    "settings": "Settings",
+    "adminMode": "Admin Mode",
+    "toggleAdminMode": "Toggle admin mode",
+    "logOut": "Log out"
+  },
+  "navbar": {
+    "toggleSidebar": "Toggle sidebar",
+    "pageInfo": "Page info",
+    "openSearch": "Open search",
+    "theme": {
+      "light": "Light theme",
+      "dark": "Dark theme",
+      "system": "System theme",
+      "change": "Change theme"
+    }
+  },
+  "serviceStatus": {
+    "connected": "Connected",
+    "reconnecting": "Reconnecting",
+    "disconnected": "Disconnected"
+  },
+  "settingsCard": {
+    "settings": "Settings",
+    "status": {
+      "connected": "Connected",
+      "active": "Active",
+      "setup": "Setup",
+      "error": "Error",
+      "disabled": "Disabled",
+      "loading": "Loading"
+    }
+  },
+  "dataTable": {
+    "rowsSelected": "{{selected}} of {{total}} row(s) selected",
+    "goToPage": "Go to page",
+    "goToNextPage": "Go to next page",
+    "goToLastPage": "Go to last page",
+    "selected": "{{count}} selected",
+    "clearFilters": "Clear filters"
   }
 }

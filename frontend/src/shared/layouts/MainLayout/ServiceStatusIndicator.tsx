@@ -1,4 +1,5 @@
 import { CheckCircle, AlertCircle, XCircle, type LucideIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   Tooltip,
   TooltipContent,
@@ -18,25 +19,29 @@ export interface ServiceStatusIndicatorProps {
   className?: string;
 }
 
-const statusConfig: Record<
-  StatusIndicatorVariant,
-  { title: string; label: string; Icon: LucideIcon; iconClass: string }
-> = {
+type StatusConfigItem = {
+  titleKey: string;
+  labelKey: string;
+  Icon: LucideIcon;
+  iconClass: string;
+};
+
+const statusConfig: Record<StatusIndicatorVariant, StatusConfigItem> = {
   healthy: {
-    title: 'Connected',
-    label: 'Connected',
+    titleKey: 'serviceStatus.connected',
+    labelKey: 'serviceStatus.connected',
     Icon: CheckCircle,
     iconClass: 'text-semantic-success',
   },
   warning: {
-    title: 'Reconnecting',
-    label: 'Reconnecting',
+    titleKey: 'serviceStatus.reconnecting',
+    labelKey: 'serviceStatus.reconnecting',
     Icon: AlertCircle,
     iconClass: 'text-semantic-warning',
   },
   error: {
-    title: 'Disconnected',
-    label: 'Disconnected',
+    titleKey: 'serviceStatus.disconnected',
+    labelKey: 'serviceStatus.disconnected',
     Icon: XCircle,
     iconClass: 'text-destructive',
   },
@@ -59,9 +64,12 @@ export function ServiceStatusIndicator({
   showLabel = false,
   className,
 }: ServiceStatusIndicatorProps) {
+  const { t } = useTranslation();
   const config = statusConfig[status];
   const { Icon, iconClass } = config;
-  const effectiveAriaLabel = ariaLabel ?? config.title;
+  const title = t(config.titleKey);
+  const label = t(config.labelKey);
+  const effectiveAriaLabel = ariaLabel ?? title;
 
   return (
     <TooltipProvider>
@@ -76,7 +84,7 @@ export function ServiceStatusIndicator({
               <Icon className={`h-4 w-4 ${iconClass}`} aria-hidden="true" />
               {showLabel && (
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {config.label}
+                  {label}
                 </span>
               )}
             </div>
@@ -85,7 +93,7 @@ export function ServiceStatusIndicator({
         <TooltipContent>
           <div className="flex items-center gap-2">
             <Icon className={`h-4 w-4 ${iconClass}`} aria-hidden="true" />
-            <span>{config.title}</span>
+            <span>{title}</span>
           </div>
         </TooltipContent>
       </Tooltip>
