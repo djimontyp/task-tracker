@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel
 
@@ -10,6 +10,25 @@ class HealthResponse(BaseModel):
 
     class Config:
         schema_extra = {"example": {"status": "healthy", "timestamp": "2025-10-04T12:00:00"}}
+
+
+class DetailedHealthResponse(BaseModel):
+    """Detailed health check response with individual service status."""
+
+    status: Literal["healthy", "degraded"]
+    timestamp: str
+    checks: dict[str, bool]
+    version: str = "1.0.0"
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "status": "healthy",
+                "timestamp": "2025-10-04T12:00:00Z",
+                "checks": {"database": True, "nats": True},
+                "version": "1.0.0",
+            }
+        }
 
 
 class ConfigResponse(BaseModel):
