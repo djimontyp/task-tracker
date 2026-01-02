@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { HealthCards } from './HealthCards'
 import { LiveActivityFeed } from './LiveActivityFeed'
 import { TaskHistoryTable } from './TaskHistoryTable'
@@ -9,6 +10,7 @@ import { monitoringService } from '../api/monitoringService'
 import type { HistoryFilters } from '../types'
 
 export const MonitoringDashboard = () => {
+  const { t } = useTranslation('taskMonitoring')
   const [historyFilters, setHistoryFilters] = useState<HistoryFilters>({ page: 1, page_size: 50 })
   const [timeWindow] = useState(24)
 
@@ -41,7 +43,7 @@ export const MonitoringDashboard = () => {
   if (metricsError || historyError) {
     return (
       <div className="p-8 text-center">
-        <div className="text-destructive mb-2">Помилка завантаження даних</div>
+        <div className="text-destructive mb-2">{t('errors.loadingFailed')}</div>
         <div className="text-sm text-muted-foreground">
           {metricsError ? String(metricsError) : String(historyError)}
         </div>
@@ -53,9 +55,9 @@ export const MonitoringDashboard = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Моніторинг фонових задач</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground mt-2">
-            Статус та історія виконання всіх задач системи
+            {t('description')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -70,10 +72,10 @@ export const MonitoringDashboard = () => {
           />
           <span className="text-sm text-muted-foreground">
             {isConnected
-              ? 'WebSocket підключено'
+              ? t('connection.connected')
               : connectionState === 'reconnecting'
-                ? 'Перепідключення...'
-                : 'Підключення...'}
+                ? t('connection.reconnecting')
+                : t('connection.connecting')}
           </span>
         </div>
       </div>
@@ -82,7 +84,7 @@ export const MonitoringDashboard = () => {
         <div className="lg:col-span-2">
           {metricsLoading ? (
             <div className="text-center py-12 text-muted-foreground">
-              Завантаження метрик...
+              {t('loading.metrics')}
             </div>
           ) : (
             <HealthCards metrics={metricsData?.metrics ?? []} />
@@ -98,7 +100,7 @@ export const MonitoringDashboard = () => {
       <div>
         {historyLoading ? (
           <div className="text-center py-12 text-muted-foreground">
-            Завантаження історії...
+            {t('loading.history')}
           </div>
         ) : historyData ? (
           <TaskHistoryTable
