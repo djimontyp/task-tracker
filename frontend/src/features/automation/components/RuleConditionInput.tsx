@@ -24,29 +24,29 @@ interface RuleConditionInputProps {
 
 interface FieldOption {
   value: string
-  label: string
+  labelKey: string
   type: 'number' | 'text'
 }
 
 const fieldOptions: FieldOption[] = [
-  { value: 'confidence', label: 'Confidence', type: 'number' },
-  { value: 'similarity', label: 'Similarity', type: 'number' },
-  { value: 'topic_count', label: 'Topic Count', type: 'number' },
-  { value: 'topic.name', label: 'Topic Name', type: 'text' },
-  { value: 'atom.content', label: 'Atom Content', type: 'text' },
+  { value: 'confidence', labelKey: 'automation.rules.fields.confidence', type: 'number' },
+  { value: 'similarity', labelKey: 'automation.rules.fields.similarity', type: 'number' },
+  { value: 'topic_count', labelKey: 'automation.rules.fields.topicCount', type: 'number' },
+  { value: 'topic.name', labelKey: 'automation.rules.fields.topicName', type: 'text' },
+  { value: 'atom.content', labelKey: 'automation.rules.fields.atomContent', type: 'text' },
 ]
 
 const numberOperators = [
-  { value: 'gte', label: '≥' },
-  { value: 'lte', label: '≤' },
-  { value: 'eq', label: '=' },
-  { value: 'ne', label: '≠' },
+  { value: 'gte', labelKey: 'automation.rules.operators.gte' },
+  { value: 'lte', labelKey: 'automation.rules.operators.lte' },
+  { value: 'eq', labelKey: 'automation.rules.operators.eq' },
+  { value: 'ne', labelKey: 'automation.rules.operators.ne' },
 ]
 
 const textOperators = [
-  { value: 'contains', label: 'Contains' },
-  { value: 'eq', label: 'Equals' },
-  { value: 'starts_with', label: 'Starts with' },
+  { value: 'contains', labelKey: 'automation.rules.operators.contains' },
+  { value: 'eq', labelKey: 'automation.rules.operators.equals' },
+  { value: 'starts_with', labelKey: 'automation.rules.operators.startsWith' },
 ]
 
 export function RuleConditionInput({ value, onChange, onRemove }: RuleConditionInputProps) {
@@ -88,7 +88,7 @@ export function RuleConditionInput({ value, onChange, onRemove }: RuleConditionI
         <SelectContent>
           {fieldOptions.map((opt) => (
             <SelectItem key={opt.value} value={opt.value}>
-              {opt.label}
+              {t(opt.labelKey)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -101,7 +101,7 @@ export function RuleConditionInput({ value, onChange, onRemove }: RuleConditionI
         <SelectContent>
           {operators.map((opt) => (
             <SelectItem key={opt.value} value={opt.value}>
-              {opt.label}
+              {t(opt.labelKey)}
             </SelectItem>
           ))}
         </SelectContent>

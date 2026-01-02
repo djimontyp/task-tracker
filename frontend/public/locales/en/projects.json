@@ -1,4 +1,25 @@
 {
+  "title": "Projects",
+  "actions": {
+    "createProject": "Create Project"
+  },
+  "search": {
+    "placeholder": "Search projects by name, keywords, or components...",
+    "showing": "Showing {{filtered}} of {{total}} projects"
+  },
+  "empty": {
+    "title": "No projects found",
+    "description": {
+      "noProjects": "Create your first project to organize message classification.",
+      "noResults": "Try adjusting your search query."
+    }
+  },
+  "errors": {
+    "loadingFailed": "Error loading data"
+  },
+  "confirmation": {
+    "delete": "Are you sure you want to delete this project?"
+  },
   "form": {
     "title": {
       "create": "Create Project",

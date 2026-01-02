@@ -16,7 +16,8 @@ import { TaskForm } from '@/features/agents/components'
 import { PageWrapper } from '@/shared/primitives'
 
 const AgentTasksPage = () => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('agentTasks')
+  const { t: tCommon } = useTranslation()
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<TaskConfig | null>(null)
@@ -30,11 +31,11 @@ const AgentTasksPage = () => {
     mutationFn: (data: TaskConfigCreate) => taskService.createTask(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-configs'] })
-      toast.success(t('toast.success.created', { entity: t('toast.entities.task') }))
+      toast.success(tCommon('toast.success.created', { entity: tCommon('toast.entities.task') }))
       setFormOpen(false)
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('toast.error.createFailed', { entity: t('toast.entities.task') }))
+      toast.error(error.message || tCommon('toast.error.createFailed', { entity: tCommon('toast.entities.task') }))
     },
   })
 
@@ -43,12 +44,12 @@ const AgentTasksPage = () => {
       taskService.updateTask(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-configs'] })
-      toast.success(t('toast.success.updated', { entity: t('toast.entities.task') }))
+      toast.success(tCommon('toast.success.updated', { entity: tCommon('toast.entities.task') }))
       setFormOpen(false)
       setEditingTask(null)
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('toast.error.updateFailed', { entity: t('toast.entities.task') }))
+      toast.error(error.message || tCommon('toast.error.updateFailed', { entity: tCommon('toast.entities.task') }))
     },
   })
 
@@ -56,10 +57,10 @@ const AgentTasksPage = () => {
     mutationFn: (id: string) => taskService.deleteTask(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-configs'] })
-      toast.success(t('toast.success.deleted', { entity: t('toast.entities.task') }))
+      toast.success(tCommon('toast.success.deleted', { entity: tCommon('toast.entities.task') }))
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('toast.error.deleteFailed', { entity: t('toast.entities.task') }))
+      toast.error(error.message || tCommon('toast.error.deleteFailed', { entity: tCommon('toast.entities.task') }))
     },
   })
 
@@ -74,7 +75,7 @@ const AgentTasksPage = () => {
   }
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
+    if (window.confirm(t('confirmation.delete'))) {
       deleteMutation.mutate(id)
     }
   }
@@ -101,7 +102,7 @@ const AgentTasksPage = () => {
       <div className="flex justify-end mb-4">
         <Button onClick={handleCreate} size="sm">
           <Plus className="mr-2 h-4 w-4" />
-          Add Task
+          {t('actions.addTask')}
         </Button>
       </div>
 
@@ -110,7 +111,7 @@ const AgentTasksPage = () => {
           <Card className="col-span-full">
             <CardContent className="py-8">
               <p className="text-center text-muted-foreground">
-                No tasks found. Create one to get started.
+                {t('empty.description')}
               </p>
             </CardContent>
           </Card>
@@ -133,7 +134,7 @@ const AgentTasksPage = () => {
                         size="icon"
                         variant="ghost"
                         onClick={() => handleEdit(task)}
-                        aria-label="Edit task"
+                        aria-label={t('actions.editTask')}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -141,7 +142,7 @@ const AgentTasksPage = () => {
                         size="icon"
                         variant="ghost"
                         onClick={() => handleDelete(task.id)}
-                        aria-label="Delete task"
+                        aria-label={t('actions.deleteTask')}
                         disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -151,7 +152,7 @@ const AgentTasksPage = () => {
 
                   <div className="space-y-2 text-sm">
                     <div>
-                      <span className="text-muted-foreground">Schema Fields:</span>
+                      <span className="text-muted-foreground">{t('card.schemaFields')}</span>
                       <div className="mt-2 space-x-2">
                         {task.response_schema?.properties ? (
                           Object.keys(task.response_schema.properties).map(
@@ -163,21 +164,21 @@ const AgentTasksPage = () => {
                           )
                         ) : (
                           <span className="text-xs text-muted-foreground">
-                            No fields
+                            {t('card.noFields')}
                           </span>
                         )}
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
-                      <span className="text-muted-foreground">Status:</span>
+                      <span className="text-muted-foreground">{t('card.status')}</span>
                       <Badge variant={task.is_active ? 'default' : 'secondary'}>
-                        {task.is_active ? 'Active' : 'Inactive'}
+                        {task.is_active ? t('status.active') : t('status.inactive')}
                       </Badge>
                     </div>
 
                     <div className="text-xs text-muted-foreground">
-                      Created: {new Date(task.created_at).toLocaleDateString()}
+                      {t('card.created')} {new Date(task.created_at).toLocaleDateString()}
                     </div>
                   </div>
                 </div>

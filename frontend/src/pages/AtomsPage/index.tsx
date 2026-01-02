@@ -31,14 +31,14 @@ import type { Atom, AtomType } from '@/features/atoms/types'
 import { AtomsSmartFilters, type AtomCounts } from './AtomsSmartFilters'
 import { useAtomFilterParams } from './useAtomFilterParams'
 
-const atomTypeConfig: Record<AtomType, { icon: React.ComponentType<{ className?: string }>; label: string; color: string }> = {
-  problem: { icon: AlertCircle, label: 'Problems', color: 'text-semantic-error' },
-  solution: { icon: CheckCircle, label: 'Solutions', color: 'text-semantic-success' },
-  decision: { icon: Diamond, label: 'Decisions', color: 'text-semantic-info' },
-  question: { icon: HelpCircle, label: 'Questions', color: 'text-semantic-warning' },
-  insight: { icon: Lightbulb, label: 'Insights', color: 'text-primary' },
-  pattern: { icon: Cog, label: 'Patterns', color: 'text-muted-foreground' },
-  requirement: { icon: FileText, label: 'Requirements', color: 'text-foreground' },
+const atomTypeConfig: Record<AtomType, { icon: React.ComponentType<{ className?: string }>; labelKey: string; color: string }> = {
+  problem: { icon: AlertCircle, labelKey: 'typeLabel.problem', color: 'text-semantic-error' },
+  solution: { icon: CheckCircle, labelKey: 'typeLabel.solution', color: 'text-semantic-success' },
+  decision: { icon: Diamond, labelKey: 'typeLabel.decision', color: 'text-semantic-info' },
+  question: { icon: HelpCircle, labelKey: 'typeLabel.question', color: 'text-semantic-warning' },
+  insight: { icon: Lightbulb, labelKey: 'typeLabel.insight', color: 'text-primary' },
+  pattern: { icon: Cog, labelKey: 'typeLabel.pattern', color: 'text-muted-foreground' },
+  requirement: { icon: FileText, labelKey: 'typeLabel.requirement', color: 'text-foreground' },
 }
 
 const AtomsPage: React.FC = () => {
@@ -347,7 +347,7 @@ const AtomsPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Icon className={`h-5 w-5 ${config?.color || ''}`} />
-                    {config?.label || type}
+                    {config ? t(config.labelKey) : type}
                     <Badge variant="secondary" className="ml-2">
                       {groupAtoms.length}
                     </Badge>

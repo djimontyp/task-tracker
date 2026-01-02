@@ -334,6 +334,22 @@
         "similarityThreshold": "Similarity Threshold",
         "estimatedImpact": "Estimated Impact",
         "minValue": "≥{{value}}%"
+      },
+      "fields": {
+        "confidence": "Confidence",
+        "similarity": "Similarity",
+        "topicCount": "Topic Count",
+        "topicName": "Topic Name",
+        "atomContent": "Atom Content"
+      },
+      "operators": {
+        "gte": ">=",
+        "lte": "<=",
+        "eq": "=",
+        "ne": "!=",
+        "contains": "Contains",
+        "equals": "Equals",
+        "startsWith": "Starts with"
       }
     },
     "schedule": {

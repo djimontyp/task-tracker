@@ -335,6 +335,22 @@
         "similarityThreshold": "Поріг схожості",
         "estimatedImpact": "Очікуваний вплив",
         "minValue": "≥{{value}}%"
+      },
+      "fields": {
+        "confidence": "Впевненість",
+        "similarity": "Схожість",
+        "topicCount": "Кількість тем",
+        "topicName": "Назва теми",
+        "atomContent": "Вміст атома"
+      },
+      "operators": {
+        "gte": ">=",
+        "lte": "<=",
+        "eq": "=",
+        "ne": "!=",
+        "contains": "Містить",
+        "equals": "Дорівнює",
+        "startsWith": "Починається з"
       }
     },
     "schedule": {
