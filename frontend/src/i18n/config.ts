@@ -13,7 +13,7 @@ i18n
   .init({
     fallbackLng: 'uk',
     defaultNS: 'common',
-    ns: ['common', 'dashboard', 'messages', 'atoms', 'topics', 'settings', 'errors', 'validation'],
+    ns: ['common', 'dashboard', 'messages', 'atoms', 'topics', 'settings', 'errors', 'validation', 'executiveSummary', 'autoApproval', 'onboarding', 'taskMonitoring'],
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },

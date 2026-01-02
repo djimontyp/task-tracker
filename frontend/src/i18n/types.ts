@@ -13,6 +13,10 @@ import type atoms from '../../public/locales/en/atoms.json';
 import type topics from '../../public/locales/en/topics.json';
 import type errors from '../../public/locales/en/errors.json';
 import type validation from '../../public/locales/en/validation.json';
+import type executiveSummary from '../../public/locales/en/executiveSummary.json';
+import type autoApproval from '../../public/locales/en/autoApproval.json';
+import type onboarding from '../../public/locales/en/onboarding.json';
+import type taskMonitoring from '../../public/locales/en/taskMonitoring.json';
 
 declare module 'react-i18next' {
   interface CustomTypeOptions {
@@ -26,6 +30,10 @@ declare module 'react-i18next' {
       topics: typeof topics;
       errors: typeof errors;
       validation: typeof validation;
+      executiveSummary: typeof executiveSummary;
+      autoApproval: typeof autoApproval;
+      onboarding: typeof onboarding;
+      taskMonitoring: typeof taskMonitoring;
     };
   }
 }
