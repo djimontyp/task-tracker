@@ -19,7 +19,7 @@ interface SmartFiltersProps {
 /**
  * Smart Filters component for MessagesPage.
  * Provides tab-based filtering for All/Signals/Noise message categories.
- * Uses Radix Tabs with semantic tokens and 44px touch targets.
+ * Uses underline tabs with semantic tokens and 44px touch targets.
  */
 export function SmartFilters({
   counts,
@@ -33,33 +33,28 @@ export function SmartFilters({
       value={activeFilter}
       onValueChange={(value) => onFilterChange(value as FilterMode)}
     >
-      <TabsList
-        aria-label={t('smartFilters.ariaLabel')}
-        className="h-auto gap-0.5 bg-muted p-0.5"
-      >
+      <TabsList aria-label={t('smartFilters.ariaLabel')}>
         {/* All messages tab */}
         <TabsTrigger
           value="all"
           aria-label={t('smartFilters.allAriaLabel', { count: counts.all })}
-          className="h-11 gap-2 px-4"
+          className="gap-2"
         >
           {t('smartFilters.all')}
-          <Badge variant="secondary" className="ml-2">
-            {counts.all}
-          </Badge>
+          <Badge variant="secondary">{counts.all}</Badge>
         </TabsTrigger>
 
         {/* Signals tab */}
         <TabsTrigger
           value="signals"
           aria-label={t('smartFilters.signalsAriaLabel', { count: counts.signals })}
-          className="h-11 gap-2 px-4"
+          className="gap-2"
         >
           <Signal className="h-4 w-4" />
           {t('smartFilters.signals')}
           <Badge
             variant="outline"
-            className="ml-2 gap-0.5 border-status-connected bg-status-connected/10 text-status-connected"
+            className="gap-0.5 border-status-connected bg-status-connected/10 text-status-connected"
           >
             {counts.signals}
           </Badge>
@@ -69,11 +64,11 @@ export function SmartFilters({
         <TabsTrigger
           value="noise"
           aria-label={t('smartFilters.noiseAriaLabel', { count: counts.noise })}
-          className="h-11 gap-2 px-4"
+          className="gap-2"
         >
           <Volume2 className="h-4 w-4" />
           {t('smartFilters.noise')}
-          <Badge variant="outline" className="ml-2 text-muted-foreground">
+          <Badge variant="outline" className="text-muted-foreground">
             {counts.noise}
           </Badge>
         </TabsTrigger>

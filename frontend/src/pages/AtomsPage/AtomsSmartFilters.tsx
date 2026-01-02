@@ -37,11 +37,12 @@ export function AtomsSmartFilters({
       onValueChange={(value) => onFilterChange(value as AtomStatusFilter)}
     >
       <TabsList
+        variant="pill"
         aria-label={t('smartFilters.ariaLabel', 'Filter atoms by status')}
-        className="h-auto gap-0.5 bg-muted p-0.5"
       >
         {/* All atoms tab */}
         <TabsTrigger
+          variant="pill"
           value="all"
           aria-label={t('smartFilters.allAriaLabel', {
             count: counts.all,
@@ -57,6 +58,7 @@ export function AtomsSmartFilters({
 
         {/* Pending tab */}
         <TabsTrigger
+          variant="pill"
           value="pending"
           aria-label={t('smartFilters.pendingAriaLabel', {
             count: counts.pending,
@@ -76,6 +78,7 @@ export function AtomsSmartFilters({
 
         {/* Approved tab */}
         <TabsTrigger
+          variant="pill"
           value="approved"
           aria-label={t('smartFilters.approvedAriaLabel', {
             count: counts.approved,
@@ -95,6 +98,7 @@ export function AtomsSmartFilters({
 
         {/* Rejected tab */}
         <TabsTrigger
+          variant="pill"
           value="rejected"
           aria-label={t('smartFilters.rejectedAriaLabel', {
             count: counts.rejected,
