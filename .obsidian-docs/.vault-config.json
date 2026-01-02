@@ -33,12 +33,12 @@
       "journal_entries": 5,
       "sessions_created": 10,
       "vault_reorganized": 1,
-      "knowledge_notes_updated": 1,
+      "knowledge_notes_updated": 2,
       "commands_executed": {
         "journal": 12,
-        "vault": 11
+        "vault": 12
       },
-      "last_activity": "2026-01-01T14:15:00"
+      "last_activity": "2026-01-02"
     }
   }
 }
