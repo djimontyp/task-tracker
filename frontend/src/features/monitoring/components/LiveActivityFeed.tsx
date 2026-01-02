@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import type { TaskExecutionLog, TaskStatus } from '../types'
@@ -8,6 +9,7 @@ interface LiveActivityFeedProps {
 }
 
 export const LiveActivityFeed = ({ events }: LiveActivityFeedProps) => {
+  const { t } = useTranslation('taskMonitoring')
   const feedRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -20,11 +22,11 @@ export const LiveActivityFeed = ({ events }: LiveActivityFeedProps) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Активність в реальному часі</CardTitle>
+          <CardTitle>{t('sections.liveActivity')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
-            Очікування подій задач...
+            {t('emptyState.waitingForEvents')}
           </div>
         </CardContent>
       </Card>
@@ -36,7 +38,7 @@ export const LiveActivityFeed = ({ events }: LiveActivityFeedProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-semantic-success animate-pulse" />
-          Активність в реальному часі
+          {t('sections.liveActivity')}
           <Badge variant="secondary" className="ml-auto">
             {events.length}
           </Badge>
@@ -55,7 +57,7 @@ export const LiveActivityFeed = ({ events }: LiveActivityFeedProps) => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant={getStatusVariant(event.status)}>
-                    {getStatusText(event.status)}
+                    {t(`statuses.${event.status}`)}
                   </Badge>
                   <span className="font-medium truncate" title={event.task_name}>
                     {formatTaskName(event.task_name)}
@@ -99,21 +101,6 @@ function getStatusVariant(status: TaskStatus): 'default' | 'secondary' | 'succes
       return 'secondary'
     default:
       return 'secondary'
-  }
-}
-
-function getStatusText(status: TaskStatus): string {
-  switch (status) {
-    case 'pending':
-      return 'В черзі'
-    case 'running':
-      return 'Виконується'
-    case 'success':
-      return 'Успішно'
-    case 'failed':
-      return 'Помилка'
-    default:
-      return status
   }
 }
 

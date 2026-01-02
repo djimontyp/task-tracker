@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Table,
   TableBody,
@@ -33,6 +34,7 @@ export const TaskHistoryTable = ({
   onPageChange,
   availableTaskNames = [],
 }: TaskHistoryTableProps) => {
+  const { t } = useTranslation('taskMonitoring')
   const [filters, setFilters] = useState<HistoryFilters>({})
   const [expandedRow, setExpandedRow] = useState<number | null>(null)
 
@@ -54,19 +56,19 @@ export const TaskHistoryTable = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Історія виконання задач</CardTitle>
+        <CardTitle>{t('sections.taskHistory')}</CardTitle>
         <div className="flex flex-wrap gap-4 pt-4">
           <div className="flex-1 min-w-[200px]">
-            <label className="text-sm font-medium mb-2 block">Тип задачі</label>
+            <label className="text-sm font-medium mb-2 block">{t('history.filters.taskType')}</label>
             <Select
               value={filters.task_name ?? 'all'}
               onValueChange={(value) => handleFilterChange('task_name', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Всі задачі" />
+                <SelectValue placeholder={t('history.filters.allTasks')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Всі задачі</SelectItem>
+                <SelectItem value="all">{t('history.filters.allTasks')}</SelectItem>
                 {availableTaskNames.map((name) => (
                   <SelectItem key={name} value={name}>
                     {formatTaskName(name)}
@@ -77,20 +79,20 @@ export const TaskHistoryTable = ({
           </div>
 
           <div className="flex-1 min-w-[150px]">
-            <label className="text-sm font-medium mb-2 block">Статус</label>
+            <label className="text-sm font-medium mb-2 block">{t('history.filters.status')}</label>
             <Select
               value={filters.status ?? 'all'}
               onValueChange={(value) => handleFilterChange('status', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Всі статуси" />
+                <SelectValue placeholder={t('history.filters.allStatuses')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Всі статуси</SelectItem>
-                <SelectItem value="pending">В черзі</SelectItem>
-                <SelectItem value="running">Виконується</SelectItem>
-                <SelectItem value="success">Успішно</SelectItem>
-                <SelectItem value="failed">Помилка</SelectItem>
+                <SelectItem value="all">{t('history.filters.allStatuses')}</SelectItem>
+                <SelectItem value="pending">{t('statuses.pending')}</SelectItem>
+                <SelectItem value="running">{t('statuses.running')}</SelectItem>
+                <SelectItem value="success">{t('statuses.success')}</SelectItem>
+                <SelectItem value="failed">{t('statuses.failed')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -100,18 +102,18 @@ export const TaskHistoryTable = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Задача</TableHead>
-              <TableHead>Статус</TableHead>
-              <TableHead>Початок</TableHead>
-              <TableHead>Тривалість</TableHead>
-              <TableHead>Помилка</TableHead>
+              <TableHead>{t('history.table.task')}</TableHead>
+              <TableHead>{t('history.table.status')}</TableHead>
+              <TableHead>{t('history.table.startTime')}</TableHead>
+              <TableHead>{t('history.table.duration')}</TableHead>
+              <TableHead>{t('history.table.error')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {history.items.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                  Немає записів
+                  {t('history.table.noRecords')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -127,7 +129,7 @@ export const TaskHistoryTable = ({
                     </TableCell>
                     <TableCell>
                       <Badge variant={getStatusVariant(log.status)}>
-                        {getStatusText(log.status)}
+                        {t(`statuses.${log.status}`)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
@@ -150,13 +152,13 @@ export const TaskHistoryTable = ({
                     <TableRow>
                       <TableCell colSpan={5} className="bg-muted/50">
                         <div className="p-4">
-                          <h4 className="font-semibold mb-2">Деталі помилки:</h4>
+                          <h4 className="font-semibold mb-2">{t('history.details.errorDetails')}</h4>
                           <pre className="text-xs overflow-x-auto bg-background p-4 rounded-md border">
                             {log.error_traceback}
                           </pre>
                           {log.params && (
                             <>
-                              <h4 className="font-semibold mt-4 mb-2">Параметри:</h4>
+                              <h4 className="font-semibold mt-4 mb-2">{t('history.details.parameters')}</h4>
                               <pre className="text-xs overflow-x-auto bg-background p-4 rounded-md border">
                                 {JSON.stringify(log.params, null, 2)}
                               </pre>
@@ -175,7 +177,11 @@ export const TaskHistoryTable = ({
         {history.total_pages > 1 && (
           <div className="flex items-center justify-between mt-4 pt-4 border-t">
             <div className="text-sm text-muted-foreground">
-              Сторінка {history.page} з {history.total_pages} (всього: {history.total_count})
+              {t('history.pagination.page', {
+                current: history.page,
+                total: history.total_pages,
+                count: history.total_count,
+              })}
             </div>
             <div className="flex gap-2">
               <Button
@@ -185,7 +191,7 @@ export const TaskHistoryTable = ({
                 disabled={history.page === 1}
               >
                 <ChevronLeft className="h-4 w-4" />
-                Назад
+                {t('history.pagination.back')}
               </Button>
               <Button
                 variant="outline"
@@ -193,7 +199,7 @@ export const TaskHistoryTable = ({
                 onClick={() => handlePageChange(history.page + 1)}
                 disabled={history.page === history.total_pages}
               >
-                Далі
+                {t('history.pagination.next')}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -219,20 +225,6 @@ function getStatusVariant(status: TaskStatus): 'default' | 'secondary' | 'succes
   }
 }
 
-function getStatusText(status: TaskStatus): string {
-  switch (status) {
-    case 'pending':
-      return 'В черзі'
-    case 'running':
-      return 'Виконується'
-    case 'success':
-      return 'Успішно'
-    case 'failed':
-      return 'Помилка'
-    default:
-      return status
-  }
-}
 
 function formatTaskName(taskName: string): string {
   return taskName
