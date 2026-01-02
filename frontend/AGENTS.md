@@ -70,6 +70,8 @@ React 18 · TypeScript · Tailwind 3.4 · shadcn/ui · Lucide icons
 | Small gap | `gap-2` (8px) |
 | Medium gap | `gap-4` (16px) |
 | Card padding | `p-4` (16px) |
+| Navigation tabs | `<TabsList>` (underline, default) |
+| Filter tabs | `<TabsList variant="pill">` |
 
 ## Imports
 
