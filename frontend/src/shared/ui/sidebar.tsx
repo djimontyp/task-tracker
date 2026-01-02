@@ -25,7 +25,8 @@ import { PanelLeft } from "lucide-react"
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3.5rem"
-const SIDEBAR_KEYBOARD_SHORTCUT = "b"
+// Use physical key code for layout-independent shortcut (works on EN/UK/RU)
+const SIDEBAR_KEYBOARD_SHORTCUT = "KeyB"
 
 type SidebarContextProps = {
   state: "expanded" | "collapsed"
@@ -92,10 +93,11 @@ const SidebarProvider = React.forwardRef<
     }, [isMobile, setOpen, setOpenMobile])
 
     // Adds a keyboard shortcut to toggle the sidebar.
+    // Uses event.code for layout-independent key detection
     React.useEffect(() => {
       const handleKeyDown = (event: KeyboardEvent) => {
         if (
-          event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
+          event.code === SIDEBAR_KEYBOARD_SHORTCUT &&
           (event.metaKey || event.ctrlKey)
         ) {
           event.preventDefault()
