@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Clipboard, ChevronDown, ChevronRight } from 'lucide-react'
 import { Progress } from '@/shared/ui/progress'
 import { Badge } from '@/shared/ui/badge'
@@ -16,34 +17,34 @@ interface ClassificationTabProps {
 type ConfidenceLevel = 'high' | 'medium' | 'low'
 
 interface ConfidenceLevelConfig {
-  label: string
+  labelKey: string
+  descriptionKey: string
   color: string
   bgColor: string
   badgeVariant: 'success' | 'default' | 'destructive'
-  description: string
 }
 
 const CONFIDENCE_LEVELS: Record<ConfidenceLevel, ConfidenceLevelConfig> = {
   high: {
-    label: 'High Confidence',
+    labelKey: 'classification.confidenceLevels.high.label',
+    descriptionKey: 'classification.confidenceLevels.high.description',
     color: 'bg-semantic-success',
     bgColor: 'bg-semantic-success',
     badgeVariant: 'success',
-    description: '71-100% - Classification is reliable',
   },
   medium: {
-    label: 'Medium Confidence',
+    labelKey: 'classification.confidenceLevels.medium.label',
+    descriptionKey: 'classification.confidenceLevels.medium.description',
     color: 'bg-semantic-warning',
     bgColor: 'bg-semantic-warning',
     badgeVariant: 'default',
-    description: '41-70% - Manual review recommended',
   },
   low: {
-    label: 'Low Confidence',
+    labelKey: 'classification.confidenceLevels.low.label',
+    descriptionKey: 'classification.confidenceLevels.low.description',
     color: 'bg-semantic-error',
     bgColor: 'bg-semantic-error',
     badgeVariant: 'destructive',
-    description: '0-40% - Likely misclassified',
   },
 }
 
@@ -58,13 +59,14 @@ function getConfidenceConfig(score: number): ConfidenceLevelConfig {
 }
 
 interface DimensionScore {
-  label: string
+  labelKey: string
+  descriptionKey: string
   value: number
-  description: string
   inverted?: boolean
 }
 
 export function ClassificationTab({ data }: ClassificationTabProps) {
+  const { t } = useTranslation('messages')
   const [whyTopicOpen, setWhyTopicOpen] = useState(true)
   const [whyNotNoiseOpen, setWhyNotNoiseOpen] = useState(false)
   const [keyIndicatorsOpen, setKeyIndicatorsOpen] = useState(false)
@@ -73,26 +75,26 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
 
   const dimensions: DimensionScore[] = [
     {
-      label: 'Topic Relevance',
+      labelKey: 'classification.dimensions.topicRelevance.label',
+      descriptionKey: 'classification.dimensions.topicRelevance.description',
       value: data.confidence,
-      description: 'How well this message matches the assigned topic',
     },
     {
-      label: 'Noise Score',
+      labelKey: 'classification.dimensions.noiseScore.label',
+      descriptionKey: 'classification.dimensions.noiseScore.description',
       value: data.noise_score,
-      description: 'Signal quality (lower is better)',
       inverted: true,
     },
     {
-      label: 'Urgency Score',
+      labelKey: 'classification.dimensions.urgencyScore.label',
+      descriptionKey: 'classification.dimensions.urgencyScore.description',
       value: data.urgency_score,
-      description: 'How urgent or time-sensitive this message is',
     },
   ]
 
   const handleCopyReasoning = () => {
     navigator.clipboard.writeText(data.reasoning)
-    toast.success('Reasoning copied to clipboard')
+    toast.success(t('classification.toast.copiedReasoning'))
   }
 
   const parseReasoning = () => {
@@ -130,7 +132,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
       } else if (currentSection === 'whyNotNoise') {
         sections.whyNotNoise += trimmed + ' '
       } else if (currentSection === 'indicators') {
-        if (trimmed.startsWith('-') || trimmed.startsWith('•') || trimmed.startsWith('*')) {
+        if (trimmed.startsWith('-') || trimmed.startsWith('\u2022') || trimmed.startsWith('*')) {
           sections.keyIndicators.push(trimmed.substring(1).trim())
         } else if (trimmed.match(/^\d+\./)) {
           sections.keyIndicators.push(trimmed.replace(/^\d+\./, '').trim())
@@ -152,10 +154,10 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
       {/* Overall Confidence Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-foreground">Overall confidence</h3>
+          <h3 className="text-lg font-semibold text-foreground">{t('classification.overallConfidence')}</h3>
           <div className="flex items-center gap-2">
             <span className="text-2xl font-bold text-foreground">{data.confidence}%</span>
-            <Badge variant={overallConfig.badgeVariant}>{overallConfig.label}</Badge>
+            <Badge variant={overallConfig.badgeVariant}>{t(overallConfig.labelKey)}</Badge>
           </div>
         </div>
 
@@ -166,7 +168,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
                 <Progress
                   value={data.confidence}
                   className="h-4"
-                  aria-label={`Confidence: ${data.confidence}%`}
+                  aria-label={t('classification.ariaLabel.confidence', { value: data.confidence })}
                 />
                 <div
                   className={cn('absolute inset-0 h-full rounded-full transition-all', overallConfig.bgColor)}
@@ -185,31 +187,31 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p className="font-semibold">{overallConfig.label}</p>
-              <p className="text-xs">{overallConfig.description}</p>
+              <p className="font-semibold">{t(overallConfig.labelKey)}</p>
+              <p className="text-xs">{t(overallConfig.descriptionKey)}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
 
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Low (0-40)</span>
-          <span>Medium (41-70)</span>
-          <span>High (71-100)</span>
+          <span>{t('classification.thresholds.low')}</span>
+          <span>{t('classification.thresholds.medium')}</span>
+          <span>{t('classification.thresholds.high')}</span>
         </div>
       </div>
 
       {/* Dimension Breakdown */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-foreground">Dimension breakdown</h3>
+        <h3 className="text-lg font-semibold text-foreground">{t('classification.dimensionBreakdown')}</h3>
 
         {dimensions.map((dimension) => {
           const displayValue = dimension.inverted ? 100 - dimension.value : dimension.value
           const config = getConfidenceConfig(displayValue)
 
           return (
-            <div key={dimension.label} className="space-y-2">
+            <div key={dimension.labelKey} className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">{dimension.label}</span>
+                <span className="text-sm font-medium text-foreground">{t(dimension.labelKey)}</span>
                 <span className="text-sm font-semibold text-foreground">{dimension.value}%</span>
               </div>
 
@@ -217,7 +219,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="relative">
-                      <Progress value={displayValue} className="h-2" aria-label={`${dimension.label}: ${dimension.value}%`} />
+                      <Progress value={displayValue} className="h-2" aria-label={`${t(dimension.labelKey)}: ${dimension.value}%`} />
                       <div
                         className={cn('absolute inset-0 h-full rounded-full transition-all', config.bgColor)}
                         style={{ width: `${displayValue}%` }}
@@ -225,8 +227,8 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="text-xs">{dimension.description}</p>
-                    {dimension.inverted && <p className="text-xs mt-2">Lower scores are better</p>}
+                    <p className="text-xs">{t(dimension.descriptionKey)}</p>
+                    {dimension.inverted && <p className="text-xs mt-2">{t('classification.dimensions.lowerIsBetter')}</p>}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -238,10 +240,10 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
       {/* Decision Rationale */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-foreground">Decision rationale</h3>
+          <h3 className="text-lg font-semibold text-foreground">{t('classification.decisionRationale')}</h3>
           <Button variant="ghost" size="sm" onClick={handleCopyReasoning}>
             <Clipboard className="size-4 mr-2" />
-            Copy Reasoning
+            {t('classification.copyReasoning')}
           </Button>
         </div>
 
@@ -250,7 +252,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
           <div className="rounded-lg border border-border bg-card">
             <CollapsibleTrigger asChild>
               <button className="flex w-full items-center justify-between p-4 hover:bg-muted transition-colors">
-                <span className="text-sm font-semibold text-foreground">Why this topic?</span>
+                <span className="text-sm font-semibold text-foreground">{t('classification.sections.whyTopic')}</span>
                 {whyTopicOpen ? (
                   <ChevronDown className="size-5 text-muted-foreground" />
                 ) : (
@@ -262,7 +264,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
               <div className="px-4 pb-4">
                 <div className="rounded-md bg-semantic-info/10 p-4">
                   <p className="text-sm text-foreground leading-relaxed">
-                    {reasoning.whyTopic || `This message was classified to "${data.topic_title}" based on content analysis and semantic similarity.`}
+                    {reasoning.whyTopic || t('classification.defaultReasoning.whyTopic', { topic: data.topic_title })}
                   </p>
                 </div>
               </div>
@@ -275,7 +277,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
           <div className="rounded-lg border border-border bg-card">
             <CollapsibleTrigger asChild>
               <button className="flex w-full items-center justify-between p-4 hover:bg-muted transition-colors">
-                <span className="text-sm font-semibold text-foreground">Why not noise?</span>
+                <span className="text-sm font-semibold text-foreground">{t('classification.sections.whyNotNoise')}</span>
                 {whyNotNoiseOpen ? (
                   <ChevronDown className="size-5 text-muted-foreground" />
                 ) : (
@@ -287,7 +289,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
               <div className="px-4 pb-4">
                 <div className="rounded-md bg-semantic-success/10 p-4">
                   <p className="text-sm text-foreground leading-relaxed">
-                    {reasoning.whyNotNoise || 'Message contains actionable content with clear signals, not casual conversation or spam.'}
+                    {reasoning.whyNotNoise || t('classification.defaultReasoning.whyNotNoise')}
                   </p>
                 </div>
               </div>
@@ -300,7 +302,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
           <div className="rounded-lg border border-border bg-card">
             <CollapsibleTrigger asChild>
               <button className="flex w-full items-center justify-between p-4 hover:bg-muted transition-colors">
-                <span className="text-sm font-semibold text-foreground">Key indicators</span>
+                <span className="text-sm font-semibold text-foreground">{t('classification.sections.keyIndicators')}</span>
                 {keyIndicatorsOpen ? (
                   <ChevronDown className="size-5 text-muted-foreground" />
                 ) : (
@@ -314,7 +316,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
                   <ul className="space-y-2">
                     {reasoning.keyIndicators.map((indicator, index) => (
                       <li key={index} className="flex items-start gap-2 text-sm text-foreground">
-                        <span className="text-semantic-success mt-0.5">✓</span>
+                        <span className="text-semantic-success mt-0.5">{'\u2713'}</span>
                         <span>{indicator}</span>
                       </li>
                     ))}
@@ -322,16 +324,16 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
                 ) : (
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2 text-sm text-foreground">
-                      <span className="text-semantic-success mt-0.5">✓</span>
-                      <span>Content matched topic criteria</span>
+                      <span className="text-semantic-success mt-0.5">{'\u2713'}</span>
+                      <span>{t('classification.defaultIndicators.matchedCriteria')}</span>
                     </li>
                     <li className="flex items-start gap-2 text-sm text-foreground">
-                      <span className="text-semantic-success mt-0.5">✓</span>
-                      <span>Signal-to-noise ratio above threshold</span>
+                      <span className="text-semantic-success mt-0.5">{'\u2713'}</span>
+                      <span>{t('classification.defaultIndicators.signalRatio')}</span>
                     </li>
                     <li className="flex items-start gap-2 text-sm text-foreground">
-                      <span className="text-semantic-success mt-0.5">✓</span>
-                      <span>Semantic similarity score acceptable</span>
+                      <span className="text-semantic-success mt-0.5">{'\u2713'}</span>
+                      <span>{t('classification.defaultIndicators.semanticSimilarity')}</span>
                     </li>
                   </ul>
                 )}
@@ -344,7 +346,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
       {/* Topic Assignment */}
       <div className="rounded-lg border border-border bg-muted p-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground">Assigned topic</span>
+          <span className="text-sm font-medium text-foreground">{t('classification.assignedTopic')}</span>
           <span className="text-sm font-semibold text-foreground">{data.topic_title}</span>
         </div>
       </div>

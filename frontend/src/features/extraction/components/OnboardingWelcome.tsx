@@ -18,6 +18,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/button';
 import { Badge } from '@/shared/ui/badge';
 import { Card, CardContent } from '@/shared/ui/card';
@@ -63,28 +64,28 @@ export interface OnboardingWelcomeProps {
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════
 
-const STEPS: { id: OnboardingStep; label: string }[] = [
-  { id: 'welcome', label: 'Welcome' },
-  { id: 'connect', label: 'Connect' },
-  { id: 'configure', label: 'Configure' },
-  { id: 'complete', label: 'Ready' },
+const STEPS: { id: OnboardingStep; labelKey: string }[] = [
+  { id: 'welcome', labelKey: 'onboarding.steps.welcome' },
+  { id: 'connect', labelKey: 'onboarding.steps.connect' },
+  { id: 'configure', labelKey: 'onboarding.steps.configure' },
+  { id: 'complete', labelKey: 'onboarding.steps.ready' },
 ];
 
-const VALUE_PROPS: { icon: typeof Inbox; title: string; description: string }[] = [
+const VALUE_PROPS: { icon: typeof Inbox; titleKey: string; descriptionKey: string }[] = [
   {
     icon: Inbox,
-    title: 'Capture Everything',
-    description: 'Automatically ingest messages from Telegram channels and groups',
+    titleKey: 'onboarding.valueProps.capture.title',
+    descriptionKey: 'onboarding.valueProps.capture.description',
   },
   {
     icon: Filter,
-    title: 'Cut the Noise',
-    description: 'AI filters out spam and low-value messages, keeping only signal',
+    titleKey: 'onboarding.valueProps.filter.title',
+    descriptionKey: 'onboarding.valueProps.filter.description',
   },
   {
     icon: Lightbulb,
-    title: 'Extract Knowledge',
-    description: 'Transform conversations into actionable tasks, decisions, and insights',
+    titleKey: 'onboarding.valueProps.extract.title',
+    descriptionKey: 'onboarding.valueProps.extract.description',
   },
 ];
 
@@ -98,10 +99,11 @@ interface StepIndicatorProps {
 }
 
 function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
+  const { t } = useTranslation('extraction');
   const currentIndex = steps.findIndex((s) => s.id === currentStep);
 
   return (
-    <nav aria-label="Onboarding progress" className="flex items-center justify-center gap-2">
+    <nav aria-label={t('onboarding.progressLabel')} className="flex items-center justify-center gap-2">
       {steps.map((step, index) => {
         const isComplete = index < currentIndex;
         const isCurrent = index === currentIndex;
@@ -142,12 +144,14 @@ function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
 
 interface ValuePropCardProps {
   icon: typeof Inbox;
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   delay: number;
 }
 
-function ValuePropCard({ icon: Icon, title, description, delay }: ValuePropCardProps) {
+function ValuePropCard({ icon: Icon, titleKey, descriptionKey, delay }: ValuePropCardProps) {
+  const { t } = useTranslation('extraction');
+
   return (
     <div
       className={cn(
@@ -163,8 +167,8 @@ function ValuePropCard({ icon: Icon, title, description, delay }: ValuePropCardP
         <Icon className="h-6 w-6 text-primary" />
       </div>
       <div>
-        <h3 className="font-semibold text-sm mb-2">{title}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <h3 className="font-semibold text-sm mb-2">{t(titleKey)}</h3>
+        <p className="text-sm text-muted-foreground">{t(descriptionKey)}</p>
       </div>
     </div>
   );
@@ -201,6 +205,7 @@ export function OnboardingWelcome({
   demoMessageCount = 500,
   userName,
 }: OnboardingWelcomeProps) {
+  const { t } = useTranslation('extraction');
   const [isHoveredDemo, setIsHoveredDemo] = useState(false);
   const [isHoveredConnect, setIsHoveredConnect] = useState(false);
 
@@ -248,32 +253,31 @@ export function OnboardingWelcome({
             {/* Greeting */}
             {userName && (
               <Badge variant="secondary" className="mb-4 text-sm">
-                Welcome back, {userName}
+                {t('onboarding.welcomeBack', { name: userName })}
               </Badge>
             )}
 
             {/* Main headline */}
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              <span className="text-foreground">Transform </span>
-              <span className="text-primary">Noise</span>
-              <span className="text-foreground"> into </span>
-              <span className="text-primary">Knowledge</span>
+              <span className="text-foreground">{t('onboarding.headline.transform')} </span>
+              <span className="text-primary">{t('onboarding.headline.noise')}</span>
+              <span className="text-foreground"> {t('onboarding.headline.into')} </span>
+              <span className="text-primary">{t('onboarding.headline.knowledge')}</span>
             </h1>
 
             {/* Subheadline */}
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              Pulse Radar uses AI to extract actionable insights from your team&apos;s conversations.
-              Stop drowning in messages, start making decisions.
+              {t('onboarding.subheadline')}
             </p>
 
             {/* Stats banner */}
             <Card className="inline-flex items-center justify-center border-dashed bg-muted/30 mb-8">
               <CardContent className="flex items-center gap-8 py-6 px-8">
-                <StatBadge from={demoMessageCount} to={estimatedDecisions} label="decisions" />
+                <StatBadge from={demoMessageCount} to={estimatedDecisions} label={t('onboarding.stats.decisions')} />
                 <div className="h-10 w-px bg-border" aria-hidden="true" />
-                <StatBadge from={demoMessageCount} to={estimatedTasks} label="tasks" />
+                <StatBadge from={demoMessageCount} to={estimatedTasks} label={t('onboarding.stats.tasks')} />
                 <div className="h-10 w-px bg-border" aria-hidden="true" />
-                <StatBadge from={demoMessageCount} to={estimatedInsights} label="insights" />
+                <StatBadge from={demoMessageCount} to={estimatedInsights} label={t('onboarding.stats.insights')} />
               </CardContent>
             </Card>
           </div>
@@ -282,11 +286,11 @@ export function OnboardingWelcome({
           <div
             className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12"
             role="list"
-            aria-label="Key features"
+            aria-label={t('onboarding.keyFeatures')}
           >
             {VALUE_PROPS.map((prop, index) => (
               <ValuePropCard
-                key={prop.title}
+                key={prop.titleKey}
                 {...prop}
                 delay={100 + index * 100}
               />
@@ -320,7 +324,7 @@ export function OnboardingWelcome({
                 'h-5 w-5 mr-2 transition-transform',
                 isHoveredDemo && 'scale-110'
               )} />
-              Try Demo
+              {t('onboarding.cta.tryDemo')}
               <span
                 className={cn(
                   'absolute -bottom-6 left-1/2 -translate-x-1/2',
@@ -330,7 +334,7 @@ export function OnboardingWelcome({
                 )}
                 id="demo-description"
               >
-                Explore with sample data
+                {t('onboarding.cta.tryDemoHint')}
               </span>
             </Button>
 
@@ -353,7 +357,7 @@ export function OnboardingWelcome({
                 'h-5 w-5 mr-2 transition-transform',
                 isHoveredConnect && 'translate-x-0.5 -translate-y-0.5'
               )} />
-              Connect Telegram
+              {t('onboarding.cta.connectTelegram')}
               <ChevronRight className={cn(
                 'h-5 w-5 ml-2 transition-transform',
                 isHoveredConnect && 'translate-x-1'
@@ -367,7 +371,7 @@ export function OnboardingWelcome({
                 )}
                 id="connect-description"
               >
-                Start with your real data
+                {t('onboarding.cta.connectTelegramHint')}
               </span>
             </Button>
           </div>
@@ -380,7 +384,7 @@ export function OnboardingWelcome({
               onClick={handleSkip}
               className="text-muted-foreground hover:text-foreground"
             >
-              I&apos;ll set this up later
+              {t('onboarding.cta.skip')}
             </Button>
           </div>
         </div>
@@ -390,10 +394,10 @@ export function OnboardingWelcome({
       <footer className="flex-shrink-0 py-4 text-center">
         <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
           <kbd className="bg-muted px-2 py-0.5 rounded font-mono text-[10px]">Enter</kbd>
-          <span>to continue with Telegram</span>
+          <span>{t('onboarding.keyboard.continueWithTelegram')}</span>
           <span className="text-muted-foreground/50">|</span>
           <kbd className="bg-muted px-2 py-0.5 rounded font-mono text-[10px]">D</kbd>
-          <span>for demo</span>
+          <span>{t('onboarding.keyboard.forDemo')}</span>
         </p>
       </footer>
     </div>
@@ -415,6 +419,8 @@ export function OnboardingWelcomeCompact({
   onConnectTelegram,
   onDismiss,
 }: OnboardingWelcomeCompactProps) {
+  const { t } = useTranslation('extraction');
+
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-6">
@@ -426,19 +432,19 @@ export function OnboardingWelcomeCompact({
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold mb-2">Get started with Pulse Radar</h3>
+            <h3 className="font-semibold mb-2">{t('onboarding.compact.title')}</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Connect Telegram to start extracting knowledge, or try the demo first.
+              {t('onboarding.compact.description')}
             </p>
 
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={onTryDemo}>
                 <Play className="h-4 w-4 mr-2" />
-                Try Demo
+                {t('onboarding.cta.tryDemo')}
               </Button>
               <Button size="sm" onClick={onConnectTelegram}>
                 <Send className="h-4 w-4 mr-2" />
-                Connect
+                {t('onboarding.compact.connect')}
               </Button>
             </div>
           </div>
@@ -450,7 +456,7 @@ export function OnboardingWelcomeCompact({
               size="icon"
               className="shrink-0 h-11 w-11"
               onClick={onDismiss}
-              aria-label="Dismiss"
+              aria-label={t('onboarding.compact.dismiss')}
             >
               <Target className="h-4 w-4" />
             </Button>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/shared/ui/badge';
 import { useWebSocket } from '@/shared/hooks';
 import { versioningService } from '../api/versioningService';
@@ -13,6 +14,7 @@ interface WebSocketMessage {
 }
 
 export function PendingVersionsBadge() {
+  const { t } = useTranslation('atoms');
   const navigate = useNavigate();
   const [pendingCount, setPendingCount] = useState<PendingVersionsCount>({ count: 0, topics: 0, atoms: 0 });
   const [isVisible, setIsVisible] = useState(false);
@@ -66,8 +68,8 @@ export function PendingVersionsBadge() {
   }
 
   const tooltipText = pendingCount.count === 1
-    ? '1 version awaiting approval'
-    : `${pendingCount.count} versions awaiting approval (${pendingCount.topics} topics, ${pendingCount.atoms} atoms)`;
+    ? t('versions.awaiting_one')
+    : t('versions.awaiting_other', { count: pendingCount.count, topics: pendingCount.topics, atoms: pendingCount.atoms });
 
   return (
     <Badge

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Badge, Spinner } from '@/shared/ui';
 import { Checkbox } from '@/shared/ui/checkbox';
 import { Button } from '@/shared/ui/button';
@@ -20,6 +21,7 @@ export function VersionHistoryList({
   onSelectVersion,
   enableBulkActions = false,
 }: VersionHistoryListProps) {
+  const { t } = useTranslation('atoms');
   const [versions, setVersions] = useState<(TopicVersion | AtomVersion)[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVersions, setSelectedVersions] = useState<Set<number>>(new Set());
@@ -87,7 +89,7 @@ export function VersionHistoryList({
   if (versions.length === 0) {
     return (
       <div className="text-center p-4 text-muted-foreground">
-        No version history available
+        {t('versions.noHistory')}
       </div>
     );
   }
@@ -104,16 +106,16 @@ export function VersionHistoryList({
               <Checkbox
                 checked={allSelected}
                 onCheckedChange={toggleSelectAll}
-                aria-label="Select all versions"
+                aria-label={t('versions.selectAllAriaLabel')}
                 className={someSelected ? 'opacity-50' : ''}
               />
               <span className="text-sm font-medium">
-                {allSelected ? 'Скасувати вибір усіх' : 'Вибрати всі'}
+                {allSelected ? t('versions.deselectAll') : t('versions.selectAll')}
               </span>
             </div>
             {selectedVersions.size > 0 && (
               <Button variant="ghost" size="sm" onClick={clearSelection}>
-                Очистити ({selectedVersions.size})
+                {t('versions.clear', { count: selectedVersions.size })}
               </Button>
             )}
           </div>
@@ -149,7 +151,7 @@ export function VersionHistoryList({
                     <Checkbox
                       checked={isSelected}
                       onCheckedChange={() => toggleVersionSelection(version.id)}
-                      aria-label={`Select version ${version.version}`}
+                      aria-label={t('versions.selectVersionAriaLabel', { version: version.version })}
                       onClick={(e) => e.stopPropagation()}
                     />
                   )}
@@ -159,12 +161,12 @@ export function VersionHistoryList({
                   {version.approved ? (
                     <Badge variant="default" className="bg-semantic-success hover:bg-semantic-success/90">
                       <Check className="h-3 w-3 mr-2" />
-                      Approved
+                      {t('status.approved')}
                     </Badge>
                   ) : (
                     <Badge variant="secondary">
                       <Clock className="h-3 w-3 mr-2" />
-                      Pending
+                      {t('versions.pending')}
                     </Badge>
                   )}
                 </div>
@@ -176,7 +178,7 @@ export function VersionHistoryList({
 
               {version.created_by && (
                 <div className="mt-2 text-sm text-muted-foreground">
-                  By {version.created_by}
+                  {t('versions.by')} {version.created_by}
                 </div>
               )}
             </Card>

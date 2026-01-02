@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/shared/ui/alert-dialog';
 import { Check, X } from 'lucide-react';
@@ -19,6 +20,7 @@ export function BulkVersionActions({
   onActionComplete,
   onClearSelection,
 }: BulkVersionActionsProps) {
+  const { t } = useTranslation('atoms');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState<'approve' | 'reject' | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -35,7 +37,7 @@ export function BulkVersionActions({
     const versionIds = selectedVersions.map((v) => v.id);
 
     const loadingToastId = toast.loading(
-      `${pendingAction === 'approve' ? 'Схвалення' : 'Відхилення'} ${versionIds.length} версій...`
+      t('versions.bulk.processing', { action: pendingAction === 'approve' ? t('versions.bulk.approving') : t('versions.bulk.rejecting'), count: versionIds.length })
     );
 
     try {
@@ -44,10 +46,10 @@ export function BulkVersionActions({
         : await versioningService.bulkRejectVersions({ version_ids: versionIds, entity_type: entityType });
 
       const failureMessage = response.failed_ids.length > 0
-        ? ` (${response.failed_ids.length} помилок)`
+        ? ` (${t('versions.bulk.failedCount', { count: response.failed_ids.length })})`
         : '';
       toast.success(
-        `Успішно ${pendingAction === 'approve' ? 'схвалено' : 'відхилено'} ${response.success_count} версій${failureMessage}`,
+        t('versions.bulk.success', { action: pendingAction === 'approve' ? t('versions.bulk.approved') : t('versions.bulk.rejected'), count: response.success_count }) + failureMessage,
         { id: loadingToastId }
       );
 
@@ -55,7 +57,7 @@ export function BulkVersionActions({
         const errorDetails = Object.entries(response.errors)
           .map(([id, msg]) => `ID ${id}: ${msg}`)
           .join('\n');
-        toast.error(`Помилки:\n${errorDetails}`, { duration: 8000 });
+        toast.error(`${t('versions.bulk.errors')}:\n${errorDetails}`, { duration: 8000 });
       }
 
       onActionComplete();
@@ -63,7 +65,7 @@ export function BulkVersionActions({
     } catch (error) {
       console.error('Bulk action failed:', error);
       toast.error(
-        `Помилка при ${pendingAction === 'approve' ? 'схваленні' : 'відхиленні'} версій`,
+        t('versions.bulk.error', { action: pendingAction === 'approve' ? t('versions.bulk.approving') : t('versions.bulk.rejecting') }),
         { id: loadingToastId }
       );
     } finally {
@@ -80,7 +82,7 @@ export function BulkVersionActions({
       <div className="sticky top-0 z-sticky flex items-center justify-between gap-4 rounded-lg border bg-background p-4 shadow-md">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-muted-foreground">
-            Обрано: {selectedVersions.length} версій
+            {t('versions.selected', { count: selectedVersions.length })}
           </span>
         </div>
 
@@ -93,7 +95,7 @@ export function BulkVersionActions({
             className="gap-2"
           >
             <Check className="h-4 w-4" />
-            Схвалити вибрані
+            {t('actions.approveSelected')}
           </Button>
 
           <Button
@@ -104,7 +106,7 @@ export function BulkVersionActions({
             className="gap-2"
           >
             <X className="h-4 w-4" />
-            Відхилити вибрані
+            {t('actions.rejectSelected')}
           </Button>
 
           <Button
@@ -113,7 +115,7 @@ export function BulkVersionActions({
             onClick={onClearSelection}
             disabled={isProcessing}
           >
-            Скасувати вибір
+            {t('versions.clearSelection')}
           </Button>
         </div>
       </div>
@@ -122,32 +124,31 @@ export function BulkVersionActions({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Підтвердження {pendingAction === 'approve' ? 'схвалення' : 'відхилення'}
+              {t('versions.confirmDialog.title', { action: pendingAction === 'approve' ? t('versions.confirmDialog.approval') : t('versions.confirmDialog.rejection') })}
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
               <p>
-                Ви збираєтеся {pendingAction === 'approve' ? 'схвалити' : 'відхилити'}{' '}
-                <strong>{selectedVersions.length}</strong> версій.
+                {t('versions.confirmDialog.message', { action: pendingAction === 'approve' ? t('versions.confirmDialog.approve') : t('versions.confirmDialog.reject'), count: selectedVersions.length })}
               </p>
               <div className="mt-4 max-h-32 overflow-y-auto rounded border p-2 text-xs">
                 {selectedVersions.slice(0, 10).map((v) => (
                   <div key={v.id} className="text-muted-foreground">
-                    • v{v.version} (ID: {v.id})
+                    {t('versions.confirmDialog.versionItem', { version: v.version, id: v.id })}
                   </div>
                 ))}
                 {selectedVersions.length > 10 && (
                   <div className="mt-2 text-muted-foreground">
-                    ...та ще {selectedVersions.length - 10} версій
+                    {t('versions.confirmDialog.andMore', { count: selectedVersions.length - 10 })}
                   </div>
                 )}
               </div>
-              <p className="mt-4 text-sm">Ви впевнені?</p>
+              <p className="mt-4 text-sm">{t('versions.confirmDialog.areYouSure')}</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>Скасувати</AlertDialogCancel>
+            <AlertDialogCancel disabled={isProcessing}>{t('actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmBulkAction} disabled={isProcessing}>
-              {isProcessing ? 'Обробка...' : 'Підтвердити'}
+              {isProcessing ? t('versions.confirmDialog.processing') : t('versions.confirmDialog.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

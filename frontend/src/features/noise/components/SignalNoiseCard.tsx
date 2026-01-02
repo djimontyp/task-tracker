@@ -11,6 +11,7 @@
  */
 
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/shared/lib/utils';
 import { Card, CardContent, CardHeader } from '@/shared/ui/card';
 import { Checkbox } from '@/shared/ui/checkbox';
@@ -66,11 +67,13 @@ const CardHeaderContent = ({
   selected,
   onSelect,
   isSignal,
+  t,
 }: {
   message: MessageData;
   selected?: boolean;
   onSelect?: (id: string, selected: boolean) => void;
   isSignal: boolean;
+  t: (key: string, options?: Record<string, unknown>) => string;
 }) => {
   const Icon = isSignal ? Sparkles : VolumeX;
 
@@ -83,7 +86,7 @@ const CardHeaderContent = ({
           onCheckedChange={(checked) =>
             onSelect(message.id, checked as boolean)
           }
-          aria-label={`Select message from ${message.author}`}
+          aria-label={t('noise.card.selectMessage', { author: message.author })}
           className="mt-0.5"
         />
       )}
@@ -108,7 +111,7 @@ const CardHeaderContent = ({
           {message.isReviewed && (
             <Badge variant="outline" className="text-xs gap-2">
               <Check className="h-3 w-3" />
-              Reviewed
+              {t('noise.card.reviewed')}
             </Badge>
           )}
         </div>
@@ -157,6 +160,7 @@ export const SignalCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
     },
     ref
   ) => {
+    const { t } = useTranslation('messages');
     const isExpandable = message.content.length > 200;
     const displayContent = expanded
       ? message.content
@@ -181,6 +185,7 @@ export const SignalCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
             selected={selected}
             onSelect={onSelect}
             isSignal={true}
+            t={t}
           />
         </CardHeader>
 
@@ -216,12 +221,12 @@ export const SignalCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                   {expanded ? (
                     <>
                       <ChevronUp className="h-3 w-3 mr-2" />
-                      Less
+                      {t('noise.card.less')}
                     </>
                   ) : (
                     <>
                       <ChevronDown className="h-3 w-3 mr-2" />
-                      More
+                      {t('noise.card.more')}
                     </>
                   )}
                 </Button>
@@ -237,7 +242,7 @@ export const SignalCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                   className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
                   <X className="h-3 w-3 mr-2" />
-                  Reject
+                  {t('noise.card.reject')}
                 </Button>
               )}
               {onApprove && (
@@ -248,7 +253,7 @@ export const SignalCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                   className="h-8 text-xs"
                 >
                   <Check className="h-3 w-3 mr-2" />
-                  Approve
+                  {t('noise.card.approve')}
                 </Button>
               )}
             </div>
@@ -278,6 +283,7 @@ export const NoiseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
     },
     ref
   ) => {
+    const { t } = useTranslation('messages');
     const isExpandable = message.content.length > 150;
     const displayContent = expanded
       ? message.content
@@ -303,6 +309,7 @@ export const NoiseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
             selected={selected}
             onSelect={onSelect}
             isSignal={false}
+            t={t}
           />
         </CardHeader>
 
@@ -325,12 +332,12 @@ export const NoiseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                   {expanded ? (
                     <>
                       <ChevronUp className="h-3 w-3 mr-2" />
-                      Less
+                      {t('noise.card.less')}
                     </>
                   ) : (
                     <>
                       <ChevronDown className="h-3 w-3 mr-2" />
-                      More
+                      {t('noise.card.more')}
                     </>
                   )}
                 </Button>
@@ -345,7 +352,7 @@ export const NoiseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0"
-                    aria-label="More actions"
+                    aria-label={t('noise.card.moreActions')}
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
@@ -354,7 +361,7 @@ export const NoiseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                   {onApprove && (
                     <DropdownMenuItem onClick={() => onApprove(message.id)}>
                       <Check className="h-4 w-4 mr-2" />
-                      Mark as Signal
+                      {t('noise.card.markAsSignal')}
                     </DropdownMenuItem>
                   )}
                   {onReject && (
@@ -363,7 +370,7 @@ export const NoiseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                       className="text-destructive"
                     >
                       <X className="h-4 w-4 mr-2" />
-                      Confirm as Noise
+                      {t('noise.card.confirmAsNoise')}
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>

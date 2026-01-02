@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -35,6 +36,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   project,
   isLoading,
 }) => {
+  const { t } = useTranslation('projects')
   const [formData, setFormData] = useState<CreateProjectConfig>({
     name: '',
     description: '',
@@ -254,34 +256,34 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{project ? 'Edit Project' : 'Create Project'}</DialogTitle>
+          <DialogTitle>{project ? t('form.title.edit') : t('form.title.create')}</DialogTitle>
           <DialogDescription>
-            Configure project settings for AI analysis and task classification
+            {t('form.description')}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <FormField label="Project name" required>
+          <FormField label={t('form.fields.name.label')} required>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g., Task Tracker Frontend"
+              placeholder={t('form.fields.name.placeholder')}
               required
             />
           </FormField>
 
-          <FormField label="Description">
+          <FormField label={t('form.fields.description.label')}>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Brief project description..."
+              placeholder={t('form.fields.description.placeholder')}
               rows={3}
             />
           </FormField>
 
-          <FormField label="Project manager user ID" required>
+          <FormField label={t('form.fields.pmUserId.label')} required>
             <Input
               id="pm_user_id"
               type="number"
@@ -294,7 +296,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             />
           </FormField>
 
-          <FormField label="Keywords">
+          <FormField label={t('form.fields.keywords.label')}>
             <div className="flex gap-2">
               <Input
                 id="keywords"
@@ -306,10 +308,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     handleAddKeyword()
                   }
                 }}
-                placeholder="Add keyword and press Enter"
+                placeholder={t('form.fields.keywords.placeholder')}
               />
               <Button type="button" onClick={handleAddKeyword} variant="outline">
-                Add
+                {t('form.actions.add')}
               </Button>
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -329,30 +331,30 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
           </FormField>
 
           <div className="space-y-2">
-            <Label>Components</Label>
+            <Label>{t('form.fields.components.label')}</Label>
             <div className="flex flex-col gap-2">
               <Input
                 id="component_name"
                 value={componentNameInput}
                 onChange={(e) => setComponentNameInput(e.target.value)}
-                placeholder="Component name"
+                placeholder={t('form.fields.components.name.placeholder')}
               />
               <Input
                 id="component_keywords"
                 value={componentKeywordsInput}
                 onChange={(e) => setComponentKeywordsInput(e.target.value)}
-                placeholder="Keywords (comma separated)"
+                placeholder={t('form.fields.components.keywords.placeholder')}
               />
               <Textarea
                 id="component_description"
                 value={componentDescriptionInput}
                 onChange={(e) => setComponentDescriptionInput(e.target.value)}
-                placeholder="Optional component description"
+                placeholder={t('form.fields.components.description.placeholder')}
                 rows={2}
               />
               <div className="flex justify-end">
                 <Button type="button" onClick={handleAddComponent} variant="outline">
-                  Add Component
+                  {t('form.actions.addComponent')}
                 </Button>
               </div>
             </div>
@@ -391,7 +393,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             </div>
           </div>
 
-          <FormField label="Default assignee IDs">
+          <FormField label={t('form.fields.assignees.label')}>
             <div className="flex gap-2">
               <Input
                 value={assigneeInput}
@@ -402,10 +404,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     handleAddAssignee()
                   }
                 }}
-                placeholder="Enter user ID and press Enter"
+                placeholder={t('form.fields.assignees.placeholder')}
               />
               <Button type="button" onClick={handleAddAssignee} variant="outline">
-                Add
+                {t('form.actions.add')}
               </Button>
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -424,22 +426,22 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             </div>
           </FormField>
 
-          <FormField label="Glossary">
+          <FormField label={t('form.fields.glossary.label')}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <Input
                 value={glossaryTermInput}
                 onChange={(e) => setGlossaryTermInput(e.target.value)}
-                placeholder="Term"
+                placeholder={t('form.fields.glossary.term.placeholder')}
               />
               <Input
                 value={glossaryDefinitionInput}
                 onChange={(e) => setGlossaryDefinitionInput(e.target.value)}
-                placeholder="Definition"
+                placeholder={t('form.fields.glossary.definition.placeholder')}
               />
             </div>
             <div className="flex justify-end">
               <Button type="button" onClick={handleAddGlossaryEntry} variant="outline">
-                Add Glossary Entry
+                {t('form.actions.addGlossaryEntry')}
               </Button>
             </div>
             <div className="space-y-2">
@@ -462,61 +464,61 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
           </FormField>
 
           <div className="space-y-2">
-            <Label>Priority Rules</Label>
+            <Label>{t('form.fields.priorityRules.label')}</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div className="space-y-2">
                 <Label htmlFor="critical_keywords" className="text-xs">
-                  Critical Keywords
+                  {t('form.fields.priorityRules.critical')}
                 </Label>
                 <Input
                   id="critical_keywords"
                   value={priorityInputs.critical}
                   onChange={(e) => handlePriorityInputChange('critical', e.target.value)}
-                  placeholder="Comma separated keywords"
+                  placeholder={t('form.fields.priorityRules.placeholder')}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="high_keywords" className="text-xs">
-                  High Keywords
+                  {t('form.fields.priorityRules.high')}
                 </Label>
                 <Input
                   id="high_keywords"
                   value={priorityInputs.high}
                   onChange={(e) => handlePriorityInputChange('high', e.target.value)}
-                  placeholder="Comma separated keywords"
+                  placeholder={t('form.fields.priorityRules.placeholder')}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="medium_keywords" className="text-xs">
-                  Medium Keywords
+                  {t('form.fields.priorityRules.medium')}
                 </Label>
                 <Input
                   id="medium_keywords"
                   value={priorityInputs.medium}
                   onChange={(e) => handlePriorityInputChange('medium', e.target.value)}
-                  placeholder="Comma separated keywords"
+                  placeholder={t('form.fields.priorityRules.placeholder')}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="low_keywords" className="text-xs">
-                  Low Keywords
+                  {t('form.fields.priorityRules.low')}
                 </Label>
                 <Input
                   id="low_keywords"
                   value={priorityInputs.low}
                   onChange={(e) => handlePriorityInputChange('low', e.target.value)}
-                  placeholder="Comma separated keywords"
+                  placeholder={t('form.fields.priorityRules.placeholder')}
                 />
               </div>
             </div>
           </div>
 
-          <FormField label="Version">
+          <FormField label={t('form.fields.version.label')}>
             <Input
               id="version"
               value={formData.version ?? '1.0.0'}
               onChange={(e) => setFormData({ ...formData, version: e.target.value })}
-              placeholder="e.g., 1.0.0"
+              placeholder={t('form.fields.version.placeholder')}
             />
           </FormField>
 
@@ -527,10 +529,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              {t('form.actions.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading || !formData.name.trim()}>
-              {isLoading ? 'Saving...' : project ? 'Update Project' : 'Create Project'}
+              {isLoading ? t('form.actions.saving') : project ? t('form.actions.update') : t('form.actions.create')}
             </Button>
           </DialogFooter>
         </form>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Button,
   Card,
@@ -40,6 +41,7 @@ export function KnowledgeExtractionPanel({
   topicId,
   onComplete,
 }: KnowledgeExtractionPanelProps) {
+  const { t } = useTranslation('atoms');
   const navigate = useNavigate();
   const [agentConfigs, setAgentConfigs] = useState<AgentConfig[]>([]);
   const [agentConfigsLoading, setAgentConfigsLoading] = useState(true);
@@ -67,7 +69,7 @@ export function KnowledgeExtractionPanel({
         }
       } catch (error) {
         console.error('Failed to fetch agent configs:', error);
-        toast.error('Failed to load agent configurations');
+        toast.error(t('extraction.errors.loadAgents'));
       } finally {
         setAgentConfigsLoading(false);
       }
@@ -86,7 +88,7 @@ export function KnowledgeExtractionPanel({
 
       if (event.type === 'knowledge.extraction_started') {
         setProgress((prev) => ({ ...prev, status: 'running' }));
-        toast.success(`Knowledge extraction started for ${event.data?.message_count || 0} messages`);
+        toast.success(t('extraction.notifications.started', { count: event.data?.message_count || 0 }));
       } else if (event.type === 'knowledge.topic_created') {
         setProgress((prev) => ({
           ...prev,
@@ -113,14 +115,14 @@ export function KnowledgeExtractionPanel({
         const topicsCreated = stats.topics_created || 0;
 
         toast.success(
-          `Extraction complete! ${atomsCreated} atoms created, ${versionsCreated} pending review`,
+          t('extraction.notifications.completed', { atoms: atomsCreated, versions: versionsCreated }),
           {
             duration: 8000,
             action: versionsCreated > 0 ? {
-              label: 'Review Now',
+              label: t('extraction.notifications.reviewNow'),
               onClick: () => navigate('/versions?status=pending')
             } : undefined,
-            description: topicsCreated > 0 ? `${topicsCreated} topics identified` : undefined,
+            description: topicsCreated > 0 ? t('extraction.notifications.topicsIdentified', { count: topicsCreated }) : undefined,
           }
         );
         onComplete?.();
@@ -128,10 +130,10 @@ export function KnowledgeExtractionPanel({
         setProgress((prev) => ({
           ...prev,
           status: 'failed',
-          error: event.data?.error || 'Unknown error',
+          error: event.data?.error || t('extraction.errors.unknown'),
         }));
         setExtracting(false);
-        toast.error(`Extraction failed: ${event.data?.error || 'Unknown error'}`);
+        toast.error(t('extraction.notifications.failed', { error: event.data?.error || t('extraction.errors.unknown') }));
       }
     },
   });
@@ -149,12 +151,12 @@ export function KnowledgeExtractionPanel({
 
   const handleExtractByPeriod = async () => {
     if (!agentConfigId) {
-      toast.error('Please select an AI agent');
+      toast.error(t('extraction.errors.selectAgent'));
       return;
     }
 
     if (!timeWindow.start || !timeWindow.end) {
-      toast.error('Please select a time window');
+      toast.error(t('extraction.errors.selectTimeWindow'));
       return;
     }
 
@@ -184,20 +186,20 @@ export function KnowledgeExtractionPanel({
       setProgress((prev) => ({
         ...prev,
         status: 'failed',
-        error: error instanceof Error ? error.message : 'Failed to start extraction',
+        error: error instanceof Error ? error.message : t('extraction.errors.startFailed'),
       }));
-      toast.error(error instanceof Error ? error.message : 'Failed to start extraction');
+      toast.error(error instanceof Error ? error.message : t('extraction.errors.startFailed'));
     }
   };
 
   const handleExtractByMessages = async () => {
     if (!agentConfigId) {
-      toast.error('Please select an AI agent');
+      toast.error(t('extraction.errors.selectAgent'));
       return;
     }
 
     if (!messageIds || messageIds.length === 0) {
-      toast.error('No messages available for extraction');
+      toast.error(t('extraction.errors.noMessages'));
       return;
     }
 
@@ -217,9 +219,9 @@ export function KnowledgeExtractionPanel({
       setProgress((prev) => ({
         ...prev,
         status: 'failed',
-        error: error instanceof Error ? error.message : 'Failed to start extraction',
+        error: error instanceof Error ? error.message : t('extraction.errors.startFailed'),
       }));
-      toast.error(error instanceof Error ? error.message : 'Failed to start extraction');
+      toast.error(error instanceof Error ? error.message : t('extraction.errors.startFailed'));
     }
   };
 
@@ -234,15 +236,15 @@ export function KnowledgeExtractionPanel({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Extract Knowledge from Messages</CardTitle>
+        <CardTitle>{t('extraction.title')}</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-4">
         <Tabs value={tabMode} onValueChange={(value) => setTabMode(value as 'period' | 'messages')}>
           <TabsList variant="pill" className="grid w-full grid-cols-2">
-            <TabsTrigger variant="pill" value="period">By Period</TabsTrigger>
+            <TabsTrigger variant="pill" value="period">{t('extraction.byPeriod')}</TabsTrigger>
             <TabsTrigger variant="pill" value="messages" disabled={!messageIds || messageIds.length === 0}>
-              By Messages ({messageIds?.length || 0})
+              {t('extraction.byMessages', { count: messageIds?.length || 0 })}
             </TabsTrigger>
           </TabsList>
 
@@ -260,43 +262,43 @@ export function KnowledgeExtractionPanel({
                   id="filter-topic"
                   checked={filterByTopic}
                   onCheckedChange={(checked) => setFilterByTopic(checked === true)}
-                  aria-label="Filter by current topic"
+                  aria-label={t('extraction.filterByTopicAriaLabel')}
                 />
                 <Label
                   htmlFor="filter-topic"
                   className="text-sm font-normal cursor-pointer select-none"
                 >
-                  Extract only from current topic
+                  {t('extraction.filterByTopic')}
                 </Label>
               </div>
             )}
 
             <div className="text-sm text-muted-foreground">
               {filterByTopic && topicId
-                ? `Will analyze messages from this topic within the selected period`
-                : `Will analyze all unprocessed messages within the selected period`}
+                ? t('extraction.willAnalyzeFromTopic')
+                : t('extraction.willAnalyzeAll')}
             </div>
           </TabsContent>
 
           <TabsContent value="messages" className="space-y-4 mt-4">
             <div className="text-sm text-muted-foreground">
               {messageIds && messageIds.length > 0
-                ? `Ready to extract knowledge from ${messageIds.length} selected message${messageIds.length > 1 ? 's' : ''}`
-                : 'No messages available for extraction'}
+                ? t('extraction.readyToExtract', { count: messageIds.length })
+                : t('extraction.noMessagesAvailable')}
             </div>
           </TabsContent>
         </Tabs>
 
         <div>
-          <label className="text-sm font-medium mb-2 block">Select AI Agent</label>
+          <label className="text-sm font-medium mb-2 block">{t('extraction.selectAgent')}</label>
           <Select value={agentConfigId} onValueChange={setAgentConfigId} disabled={agentConfigsLoading}>
             <SelectTrigger>
-              <SelectValue placeholder={agentConfigsLoading ? "Loading agents..." : "Choose agent configuration"} />
+              <SelectValue placeholder={agentConfigsLoading ? t('extraction.loadingAgents') : t('extraction.chooseAgent')} />
             </SelectTrigger>
             <SelectContent>
               {agentConfigs.length === 0 && !agentConfigsLoading ? (
                 <div className="p-2 text-sm text-muted-foreground text-center">
-                  No active agents available. Please create one in the Agents page.
+                  {t('extraction.noActiveAgents')}
                 </div>
               ) : (
                 agentConfigs.map((config) => (
@@ -314,19 +316,19 @@ export function KnowledgeExtractionPanel({
 
         <Button onClick={handleExtract} disabled={!agentConfigId || extracting} className="w-full">
           <Sparkles className="h-4 w-4 mr-2" />
-          {extracting ? 'Extracting...' : 'Extract Knowledge'}
+          {extracting ? t('extraction.extracting') : t('extraction.extractKnowledge')}
         </Button>
 
         {progress.status !== 'idle' && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Progress</span>
+              <span>{t('extraction.progress')}</span>
               <span className="text-muted-foreground">
                 {progress.status === 'running'
-                  ? 'Processing...'
+                  ? t('extraction.processing')
                   : progress.status === 'completed'
-                    ? 'Complete'
-                    : 'Failed'}
+                    ? t('extraction.complete')
+                    : t('extraction.failed')}
               </span>
             </div>
 
@@ -337,19 +339,19 @@ export function KnowledgeExtractionPanel({
                 <div className="text-2xl font-bold text-semantic-info">
                   {progress.topics_created}
                 </div>
-                <div className="text-xs text-muted-foreground">Topics</div>
+                <div className="text-xs text-muted-foreground">{t('extraction.topics')}</div>
               </div>
               <div className="p-2 bg-semantic-success/10 rounded">
                 <div className="text-2xl font-bold text-semantic-success">
                   {progress.atoms_created}
                 </div>
-                <div className="text-xs text-muted-foreground">Atoms</div>
+                <div className="text-xs text-muted-foreground">{t('extraction.atoms')}</div>
               </div>
               <div className="p-2 bg-semantic-warning/10 rounded">
                 <div className="text-2xl font-bold text-semantic-warning">
                   {progress.versions_created}
                 </div>
-                <div className="text-xs text-muted-foreground">Versions</div>
+                <div className="text-xs text-muted-foreground">{t('extraction.versions')}</div>
               </div>
             </div>
 
