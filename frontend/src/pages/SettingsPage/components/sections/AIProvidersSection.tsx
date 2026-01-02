@@ -108,8 +108,11 @@ export function AIProvidersSection() {
     providerId: string,
     action: 'created' | 'updated'
   ) => {
-    toast.success(
-      t('providers.validation.started', `Provider ${action}. Validating...`)
+    // Use toast ID to update the same toast instead of creating multiple
+    const toastId = `provider-validation-${providerId}`;
+    toast.loading(
+      t('providers.validation.started', `Provider ${action}. Validating...`),
+      { id: toastId }
     );
 
     for (let attempt = 0; attempt < MAX_POLLING_ATTEMPTS; attempt++) {
@@ -120,13 +123,14 @@ export function AIProvidersSection() {
       const provider = providers?.find((p) => p.id === providerId);
 
       if (!provider) {
-        toast.error(t('providers.validation.notFound', 'Provider not found'));
+        toast.error(t('providers.validation.notFound', 'Provider not found'), { id: toastId });
         return;
       }
 
       if (provider.validation_status === ValidationStatusEnum.CONNECTED) {
         toast.success(
-          t('providers.validation.success', 'Provider validated successfully!')
+          t('providers.validation.success', 'Provider validated successfully!'),
+          { id: toastId }
         );
         return;
       }
@@ -134,14 +138,16 @@ export function AIProvidersSection() {
       if (provider.validation_status === ValidationStatusEnum.ERROR) {
         toast.error(
           t('providers.validation.failed', 'Validation failed: ') +
-            (provider.validation_error || 'Unknown error')
+            (provider.validation_error || 'Unknown error'),
+          { id: toastId }
         );
         return;
       }
     }
 
     toast.error(
-      t('providers.validation.timeout', 'Validation timeout. Check status.')
+      t('providers.validation.timeout', 'Validation timeout. Check status.'),
+      { id: toastId }
     );
   };
 

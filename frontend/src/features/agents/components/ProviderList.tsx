@@ -37,7 +37,9 @@ const ProviderList = () => {
   })
 
   const pollValidationStatus = async (providerId: string, action: 'created' | 'updated') => {
-    toast.success(t(`providerList.toast.${action}Validating`))
+    // Use toast ID to update the same toast instead of creating multiple
+    const toastId = `provider-validation-${providerId}`
+    toast.loading(t(`providerList.toast.${action}Validating`), { id: toastId })
 
     for (let attempt = 0; attempt < MAX_POLLING_ATTEMPTS; attempt++) {
       await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS))
@@ -47,22 +49,22 @@ const ProviderList = () => {
       const provider = providers?.find(p => p.id === providerId)
 
       if (!provider) {
-        toast.error(t('providerList.toast.notFound'))
+        toast.error(t('providerList.toast.notFound'), { id: toastId })
         return
       }
 
       if (provider.validation_status === ValidationStatus.CONNECTED) {
-        toast.success(t('providerList.toast.validationSuccess'))
+        toast.success(t('providerList.toast.validationSuccess'), { id: toastId })
         return
       }
 
       if (provider.validation_status === ValidationStatus.ERROR) {
-        toast.error(t('providerList.toast.validationFailed', { error: provider.validation_error || t('providerList.toast.unknownError') }))
+        toast.error(t('providerList.toast.validationFailed', { error: provider.validation_error || t('providerList.toast.unknownError') }), { id: toastId })
         return
       }
     }
 
-    toast.error(t('providerList.toast.validationTimeout'))
+    toast.error(t('providerList.toast.validationTimeout'), { id: toastId })
   }
 
   const createMutation = useMutation({
