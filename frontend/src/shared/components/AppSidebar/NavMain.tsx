@@ -58,8 +58,8 @@ export function NavMain({ groups, currentPath }: NavMainProps) {
           <GroupWrapper key={groupKey} {...groupWrapperProps}>
             <SidebarGroup
               className={cn(
-                'py-2 transition-all duration-200',
-                isCollapsed && 'py-1 flex flex-col items-center'
+                'py-2 px-2 transition-all duration-200',
+                isCollapsed && 'py-1 px-0 flex flex-col items-center'
               )}
             >
               {/* Group label - animates out when collapsed */}
