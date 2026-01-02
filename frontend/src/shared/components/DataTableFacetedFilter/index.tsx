@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Check, PlusCircle } from 'lucide-react'
 import { Column } from '@tanstack/react-table'
 
@@ -21,6 +22,7 @@ export function DataTableFacetedFilter<TData, TValue>({
   title,
   options,
 }: DataTableFacetedFilterProps<TData, TValue>) {
+  const { t } = useTranslation()
   const facets = column?.getFacetedUniqueValues()
   const filterValue = column?.getFilterValue() as string[] | undefined
   const selectedValues = useMemo(
@@ -43,7 +45,7 @@ export function DataTableFacetedFilter<TData, TValue>({
               <div className="hidden space-x-2 lg:flex">
                 {selectedValues.size > 2 ? (
                   <Badge variant="secondary" className="rounded-sm px-2 font-normal">
-                    {selectedValues.size} selected
+                    {t('dataTable.selected', { count: selectedValues.size })}
                   </Badge>
                 ) : (
                   options
@@ -63,7 +65,7 @@ export function DataTableFacetedFilter<TData, TValue>({
         <Command>
           <CommandInput placeholder={title} />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>{t('labels.noResults')}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value)
@@ -104,7 +106,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                 <CommandSeparator />
                 <CommandGroup>
                   <CommandItem onSelect={() => column?.setFilterValue(undefined)} className="justify-center text-center">
-                    Clear filters
+                    {t('dataTable.clearFilters')}
                   </CommandItem>
                 </CommandGroup>
               </>

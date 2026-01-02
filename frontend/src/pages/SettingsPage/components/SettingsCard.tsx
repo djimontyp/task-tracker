@@ -15,6 +15,7 @@
  */
 
 import type { ComponentType } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@/shared/ui/card';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
@@ -73,45 +74,44 @@ export interface SettingsCardProps {
 // STATUS CONFIGURATION
 // ═══════════════════════════════════════════════════════════════
 
-const statusConfig: Record<
-  SettingsCardStatus,
-  {
-    icon: ComponentType<{ className?: string }>;
-    label: string;
-    badgeClass: string;
-  }
-> = {
+type StatusConfigItem = {
+  icon: ComponentType<{ className?: string }>;
+  labelKey: string;
+  badgeClass: string;
+};
+
+const statusConfig: Record<SettingsCardStatus, StatusConfigItem> = {
   connected: {
     icon: CheckCircle,
-    label: 'Connected',
+    labelKey: 'settingsCard.status.connected',
     badgeClass:
       'border-status-connected bg-status-connected/10 text-status-connected',
   },
   active: {
     icon: CheckCircle,
-    label: 'Active',
+    labelKey: 'settingsCard.status.active',
     badgeClass:
       'border-status-connected bg-status-connected/10 text-status-connected',
   },
   pending: {
     icon: Clock,
-    label: 'Setup',
+    labelKey: 'settingsCard.status.setup',
     badgeClass:
       'border-status-pending bg-status-pending/10 text-status-pending',
   },
   error: {
     icon: XCircle,
-    label: 'Error',
+    labelKey: 'settingsCard.status.error',
     badgeClass: 'border-destructive bg-destructive/10 text-destructive',
   },
   disabled: {
     icon: AlertCircle,
-    label: 'Disabled',
+    labelKey: 'settingsCard.status.disabled',
     badgeClass: 'border-muted-foreground bg-muted text-muted-foreground',
   },
   loading: {
     icon: Loader2,
-    label: 'Loading',
+    labelKey: 'settingsCard.status.loading',
     badgeClass: 'border-muted-foreground bg-muted text-muted-foreground',
   },
 };
@@ -131,6 +131,8 @@ export function SettingsCard({
   isLoading = false,
   className,
 }: SettingsCardProps) {
+  const { t } = useTranslation();
+
   if (isLoading) {
     return <SettingsCardSkeleton />;
   }
@@ -198,7 +200,7 @@ export function SettingsCard({
                   status === 'loading' && 'animate-spin'
                 )}
               />
-              <span className="text-xs font-medium">{statusLabel || config.label}</span>
+              <span className="text-xs font-medium">{statusLabel || t(config.labelKey)}</span>
             </Badge>
           )}
           {isClickable && (
@@ -222,7 +224,7 @@ export function SettingsCard({
                 }}
                 className="h-9"
               >
-                Settings
+                {t('settingsCard.settings')}
               </Button>
             )}
             {!onClick && <div />}

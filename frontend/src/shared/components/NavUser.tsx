@@ -1,5 +1,6 @@
 import { BadgeCheck, LogOut, Settings, Shield } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar'
 import { Button } from '@/shared/ui/button'
 import {
@@ -40,6 +41,8 @@ export function NavUser({
   isAdminMode,
   onToggleAdminMode,
 }: NavUserProps) {
+  const { t } = useTranslation();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -47,7 +50,7 @@ export function NavUser({
           variant="ghost"
           size="icon"
           className="h-11 w-11 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label="User menu"
+          aria-label={t('userMenu.ariaLabel')}
         >
           <Avatar className="h-8 w-8 rounded-lg">
             <AvatarImage src={user.avatar} alt={user.name} />
@@ -81,12 +84,12 @@ export function NavUser({
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <BadgeCheck className="mr-2 h-4 w-4" />
-            Account
+            {t('userMenu.account')}
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link to="/settings" className="flex items-center">
               <Settings className="mr-2 h-4 w-4" />
-              Settings
+              {t('userMenu.settings')}
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -97,7 +100,7 @@ export function NavUser({
             <div className="flex items-center justify-between px-2 py-2">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Admin Mode</span>
+                <span className="text-sm">{t('userMenu.adminMode')}</span>
                 <kbd className="ml-2 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded font-mono">
                   ⌘⇧A
                 </kbd>
@@ -105,7 +108,7 @@ export function NavUser({
               <Switch
                 checked={isAdminMode}
                 onCheckedChange={onToggleAdminMode}
-                aria-label="Toggle admin mode"
+                aria-label={t('userMenu.toggleAdminMode')}
               />
             </div>
           </>
@@ -114,7 +117,7 @@ export function NavUser({
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-destructive focus:text-destructive">
           <LogOut className="mr-2 h-4 w-4" />
-          Log out
+          {t('userMenu.logOut')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

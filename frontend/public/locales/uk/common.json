@@ -154,5 +154,48 @@
     "clear": "Очистити пошук",
     "noResults": "Результатів не знайдено",
     "hint": "Натисніть / для фокусу"
+  },
+  "userMenu": {
+    "ariaLabel": "Меню користувача",
+    "account": "Акаунт",
+    "settings": "Налаштування",
+    "adminMode": "Режим адміністратора",
+    "toggleAdminMode": "Перемкнути режим адміністратора",
+    "logOut": "Вийти"
+  },
+  "navbar": {
+    "toggleSidebar": "Згорнути бічну панель",
+    "pageInfo": "Інформація про сторінку",
+    "openSearch": "Відкрити пошук",
+    "theme": {
+      "light": "Світла тема",
+      "dark": "Темна тема",
+      "system": "Системна тема",
+      "change": "Змінити тему"
+    }
+  },
+  "serviceStatus": {
+    "connected": "Підключено",
+    "reconnecting": "Перепідключення",
+    "disconnected": "Відключено"
+  },
+  "settingsCard": {
+    "settings": "Налаштування",
+    "status": {
+      "connected": "Підключено",
+      "active": "Активний",
+      "setup": "Налаштування",
+      "error": "Помилка",
+      "disabled": "Вимкнено",
+      "loading": "Завантаження"
+    }
+  },
+  "dataTable": {
+    "rowsSelected": "{{selected}} з {{total}} рядків вибрано",
+    "goToPage": "Перейти на сторінку",
+    "goToNextPage": "Перейти на наступну сторінку",
+    "goToLastPage": "Перейти на останню сторінку",
+    "selected": "{{count}} вибрано",
+    "clearFilters": "Очистити фільтри"
   }
 }
