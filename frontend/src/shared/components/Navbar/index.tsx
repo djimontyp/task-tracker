@@ -126,10 +126,10 @@ export function Navbar({
               variant="ghost"
               size="icon"
               onClick={onMobileSidebarToggle}
-              className="h-11 w-11 shrink-0 rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 w-11 shrink-0 rounded-lg text-muted-foreground transition-all duration-200 ease-out hover:bg-muted hover:text-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label={t('navbar.toggleSidebar')}
             >
-              <Menu className="size-5" />
+              <Menu className="size-5 transition-transform duration-200" />
             </Button>
           </div>
 
@@ -138,7 +138,7 @@ export function Navbar({
             <Button
               variant="ghost"
               size="icon"
-              className="h-11 w-11 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 w-11 rounded-lg text-muted-foreground transition-all duration-200 ease-out hover:bg-muted hover:text-foreground active:scale-95 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               onClick={() => setMobileSearchOpen(true)}
               aria-label={t('navbar.openSearch')}
             >

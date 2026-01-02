@@ -49,12 +49,12 @@ export function NavUser({
         <Button
           variant="ghost"
           size="icon"
-          className="h-11 w-11 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-11 w-11 rounded-lg text-muted-foreground transition-all duration-200 ease-out hover:bg-muted hover:text-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label={t('userMenu.ariaLabel')}
         >
-          <Avatar className="h-8 w-8 rounded-lg">
+          <Avatar className="h-8 w-8 rounded-lg shadow-sm">
             <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback className="rounded-lg text-xs">
+            <AvatarFallback className="rounded-lg bg-gradient-to-br from-primary to-primary-bright text-primary-foreground text-xs font-medium flex items-center justify-center">
               {user.name.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -68,9 +68,9 @@ export function NavUser({
       >
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-2 py-2 text-left text-sm">
-            <Avatar className="h-8 w-8 rounded-lg">
+            <Avatar className="h-8 w-8 rounded-lg shadow-sm">
               <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="rounded-lg">
+              <AvatarFallback className="rounded-lg bg-gradient-to-br from-primary to-primary-bright text-primary-foreground text-xs font-medium flex items-center justify-center">
                 {user.name.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
