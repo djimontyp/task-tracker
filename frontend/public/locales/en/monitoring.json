@@ -1,0 +1,33 @@
+{
+  "scoringAccuracy": {
+    "title": "Classification Accuracy",
+    "description": "Quality metrics for message importance scoring system",
+    "loading": "Loading metrics...",
+    "error": {
+      "title": "Error loading metrics",
+      "description": "Failed to load scoring accuracy metrics"
+    },
+    "status": {
+      "healthy": "Normal",
+      "alert": "Needs Attention"
+    },
+    "validatedOn": "Validated on {{count}} samples",
+    "overallAccuracy": "Overall accuracy",
+    "categories": {
+      "noise": "Noise",
+      "weakSignal": "Weak Signal",
+      "signal": "Signal"
+    },
+    "metrics": {
+      "precision": "Precision",
+      "recall": "Recall",
+      "f1Score": "F1 Score",
+      "samples": "{{count}} samples"
+    },
+    "alert": {
+      "title": "Accuracy below 80% threshold",
+      "description": "It is recommended to review the importance scoring system and validation dataset"
+    },
+    "updated": "Updated: {{date}}"
+  }
+}

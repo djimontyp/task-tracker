@@ -28,7 +28,8 @@
     "rejectSelected": "Відхилити обрані",
     "selectAll": "Обрати все",
     "clear": "Очистити",
-    "selected": "{{count}} обрано"
+    "selected": "{{count}} обрано",
+    "cancel": "Скасувати"
   },
   "messages": {
     "created": "Атом успішно створено",
@@ -81,5 +82,97 @@
   "empty": {
     "title": "Немає атомів",
     "description": "Атоми з'являться після обробки повідомлень"
+  },
+  "extraction": {
+    "title": "Екстракція знань з повідомлень",
+    "extractKnowledge": "Екстрагувати знання",
+    "extracting": "Екстракція...",
+    "fromAllMessages": "Екстракція знань з усіх повідомлень",
+    "globalAriaLabel": "Екстрагувати знання глобально",
+    "byPeriod": "За період",
+    "byMessages": "За повідомленнями ({{count}})",
+    "filterByTopic": "Екстрагувати тільки з поточної теми",
+    "filterByTopicAriaLabel": "Фільтрувати за поточною темою",
+    "willAnalyzeFromTopic": "Будуть проаналізовані повідомлення з цієї теми за обраний період",
+    "willAnalyzeAll": "Будуть проаналізовані всі необроблені повідомлення за обраний період",
+    "readyToExtract_one": "Готово до екстракції знань з {{count}} обраного повідомлення",
+    "readyToExtract_few": "Готово до екстракції знань з {{count}} обраних повідомлень",
+    "readyToExtract_many": "Готово до екстракції знань з {{count}} обраних повідомлень",
+    "noMessagesAvailable": "Немає повідомлень для екстракції",
+    "selectAgent": "Оберіть AI агента",
+    "loadingAgents": "Завантаження агентів...",
+    "chooseAgent": "Оберіть конфігурацію агента",
+    "noActiveAgents": "Немає активних агентів. Будь ласка, створіть агента на сторінці Агенти.",
+    "progress": "Прогрес",
+    "processing": "Обробка...",
+    "complete": "Завершено",
+    "failed": "Помилка",
+    "topics": "Теми",
+    "atoms": "Атоми",
+    "versions": "Версії",
+    "errors": {
+      "loadAgents": "Не вдалося завантажити конфігурації агентів",
+      "selectAgent": "Будь ласка, оберіть AI агента",
+      "selectTimeWindow": "Будь ласка, оберіть часовий період",
+      "noMessages": "Немає повідомлень для екстракції",
+      "startFailed": "Не вдалося розпочати екстракцію",
+      "unknown": "Невідома помилка"
+    },
+    "notifications": {
+      "started": "Екстракція знань розпочата для {{count}} повідомлень",
+      "completed": "Екстракцію завершено! Створено {{atoms}} атомів, {{versions}} на перевірці",
+      "failed": "Помилка екстракції: {{error}}",
+      "reviewNow": "Переглянути зараз",
+      "topicsIdentified": "Виявлено {{count}} тем"
+    }
+  },
+  "versions": {
+    "awaiting_one": "1 версія очікує затвердження",
+    "awaiting_few": "{{count}} версії очікують затвердження ({{topics}} тем, {{atoms}} атомів)",
+    "awaiting_many": "{{count}} версій очікують затвердження ({{topics}} тем, {{atoms}} атомів)",
+    "awaiting_other": "{{count}} версій очікують затвердження ({{topics}} тем, {{atoms}} атомів)",
+    "selected": "Обрано: {{count}} версій",
+    "clearSelection": "Скасувати вибір",
+    "noHistory": "Немає історії версій",
+    "selectAllAriaLabel": "Обрати всі версії",
+    "selectVersionAriaLabel": "Обрати версію {{version}}",
+    "selectAll": "Обрати всі",
+    "deselectAll": "Скасувати вибір усіх",
+    "clear": "Очистити ({{count}})",
+    "pending": "Очікує",
+    "by": "Автор:",
+    "bulk": {
+      "processing": "{{action}} {{count}} версій...",
+      "approving": "Схвалення",
+      "rejecting": "Відхилення",
+      "approved": "схвалено",
+      "rejected": "відхилено",
+      "success": "Успішно {{action}} {{count}} версій",
+      "failedCount": "{{count}} помилок",
+      "errors": "Помилки",
+      "error": "Помилка при {{action}} версій"
+    },
+    "confirmDialog": {
+      "title": "Підтвердження {{action}}",
+      "approval": "схвалення",
+      "rejection": "відхилення",
+      "message": "Ви збираєтеся {{action}} {{count}} версій.",
+      "approve": "схвалити",
+      "reject": "відхилити",
+      "versionItem": "v{{version}} (ID: {{id}})",
+      "andMore": "...та ще {{count}} версій",
+      "areYouSure": "Ви впевнені?",
+      "processing": "Обробка...",
+      "confirm": "Підтвердити"
+    },
+    "diff": {
+      "noDiff": "Немає змін для порівняння",
+      "comparison": "Версія {{from}} → Версія {{to}}",
+      "added": "додано",
+      "removed": "видалено",
+      "modified": "змінено",
+      "addedTitle": "Додано",
+      "removedTitle": "Видалено"
+    }
   }
 }

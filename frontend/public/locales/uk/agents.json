@@ -1,0 +1,291 @@
+{
+  "form": {
+    "title": {
+      "create": "Створити агента",
+      "edit": "Редагувати агента"
+    },
+    "fields": {
+      "name": {
+        "label": "Назва",
+        "placeholder": "Мій агент"
+      },
+      "description": {
+        "label": "Опис",
+        "placeholder": "Опис агента"
+      },
+      "provider": {
+        "label": "Провайдер",
+        "placeholder": "Оберіть провайдера"
+      },
+      "modelName": {
+        "label": "Назва моделі",
+        "placeholder": "llama3.2:latest",
+        "manualInput": "Ручне введення",
+        "useDropdown": "Використати список",
+        "selectPlaceholder": "Оберіть модель"
+      },
+      "systemPrompt": {
+        "label": "Системний промпт",
+        "placeholder": "Ви - корисний асистент..."
+      },
+      "temperature": {
+        "label": "Температура"
+      },
+      "maxTokens": {
+        "label": "Макс. токенів"
+      },
+      "active": {
+        "label": "Активний"
+      }
+    },
+    "messages": {
+      "selectProviderFirst": "Спочатку оберіть провайдера",
+      "loadingModels": "Завантаження моделей...",
+      "noModelsFound": "Моделі не знайдено. Введіть назву моделі вручну."
+    },
+    "actions": {
+      "cancel": "Скасувати",
+      "create": "Створити",
+      "update": "Оновити"
+    }
+  },
+  "testDialog": {
+    "title": "Тест агента: {{name}}",
+    "titleUnknown": "Тест агента: Невідомий",
+    "fields": {
+      "prompt": {
+        "label": "Промпт",
+        "placeholder": "Введіть тестовий промпт...",
+        "minRequired": "Мінімум {{count}} символів",
+        "characters": "Символів: {{current}}/{{max}}"
+      }
+    },
+    "actions": {
+      "clear": "Очистити",
+      "example": "Приклад {{number}}",
+      "cancel": "Скасувати",
+      "test": "Тестувати агента"
+    },
+    "status": {
+      "testing": "Тестування агента..."
+    },
+    "results": {
+      "title": "Результати тесту",
+      "success": "Успішно",
+      "response": "Відповідь",
+      "model": "Модель:",
+      "provider": "Провайдер:",
+      "time": "Час:",
+      "timeValue": "{{value}} мс"
+    },
+    "toast": {
+      "success": "Тест агента успішно завершено",
+      "error": "Не вдалося протестувати агента",
+      "promptTooShort": "Промпт має містити мінімум {{count}} символів",
+      "promptTooLong": "Промпт має містити не більше {{count}} символів"
+    }
+  },
+  "schemaEditor": {
+    "header": {
+      "fieldName": "Назва поля",
+      "type": "Тип",
+      "description": "Опис"
+    },
+    "empty": {
+      "title": "Полів ще не визначено",
+      "description": "Поля визначають, які дані має повернути AI-агент.",
+      "example": "Наприклад: \"summary\" (текст), \"priority\" (число), \"tags\" (масив)"
+    },
+    "fields": {
+      "namePlaceholder": "назва_поля",
+      "descriptionPlaceholder": "Необов'язково"
+    },
+    "actions": {
+      "removeField": "Видалити поле",
+      "removeFieldLabel": "Видалити {{name}}",
+      "addField": "Додати поле"
+    },
+    "types": {
+      "string": "Рядок (текст)",
+      "number": "Число (десяткове)",
+      "integer": "Ціле число",
+      "boolean": "Булеве (так/ні)",
+      "array": "Масив (список)",
+      "object": "Об'єкт (JSON)",
+      "date": "Дата",
+      "email": "Email",
+      "url": "URL"
+    }
+  },
+  "card": {
+    "actions": {
+      "edit": "Редагувати агента",
+      "manageTasks": "Керувати завданнями",
+      "test": "Тестувати агента",
+      "delete": "Видалити агента"
+    },
+    "fields": {
+      "model": "Модель:",
+      "temperature": "Температура:",
+      "maxTokens": "Макс. токенів:",
+      "systemPrompt": "Системний промпт:",
+      "status": "Статус:"
+    }
+  },
+  "list": {
+    "title": "AI Агенти",
+    "addButton": "Додати агента",
+    "empty": {
+      "title": "Агентів не знайдено",
+      "description": "Створіть свого першого AI-агента для автоматизації завдань."
+    }
+  },
+  "status": {
+    "active": "Активний",
+    "inactive": "Неактивний"
+  },
+  "actions": {
+    "cancel": "Скасувати",
+    "create": "Створити",
+    "update": "Оновити",
+    "close": "Закрити"
+  },
+  "common": {
+    "yes": "Так",
+    "no": "Ні"
+  },
+  "providerForm": {
+    "title": {
+      "create": "Створити провайдера",
+      "edit": "Редагувати провайдера"
+    },
+    "fields": {
+      "name": {
+        "label": "Назва",
+        "placeholder": "Мій LLM провайдер"
+      },
+      "type": {
+        "label": "Тип провайдера",
+        "ollama": "Ollama",
+        "openai": "OpenAI"
+      },
+      "baseUrl": {
+        "label": "Базова URL"
+      },
+      "apiKey": {
+        "label": "API ключ",
+        "placeholder": "sk-...",
+        "keepExisting": "Залиште порожнім, щоб зберегти існуючий ключ"
+      }
+    }
+  },
+  "providerList": {
+    "title": "LLM Провайдери",
+    "addButton": "Додати провайдера",
+    "empty": {
+      "title": "Провайдерів не знайдено",
+      "description": "Додайте LLM провайдера для увімкнення AI-аналізу."
+    },
+    "actions": {
+      "edit": "Редагувати провайдера",
+      "delete": "Видалити провайдера"
+    },
+    "fields": {
+      "baseUrl": "Базова URL:",
+      "status": "Статус:",
+      "validated": "Перевірено:",
+      "active": "Активний:"
+    },
+    "confirm": {
+      "delete": "Ви впевнені, що хочете видалити цього провайдера?"
+    },
+    "toast": {
+      "createdValidating": "Провайдера створено. Перевірка з'єднання...",
+      "updatedValidating": "Провайдера оновлено. Перевірка з'єднання...",
+      "notFound": "Провайдера не знайдено",
+      "validationSuccess": "Провайдера успішно перевірено!",
+      "validationFailed": "Помилка перевірки: {{error}}",
+      "unknownError": "Невідома помилка",
+      "validationTimeout": "Час очікування перевірки вичерпано. Перевірте статус провайдера.",
+      "createError": "Не вдалося створити провайдера",
+      "updateError": "Не вдалося оновити провайдера",
+      "deleteSuccess": "Провайдера успішно видалено",
+      "deleteError": "Не вдалося видалити провайдера"
+    }
+  },
+  "taskAssignment": {
+    "title": "Керування завданнями для {{name}}",
+    "noTasks": "Немає доступних завдань. Спочатку створіть завдання.",
+    "assigned": "Призначено",
+    "notAssigned": "Не призначено",
+    "toast": {
+      "assignSuccess": "Завдання успішно призначено",
+      "assignError": "Не вдалося призначити завдання",
+      "unassignSuccess": "Завдання успішно відкріплено",
+      "unassignError": "Не вдалося відкріпити завдання"
+    }
+  },
+  "taskForm": {
+    "title": {
+      "create": "Створити завдання",
+      "edit": "Редагувати завдання"
+    },
+    "fields": {
+      "name": {
+        "label": "Назва завдання",
+        "placeholder": "Моє завдання"
+      },
+      "description": {
+        "label": "Опис",
+        "placeholder": "Опис завдання"
+      }
+    },
+    "responseFields": {
+      "legend": "Налаштування полів відповіді",
+      "label": "Поля відповіді *",
+      "helpAriaLabel": "Допомога по полях відповіді",
+      "tooltip": "Визначте структуру даних, які поверне AI",
+      "description": "Визначте, які дані має повернути AI-агент"
+    }
+  },
+  "taskList": {
+    "title": "Конфігурації завдань",
+    "addButton": "Додати завдання",
+    "empty": {
+      "title": "Завдань не знайдено",
+      "description": "Визначте конфігурації завдань для структурування виводу AI-агентів."
+    },
+    "actions": {
+      "edit": "Редагувати завдання",
+      "delete": "Видалити завдання"
+    },
+    "fields": {
+      "schemaFields": "Поля схеми:",
+      "noFields": "Немає полів",
+      "status": "Статус:",
+      "created": "Створено:"
+    },
+    "confirm": {
+      "delete": "Ви впевнені, що хочете видалити це завдання?"
+    },
+    "toast": {
+      "createSuccess": "Завдання успішно створено",
+      "createError": "Не вдалося створити завдання",
+      "updateSuccess": "Завдання успішно оновлено",
+      "updateError": "Не вдалося оновити завдання",
+      "deleteSuccess": "Завдання успішно видалено",
+      "deleteError": "Не вдалося видалити завдання"
+    }
+  },
+  "toast": {
+    "createSuccess": "Агента успішно створено",
+    "createError": "Не вдалося створити агента",
+    "updateSuccess": "Агента успішно оновлено",
+    "updateError": "Не вдалося оновити агента",
+    "deleteSuccess": "Агента успішно видалено",
+    "deleteError": "Не вдалося видалити агента"
+  },
+  "confirm": {
+    "deleteAgent": "Ви впевнені, що хочете видалити цього агента?"
+  }
+}

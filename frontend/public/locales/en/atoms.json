@@ -28,7 +28,8 @@
     "rejectSelected": "Reject Selected",
     "selectAll": "Select All",
     "clear": "Clear",
-    "selected": "{{count}} selected"
+    "selected": "{{count}} selected",
+    "cancel": "Cancel"
   },
   "messages": {
     "created": "Atom created successfully",
@@ -80,5 +81,94 @@
   "empty": {
     "title": "No atoms",
     "description": "Atoms will appear after processing messages"
+  },
+  "extraction": {
+    "title": "Extract Knowledge from Messages",
+    "extractKnowledge": "Extract Knowledge",
+    "extracting": "Extracting...",
+    "fromAllMessages": "Extract Knowledge from All Messages",
+    "globalAriaLabel": "Extract knowledge globally",
+    "byPeriod": "By Period",
+    "byMessages": "By Messages ({{count}})",
+    "filterByTopic": "Extract only from current topic",
+    "filterByTopicAriaLabel": "Filter by current topic",
+    "willAnalyzeFromTopic": "Will analyze messages from this topic within the selected period",
+    "willAnalyzeAll": "Will analyze all unprocessed messages within the selected period",
+    "readyToExtract_one": "Ready to extract knowledge from {{count}} selected message",
+    "readyToExtract_other": "Ready to extract knowledge from {{count}} selected messages",
+    "noMessagesAvailable": "No messages available for extraction",
+    "selectAgent": "Select AI Agent",
+    "loadingAgents": "Loading agents...",
+    "chooseAgent": "Choose agent configuration",
+    "noActiveAgents": "No active agents available. Please create one in the Agents page.",
+    "progress": "Progress",
+    "processing": "Processing...",
+    "complete": "Complete",
+    "failed": "Failed",
+    "topics": "Topics",
+    "atoms": "Atoms",
+    "versions": "Versions",
+    "errors": {
+      "loadAgents": "Failed to load agent configurations",
+      "selectAgent": "Please select an AI agent",
+      "selectTimeWindow": "Please select a time window",
+      "noMessages": "No messages available for extraction",
+      "startFailed": "Failed to start extraction",
+      "unknown": "Unknown error"
+    },
+    "notifications": {
+      "started": "Knowledge extraction started for {{count}} messages",
+      "completed": "Extraction complete! {{atoms}} atoms created, {{versions}} pending review",
+      "failed": "Extraction failed: {{error}}",
+      "reviewNow": "Review Now",
+      "topicsIdentified": "{{count}} topics identified"
+    }
+  },
+  "versions": {
+    "awaiting_one": "1 version awaiting approval",
+    "awaiting_other": "{{count}} versions awaiting approval ({{topics}} topics, {{atoms}} atoms)",
+    "selected": "Selected: {{count}} versions",
+    "clearSelection": "Clear selection",
+    "noHistory": "No version history available",
+    "selectAllAriaLabel": "Select all versions",
+    "selectVersionAriaLabel": "Select version {{version}}",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "clear": "Clear ({{count}})",
+    "pending": "Pending",
+    "by": "By",
+    "bulk": {
+      "processing": "{{action}} {{count}} versions...",
+      "approving": "Approving",
+      "rejecting": "Rejecting",
+      "approved": "approved",
+      "rejected": "rejected",
+      "success": "Successfully {{action}} {{count}} versions",
+      "failedCount": "{{count}} errors",
+      "errors": "Errors",
+      "error": "Error while {{action}} versions"
+    },
+    "confirmDialog": {
+      "title": "Confirm {{action}}",
+      "approval": "approval",
+      "rejection": "rejection",
+      "message": "You are about to {{action}} {{count}} versions.",
+      "approve": "approve",
+      "reject": "reject",
+      "versionItem": "v{{version}} (ID: {{id}})",
+      "andMore": "...and {{count}} more versions",
+      "areYouSure": "Are you sure?",
+      "processing": "Processing...",
+      "confirm": "Confirm"
+    },
+    "diff": {
+      "noDiff": "No diff available",
+      "comparison": "Version {{from}} → Version {{to}}",
+      "added": "added",
+      "removed": "removed",
+      "modified": "modified",
+      "addedTitle": "Added",
+      "removedTitle": "Removed"
+    }
   }
 }
