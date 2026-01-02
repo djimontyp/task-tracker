@@ -4,6 +4,7 @@
  * T048: Period selector for executive summary.
  */
 
+import { useTranslation } from 'react-i18next';
 import {
   Select,
   SelectContent,
@@ -27,6 +28,8 @@ export function SummaryPeriodSelector({
   options,
   disabled = false,
 }: SummaryPeriodSelectorProps) {
+  const { t } = useTranslation('executiveSummary');
+
   return (
     <Select
       value={value.toString()}
@@ -36,7 +39,7 @@ export function SummaryPeriodSelector({
       <SelectTrigger className="w-48">
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4" />
-          <SelectValue placeholder="Оберіть період" />
+          <SelectValue placeholder={t('periods.selectPeriod')} />
         </div>
       </SelectTrigger>
       <SelectContent>

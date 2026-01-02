@@ -4,6 +4,7 @@
  * T032: Displays aggregate statistics for executive summary.
  */
 
+import { useTranslation } from 'react-i18next';
 import {
   CheckCircle,
   AlertTriangle,
@@ -19,6 +20,8 @@ interface SummaryStatsProps {
 }
 
 export function SummaryStats({ stats, periodLabel }: SummaryStatsProps) {
+  const { t } = useTranslation('executiveSummary');
+
   return (
     <div className="space-y-4">
       <div className="text-sm text-muted-foreground">{periodLabel}</div>
@@ -26,25 +29,25 @@ export function SummaryStats({ stats, periodLabel }: SummaryStatsProps) {
         <StatCard
           icon={CheckCircle}
           iconColor="text-primary"
-          label="Рішень"
+          label={t('stats.decisions')}
           value={stats.decisions_count}
         />
         <StatCard
           icon={AlertTriangle}
           iconColor="text-destructive"
-          label="Блокерів"
+          label={t('stats.blockers')}
           value={stats.blockers_count}
         />
         <StatCard
           icon={Folder}
           iconColor="text-semantic-info"
-          label="Активних топіків"
+          label={t('stats.activeTopics')}
           value={stats.active_topics_count}
         />
         <StatCard
           icon={AlertCircle}
           iconColor="text-semantic-warning"
-          label="Застарілих блокерів"
+          label={t('stats.staleBlockers')}
           value={stats.stale_blockers_count}
           highlight={stats.stale_blockers_count > 0}
         />

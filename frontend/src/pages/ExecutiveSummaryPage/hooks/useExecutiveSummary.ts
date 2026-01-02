@@ -7,6 +7,7 @@
 
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { executiveSummaryService } from '@/features/executive-summary/api/executiveSummaryService';
 import type {
@@ -134,6 +135,8 @@ export interface UseExecutiveSummaryReturn {
 export function useExecutiveSummary(
   options: UseExecutiveSummaryOptions = {}
 ): UseExecutiveSummaryReturn {
+  const { t } = useTranslation('executiveSummary');
+
   // Initialize period from saved preference or default
   const [period, setPeriodState] = useState<SummaryPeriod>(() =>
     options.initialPeriod ?? loadSavedPeriod()
@@ -166,10 +169,10 @@ export function useExecutiveSummary(
     mutationFn: (request: ExportRequest) =>
       executiveSummaryService.downloadReport(request),
     onSuccess: () => {
-      toast.success('Звіт успішно експортовано');
+      toast.success(t('toast.exportSuccess'));
     },
     onError: () => {
-      toast.error('Помилка експорту звіту');
+      toast.error(t('errors.exportFailed'));
     },
   });
 
