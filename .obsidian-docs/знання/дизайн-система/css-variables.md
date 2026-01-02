@@ -1,11 +1,14 @@
 ---
 title: "CSS Variables"
 created: 2025-12-27
+updated: 2026-01-02
 tags:
   - дизайн-система
   - css
   - dark-mode
+  - navigation
 status: active
+version: 1.1.0
 ---
 
 # CSS Variables
@@ -43,6 +46,17 @@ status: active
 | `--semantic-success` | 142 76% 36% | 142 71% 59% |
 | `--semantic-error` | 0 84% 60% | 0 78% 65% |
 | `--status-connected` | 142 71% 45% | — |
+
+## Навігація
+
+| Variable | Light | Dark | Призначення |
+|----------|-------|------|-------------|
+| `--primary` | 172 66% 28% | 172 66% 30% | Кнопки, основні дії (WCAG AA) |
+| `--primary-bright` | 172 66% 36% | 172 66% 45% | **Активні елементи навігації** |
+
+> [!important] Єдиний колір активу
+> `--primary-bright` використовується для ==sidebar active== та ==tabs active==.
+> Яскравіший за `--primary` для кращої видимості, але не надто яскравий.
 
 ## Використання
 
