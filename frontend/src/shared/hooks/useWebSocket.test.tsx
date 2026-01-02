@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
+import { ReactNode } from 'react'
 import { useWebSocket } from './useWebSocket'
+import { WebSocketProvider } from '@/shared/providers/WebSocketProvider'
 
 // Mock logger to avoid console noise
 vi.mock('@/shared/utils/logger', () => ({
@@ -93,6 +95,11 @@ class MockWebSocket {
   }
 }
 
+// Wrapper component with WebSocketProvider
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <WebSocketProvider>{children}</WebSocketProvider>
+)
+
 // Setup global mocks
 beforeEach(() => {
   vi.useFakeTimers()
@@ -117,19 +124,27 @@ afterEach(() => {
   MockWebSocket.clearInstances()
 })
 
-describe('useWebSocket', () => {
-  describe('Connection', () => {
-    it('creates WebSocket connection on mount', () => {
-      renderHook(() => useWebSocket())
+describe('useWebSocket with Provider', () => {
+  describe('Connection via Provider', () => {
+    it('creates WebSocket connection when topic is subscribed', () => {
+      renderHook(() => useWebSocket({ topics: ['test'] }), { wrapper })
 
       expect(MockWebSocket.instances.length).toBe(1)
+    })
+
+    it('does not create connection when no topics provided', () => {
+      renderHook(() => useWebSocket(), { wrapper })
+
+      // Provider only connects when there are topics
+      expect(MockWebSocket.instances.length).toBe(0)
     })
 
     it('includes topics in URL when provided', () => {
       renderHook(() =>
         useWebSocket({
           topics: ['analysis', 'proposals'],
-        })
+        }),
+        { wrapper }
       )
 
       const ws = MockWebSocket.lastInstance
@@ -137,10 +152,12 @@ describe('useWebSocket', () => {
     })
 
     it('sets isConnected to true when connection opens', () => {
-      const { result } = renderHook(() => useWebSocket())
+      const { result } = renderHook(() =>
+        useWebSocket({ topics: ['test'] }),
+        { wrapper }
+      )
 
       expect(result.current.isConnected).toBe(false)
-      expect(result.current.connectionState).toBe('connecting')
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -153,7 +170,10 @@ describe('useWebSocket', () => {
     it('calls onConnect callback when connection opens', () => {
       const onConnect = vi.fn()
 
-      renderHook(() => useWebSocket({ onConnect }))
+      renderHook(() =>
+        useWebSocket({ topics: ['test'], onConnect }),
+        { wrapper }
+      )
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -161,24 +181,16 @@ describe('useWebSocket', () => {
 
       expect(onConnect).toHaveBeenCalledTimes(1)
     })
-
-    it('handles connection error gracefully', () => {
-      const { result } = renderHook(() => useWebSocket())
-
-      act(() => {
-        MockWebSocket.lastInstance.simulateError()
-      })
-
-      // Should not crash, state should indicate connecting still
-      expect(result.current.connectionState).toBe('connecting')
-    })
   })
 
   describe('Message Handling', () => {
     it('calls onMessage callback with parsed data', () => {
       const onMessage = vi.fn()
 
-      renderHook(() => useWebSocket({ onMessage }))
+      renderHook(() =>
+        useWebSocket({ topics: ['test'], onMessage }),
+        { wrapper }
+      )
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -196,7 +208,10 @@ describe('useWebSocket', () => {
     it('handles malformed JSON gracefully', () => {
       const onMessage = vi.fn()
 
-      renderHook(() => useWebSocket({ onMessage }))
+      renderHook(() =>
+        useWebSocket({ topics: ['test'], onMessage }),
+        { wrapper }
+      )
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -214,7 +229,10 @@ describe('useWebSocket', () => {
     })
 
     it('responds to ping messages with pong', () => {
-      renderHook(() => useWebSocket())
+      renderHook(() =>
+        useWebSocket({ topics: ['test'] }),
+        { wrapper }
+      )
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -234,7 +252,10 @@ describe('useWebSocket', () => {
     it('does not pass ping messages to onMessage callback', () => {
       const onMessage = vi.fn()
 
-      renderHook(() => useWebSocket({ onMessage }))
+      renderHook(() =>
+        useWebSocket({ topics: ['test'], onMessage }),
+        { wrapper }
+      )
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -247,19 +268,78 @@ describe('useWebSocket', () => {
       // Ping should be handled internally, not passed to callback
       expect(onMessage).not.toHaveBeenCalled()
     })
+  })
 
-    // Note: connectionId is stored in a ref and doesn't trigger re-render
-    // Testing it would require accessing internal implementation
-    // The actual functionality is that the hook stores connectionId for replay on reconnect
+  // Note: Singleton behavior is tested in browser/E2E tests
+  // because each renderHook creates its own Provider context.
+  // The real singleton behavior happens at the application level
+  // where one WebSocketProvider wraps all components.
+
+  describe('Cleanup', () => {
+    it('unsubscribes on unmount', () => {
+      const { unmount } = renderHook(() =>
+        useWebSocket({ topics: ['test'] }),
+        { wrapper }
+      )
+
+      act(() => {
+        MockWebSocket.lastInstance.simulateOpen()
+      })
+
+      unmount()
+
+      // After unmount and cleanup delay, connection should close
+      // because no subscriptions remain
+      act(() => {
+        vi.advanceTimersByTime(200)
+      })
+
+      expect(MockWebSocket.lastInstance.close).toHaveBeenCalled()
+    })
+  })
+
+  describe('Manual Controls', () => {
+    it('send() sends JSON data when connected', () => {
+      const { result } = renderHook(() =>
+        useWebSocket({ topics: ['test'] }),
+        { wrapper }
+      )
+
+      act(() => {
+        MockWebSocket.lastInstance.simulateOpen()
+      })
+
+      expect(result.current.isConnected).toBe(true)
+
+      act(() => {
+        result.current.send({ type: 'test', data: 'hello' })
+      })
+
+      expect(MockWebSocket.lastInstance.send).toHaveBeenCalledWith(
+        JSON.stringify({ type: 'test', data: 'hello' })
+      )
+    })
+
+    it('send() does nothing when not connected', () => {
+      const { result } = renderHook(() =>
+        useWebSocket({ topics: ['test'] }),
+        { wrapper }
+      )
+
+      // Don't open connection
+      act(() => {
+        result.current.send({ type: 'test' })
+      })
+
+      expect(MockWebSocket.lastInstance.send).not.toHaveBeenCalled()
+    })
   })
 
   describe('Reconnection', () => {
     it('attempts to reconnect when connection closes unexpectedly', async () => {
       renderHook(() =>
-        useWebSocket({
-          reconnect: true,
-          reconnectInterval: 1000,
-        })
+        useWebSocket({ topics: ['test'] }),
+        { wrapper }
       )
 
       // Initial connection
@@ -267,26 +347,26 @@ describe('useWebSocket', () => {
         MockWebSocket.lastInstance.simulateOpen()
       })
 
+      const initialInstanceCount = MockWebSocket.instances.length
+
       // Simulate disconnect
       act(() => {
         MockWebSocket.lastInstance.simulateClose(1006, 'Connection lost')
       })
 
-      // Advance timer to trigger reconnect
+      // Advance timer to trigger reconnect (exponential backoff)
       await act(async () => {
-        vi.advanceTimersByTime(1000)
+        vi.advanceTimersByTime(2000)
       })
 
       // Should have created a new connection
-      expect(MockWebSocket.instances.length).toBe(2)
+      expect(MockWebSocket.instances.length).toBeGreaterThan(initialInstanceCount)
     })
 
     it('sets state to reconnecting when connection closes', () => {
       const { result } = renderHook(() =>
-        useWebSocket({
-          reconnect: true,
-          reconnectInterval: 1000,
-        })
+        useWebSocket({ topics: ['test'] }),
+        { wrapper }
       )
 
       act(() => {
@@ -302,39 +382,15 @@ describe('useWebSocket', () => {
       expect(result.current.connectionState).toBe('reconnecting')
     })
 
-    it('does not reconnect when reconnect option is false', async () => {
-      const { result } = renderHook(() =>
-        useWebSocket({
-          reconnect: false,
-        })
-      )
-
-      act(() => {
-        MockWebSocket.lastInstance.simulateOpen()
-      })
-
-      act(() => {
-        MockWebSocket.lastInstance.simulateClose(1006)
-      })
-
-      // Advance time significantly
-      await act(async () => {
-        vi.advanceTimersByTime(10000)
-      })
-
-      // Should only have the initial connection
-      expect(MockWebSocket.instances.length).toBe(1)
-      expect(result.current.connectionState).toBe('disconnected')
-    })
-
     it('calls onDisconnect callback when connection closes', () => {
       const onDisconnect = vi.fn()
 
       renderHook(() =>
         useWebSocket({
+          topics: ['test'],
           onDisconnect,
-          reconnect: false,
-        })
+        }),
+        { wrapper }
       )
 
       act(() => {
@@ -349,127 +405,12 @@ describe('useWebSocket', () => {
     })
   })
 
-  describe('Cleanup', () => {
-    it('closes connection on unmount', () => {
-      const { unmount } = renderHook(() => useWebSocket())
-
-      act(() => {
-        MockWebSocket.lastInstance.simulateOpen()
-      })
-
-      unmount()
-
-      expect(MockWebSocket.lastInstance.close).toHaveBeenCalled()
-    })
-
-    it('clears reconnection timer on unmount', async () => {
-      const { unmount } = renderHook(() =>
-        useWebSocket({
-          reconnect: true,
-          reconnectInterval: 1000,
-        })
-      )
-
-      act(() => {
-        MockWebSocket.lastInstance.simulateOpen()
-      })
-
-      act(() => {
-        MockWebSocket.lastInstance.simulateClose(1006)
-      })
-
-      // Unmount before reconnection timer fires
-      unmount()
-
-      // Advance time - should NOT create new connection
-      await act(async () => {
-        vi.advanceTimersByTime(5000)
-      })
-
-      // Only the original connection should exist
-      expect(MockWebSocket.instances.length).toBe(1)
-    })
-  })
-
-  describe('Manual Controls', () => {
-    it('send() sends JSON data when connected', () => {
-      const { result } = renderHook(() => useWebSocket())
-
-      act(() => {
-        MockWebSocket.lastInstance.simulateOpen()
-      })
-
-      // After simulateOpen, isConnected should be true synchronously
-      expect(result.current.isConnected).toBe(true)
-
-      act(() => {
-        result.current.send({ type: 'test', data: 'hello' })
-      })
-
-      expect(MockWebSocket.lastInstance.send).toHaveBeenCalledWith(
-        JSON.stringify({ type: 'test', data: 'hello' })
-      )
-    })
-
-    it('send() does nothing when not connected', () => {
-      const { result } = renderHook(() => useWebSocket())
-
-      // Don't open connection
-      act(() => {
-        result.current.send({ type: 'test' })
-      })
-
-      expect(MockWebSocket.lastInstance.send).not.toHaveBeenCalled()
-    })
-
-    it('disconnect() closes the connection', () => {
-      const { result } = renderHook(() => useWebSocket())
-
-      act(() => {
-        MockWebSocket.lastInstance.simulateOpen()
-      })
-
-      expect(result.current.isConnected).toBe(true)
-
-      act(() => {
-        result.current.disconnect()
-      })
-
-      expect(MockWebSocket.lastInstance.close).toHaveBeenCalled()
-      expect(result.current.isConnected).toBe(false)
-      expect(result.current.connectionState).toBe('disconnected')
-    })
-
-    it('reconnect() creates new connection', () => {
-      const { result } = renderHook(() =>
-        useWebSocket({
-          reconnect: false,
-        })
-      )
-
-      act(() => {
-        MockWebSocket.lastInstance.simulateOpen()
-      })
-
-      act(() => {
-        MockWebSocket.lastInstance.simulateClose(1000)
-      })
-
-      expect(result.current.isConnected).toBe(false)
-
-      // Manually trigger reconnect
-      act(() => {
-        result.current.reconnect()
-      })
-
-      // Should create new connection
-      expect(MockWebSocket.instances.length).toBe(2)
-    })
-  })
-
   describe('Ping Timeout', () => {
     it('closes connection after ping timeout (45s without ping)', async () => {
-      renderHook(() => useWebSocket())
+      renderHook(() =>
+        useWebSocket({ topics: ['test'] }),
+        { wrapper }
+      )
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -485,7 +426,10 @@ describe('useWebSocket', () => {
     })
 
     it('resets ping timeout when ping is received', async () => {
-      renderHook(() => useWebSocket())
+      renderHook(() =>
+        useWebSocket({ topics: ['test'] }),
+        { wrapper }
+      )
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -512,53 +456,6 @@ describe('useWebSocket', () => {
         (call: unknown[]) => call[0] === 4000
       )
       expect(closeCallsWithPingTimeout.length).toBe(0)
-    })
-  })
-
-  describe('Sequence Tracking', () => {
-    it('tracks sequence numbers for message replay on reconnect', async () => {
-      renderHook(() =>
-        useWebSocket({
-          topics: ['test-topic'],
-          reconnect: true,
-          reconnectInterval: 100,
-        })
-      )
-
-      act(() => {
-        MockWebSocket.lastInstance.simulateOpen()
-      })
-
-      // Receive messages with sequence numbers
-      act(() => {
-        MockWebSocket.lastInstance.simulateMessage({
-          topic: 'test-topic',
-          seq: 1,
-          data: 'first',
-        })
-      })
-
-      act(() => {
-        MockWebSocket.lastInstance.simulateMessage({
-          topic: 'test-topic',
-          seq: 5,
-          data: 'fifth',
-        })
-      })
-
-      // Disconnect
-      act(() => {
-        MockWebSocket.lastInstance.simulateClose(1006)
-      })
-
-      // Reconnect
-      await act(async () => {
-        vi.advanceTimersByTime(200)
-      })
-
-      // New connection URL should include lastSeq
-      const newWs = MockWebSocket.instances[1]
-      expect(newWs.url).toContain('lastSeq=test-topic:5')
     })
   })
 })

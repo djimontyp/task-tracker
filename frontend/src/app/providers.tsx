@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { onLCP, onINP, onCLS, onFCP, onTTFB, type Metric } from 'web-vitals'
 import { ThemeProvider } from '@/shared/components/ThemeProvider'
 import { TooltipProvider } from '@/shared/ui/tooltip'
+import { WebSocketProvider } from '@/shared/providers/WebSocketProvider'
 import { logger } from '@/shared/utils/logger'
 
 const queryClient = new QueryClient({
@@ -53,9 +54,11 @@ export const Providers = ({ children }: ProvidersProps) => {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ThemeProvider>
-          <TooltipProvider delayDuration={300}>
-            {children}
-          </TooltipProvider>
+          <WebSocketProvider>
+            <TooltipProvider delayDuration={300}>
+              {children}
+            </TooltipProvider>
+          </WebSocketProvider>
         </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>
