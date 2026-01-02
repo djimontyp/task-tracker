@@ -68,30 +68,28 @@ describe('Logo Component', () => {
     expect(link.getAttribute('aria-label')).toContain('home')
   })
 
-  test('applies animation class when animated=true', () => {
+  test('applies logo-svg class when animated=true', () => {
     renderLogo({ animated: true })
     const svg = screen.getByRole('link').querySelector('svg')
-    expect(svg).toHaveClass('hover:[&_line]:animate-spin-slow')
+    expect(svg).toHaveClass('logo-svg')
   })
 
-  test('does not apply animation class when animated=false', () => {
+  test('applies pointer-events-none when animated=false', () => {
     renderLogo({ animated: false })
     const svg = screen.getByRole('link').querySelector('svg')
-    expect(svg).not.toHaveClass('hover:[&_line]:animate-spin-slow')
+    expect(svg).toHaveClass('pointer-events-none')
   })
 
-  test('gradient includes blue and purple colors', () => {
+  test('uses CSS variables for theming', () => {
     renderLogo()
     const svg = screen.getByRole('link').querySelector('svg')
-    const gradient = svg?.querySelector('linearGradient')
 
-    expect(gradient).toBeInTheDocument()
-    expect(gradient).toHaveAttribute('id', 'pulseGradient')
+    // Gradients use CSS variables
+    const sweepGradient = svg?.querySelector('#sweepGradient')
+    expect(sweepGradient).toBeInTheDocument()
 
-    const stops = gradient?.querySelectorAll('stop')
-    expect(stops).toHaveLength(2)
-    expect(stops?.[0]).toHaveStyle({ stopColor: '#3b82f6' }) // Blue
-    expect(stops?.[1]).toHaveStyle({ stopColor: '#8b5cf6' }) // Purple
+    const centerGradient = svg?.querySelector('#centerGradient')
+    expect(centerGradient).toBeInTheDocument()
   })
 
   test('custom className is applied', () => {
@@ -101,26 +99,23 @@ describe('Logo Component', () => {
     expect(link).toHaveClass(customClass)
   })
 
-  test('renders all radar elements (circles, line, dots)', () => {
+  test('renders all radar elements (circles, line, orbits)', () => {
     renderLogo()
     const svg = screen.getByRole('link').querySelector('svg')
 
-    // 3 concentric circles (radar rings) with stroke
-    const strokeCircles = svg?.querySelectorAll('circle[stroke="url(#pulseGradient)"]')
-    expect(strokeCircles).toHaveLength(3) // 3 radar rings only
+    // 3 concentric circles (radar rings)
+    const circles = svg?.querySelectorAll('circle')
+    expect(circles?.length).toBeGreaterThanOrEqual(6) // rings + center + orbiting atoms
 
-    // Center pulse dot with fill
-    const centerPulse = svg?.querySelector('circle[fill="url(#pulseGradient)"]')
-    expect(centerPulse).toBeInTheDocument()
-
-    // Radar sweep line
-    const line = svg?.querySelector('line')
+    // Radar sweep line in group
+    const sweepGroup = svg?.querySelector('.sweep-group')
+    expect(sweepGroup).toBeInTheDocument()
+    const line = sweepGroup?.querySelector('line')
     expect(line).toBeInTheDocument()
-    expect(line).toHaveAttribute('stroke', 'url(#pulseGradient)')
 
-    // Task dots (3 dots representing tracked items)
-    const dots = svg?.querySelectorAll('circle[fill="#3b82f6"], circle[fill="#8b5cf6"]')
-    expect(dots?.length).toBeGreaterThanOrEqual(3)
+    // Orbit groups for atoms
+    const orbitGroups = svg?.querySelectorAll('.orbit-group')
+    expect(orbitGroups?.length).toBe(3)
   })
 
   test('has data-testid for E2E testing', () => {
@@ -129,12 +124,8 @@ describe('Logo Component', () => {
     expect(link).toHaveAttribute('data-testid', 'sidebar-logo')
   })
 
-  // Note: VITE_* env vars are bundled at compile time.
-  // Runtime mutation of import.meta.env doesn't work reliably in Vitest.
-  // These tests verify the actual behavior with current env config.
   test('displays app name from env or default', () => {
     renderLogo({ showText: true })
-    // Should have some text label (env var or default "Pulse Radar")
     const textElement = screen.getByRole('link').querySelector('span')
     expect(textElement).toBeInTheDocument()
     expect(textElement?.textContent).toBeTruthy()
@@ -151,5 +142,11 @@ describe('Logo Component', () => {
     const textElement = screen.getByRole('link').querySelector('span')
     expect(textElement).toBeInTheDocument()
     expect(textElement).toHaveClass('whitespace-nowrap')
+  })
+
+  test('has logo-container class for styling', () => {
+    renderLogo()
+    const link = screen.getByRole('link')
+    expect(link).toHaveClass('logo-container')
   })
 })

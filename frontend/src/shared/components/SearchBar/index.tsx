@@ -89,11 +89,13 @@ export function SearchBar({
     }
   }, [shouldShowDropdown, data])
 
-  // Global keyboard shortcut: / to focus search
+  // Global keyboard shortcut: / to focus search (works on any keyboard layout)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Use e.code for layout-independent key detection
+      // 'Slash' is the physical key, works on EN/UK/RU layouts
       if (
-        e.key === '/' &&
+        e.code === 'Slash' &&
         !['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)
       ) {
         e.preventDefault()

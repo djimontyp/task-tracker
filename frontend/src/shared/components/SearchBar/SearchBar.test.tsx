@@ -15,6 +15,7 @@ const createMockProps = (overrides: Partial<SearchBarProps> = {}): SearchBarProp
   onSelectMessage: vi.fn(),
   onSelectAtom: vi.fn(),
   onSelectTopic: vi.fn(),
+  placeholder: 'Search...', // Default for tests
   ...overrides,
 });
 
@@ -35,7 +36,7 @@ describe('SearchBar', () => {
   test('renders input with correct placeholder', () => {
     renderSearchBar(createMockProps());
 
-    const input = screen.getByPlaceholderText('Search... (/)');
+    const input = screen.getByPlaceholderText('Search...');
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute('type', 'text');
     expect(input).toHaveAttribute('id', 'global-search');
@@ -43,9 +44,9 @@ describe('SearchBar', () => {
   });
 
   test('renders custom placeholder', () => {
-    renderSearchBar(createMockProps({ placeholder: 'Custom placeholder' }));
+    renderSearchBar(createMockProps({ placeholder: 'Custom search placeholder' }));
 
-    const input = screen.getByPlaceholderText('Custom placeholder');
+    const input = screen.getByPlaceholderText('Custom search placeholder');
     expect(input).toBeInTheDocument();
   });
 
@@ -60,7 +61,7 @@ describe('SearchBar', () => {
   test('displays the provided query value', () => {
     renderSearchBar(createMockProps({ query: 'test value' }));
 
-    const input = screen.getByPlaceholderText('Search... (/)');
+    const input = screen.getByPlaceholderText('Search...');
     expect(input).toHaveValue('test value');
   });
 
@@ -135,7 +136,7 @@ describe('SearchBar', () => {
     const onQueryChange = vi.fn();
     renderSearchBar(createMockProps({ onQueryChange }));
 
-    const input = screen.getByPlaceholderText('Search... (/)');
+    const input = screen.getByPlaceholderText('Search...');
     await user.type(input, 'abc');
 
     expect(onQueryChange).toHaveBeenCalledTimes(3);
@@ -148,7 +149,7 @@ describe('SearchBar', () => {
   test('focuses input when "/" key is pressed', async () => {
     renderSearchBar(createMockProps());
 
-    const input = screen.getByPlaceholderText('Search... (/)');
+    const input = screen.getByPlaceholderText('Search...');
 
     // Simulate "/" key press on window directly
     const event = new KeyboardEvent('keydown', { key: '/', bubbles: true });
@@ -163,7 +164,7 @@ describe('SearchBar', () => {
     const user = userEvent.setup();
     renderSearchBar(createMockProps());
 
-    const input = screen.getByPlaceholderText('Search... (/)');
+    const input = screen.getByPlaceholderText('Search...');
 
     // Focus input first and type
     await user.click(input);
@@ -177,7 +178,7 @@ describe('SearchBar', () => {
   test('input has correct aria-label', () => {
     renderSearchBar(createMockProps());
 
-    const input = screen.getByPlaceholderText('Search... (/)');
+    const input = screen.getByPlaceholderText('Search...');
     expect(input).toHaveAttribute('aria-label', 'Search topics, messages, and atoms');
   });
 
@@ -193,7 +194,7 @@ describe('SearchBar', () => {
     const onQueryChange = vi.fn();
     renderSearchBar(createMockProps({ onQueryChange }));
 
-    const input = screen.getByPlaceholderText('Search... (/)');
+    const input = screen.getByPlaceholderText('Search...');
 
     // Tab to input
     await user.tab();

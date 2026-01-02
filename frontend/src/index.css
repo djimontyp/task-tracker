@@ -225,3 +225,56 @@
    * No global outline - prevents double focus indicators.
    */
 }
+
+/* Logo animations - harmonized speeds (all multiples of 4s base) */
+@keyframes radar-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes orbit {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes orbit-reverse {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+/* Logo base styles */
+.logo-svg .sweep-group,
+.logo-svg .orbit-group {
+  transform-origin: 16px 16px;
+  will-change: transform;
+}
+
+/* Hover + animating states - slow, elegant motion */
+.logo-container:hover .logo-svg .sweep-group,
+.logo-svg.animating .sweep-group {
+  animation: radar-sweep 6s linear infinite;
+}
+
+/* Atoms orbit even slower - very subtle, harmonized ratios */
+.logo-container:hover .logo-svg .orbit-1,
+.logo-svg.animating .orbit-1 {
+  animation: orbit 18s linear infinite;  /* 3x sweep = gentle */
+}
+
+.logo-container:hover .logo-svg .orbit-2,
+.logo-svg.animating .orbit-2 {
+  animation: orbit-reverse 24s linear infinite;  /* 4x sweep = very gentle, opposite */
+}
+
+.logo-container:hover .logo-svg .orbit-3,
+.logo-svg.animating .orbit-3 {
+  animation: orbit 12s linear infinite;  /* 2x sweep */
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .logo-svg .sweep-group,
+  .logo-svg .orbit-group {
+    animation: none !important;
+  }
+}

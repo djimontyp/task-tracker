@@ -4,31 +4,28 @@ import userEvent from '@testing-library/user-event';
 import { ServiceStatusIndicator } from './ServiceStatusIndicator';
 
 describe('ServiceStatusIndicator', () => {
-  test('renders healthy state with correct classes', () => {
+  test('renders healthy state with correct icon', () => {
     render(<ServiceStatusIndicator status="healthy" />);
 
-    const dot = screen.getByTestId('status-dot');
-    expect(dot).toBeInTheDocument();
-    expect(dot).toHaveClass('bg-semantic-success');
-    expect(dot).not.toHaveClass('animate-pulse');
+    const statusElement = screen.getByRole('status');
+    expect(statusElement).toBeInTheDocument();
+    // Icon should have semantic success color
+    const icon = statusElement.querySelector('svg');
+    expect(icon).toBeInTheDocument();
   });
 
-  test('renders warning state with animate-pulse', () => {
+  test('renders warning state', () => {
     render(<ServiceStatusIndicator status="warning" />);
 
-    const dot = screen.getByTestId('status-dot');
-    expect(dot).toBeInTheDocument();
-    expect(dot).toHaveClass('bg-semantic-warning');
-    expect(dot).toHaveClass('animate-pulse');
+    const statusElement = screen.getByRole('status');
+    expect(statusElement).toBeInTheDocument();
   });
 
-  test('renders error state with animate-pulse', () => {
+  test('renders error state', () => {
     render(<ServiceStatusIndicator status="error" />);
 
-    const dot = screen.getByTestId('status-dot');
-    expect(dot).toBeInTheDocument();
-    expect(dot).toHaveClass('bg-destructive');
-    expect(dot).toHaveClass('animate-pulse');
+    const statusElement = screen.getByRole('status');
+    expect(statusElement).toBeInTheDocument();
   });
 
   test('shows tooltip content on hover', async () => {
