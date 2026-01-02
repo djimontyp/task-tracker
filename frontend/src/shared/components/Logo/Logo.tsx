@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/shared/lib/utils'
 
@@ -38,6 +38,20 @@ export function Logo({
   const svgRef = useRef<SVGSVGElement>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Start animation on page load for 3 seconds
+  useEffect(() => {
+    if (!animated || !svgRef.current) return
+
+    const svg = svgRef.current
+    svg.classList.add('animating')
+
+    const timer = setTimeout(() => {
+      svg.classList.remove('animating')
+    }, 3000)
+
+    return () => clearTimeout(timer)
+  }, [animated])
+
   // On mouse leave: add "animating" class for 3s to continue animation
   const handleMouseLeave = useCallback(() => {
     if (!animated || !svgRef.current) return
@@ -62,7 +76,10 @@ export function Logo({
       to="/"
       className={cn(
         'logo-container flex items-center gap-2 rounded-md',
+        'hover:bg-sidebar-accent/50 transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        // Ensure 44px touch target
+        'min-h-11',
         className
       )}
       aria-label={`${appName} home`}
@@ -100,13 +117,13 @@ export function Logo({
             </radialGradient>
           </defs>
 
-          {/* Outer radar circle - subtle */}
+          {/* Outer radar circle */}
           <circle
             cx="16"
             cy="16"
             r="14"
-            stroke="hsl(var(--primary) / 0.3)"
-            strokeWidth="1"
+            stroke="hsl(var(--primary) / 0.5)"
+            strokeWidth="1.5"
             fill="none"
           />
 
@@ -115,8 +132,8 @@ export function Logo({
             cx="16"
             cy="16"
             r="10"
-            stroke="hsl(var(--primary) / 0.5)"
-            strokeWidth="1"
+            stroke="hsl(var(--primary) / 0.7)"
+            strokeWidth="1.5"
             fill="none"
           />
 
@@ -125,8 +142,8 @@ export function Logo({
             cx="16"
             cy="16"
             r="6"
-            stroke="hsl(var(--primary) / 0.7)"
-            strokeWidth="1"
+            stroke="hsl(var(--primary) / 0.9)"
+            strokeWidth="1.5"
             fill="none"
           />
 

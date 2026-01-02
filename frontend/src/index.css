@@ -226,20 +226,20 @@
    */
 }
 
-/* Logo animations - harmonized speeds (all multiples of 4s base) */
+/* Logo animations - 2 full rotations (720°) */
 @keyframes radar-sweep {
   0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  100% { transform: rotate(720deg); }
 }
 
-@keyframes orbit {
+@keyframes orbit-fast {
   0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  100% { transform: rotate(720deg); }
 }
 
 @keyframes orbit-reverse {
   0% { transform: rotate(0deg); }
-  100% { transform: rotate(-360deg); }
+  100% { transform: rotate(-720deg); }
 }
 
 /* Logo base styles */
@@ -249,26 +249,28 @@
   will-change: transform;
 }
 
-/* Hover + animating states - slow, elegant motion */
+/* Hover + animating states */
 .logo-container:hover .logo-svg .sweep-group,
 .logo-svg.animating .sweep-group {
-  animation: radar-sweep 6s linear infinite;
+  animation: radar-sweep 3s linear infinite;  /* 2 rotations in 3s */
 }
 
-/* Atoms orbit even slower - very subtle, harmonized ratios */
+/* Atom 1 - same direction as sweep, faster */
 .logo-container:hover .logo-svg .orbit-1,
 .logo-svg.animating .orbit-1 {
-  animation: orbit 18s linear infinite;  /* 3x sweep = gentle */
+  animation: orbit-fast 2.5s linear infinite;  /* faster than sweep */
 }
 
+/* Atom 2 - REVERSE direction, slower */
 .logo-container:hover .logo-svg .orbit-2,
 .logo-svg.animating .orbit-2 {
-  animation: orbit-reverse 24s linear infinite;  /* 4x sweep = very gentle, opposite */
+  animation: orbit-reverse 5s linear infinite;  /* opposite, slower */
 }
 
+/* Atom 3 - same direction, medium */
 .logo-container:hover .logo-svg .orbit-3,
 .logo-svg.animating .orbit-3 {
-  animation: orbit 12s linear infinite;  /* 2x sweep */
+  animation: orbit-fast 4s linear infinite;  /* medium speed */
 }
 
 /* Reduced motion */
