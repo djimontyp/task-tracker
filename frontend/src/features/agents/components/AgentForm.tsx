@@ -75,6 +75,12 @@ const AgentForm = ({
     hasProviderSelected && isOllamaProvider && !manualModelInput
   )
 
+  // Filter out embedding models - they don't support chat API
+  const chatModels = models.filter((model) => {
+    const name = model.name.toLowerCase()
+    return !name.includes('embed') && !name.includes('minilm')
+  })
+
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -96,11 +102,11 @@ const AgentForm = ({
   }, [formData.provider_id])
 
   useEffect(() => {
-    if (models.length > 0 && !formData.model_name && !isEdit) {
-      setFormData((prev) => ({ ...prev, model_name: models[0].name }))
+    if (chatModels.length > 0 && !formData.model_name && !isEdit) {
+      setFormData((prev) => ({ ...prev, model_name: chatModels[0].name }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [models, isEdit])
+  }, [chatModels, isEdit])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -160,7 +166,7 @@ const AgentForm = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="model_name">{t('form.fields.modelName.label')} *</Label>
-                {hasProviderSelected && isOllamaProvider && models.length > 0 && (
+                {hasProviderSelected && isOllamaProvider && chatModels.length > 0 && (
                   <button
                     type="button"
                     onClick={() => setManualModelInput(!manualModelInput)}
@@ -195,7 +201,7 @@ const AgentForm = ({
                         required
                       />
                     </div>
-                  ) : models.length > 0 ? (
+                  ) : chatModels.length > 0 ? (
                     <Select
                       value={formData.model_name}
                       onValueChange={(value) => setFormData({ ...formData, model_name: value })}
@@ -204,7 +210,7 @@ const AgentForm = ({
                         <SelectValue placeholder={t('form.fields.modelName.selectPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
-                        {models.map((model) => (
+                        {chatModels.map((model) => (
                           <SelectItem key={model.name} value={model.name}>
                             {model.name}
                           </SelectItem>
