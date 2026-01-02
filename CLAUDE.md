@@ -10,6 +10,21 @@
 - **Код:** коментарі та docstrings **ТІЛЬКИ** англійською
 - **Питання:** спершу пряма відповідь, потім дії (не ігноруй питання!)
 
+## MCP Playwright
+
+**URL для браузера:** `http://localhost` (БЕЗ порта!)
+
+```bash
+# ✅ ПРАВИЛЬНО
+http://localhost/messages
+http://localhost/settings
+
+# ❌ НЕПРАВИЛЬНО
+http://localhost:3000/messages
+```
+
+Nginx проксює на правильний порт автоматично.
+
 ## Проект
 
 **Pulse Radar** — AI-система збору знань з комунікаційних каналів (Telegram, Slack).

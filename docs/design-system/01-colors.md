@@ -33,6 +33,37 @@
 - Unique positioning vs competitors (Linear=purple, Notion=black)
 - Works well in both light and dark modes
 
+### Accent Color (Primary Bright)
+
+**Single source of truth** for all active/selected UI elements.
+
+| Mode | HSL | Hex | Use |
+|------|-----|-----|-----|
+| **Light** | `172 80% 32%` | `#107D6E` | Active tabs, sidebar selection, focus states |
+| **Dark** | `172 66% 50%` | `#14B8A6` | Active tabs, sidebar selection, focus states |
+
+**CSS Variable:** `--primary-bright`
+
+**Usage in components:**
+```jsx
+// Tabs - active tab text and underline
+<span className="text-[hsl(var(--primary-bright))]">Active Tab</span>
+
+// Sidebar - active navigation item
+<span className="text-primary-bright">Active Page</span>
+
+// Using Tailwind token
+<span className="text-primary-bright">Highlighted text</span>
+```
+
+**Design principle:**
+- **Light mode:** Higher saturation (80%) + darker (32% lightness) for crisp contrast on white
+- **Dark mode:** Standard saturation (66%) + brighter (50% lightness) for visibility on dark
+
+**Why separate from `--primary`?**
+- `--primary` (28-30% lightness) is for filled buttons where white text needs high contrast
+- `--primary-bright` is for text/underlines on light/dark backgrounds — needs different tuning per theme
+
 ### Secondary Colors (Neutral Gray)
 - **Light mode:** `60 4.8% 95.9%` → RGB `244, 244, 244`
 - **Dark mode:** `12 6.5% 15.1%` → RGB `28, 26, 23`
