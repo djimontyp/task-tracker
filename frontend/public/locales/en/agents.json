@@ -120,6 +120,7 @@
   "card": {
     "actions": {
       "edit": "Edit agent",
+      "copy": "Copy agent",
       "manageTasks": "Manage tasks",
       "test": "Test agent",
       "delete": "Delete agent"

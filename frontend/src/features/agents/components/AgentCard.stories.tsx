@@ -20,6 +20,10 @@ const meta: Meta<typeof AgentCard> = {
       action: 'edit',
       description: 'Called when edit button is clicked',
     },
+    onCopy: {
+      action: 'copy',
+      description: 'Called when copy button is clicked',
+    },
     onDelete: {
       action: 'delete',
       description: 'Called when delete button is clicked',
@@ -212,6 +216,7 @@ export const MultipleAgents: Story = {
           is_active: true,
         })}
         onEdit={() => {}}
+        onCopy={() => {}}
         onDelete={() => {}}
         onManageTasks={() => {}}
         onTest={() => {}}
@@ -225,6 +230,7 @@ export const MultipleAgents: Story = {
           is_active: true,
         })}
         onEdit={() => {}}
+        onCopy={() => {}}
         onDelete={() => {}}
         onManageTasks={() => {}}
         onTest={() => {}}
@@ -237,6 +243,7 @@ export const MultipleAgents: Story = {
           is_active: false,
         })}
         onEdit={() => {}}
+        onCopy={() => {}}
         onDelete={() => {}}
         onManageTasks={() => {}}
         onTest={() => {}}

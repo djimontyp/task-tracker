@@ -17,6 +17,7 @@ const AgentList = () => {
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingAgent, setEditingAgent] = useState<AgentConfig | null>(null)
+  const [copyingAgent, setCopyingAgent] = useState<Partial<AgentConfigCreate> | null>(null)
   const [managingAgent, setManagingAgent] = useState<AgentConfig | null>(null)
   const [testingAgent, setTestingAgent] = useState<AgentConfig | null>(null)
 
@@ -64,11 +65,29 @@ const AgentList = () => {
 
   const handleCreate = () => {
     setEditingAgent(null)
+    setCopyingAgent(null)
     setFormOpen(true)
   }
 
   const handleEdit = (agent: AgentConfig) => {
     setEditingAgent(agent)
+    setCopyingAgent(null)
+    setFormOpen(true)
+  }
+
+  const handleCopy = (agent: AgentConfig) => {
+    const copyData: Partial<AgentConfigCreate> = {
+      name: `${agent.name} (Copy)`,
+      description: agent.description,
+      provider_id: agent.provider_id,
+      model_name: agent.model_name,
+      system_prompt: agent.system_prompt,
+      temperature: agent.temperature,
+      max_tokens: agent.max_tokens,
+      is_active: agent.is_active,
+    }
+    setCopyingAgent(copyData)
+    setEditingAgent(null)
     setFormOpen(true)
   }
 
@@ -134,6 +153,7 @@ const AgentList = () => {
               key={agent.id}
               agent={agent}
               onEdit={handleEdit}
+              onCopy={handleCopy}
               onDelete={handleDelete}
               onManageTasks={handleManageTasks}
               onTest={handleTest}
@@ -148,9 +168,10 @@ const AgentList = () => {
         onClose={() => {
           setFormOpen(false)
           setEditingAgent(null)
+          setCopyingAgent(null)
         }}
         onSubmit={handleSubmit}
-        initialData={editingAgent || undefined}
+        initialData={editingAgent || copyingAgent || undefined}
         isEdit={!!editingAgent}
         loading={createMutation.isPending || updateMutation.isPending}
       />
