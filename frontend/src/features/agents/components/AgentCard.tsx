@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, Button, Badge } from '@/shared/ui'
 import { AgentConfig } from '@/features/agents/types'
 import { Pencil, Trash2, Settings, TestTube2 } from 'lucide-react'
@@ -19,6 +20,8 @@ const AgentCard = ({
   onTest,
   isDeleting = false,
 }: AgentCardProps) => {
+  const { t } = useTranslation('agents')
+
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardContent className="pt-6">
@@ -35,7 +38,7 @@ const AgentCard = ({
                 size="icon"
                 variant="ghost"
                 onClick={() => onEdit(agent)}
-                aria-label="Edit agent"
+                aria-label={t('card.actions.edit')}
               >
                 <Pencil className="h-4 w-4" />
               </Button>
@@ -43,7 +46,7 @@ const AgentCard = ({
                 size="icon"
                 variant="ghost"
                 onClick={() => onManageTasks(agent)}
-                aria-label="Manage tasks"
+                aria-label={t('card.actions.manageTasks')}
               >
                 <Settings className="h-4 w-4" />
               </Button>
@@ -51,7 +54,7 @@ const AgentCard = ({
                 size="icon"
                 variant="ghost"
                 onClick={() => onTest(agent)}
-                aria-label="Test agent"
+                aria-label={t('card.actions.test')}
               >
                 <TestTube2 className="h-4 w-4" />
               </Button>
@@ -59,7 +62,7 @@ const AgentCard = ({
                 size="icon"
                 variant="ghost"
                 onClick={() => onDelete(agent.id)}
-                aria-label="Delete agent"
+                aria-label={t('card.actions.delete')}
                 disabled={isDeleting}
               >
                 <Trash2 className="h-4 w-4" />
@@ -69,34 +72,34 @@ const AgentCard = ({
 
           <div className="space-y-2 text-sm">
             <div>
-              <span className="text-muted-foreground">Model:</span>
+              <span className="text-muted-foreground">{t('card.fields.model')}</span>
               <p className="font-mono text-xs">{agent.model_name}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               {agent.temperature !== undefined && (
                 <div>
-                  <span className="text-muted-foreground">Temperature:</span>
+                  <span className="text-muted-foreground">{t('card.fields.temperature')}</span>
                   <p className="font-mono text-xs">{agent.temperature}</p>
                 </div>
               )}
               {agent.max_tokens !== undefined && (
                 <div>
-                  <span className="text-muted-foreground">Max Tokens:</span>
+                  <span className="text-muted-foreground">{t('card.fields.maxTokens')}</span>
                   <p className="font-mono text-xs">{agent.max_tokens}</p>
                 </div>
               )}
             </div>
 
             <div>
-              <span className="text-muted-foreground">System Prompt:</span>
+              <span className="text-muted-foreground">{t('card.fields.systemPrompt')}</span>
               <p className="text-xs mt-2 line-clamp-2">{agent.system_prompt}</p>
             </div>
 
             <div className="flex items-center justify-between pt-2">
-              <span className="text-muted-foreground">Status:</span>
+              <span className="text-muted-foreground">{t('card.fields.status')}</span>
               <Badge variant={agent.is_active ? 'default' : 'secondary'}>
-                {agent.is_active ? 'Active' : 'Inactive'}
+                {agent.is_active ? t('status.active') : t('status.inactive')}
               </Badge>
             </div>
           </div>

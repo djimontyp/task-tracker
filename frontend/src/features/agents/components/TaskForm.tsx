@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -42,6 +43,7 @@ const TaskForm = ({
   isEdit = false,
   loading = false,
 }: TaskFormProps) => {
+  const { t } = useTranslation('agents')
   const [formData, setFormData] = useState<Partial<TaskConfigCreate>>({
     name: initialData?.name || '',
     description: initialData?.description || '',
@@ -73,51 +75,51 @@ const TaskForm = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-2xl lg:max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Edit Task' : 'Create Task'}</DialogTitle>
+          <DialogTitle>{isEdit ? t('taskForm.title.edit') : t('taskForm.title.create')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <FormField label="Task name" required>
+          <FormField label={t('taskForm.fields.name.label')} required>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="My Task"
+              placeholder={t('taskForm.fields.name.placeholder')}
               required
             />
           </FormField>
 
-          <FormField label="Description">
+          <FormField label={t('taskForm.fields.description.label')}>
             <Input
               id="description"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              placeholder="Task description"
+              placeholder={t('taskForm.fields.description.placeholder')}
             />
           </FormField>
 
           <fieldset className="space-y-2">
-            <legend className="sr-only">Response Fields Configuration</legend>
+            <legend className="sr-only">{t('taskForm.responseFields.legend')}</legend>
             <div className="flex items-center gap-2">
-              <Label htmlFor="response-fields">Response Fields *</Label>
+              <Label htmlFor="response-fields">{t('taskForm.responseFields.label')}</Label>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Info
                       className="h-4 w-4 text-muted-foreground cursor-help"
-                      aria-label="Response fields help"
+                      aria-label={t('taskForm.responseFields.helpAriaLabel')}
                     />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Define the structure of data the AI will return</p>
+                    <p>{t('taskForm.responseFields.tooltip')}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
             <p className="text-sm text-muted-foreground">
-              Define what data the AI agent should return
+              {t('taskForm.responseFields.description')}
             </p>
             <SchemaEditor
               value={formData.response_schema || defaultSchema}
@@ -134,16 +136,16 @@ const TaskForm = ({
               }
             />
             <Label htmlFor="is_active" className="cursor-pointer">
-              Active
+              {t('status.active')}
             </Label>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-              Cancel
+              {t('actions.cancel')}
             </Button>
             <Button type="submit" loading={loading}>
-              {isEdit ? 'Update' : 'Create'}
+              {isEdit ? t('actions.update') : t('actions.create')}
             </Button>
           </DialogFooter>
         </form>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import {
   Dialog,
@@ -40,6 +41,7 @@ const AgentForm = ({
   isEdit = false,
   loading = false,
 }: AgentFormProps) => {
+  const { t } = useTranslation('agents')
   const [formData, setFormData] = useState<Partial<AgentConfigCreate>>({
     name: initialData?.name || '',
     description: initialData?.description || '',
@@ -109,7 +111,7 @@ const AgentForm = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Edit Agent' : 'Create Agent'}</DialogTitle>
+          <DialogTitle>{isEdit ? t('form.title.edit') : t('form.title.create')}</DialogTitle>
         </DialogHeader>
 
         {providersLoading ? (
@@ -118,32 +120,32 @@ const AgentForm = ({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <FormField label="Name" id="name" required>
+            <FormField label={t('form.fields.name.label')} id="name" required>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="My Agent"
+                placeholder={t('form.fields.name.placeholder')}
                 required
               />
             </FormField>
 
-            <FormField label="Description" id="description">
+            <FormField label={t('form.fields.description.label')} id="description">
               <Input
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Agent description"
+                placeholder={t('form.fields.description.placeholder')}
               />
             </FormField>
 
-            <FormField label="Provider" id="provider_id" required>
+            <FormField label={t('form.fields.provider.label')} id="provider_id" required>
               <Select
                 value={formData.provider_id}
                 onValueChange={(value) => setFormData({ ...formData, provider_id: value })}
               >
                 <SelectTrigger id="provider_id">
-                  <SelectValue placeholder="Select provider" />
+                  <SelectValue placeholder={t('form.fields.provider.placeholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {providers?.map((provider) => (
@@ -157,28 +159,28 @@ const AgentForm = ({
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="model_name">Model Name *</Label>
+                <Label htmlFor="model_name">{t('form.fields.modelName.label')} *</Label>
                 {hasProviderSelected && isOllamaProvider && models.length > 0 && (
                   <button
                     type="button"
                     onClick={() => setManualModelInput(!manualModelInput)}
                     className="text-xs text-muted-foreground hover:text-foreground"
                   >
-                    {manualModelInput ? 'Use dropdown' : 'Manual input'}
+                    {manualModelInput ? t('form.fields.modelName.useDropdown') : t('form.fields.modelName.manualInput')}
                   </button>
                 )}
               </div>
 
               {!hasProviderSelected ? (
                 <div className="px-4 py-2 text-sm border border-input bg-muted rounded-md text-muted-foreground">
-                  Please select a provider first
+                  {t('form.messages.selectProviderFirst')}
                 </div>
               ) : isOllamaProvider && !manualModelInput ? (
                 <>
                   {modelsLoading ? (
                     <div className="flex items-center gap-2 px-4 py-2 text-sm border border-input bg-background rounded-md">
                       <Spinner className="w-4 h-4" />
-                      <span className="text-muted-foreground">Loading models...</span>
+                      <span className="text-muted-foreground">{t('form.messages.loadingModels')}</span>
                     </div>
                   ) : modelsError ? (
                     <div className="space-y-2">
@@ -189,7 +191,7 @@ const AgentForm = ({
                         id="model_name"
                         value={formData.model_name}
                         onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
-                        placeholder="llama3.2:latest"
+                        placeholder={t('form.fields.modelName.placeholder')}
                         required
                       />
                     </div>
@@ -199,7 +201,7 @@ const AgentForm = ({
                       onValueChange={(value) => setFormData({ ...formData, model_name: value })}
                     >
                       <SelectTrigger id="model_name">
-                        <SelectValue placeholder="Select model" />
+                        <SelectValue placeholder={t('form.fields.modelName.selectPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {models.map((model) => (
@@ -212,13 +214,13 @@ const AgentForm = ({
                   ) : (
                     <div className="space-y-2">
                       <div className="px-4 py-2 text-sm border border-input bg-muted rounded-md text-muted-foreground">
-                        No models found. Please enter model name manually.
+                        {t('form.messages.noModelsFound')}
                       </div>
                       <Input
                         id="model_name"
                         value={formData.model_name}
                         onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
-                        placeholder="llama3.2:latest"
+                        placeholder={t('form.fields.modelName.placeholder')}
                         required
                       />
                     </div>
@@ -229,26 +231,26 @@ const AgentForm = ({
                   id="model_name"
                   value={formData.model_name}
                   onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
-                  placeholder="llama3.2:latest"
+                  placeholder={t('form.fields.modelName.placeholder')}
                   required
                 />
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="system_prompt">System Prompt *</Label>
+              <Label htmlFor="system_prompt">{t('form.fields.systemPrompt.label')} *</Label>
               <textarea
                 id="system_prompt"
                 value={formData.system_prompt}
                 onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
-                placeholder="You are a helpful assistant..."
+                placeholder={t('form.fields.systemPrompt.placeholder')}
                 required
                 className="w-full min-h-[100px] px-4 py-2 text-sm rounded-md border border-input bg-background"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <FormField label="Temperature" id="temperature">
+              <FormField label={t('form.fields.temperature.label')} id="temperature">
                 <Input
                   id="temperature"
                   type="number"
@@ -262,7 +264,7 @@ const AgentForm = ({
                 />
               </FormField>
 
-              <FormField label="Max tokens" id="max_tokens">
+              <FormField label={t('form.fields.maxTokens.label')} id="max_tokens">
                 <Input
                   id="max_tokens"
                   type="number"
@@ -285,16 +287,16 @@ const AgentForm = ({
                 }
               />
               <Label htmlFor="is_active" className="cursor-pointer">
-                Active
+                {t('form.fields.active.label')}
               </Label>
             </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-                Cancel
+                {t('form.actions.cancel')}
               </Button>
               <Button type="submit" loading={loading}>
-                {isEdit ? 'Update' : 'Create'}
+                {isEdit ? t('form.actions.update') : t('form.actions.create')}
               </Button>
             </DialogFooter>
           </form>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useMutation } from '@tanstack/react-query'
 import {
   Dialog,
@@ -44,6 +45,7 @@ const MIN_PROMPT_LENGTH = 1
 const MAX_PROMPT_LENGTH = 5000
 
 const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
+  const { t } = useTranslation('agents')
   const [prompt, setPrompt] = useState('')
   const [result, setResult] = useState<TestResult | null>(null)
 
@@ -54,21 +56,21 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
     },
     onSuccess: (data) => {
       setResult(data)
-      toast.success('Agent test completed successfully')
+      toast.success(t('testDialog.toast.success'))
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to test agent')
+      toast.error(error.message || t('testDialog.toast.error'))
       setResult(null)
     },
   })
 
   const handleTest = () => {
     if (prompt.length < MIN_PROMPT_LENGTH) {
-      toast.error(`Prompt must be at least ${MIN_PROMPT_LENGTH} characters`)
+      toast.error(t('testDialog.toast.promptTooShort', { count: MIN_PROMPT_LENGTH }))
       return
     }
     if (prompt.length > MAX_PROMPT_LENGTH) {
-      toast.error(`Prompt must be no more than ${MAX_PROMPT_LENGTH} characters`)
+      toast.error(t('testDialog.toast.promptTooLong', { count: MAX_PROMPT_LENGTH }))
       return
     }
     testMutation.mutate(prompt)
@@ -104,27 +106,27 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Test Agent: {agent?.name || 'Unknown'}</DialogTitle>
+          <DialogTitle>{agent?.name ? t('testDialog.title', { name: agent.name }) : t('testDialog.titleUnknown')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Prompt Input */}
-          <FormField label="Prompt">
+          <FormField label={t('testDialog.fields.prompt.label')}>
             <Textarea
               id="prompt"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Enter your test prompt here..."
+              placeholder={t('testDialog.fields.prompt.placeholder')}
               className="min-h-[120px] resize-none"
               disabled={testMutation.isPending}
             />
             <div className="flex items-center justify-between text-xs mt-2">
               <span className={characterCountColor}>
-                Characters: {characterCount}/{MAX_PROMPT_LENGTH}
+                {t('testDialog.fields.prompt.characters', { current: characterCount, max: MAX_PROMPT_LENGTH })}
               </span>
               {characterCount < MIN_PROMPT_LENGTH && (
                 <span className="text-semantic-error">
-                  Minimum {MIN_PROMPT_LENGTH} characters required
+                  {t('testDialog.fields.prompt.minRequired', { count: MIN_PROMPT_LENGTH })}
                 </span>
               )}
             </div>
@@ -139,7 +141,7 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
               onClick={handleClear}
               disabled={testMutation.isPending || !prompt}
             >
-              Clear
+              {t('testDialog.actions.clear')}
             </Button>
             <div className="flex-1 flex items-center gap-2 overflow-x-auto">
               {EXAMPLE_PROMPTS.map((examplePrompt, index) => (
@@ -152,7 +154,7 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
                   disabled={testMutation.isPending}
                   className="whitespace-nowrap text-xs"
                 >
-                  Example {index + 1}
+                  {t('testDialog.actions.example', { number: index + 1 })}
                 </Button>
               ))}
             </div>
@@ -162,19 +164,19 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
           {testMutation.isPending && (
             <div className="flex items-center justify-center py-8 space-x-2">
               <Spinner />
-              <span className="text-sm text-muted-foreground">Testing agent...</span>
+              <span className="text-sm text-muted-foreground">{t('testDialog.status.testing')}</span>
             </div>
           )}
 
           {result && !testMutation.isPending && (
             <div className="space-y-4 animate-fade-in">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">Test Results</span>
-                <Badge variant="default">Success</Badge>
+                <span className="text-sm font-semibold">{t('testDialog.results.title')}</span>
+                <Badge variant="default">{t('testDialog.results.success')}</Badge>
               </div>
 
               <div className="space-y-2">
-                <Label>Response</Label>
+                <Label>{t('testDialog.results.response')}</Label>
                 <div className="max-h-[300px] overflow-y-auto rounded-md border border-input bg-muted/50 px-4 py-2">
                   <pre className="text-sm whitespace-pre-wrap break-words">
                     {result.response}
@@ -184,17 +186,17 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
 
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Model:</span>
+                  <span className="text-muted-foreground">{t('testDialog.results.model')}</span>
                   <p className="font-mono text-xs mt-2">{result.model_name}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Provider:</span>
+                  <span className="text-muted-foreground">{t('testDialog.results.provider')}</span>
                   <p className="font-mono text-xs mt-2 capitalize">{result.provider_type}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Time:</span>
+                  <span className="text-muted-foreground">{t('testDialog.results.time')}</span>
                   <p className="font-mono text-xs mt-2">
-                    {(result.elapsed_time * 1000).toFixed(0)} ms
+                    {t('testDialog.results.timeValue', { value: (result.elapsed_time * 1000).toFixed(0) })}
                   </p>
                 </div>
               </div>
@@ -204,7 +206,7 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={handleClose}>
-            Cancel
+            {t('testDialog.actions.cancel')}
           </Button>
           <Button
             type="button"
@@ -212,7 +214,7 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
             disabled={!agent || !isPromptValid || testMutation.isPending}
             loading={testMutation.isPending}
           >
-            Test Agent
+            {t('testDialog.actions.test')}
           </Button>
         </DialogFooter>
       </DialogContent>

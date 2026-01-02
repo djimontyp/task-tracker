@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -35,6 +36,7 @@ const ProviderForm = ({
   isEdit = false,
   loading = false,
 }: ProviderFormProps) => {
+  const { t } = useTranslation('agents')
   const [formData, setFormData] = useState<Partial<LLMProviderCreate>>({
     name: initialData?.name || '',
     type: initialData?.type || ProviderType.OLLAMA,
@@ -80,21 +82,21 @@ const ProviderForm = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Edit Provider' : 'Create Provider'}</DialogTitle>
+          <DialogTitle>{isEdit ? t('providerForm.title.edit') : t('providerForm.title.create')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <FormField label="Name" id="name" required>
+          <FormField label={t('providerForm.fields.name.label')} id="name" required>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="My LLM Provider"
+              placeholder={t('providerForm.fields.name.placeholder')}
               required
             />
           </FormField>
 
-          <FormField label="Provider type" id="type" required>
+          <FormField label={t('providerForm.fields.type.label')} id="type" required>
             <Select
               value={formData.type}
               onValueChange={(value) => handleTypeChange(value as ProviderType)}
@@ -103,14 +105,14 @@ const ProviderForm = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={ProviderType.OLLAMA}>Ollama</SelectItem>
-                <SelectItem value={ProviderType.OPENAI}>OpenAI</SelectItem>
+                <SelectItem value={ProviderType.OLLAMA}>{t('providerForm.fields.type.ollama')}</SelectItem>
+                <SelectItem value={ProviderType.OPENAI}>{t('providerForm.fields.type.openai')}</SelectItem>
               </SelectContent>
             </Select>
           </FormField>
 
           {formData.type === ProviderType.OLLAMA && (
-            <FormField label="Base URL" id="base_url" required>
+            <FormField label={t('providerForm.fields.baseUrl.label')} id="base_url" required>
               <Input
                 id="base_url"
                 value={formData.base_url}
@@ -123,17 +125,17 @@ const ProviderForm = ({
 
           {formData.type === ProviderType.OPENAI && (
             <FormField
-              label="API Key"
+              label={t('providerForm.fields.apiKey.label')}
               id="api_key"
               required={!isEdit}
-              description={isEdit ? "Leave empty to keep existing key" : undefined}
+              description={isEdit ? t('providerForm.fields.apiKey.keepExisting') : undefined}
             >
               <Input
                 id="api_key"
                 type="password"
                 value={formData.api_key}
                 onChange={(e) => setFormData({ ...formData, api_key: e.target.value })}
-                placeholder="sk-..."
+                placeholder={t('providerForm.fields.apiKey.placeholder')}
                 required={!isEdit}
               />
             </FormField>
@@ -148,16 +150,16 @@ const ProviderForm = ({
               }
             />
             <Label htmlFor="is_active" className="cursor-pointer">
-              Active
+              {t('status.active')}
             </Label>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-              Cancel
+              {t('actions.cancel')}
             </Button>
             <Button type="submit" loading={loading}>
-              {isEdit ? 'Update' : 'Create'}
+              {isEdit ? t('actions.update') : t('actions.create')}
             </Button>
           </DialogFooter>
         </form>
