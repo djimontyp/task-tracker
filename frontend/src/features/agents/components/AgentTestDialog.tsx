@@ -8,12 +8,12 @@ import {
   DialogTitle,
   DialogFooter,
   Button,
-  Label,
   Textarea,
   Spinner,
   Badge,
 } from '@/shared/ui'
 import { FormField } from '@/shared/patterns'
+import { JsonResponseViewer } from '@/shared/components/JsonResponseViewer'
 import { AgentConfig } from '@/features/agents/types'
 import { agentService } from '@/features/agents/api'
 import { toast } from 'sonner'
@@ -175,14 +175,7 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
                 <Badge variant="default">{t('testDialog.results.success')}</Badge>
               </div>
 
-              <div className="space-y-2">
-                <Label>{t('testDialog.results.response')}</Label>
-                <div className="max-h-[300px] overflow-y-auto rounded-md border border-input bg-muted/50 px-4 py-2">
-                  <pre className="text-sm whitespace-pre-wrap break-words">
-                    {result.response}
-                  </pre>
-                </div>
-              </div>
+              <JsonResponseViewer response={result.response} />
 
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div>
