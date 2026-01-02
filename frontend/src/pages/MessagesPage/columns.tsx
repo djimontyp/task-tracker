@@ -1,5 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal, Mail, User, X, Info } from 'lucide-react'
+import type { TFunction } from 'i18next'
 
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui'
 import { DataTableColumnHeader } from '@/shared/components/DataTableColumnHeader'
@@ -19,6 +20,8 @@ export interface ColumnsCallbacks {
   onCheckboxClick?: (rowId: string, event: React.MouseEvent) => void
   /** Scoring config for dynamic thresholds (optional, uses defaults if not provided) */
   scoringConfig?: ScoringConfig
+  /** Translation function for i18n */
+  t: TFunction
 }
 
 // Type for importance score filter with separate unscored toggle
@@ -27,14 +30,18 @@ export interface ImportanceFilterValue {
   showUnscored: boolean           // true = include messages without score
 }
 
-export const sourceLabels: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
-  telegram: { label: 'Telegram', icon: Mail },
-  api: { label: 'API', icon: Mail },
-  slack: { label: 'Slack', icon: Mail },
-}
+/** Get source labels with translation support */
+export const getSourceLabels = (t: TFunction): Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> => ({
+  telegram: { label: t('messages:columns.sources.telegram'), icon: Mail },
+  api: { label: t('messages:columns.sources.api'), icon: Mail },
+  slack: { label: t('messages:columns.sources.slack'), icon: Mail },
+})
 
 
-export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[] => [
+export const createColumns = (callbacks: ColumnsCallbacks): ColumnDef<Message>[] => {
+  const { t } = callbacks
+
+  return [
   {
     id: 'select',
     size: 40,
@@ -45,7 +52,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       <Checkbox
         checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label={t('messages:columns.aria.selectAll')}
       />
     ),
     cell: ({ row }) => (
@@ -58,7 +65,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
             callbacks.onCheckboxClick(row.id, event)
           }
         }}
-        aria-label="Select row"
+        aria-label={t('messages:columns.aria.selectRow')}
       />
     ),
     enableSorting: false,
@@ -81,7 +88,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     size: 150,
     minSize: 100,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Author" />
+      <DataTableColumnHeader column={column} title={t('messages:columns.author')} />
     ),
     cell: ({ row }) => {
       const authorName = row.getValue<string>('author_name') || row.original.author
@@ -104,7 +111,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     accessorKey: 'content',
     size: 400,
     minSize: 200,
-    header: 'Content',
+    header: t('messages:columns.content'),
     cell: ({ row }) => {
       const content = row.getValue<string>('content')
       const isEmpty = !content || content.trim() === ''
@@ -114,7 +121,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
         return (
           <div className="flex items-center gap-2 text-muted-foreground/50 italic text-sm">
             <Mail className="h-4 w-4" />
-            <span>(Empty message)</span>
+            <span>{t('messages:columns.emptyMessage')}</span>
           </div>
         )
       }
@@ -142,10 +149,11 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     size: 120,
     minSize: 80,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Source" />
+      <DataTableColumnHeader column={column} title={t('messages:columns.source')} />
     ),
     cell: ({ row }) => {
       const value = row.getValue<string>('source_name')
+      const sourceLabels = getSourceLabels(t)
       const meta = sourceLabels[value] ?? { label: value, icon: Mail }
       const Icon = meta.icon
       return (
@@ -169,7 +177,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     size: 100,
     minSize: 80,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title={t('messages:columns.status')} />
     ),
     cell: ({ row }) => {
       const analyzed = row.getValue<boolean>('analyzed')
@@ -196,7 +204,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     size: 130,
     minSize: 100,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Importance" />
+      <DataTableColumnHeader column={column} title={t('messages:columns.importance')} />
     ),
     cell: ({ row }) => {
       const score = row.getValue<number>('importance_score')
@@ -226,11 +234,11 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
             {row.original.noise_factors && (
               <TooltipContent>
                 <div className="space-y-2 text-xs">
-                  <div><strong>Factors breakdown:</strong></div>
-                  <div>Content: {Math.round(row.original.noise_factors.content * 100)}%</div>
-                  <div>Author: {Math.round(row.original.noise_factors.author * 100)}%</div>
-                  <div>Temporal: {Math.round(row.original.noise_factors.temporal * 100)}%</div>
-                  <div>Topics: {Math.round(row.original.noise_factors.topics * 100)}%</div>
+                  <div><strong>{t('messages:columns.factorsBreakdown')}:</strong></div>
+                  <div>{t('messages:noise.scoreBreakdown.factors.content.label')}: {Math.round(row.original.noise_factors.content * 100)}%</div>
+                  <div>{t('messages:noise.scoreBreakdown.factors.author.label')}: {Math.round(row.original.noise_factors.author * 100)}%</div>
+                  <div>{t('messages:noise.scoreBreakdown.factors.temporal.label')}: {Math.round(row.original.noise_factors.temporal * 100)}%</div>
+                  <div>{t('messages:noise.scoreBreakdown.factors.topics.label')}: {Math.round(row.original.noise_factors.topics * 100)}%</div>
                 </div>
               </TooltipContent>
             )}
@@ -263,7 +271,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     size: 130,
     minSize: 100,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Classification" />
+      <DataTableColumnHeader column={column} title={t('messages:columns.classification')} />
     ),
     cell: ({ row }) => {
       const score = row.getValue<number>('importance_score')
@@ -298,7 +306,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     size: 150,
     minSize: 100,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Topic" />
+      <DataTableColumnHeader column={column} title={t('messages:columns.topic')} />
     ),
     cell: ({ row }) => {
       const topicName = row.getValue<string | null>('topic_name')
@@ -331,7 +339,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
     size: 140,
     minSize: 100,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Sent at" />
+      <DataTableColumnHeader column={column} title={t('messages:columns.sentAt')} />
     ),
     cell: ({ row }) => {
       const d = row.getValue<string>('sent_at')
@@ -358,7 +366,7 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
             className="hover:bg-destructive/10"
           >
             <X className="h-4 w-4 text-destructive/70 hover:text-destructive" />
-            <span className="sr-only">Reset filters</span>
+            <span className="sr-only">{t('messages:columns.actions.resetFilters')}</span>
           </Button>
         )
       }
@@ -370,25 +378,23 @@ export const createColumns = (callbacks?: ColumnsCallbacks): ColumnDef<Message>[
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-11 w-11 p-0" aria-label={`Actions for message ${message.id}`}>
-              <span className="sr-only">Open menu</span>
+            <Button variant="ghost" className="h-11 w-11 p-0" aria-label={t('messages:columns.aria.actionsFor', { id: message.id })}>
+              <span className="sr-only">{t('messages:columns.actions.openMenu')}</span>
               <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel>{t('messages:columns.actions.label')}</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => navigator.clipboard.writeText(String(message.id))}>
-              Copy message ID
+              {t('messages:columns.actions.copyId')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View details</DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
+            <DropdownMenuItem>{t('messages:columns.actions.viewDetails')}</DropdownMenuItem>
+            <DropdownMenuItem>{t('messages:columns.actions.delete')}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
     },
   },
 ]
-
-// Legacy export for backward compatibility
-export const columns = createColumns()
+}

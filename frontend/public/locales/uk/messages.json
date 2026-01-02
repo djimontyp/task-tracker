@@ -1,6 +1,36 @@
 {
   "title": "Повідомлення",
   "subtitle": "Керуйте вхідними повідомленнями з усіх джерел",
+  "columns": {
+    "author": "Автор",
+    "content": "Зміст",
+    "source": "Джерело",
+    "status": "Статус",
+    "importance": "Важливість",
+    "classification": "Класифікація",
+    "topic": "Тема",
+    "sentAt": "Надіслано",
+    "emptyMessage": "(Порожнє повідомлення)",
+    "factorsBreakdown": "Розбивка за факторами",
+    "sources": {
+      "telegram": "Telegram",
+      "api": "API",
+      "slack": "Slack"
+    },
+    "aria": {
+      "selectAll": "Вибрати всі",
+      "selectRow": "Вибрати рядок",
+      "actionsFor": "Дії для повідомлення {{id}}"
+    },
+    "actions": {
+      "label": "Дії",
+      "openMenu": "Відкрити меню",
+      "copyId": "Скопіювати ID повідомлення",
+      "viewDetails": "Переглянути деталі",
+      "delete": "Видалити",
+      "resetFilters": "Скинути фільтри"
+    }
+  },
   "summary": {
     "greeting": {
       "morning": "Доброго ранку!",

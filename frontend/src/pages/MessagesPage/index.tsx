@@ -28,7 +28,7 @@ import {
   getFacetedUniqueValues,
   useReactTable,
 } from '@tanstack/react-table'
-import { createColumns, sourceLabels } from './columns'
+import { createColumns, getSourceLabels } from './columns'
 import { getMessageAnalysisBadge, getNoiseClassificationBadge } from '@/shared/utils/statusBadges'
 import { useScoringConfig } from '@/shared/api/scoringConfig'
 import { Message, NoiseClassification } from '@/shared/types'
@@ -188,8 +188,9 @@ const MessagesPage = () => {
         hasActiveFilters,
         onCheckboxClick: handleCheckboxClick,
         scoringConfig,
+        t,
       }),
-    [hasActiveFilters, handleReset, handleCheckboxClick, scoringConfig]
+    [hasActiveFilters, handleReset, handleCheckboxClick, scoringConfig, t]
   )
 
   const table = useReactTable({
@@ -542,7 +543,7 @@ const MessagesPage = () => {
           <DataTableFacetedFilter
             column={table.getColumn('source_name')}
             title={t('filters.source')}
-            options={Object.entries(sourceLabels).map(([value, meta]) => ({
+            options={Object.entries(getSourceLabels(t)).map(([value, meta]) => ({
               value,
               label: meta.label,
               icon: meta.icon
