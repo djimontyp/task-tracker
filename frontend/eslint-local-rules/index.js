@@ -15,4 +15,5 @@ module.exports = {
   'no-default-export': require('./no-default-export'),
   'stories-no-i18n-keys': require('./stories-no-i18n-keys'),
   'no-data-in-presenters': require('./no-data-in-presenters'),
+  'no-hardcoded-text': require('./no-hardcoded-text'),
 };
