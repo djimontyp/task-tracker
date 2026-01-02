@@ -1,0 +1,61 @@
+{
+  "title": "Моніторинг фонових задач",
+  "description": "Статус та історія виконання всіх задач системи",
+  "connection": {
+    "connected": "WebSocket підключено",
+    "reconnecting": "Перепідключення...",
+    "connecting": "Підключення..."
+  },
+  "sections": {
+    "metrics": "Метрики",
+    "liveActivity": "Стрічка подій",
+    "taskHistory": "Історія виконання задач",
+    "scoringAccuracy": "Точність оцінювання"
+  },
+  "history": {
+    "filters": {
+      "taskType": "Тип задачі",
+      "status": "Статус",
+      "allTasks": "Всі задачі",
+      "allStatuses": "Всі статуси"
+    },
+    "table": {
+      "task": "Задача",
+      "status": "Статус",
+      "startTime": "Початок",
+      "duration": "Тривалість",
+      "error": "Помилка",
+      "noRecords": "Немає записів"
+    },
+    "pagination": {
+      "page": "Сторінка {{current}} з {{total}} (всього: {{count}})",
+      "back": "Назад",
+      "next": "Далі"
+    },
+    "details": {
+      "errorDetails": "Деталі помилки:",
+      "parameters": "Параметри:"
+    }
+  },
+  "statuses": {
+    "pending": "В черзі",
+    "running": "Виконується",
+    "success": "Успішно",
+    "failed": "Помилка"
+  },
+  "duration": {
+    "milliseconds": "{{value}}ms",
+    "seconds": "{{value}}s",
+    "minutes": "{{value}}m"
+  },
+  "errors": {
+    "loadingFailed": "Помилка завантаження даних"
+  },
+  "loading": {
+    "metrics": "Завантаження метрик...",
+    "history": "Завантаження історії..."
+  },
+  "emptyState": {
+    "waitingForEvents": "Очікування подій задач..."
+  }
+}

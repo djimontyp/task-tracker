@@ -1,0 +1,61 @@
+{
+  "title": "Background Task Monitoring",
+  "description": "Status and history of all system tasks",
+  "connection": {
+    "connected": "WebSocket connected",
+    "reconnecting": "Reconnecting...",
+    "connecting": "Connecting..."
+  },
+  "sections": {
+    "metrics": "Metrics",
+    "liveActivity": "Live Activity Feed",
+    "taskHistory": "Task Execution History",
+    "scoringAccuracy": "Scoring Accuracy"
+  },
+  "history": {
+    "filters": {
+      "taskType": "Task type",
+      "status": "Status",
+      "allTasks": "All tasks",
+      "allStatuses": "All statuses"
+    },
+    "table": {
+      "task": "Task",
+      "status": "Status",
+      "startTime": "Start time",
+      "duration": "Duration",
+      "error": "Error",
+      "noRecords": "No records"
+    },
+    "pagination": {
+      "page": "Page {{current}} of {{total}} (total: {{count}})",
+      "back": "Back",
+      "next": "Next"
+    },
+    "details": {
+      "errorDetails": "Error details:",
+      "parameters": "Parameters:"
+    }
+  },
+  "statuses": {
+    "pending": "Queued",
+    "running": "Running",
+    "success": "Success",
+    "failed": "Error"
+  },
+  "duration": {
+    "milliseconds": "{{value}}ms",
+    "seconds": "{{value}}s",
+    "minutes": "{{value}}m"
+  },
+  "errors": {
+    "loadingFailed": "Failed to load data"
+  },
+  "loading": {
+    "metrics": "Loading metrics...",
+    "history": "Loading history..."
+  },
+  "emptyState": {
+    "waitingForEvents": "Waiting for task events..."
+  }
+}

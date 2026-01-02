@@ -1,0 +1,60 @@
+{
+  "title": "Onboarding Wizard",
+  "progress": {
+    "step": "Step {{current}} of {{total}}",
+    "skip": "Skip"
+  },
+  "steps": {
+    "welcome": {
+      "title": "Welcome to Pulse Radar",
+      "description": "Let's set up your AI task tracker in 4 simple steps",
+      "content": "Pulse Radar is an AI system for classifying and analyzing tasks from your messages. We'll configure everything in a few minutes."
+    },
+    "telegram": {
+      "title": "Connect Telegram",
+      "description": "Link your Telegram bot to import messages",
+      "instructions": {
+        "title": "To connect Telegram:",
+        "steps": [
+          "Go to Settings → Sources",
+          "Click \"Connect Telegram\"",
+          "Enter API credentials"
+        ]
+      }
+    },
+    "agent": {
+      "title": "Configure AI Agent",
+      "description": "Create your first AI agent for task analysis",
+      "instructions": {
+        "title": "Creating an AI agent:",
+        "steps": [
+          "Go to Agents",
+          "Click \"Create Agent\"",
+          "Configure analysis parameters"
+        ]
+      }
+    },
+    "import": {
+      "title": "Import Messages",
+      "description": "Load your first batch of messages for analysis",
+      "instructions": {
+        "title": "Importing messages:",
+        "steps": [
+          "Go to Messages",
+          "Click \"Ingest Messages\"",
+          "Select source and time period"
+        ]
+      }
+    },
+    "complete": {
+      "title": "All set!",
+      "description": "You're ready to start analyzing tasks",
+      "content": "System is ready! Start importing messages and analyzing tasks."
+    }
+  },
+  "actions": {
+    "back": "Back",
+    "continue": "Continue",
+    "getStarted": "Get started"
+  }
+}

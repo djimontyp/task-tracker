@@ -1,0 +1,64 @@
+{
+  "title": "Executive Summary",
+  "description": "Weekly summary of decisions and blockers for executives",
+  "periods": {
+    "weekly": "Last 7 days",
+    "biweekly": "Last 14 days",
+    "monthly": "Last 30 days",
+    "selectPeriod": "Select period"
+  },
+  "stats": {
+    "decisions": "Decisions",
+    "blockers": "Blockers",
+    "activeTopics": "Active topics",
+    "staleBlockers": "Stale blockers"
+  },
+  "sections": {
+    "blockers": "Blockers",
+    "decisions": "Decisions",
+    "needsAttention": "Needs immediate attention",
+    "activeBlockers": "Active blockers",
+    "withoutTopic": "Without topic",
+    "critical": "Critical"
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "export": "Export",
+    "exporting": "Exporting..."
+  },
+  "export": {
+    "markdown": "Markdown (.md)",
+    "plainText": "Plain Text (.txt)"
+  },
+  "empty": {
+    "title": "No activity",
+    "description": "No approved decisions or blockers for the last {{period}}",
+    "periods": {
+      "week": "week",
+      "twoWeeks": "2 weeks",
+      "month": "month"
+    }
+  },
+  "errors": {
+    "loadingFailed": "Failed to load data",
+    "tryAgain": "Couldn't load data. Please try again.",
+    "retryButton": "Try again",
+    "exportFailed": "Failed to export report"
+  },
+  "toast": {
+    "exportSuccess": "Report exported successfully"
+  },
+  "labels": {
+    "daysOld": "{{count}} d.",
+    "affectedVersions": "Will affect {{count}} versions"
+  },
+  "info": {
+    "howItWorks": "How it works",
+    "details": [
+      "Versions are automatically evaluated based on model confidence and vector similarity",
+      "If both thresholds are exceeded, the selected action is executed",
+      "Versions that don't meet criteria remain for manual review",
+      "You can preview how many versions will be affected before saving"
+    ]
+  }
+}

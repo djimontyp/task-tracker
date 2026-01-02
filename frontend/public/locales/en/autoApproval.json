@@ -1,0 +1,57 @@
+{
+  "title": "Auto-Approval Settings",
+  "description": "Configure automatic version processing based on quality metrics",
+  "settings": {
+    "enable": {
+      "title": "Enable auto-approval",
+      "description": "Automatically process versions based on threshold values"
+    },
+    "confidenceThreshold": {
+      "title": "Confidence threshold ({{value}}%)",
+      "description": "Minimum model confidence for automatic processing",
+      "range": "0% - 100%"
+    },
+    "similarityThreshold": {
+      "title": "Similarity threshold ({{value}}%)",
+      "description": "Minimum vector similarity for automatic processing",
+      "range": "0% - 100%"
+    },
+    "action": {
+      "title": "Action for versions that meet criteria",
+      "approve": "Approve",
+      "approveDescription": "Automatically approve versions",
+      "reject": "Reject",
+      "rejectDescription": "Automatically reject versions",
+      "manual": "Manual",
+      "manualDescription": "Leave for manual review"
+    }
+  },
+  "validation": {
+    "confidenceLowerThanSimilarity": "Confidence threshold must be at least equal to similarity threshold"
+  },
+  "actions": {
+    "preview": "Preview",
+    "previewing": "Checking...",
+    "save": "Save settings",
+    "saving": "Saving...",
+    "impact_one": "Will affect {{count}} version",
+    "impact_other": "Will affect {{count}} versions"
+  },
+  "messages": {
+    "settingsSaved": "Settings saved",
+    "saveFailed": "Failed to save settings",
+    "loadFailed": "Failed to load settings",
+    "previewFailed": "Failed to get preview",
+    "previewSuccess_one": "Settings will affect {{count}} version",
+    "previewSuccess_other": "Settings will affect {{count}} versions"
+  },
+  "info": {
+    "howItWorks": "How it works",
+    "details": [
+      "Versions are automatically evaluated based on model confidence and vector similarity",
+      "If both thresholds are exceeded, the selected action is executed",
+      "Versions that don't meet criteria remain for manual review",
+      "You can preview how many versions will be affected before saving"
+    ]
+  }
+}

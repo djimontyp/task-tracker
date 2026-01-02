@@ -1,0 +1,68 @@
+{
+  "title": "Резюме",
+  "description": "Тижневе резюме рішень та блокерів для керівництва",
+  "periods": {
+    "weekly": "Останні 7 днів",
+    "biweekly": "Останні 14 днів",
+    "monthly": "Останні 30 днів",
+    "selectPeriod": "Оберіть період"
+  },
+  "stats": {
+    "decisions": "Рішень",
+    "blockers": "Блокерів",
+    "activeTopics": "Активних топіків",
+    "staleBlockers": "Застарілих блокерів"
+  },
+  "sections": {
+    "blockers": "Блокери",
+    "decisions": "Рішення",
+    "needsAttention": "Потребують негайної уваги",
+    "activeBlockers": "Активні блокери",
+    "withoutTopic": "Без топіку",
+    "critical": "Критично"
+  },
+  "actions": {
+    "refresh": "Оновити",
+    "export": "Експорт",
+    "exporting": "Експорт..."
+  },
+  "export": {
+    "markdown": "Markdown (.md)",
+    "plainText": "Plain Text (.txt)"
+  },
+  "empty": {
+    "title": "Немає активності",
+    "description": "За останній {{period}} немає затверджених рішень або блокерів",
+    "periods": {
+      "week": "тиждень",
+      "twoWeeks": "2 тижні",
+      "month": "місяць"
+    }
+  },
+  "errors": {
+    "loadingFailed": "Помилка завантаження",
+    "tryAgain": "Не вдалося завантажити дані. Спробуйте ще раз.",
+    "retryButton": "Спробувати знову",
+    "exportFailed": "Помилка експорту звіту"
+  },
+  "toast": {
+    "exportSuccess": "Звіт успішно експортовано"
+  },
+  "labels": {
+    "daysOld_one": "{{count}} дн.",
+    "daysOld_few": "{{count}} дн.",
+    "daysOld_many": "{{count}} дн.",
+    "affectedVersions_one": "Вплине на {{count}} версію",
+    "affectedVersions_few": "Вплине на {{count}} версії",
+    "affectedVersions_many": "Вплине на {{count}} версій"
+  },
+  "info": {
+    "howItWorks": "Як це працює",
+    "details": [
+      "Версії автоматично оцінюються на основі впевненості моделі та векторної схожості",
+      "Якщо обидва порогові значення перевищені, виконується обрана дія",
+      "Версії, які не відповідають критеріям, залишаються для ручного перегляду",
+      "Ви можете переглянути, скільки версій будуть оброблені, перш ніж зберігати"
+    ]
+  }
+}
