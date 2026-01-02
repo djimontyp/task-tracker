@@ -34,11 +34,12 @@ export function TopicsSmartFilters({
       onValueChange={(value) => onFilterChange(value as TopicFilterMode)}
     >
       <TabsList
+        variant="pill"
         aria-label={t('smartFilters.ariaLabel', 'Topic filters')}
-        className="h-auto gap-0.5 bg-muted p-0.5"
       >
         {/* All topics tab */}
         <TabsTrigger
+          variant="pill"
           value="all"
           aria-label={t('smartFilters.allAriaLabel', 'All topics: {{count}}', { count: counts.all })}
           className="h-11 gap-2 px-4"
@@ -51,6 +52,7 @@ export function TopicsSmartFilters({
 
         {/* Active topics tab */}
         <TabsTrigger
+          variant="pill"
           value="active"
           aria-label={t('smartFilters.activeAriaLabel', 'Active topics: {{count}}', { count: counts.active })}
           className="h-11 gap-2 px-4"
@@ -67,6 +69,7 @@ export function TopicsSmartFilters({
 
         {/* Archived topics tab */}
         <TabsTrigger
+          variant="pill"
           value="archived"
           aria-label={t('smartFilters.archivedAriaLabel', 'Archived topics: {{count}}', { count: counts.archived })}
           className="h-11 gap-2 px-4"
