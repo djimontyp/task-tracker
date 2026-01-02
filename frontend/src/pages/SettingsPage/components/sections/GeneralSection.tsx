@@ -6,8 +6,9 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { Palette, Globe, Shield } from 'lucide-react';
+import { Globe, Shield } from 'lucide-react';
 import { toast } from 'sonner';
+import { UniversalThemeIcon } from '@/shared/components';
 
 import { Card } from '@/shared/ui/card';
 import { Badge } from '@/shared/ui/badge';
@@ -42,26 +43,30 @@ const themeLabels: Record<Theme, string> = {
 // ═══════════════════════════════════════════════════════════════
 
 interface InlineSettingCardProps {
-  icon: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string }>;
+  iconElement?: React.ReactNode;
   title: string;
   description: string;
   children: React.ReactNode;
   className?: string;
+  iconColor?: string;
 }
 
 function InlineSettingCard({
   icon: Icon,
+  iconElement,
   title,
   description,
   children,
   className,
+  iconColor = 'text-muted-foreground',
 }: InlineSettingCardProps) {
   return (
     <Card className={className}>
       <div className="flex items-center gap-4 p-4">
         {/* Icon */}
         <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-          <Icon className="h-5 w-5 text-muted-foreground" />
+          {iconElement || (Icon && <Icon className={`h-5 w-5 ${iconColor}`} />)}
         </div>
 
         {/* Content */}
@@ -109,11 +114,27 @@ export function GeneralSection() {
     AVAILABLE_LANGUAGES.find((l) => l.code === language)?.nativeLabel ||
     'English';
 
+  // Get theme icon color based on current theme
+  const getThemeIconColor = () => {
+    switch (theme) {
+      case 'light':
+        return 'text-amber-500'; // Sun - yellow/amber
+      case 'dark':
+        return 'text-indigo-500'; // Moon - indigo/purple
+      case 'system':
+        return 'text-slate-500'; // Monitor - neutral gray
+      default:
+        return 'text-muted-foreground';
+    }
+  };
+
   return (
     <SettingsSection title={t('sections.general', 'General')}>
       {/* Appearance */}
       <InlineSettingCard
-        icon={Palette}
+        iconElement={
+          <UniversalThemeIcon theme={theme} className={`h-5 w-5 ${getThemeIconColor()}`} />
+        }
         title={t('general.appearance.title', 'Appearance')}
         description={t('general.appearance.description', 'Color theme')}
       >
@@ -134,6 +155,7 @@ export function GeneralSection() {
       {/* Language */}
       <InlineSettingCard
         icon={Globe}
+        iconColor="text-blue-500"
         title={t('general.language.title', 'Language')}
         description={t('general.language.description', 'Interface language')}
       >
@@ -154,6 +176,7 @@ export function GeneralSection() {
       {/* Admin Mode */}
       <InlineSettingCard
         icon={Shield}
+        iconColor="text-amber-500"
         title={t('general.admin.title', 'Admin Mode')}
         description={t('general.admin.description', 'Advanced features')}
       >
