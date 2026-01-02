@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Card } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Badge } from '@/shared/ui/badge'
@@ -36,6 +37,8 @@ export function ChannelList({
   onRemoveChannel,
   onRefreshNames,
 }: ChannelListProps) {
+  const { t } = useTranslation('settings')
+
   const handleInputChange = (value: string) => {
     onNewChannelIdChange(value)
   }
@@ -46,7 +49,7 @@ export function ChannelList({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-lg font-semibold">Channels ({channels.length})</h3>
+          <h3 className="text-lg font-semibold">{t('telegram.channels.title', { count: channels.length })}</h3>
         </div>
         <Button
           type="button"
@@ -54,31 +57,31 @@ export function ChannelList({
           size="sm"
           onClick={onRefreshNames}
           disabled={isRefreshingNames || channels.length === 0}
-          aria-label="Refresh Telegram channel names"
+          aria-label={t('telegram.channels.refreshNames')}
         >
           <RefreshCw className={cn('h-4 w-4 mr-2', isRefreshingNames && 'animate-spin')} />
-          {isRefreshingNames ? 'Refreshing…' : 'Refresh Names'}
+          {isRefreshingNames ? t('telegram.channels.refreshing') : t('telegram.channels.refreshNames')}
         </Button>
       </div>
 
       {/* Add Channel Form */}
       <FormField
-        label="Add Channel"
+        label={t('telegram.channels.addChannel')}
         id="new-channel-id"
         error={
           inputValidation === 'invalid'
-            ? 'Invalid format. Paste a Telegram group link or enter -100XXXXXXXXX'
+            ? t('telegram.channels.invalidFormat')
             : undefined
         }
       >
         <div className="flex gap-2">
           <Input
             id="new-channel-id"
-            placeholder="Paste group URL or enter -100XXXXXXXXX"
+            placeholder={t('telegram.channels.addPlaceholder')}
             value={newChannelId}
             onChange={(e) => handleInputChange(e.target.value)}
             autoComplete="off"
-            aria-label="Enter Telegram channel ID or URL"
+            aria-label={t('telegram.channels.addChannel')}
             className={cn(
               'flex-1',
               inputValidation === 'valid' && 'border-semantic-success focus-visible:ring-semantic-success',
@@ -96,16 +99,16 @@ export function ChannelList({
             size="sm"
             onClick={onAddChannel}
             disabled={isAddingChannel || !newChannelId.trim() || inputValidation === 'invalid'}
-            aria-label="Add Telegram channel to monitoring list"
+            aria-label={t('telegram.channels.addChannel')}
             className="shrink-0 self-start"
           >
-            {isAddingChannel ? 'Adding…' : 'Add'}
+            {isAddingChannel ? t('telegram.channels.adding') : t('telegram.channels.addButton')}
           </Button>
         </div>
         {inputValidation === 'valid' && (
           <p className="text-xs text-semantic-success mt-2 flex items-center gap-2">
             <Check className="h-3 w-3" />
-            Valid channel ID
+            {t('telegram.channels.validId')}
           </p>
         )}
       </FormField>
@@ -125,11 +128,11 @@ export function ChannelList({
                       {channel.name || `Channel ${channel.id}`}
                     </p>
                     {!channel.name && (
-                      <Badge variant="outline" className="text-xs shrink-0">Name Pending</Badge>
+                      <Badge variant="outline" className="text-xs shrink-0">{t('telegram.channels.namePending')}</Badge>
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground font-mono">
-                    ID: {channel.id}
+                    {t('telegram.actions.idLabel')} {channel.id}
                   </p>
                 </div>
                 <Button
@@ -139,14 +142,14 @@ export function ChannelList({
                   onClick={() => onRemoveChannel(channel.id)}
                   disabled={removingChannelIds.has(channel.id)}
                   className="text-destructive hover:text-destructive/90 hover:bg-destructive/10 shrink-0"
-                  aria-label={`Remove ${channel.name || 'channel'} from monitoring list`}
+                  aria-label={t('telegram.channels.remove')}
                 >
                   {removingChannelIds.has(channel.id) ? (
-                    'Removing…'
+                    t('telegram.channels.removing')
                   ) : (
                     <>
                       <X className="h-4 w-4 mr-2" />
-                      Remove
+                      {t('telegram.channels.remove')}
                     </>
                   )}
                 </Button>
@@ -155,7 +158,7 @@ export function ChannelList({
           ))}
           {channels.some(c => !c.name) && (
             <p className="text-xs text-muted-foreground">
-              Tip: Add bot as admin to the channel, then click &quot;Refresh Names&quot; to load names
+              {t('telegram.channels.refreshTip')}
             </p>
           )}
         </div>
@@ -165,9 +168,9 @@ export function ChannelList({
           <div className="w-16 h-16 mb-4 rounded-full bg-muted flex items-center justify-center">
             <MessageSquare className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h4 className="text-sm font-medium text-foreground mb-2">No channels yet</h4>
+          <h4 className="text-sm font-medium text-foreground mb-2">{t('telegram.channels.noChannels')}</h4>
           <p className="text-xs text-muted-foreground max-w-xs">
-            Paste a Telegram group URL or enter a channel ID to start monitoring messages from that channel.
+            {t('telegram.channels.noChannelsDescription')}
           </p>
         </div>
       )}

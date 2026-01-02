@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, CheckCircle, CloudUpload, AlertCircle, Plus, Clock, Sparkles } from 'lucide-react'
@@ -23,6 +24,7 @@ import { toast } from 'sonner'
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
 const TopicDetailPage = () => {
+  const { t } = useTranslation('topics')
   const { topicId } = useParams<{ topicId: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -245,7 +247,7 @@ const TopicDetailPage = () => {
         return (
           <div className="flex items-center gap-2 text-semantic-info animate-pulse">
             <CloudUpload className="h-5 w-5" />
-            <span className="text-sm font-medium">Saving...</span>
+            <span className="text-sm font-medium">{t('detailPage.saveStatus.saving')}</span>
           </div>
         )
       case 'saved':
@@ -253,7 +255,7 @@ const TopicDetailPage = () => {
           <div className="flex items-center gap-2 text-semantic-success animate-in fade-in slide-in-from-top-2 duration-300">
             <CheckCircle className="h-5 w-5" />
             <span className="text-sm font-medium">
-              Saved {formatTimeAgo(lastSavedAt)}
+              {t('detailPage.saveStatus.saved', { time: formatTimeAgo(lastSavedAt) })}
             </span>
           </div>
         )
@@ -261,19 +263,19 @@ const TopicDetailPage = () => {
         return (
           <div className="flex items-center gap-2 text-semantic-error">
             <AlertCircle className="h-5 w-5" />
-            <span className="text-sm font-medium">Save failed</span>
+            <span className="text-sm font-medium">{t('detailPage.saveStatus.error')}</span>
           </div>
         )
       default:
         return hasUnsavedChanges ? (
           <div className="flex items-center gap-2 text-semantic-warning">
             <div className="h-2 w-2 rounded-full bg-semantic-warning animate-pulse" />
-            <span className="text-sm font-medium">Unsaved changes</span>
+            <span className="text-sm font-medium">{t('detailPage.saveStatus.unsaved')}</span>
           </div>
         ) : (
           <div className="flex items-center gap-2 text-muted-foreground">
             <CheckCircle className="h-5 w-5" />
-            <span className="text-sm">All changes saved</span>
+            <span className="text-sm">{t('detailPage.saveStatus.allSaved')}</span>
           </div>
         )
     }
@@ -296,15 +298,15 @@ const TopicDetailPage = () => {
       <div className="p-6 space-y-6">
         <Button variant="outline" onClick={() => navigate('/topics')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Topics
+          {t('detailPage.backToTopics')}
         </Button>
         <Card className="p-6 border-destructive">
           <div className="flex items-start gap-4">
-            <div className="text-destructive text-lg">⚠️</div>
+            <AlertCircle className="h-5 w-5 text-destructive" />
             <div>
-              <p className="font-semibold text-destructive mb-2">Topic not found</p>
+              <p className="font-semibold text-destructive mb-2">{t('detailPage.notFound')}</p>
               <p className="text-sm text-muted-foreground">
-                {error instanceof Error ? error.message : 'Unknown error'}
+                {error instanceof Error ? error.message : t('detailPage.unknownError')}
               </p>
             </div>
           </div>
@@ -319,14 +321,14 @@ const TopicDetailPage = () => {
         <div className="space-y-4 flex-1">
           <Button variant="ghost" onClick={() => navigate('/topics')} size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Topics
+            {t('detailPage.backToTopics')}
           </Button>
 
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/topics">Topics</Link>
+                  <Link to="/topics">{t('title')}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -342,7 +344,7 @@ const TopicDetailPage = () => {
 
           <div className="flex items-center gap-2 pl-4 border-l border-border">
             <Label htmlFor="auto-save-toggle" className="text-sm text-muted-foreground cursor-pointer">
-              Auto-save
+              {t('detailPage.autoSave')}
             </Label>
             <Switch
               id="auto-save-toggle"
@@ -367,14 +369,14 @@ const TopicDetailPage = () => {
               }
             }}
           >
-            Discard Changes
+            {t('detailPage.discardChanges')}
           </Button>
           <Button
             size="sm"
             onClick={handleManualSave}
             disabled={updateMutation.isPending || !hasUnsavedChanges}
           >
-            {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+            {updateMutation.isPending ? t('detailPage.saveStatus.saving') : t('detailPage.saveChanges')}
           </Button>
         </div>
       )}
@@ -382,18 +384,18 @@ const TopicDetailPage = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
-            <CardTitle className="text-lg">Topic Details</CardTitle>
-            <CardDescription>Edit topic information and manage knowledge</CardDescription>
+            <CardTitle className="text-lg">{t('detailPage.topicDetails')}</CardTitle>
+            <CardDescription>{t('detailPage.topicDetailsDescription')}</CardDescription>
           </div>
           <div className="flex items-center gap-2">
             <Sheet open={showVersionHistory} onOpenChange={setShowVersionHistory}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" aria-label="View version history">
+                <Button variant="outline" size="sm" aria-label={t('detailPage.versionHistory.ariaLabel')}>
                   <Clock className="h-4 w-4 mr-2" />
-                  Version History
+                  {t('detailPage.versionHistory.title')}
                   {pendingVersionsCount > 0 && (
                     <Badge className="ml-2 bg-semantic-warning text-white hover:bg-semantic-warning/90">
-                      {pendingVersionsCount} pending
+                      {t('detailPage.versionHistory.pending', { count: pendingVersionsCount })}
                     </Badge>
                   )}
                 </Button>
@@ -401,7 +403,7 @@ const TopicDetailPage = () => {
 
               <SheetContent side="right" className="w-[500px] sm:w-[600px] overflow-y-auto">
                 <SheetHeader>
-                  <SheetTitle>Version History - {topic.name}</SheetTitle>
+                  <SheetTitle>{t('detailPage.versionHistory.sheetTitle', { name: topic.name })}</SheetTitle>
                 </SheetHeader>
 
                 <div className="mt-6">
@@ -420,15 +422,15 @@ const TopicDetailPage = () => {
 
             <Dialog open={showExtractionPanel} onOpenChange={setShowExtractionPanel}>
               <DialogTrigger asChild>
-                <Button variant="default" size="sm" aria-label="Extract knowledge from messages">
+                <Button variant="default" size="sm" aria-label={t('detailPage.extractKnowledge.ariaLabel')}>
                   <Sparkles className="h-4 w-4 mr-2" />
-                  Extract Knowledge
+                  {t('detailPage.extractKnowledge.button')}
                 </Button>
               </DialogTrigger>
 
               <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                  <DialogTitle>Extract Knowledge from Messages</DialogTitle>
+                  <DialogTitle>{t('detailPage.extractKnowledge.dialogTitle')}</DialogTitle>
                 </DialogHeader>
 
                 <KnowledgeExtractionPanel
@@ -453,11 +455,11 @@ const TopicDetailPage = () => {
             </div>
 
             <div className="flex-1 space-y-4">
-              <FormField label="Topic Name">
+              <FormField label={t('form.name')}>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter topic name"
+                  placeholder={t('form.namePlaceholder')}
                   className={`text-2xl font-bold h-auto py-2 transition-colors ${
                     hasUnsavedChanges ? 'border-semantic-warning/50' : ''
                   }`}
@@ -465,7 +467,7 @@ const TopicDetailPage = () => {
               </FormField>
 
               <div className="flex items-center gap-4">
-                <div className="text-sm font-medium text-muted-foreground">Color:</div>
+                <div className="text-sm font-medium text-muted-foreground">{t('form.color')}:</div>
                 <ColorPickerPopover
                   color={topic.color || '#64748B'}
                   onColorChange={handleColorChange}
@@ -476,11 +478,11 @@ const TopicDetailPage = () => {
             </div>
           </div>
 
-          <FormField label="Description">
+          <FormField label={t('form.description')}>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter topic description"
+              placeholder={t('form.descriptionPlaceholder')}
               rows={6}
               className={`resize-none transition-colors ${
                 hasUnsavedChanges ? 'border-semantic-warning/50' : ''
@@ -490,11 +492,11 @@ const TopicDetailPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
             <div>
-              <div className="text-xs font-medium text-muted-foreground mb-2">Topic ID</div>
+              <div className="text-xs font-medium text-muted-foreground mb-2">{t('detailPage.metadata.topicId')}</div>
               <div className="text-sm font-mono">{topic.id}</div>
             </div>
             <div>
-              <div className="text-xs font-medium text-muted-foreground mb-2">Created</div>
+              <div className="text-xs font-medium text-muted-foreground mb-2">{t('detail.created')}</div>
               <div className="text-sm">
                 {new Date(topic.created_at).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -504,7 +506,7 @@ const TopicDetailPage = () => {
               </div>
             </div>
             <div>
-              <div className="text-xs font-medium text-muted-foreground mb-2">Last Updated</div>
+              <div className="text-xs font-medium text-muted-foreground mb-2">{t('detailPage.metadata.lastUpdated')}</div>
               <div className="text-sm">
                 {new Date(topic.updated_at).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -520,14 +522,14 @@ const TopicDetailPage = () => {
       <div className="space-y-6">
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Knowledge Atoms</h2>
+            <h2 className="text-xl font-semibold">{t('detailPage.atoms.title')}</h2>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsCreateDialogOpen(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Create Atom
+              {t('detailPage.atoms.create')}
             </Button>
           </div>
 
@@ -540,8 +542,8 @@ const TopicDetailPage = () => {
           ) : atoms.length === 0 ? (
             <Card className="p-8 text-center">
               <div className="text-muted-foreground">
-                <p className="text-lg mb-2">No atoms yet</p>
-                <p className="text-sm">Create your first knowledge atom to get started.</p>
+                <p className="text-lg mb-2">{t('detailPage.atoms.empty')}</p>
+                <p className="text-sm">{t('detailPage.atoms.emptyDescription')}</p>
               </div>
             </Card>
           ) : (
@@ -554,7 +556,7 @@ const TopicDetailPage = () => {
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold mb-4">Related Messages</h2>
+          <h2 className="text-xl font-semibold mb-4">{t('detailPage.messages.title')}</h2>
 
           {isLoadingMessages ? (
             <div className="space-y-4">
@@ -565,7 +567,7 @@ const TopicDetailPage = () => {
           ) : messages.length === 0 ? (
             <Card className="p-8 text-center">
               <div className="text-muted-foreground">
-                <p className="text-lg">No messages linked to this topic yet.</p>
+                <p className="text-lg">{t('detailPage.messages.empty')}</p>
               </div>
             </Card>
           ) : (
@@ -583,7 +585,7 @@ const TopicDetailPage = () => {
                       setSelectedMessageId(message.id ? String(message.id) : null)
                     }
                   }}
-                  aria-label={`Open message: ${message.content.substring(0, 50)}`}
+                  aria-label={t('detailPage.messages.openMessage', { preview: message.content.substring(0, 50) })}
                 >
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-4">
@@ -635,7 +637,7 @@ const TopicDetailPage = () => {
         >
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Version Comparison</DialogTitle>
+              <DialogTitle>{t('detailPage.versionHistory.comparison')}</DialogTitle>
             </DialogHeader>
 
             <VersionDiffViewer

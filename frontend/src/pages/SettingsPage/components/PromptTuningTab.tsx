@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
@@ -36,6 +37,7 @@ import {
 import type { ValidationError } from '@/features/prompts/types'
 
 const PromptTuningTab = () => {
+  const { t } = useTranslation('settings')
   const queryClient = useQueryClient()
 
   const [selectedType, setSelectedType] = useState<PromptType>('knowledge_extraction')
@@ -65,11 +67,11 @@ const PromptTuningTab = () => {
       setOriginalPrompt(data.prompt_text)
       setCurrentPrompt(data.prompt_text)
       setValidationErrors([])
-      toast.success('Prompt saved successfully')
+      toast.success(t('prompts.toast.saved'))
       setShowSaveDialog(false)
     },
     onError: () => {
-      toast.error('Failed to save prompt')
+      toast.error(t('prompts.toast.saveFailed'))
     },
   })
 
@@ -111,7 +113,7 @@ const PromptTuningTab = () => {
 
   const handleSave = () => {
     if (!isValid || !isWithinLimits) {
-      toast.error('Please fix validation errors before saving')
+      toast.error(t('prompts.validation.fixErrors'))
       return
     }
     setShowSaveDialog(true)
@@ -131,7 +133,7 @@ const PromptTuningTab = () => {
     setCurrentPrompt(originalPrompt)
     setValidationErrors([])
     setShowCancelDialog(false)
-    toast.info('Changes discarded')
+    toast.info(t('prompts.toast.discarded'))
   }
 
   return (
@@ -141,16 +143,16 @@ const PromptTuningTab = () => {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center">
-                <CardTitle>LLM Prompt Tuning</CardTitle>
+                <CardTitle>{t('prompts.title')}</CardTitle>
                 <AdminFeatureBadge variant="inline" size="sm" />
               </div>
-              <CardDescription>Configure and test prompts for AI models</CardDescription>
+              <CardDescription>{t('prompts.description')}</CardDescription>
             </div>
-            {isDirty && <Badge variant="warning">Unsaved Changes</Badge>}
+            {isDirty && <Badge variant="warning">{t('prompts.unsavedChanges')}</Badge>}
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <FormField label="Prompt Type" id="prompt-type">
+          <FormField label={t('prompts.promptType')} id="prompt-type">
             <Select value={selectedType} onValueChange={(value) => setSelectedType(value as PromptType)}>
               <SelectTrigger id="prompt-type">
                 <SelectValue />
@@ -169,20 +171,20 @@ const PromptTuningTab = () => {
           </FormField>
 
           {isLoading ? (
-            <div className="text-center text-muted-foreground py-8">Loading prompt...</div>
+            <div className="text-center text-muted-foreground py-8">{t('prompts.loading')}</div>
           ) : (
             <>
               <FormField
-                label="Prompt Text"
+                label={t('prompts.promptText')}
                 id="prompt-text"
                 error={
                   !isWithinLimits
                     ? charCount < CHARACTER_LIMITS.min
-                      ? `Prompt must be at least ${CHARACTER_LIMITS.min} characters`
-                      : `Prompt must not exceed ${CHARACTER_LIMITS.max} characters`
+                      ? t('prompts.validation.minLength', { min: CHARACTER_LIMITS.min })
+                      : t('prompts.validation.maxLength', { max: CHARACTER_LIMITS.max })
                     : undefined
                 }
-                description={`${charCount} / ${CHARACTER_LIMITS.max} characters`}
+                description={t('prompts.characterCount', { count: charCount, max: CHARACTER_LIMITS.max })}
               >
                 <Textarea
                   id="prompt-text"
@@ -190,13 +192,13 @@ const PromptTuningTab = () => {
                   onChange={(e) => setCurrentPrompt(e.target.value)}
                   rows={12}
                   className="font-mono text-sm"
-                  placeholder="Enter prompt text..."
+                  placeholder={t('prompts.placeholder')}
                 />
               </FormField>
 
               {validationErrors.length > 0 && (
                 <div className="rounded-lg border border-destructive bg-destructive/10 p-4 space-y-2">
-                  <p className="text-sm font-medium text-destructive">Validation Errors:</p>
+                  <p className="text-sm font-medium text-destructive">{t('prompts.validation.errors')}</p>
                   <ul className="list-disc list-inside space-y-2">
                     {validationErrors.map((error, idx) => (
                       <li key={idx} className="text-sm text-destructive">
@@ -209,7 +211,7 @@ const PromptTuningTab = () => {
 
               {promptConfig && (
                 <div className="rounded-lg border border-muted bg-muted/50 p-4 space-y-2">
-                  <p className="text-sm font-medium">Required Placeholders:</p>
+                  <p className="text-sm font-medium">{t('prompts.placeholders.title')}</p>
                   <div className="flex flex-wrap gap-2">
                     {promptConfig.placeholders.map((placeholder) => (
                       <Badge key={placeholder} variant="outline">
@@ -222,10 +224,10 @@ const PromptTuningTab = () => {
 
               <div className="flex gap-4">
                 <Button onClick={handleSave} disabled={!isDirty || !isValid || !isWithinLimits}>
-                  Save Changes
+                  {t('prompts.buttons.save')}
                 </Button>
                 <Button onClick={handleCancel} variant="outline" disabled={!isDirty}>
-                  Cancel
+                  {t('prompts.buttons.cancel')}
                 </Button>
               </div>
             </>
@@ -236,17 +238,17 @@ const PromptTuningTab = () => {
       <AlertDialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Save Prompt Changes?</AlertDialogTitle>
+            <AlertDialogTitle>{t('prompts.dialogs.save.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will affect all new messages processed after saving. Existing messages will not be re-processed.
+              {t('prompts.dialogs.save.description')}
               <br />
               <br />
-              <strong>Prompt Type:</strong> {PROMPT_TYPE_LABELS[selectedType]}
+              <strong>{t('prompts.dialogs.save.promptType')}</strong> {PROMPT_TYPE_LABELS[selectedType]}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmSave}>Save Changes</AlertDialogAction>
+            <AlertDialogCancel>{t('prompts.dialogs.save.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmSave}>{t('prompts.dialogs.save.confirm')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -254,15 +256,15 @@ const PromptTuningTab = () => {
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Discard Changes?</AlertDialogTitle>
+            <AlertDialogTitle>{t('prompts.dialogs.discard.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              All unsaved changes will be lost. This action cannot be undone.
+              {t('prompts.dialogs.discard.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep Editing</AlertDialogCancel>
+            <AlertDialogCancel>{t('prompts.dialogs.discard.keepEditing')}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmCancel} className="bg-destructive text-destructive-foreground">
-              Discard Changes
+              {t('prompts.dialogs.discard.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

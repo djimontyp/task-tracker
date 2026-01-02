@@ -32,34 +32,34 @@ import type { TodaysFocusProps, FocusAtom, FocusAtomType } from '../types'
 // Atom type configuration with icons and colors
 type AtomConfigItem = {
   icon: typeof AlertCircle
-  label: string
+  labelKey: string
   badgeClass: string
 }
 
 const ATOM_TYPE_CONFIG: Record<FocusAtomType, AtomConfigItem> = {
   TASK: {
     icon: FileText,
-    label: 'Task',
+    labelKey: 'task',
     badgeClass: cn('gap-2', atomColors.requirement.border, atomColors.requirement.text, 'bg-atom-requirement/10'),
   },
   IDEA: {
     icon: Lightbulb,
-    label: 'Idea',
+    labelKey: 'idea',
     badgeClass: cn('gap-2', atomColors.insight.border, atomColors.insight.text, 'bg-atom-insight/10'),
   },
   QUESTION: {
     icon: HelpCircle,
-    label: 'Question',
+    labelKey: 'question',
     badgeClass: cn('gap-2', atomColors.question.border, atomColors.question.text, 'bg-atom-question/10'),
   },
   DECISION: {
     icon: Diamond,
-    label: 'Decision',
+    labelKey: 'decision',
     badgeClass: cn('gap-2', atomColors.decision.border, atomColors.decision.text, 'bg-atom-decision/10'),
   },
   INSIGHT: {
     icon: Cog,
-    label: 'Insight',
+    labelKey: 'insight',
     badgeClass: cn('gap-2', atomColors.pattern.border, atomColors.pattern.text, 'bg-atom-pattern/10'),
   },
 }
@@ -67,13 +67,14 @@ const ATOM_TYPE_CONFIG: Record<FocusAtomType, AtomConfigItem> = {
 // Fallback for unknown types
 const DEFAULT_CONFIG: AtomConfigItem = {
   icon: FileText,
-  label: 'Item',
+  labelKey: 'item',
   badgeClass: 'gap-1.5 border-muted text-muted-foreground bg-muted/10',
 }
 
-const FocusItem = ({ atom }: { atom: FocusAtom }) => {
+const FocusItem = ({ atom, getLabel }: { atom: FocusAtom; getLabel: (key: string) => string }) => {
   const config = ATOM_TYPE_CONFIG[atom.atom_type] || DEFAULT_CONFIG
   const Icon = config.icon
+  const label = getLabel(config.labelKey)
 
   return (
     <Link
@@ -88,7 +89,7 @@ const FocusItem = ({ atom }: { atom: FocusAtom }) => {
       {/* Atom type badge */}
       <Badge variant="outline" className={config.badgeClass}>
         <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-        {config.label}
+        {label}
       </Badge>
 
       {/* Title */}
@@ -115,6 +116,8 @@ const TodaysFocus = ({ atoms, isLoading = false }: TodaysFocusProps) => {
 
   // Limit to top 3 items
   const displayAtoms = atoms?.slice(0, 3) ?? []
+
+  const getAtomLabel = (key: string) => t(`todaysFocus.atomTypes.${key}`)
 
   return (
     <Card>
@@ -147,7 +150,7 @@ const TodaysFocus = ({ atoms, isLoading = false }: TodaysFocusProps) => {
         ) : (
           <div className="space-y-4" role="list" aria-label={t('todaysFocus.title')}>
             {displayAtoms.map((atom) => (
-              <FocusItem key={atom.id} atom={atom} />
+              <FocusItem key={atom.id} atom={atom} getLabel={getAtomLabel} />
             ))}
           </div>
         )}

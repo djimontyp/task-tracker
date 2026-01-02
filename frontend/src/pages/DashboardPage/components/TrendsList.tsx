@@ -5,6 +5,7 @@
  * Shows keyword, mention count, delta, and related problems if any.
  */
 
+import { useTranslation } from 'react-i18next'
 import { TrendingUp, ArrowUp, ArrowDown, Minus, AlertCircle, ChevronRight } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
@@ -14,6 +15,8 @@ import { cn } from '@/shared/lib'
 import type { TrendsListProps, Trend } from '../types'
 
 const TrendItem = ({ trend, index }: { trend: Trend; index: number }) => {
+  const { t } = useTranslation('dashboard')
+
   const getDeltaIcon = () => {
     if (trend.delta > 0) return <ArrowUp className="h-3 w-3" aria-hidden="true" />
     if (trend.delta < 0) return <ArrowDown className="h-3 w-3" aria-hidden="true" />
@@ -24,6 +27,12 @@ const TrendItem = ({ trend, index }: { trend: Trend; index: number }) => {
     if (trend.delta > 0) return 'text-semantic-success'
     if (trend.delta < 0) return 'text-semantic-error'
     return 'text-muted-foreground'
+  }
+
+  const getDeltaAriaLabel = () => {
+    if (trend.delta > 0) return t('trendsList.deltaIncrease', { value: Math.abs(trend.delta) })
+    if (trend.delta < 0) return t('trendsList.deltaDecrease', { value: Math.abs(trend.delta) })
+    return t('trendsList.deltaNoChange')
   }
 
   return (
@@ -48,19 +57,19 @@ const TrendItem = ({ trend, index }: { trend: Trend; index: number }) => {
               className="gap-2 border-semantic-error/50 text-semantic-error bg-semantic-error/10"
             >
               <AlertCircle className="h-3 w-3" aria-hidden="true" />
-              {trend.relatedProblems} {trend.relatedProblems === 1 ? 'проблема' : 'проблеми'}
+              {t('trendsList.problems', { count: trend.relatedProblems })}
             </Badge>
           )}
         </div>
         <p className="text-sm text-muted-foreground tabular-nums">
-          {trend.count} згадувань
+          {t('trendsList.mentions', { count: trend.count })}
         </p>
       </div>
 
       {/* Delta indicator */}
       <div
         className={cn('flex items-center gap-2 text-sm font-medium', getDeltaColor())}
-        aria-label={`${trend.delta > 0 ? 'Збільшення' : trend.delta < 0 ? 'Зменшення' : 'Без змін'} на ${Math.abs(trend.delta)}`}
+        aria-label={getDeltaAriaLabel()}
       >
         {getDeltaIcon()}
         <span className="tabular-nums">
@@ -87,37 +96,43 @@ const TrendsListSkeleton = () => (
   </div>
 )
 
-const TrendsListEmpty = () => (
-  <div className="flex flex-col items-center justify-center py-8 text-center">
-    <div className="rounded-full bg-muted p-4 mb-4">
-      <TrendingUp className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+const TrendsListEmpty = () => {
+  const { t } = useTranslation('dashboard')
+
+  return (
+    <div className="flex flex-col items-center justify-center py-8 text-center">
+      <div className="rounded-full bg-muted p-4 mb-4">
+        <TrendingUp className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+      </div>
+      <h3 className="text-sm font-medium text-foreground mb-2">
+        {t('trendsList.empty')}
+      </h3>
+      <p className="text-sm text-muted-foreground max-w-xs">
+        {t('trendsList.emptyDescription')}
+      </p>
     </div>
-    <h3 className="text-sm font-medium text-foreground mb-2">
-      Немає трендів
-    </h3>
-    <p className="text-sm text-muted-foreground max-w-xs">
-      Тренди з&apos;являться після аналізу повідомлень
-    </p>
-  </div>
-)
+  )
+}
 
 const TrendsList = ({ data, isLoading, error, onShowAll }: TrendsListProps) => {
+  const { t } = useTranslation('dashboard')
+
   if (error) {
     return (
       <Card className="border-semantic-error/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" aria-hidden="true" />
-            Тренди тижня
+            {t('trendsList.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <p className="text-sm text-muted-foreground mb-4">
-              Не вдалось завантажити тренди
+              {t('trendsList.loadError')}
             </p>
             <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-              Спробувати знову
+              {t('trendsList.retry')}
             </Button>
           </div>
         </CardContent>
@@ -130,7 +145,7 @@ const TrendsList = ({ data, isLoading, error, onShowAll }: TrendsListProps) => {
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" aria-hidden="true" />
-          Тренди тижня
+          {t('trendsList.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
@@ -140,7 +155,7 @@ const TrendsList = ({ data, isLoading, error, onShowAll }: TrendsListProps) => {
           <TrendsListEmpty />
         ) : (
           <>
-            <div className="space-y-2" role="list" aria-label="Тренди тижня">
+            <div className="space-y-2" role="list" aria-label={t('trendsList.ariaLabel')}>
               {data.trends.map((trend, index) => (
                 <TrendItem key={trend.keyword} trend={trend} index={index} />
               ))}
@@ -151,7 +166,7 @@ const TrendsList = ({ data, isLoading, error, onShowAll }: TrendsListProps) => {
                 className="w-full mt-4 justify-between"
                 onClick={onShowAll}
               >
-                Показати всі тренди
+                {t('trendsList.showAll')}
                 <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </Button>
             )}
