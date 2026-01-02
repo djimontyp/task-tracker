@@ -4,7 +4,8 @@
  * T031: Displays decisions grouped by topics.
  */
 
-import { CheckCircle, Clock, Folder } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { CheckCircle, Clock, Folder, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Badge } from '@/shared/ui/badge';
 import {
@@ -12,7 +13,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/shared/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import type {
   TopicDecisions,
@@ -28,6 +28,7 @@ export function DecisionsList({
   decisionsByTopic,
   uncategorizedDecisions,
 }: DecisionsListProps) {
+  const { t } = useTranslation('executiveSummary');
   const totalDecisions =
     decisionsByTopic.reduce((sum, td) => sum + td.count, 0) +
     uncategorizedDecisions.length;
@@ -41,7 +42,7 @@ export function DecisionsList({
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-lg">
           <CheckCircle className="h-5 w-5 text-primary" />
-          Рішення
+          {t('sections.decisions')}
           <Badge variant="default" className="ml-2">
             {totalDecisions}
           </Badge>
@@ -61,7 +62,7 @@ export function DecisionsList({
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Folder className="h-4 w-4" />
-              Без топіку ({uncategorizedDecisions.length})
+              {t('sections.withoutTopic')} ({uncategorizedDecisions.length})
             </h4>
             <div className="space-y-2">
               {uncategorizedDecisions.map((decision) => (
@@ -116,6 +117,8 @@ interface DecisionItemProps {
 }
 
 function DecisionItem({ decision }: DecisionItemProps) {
+  const { t } = useTranslation('executiveSummary');
+
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-4">
@@ -130,7 +133,7 @@ function DecisionItem({ decision }: DecisionItemProps) {
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground flex-shrink-0">
           <Clock className="h-3 w-3" />
-          {decision.days_old} дн.
+          {t('labels.daysOld', { count: decision.days_old })}
         </div>
       </div>
     </div>

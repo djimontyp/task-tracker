@@ -5,6 +5,7 @@
  * Displays weekly/bi-weekly/monthly summary of decisions and blockers for CEO.
  */
 
+import { useTranslation } from 'react-i18next';
 import { ClipboardList, RefreshCw, FileText } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
@@ -17,6 +18,7 @@ import { SummaryPeriodSelector } from './components/SummaryPeriodSelector';
 import { ExportButton } from './components/ExportButton';
 
 export function ExecutiveSummaryPage() {
+  const { t } = useTranslation('executiveSummary');
   const {
     data,
     isLoading,
@@ -36,7 +38,7 @@ export function ExecutiveSummaryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <ClipboardList className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">Executive Summary</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
         </div>
         <div className="flex items-center gap-2">
           <SummaryPeriodSelector
@@ -50,7 +52,7 @@ export function ExecutiveSummaryPage() {
             size="icon"
             onClick={() => refetch()}
             disabled={isFetching}
-            aria-label="Оновити"
+            aria-label={t('actions.refresh')}
           >
             <RefreshCw
               className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`}
@@ -115,17 +117,19 @@ interface ErrorStateProps {
 }
 
 function ErrorState({ error, onRetry }: ErrorStateProps) {
+  const { t } = useTranslation('executiveSummary');
+
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="rounded-full bg-destructive/10 p-4 mb-4">
         <ClipboardList className="h-8 w-8 text-destructive" />
       </div>
-      <h3 className="text-lg font-medium">Помилка завантаження</h3>
+      <h3 className="text-lg font-medium">{t('errors.loadingFailed')}</h3>
       <p className="text-sm text-muted-foreground mt-2 max-w-sm">
-        {error.message || 'Не вдалося завантажити дані. Спробуйте ще раз.'}
+        {error.message || t('errors.tryAgain')}
       </p>
       <Button onClick={onRetry} className="mt-4">
-        Спробувати знову
+        {t('errors.retryButton')}
       </Button>
     </div>
   );
@@ -136,21 +140,22 @@ interface EmptyStateProps {
 }
 
 function EmptyState({ period }: EmptyStateProps) {
-  const periodLabel =
+  const { t } = useTranslation('executiveSummary');
+  const periodKey =
     period === 7
-      ? 'тиждень'
+      ? 'week'
       : period === 14
-        ? '2 тижні'
-        : 'місяць';
+        ? 'twoWeeks'
+        : 'month';
 
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="rounded-full bg-muted p-4 mb-4">
         <FileText className="h-8 w-8 text-muted-foreground" />
       </div>
-      <h3 className="text-lg font-medium">Немає активності</h3>
+      <h3 className="text-lg font-medium">{t('empty.title')}</h3>
       <p className="text-sm text-muted-foreground mt-2 max-w-sm">
-        За останній {periodLabel} немає затверджених рішень або блокерів.
+        {t('empty.description', { period: t(`empty.periods.${periodKey}`) })}
       </p>
     </div>
   );

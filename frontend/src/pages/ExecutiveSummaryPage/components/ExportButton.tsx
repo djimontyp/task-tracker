@@ -4,6 +4,7 @@
  * T044: Button for exporting executive summary.
  */
 
+import { useTranslation } from 'react-i18next';
 import { Download, FileText, FileCode } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import {
@@ -25,22 +26,24 @@ export function ExportButton({
   isExporting,
   disabled = false,
 }: ExportButtonProps) {
+  const { t } = useTranslation('executiveSummary');
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" disabled={disabled || isExporting}>
           <Download className="h-4 w-4 mr-2" />
-          {isExporting ? 'Експорт...' : 'Експорт'}
+          {isExporting ? t('actions.exporting') : t('actions.export')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => onExport('markdown')}>
           <FileCode className="h-4 w-4 mr-2" />
-          Markdown (.md)
+          {t('export.markdown')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onExport('plain_text')}>
           <FileText className="h-4 w-4 mr-2" />
-          Plain Text (.txt)
+          {t('export.plainText')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

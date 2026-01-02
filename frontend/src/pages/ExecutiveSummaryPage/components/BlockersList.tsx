@@ -5,6 +5,7 @@
  * Stale blockers (>14 days) are visually emphasized.
  */
 
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle, AlertCircle, Clock, Folder } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Badge } from '@/shared/ui/badge';
@@ -15,6 +16,8 @@ interface BlockersListProps {
 }
 
 export function BlockersList({ blockers }: BlockersListProps) {
+  const { t } = useTranslation('executiveSummary');
+
   if (blockers.length === 0) {
     return null;
   }
@@ -27,7 +30,7 @@ export function BlockersList({ blockers }: BlockersListProps) {
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-lg">
           <AlertTriangle className="h-5 w-5 text-destructive" />
-          Блокери
+          {t('sections.blockers')}
           <Badge variant="destructive" className="ml-2">
             {blockers.length}
           </Badge>
@@ -39,7 +42,7 @@ export function BlockersList({ blockers }: BlockersListProps) {
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-destructive flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
-              Потребують негайної уваги ({staleBlockers.length})
+              {t('sections.needsAttention')} ({staleBlockers.length})
             </h4>
             <div className="space-y-2">
               {staleBlockers.map((blocker) => (
@@ -54,7 +57,7 @@ export function BlockersList({ blockers }: BlockersListProps) {
           <div className="space-y-2">
             {staleBlockers.length > 0 && (
               <h4 className="text-sm font-medium text-muted-foreground">
-                Активні блокери ({recentBlockers.length})
+                {t('sections.activeBlockers')} ({recentBlockers.length})
               </h4>
             )}
             <div className="space-y-2">
@@ -75,6 +78,8 @@ interface BlockerItemProps {
 }
 
 function BlockerItem({ blocker, isStale = false }: BlockerItemProps) {
+  const { t } = useTranslation('executiveSummary');
+
   return (
     <div
       className={`rounded-lg border p-4 ${
@@ -101,12 +106,12 @@ function BlockerItem({ blocker, isStale = false }: BlockerItemProps) {
           {isStale && (
             <Badge variant="destructive" className="gap-2">
               <AlertTriangle className="h-3 w-3" />
-              Критично
+              {t('sections.critical')}
             </Badge>
           )}
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
-            {blocker.days_old} дн.
+            {t('labels.daysOld', { count: blocker.days_old })}
           </div>
         </div>
       </div>
