@@ -1,6 +1,7 @@
 {
   "title": "Дашборд",
   "welcome": "Ласкаво просимо до Pulse Radar",
+  "settings": "Налаштування",
   "greeting": {
     "morning": "Доброго ранку",
     "afternoon": "Доброго дня",
@@ -12,6 +13,12 @@
     "attention": "Є {{count}} сигналів що потребують уваги",
     "pending": "{{count}} інсайтів очікують на розгляд",
     "stable": "Проєкт рухається стабільно"
+  },
+  "coldStart": {
+    "title": "Почніть збирати знання",
+    "description": "Підключіть Telegram, щоб AI почав аналізувати повідомлення та витягувати важливу інформацію",
+    "setupTelegram": "Налаштувати Telegram",
+    "viewMessages": "Переглянути повідомлення"
   },
   "metrics": {
     "title": "Метрики",
@@ -26,11 +33,60 @@
     "active": "Активних",
     "pending": "Очікують"
   },
+  "metricsCard": {
+    "error": "Помилка",
+    "critical": {
+      "title": "Критичне",
+      "empty": "Все добре!",
+      "deltaLabel": "vs вчора"
+    },
+    "ideas": {
+      "title": "Ідеї",
+      "empty": "Поки немає",
+      "deltaLabel": "цього тижня"
+    },
+    "decisions": {
+      "title": "Рішення",
+      "empty": "Ще не прийнято",
+      "deltaLabel": "цього тижня"
+    },
+    "questions": {
+      "title": "Питання",
+      "empty": "Все зрозуміло",
+      "deltaLabel": "відкритих"
+    }
+  },
   "charts": {
     "messageFlow": "Потік повідомлень",
     "atomTypes": "Типи атомів",
     "topicDistribution": "Розподіл тем",
     "activityHeatmap": "Теплова карта активності"
+  },
+  "activityHeatmap": {
+    "title": "Пульс Активності",
+    "description": "Інтенсивність повідомлень за останні 6 місяців",
+    "messages": "повідомлень"
+  },
+  "trendChart": {
+    "title": "Динаміка Повідомлень",
+    "description": "Співвідношення корисних сигналів до шуму (14 днів)",
+    "signal": "Сигнал",
+    "noise": "Шум"
+  },
+  "trendsList": {
+    "title": "Тренди тижня",
+    "ariaLabel": "Тренди тижня",
+    "empty": "Немає трендів",
+    "emptyDescription": "Тренди з'являться після аналізу повідомлень",
+    "loadError": "Не вдалось завантажити тренди",
+    "retry": "Спробувати знову",
+    "showAll": "Показати всі тренди",
+    "mentions": "{{count}} згадувань",
+    "problems": "{{count}} проблема",
+    "problems_plural": "{{count}} проблеми",
+    "deltaIncrease": "Збільшення на {{value}}",
+    "deltaDecrease": "Зменшення на {{value}}",
+    "deltaNoChange": "Без змін"
   },
   "heatmap": {
     "tabs": {
@@ -75,7 +131,15 @@
     "title": "Сьогоднішній фокус",
     "viewAll": "Дивитись все",
     "empty": "Все оброблено!",
-    "emptyDescription": "Немає елементів, що потребують вашої уваги."
+    "emptyDescription": "Немає елементів, що потребують вашої уваги.",
+    "atomTypes": {
+      "task": "Задача",
+      "idea": "Ідея",
+      "question": "Питання",
+      "decision": "Рішення",
+      "insight": "Інсайт",
+      "item": "Елемент"
+    }
   },
   "recentInsights": {
     "title": "Що нового",

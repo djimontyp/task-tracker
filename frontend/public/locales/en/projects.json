@@ -1,0 +1,72 @@
+{
+  "form": {
+    "title": {
+      "create": "Create Project",
+      "edit": "Edit Project"
+    },
+    "description": "Configure project settings for AI analysis and task classification",
+    "fields": {
+      "name": {
+        "label": "Project name",
+        "placeholder": "e.g., Task Tracker Frontend"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Brief project description..."
+      },
+      "pmUserId": {
+        "label": "Project manager user ID"
+      },
+      "keywords": {
+        "label": "Keywords",
+        "placeholder": "Add keyword and press Enter"
+      },
+      "components": {
+        "label": "Components",
+        "name": {
+          "placeholder": "Component name"
+        },
+        "keywords": {
+          "placeholder": "Keywords (comma separated)"
+        },
+        "description": {
+          "placeholder": "Optional component description"
+        }
+      },
+      "assignees": {
+        "label": "Default assignee IDs",
+        "placeholder": "Enter user ID and press Enter"
+      },
+      "glossary": {
+        "label": "Glossary",
+        "term": {
+          "placeholder": "Term"
+        },
+        "definition": {
+          "placeholder": "Definition"
+        }
+      },
+      "priorityRules": {
+        "label": "Priority Rules",
+        "critical": "Critical Keywords",
+        "high": "High Keywords",
+        "medium": "Medium Keywords",
+        "low": "Low Keywords",
+        "placeholder": "Comma separated keywords"
+      },
+      "version": {
+        "label": "Version",
+        "placeholder": "e.g., 1.0.0"
+      }
+    },
+    "actions": {
+      "add": "Add",
+      "addComponent": "Add Component",
+      "addGlossaryEntry": "Add Glossary Entry",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "update": "Update Project",
+      "create": "Create Project"
+    }
+  }
+}

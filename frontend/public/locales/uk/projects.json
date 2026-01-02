@@ -1,0 +1,72 @@
+{
+  "form": {
+    "title": {
+      "create": "Створити проект",
+      "edit": "Редагувати проект"
+    },
+    "description": "Налаштуйте параметри проекту для AI-аналізу та класифікації завдань",
+    "fields": {
+      "name": {
+        "label": "Назва проекту",
+        "placeholder": "напр., Task Tracker Frontend"
+      },
+      "description": {
+        "label": "Опис",
+        "placeholder": "Короткий опис проекту..."
+      },
+      "pmUserId": {
+        "label": "ID менеджера проекту"
+      },
+      "keywords": {
+        "label": "Ключові слова",
+        "placeholder": "Додайте ключове слово та натисніть Enter"
+      },
+      "components": {
+        "label": "Компоненти",
+        "name": {
+          "placeholder": "Назва компонента"
+        },
+        "keywords": {
+          "placeholder": "Ключові слова (через кому)"
+        },
+        "description": {
+          "placeholder": "Опис компонента (необов'язково)"
+        }
+      },
+      "assignees": {
+        "label": "ID виконавців за замовчуванням",
+        "placeholder": "Введіть ID користувача та натисніть Enter"
+      },
+      "glossary": {
+        "label": "Глосарій",
+        "term": {
+          "placeholder": "Термін"
+        },
+        "definition": {
+          "placeholder": "Визначення"
+        }
+      },
+      "priorityRules": {
+        "label": "Правила пріоритетів",
+        "critical": "Критичні ключові слова",
+        "high": "Високі ключові слова",
+        "medium": "Середні ключові слова",
+        "low": "Низькі ключові слова",
+        "placeholder": "Ключові слова через кому"
+      },
+      "version": {
+        "label": "Версія",
+        "placeholder": "напр., 1.0.0"
+      }
+    },
+    "actions": {
+      "add": "Додати",
+      "addComponent": "Додати компонент",
+      "addGlossaryEntry": "Додати запис глосарію",
+      "cancel": "Скасувати",
+      "saving": "Збереження...",
+      "update": "Оновити проект",
+      "create": "Створити проект"
+    }
+  }
+}

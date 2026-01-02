@@ -40,6 +40,82 @@
       "copyWebhook": "Copy URL"
     }
   },
+  "telegram": {
+    "integration": "Telegram Integration",
+    "configureDescription": "Configure your Telegram bot webhook URL and manage monitored groups for message tracking",
+    "status": {
+      "connected": "Connected",
+      "pending": "Pending",
+      "error": "Error",
+      "checking": "Checking...",
+      "unknown": "Unknown"
+    },
+    "webhook": {
+      "label": "Webhook Host",
+      "placeholder": "abc123.ngrok-free.app",
+      "description": "Enter host to see full webhook URL",
+      "updateTitle": "Update Webhook URL?",
+      "updateDescription": "This will change your Telegram webhook configuration:",
+      "updateFrom": "From:",
+      "updateTo": "To:",
+      "updateNotice": "Messages will be sent to the new URL immediately after the change.",
+      "updateButton": "Update Webhook",
+      "deleteTitle": "Delete Webhook?",
+      "deleteDescription": "This will remove the webhook from Telegram and stop receiving messages. You can re-configure it anytime.",
+      "deleteButton": "Delete Webhook",
+      "deleting": "Deleting...",
+      "httpsNotice": "Telegram requires HTTPS for webhook URLs. Use a service like ngrok for local development."
+    },
+    "connection": {
+      "lastChecked": "Last checked:",
+      "justNow": "just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago"
+    },
+    "groups": {
+      "title": "Groups ({{count}})",
+      "refreshNames": "Refresh Names",
+      "refreshing": "Refreshing...",
+      "addGroup": "Add Group",
+      "addPlaceholder": "Paste group URL or enter -100XXXXXXXXX",
+      "addButton": "Add",
+      "adding": "Adding...",
+      "invalidFormat": "Invalid format. Paste a Telegram group link or enter -100XXXXXXXXX",
+      "validId": "Valid group ID",
+      "active": "Active",
+      "noGroups": "No groups yet",
+      "noGroupsDescription": "Paste a Telegram group URL or enter a group ID to start monitoring messages",
+      "refreshTip": "Tip: Add bot as admin to group, then click \"Refresh Names\" to load names"
+    },
+    "channels": {
+      "title": "Channels ({{count}})",
+      "refreshNames": "Refresh Names",
+      "refreshing": "Refreshing...",
+      "addChannel": "Add Channel",
+      "addPlaceholder": "Paste group URL or enter -100XXXXXXXXX",
+      "addButton": "Add",
+      "adding": "Adding...",
+      "invalidFormat": "Invalid format. Paste a Telegram group link or enter -100XXXXXXXXX",
+      "validId": "Valid channel ID",
+      "namePending": "Name Pending",
+      "removing": "Removing...",
+      "remove": "Remove",
+      "noChannels": "No channels yet",
+      "noChannelsDescription": "Paste a Telegram group URL or enter a channel ID to start monitoring messages from that channel.",
+      "refreshTip": "Tip: Add bot as admin to the channel, then click \"Refresh Names\" to load names"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "pasted": "Pasted: {{url}}",
+      "clipboardEmpty": "Clipboard is empty or contains invalid URL",
+      "clipboardDenied": "Clipboard access denied. Please allow clipboard permissions or paste manually.",
+      "clipboardError": "Failed to read clipboard: {{message}}",
+      "clipboardUnavailable": "Clipboard API not available in this browser",
+      "testConnection": "Test webhook connection",
+      "idLabel": "ID:",
+      "pasteUrl": "Paste URL from clipboard and apply"
+    }
+  },
   "providers": {
     "title": "LLM providers",
     "description": "AI model settings for analysis",
@@ -52,6 +128,235 @@
       "error": "Error",
       "validating": "Validating...",
       "pending": "Pending"
+    }
+  },
+  "prompts": {
+    "title": "LLM Prompt Tuning",
+    "description": "Configure and test prompts for AI models",
+    "unsavedChanges": "Unsaved Changes",
+    "promptType": "Prompt Type",
+    "promptText": "Prompt Text",
+    "loading": "Loading prompt...",
+    "placeholder": "Enter prompt text...",
+    "characterCount": "{{count}} / {{max}} characters",
+    "validation": {
+      "minLength": "Prompt must be at least {{min}} characters",
+      "maxLength": "Prompt must not exceed {{max}} characters",
+      "errors": "Validation Errors:",
+      "fixErrors": "Please fix validation errors before saving"
+    },
+    "placeholders": {
+      "title": "Required Placeholders:"
+    },
+    "buttons": {
+      "save": "Save Changes",
+      "cancel": "Cancel"
+    },
+    "dialogs": {
+      "save": {
+        "title": "Save Prompt Changes?",
+        "description": "This will affect all new messages processed after saving. Existing messages will not be re-processed.",
+        "promptType": "Prompt Type:",
+        "cancel": "Cancel",
+        "confirm": "Save Changes"
+      },
+      "discard": {
+        "title": "Discard Changes?",
+        "description": "All unsaved changes will be lost. This action cannot be undone.",
+        "keepEditing": "Keep Editing",
+        "confirm": "Discard Changes"
+      }
+    },
+    "toast": {
+      "saved": "Prompt saved successfully",
+      "saveFailed": "Failed to save prompt",
+      "discarded": "Changes discarded"
+    }
+  },
+  "automation": {
+    "wizard": {
+      "title": "Automation Setup Wizard",
+      "description": "Configure automated knowledge extraction in 4 simple steps",
+      "skipConfigureLater": "Skip & Configure Later",
+      "previous": "Previous",
+      "next": "Next",
+      "activating": "Activating...",
+      "activateAutomation": "Activate Automation"
+    },
+    "trends": {
+      "title": "Approval Trends",
+      "noData": "No trend data available",
+      "periods": {
+        "7d": "Last 7 Days",
+        "30d": "Last 30 Days",
+        "90d": "Last 90 Days"
+      }
+    },
+    "jobs": {
+      "dialogTitle": {
+        "edit": "Edit Job",
+        "create": "Create New Job"
+      },
+      "jobName": "Job Name",
+      "jobNamePlaceholder": "Daily Knowledge Extraction",
+      "scheduleCron": "Schedule (Cron Expression)",
+      "enableJob": "Enable Job",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "updateJob": "Update Job",
+      "createJob": "Create Job",
+      "schedulerStatus": "Scheduler Status",
+      "noJobsConfigured": "No scheduled jobs configured",
+      "lastRun": "Last Run",
+      "nextRun": "Next Run",
+      "status": "Status",
+      "never": "Never",
+      "notScheduled": "Not scheduled",
+      "in": "In",
+      "triggerNow": "Trigger Now",
+      "triggering": "Triggering...",
+      "edit": "Edit",
+      "viewHistory": "View History",
+      "delete": "Delete",
+      "loading": "Loading...",
+      "actions": "Actions",
+      "toggleAriaLabel": "Toggle {{name}} enabled status",
+      "actionsAriaLabel": "Job actions for {{name}}"
+    },
+    "cron": {
+      "scheduleFrequency": "Schedule Frequency",
+      "cronExpression": "Cron Expression",
+      "preview": "Preview:",
+      "error": "Error:",
+      "presets": {
+        "hourly": {
+          "label": "Hourly",
+          "description": "Runs at the start of every hour"
+        },
+        "daily": {
+          "label": "Daily",
+          "description": "Runs every day at 9:00 AM UTC"
+        },
+        "weekly": {
+          "label": "Weekly",
+          "description": "Runs every Monday at 9:00 AM UTC"
+        },
+        "custom": {
+          "label": "Custom",
+          "description": "Define your own cron expression"
+        }
+      }
+    },
+    "review": {
+      "title": "Review & Activate",
+      "description": "Review your automation configuration before activation",
+      "schedule": "Schedule",
+      "automationRules": "Automation Rules",
+      "action": "Action:",
+      "confidence": "Confidence:",
+      "similarity": "Similarity:",
+      "greaterOrEqual": ">=",
+      "whatHappensNext": "What happens next?",
+      "step1": "Scheduler job will be created with your configured schedule",
+      "step2": "Automation rule will be created with your thresholds",
+      "step3": "You can monitor and adjust everything from the Automation Dashboard"
+    },
+    "rules": {
+      "title": "Auto-Approval Rules",
+      "description": "Configure thresholds and actions for automated decision-making",
+      "sectionTitle": "Action & Status",
+      "actionLabel": "Action",
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "escalate": "Escalate",
+        "notify": "Notify",
+        "autoApprove": "Auto-Approve",
+        "autoApproveDescription": "Automatically approve versions meeting thresholds",
+        "autoReject": "Auto-Reject",
+        "autoRejectDescription": "Automatically reject versions below thresholds",
+        "manualReview": "Manual Review",
+        "manualReviewDescription": "Flag for manual review without auto-action"
+      },
+      "enabled": "Enabled",
+      "estimatedImpact": "Estimated Impact",
+      "impact": {
+        "high": "High automation rate (~85% of versions)",
+        "medium": "Medium automation rate (~60% of versions)",
+        "low": "Low automation rate (~30% of versions)"
+      },
+      "basicInfo": {
+        "title": "Basic Information",
+        "ruleName": "Rule Name",
+        "ruleNamePlaceholder": "High Confidence Auto-Approval",
+        "priority": "Priority (0-100)"
+      },
+      "conditions": {
+        "title": "Conditions",
+        "description": "Define when this rule should trigger",
+        "addCondition": "+ Add Condition",
+        "noConditions": "No conditions added yet. Click \"Add Condition\" to start.",
+        "logicOperator": "Logic Operator",
+        "andDescription": "AND (all conditions must match)",
+        "orDescription": "OR (any condition can match)",
+        "valuePlaceholder": "Value",
+        "removeCondition": "Remove condition",
+        "condition": "condition",
+        "conditions_one": "{{count}} condition",
+        "conditions_other": "{{count}} conditions"
+      },
+      "livePreview": {
+        "title": "Live Preview",
+        "addConditionsPrompt": "Add conditions to preview impact",
+        "versionsWillBe": "versions will be",
+        "sampleVersions": "Sample versions:",
+        "moreVersions": "+ {{count}} more versions"
+      },
+      "performance": {
+        "disabled": "Disabled",
+        "actionsAriaLabel": "Rule actions for {{name}}"
+      },
+      "templates": {
+        "title": "Rule Templates",
+        "templatesTab": "Templates",
+        "priority": "Priority:",
+        "noTemplates": "No templates available"
+      },
+      "thresholds": {
+        "title": "Thresholds",
+        "confidence": "Confidence Threshold",
+        "confidenceDescription": "Minimum AI confidence score required for auto-action",
+        "confidenceLabel": "Confidence:",
+        "confidenceThreshold": "Confidence Threshold",
+        "similarity": "Similarity Threshold",
+        "similarityDescription": "Minimum similarity score to existing knowledge base",
+        "similarityLabel": "Similarity:",
+        "similarityThreshold": "Similarity Threshold",
+        "estimatedImpact": "Estimated Impact",
+        "minValue": "≥{{value}}%"
+      }
+    },
+    "schedule": {
+      "title": "Configure Schedule",
+      "description": "Set up when automated analysis should run to process pending versions",
+      "whatHappens": {
+        "title": "What happens when the job runs?",
+        "fetchPending": "Fetches all pending topic/atom versions",
+        "applyRules": "Applies automation rules to each version",
+        "autoAction": "Auto-approves/rejects based on configured thresholds",
+        "sendNotifications": "Sends notifications if enabled"
+      }
+    },
+    "common": {
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "loading": "Loading...",
+      "saving": "Saving...",
+      "createRule": "Create Rule",
+      "updateRule": "Update Rule",
+      "editRule": "Edit Rule",
+      "createNewRule": "Create New Rule"
     }
   }
 }

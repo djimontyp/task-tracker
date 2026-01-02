@@ -1,6 +1,7 @@
 {
   "title": "Dashboard",
   "welcome": "Welcome to Pulse Radar",
+  "settings": "Settings",
   "greeting": {
     "morning": "Good morning",
     "afternoon": "Good afternoon",
@@ -12,6 +13,12 @@
     "attention": "{{count}} signals need your attention",
     "pending": "{{count}} insights pending review",
     "stable": "Project is moving steadily"
+  },
+  "coldStart": {
+    "title": "Start collecting knowledge",
+    "description": "Connect Telegram so AI can start analyzing messages and extracting important information",
+    "setupTelegram": "Setup Telegram",
+    "viewMessages": "View messages"
   },
   "metrics": {
     "title": "Metrics",
@@ -26,11 +33,60 @@
     "active": "Active",
     "pending": "Pending"
   },
+  "metricsCard": {
+    "error": "Error",
+    "critical": {
+      "title": "Critical",
+      "empty": "All good!",
+      "deltaLabel": "vs yesterday"
+    },
+    "ideas": {
+      "title": "Ideas",
+      "empty": "None yet",
+      "deltaLabel": "this week"
+    },
+    "decisions": {
+      "title": "Decisions",
+      "empty": "Not made yet",
+      "deltaLabel": "this week"
+    },
+    "questions": {
+      "title": "Questions",
+      "empty": "All clear",
+      "deltaLabel": "open"
+    }
+  },
   "charts": {
     "messageFlow": "Message flow",
     "atomTypes": "Atom types",
     "topicDistribution": "Topic distribution",
     "activityHeatmap": "Activity heatmap"
+  },
+  "activityHeatmap": {
+    "title": "Activity Pulse",
+    "description": "Message intensity over the last 6 months",
+    "messages": "messages"
+  },
+  "trendChart": {
+    "title": "Message Dynamics",
+    "description": "Signal to noise ratio (14 days)",
+    "signal": "Signal",
+    "noise": "Noise"
+  },
+  "trendsList": {
+    "title": "Weekly Trends",
+    "ariaLabel": "Weekly Trends",
+    "empty": "No trends",
+    "emptyDescription": "Trends will appear after message analysis",
+    "loadError": "Failed to load trends",
+    "retry": "Try again",
+    "showAll": "Show all trends",
+    "mentions": "{{count}} mentions",
+    "problems": "{{count}} problem",
+    "problems_plural": "{{count}} problems",
+    "deltaIncrease": "Increased by {{value}}",
+    "deltaDecrease": "Decreased by {{value}}",
+    "deltaNoChange": "No change"
   },
   "heatmap": {
     "tabs": {
@@ -75,7 +131,15 @@
     "title": "Today's Focus",
     "viewAll": "View all",
     "empty": "All caught up!",
-    "emptyDescription": "No pending items that need your attention."
+    "emptyDescription": "No pending items that need your attention.",
+    "atomTypes": {
+      "task": "Task",
+      "idea": "Idea",
+      "question": "Question",
+      "decision": "Decision",
+      "insight": "Insight",
+      "item": "Item"
+    }
   },
   "recentInsights": {
     "title": "What's New",

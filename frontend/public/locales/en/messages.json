@@ -83,5 +83,116 @@
     "allAriaLabel": "All messages, {{count}} total",
     "signalsAriaLabel": "Signal messages, {{count}} items",
     "noiseAriaLabel": "Noise messages, {{count}} items"
+  },
+  "classification": {
+    "overallConfidence": "Overall confidence",
+    "dimensionBreakdown": "Dimension breakdown",
+    "decisionRationale": "Decision rationale",
+    "copyReasoning": "Copy Reasoning",
+    "assignedTopic": "Assigned topic",
+    "confidenceLevels": {
+      "high": {
+        "label": "High Confidence",
+        "description": "71-100% - Classification is reliable"
+      },
+      "medium": {
+        "label": "Medium Confidence",
+        "description": "41-70% - Manual review recommended"
+      },
+      "low": {
+        "label": "Low Confidence",
+        "description": "0-40% - Likely misclassified"
+      }
+    },
+    "thresholds": {
+      "low": "Low (0-40)",
+      "medium": "Medium (41-70)",
+      "high": "High (71-100)"
+    },
+    "dimensions": {
+      "topicRelevance": {
+        "label": "Topic Relevance",
+        "description": "How well this message matches the assigned topic"
+      },
+      "noiseScore": {
+        "label": "Noise Score",
+        "description": "Signal quality (lower is better)"
+      },
+      "urgencyScore": {
+        "label": "Urgency Score",
+        "description": "How urgent or time-sensitive this message is"
+      },
+      "lowerIsBetter": "Lower scores are better"
+    },
+    "sections": {
+      "whyTopic": "Why this topic?",
+      "whyNotNoise": "Why not noise?",
+      "keyIndicators": "Key indicators"
+    },
+    "defaultReasoning": {
+      "whyTopic": "This message was classified to \"{{topic}}\" based on content analysis and semantic similarity.",
+      "whyNotNoise": "Message contains actionable content with clear signals, not casual conversation or spam."
+    },
+    "defaultIndicators": {
+      "matchedCriteria": "Content matched topic criteria",
+      "signalRatio": "Signal-to-noise ratio above threshold",
+      "semanticSimilarity": "Semantic similarity score acceptable"
+    },
+    "toast": {
+      "copiedReasoning": "Reasoning copied to clipboard"
+    },
+    "ariaLabel": {
+      "confidence": "Confidence: {{value}}%"
+    }
+  },
+  "noise": {
+    "bulkActions": {
+      "ariaLabel": "Bulk actions",
+      "selected": "{{count}} selected",
+      "clear": "Clear",
+      "reject": "Reject",
+      "approve": "Approve"
+    },
+    "scoreBreakdown": {
+      "ariaLabel": "Score breakdown by factor",
+      "title": "Score Breakdown",
+      "total": "Total:",
+      "weightsLegend": "Weights: Content {{content}}% | Author {{author}}% | Temporal {{temporal}}% | Topics {{topics}}%",
+      "factors": {
+        "content": {
+          "label": "Content"
+        },
+        "author": {
+          "label": "Author"
+        },
+        "temporal": {
+          "label": "Temporal"
+        },
+        "topics": {
+          "label": "Topics"
+        }
+      }
+    },
+    "scoreIndicator": {
+      "ariaLabel": "Importance: {{level}} ({{percentage}}%)",
+      "levels": {
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "noise": "Noise"
+      }
+    },
+    "card": {
+      "selectMessage": "Select message from {{author}}",
+      "reviewed": "Reviewed",
+      "less": "Less",
+      "more": "More",
+      "reject": "Reject",
+      "approve": "Approve",
+      "moreActions": "More actions",
+      "markAsSignal": "Mark as Signal",
+      "confirmAsNoise": "Confirm as Noise"
+    }
   }
 }

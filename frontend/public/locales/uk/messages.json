@@ -85,5 +85,116 @@
     "allAriaLabel": "Усі повідомлення, {{count}} загалом",
     "signalsAriaLabel": "Сигнальні повідомлення, {{count}} елементів",
     "noiseAriaLabel": "Шумові повідомлення, {{count}} елементів"
+  },
+  "classification": {
+    "overallConfidence": "Загальна впевненість",
+    "dimensionBreakdown": "Розбивка за вимірами",
+    "decisionRationale": "Обґрунтування рішення",
+    "copyReasoning": "Скопіювати обґрунтування",
+    "assignedTopic": "Призначена тема",
+    "confidenceLevels": {
+      "high": {
+        "label": "Висока впевненість",
+        "description": "71-100% - Класифікація надійна"
+      },
+      "medium": {
+        "label": "Середня впевненість",
+        "description": "41-70% - Рекомендується ручна перевірка"
+      },
+      "low": {
+        "label": "Низька впевненість",
+        "description": "0-40% - Ймовірно помилкова класифікація"
+      }
+    },
+    "thresholds": {
+      "low": "Низька (0-40)",
+      "medium": "Середня (41-70)",
+      "high": "Висока (71-100)"
+    },
+    "dimensions": {
+      "topicRelevance": {
+        "label": "Релевантність теми",
+        "description": "Наскільки повідомлення відповідає призначеній темі"
+      },
+      "noiseScore": {
+        "label": "Рівень шуму",
+        "description": "Якість сигналу (менше - краще)"
+      },
+      "urgencyScore": {
+        "label": "Терміновість",
+        "description": "Наскільки повідомлення є терміновим"
+      },
+      "lowerIsBetter": "Менші значення краще"
+    },
+    "sections": {
+      "whyTopic": "Чому ця тема?",
+      "whyNotNoise": "Чому не шум?",
+      "keyIndicators": "Ключові індикатори"
+    },
+    "defaultReasoning": {
+      "whyTopic": "Це повідомлення класифіковано до теми \"{{topic}}\" на основі аналізу змісту та семантичної схожості.",
+      "whyNotNoise": "Повідомлення містить дієвий контент з чіткими сигналами, а не випадкову розмову чи спам."
+    },
+    "defaultIndicators": {
+      "matchedCriteria": "Зміст відповідає критеріям теми",
+      "signalRatio": "Співвідношення сигнал/шум вище порогу",
+      "semanticSimilarity": "Семантична схожість прийнятна"
+    },
+    "toast": {
+      "copiedReasoning": "Обґрунтування скопійовано до буфера обміну"
+    },
+    "ariaLabel": {
+      "confidence": "Впевненість: {{value}}%"
+    }
+  },
+  "noise": {
+    "bulkActions": {
+      "ariaLabel": "Масові дії",
+      "selected": "{{count}} вибрано",
+      "clear": "Очистити",
+      "reject": "Відхилити",
+      "approve": "Схвалити"
+    },
+    "scoreBreakdown": {
+      "ariaLabel": "Розбивка оцінки за факторами",
+      "title": "Розбивка оцінки",
+      "total": "Всього:",
+      "weightsLegend": "Ваги: Контент {{content}}% | Автор {{author}}% | Час {{temporal}}% | Теми {{topics}}%",
+      "factors": {
+        "content": {
+          "label": "Контент"
+        },
+        "author": {
+          "label": "Автор"
+        },
+        "temporal": {
+          "label": "Час"
+        },
+        "topics": {
+          "label": "Теми"
+        }
+      }
+    },
+    "scoreIndicator": {
+      "ariaLabel": "Важливість: {{level}} ({{percentage}}%)",
+      "levels": {
+        "critical": "Критична",
+        "high": "Висока",
+        "medium": "Середня",
+        "low": "Низька",
+        "noise": "Шум"
+      }
+    },
+    "card": {
+      "selectMessage": "Вибрати повідомлення від {{author}}",
+      "reviewed": "Перевірено",
+      "less": "Менше",
+      "more": "Більше",
+      "reject": "Відхилити",
+      "approve": "Схвалити",
+      "moreActions": "Більше дій",
+      "markAsSignal": "Позначити як сигнал",
+      "confirmAsNoise": "Підтвердити як шум"
+    }
   }
 }

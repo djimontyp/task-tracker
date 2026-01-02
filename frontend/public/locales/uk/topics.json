@@ -14,6 +14,50 @@
     "created": "Створено",
     "updated": "Оновлено"
   },
+  "detailPage": {
+    "backToTopics": "Назад до тем",
+    "notFound": "Тему не знайдено",
+    "unknownError": "Невідома помилка",
+    "autoSave": "Автозбереження",
+    "discardChanges": "Скасувати зміни",
+    "saveChanges": "Зберегти зміни",
+    "topicDetails": "Деталі теми",
+    "topicDetailsDescription": "Редагуйте інформацію про тему та керуйте знаннями",
+    "saveStatus": {
+      "saving": "Збереження...",
+      "saved": "Збережено {{time}}",
+      "error": "Помилка збереження",
+      "unsaved": "Незбережені зміни",
+      "allSaved": "Усі зміни збережено"
+    },
+    "versionHistory": {
+      "title": "Історія версій",
+      "ariaLabel": "Переглянути історію версій",
+      "sheetTitle": "Історія версій - {{name}}",
+      "pending": "{{count}} очікує",
+      "comparison": "Порівняння версій"
+    },
+    "extractKnowledge": {
+      "button": "Витягнути знання",
+      "ariaLabel": "Витягнути знання з повідомлень",
+      "dialogTitle": "Витягнути знання з повідомлень"
+    },
+    "metadata": {
+      "topicId": "ID теми",
+      "lastUpdated": "Останнє оновлення"
+    },
+    "atoms": {
+      "title": "Атоми знань",
+      "create": "Створити атом",
+      "empty": "Поки немає атомів",
+      "emptyDescription": "Створіть перший атом знань, щоб почати."
+    },
+    "messages": {
+      "title": "Пов'язані повідомлення",
+      "empty": "Поки немає повідомлень, пов'язаних з цією темою.",
+      "openMessage": "Відкрити повідомлення: {{preview}}"
+    }
+  },
   "filters": {
     "all": "Всі",
     "active": "Активні",
