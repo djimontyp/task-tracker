@@ -233,9 +233,9 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
 
           <div className="flex flex-wrap items-center gap-4">
             <Tabs value={selectedPeriod} onValueChange={(v) => setSelectedPeriod(v as 'week' | 'month')}>
-              <TabsList>
-                <TabsTrigger value="week">{t('heatmap.tabs.week')}</TabsTrigger>
-                <TabsTrigger value="month">{t('heatmap.tabs.month')}</TabsTrigger>
+              <TabsList variant="pill">
+                <TabsTrigger variant="pill" value="week">{t('heatmap.tabs.week')}</TabsTrigger>
+                <TabsTrigger variant="pill" value="month">{t('heatmap.tabs.month')}</TabsTrigger>
               </TabsList>
             </Tabs>
 
