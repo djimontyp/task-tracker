@@ -239,9 +239,9 @@ export function KnowledgeExtractionPanel({
 
       <CardContent className="space-y-4">
         <Tabs value={tabMode} onValueChange={(value) => setTabMode(value as 'period' | 'messages')}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="period">By Period</TabsTrigger>
-            <TabsTrigger value="messages" disabled={!messageIds || messageIds.length === 0}>
+          <TabsList variant="pill" className="grid w-full grid-cols-2">
+            <TabsTrigger variant="pill" value="period">By Period</TabsTrigger>
+            <TabsTrigger variant="pill" value="messages" disabled={!messageIds || messageIds.length === 0}>
               By Messages ({messageIds?.length || 0})
             </TabsTrigger>
           </TabsList>

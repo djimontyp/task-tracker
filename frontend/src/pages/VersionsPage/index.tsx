@@ -201,18 +201,18 @@ const VersionsPage = () => {
         </div>
 
         <Tabs value={entityType} onValueChange={(v) => setEntityType(v as EntityType)}>
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="topic">Topics</TabsTrigger>
-            <TabsTrigger value="atom">Atoms</TabsTrigger>
+          <TabsList variant="pill">
+            <TabsTrigger variant="pill" value="all">All</TabsTrigger>
+            <TabsTrigger variant="pill" value="topic">Topics</TabsTrigger>
+            <TabsTrigger variant="pill" value="atom">Atoms</TabsTrigger>
           </TabsList>
         </Tabs>
 
         <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as VersionStatus)}>
-          <TabsList>
-            <TabsTrigger value="pending">Pending</TabsTrigger>
-            <TabsTrigger value="approved">Approved</TabsTrigger>
-            <TabsTrigger value="rejected">Rejected</TabsTrigger>
+          <TabsList variant="pill">
+            <TabsTrigger variant="pill" value="pending">Pending</TabsTrigger>
+            <TabsTrigger variant="pill" value="approved">Approved</TabsTrigger>
+            <TabsTrigger variant="pill" value="rejected">Rejected</TabsTrigger>
           </TabsList>
         </Tabs>
 
