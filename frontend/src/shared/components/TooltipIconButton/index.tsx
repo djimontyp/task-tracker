@@ -97,7 +97,7 @@ export function TooltipIconButton({
   );
 
   return (
-    <TooltipProvider delayDuration={400}>
+    <TooltipProvider delayDuration={400} disableHoverableContent>
       <Tooltip>
         <TooltipTrigger asChild>{content}</TooltipTrigger>
         <TooltipContent>
