@@ -428,3 +428,25 @@ api-sync:
     @just api-export
     @just api-generate
     @echo "🎉 API contracts synchronized!"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# WIFI SHARING (macOS)
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Toggle WiFi access (start/stop services)
+[group: 'WiFi']
+wifi:
+    #!/usr/bin/env bash
+    if docker compose ps nginx --format "{{{{.State}}}}" 2>/dev/null | grep -q "running"; then
+        echo "📡 Stopping WiFi access..."
+        just services-stop
+        echo "✅ WiFi access disabled"
+    else
+        echo "📡 Starting WiFi access..."
+        docker compose up -d postgres nats worker api dashboard nginx
+        echo ""
+        echo "✅ WiFi access enabled!"
+        echo ""
+        echo "📱 Access from other devices:"
+        echo "   http://$(ipconfig getifaddr en0 || echo 'N/A')"
+    fi
