@@ -1,0 +1,27 @@
+{
+  "title": "Фільтрація шуму",
+  "actions": {
+    "scoreUnscored": "Оцінити необроблені повідомлення"
+  },
+  "metrics": {
+    "totalMessages": "Всього повідомлень",
+    "signalRatio": "Співвідношення сигналу",
+    "needsReview": "Потребує огляду",
+    "topNoiseSource": "Топ джерело шуму",
+    "ofAllMessages": "від усіх повідомлень",
+    "requiringManualReview": "потребують ручного огляду",
+    "mostFrequentNoiseSource": "найчастіше джерело шуму"
+  },
+  "chart": {
+    "title": "Тренди шуму - Останні 7 днів",
+    "signal": "Сигнал",
+    "noise": "Шум",
+    "weakSignal": "Слабкий сигнал"
+  },
+  "noiseSources": {
+    "title": "Топ джерела шуму",
+    "noise": "шум",
+    "noSources": "Джерел шуму ще немає",
+    "ariaLabel": "Топ джерела шуму"
+  }
+}

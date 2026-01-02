@@ -6,7 +6,18 @@
     "idea": "Idea",
     "question": "Question",
     "decision": "Decision",
-    "insight": "Insight"
+    "insight": "Insight",
+    "pattern": "Pattern",
+    "requirement": "Requirement"
+  },
+  "typeLabel": {
+    "problem": "Problems",
+    "solution": "Solutions",
+    "decision": "Decisions",
+    "question": "Questions",
+    "insight": "Insights",
+    "pattern": "Patterns",
+    "requirement": "Requirements"
   },
   "status": {
     "draft": "Draft",

@@ -1,0 +1,25 @@
+{
+  "title": "Task Templates",
+  "actions": {
+    "addTask": "Add Task",
+    "editTask": "Edit task",
+    "deleteTask": "Delete task"
+  },
+  "empty": {
+    "title": "No tasks found",
+    "description": "No tasks found. Create one to get started."
+  },
+  "card": {
+    "schemaFields": "Schema Fields:",
+    "noFields": "No fields",
+    "status": "Status:",
+    "created": "Created:"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "confirmation": {
+    "delete": "Are you sure you want to delete this task?"
+  }
+}

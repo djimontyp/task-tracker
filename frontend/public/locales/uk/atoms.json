@@ -6,7 +6,18 @@
     "idea": "Ідея",
     "question": "Питання",
     "decision": "Рішення",
-    "insight": "Інсайт"
+    "insight": "Інсайт",
+    "pattern": "Патерн",
+    "requirement": "Вимога"
+  },
+  "typeLabel": {
+    "problem": "Проблеми",
+    "solution": "Рішення",
+    "decision": "Рішення",
+    "question": "Питання",
+    "insight": "Інсайти",
+    "pattern": "Патерни",
+    "requirement": "Вимоги"
   },
   "status": {
     "draft": "Чернетка",

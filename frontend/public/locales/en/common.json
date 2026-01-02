@@ -128,6 +128,20 @@
     "weeks": "weeks",
     "months": "months"
   },
+  "timeWindow": {
+    "label": "Time Window",
+    "presets": {
+      "last24h": "Last 24h",
+      "last7d": "Last 7 days",
+      "last30d": "Last 30 days",
+      "custom": "Custom"
+    },
+    "from": "From",
+    "to": "To",
+    "selectAriaLabel": "Select {{preset}} time window",
+    "startAriaLabel": "Time window start",
+    "endAriaLabel": "Time window end"
+  },
   "confirmation": {
     "delete": "Are you sure you want to delete?",
     "unsavedChanges": "You have unsaved changes. Continue?",

@@ -1,0 +1,27 @@
+{
+  "title": "Noise Filtering",
+  "actions": {
+    "scoreUnscored": "Score Unscored Messages"
+  },
+  "metrics": {
+    "totalMessages": "Total messages",
+    "signalRatio": "Signal ratio",
+    "needsReview": "Needs review",
+    "topNoiseSource": "Top noise source",
+    "ofAllMessages": "of all messages",
+    "requiringManualReview": "requiring manual review",
+    "mostFrequentNoiseSource": "most frequent noise source"
+  },
+  "chart": {
+    "title": "Noise Trends - Last 7 Days",
+    "signal": "Signal",
+    "noise": "Noise",
+    "weakSignal": "Weak Signal"
+  },
+  "noiseSources": {
+    "title": "Top Noise Sources",
+    "noise": "noise",
+    "noSources": "No noise sources yet",
+    "ariaLabel": "Top noise sources"
+  }
+}

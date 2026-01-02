@@ -15,7 +15,8 @@ import { EmptyState } from '@/shared/patterns'
 import { PageWrapper } from '@/shared/primitives'
 
 const ProjectsPage = () => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('projects')
+  const { t: tCommon } = useTranslation()
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<ProjectConfig | undefined>(undefined)
@@ -82,12 +83,12 @@ const ProjectsPage = () => {
     mutationFn: projectService.createProject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
-      toast.success(t('toast.success.created', { entity: t('toast.entities.project') }))
+      toast.success(tCommon('toast.success.created', { entity: tCommon('toast.entities.project') }))
       setFormOpen(false)
       setSelectedProject(undefined)
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('toast.error.createFailed', { entity: t('toast.entities.project') }))
+      toast.error(error.message || tCommon('toast.error.createFailed', { entity: tCommon('toast.entities.project') }))
     },
   })
 
@@ -97,12 +98,12 @@ const ProjectsPage = () => {
       projectService.updateProject(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
-      toast.success(t('toast.success.updated', { entity: t('toast.entities.project') }))
+      toast.success(tCommon('toast.success.updated', { entity: tCommon('toast.entities.project') }))
       setFormOpen(false)
       setSelectedProject(undefined)
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('toast.error.updateFailed', { entity: t('toast.entities.project') }))
+      toast.error(error.message || tCommon('toast.error.updateFailed', { entity: tCommon('toast.entities.project') }))
     },
   })
 
@@ -110,10 +111,10 @@ const ProjectsPage = () => {
     mutationFn: projectService.deleteProject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
-      toast.success(t('toast.success.deleted', { entity: t('toast.entities.project') }))
+      toast.success(tCommon('toast.success.deleted', { entity: tCommon('toast.entities.project') }))
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('toast.error.deleteFailed', { entity: t('toast.entities.project') }))
+      toast.error(error.message || tCommon('toast.error.deleteFailed', { entity: tCommon('toast.entities.project') }))
     },
   })
 
@@ -128,7 +129,7 @@ const ProjectsPage = () => {
   }
 
   const handleDelete = (projectId: string) => {
-    if (window.confirm('Are you sure you want to delete this project?')) {
+    if (window.confirm(t('confirmation.delete'))) {
       deleteMutation.mutate(projectId)
     }
   }
@@ -153,14 +154,14 @@ const ProjectsPage = () => {
   if (error) {
     return (
       <div className="p-6 space-y-6">
-        <h1 className="text-3xl font-bold">Projects</h1>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
         <Card className="p-6 border-destructive">
           <div className="flex items-start gap-4">
             <div className="text-destructive text-lg">⚠️</div>
             <div>
-              <p className="font-semibold text-destructive mb-2">Error loading data</p>
+              <p className="font-semibold text-destructive mb-2">{t('errors.loadingFailed')}</p>
               <p className="text-sm text-muted-foreground">
-                {error instanceof Error ? error.message : 'Unknown error'}
+                {error instanceof Error ? error.message : tCommon('labels.unknown')}
               </p>
             </div>
           </div>
@@ -175,7 +176,7 @@ const ProjectsPage = () => {
       <div className="flex justify-end">
         <Button onClick={handleCreate} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Create Project
+          {t('actions.createProject')}
         </Button>
       </div>
 
@@ -184,14 +185,14 @@ const ProjectsPage = () => {
         <div className="flex items-center gap-2">
           <Search className="h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search projects by name, keywords, or components..."
+            placeholder={t('search.placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1"
           />
         </div>
         <div className="text-sm text-muted-foreground mt-2">
-          Showing {filteredProjects.length} of {totalProjects} projects
+          {t('search.showing', { filtered: filteredProjects.length, total: totalProjects })}
         </div>
       </Card>
 
@@ -200,17 +201,17 @@ const ProjectsPage = () => {
         <EmptyState
           variant="card"
           icon={Folder}
-          title="No projects found"
+          title={t('empty.title')}
           description={
             totalProjects === 0
-              ? 'Create your first project to organize message classification.'
-              : 'Try adjusting your search query.'
+              ? t('empty.description.noProjects')
+              : t('empty.description.noResults')
           }
           action={
             totalProjects === 0 ? (
               <Button onClick={handleCreate}>
                 <Plus className="mr-2 h-4 w-4" />
-                Create Project
+                {t('actions.createProject')}
               </Button>
             ) : undefined
           }

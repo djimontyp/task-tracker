@@ -27,7 +27,8 @@ import {
 import { PageWrapper } from '@/shared/primitives'
 
 const NoiseFilteringDashboard = () => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('noiseFiltering')
+  const { t: tCommon } = useTranslation()
   const queryClient = useQueryClient()
   const [batchScoringLimit] = useState(100)
 
@@ -46,7 +47,7 @@ const NoiseFilteringDashboard = () => {
           queryClient.invalidateQueries({ queryKey: ['noise-stats'] })
         }
         if (message.event === 'batch_scored' && message.data) {
-          toast.success(t('toast.success.scored', { count: message.data.scored }))
+          toast.success(tCommon('toast.success.scored', { count: message.data.scored }))
           queryClient.invalidateQueries({ queryKey: ['noise-stats'] })
         }
       }
@@ -57,13 +58,13 @@ const NoiseFilteringDashboard = () => {
   const scoreBatchMutation = useMutation({
     mutationFn: (limit: number) => noiseService.triggerBatchScoring(limit),
     onSuccess: (data) => {
-      toast.success(t('toast.success.scored', { count: data.messages_queued }))
+      toast.success(tCommon('toast.success.scored', { count: data.messages_queued }))
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['noise-stats'] })
       }, 5000)
     },
     onError: (error: Error) => {
-      toast.error(t('toast.error.scoringFailed', { error: error.message }))
+      toast.error(tCommon('toast.error.scoringFailed', { error: error.message }))
     },
   })
 
@@ -81,34 +82,34 @@ const NoiseFilteringDashboard = () => {
     return {
       totalMessages: {
         value: stats.total_messages,
-        subtitle: `${stats.signal_count} signal / ${stats.noise_count} noise`,
+        subtitle: `${stats.signal_count} ${t('chart.signal').toLowerCase()} / ${stats.noise_count} ${t('chart.noise').toLowerCase()}`,
       },
       signalRatio: {
         value: `${signalRatio}%`,
         trend: { value: 5, direction: signalTrend as 'up' | 'down' | 'neutral' },
-        subtitle: 'of all messages',
+        subtitle: t('metrics.ofAllMessages'),
       },
       needsReview: {
         value: stats.needs_review,
         trend: { value: 3, direction: reviewTrend as 'up' | 'down' | 'neutral' },
-        subtitle: 'requiring manual review',
+        subtitle: t('metrics.requiringManualReview'),
       },
       topNoiseSource: {
         value: topNoiseSource,
-        subtitle: 'most frequent noise source',
+        subtitle: t('metrics.mostFrequentNoiseSource'),
       },
     }
-  }, [stats])
+  }, [stats, t])
 
   const chartData = useMemo(() => {
     if (!stats) return []
     return stats.trend.map(d => ({
       date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      Signal: d.signal,
-      Noise: d.noise,
-      'Weak Signal': d.weak_signal,
+      [t('chart.signal')]: d.signal,
+      [t('chart.noise')]: d.noise,
+      [t('chart.weakSignal')]: d.weak_signal,
     }))
-  }, [stats])
+  }, [stats, t])
 
   return (
     <PageWrapper variant="fullWidth">
@@ -119,7 +120,7 @@ const NoiseFilteringDashboard = () => {
           size="sm"
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${scoreBatchMutation.isPending ? 'animate-spin' : ''}`} />
-          Score Unscored Messages
+          {t('actions.scoreUnscored')}
         </Button>
       </div>
 
@@ -139,14 +140,14 @@ const NoiseFilteringDashboard = () => {
         ) : metrics ? (
           <>
             <MetricCard
-              title="Total messages"
+              title={t('metrics.totalMessages')}
               value={metrics.totalMessages.value}
               subtitle={metrics.totalMessages.subtitle}
               icon={MessageSquare}
               iconColor="text-primary"
             />
             <MetricCard
-              title="Signal ratio"
+              title={t('metrics.signalRatio')}
               value={metrics.signalRatio.value}
               subtitle={metrics.signalRatio.subtitle}
               trend={metrics.signalRatio.trend}
@@ -154,7 +155,7 @@ const NoiseFilteringDashboard = () => {
               iconColor="text-semantic-success"
             />
             <MetricCard
-              title="Needs review"
+              title={t('metrics.needsReview')}
               value={metrics.needsReview.value}
               subtitle={metrics.needsReview.subtitle}
               trend={metrics.needsReview.trend}
@@ -162,7 +163,7 @@ const NoiseFilteringDashboard = () => {
               iconColor="text-semantic-warning"
             />
             <MetricCard
-              title="Top noise source"
+              title={t('metrics.topNoiseSource')}
               value={metrics.topNoiseSource.value}
               subtitle={metrics.topNoiseSource.subtitle}
               icon={RefreshCw}
@@ -175,7 +176,7 @@ const NoiseFilteringDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-6 animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}>
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Noise Trends - Last 7 Days</CardTitle>
+            <CardTitle>{t('chart.title')}</CardTitle>
           </CardHeader>
           <CardContent>
             {statsLoading ? (
@@ -205,21 +206,21 @@ const NoiseFilteringDashboard = () => {
                   <Legend />
                   <Line
                     type="monotone"
-                    dataKey="Signal"
+                    dataKey={t('chart.signal')}
                     stroke="hsl(var(--chart-signal))"
                     strokeWidth={2}
                     dot={{ fill: 'hsl(var(--chart-signal))' }}
                   />
                   <Line
                     type="monotone"
-                    dataKey="Noise"
+                    dataKey={t('chart.noise')}
                     stroke="hsl(var(--semantic-error))"
                     strokeWidth={2}
                     dot={{ fill: 'hsl(var(--semantic-error))' }}
                   />
                   <Line
                     type="monotone"
-                    dataKey="Weak Signal"
+                    dataKey={t('chart.weakSignal')}
                     stroke="hsl(var(--semantic-warning))"
                     strokeWidth={2}
                     dot={{ fill: 'hsl(var(--semantic-warning))' }}
@@ -232,10 +233,10 @@ const NoiseFilteringDashboard = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Top Noise Sources</CardTitle>
+            <CardTitle>{t('noiseSources.title')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4" role="list" aria-label="Top noise sources">
+            <div className="space-y-4" role="list" aria-label={t('noiseSources.ariaLabel')}>
               {statsLoading ? (
                 <>
                   {[...Array(5)].map((_, i) => (
@@ -253,12 +254,12 @@ const NoiseFilteringDashboard = () => {
                     role="listitem"
                   >
                     <span className="text-sm font-medium text-foreground">{source.name}</span>
-                    <Badge variant="destructive">{source.count} noise</Badge>
+                    <Badge variant="destructive">{source.count} {t('noiseSources.noise')}</Badge>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">No noise sources yet</p>
+                  <p className="text-muted-foreground">{t('noiseSources.noSources')}</p>
                 </div>
               )}
             </div>

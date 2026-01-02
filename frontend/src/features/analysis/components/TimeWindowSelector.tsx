@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
@@ -15,14 +16,15 @@ interface TimeWindowSelectorProps {
 
 type PresetType = 'last24h' | 'last7d' | 'last30d' | 'custom'
 
-const PRESETS: { type: PresetType; label: string; hours?: number }[] = [
-  { type: 'last24h', label: 'Last 24h', hours: 24 },
-  { type: 'last7d', label: 'Last 7 days', hours: 24 * 7 },
-  { type: 'last30d', label: 'Last 30 days', hours: 24 * 30 },
-  { type: 'custom', label: 'Custom' },
+const PRESETS: { type: PresetType; hours?: number }[] = [
+  { type: 'last24h', hours: 24 },
+  { type: 'last7d', hours: 24 * 7 },
+  { type: 'last30d', hours: 24 * 30 },
+  { type: 'custom' },
 ]
 
 export const TimeWindowSelector: React.FC<TimeWindowSelectorProps> = ({ value, onChange }) => {
+  const { t } = useTranslation()
   const [activePreset, setActivePreset] = useState<PresetType | null>(null)
 
   const formatDatetimeLocal = (date: Date): string => {
@@ -66,32 +68,35 @@ export const TimeWindowSelector: React.FC<TimeWindowSelectorProps> = ({ value, o
   return (
     <div className="space-y-4">
       <div>
-        <Label className="mb-4 block">Time Window</Label>
+        <Label className="mb-4 block">{t('timeWindow.label')}</Label>
         <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-          {PRESETS.map((preset) => (
-            <Button
-              key={preset.type}
-              type="button"
-              variant={activePreset === preset.type ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handlePresetClick(preset)}
-              className={cn(
-                'min-h-[44px] w-full',
-                activePreset === preset.type &&
-                  'aria-pressed:border-primary aria-pressed:from-primary aria-pressed:to-accent'
-              )}
-              aria-pressed={activePreset === preset.type}
-              aria-label={`Select ${preset.label} time window`}
-            >
-              {preset.label}
-            </Button>
-          ))}
+          {PRESETS.map((preset) => {
+            const presetLabel = t(`timeWindow.presets.${preset.type}`)
+            return (
+              <Button
+                key={preset.type}
+                type="button"
+                variant={activePreset === preset.type ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handlePresetClick(preset)}
+                className={cn(
+                  'min-h-[44px] w-full',
+                  activePreset === preset.type &&
+                    'aria-pressed:border-primary aria-pressed:from-primary aria-pressed:to-accent'
+                )}
+                aria-pressed={activePreset === preset.type}
+                aria-label={t('timeWindow.selectAriaLabel', { preset: presetLabel })}
+              >
+                {presetLabel}
+              </Button>
+            )
+          })}
         </div>
       </div>
 
       {isCustomMode && (
         <div className="grid gap-4 md:grid-cols-2">
-          <FormField label="From" required>
+          <FormField label={t('timeWindow.from')} required>
             <Input
               id="time_window_start"
               type="datetime-local"
@@ -99,11 +104,11 @@ export const TimeWindowSelector: React.FC<TimeWindowSelectorProps> = ({ value, o
               onChange={(e) => handleCustomChange('start', e.target.value)}
               required
               className="min-h-[44px]"
-              aria-label="Time window start"
+              aria-label={t('timeWindow.startAriaLabel')}
             />
           </FormField>
 
-          <FormField label="To" required>
+          <FormField label={t('timeWindow.to')} required>
             <Input
               id="time_window_end"
               type="datetime-local"
@@ -111,7 +116,7 @@ export const TimeWindowSelector: React.FC<TimeWindowSelectorProps> = ({ value, o
               onChange={(e) => handleCustomChange('end', e.target.value)}
               required
               className="min-h-[44px]"
-              aria-label="Time window end"
+              aria-label={t('timeWindow.endAriaLabel')}
             />
           </FormField>
         </div>

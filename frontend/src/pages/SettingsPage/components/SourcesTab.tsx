@@ -1,12 +1,15 @@
+import { useTranslation } from 'react-i18next'
 import { sourcePlugins } from '../plugins/registry'
 
 const SourcesTab = () => {
+  const { t } = useTranslation('settings')
+
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold">Data Sources</h2>
+        <h2 className="text-lg font-semibold">{t('sources.title')}</h2>
         <p className="text-sm text-muted-foreground mt-2">
-          Configure integrations and data sources for your task tracking system
+          {t('sources.description')}
         </p>
       </div>
 
