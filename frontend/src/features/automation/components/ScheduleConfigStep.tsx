@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next'
 import { useWizardStore } from '../store/wizardStore'
 import { CronPicker } from './CronPicker'
 
 export function ScheduleConfigStep() {
+  const { t } = useTranslation('settings')
   const { formData, updateSchedule, setStepValidity } = useWizardStore()
 
   const handleCronChange = (cron: string) => {
@@ -26,9 +28,9 @@ export function ScheduleConfigStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Configure Schedule</h3>
+        <h3 className="text-lg font-semibold mb-2">{t('automation.schedule.title')}</h3>
         <p className="text-sm text-muted-foreground">
-          Set up when automated analysis should run to process pending versions
+          {t('automation.schedule.description')}
         </p>
       </div>
 
@@ -40,13 +42,13 @@ export function ScheduleConfigStep() {
 
       <div className="rounded-lg bg-semantic-info/10 border border-semantic-info/20 p-4">
         <h4 className="text-sm font-medium text-semantic-info mb-2">
-          What happens when the job runs?
+          {t('automation.schedule.whatHappens.title')}
         </h4>
         <ul className="text-sm text-semantic-info/80 space-y-2 list-disc list-inside">
-          <li>Fetches all pending topic/atom versions</li>
-          <li>Applies automation rules to each version</li>
-          <li>Auto-approves/rejects based on configured thresholds</li>
-          <li>Sends notifications if enabled</li>
+          <li>{t('automation.schedule.whatHappens.fetchPending')}</li>
+          <li>{t('automation.schedule.whatHappens.applyRules')}</li>
+          <li>{t('automation.schedule.whatHappens.autoAction')}</li>
+          <li>{t('automation.schedule.whatHappens.sendNotifications')}</li>
         </ul>
       </div>
     </div>

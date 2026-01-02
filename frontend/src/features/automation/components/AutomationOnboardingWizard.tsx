@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useWizardStore } from '../store/wizardStore'
 import { useCreateJob, useCreateRule } from '../api/automationService'
 import { Button } from '@/shared/ui/button'
@@ -18,6 +19,7 @@ const STEPS = [
 ]
 
 export function AutomationOnboardingWizard() {
+  const { t } = useTranslation('settings')
   const navigate = useNavigate()
   const { currentStep, formData, isValid, nextStep, prevStep, setCurrentStep, resetWizard } =
     useWizardStore()
@@ -95,9 +97,9 @@ export function AutomationOnboardingWizard() {
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Automation Setup Wizard</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('automation.wizard.title')}</h1>
         <p className="text-muted-foreground">
-          Configure automated knowledge extraction in 4 simple steps
+          {t('automation.wizard.description')}
         </p>
       </div>
 
@@ -146,19 +148,19 @@ export function AutomationOnboardingWizard() {
         <div>
           {currentStep === STEPS.length - 1 && (
             <Button variant="ghost" onClick={handleSkip}>
-              Skip & Configure Later
+              {t('automation.wizard.skipConfigureLater')}
             </Button>
           )}
         </div>
         <div className="flex items-center gap-4">
           {currentStep > 0 && (
             <Button variant="outline" onClick={handlePrevious} disabled={isActivating}>
-              Previous
+              {t('automation.wizard.previous')}
             </Button>
           )}
           {currentStep < STEPS.length - 1 ? (
             <Button onClick={handleNext} disabled={!canProceed()}>
-              Next
+              {t('automation.wizard.next')}
             </Button>
           ) : (
             <Button
@@ -166,7 +168,7 @@ export function AutomationOnboardingWizard() {
               disabled={isActivating}
               className="bg-semantic-success hover:bg-semantic-success/90 text-white"
             >
-              {isActivating ? 'Activating...' : 'Activate Automation'}
+              {isActivating ? t('automation.wizard.activating') : t('automation.wizard.activateAutomation')}
             </Button>
           )}
         </div>

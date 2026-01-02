@@ -1,4 +1,5 @@
 import { useForm, Controller } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
@@ -33,6 +34,7 @@ interface CreateEditJobDialogProps {
 }
 
 export function CreateEditJobDialog({ open, onOpenChange, job }: CreateEditJobDialogProps) {
+  const { t } = useTranslation('settings')
   const isEditing = !!job
 
   const {
@@ -82,19 +84,19 @@ export function CreateEditJobDialog({ open, onOpenChange, job }: CreateEditJobDi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-2xl lg:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Job' : 'Create New Job'}</DialogTitle>
+          <DialogTitle>{isEditing ? t('automation.jobs.dialogTitle.edit') : t('automation.jobs.dialogTitle.create')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <FormField label="Job Name" error={errors.name?.message}>
+          <FormField label={t('automation.jobs.jobName')} error={errors.name?.message}>
             <Input
               id="name"
               {...register('name')}
-              placeholder="Daily Knowledge Extraction"
+              placeholder={t('automation.jobs.jobNamePlaceholder')}
             />
           </FormField>
 
-          <FormField label="Schedule (Cron Expression)" error={errors.schedule_cron?.message}>
+          <FormField label={t('automation.jobs.scheduleCron')} error={errors.schedule_cron?.message}>
             <Controller
               control={control}
               name="schedule_cron"
@@ -105,7 +107,7 @@ export function CreateEditJobDialog({ open, onOpenChange, job }: CreateEditJobDi
           </FormField>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="enabled">Enable Job</Label>
+            <Label htmlFor="enabled">{t('automation.jobs.enableJob')}</Label>
             <Controller
               control={control}
               name="enabled"
@@ -117,17 +119,17 @@ export function CreateEditJobDialog({ open, onOpenChange, job }: CreateEditJobDi
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('automation.jobs.cancel')}
             </Button>
             <Button
               type="submit"
               disabled={createMutation.isPending || updateMutation.isPending}
             >
               {createMutation.isPending || updateMutation.isPending
-                ? 'Saving...'
+                ? t('automation.jobs.saving')
                 : isEditing
-                  ? 'Update Job'
-                  : 'Create Job'}
+                  ? t('automation.jobs.updateJob')
+                  : t('automation.jobs.createJob')}
             </Button>
           </DialogFooter>
         </form>

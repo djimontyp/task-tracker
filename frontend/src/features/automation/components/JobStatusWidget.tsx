@@ -1,4 +1,5 @@
 import { formatDistanceToNow } from 'date-fns'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
@@ -8,6 +9,7 @@ import { CheckCircle, XCircle, Clock } from 'lucide-react'
 import { useSchedulerJobs, useTriggerJob } from '../api/automationService'
 
 export function JobStatusWidget() {
+  const { t } = useTranslation('settings')
   const { data: jobs, isLoading } = useSchedulerJobs()
   const triggerMutation = useTriggerJob()
 
@@ -28,7 +30,7 @@ export function JobStatusWidget() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Scheduler Status</CardTitle>
+          <CardTitle>{t('automation.jobs.schedulerStatus')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-24 w-full" />
@@ -41,10 +43,10 @@ export function JobStatusWidget() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Scheduler Status</CardTitle>
+          <CardTitle>{t('automation.jobs.schedulerStatus')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-muted-foreground">No scheduled jobs configured</div>
+          <div className="text-sm text-muted-foreground">{t('automation.jobs.noJobsConfigured')}</div>
         </CardContent>
       </Card>
     )
@@ -79,30 +81,30 @@ export function JobStatusWidget() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Scheduler Status</CardTitle>
+        <CardTitle>{t('automation.jobs.schedulerStatus')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Last Run</span>
+            <span className="text-sm text-muted-foreground">{t('automation.jobs.lastRun')}</span>
             <span className="text-sm font-medium">
               {mainJob.last_run
                 ? formatDistanceToNow(new Date(mainJob.last_run), { addSuffix: true })
-                : 'Never'}
+                : t('automation.jobs.never')}
             </span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Next Run</span>
+            <span className="text-sm text-muted-foreground">{t('automation.jobs.nextRun')}</span>
             <span className="text-sm font-medium">
               {mainJob.next_run
-                ? `In ${formatDistanceToNow(new Date(mainJob.next_run))}`
-                : 'Not scheduled'}
+                ? `${t('automation.jobs.in')} ${formatDistanceToNow(new Date(mainJob.next_run))}`
+                : t('automation.jobs.notScheduled')}
             </span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Status</span>
+            <span className="text-sm text-muted-foreground">{t('automation.jobs.status')}</span>
             <div className="flex items-center gap-2">
               {getStatusIcon()}
               <Badge variant={getStatusBadgeVariant()}>{mainJob.status}</Badge>

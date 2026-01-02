@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Controller, Control, FieldErrors, UseFieldArrayReturn } from 'react-hook-form'
 import { RadioGroup, RadioGroupItem } from '@/shared/ui/radio-group'
 import { Label } from '@/shared/ui/label'
@@ -21,22 +22,24 @@ export function RuleConditions({
   onAddCondition,
   onRemoveCondition,
 }: RuleConditionsProps) {
+  const { t } = useTranslation('settings')
+
   return (
     <>
-      <FormSection title="Conditions">
+      <FormSection title={t('automation.rules.conditions.title')}>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
-              Define when this rule should trigger
+              {t('automation.rules.conditions.description')}
             </span>
             <Button type="button" variant="outline" size="sm" onClick={onAddCondition}>
-              + Add Condition
+              {t('automation.rules.conditions.addCondition')}
             </Button>
           </div>
 
           {fields.length === 0 ? (
             <div className="text-sm text-muted-foreground text-center py-4 border border-dashed rounded">
-              No conditions added yet. Click &quot;Add Condition&quot; to start.
+              {t('automation.rules.conditions.noConditions')}
             </div>
           ) : (
             <div className="space-y-2">
@@ -65,7 +68,7 @@ export function RuleConditions({
       </FormSection>
 
       {fields.length >= 2 && (
-        <FormField label="Logic Operator">
+        <FormField label={t('automation.rules.conditions.logicOperator')}>
           <Controller
             control={control}
             name="logic_operator"
@@ -75,13 +78,13 @@ export function RuleConditions({
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="AND" id="and" />
                     <Label htmlFor="and" className="font-normal cursor-pointer">
-                      AND (all conditions must match)
+                      {t('automation.rules.conditions.andDescription')}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="OR" id="or" />
                     <Label htmlFor="or" className="font-normal cursor-pointer">
-                      OR (any condition can match)
+                      {t('automation.rules.conditions.orDescription')}
                     </Label>
                   </div>
                 </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Controller, Control } from 'react-hook-form'
 import {
   Select,
@@ -16,9 +17,11 @@ interface RuleActionsProps {
 }
 
 export function RuleActions({ control }: RuleActionsProps) {
+  const { t } = useTranslation('settings')
+
   return (
-    <FormSection title="Action & Status">
-      <FormField label="Action">
+    <FormSection title={t('automation.rules.sectionTitle')}>
+      <FormField label={t('automation.rules.actionLabel')}>
         <Controller
           control={control}
           name="action"
@@ -28,10 +31,10 @@ export function RuleActions({ control }: RuleActionsProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="approve">Approve</SelectItem>
-                <SelectItem value="reject">Reject</SelectItem>
-                <SelectItem value="escalate">Escalate</SelectItem>
-                <SelectItem value="notify">Notify</SelectItem>
+                <SelectItem value="approve">{t('automation.rules.actions.approve')}</SelectItem>
+                <SelectItem value="reject">{t('automation.rules.actions.reject')}</SelectItem>
+                <SelectItem value="escalate">{t('automation.rules.actions.escalate')}</SelectItem>
+                <SelectItem value="notify">{t('automation.rules.actions.notify')}</SelectItem>
               </SelectContent>
             </Select>
           )}
@@ -39,7 +42,7 @@ export function RuleActions({ control }: RuleActionsProps) {
       </FormField>
 
       <div className="flex items-center justify-between pt-2">
-        <Label htmlFor="enabled">Enabled</Label>
+        <Label htmlFor="enabled">{t('automation.rules.enabled')}</Label>
         <Controller
           control={control}
           name="enabled"
