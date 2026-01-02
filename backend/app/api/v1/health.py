@@ -1,9 +1,12 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
+from sqlalchemy import text
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.api.v1.response_models import ConfigResponse, HealthResponse
+from app.api.v1.response_models import ConfigResponse, DetailedHealthResponse, HealthResponse
+from app.database import get_session
 from app.tasks import score_message_task
 
 router = APIRouter(tags=["health"])
@@ -28,6 +31,52 @@ async def health_check() -> HealthResponse:
     Returns current timestamp and healthy status indicator.
     """
     return HealthResponse(status="healthy", timestamp=datetime.now())
+
+
+@router.get(
+    "/health/detailed",
+    response_model=DetailedHealthResponse,
+    summary="Detailed health check with service status",
+    response_description="Health status with individual checks for database and NATS",
+)
+async def detailed_health_check(
+    session: AsyncSession = Depends(get_session),
+) -> DetailedHealthResponse:
+    """
+    Detailed health check with individual service status.
+
+    Checks:
+    - database: PostgreSQL connectivity via SELECT 1
+    - nats: NATS JetStream connection status
+
+    Returns 'healthy' if all checks pass, 'degraded' otherwise.
+    """
+    checks: dict[str, bool] = {}
+
+    # Database check
+    try:
+        await session.execute(text("SELECT 1"))
+        checks["database"] = True
+    except Exception:
+        checks["database"] = False
+
+    # NATS check via WebSocketManager
+    try:
+        from app.services.websocket_manager import websocket_manager
+
+        nats_client = websocket_manager._nats_client
+        checks["nats"] = nats_client is not None and nats_client.is_connected
+    except Exception:
+        checks["nats"] = False
+
+    status: str = "healthy" if all(checks.values()) else "degraded"
+
+    return DetailedHealthResponse(
+        status=status,  # type: ignore[arg-type]
+        timestamp=datetime.now(UTC).isoformat(),
+        checks=checks,
+        version="1.0.0",
+    )
 
 
 @router.get(
