@@ -1,44 +1,52 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
-import GeneralTab from './components/GeneralTab'
-import SourcesTab from './components/SourcesTab'
-import ProvidersTab from './components/ProvidersTab'
-import PromptTuningTab from './components/PromptTuningTab'
-import { useAdminMode } from '@/shared/hooks'
-import { PageWrapper } from '@/shared/primitives'
+/**
+ * SettingsPage - 3-column settings layout
+ *
+ * Single screen design (no scroll on 1080p desktop):
+ * - General: Appearance, Language, Admin Mode
+ * - Data Sources: Telegram, Slack (coming soon)
+ * - AI Providers: OpenAI, Ollama
+ *
+ * Mobile: columns stack vertically
+ */
+
+import { useTranslation } from 'react-i18next';
+
+import { PageWrapper } from '@/shared/primitives';
+
+import {
+  GeneralSection,
+  DataSourcesSection,
+  AIProvidersSection,
+} from './components/sections';
 
 const SettingsPage = () => {
-  const { isAdminMode } = useAdminMode()
+  const { t } = useTranslation('settings');
 
   return (
     <PageWrapper variant="fullWidth">
-      <Tabs defaultValue="general" className="w-full">
-        <TabsList>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="sources">Sources</TabsTrigger>
-          <TabsTrigger value="providers">Providers</TabsTrigger>
-          {isAdminMode && <TabsTrigger value="prompts">Prompt Tuning</TabsTrigger>}
-        </TabsList>
+      {/* Page header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold">
+          {t('page.title', 'Settings')}
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {t('page.description', 'Configure your app preferences and integrations')}
+        </p>
+      </div>
 
-        <TabsContent value="general" className="space-y-4">
-          <GeneralTab />
-        </TabsContent>
+      {/* 3-column grid - responsive */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+        {/* Column 1: General */}
+        <GeneralSection />
 
-        <TabsContent value="sources" className="space-y-4">
-          <SourcesTab />
-        </TabsContent>
+        {/* Column 2: Data Sources */}
+        <DataSourcesSection />
 
-        <TabsContent value="providers" className="space-y-4">
-          <ProvidersTab />
-        </TabsContent>
-
-        {isAdminMode && (
-          <TabsContent value="prompts" className="space-y-4">
-            <PromptTuningTab />
-          </TabsContent>
-        )}
-      </Tabs>
+        {/* Column 3: AI Providers */}
+        <AIProvidersSection />
+      </div>
     </PageWrapper>
-  )
-}
+  );
+};
 
-export default SettingsPage
+export default SettingsPage;
