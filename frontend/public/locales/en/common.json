@@ -195,5 +195,79 @@
     "goToLastPage": "Go to last page",
     "selected": "{{count}} selected",
     "clearFilters": "Clear filters"
+  },
+  "toast": {
+    "success": {
+      "created": "{{entity}} created successfully",
+      "updated": "{{entity}} updated successfully",
+      "deleted": "{{entity}} deleted successfully",
+      "saved": "{{entity}} saved successfully",
+      "refreshed": "{{entity}} refreshed",
+      "copied": "{{text}} copied to clipboard",
+      "validated": "{{entity}} validated successfully",
+      "started": "{{entity}} started",
+      "approved": "Approved {{count}} {{entity}}",
+      "archived": "Archived {{count}} {{entity}}",
+      "scored": "Scored {{count}} messages"
+    },
+    "error": {
+      "createFailed": "Failed to create {{entity}}",
+      "updateFailed": "Failed to update {{entity}}",
+      "deleteFailed": "Failed to delete {{entity}}",
+      "saveFailed": "Failed to save {{entity}}",
+      "loadFailed": "Failed to load {{entity}}",
+      "refreshFailed": "Failed to refresh {{entity}}",
+      "copyFailed": "Failed to copy",
+      "validationFailed": "Validation failed: {{error}}",
+      "validationTimeout": "Validation timeout. Please check {{entity}} status.",
+      "notFound": "{{entity}} not found",
+      "approveFailed": "Failed to approve {{entity}}",
+      "archiveFailed": "Failed to archive {{entity}}",
+      "scoringFailed": "Failed to trigger scoring: {{error}}",
+      "suggestFailed": "Failed to suggest {{entity}}",
+      "generic": "An error occurred"
+    },
+    "warning": {
+      "noGroups": "No Telegram groups configured. Please set up groups in Settings first.",
+      "selectGroup": "Please select at least one group",
+      "partialSuccess": "{{action}} {{successCount}}/{{totalCount}} {{entity}}. {{failedCount}} failed."
+    },
+    "info": {
+      "validating": "{{entity}} {{action}}. Validating connection...",
+      "processing": "Processing {{entity}}...",
+      "updating": "Updating {{entity}}..."
+    },
+    "entities": {
+      "project": "Project",
+      "projects": "projects",
+      "task": "Task",
+      "tasks": "tasks",
+      "provider": "Provider",
+      "providers": "providers",
+      "message": "Message",
+      "messages": "messages",
+      "topic": "Topic",
+      "topics": "topics",
+      "atom": "Atom",
+      "atoms": "atoms",
+      "webhook": "Webhook",
+      "color": "color",
+      "changes": "changes",
+      "botUsername": "Bot username",
+      "webhookUrl": "Webhook URL",
+      "authors": "message authors",
+      "ingestion": "Ingestion"
+    },
+    "actions": {
+      "created": "created",
+      "updated": "updated",
+      "approved": "Approved",
+      "archived": "Archived",
+      "deleted": "Deleted"
+    },
+    "admin": {
+      "enabled": "Admin Mode Enabled",
+      "disabled": "Admin Mode Disabled"
+    }
   }
 }

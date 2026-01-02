@@ -65,12 +65,12 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
         setGroups(groupsList)
       } else {
         logger.warn('No groups found in settings')
-        toast.warning('No Telegram groups configured. Please set up groups in Settings first.')
+        toast.warning(t('common:toast.warning.noGroups'))
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
       logger.error('Failed to fetch groups:', message)
-      toast.error('Failed to load Telegram groups')
+      toast.error(t('common:toast.error.loadFailed', { entity: 'Telegram groups' }))
     } finally {
       setFetchingGroups(false)
     }
@@ -96,7 +96,7 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
 
   const handleSubmit = async () => {
     if (selectedGroups.size === 0) {
-      toast.error('Please select at least one group')
+      toast.error(t('common:toast.warning.selectGroup'))
       return
     }
 
@@ -107,7 +107,7 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
         limit,
       })
 
-      toast.success(`Ingestion started! Job ID: ${response.data.job_id}`)
+      toast.success(t('common:toast.success.started', { entity: t('common:toast.entities.ingestion') }))
       onSuccess(response.data.job_id)
       onClose()
     } catch (error) {
@@ -118,7 +118,7 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
         const axiosError = error as { response?: { data?: { detail?: string } } }
         message = axiosError.response?.data?.detail || 'Request failed'
       }
-      toast.error(`Failed to start ingestion: ${message}`)
+      toast.error(t('common:toast.error.createFailed', { entity: t('common:toast.entities.ingestion') }) + `: ${message}`)
     } finally {
       setLoading(false)
     }

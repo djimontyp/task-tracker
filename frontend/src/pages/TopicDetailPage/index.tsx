@@ -24,7 +24,7 @@ import { toast } from 'sonner'
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
 const TopicDetailPage = () => {
-  const { t } = useTranslation('topics')
+  const { t } = useTranslation(['topics', 'common'])
   const { topicId } = useParams<{ topicId: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -165,7 +165,7 @@ const TopicDetailPage = () => {
       }
       setSaveStatus('error')
       setHasUnsavedChanges(true)
-      toast.error('Failed to save changes')
+      toast.error(t('common:toast.error.saveFailed', { entity: t('common:toast.entities.changes') }))
     },
   })
 
@@ -227,7 +227,7 @@ const TopicDetailPage = () => {
         data: { color: result.suggested_color },
       })
     } catch {
-      toast.error('Failed to suggest color')
+      toast.error(t('common:toast.error.suggestFailed', { entity: t('common:toast.entities.color') }))
     }
   }
 

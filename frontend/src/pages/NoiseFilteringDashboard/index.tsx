@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   MessageSquare,
@@ -26,6 +27,7 @@ import {
 import { PageWrapper } from '@/shared/primitives'
 
 const NoiseFilteringDashboard = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [batchScoringLimit] = useState(100)
 
@@ -44,7 +46,7 @@ const NoiseFilteringDashboard = () => {
           queryClient.invalidateQueries({ queryKey: ['noise-stats'] })
         }
         if (message.event === 'batch_scored' && message.data) {
-          toast.success(`Scored ${message.data.scored} messages`)
+          toast.success(t('toast.success.scored', { count: message.data.scored }))
           queryClient.invalidateQueries({ queryKey: ['noise-stats'] })
         }
       }
@@ -55,13 +57,13 @@ const NoiseFilteringDashboard = () => {
   const scoreBatchMutation = useMutation({
     mutationFn: (limit: number) => noiseService.triggerBatchScoring(limit),
     onSuccess: (data) => {
-      toast.success(`Scoring ${data.messages_queued} messages (${data.total_unscored} unscored total)`)
+      toast.success(t('toast.success.scored', { count: data.messages_queued }))
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['noise-stats'] })
       }, 5000)
     },
     onError: (error: Error) => {
-      toast.error(`Failed to trigger scoring: ${error.message}`)
+      toast.error(t('toast.error.scoringFailed', { error: error.message }))
     },
   })
 

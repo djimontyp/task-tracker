@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Bot, Check, Copy } from 'lucide-react'
@@ -6,16 +7,17 @@ import { toast } from 'sonner'
 import { BOT_USERNAME, BOT_NAME } from '../types'
 
 export function BotInfoCard() {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
 
   const handleCopyUsername = async () => {
     try {
       await navigator.clipboard.writeText(BOT_USERNAME)
       setCopied(true)
-      toast.success('Bot username copied to clipboard')
+      toast.success(t('toast.success.copied', { text: t('toast.entities.botUsername') }))
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      toast.error('Failed to copy username')
+      toast.error(t('toast.error.copyFailed'))
     }
   }
 

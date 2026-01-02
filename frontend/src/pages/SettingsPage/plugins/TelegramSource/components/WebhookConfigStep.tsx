@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { FormField } from '@/shared/patterns'
@@ -29,6 +30,7 @@ export function WebhookConfigStep({
   isSaving,
   onActivate,
 }: WebhookConfigStepProps) {
+  const { t } = useTranslation()
   const [hostValidationError, setHostValidationError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
@@ -44,10 +46,10 @@ export function WebhookConfigStep({
     try {
       await navigator.clipboard.writeText(computedWebhookUrl)
       setCopied(true)
-      toast.success('Webhook URL copied')
+      toast.success(t('toast.success.copied', { text: t('toast.entities.webhookUrl') }))
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      toast.error('Failed to copy')
+      toast.error(t('toast.error.copyFailed'))
     }
   }
 

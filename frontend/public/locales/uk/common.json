@@ -197,5 +197,79 @@
     "goToLastPage": "Перейти на останню сторінку",
     "selected": "{{count}} вибрано",
     "clearFilters": "Очистити фільтри"
+  },
+  "toast": {
+    "success": {
+      "created": "{{entity}} успішно створено",
+      "updated": "{{entity}} успішно оновлено",
+      "deleted": "{{entity}} успішно видалено",
+      "saved": "{{entity}} успішно збережено",
+      "refreshed": "{{entity}} оновлено",
+      "copied": "{{text}} скопійовано в буфер обміну",
+      "validated": "{{entity}} успішно перевірено",
+      "started": "{{entity}} запущено",
+      "approved": "Схвалено {{count}} {{entity}}",
+      "archived": "Архівовано {{count}} {{entity}}",
+      "scored": "Оцінено {{count}} повідомлень"
+    },
+    "error": {
+      "createFailed": "Не вдалося створити {{entity}}",
+      "updateFailed": "Не вдалося оновити {{entity}}",
+      "deleteFailed": "Не вдалося видалити {{entity}}",
+      "saveFailed": "Не вдалося зберегти {{entity}}",
+      "loadFailed": "Не вдалося завантажити {{entity}}",
+      "refreshFailed": "Не вдалося оновити {{entity}}",
+      "copyFailed": "Не вдалося скопіювати",
+      "validationFailed": "Помилка перевірки: {{error}}",
+      "validationTimeout": "Час очікування перевірки вичерпано. Перевірте статус {{entity}}.",
+      "notFound": "{{entity}} не знайдено",
+      "approveFailed": "Не вдалося схвалити {{entity}}",
+      "archiveFailed": "Не вдалося архівувати {{entity}}",
+      "scoringFailed": "Не вдалося запустити оцінювання: {{error}}",
+      "suggestFailed": "Не вдалося запропонувати {{entity}}",
+      "generic": "Виникла помилка"
+    },
+    "warning": {
+      "noGroups": "Telegram-групи не налаштовані. Спочатку налаштуйте групи в Налаштуваннях.",
+      "selectGroup": "Виберіть хоча б одну групу",
+      "partialSuccess": "{{action}} {{successCount}}/{{totalCount}} {{entity}}. {{failedCount}} не вдалося."
+    },
+    "info": {
+      "validating": "{{entity}} {{action}}. Перевірка зʼєднання...",
+      "processing": "Обробка {{entity}}...",
+      "updating": "Оновлення {{entity}}..."
+    },
+    "entities": {
+      "project": "Проєкт",
+      "projects": "проєктів",
+      "task": "Задачу",
+      "tasks": "задач",
+      "provider": "Провайдер",
+      "providers": "провайдерів",
+      "message": "Повідомлення",
+      "messages": "повідомлень",
+      "topic": "Тему",
+      "topics": "тем",
+      "atom": "Атом",
+      "atoms": "атомів",
+      "webhook": "Вебхук",
+      "color": "колір",
+      "changes": "зміни",
+      "botUsername": "Імʼя бота",
+      "webhookUrl": "URL вебхука",
+      "authors": "авторів повідомлень",
+      "ingestion": "Імпорт"
+    },
+    "actions": {
+      "created": "створено",
+      "updated": "оновлено",
+      "approved": "Схвалено",
+      "archived": "Архівовано",
+      "deleted": "Видалено"
+    },
+    "admin": {
+      "enabled": "Режим адміністратора увімкнено",
+      "disabled": "Режим адміністратора вимкнено"
+    }
   }
 }
