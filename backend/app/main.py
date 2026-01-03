@@ -141,11 +141,12 @@ app = create_app()
 
 @app.on_event("startup")
 async def startup() -> None:
-    """Initialize database, LLM system, TaskIQ broker, and WebSocketManager on startup"""
+    """Initialize database, LLM system, TaskIQ broker, WebSocketManager, and Scheduler on startup"""
     from tenacity import retry, stop_after_attempt, wait_exponential
 
     from app.database import AsyncSessionLocal
     from app.db.seed_default_agent import seed_default_knowledge_extractor
+    from app.services.extraction_scheduler_service import extraction_scheduler_service
     from app.services.websocket_manager import websocket_manager
 
     initialize_llm_system()
@@ -172,13 +173,24 @@ async def startup() -> None:
 
         await connect_nats()
 
+        # Initialize extraction scheduler and sync scheduled tasks
+        try:
+            await extraction_scheduler_service.startup()
+            async with AsyncSessionLocal() as session:
+                stats = await extraction_scheduler_service.sync_scheduled_tasks(session)  # type: ignore[arg-type]
+                logger.info(f"Extraction scheduler synced: {stats}")
+        except Exception as e:
+            logger.warning(f"Failed to start extraction scheduler: {e}")
+
 
 @app.on_event("shutdown")
 async def shutdown() -> None:
-    """Shutdown TaskIQ broker and WebSocketManager on application shutdown"""
+    """Shutdown TaskIQ broker, WebSocketManager, and Scheduler on application shutdown"""
+    from app.services.extraction_scheduler_service import extraction_scheduler_service
     from app.services.websocket_manager import websocket_manager
 
     if not nats_broker.is_worker_process:
+        await extraction_scheduler_service.shutdown()
         await websocket_manager.shutdown()
         await nats_broker.shutdown()
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import uuid
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
@@ -366,7 +367,7 @@ class KnowledgeOrchestrator:
         session: AsyncSession,
         confidence_threshold: float | None = None,
         created_by: str | None = None,
-    ) -> tuple[list[Atom], list[int]]:
+    ) -> tuple[list[Atom], list[uuid.UUID]]:
         """Create atoms and link them to topics.
 
         For existing atoms, creates a version snapshot instead of direct update.
@@ -389,7 +390,7 @@ class KnowledgeOrchestrator:
 
         versioning_service = VersioningService()
         saved_atoms: list[Atom] = []
-        version_created_atom_ids: list[int] = []
+        version_created_atom_ids: list[uuid.UUID] = []
 
         for extracted_atom in extracted_atoms:
             if extracted_atom.confidence < confidence_threshold:
