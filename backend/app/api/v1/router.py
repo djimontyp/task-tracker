@@ -18,6 +18,7 @@ from app.api.v1 import (
     projects,
     prompts,
     providers,
+    scheduled_extraction_tasks,
     scheduler,
     search,
     semantic_search,
@@ -54,6 +55,7 @@ api_router.include_router(noise.router)
 api_router.include_router(knowledge.router, prefix="/knowledge", tags=["knowledge"])
 api_router.include_router(versions.router)
 api_router.include_router(scheduler.router)
+api_router.include_router(scheduled_extraction_tasks.router)
 api_router.include_router(automation.router)
 api_router.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
 api_router.include_router(prompts.router)

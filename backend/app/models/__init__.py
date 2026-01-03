@@ -6,6 +6,11 @@ from .agent_config import (
     AgentConfigPublic,
     AgentConfigUpdate,
 )
+from .agent_project_link import (
+    AgentProjectLink,
+    AgentProjectLinkCreate,
+    AgentProjectLinkPublic,
+)
 from .agent_task_assignment import (
     AgentTaskAssignment,
     AgentTaskAssignmentCreate,
@@ -91,6 +96,13 @@ from .project_config import (
     ProjectConfigPublic,
     ProjectConfigUpdate,
 )
+from .scheduled_extraction_task import (
+    ScheduledExtractionTask,
+    ScheduledExtractionTaskCreate,
+    ScheduledExtractionTaskListResponse,
+    ScheduledExtractionTaskPublic,
+    ScheduledExtractionTaskUpdate,
+)
 from .scheduled_job import (
     JobStatus,
     ScheduledJob,
@@ -136,6 +148,12 @@ __all__ = [
     "AutomationRuleListResponse",
     "RuleAction",
     "LogicOperator",
+    # Scheduled Extraction Tasks
+    "ScheduledExtractionTask",
+    "ScheduledExtractionTaskCreate",
+    "ScheduledExtractionTaskUpdate",
+    "ScheduledExtractionTaskPublic",
+    "ScheduledExtractionTaskListResponse",
     # Scheduled Jobs
     "ScheduledJob",
     "ScheduledJobCreate",
@@ -196,6 +214,10 @@ __all__ = [
     "AgentConfigCreate",
     "AgentConfigPublic",
     "AgentConfigUpdate",
+    # Agent-Project Link
+    "AgentProjectLink",
+    "AgentProjectLinkCreate",
+    "AgentProjectLinkPublic",
     # Agent Task Assignment
     "AgentTaskAssignment",
     "AgentTaskAssignmentCreate",

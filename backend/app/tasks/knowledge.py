@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 
 from app.config.ai_config import ai_config
 from app.database import AsyncSessionLocal, get_db_session_context
-from app.models import AgentConfig, LLMProvider, Message
+from app.models import AgentConfig, LLMProvider, Message, ProjectConfig
 from app.services.embedding_service import EmbeddingService
 from app.services.knowledge.knowledge_orchestrator import KnowledgeOrchestrator as KnowledgeExtractionService
 from app.services.rag_context_builder import RAGContextBuilder
@@ -111,6 +111,7 @@ async def extract_knowledge_from_messages_task(
     agent_config_id: str,
     created_by: str | None = None,
     language: str = "uk",
+    project_config_id: str | None = None,
 ) -> dict[str, int]:
     """Background task for extracting knowledge (topics and atoms) from message batches.
 
@@ -121,11 +122,15 @@ async def extract_knowledge_from_messages_task(
     Uses language-specific prompts and validates output language with langdetect.
     Retries once with strengthened prompt if language mismatch detected.
 
+    Optionally injects project-specific context (keywords, glossary, components) when
+    project_config_id is provided.
+
     Args:
         message_ids: IDs of messages to analyze (10-50 recommended for best results)
         agent_config_id: AgentConfig UUID as string
         created_by: User ID who triggered extraction (default: "system")
         language: ISO 639-1 language code for AI output (default: "uk" for Ukrainian)
+        project_config_id: Optional ProjectConfig UUID for domain-specific context
 
     Returns:
         Statistics dictionary with:
@@ -153,6 +158,15 @@ async def extract_knowledge_from_messages_task(
         provider = await db.get(LLMProvider, agent_config.provider_id)
         if not provider:
             raise ValueError(f"Provider {agent_config.provider_id} not found")
+
+        # Load project config if provided
+        project_config = None
+        if project_config_id:
+            project_config = await db.get(ProjectConfig, UUID(project_config_id))
+            if project_config:
+                logger.info(f"Using project context: {project_config.name}")
+            else:
+                logger.warning(f"ProjectConfig {project_config_id} not found, proceeding without project context")
 
         stmt = select(Message).where(Message.id.in_(message_ids))  # type: ignore[union-attr]
         result = await db.execute(stmt)
@@ -186,6 +200,7 @@ async def extract_knowledge_from_messages_task(
             provider=provider,
             language=language,
             rag_context_builder=rag_builder,
+            project_config=project_config,
         )
 
         # Pass session for RAG context lookup

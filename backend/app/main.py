@@ -144,6 +144,8 @@ async def startup() -> None:
     """Initialize database, LLM system, TaskIQ broker, and WebSocketManager on startup"""
     from tenacity import retry, stop_after_attempt, wait_exponential
 
+    from app.database import AsyncSessionLocal
+    from app.db.seed_default_agent import seed_default_knowledge_extractor
     from app.services.websocket_manager import websocket_manager
 
     initialize_llm_system()
@@ -153,6 +155,13 @@ async def startup() -> None:
         await create_db_and_tables()
 
     await connect_db()
+
+    # Seed default knowledge_extractor agent if not exists
+    try:
+        async with AsyncSessionLocal() as session:
+            await seed_default_knowledge_extractor(session)
+    except Exception as e:
+        logger.warning(f"Failed to seed default agent: {e}")
 
     if not nats_broker.is_worker_process:
 

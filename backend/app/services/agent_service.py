@@ -15,9 +15,131 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.schemas.agent import AgentTestResponse
 from app.models import AgentConfig, LLMProvider, ProviderType, ValidationStatus
+from app.models.project_config import ProjectConfig
 from app.services.credential_encryption import CredentialEncryption
+from app.services.knowledge.knowledge_schemas import KnowledgeExtractionOutput
+from app.services.knowledge.llm_agents import KNOWLEDGE_EXTRACTION_PROMPT_UK
 
 logger = logging.getLogger(__name__)
+
+
+def compose_prompt(
+    base: str,
+    project_context: str | None = None,
+    custom: str | None = None,
+) -> str:
+    """Compose final system prompt from base, project context, and custom instructions.
+
+    The composition follows a layered approach:
+    1. Base prompt - read-only template with JSON schema and rules
+    2. Project context - domain keywords, glossary, components (injected dynamically)
+    3. Custom instructions - user-defined agent-specific instructions
+
+    Args:
+        base: Base prompt with JSON schema and extraction rules (required)
+        project_context: Optional project-specific context (keywords, glossary, etc.)
+        custom: Optional custom agent instructions from user
+
+    Returns:
+        Composed system prompt string
+
+    Example:
+        >>> prompt = compose_prompt(
+        ...     base=KNOWLEDGE_EXTRACTION_PROMPT_UK,
+        ...     project_context="Keywords: python, fastapi\\nGlossary: API - ...",
+        ...     custom="Focus on security-related topics"
+        ... )
+    """
+    sections: list[str] = [base]
+
+    if project_context:
+        sections.append(f"\n---\n\n## Project Context\n\n{project_context}")
+
+    if custom:
+        sections.append(f"\n---\n\n## Additional Instructions\n\n{custom}")
+
+    return "\n".join(sections)
+
+
+def merge_project_contexts(projects: list[ProjectConfig]) -> str:
+    """Merge keywords, glossary, and components from multiple projects.
+
+    Combines context from all linked projects into a single formatted string
+    suitable for injection into LLM prompts via compose_prompt().
+
+    Deduplication rules:
+    - Keywords: case-insensitive deduplication, preserves original casing
+    - Glossary: later projects override earlier ones for same term
+    - Components: deduped by name, keywords merged
+
+    Args:
+        projects: List of ProjectConfig instances to merge
+
+    Returns:
+        Formatted context string with Keywords, Glossary, and Components sections.
+        Returns empty string if projects list is empty.
+
+    Example:
+        >>> projects = [project_backend, project_frontend]
+        >>> context = merge_project_contexts(projects)
+        >>> prompt = compose_prompt(base=BASE_PROMPT, project_context=context)
+    """
+    if not projects:
+        return ""
+
+    # Collect all keywords (case-insensitive dedup, preserve original case)
+    seen_keywords_lower: set[str] = set()
+    merged_keywords: list[str] = []
+    for project in projects:
+        for kw in project.keywords:
+            kw_lower = kw.lower()
+            if kw_lower not in seen_keywords_lower:
+                seen_keywords_lower.add(kw_lower)
+                merged_keywords.append(kw)
+
+    # Merge glossaries (later projects override earlier for same term)
+    merged_glossary: dict[str, str] = {}
+    for project in projects:
+        if project.glossary:
+            merged_glossary.update(project.glossary)
+
+    # Merge components (dedup by name, merge keywords)
+    components_by_name: dict[str, set[str]] = {}
+    for project in projects:
+        if project.components:
+            for comp in project.components:
+                name = comp.get("name", "")
+                if not name:
+                    continue
+                if name not in components_by_name:
+                    components_by_name[name] = set()
+                comp_keywords = comp.get("keywords", [])
+                if isinstance(comp_keywords, list):
+                    components_by_name[name].update(comp_keywords)
+
+    # Format output sections
+    sections: list[str] = []
+
+    # Keywords section
+    if merged_keywords:
+        sections.append(f"## Keywords\n{', '.join(merged_keywords)}")
+
+    # Glossary section
+    if merged_glossary:
+        glossary_lines = [f"- **{term}**: {definition}" for term, definition in merged_glossary.items()]
+        sections.append(f"## Glossary\n{chr(10).join(glossary_lines)}")
+
+    # Components section
+    if components_by_name:
+        component_lines = []
+        for name, keywords in components_by_name.items():
+            if keywords:
+                component_lines.append(f"- **{name}**: {', '.join(sorted(keywords))}")
+            else:
+                component_lines.append(f"- **{name}**")
+        sections.append(f"## Components\n{chr(10).join(component_lines)}")
+
+    return "\n\n".join(sections)
 
 
 class AgentTestService:
@@ -74,12 +196,22 @@ class AgentTestService:
 
         model = self._build_model_instance(provider, agent.model_name, api_key)
 
+        # Compose system prompt: base + project_context + custom
+        # project_context is None for now (will be added when M:N relation is ready)
+        system_prompt = compose_prompt(
+            base=KNOWLEDGE_EXTRACTION_PROMPT_UK,
+            project_context=None,  # TODO: inject from agent.projects when M:N ready
+            custom=agent.system_prompt,
+        )
+
         start_time = time.time()
 
         try:
             pydantic_agent = PydanticAgent(
                 model=model,
-                system_prompt=agent.system_prompt,
+                system_prompt=system_prompt,
+                output_type=KnowledgeExtractionOutput,
+                output_retries=5,
             )
 
             # Build model settings
