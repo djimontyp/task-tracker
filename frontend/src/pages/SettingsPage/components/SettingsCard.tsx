@@ -29,6 +29,7 @@ import {
   AlertCircle,
   Loader2,
   ChevronRight,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 
@@ -66,6 +67,12 @@ export interface SettingsCardProps {
   };
   /** Loading state */
   isLoading?: boolean;
+  /** Error state */
+  isError?: boolean;
+  /** Error object */
+  error?: Error;
+  /** Retry handler */
+  onRetry?: () => void;
   /** Additional className */
   className?: string;
 }
@@ -129,9 +136,32 @@ export function SettingsCard({
   onClick,
   footer,
   isLoading = false,
+  isError = false,
+  error,
+  onRetry,
   className,
 }: SettingsCardProps) {
   const { t } = useTranslation();
+
+  if (isError) {
+    return (
+      <Card className={cn('p-5', className)}>
+        <div className="flex flex-col items-center justify-center gap-4 text-center">
+          <AlertCircle className="h-8 w-8 text-destructive" />
+          <div className="space-y-2">
+            <p className="text-sm font-medium">{t('settingsCard.error.title', 'Failed to load')}</p>
+            {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
+          </div>
+          {onRetry && (
+            <Button variant="outline" size="sm" onClick={onRetry}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              {t('settingsCard.error.retry', 'Retry')}
+            </Button>
+          )}
+        </div>
+      </Card>
+    );
+  }
 
   if (isLoading) {
     return <SettingsCardSkeleton />;
@@ -181,7 +211,7 @@ export function SettingsCard({
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="font-medium text-base mb-1">{title}</div>
+          <div className="font-medium text-base mb-1 truncate">{title}</div>
           <div className="text-sm text-muted-foreground line-clamp-2">
             {description}
           </div>
@@ -222,7 +252,7 @@ export function SettingsCard({
                   e.stopPropagation();
                   onClick();
                 }}
-                className="h-9"
+                className="h-11"
               >
                 {t('settingsCard.settings')}
               </Button>
@@ -242,7 +272,7 @@ export function SettingsCard({
                   e.stopPropagation();
                   footer.onClick(e);
                 }}
-                className="h-9"
+                className="h-11"
               >
                 {footer.label}
               </Button>
