@@ -1,0 +1,142 @@
+# Schema for Project Fixture Format
+# This defines the structure for YAML-based project generation
+
+project:
+  # Metadata
+  name: string                    # Project name (lowercase, hyphen-separated)
+  display_name: string            # Human-readable name
+  description: string             # Project description
+  version: string                 # Initial version (e.g., "0.1.0")
+
+  # Tech Stack
+  tech_stack:
+    backend:
+      language: string            # e.g., "Python 3.12"
+      framework: string           # e.g., "FastAPI"
+      orm: string                 # e.g., "SQLModel"
+      database: string            # e.g., "PostgreSQL + PostGIS"
+
+    frontend:
+      framework: string           # e.g., "React 18"
+      language: string            # e.g., "TypeScript"
+      build_tool: string          # e.g., "Vite"
+      ui_library: string          # e.g., "shadcn/ui"
+
+  # Directory Structure
+  directories:
+    - path: string                # Relative path from project root
+      description: string         # Purpose of directory
+      create_init: boolean        # Create __init__.py (Python only)
+
+  # Files
+  files:
+    - path: string                # Relative path from project root
+      type: enum                  # template | static | generated
+      template: string            # Template name (if type=template)
+      content: string             # Direct content (if type=static)
+      generator: string           # Generator function (if type=generated)
+      variables: object           # Variables for template rendering
+
+  # Models (Backend)
+  models:
+    - name: string                # Model class name (e.g., "User")
+      table_name: string          # Database table name
+      description: string         # Model purpose
+      fields:
+        - name: string            # Field name
+          type: string            # SQLModel type (str, int, datetime, etc.)
+          nullable: boolean       # Optional field
+          default: any            # Default value
+          description: string     # Field purpose
+
+      relationships:
+        - name: string            # Relationship name
+          model: string           # Related model name
+          type: enum              # one_to_many | many_to_one | many_to_many
+          back_populates: string  # Reverse relationship name
+
+  # API Endpoints (Backend)
+  endpoints:
+    - path: string                # URL path (e.g., "/api/v1/users")
+      tag: string                 # OpenAPI tag
+      methods:
+        - method: enum            # GET | POST | PUT | PATCH | DELETE
+          summary: string         # Short description
+          response_model: string  # Response schema name
+          request_model: string   # Request body schema (POST/PUT)
+          auth_required: boolean  # Requires authentication
+
+  # React Components (Frontend)
+  components:
+    - name: string                # Component name (e.g., "LandPlotCard")
+      path: string                # Location (e.g., "features/land-plots/components")
+      type: enum                  # functional | class
+      props:
+        - name: string            # Prop name
+          type: string            # TypeScript type
+          required: boolean
+          description: string
+
+      hooks:                      # React hooks used
+        - string                  # e.g., "useState", "useQuery"
+
+      imports:
+        - from: string            # Import source
+          items: [string]         # Imported items
+
+  # Pages (Frontend)
+  pages:
+    - name: string                # Page component name
+      route: string               # Route path (e.g., "/land-plots")
+      layout: string              # Layout component to use
+      components: [string]        # Components used on page
+
+  # Services (Business Logic)
+  services:
+    - name: string                # Service class name
+      type: enum                  # backend | frontend
+      methods:
+        - name: string            # Method name
+          params: [object]        # Parameters
+          returns: string         # Return type
+          description: string
+
+  # Database Migrations
+  migrations:
+    - version: string             # Migration version (e.g., "001")
+      description: string         # What this migration does
+      operations:
+        - type: enum              # create_table | add_column | create_index
+          details: object         # Operation-specific details
+
+  # Configuration Files
+  config:
+    backend:
+      pyproject: object           # pyproject.toml structure
+      env_example: object         # .env.example variables
+
+    frontend:
+      package_json: object        # package.json structure
+      tsconfig: object            # tsconfig.json structure
+      vite_config: object         # vite.config.ts structure
+
+  # Commands
+  commands:
+    - name: string                # Command name (for justfile)
+      description: string         # What it does
+      script: string              # Shell command to run
+
+  # Documentation
+  docs:
+    - path: string                # Doc file path (relative to docs/)
+      title: string               # Document title
+      content: string             # Markdown content
+      template: string            # Template name (alternative to content)
+
+# Template Variables Available:
+# {{ project.name }}
+# {{ project.display_name }}
+# {{ project.version }}
+# {{ model.name }}
+# {{ component.name }}
+# etc.

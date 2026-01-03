@@ -1,0 +1,654 @@
+project:
+  name: feudalme
+  display_name: FeodalMe
+  description: Land assets management platform for Ukraine
+  version: 0.1.0
+
+  tech_stack:
+    backend:
+      language: Python 3.12
+      framework: FastAPI
+      orm: SQLModel
+      database: PostgreSQL + PostGIS
+
+    frontend:
+      framework: React 18
+      language: TypeScript
+      build_tool: Vite
+      ui_library: shadcn/ui
+
+  # ============================================================================
+  # Directory Structure
+  # ============================================================================
+  directories:
+    # Backend
+    - path: backend
+      description: Backend application root
+    - path: backend/app
+      description: Main application package
+      create_init: true
+    - path: backend/app/models
+      description: SQLModel models
+      create_init: true
+    - path: backend/app/api
+      description: FastAPI routers
+      create_init: true
+    - path: backend/app/services
+      description: Business logic services
+      create_init: true
+    - path: backend/app/core
+      description: Core configuration and utilities
+      create_init: true
+    - path: backend/tests
+      description: Backend tests
+      create_init: true
+
+    # Frontend
+    - path: frontend
+      description: Frontend application root
+    - path: frontend/src
+      description: Source code
+    - path: frontend/src/features
+      description: Feature modules
+    - path: frontend/src/features/land-plots
+      description: Land plots feature
+    - path: frontend/src/features/land-plots/components
+      description: Land plot components
+    - path: frontend/src/features/rent-companies
+      description: Rent companies feature
+    - path: frontend/src/features/rent-companies/components
+      description: Rent company components
+    - path: frontend/src/features/reviews
+      description: Reviews feature
+    - path: frontend/src/features/reviews/components
+      description: Review components
+    - path: frontend/src/features/investments
+      description: Investments feature
+    - path: frontend/src/features/investments/components
+      description: Investment components
+    - path: frontend/src/shared/ui
+      description: Shared UI components
+    - path: frontend/src/shared/lib
+      description: Shared utilities
+
+    # Docs
+    - path: docs
+      description: Project documentation
+    - path: docs/architecture
+      description: Architecture docs
+    - path: docs/api
+      description: API documentation
+
+  # ============================================================================
+  # Models (Backend)
+  # ============================================================================
+  models:
+    # User (Landowner)
+    - name: User
+      table_name: users
+      description: Land owner (physical person)
+      fields:
+        - name: id
+          type: int
+          nullable: false
+          description: Primary key
+        - name: ipn
+          type: str
+          nullable: false
+          description: Tax identification number (10 digits)
+        - name: phone
+          type: str
+          nullable: false
+          description: Phone number for SMS verification
+        - name: full_name
+          type: str
+          nullable: false
+          description: Full name (ПІБ)
+        - name: email
+          type: str
+          nullable: true
+          description: Email address
+        - name: is_verified
+          type: bool
+          default: false
+          description: Verified via Diia or SMS
+        - name: created_at
+          type: datetime
+          description: Registration timestamp
+      relationships:
+        - name: land_plots
+          model: LandPlot
+          type: one_to_many
+          back_populates: owner
+        - name: reviews
+          model: Review
+          type: one_to_many
+          back_populates: author
+
+    # LandPlot
+    - name: LandPlot
+      table_name: land_plots
+      description: Land plot (земельна ділянка)
+      fields:
+        - name: id
+          type: int
+          nullable: false
+          description: Primary key
+        - name: cadastral_number
+          type: str
+          nullable: false
+          description: Cadastral number (XXXXXXXXXXXX:XX:XXX:XXXX)
+        - name: onm
+          type: str
+          nullable: true
+          description: Object monitoring number (НАІС)
+        - name: area
+          type: float
+          nullable: false
+          description: Area in hectares
+        - name: ngo_value
+          type: float
+          nullable: true
+          description: Normative monetary valuation (НГО)
+        - name: category
+          type: str
+          nullable: true
+          description: Land category (agricultural, residential, etc.)
+        - name: purpose
+          type: str
+          nullable: true
+          description: Intended purpose (цільове призначення)
+        - name: owner_id
+          type: int
+          nullable: false
+          description: Foreign key to User
+        - name: polygon
+          type: str
+          nullable: true
+          description: GeoJSON polygon (geometry)
+        - name: is_mine_contaminated
+          type: bool
+          default: false
+          description: IMSMA mine contamination check result
+        - name: created_at
+          type: datetime
+          description: Record creation timestamp
+      relationships:
+        - name: owner
+          model: User
+          type: many_to_one
+          back_populates: land_plots
+        - name: reviews
+          model: Review
+          type: one_to_many
+          back_populates: land_plot
+
+    # RentCompany
+    - name: RentCompany
+      table_name: rent_companies
+      description: Agricultural company that rents land
+      fields:
+        - name: id
+          type: int
+          nullable: false
+          description: Primary key
+        - name: edrpou
+          type: str
+          nullable: false
+          description: Company registration code (ЄДРПОУ, 8 digits)
+        - name: name
+          type: str
+          nullable: false
+          description: Company name
+        - name: rating
+          type: float
+          nullable: true
+          description: Average rating (1-5 stars)
+        - name: reviews_count
+          type: int
+          default: 0
+          description: Total number of reviews
+        - name: created_at
+          type: datetime
+          description: Record creation timestamp
+      relationships:
+        - name: reviews
+          model: Review
+          type: one_to_many
+          back_populates: rent_company
+
+    # Review (Tenant Rating)
+    - name: Review
+      table_name: reviews
+      description: Review of rent company by land owner
+      fields:
+        - name: id
+          type: int
+          nullable: false
+          description: Primary key
+        - name: author_id
+          type: int
+          nullable: false
+          description: Foreign key to User (author)
+        - name: land_plot_id
+          type: int
+          nullable: false
+          description: Foreign key to LandPlot
+        - name: rent_company_id
+          type: int
+          nullable: false
+          description: Foreign key to RentCompany
+        - name: rating
+          type: int
+          nullable: false
+          description: Rating (1-5 stars)
+        - name: text
+          type: str
+          nullable: true
+          description: Review text (required for 1-3 stars, min 50 chars)
+        - name: status
+          type: str
+          default: pending
+          description: Moderation status (pending, approved, rejected)
+        - name: created_at
+          type: datetime
+          description: Review creation timestamp
+      relationships:
+        - name: author
+          model: User
+          type: many_to_one
+          back_populates: reviews
+        - name: land_plot
+          model: LandPlot
+          type: many_to_one
+          back_populates: reviews
+        - name: rent_company
+          model: RentCompany
+          type: many_to_one
+          back_populates: reviews
+
+    # Investment
+    - name: Investment
+      table_name: investments
+      description: Investment in land plot with ROI tracking
+      fields:
+        - name: id
+          type: int
+          nullable: false
+          description: Primary key
+        - name: user_id
+          type: int
+          nullable: false
+          description: Foreign key to User (investor)
+        - name: land_plot_id
+          type: int
+          nullable: false
+          description: Foreign key to LandPlot
+        - name: acquisition_cost
+          type: float
+          nullable: false
+          description: Land purchase cost
+        - name: processing_cost
+          type: float
+          nullable: false
+          description: Registration and legal costs
+        - name: rental_price
+          type: float
+          nullable: true
+          description: Monthly/annual rental income
+        - name: land_tax_rate
+          type: float
+          nullable: true
+          description: Land tax rate (%)
+        - name: mpz_rate
+          type: float
+          nullable: true
+          description: Minimum tax obligation rate (%)
+        - name: roi
+          type: float
+          nullable: true
+          description: Calculated ROI (%)
+        - name: created_at
+          type: datetime
+          description: Investment creation timestamp
+
+  # ============================================================================
+  # API Endpoints (Backend)
+  # ============================================================================
+  endpoints:
+    # Users
+    - path: /api/v1/users
+      tag: Users
+      methods:
+        - method: GET
+          summary: List all users
+          response_model: List[User]
+        - method: POST
+          summary: Create new user (registration)
+          request_model: UserCreate
+          response_model: User
+
+    # Land Plots
+    - path: /api/v1/land-plots
+      tag: Land Plots
+      methods:
+        - method: GET
+          summary: List land plots for current user
+          response_model: List[LandPlot]
+          auth_required: true
+        - method: POST
+          summary: Add new land plot
+          request_model: LandPlotCreate
+          response_model: LandPlot
+          auth_required: true
+
+    # Rent Companies
+    - path: /api/v1/rent-companies
+      tag: Rent Companies
+      methods:
+        - method: GET
+          summary: List rent companies with ratings
+          response_model: List[RentCompany]
+        - method: GET
+          summary: Get rent company details
+          response_model: RentCompany
+
+    # Reviews
+    - path: /api/v1/reviews
+      tag: Reviews
+      methods:
+        - method: GET
+          summary: List reviews for rent company
+          response_model: List[Review]
+        - method: POST
+          summary: Create review
+          request_model: ReviewCreate
+          response_model: Review
+          auth_required: true
+
+    # Investments
+    - path: /api/v1/investments
+      tag: Investments
+      methods:
+        - method: GET
+          summary: List user investments
+          response_model: List[Investment]
+          auth_required: true
+        - method: POST
+          summary: Create investment
+          request_model: InvestmentCreate
+          response_model: Investment
+          auth_required: true
+
+  # ============================================================================
+  # React Components (Frontend)
+  # ============================================================================
+  components:
+    # LandPlotCard
+    - name: LandPlotCard
+      path: features/land-plots/components
+      type: functional
+      props:
+        - name: landPlot
+          type: LandPlot
+          required: true
+          description: Land plot data
+        - name: onViewDetails
+          type: "(id: number) => void"
+          required: false
+          description: Callback when user clicks details
+      hooks:
+        - useState
+      imports:
+        - from: '@/shared/ui/card'
+          items: [Card, CardHeader, CardTitle, CardContent]
+        - from: 'lucide-react'
+          items: [MapPin, Ruler]
+
+    # RentCompanyCard
+    - name: RentCompanyCard
+      path: features/rent-companies/components
+      type: functional
+      props:
+        - name: company
+          type: RentCompany
+          required: true
+          description: Rent company data
+        - name: showReviews
+          type: boolean
+          required: false
+          description: Show reviews section
+      hooks:
+        - useState
+      imports:
+        - from: '@/shared/ui/card'
+          items: [Card, CardHeader, CardTitle, CardContent]
+        - from: 'lucide-react'
+          items: [Star, MessageSquare]
+
+    # ReviewCard
+    - name: ReviewCard
+      path: features/reviews/components
+      type: functional
+      props:
+        - name: review
+          type: Review
+          required: true
+          description: Review data
+        - name: onReply
+          type: "(reviewId: number) => void"
+          required: false
+          description: Callback for CRM reply
+      hooks:
+        - useState
+      imports:
+        - from: '@/shared/ui/card'
+          items: [Card, CardHeader, CardTitle, CardContent]
+        - from: 'lucide-react'
+          items: [Star, User]
+
+    # InvestmentPortfolio
+    - name: InvestmentPortfolio
+      path: features/investments/components
+      type: functional
+      props:
+        - name: investments
+          type: Investment[]
+          required: true
+          description: List of investments
+        - name: totalROI
+          type: number
+          required: false
+          description: Weighted average ROI
+      hooks:
+        - useState
+        - useEffect
+      imports:
+        - from: '@/shared/ui/card'
+          items: [Card, CardHeader, CardTitle, CardContent]
+        - from: 'lucide-react'
+          items: [TrendingUp, DollarSign]
+
+  # ============================================================================
+  # Pages (Frontend)
+  # ============================================================================
+  pages:
+    - name: DashboardPage
+      route: /
+      layout: MainLayout
+      components:
+        - LandPlotCard
+        - InvestmentPortfolio
+
+    - name: LandPlotsPage
+      route: /land-plots
+      layout: MainLayout
+      components:
+        - LandPlotCard
+
+    - name: RentCompaniesPage
+      route: /rent-companies
+      layout: MainLayout
+      components:
+        - RentCompanyCard
+
+    - name: InvestmentsPage
+      route: /investments
+      layout: MainLayout
+      components:
+        - InvestmentPortfolio
+
+  # ============================================================================
+  # Static Files
+  # ============================================================================
+  files:
+    # README
+    - path: README.md
+      type: static
+      content: |
+        # FeodalMe
+
+        Land assets management platform for Ukraine.
+
+        ## Features
+
+        - Land plot management
+        - Rent company ratings
+        - Investment tracking (ROI)
+        - IMSMA mine contamination checks
+        - Diia OAuth integration
+
+        ## Tech Stack
+
+        - **Backend**: FastAPI + SQLModel + PostgreSQL + PostGIS
+        - **Frontend**: React 18 + TypeScript + Vite + shadcn/ui
+
+        ## Getting Started
+
+        ```bash
+        # Backend
+        cd backend
+        uv sync
+        uv run uvicorn app.main:app --reload
+
+        # Frontend
+        cd frontend
+        npm install
+        npm run dev
+        ```
+
+    # Backend pyproject.toml placeholder
+    - path: backend/pyproject.toml
+      type: static
+      content: |
+        [project]
+        name = "feudalme-backend"
+        version = "0.1.0"
+        description = "FeodalMe Backend API"
+        requires-python = ">=3.12"
+        dependencies = [
+            "fastapi>=0.117.1",
+            "sqlmodel>=0.0.24",
+            "pydantic>=2.10",
+            "uvicorn[standard]>=0.32.1",
+            "asyncpg>=0.30.0",
+        ]
+
+    # Frontend package.json placeholder
+    - path: frontend/package.json
+      type: static
+      content: |
+        {
+          "name": "feudalme-frontend",
+          "version": "0.1.0",
+          "type": "module",
+          "scripts": {
+            "dev": "vite",
+            "build": "tsc && vite build",
+            "preview": "vite preview"
+          },
+          "dependencies": {
+            "react": "^18.3.1",
+            "react-dom": "^18.3.1"
+          },
+          "devDependencies": {
+            "@types/react": "^18.3.1",
+            "@types/react-dom": "^18.3.0",
+            "@vitejs/plugin-react": "^4.3.4",
+            "typescript": "^5.9.3",
+            "vite": "^7.1.9"
+          }
+        }
+
+  # ============================================================================
+  # Documentation
+  # ============================================================================
+  docs:
+    - path: architecture/overview.md
+      title: Architecture Overview
+      content: |
+        # FeodalMe Architecture
+
+        ## System Overview
+
+        FeodalMe is a B2C/B2B platform connecting:
+        - **Landowners** (physical persons with IPN)
+        - **Rent Companies** (agricultural companies with EDRPOU)
+        - **Investors** (users tracking ROI)
+        - **Agencies** (analytics companies)
+
+        ## Core Entities
+
+        1. **User** - Land owner
+        2. **LandPlot** - Land parcel with cadastral data
+        3. **RentCompany** - Agricultural company
+        4. **Review** - Rating of rent company by landowner
+        5. **Investment** - Financial tracking of land purchase
+
+        ## External Integrations
+
+        - **Diia** - OAuth authentication
+        - **НАІС** - Land registry
+        - **FAMI** - Plot search by IPN
+        - **IMSMA** - Mine contamination data (PostGIS intersection)
+
+        ## Key Features
+
+        - Tenant rating system (1-5 stars)
+        - ROI calculator for investments
+        - Near Me filter (PostGIS geospatial queries)
+        - Land trade marketplace
+        - Agency access control
+
+    - path: api/endpoints.md
+      title: API Endpoints
+      content: |
+        # FeodalMe API Endpoints
+
+        ## Base URL
+
+        ```
+        http://localhost:8000/api/v1
+        ```
+
+        ## Endpoints
+
+        ### Users
+        - `GET /users` - List users
+        - `POST /users` - Register new user
+
+        ### Land Plots
+        - `GET /land-plots` - List plots (auth required)
+        - `POST /land-plots` - Add plot (auth required)
+
+        ### Rent Companies
+        - `GET /rent-companies` - List companies with ratings
+        - `GET /rent-companies/{id}` - Get company details
+
+        ### Reviews
+        - `GET /reviews?rent_company_id={id}` - List reviews
+        - `POST /reviews` - Create review (auth required)
+
+        ### Investments
+        - `GET /investments` - List user investments (auth required)
+        - `POST /investments` - Create investment (auth required)
