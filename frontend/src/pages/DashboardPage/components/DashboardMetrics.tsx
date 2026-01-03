@@ -2,10 +2,10 @@
  * DashboardMetrics Component
  *
  * Displays 4 MetricCards in a 2x2 grid:
- * - Critical issues (problems)
- * - New Ideas
- * - Decisions Made
  * - Open Questions
+ * - Decisions Made
+ * - New Ideas
+ * - Critical issues (problems)
  */
 
 import { useTranslation } from 'react-i18next'
@@ -60,25 +60,15 @@ const DashboardMetrics = ({ data, isLoading, error }: DashboardMetricsProps) => 
 
   const metrics = [
     {
-      key: 'critical',
-      title: t('metricsCard.critical.title'),
-      value: data.critical.count,
-      delta: data.critical.delta,
-      icon: AlertTriangle,
-      iconColor: 'text-semantic-error',
-      emptyMessage: t('metricsCard.critical.empty'),
-      status: data.critical.count > 0 ? ('critical' as const) : undefined,
-      deltaLabel: t('metricsCard.critical.deltaLabel'),
-    },
-    {
-      key: 'ideas',
-      title: t('metricsCard.ideas.title'),
-      value: data.ideas.count,
-      delta: data.ideas.delta,
-      icon: Lightbulb,
-      iconColor: 'text-semantic-warning',
-      emptyMessage: t('metricsCard.ideas.empty'),
-      deltaLabel: t('metricsCard.ideas.deltaLabel'),
+      key: 'questions',
+      title: t('metricsCard.questions.title'),
+      value: data.questions.count,
+      delta: data.questions.delta,
+      icon: HelpCircle,
+      iconColor: 'text-semantic-info',
+      emptyMessage: t('metricsCard.questions.empty'),
+      status: data.questions.count > 3 ? ('warning' as const) : undefined,
+      deltaLabel: t('metricsCard.questions.deltaLabel'),
     },
     {
       key: 'decisions',
@@ -92,15 +82,25 @@ const DashboardMetrics = ({ data, isLoading, error }: DashboardMetricsProps) => 
       deltaLabel: t('metricsCard.decisions.deltaLabel'),
     },
     {
-      key: 'questions',
-      title: t('metricsCard.questions.title'),
-      value: data.questions.count,
-      delta: data.questions.delta,
-      icon: HelpCircle,
-      iconColor: 'text-semantic-info',
-      emptyMessage: t('metricsCard.questions.empty'),
-      status: data.questions.count > 3 ? ('warning' as const) : undefined,
-      deltaLabel: t('metricsCard.questions.deltaLabel'),
+      key: 'ideas',
+      title: t('metricsCard.ideas.title'),
+      value: data.ideas.count,
+      delta: data.ideas.delta,
+      icon: Lightbulb,
+      iconColor: 'text-semantic-warning',
+      emptyMessage: t('metricsCard.ideas.empty'),
+      deltaLabel: t('metricsCard.ideas.deltaLabel'),
+    },
+    {
+      key: 'critical',
+      title: t('metricsCard.critical.title'),
+      value: data.critical.count,
+      delta: data.critical.delta,
+      icon: AlertTriangle,
+      iconColor: 'text-semantic-error',
+      emptyMessage: t('metricsCard.critical.empty'),
+      status: data.critical.count > 0 ? ('critical' as const) : undefined,
+      deltaLabel: t('metricsCard.critical.deltaLabel'),
     },
   ]
 
