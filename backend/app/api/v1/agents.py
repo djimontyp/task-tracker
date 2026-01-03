@@ -8,6 +8,7 @@ import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic_ai.exceptions import ModelHTTPError
 from sqlalchemy.exc import IntegrityError
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -407,6 +408,27 @@ async def test_agent(
     except ValueError as e:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(e))
+    except ModelHTTPError as e:
+        # Handle model-specific HTTP errors (e.g., model doesn't support tools)
+        error_body = getattr(e, "body", {}) or {}
+        error_message = error_body.get("message", str(e)) if isinstance(error_body, dict) else str(e)
+        model_name = getattr(e, "model_name", "unknown")
+
+        if "does not support tools" in error_message:
+            logger.warning(f"Model {model_name} does not support tools: {e}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Model '{model_name}' does not support function calling (tools). "
+                f"Please use a different model that supports tools, such as: "
+                f"llama3.2, mistral, qwen2.5, or GPT models.",
+            )
+
+        # Re-raise other ModelHTTPError as 502 (bad gateway to upstream LLM)
+        logger.error(f"LLM API error for agent {agent_id}: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=502,
+            detail=f"LLM API error: {error_message}",
+        )
     except Exception as e:
         # Handle unexpected errors
         logger.error(f"Failed to test agent {agent_id}: {e}", exc_info=True)
