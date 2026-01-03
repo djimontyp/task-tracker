@@ -199,6 +199,15 @@ export const base = {
     text: 'text-card',
     foreground: 'text-card-foreground',
   },
+  // Card typography colors - WCAG AA compliant
+  // @see docs/design-system/04-card-typography.md
+  cardTypography: {
+    title: 'text-card-title',
+    body: 'text-card-body',
+    label: 'text-card-label',
+    value: 'text-card-value',
+    muted: 'text-card-muted',
+  },
   popover: {
     bg: 'bg-popover',
     text: 'text-popover',

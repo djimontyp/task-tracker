@@ -68,6 +68,12 @@ module.exports = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+          // Card typography colors - WCAG AA compliant
+          title: "hsl(var(--card-title))",
+          body: "hsl(var(--card-body))",
+          label: "hsl(var(--card-label))",
+          value: "hsl(var(--card-value))",
+          muted: "hsl(var(--card-muted))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
