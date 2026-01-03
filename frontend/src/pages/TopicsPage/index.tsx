@@ -274,7 +274,7 @@ const TopicsPage = () => {
               {filteredTopics.map((topic) => (
                 <Card
                   key={topic.id}
-                  className="p-4 sm:p-4 md:p-6 transition-all duration-200 hover:shadow-lg hover:scale-[1.01] cursor-pointer"
+                  className="p-4 sm:p-4 md:p-6 card-interactive"
                   onClick={() => navigate(`/topics/${topic.id}`)}
                 >
                   <div className="flex items-center gap-4 mb-2">

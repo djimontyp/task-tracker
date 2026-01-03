@@ -1,11 +1,11 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Badge, Checkbox, Button } from '@/shared/ui'
+import { Badge, Checkbox, Button, Card, CardContent } from '@/shared/ui'
 import { Message } from '@/shared/types'
 import { getMessageAnalysisBadge, getImportanceBadge, getNoiseClassificationBadge } from '@/shared/utils/statusBadges'
 import { formatFullDate } from '@/shared/utils/date'
 import { useScoringConfig } from '@/shared/api/scoringConfig'
-import { User, Mail, Lightbulb, X } from 'lucide-react'
+import { User, Mail, Lightbulb, X, AlertCircle, RefreshCw } from 'lucide-react'
 
 interface MessageCardProps {
   message: Message
@@ -14,6 +14,9 @@ interface MessageCardProps {
   onClick: () => void
   onCreateAtom?: () => void
   onDismiss?: () => void
+  isError?: boolean
+  error?: Error
+  onRetry?: () => void
 }
 
 export const MessageCard: React.FC<MessageCardProps> = ({
@@ -22,10 +25,35 @@ export const MessageCard: React.FC<MessageCardProps> = ({
   onSelect,
   onClick,
   onCreateAtom,
-  onDismiss
+  onDismiss,
+  isError,
+  error,
+  onRetry,
 }) => {
   const { t } = useTranslation('messages')
   const { data: scoringConfig } = useScoringConfig()
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center justify-center gap-4 text-center">
+            <AlertCircle className="h-8 w-8 text-destructive" />
+            <div className="space-y-2">
+              <p className="text-sm font-medium">{t('card.error.title', 'Failed to load')}</p>
+              {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
+            </div>
+            {onRetry && (
+              <Button variant="outline" size="sm" onClick={onRetry}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                {t('card.error.retry', 'Retry')}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   const statusBadge = getMessageAnalysisBadge(message.analyzed || false)
   const importanceBadge = message.importance_score !== null && message.importance_score !== undefined
@@ -44,9 +72,9 @@ export const MessageCard: React.FC<MessageCardProps> = ({
   const glowClass = isHighImportance ? 'shadow-glow-sm' : ''
 
   return (
-    <div
+    <Card
       className={`
-        group border rounded-lg p-4 sm:p-4 space-y-4 cursor-pointer transition-all duration-300 w-full min-w-0
+        group p-4 sm:p-4 space-y-4 cursor-pointer transition-all duration-300 w-full min-w-0
         ${isSelected ? 'border-primary bg-accent/5' : 'hover:bg-accent/10'}
         ${glowClass}
       `}
@@ -117,7 +145,7 @@ export const MessageCard: React.FC<MessageCardProps> = ({
         <Button
           size="sm"
           variant="outline"
-          className="h-8"
+          className="h-11"
           onClick={(e) => {
             e.stopPropagation()
             onCreateAtom?.()
@@ -129,7 +157,7 @@ export const MessageCard: React.FC<MessageCardProps> = ({
         <Button
           size="sm"
           variant="ghost"
-          className="h-8 text-muted-foreground hover:text-foreground"
+          className="h-11 text-muted-foreground hover:text-foreground"
           onClick={(e) => {
             e.stopPropagation()
             onDismiss?.()
@@ -139,6 +167,6 @@ export const MessageCard: React.FC<MessageCardProps> = ({
           {t('card.actions.dismiss')}
         </Button>
       </div>
-    </div>
+    </Card>
   )
 }
