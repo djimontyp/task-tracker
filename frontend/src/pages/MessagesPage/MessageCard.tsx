@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge, Checkbox, Button, Card, CardContent } from '@/shared/ui'
+import { CompactCard, type CompactCardAction } from '@/shared/patterns'
 import { Message } from '@/shared/types'
 import { getMessageAnalysisBadge, getImportanceBadge, getNoiseClassificationBadge } from '@/shared/utils/statusBadges'
 import { formatFullDate } from '@/shared/utils/date'
@@ -71,10 +72,57 @@ export const MessageCard: React.FC<MessageCardProps> = ({
   const isHighImportance = message.importance_score !== null && message.importance_score !== undefined && message.importance_score >= signalThreshold
   const glowClass = isHighImportance ? 'shadow-glow-sm' : ''
 
+  // Build actions for CompactCard
+  const primaryAction: CompactCardAction | undefined = onCreateAtom
+    ? {
+        label: t('card.actions.createAtom', 'Create Atom'),
+        icon: <Lightbulb className="h-4 w-4" />,
+        onClick: () => onCreateAtom(),
+      }
+    : undefined
+
+  const secondaryActions: CompactCardAction[] = []
+  if (onDismiss) {
+    secondaryActions.push({
+      label: t('card.actions.dismiss', 'Dismiss'),
+      icon: <X className="h-4 w-4" />,
+      onClick: () => onDismiss(),
+    })
+  }
+
+  const authorName = message.author_name || message.author || 'Unknown'
+
+  const compactBadge = importanceBadge ? (
+    <Badge variant={importanceBadge.variant} className={importanceBadge.className}>
+      {importanceBadge.label}
+    </Badge>
+  ) : null
+
+  const compactContent = isEmpty ? (
+    <div className="flex items-center gap-2 text-muted-foreground/50 italic text-sm">
+      <Mail className="h-4 w-4 flex-shrink-0" />
+      <span className="truncate">(Empty message)</span>
+    </div>
+  ) : (
+    <p className="text-sm line-clamp-2 break-words">{content}</p>
+  )
+
   return (
-    <Card
+    <>
+      {/* Compact variant - mobile only (hidden on sm and above) */}
+      <CompactCard
+        title={authorName}
+        badge={compactBadge}
+        primaryAction={primaryAction}
+        secondaryActions={secondaryActions.length > 0 ? secondaryActions : undefined}
+        content={compactContent}
+        onClick={onClick}
+      />
+
+      {/* Default variant - desktop (hidden below sm) */}
+      <Card
       className={`
-        group p-4 sm:p-4 space-y-4 cursor-pointer transition-all duration-300 w-full min-w-0
+        hidden sm:block group p-4 sm:p-4 space-y-4 cursor-pointer transition-all duration-300 w-full min-w-0
         ${isSelected ? 'border-primary bg-accent/5' : 'hover:bg-accent/10'}
         ${glowClass}
       `}
@@ -168,5 +216,6 @@ export const MessageCard: React.FC<MessageCardProps> = ({
         </Button>
       </div>
     </Card>
+    </>
   )
 }
