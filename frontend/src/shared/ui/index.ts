@@ -129,3 +129,9 @@ export {
   type CardHeaderWithActionsProps,
   type CompactCardHeaderProps,
 } from './card-header-with-actions'
+export {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from './collapsible'
+export { MultiSelect, type MultiSelectOption, type MultiSelectProps } from './multi-select'

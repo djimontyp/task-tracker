@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
+import { ChevronRight } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -17,12 +18,61 @@ import {
   SelectItem,
   Checkbox,
   Spinner,
+  MultiSelect,
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
 } from '@/shared/ui'
 import { FormField } from '@/shared/patterns'
 import { AgentConfigCreate, AgentConfigUpdate } from '@/features/agents/types'
 import { providerService } from '@/features/providers/api'
 import { useOllamaModels } from '@/features/providers/hooks'
 import { ProviderType, ValidationStatus } from '@/features/providers/types'
+import { projectService } from '@/features/projects/api/projectService'
+
+// Base prompt used for knowledge extraction (read-only reference)
+const BASE_PROMPT_TEXT = `You are a knowledge extraction expert. Your ONLY job is to analyze messages and return valid JSON.
+
+CRITICAL: You must respond with ONLY a JSON object. No explanations, no markdown, no extra text.
+
+Extract two things:
+1. TOPICS - Main discussion themes (2-4 words each)
+2. ATOMS - Specific knowledge units (problem/solution/insight/decision/question/pattern/requirement)
+
+JSON STRUCTURE (respond with EXACTLY this format):
+{
+  "topics": [
+    {
+      "name": "Topic Name",
+      "description": "Brief description",
+      "confidence": 0.8,
+      "keywords": ["keyword1", "keyword2"],
+      "related_message_ids": [1, 2]
+    }
+  ],
+  "atoms": [
+    {
+      "type": "problem",
+      "title": "Brief title",
+      "content": "Full description",
+      "confidence": 0.8,
+      "topic_name": "Topic Name",
+      "related_message_ids": [1],
+      "links_to_atom_titles": [],
+      "link_types": []
+    }
+  ]
+}
+
+RULES:
+1. ALL fields must be present (use empty arrays [] for lists if no data)
+2. confidence must be a number between 0.0 and 1.0
+3. type must be one of: problem, solution, insight, decision, question, pattern, requirement
+4. NO extra fields allowed
+5. Respond ONLY with JSON - no markdown formatting, no explanations
+
+If you cannot extract any topics or atoms, return:
+{"topics": [], "atoms": []}`
 
 interface AgentFormProps {
   open: boolean
@@ -42,7 +92,7 @@ const AgentForm = ({
   loading = false,
 }: AgentFormProps) => {
   const { t } = useTranslation('agents')
-  const [formData, setFormData] = useState<Partial<AgentConfigCreate>>({
+  const [formData, setFormData] = useState<Partial<AgentConfigCreate> & { project_ids?: string[] }>({
     name: initialData?.name || '',
     description: initialData?.description || '',
     provider_id: initialData?.provider_id || '',
@@ -51,9 +101,11 @@ const AgentForm = ({
     temperature: initialData?.temperature ?? 0.7,
     max_tokens: initialData?.max_tokens ?? 2000,
     is_active: initialData?.is_active ?? true,
+    project_ids: [],
   })
 
   const [manualModelInput, setManualModelInput] = useState(false)
+  const [basePromptOpen, setBasePromptOpen] = useState(false)
 
   const { data: providers, isLoading: providersLoading } = useQuery({
     queryKey: ['providers', 'active'],
@@ -65,6 +117,16 @@ const AgentForm = ({
       return hasActiveValidation ? 2000 : false
     },
   })
+
+  const { data: projectsData, isLoading: projectsLoading } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => projectService.listProjects(),
+  })
+
+  const projectOptions = (projectsData?.items ?? []).map((project) => ({
+    value: project.id,
+    label: project.name,
+  }))
 
   const selectedProvider = providers?.find((p) => p.id === formData.provider_id)
   const isOllamaProvider = selectedProvider?.type === ProviderType.OLLAMA
@@ -92,6 +154,7 @@ const AgentForm = ({
         temperature: initialData.temperature ?? 0.7,
         max_tokens: initialData.max_tokens ?? 2000,
         is_active: initialData.is_active ?? true,
+        project_ids: [],
       })
     }
   }, [initialData])
@@ -243,17 +306,59 @@ const AgentForm = ({
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="system_prompt">{t('form.fields.systemPrompt.label')} *</Label>
-              <textarea
-                id="system_prompt"
-                value={formData.system_prompt}
-                onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
-                placeholder={t('form.fields.systemPrompt.placeholder')}
-                required
-                className="w-full min-h-[100px] px-4 py-2 text-sm rounded-md border border-input bg-background"
-              />
+            <div className="space-y-4">
+              <Collapsible open={basePromptOpen} onOpenChange={setBasePromptOpen}>
+                <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium hover:text-foreground text-muted-foreground transition-colors">
+                  <ChevronRight
+                    className={`h-4 w-4 transition-transform ${basePromptOpen ? 'rotate-90' : ''}`}
+                  />
+                  {t('form.fields.basePrompt.label', 'Base Prompt (Read-only)')}
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-2">
+                  <pre className="bg-muted p-4 rounded-md text-sm max-h-40 overflow-auto whitespace-pre-wrap font-mono">
+                    {BASE_PROMPT_TEXT}
+                  </pre>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <div className="space-y-2">
+                <Label htmlFor="system_prompt">
+                  {t('form.fields.customInstructions.label', 'Custom Instructions')} *
+                </Label>
+                <textarea
+                  id="system_prompt"
+                  value={formData.system_prompt}
+                  onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
+                  placeholder={t('form.fields.customInstructions.placeholder', 'Additional instructions for the agent...')}
+                  required
+                  className="w-full min-h-[100px] px-4 py-2 text-sm rounded-md border border-input bg-background"
+                />
+              </div>
             </div>
+
+            <FormField
+              label={t('form.fields.projects.label', 'Projects')}
+              id="project_ids"
+              description={t('form.fields.projects.description', 'Project context will be injected into the prompt')}
+            >
+              {projectsLoading ? (
+                <div className="flex items-center gap-2 px-4 py-2 text-sm border border-input bg-background rounded-md">
+                  <Spinner className="w-4 h-4" />
+                  <span className="text-muted-foreground">{t('form.messages.loadingProjects', 'Loading projects...')}</span>
+                </div>
+              ) : (
+                <MultiSelect
+                  options={projectOptions}
+                  value={formData.project_ids ?? []}
+                  onChange={(values) => setFormData({ ...formData, project_ids: values })}
+                  placeholder={t('form.fields.projects.placeholder', 'Select projects...')}
+                  searchPlaceholder={t('form.fields.projects.searchPlaceholder', 'Search projects...')}
+                  emptyText={t('form.fields.projects.emptyText', 'No projects found.')}
+                  removeLabel={t('form.fields.projects.removeLabel', 'Remove {label}')}
+                  clearLabel={t('form.fields.projects.clearLabel', 'Clear all projects')}
+                />
+              )}
+            </FormField>
 
             <div className="grid grid-cols-2 gap-4">
               <FormField label={t('form.fields.temperature.label')} id="temperature">

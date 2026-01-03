@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from pydantic_ai.models.openai import OpenAIChatModel
 
 from app.config.ai_config import ai_config
-from app.models import AgentConfig, Atom, AtomLink, LLMProvider, Message, Topic, TopicAtom
+from app.models import AgentConfig, Atom, AtomLink, LLMProvider, Message, ProjectConfig, Topic, TopicAtom
 from app.models.topic import auto_select_color, auto_select_icon
 from app.services.credential_encryption import CredentialEncryption
 from app.services.knowledge.knowledge_schemas import (
@@ -51,6 +51,7 @@ class KnowledgeOrchestrator:
         provider: LLMProvider,
         language: str = "uk",
         rag_context_builder: RAGContextBuilder | None = None,
+        project_config: ProjectConfig | None = None,
     ):
         """Initialize knowledge extraction service.
 
@@ -59,11 +60,13 @@ class KnowledgeOrchestrator:
             provider: LLM provider configuration (must be Ollama or OpenAI)
             language: ISO 639-1 language code for AI output (default: 'uk')
             rag_context_builder: Optional RAG context builder for semantic context injection
+            project_config: Optional project configuration for domain-specific context injection
         """
         self.agent_config = agent_config
         self.provider = provider
         self.language = language
         self.rag_context_builder = rag_context_builder
+        self.project_config = project_config
         self.encryptor = CredentialEncryption()
 
     async def extract_knowledge(
@@ -581,10 +584,50 @@ class KnowledgeOrchestrator:
         logger.info(f"Updated {updated_count} messages with topic assignments")
         return updated_count
 
+    def _format_glossary(self, glossary: dict[str, str]) -> str:
+        """Format project glossary as markdown bullet list.
+
+        Args:
+            glossary: Dictionary of term -> definition
+
+        Returns:
+            Formatted glossary string
+        """
+        if not glossary:
+            return "No glossary terms defined."
+
+        lines = []
+        for term, definition in glossary.items():
+            lines.append(f"- **{term}**: {definition}")
+
+        return "\n".join(lines)
+
+    def _format_components(self, components: list[dict]) -> str:
+        """Format project components with their keywords.
+
+        Args:
+            components: List of component dictionaries with 'name' and 'keywords'
+
+        Returns:
+            Formatted components string
+        """
+        if not components:
+            return "No components defined."
+
+        lines = []
+        for comp in components:
+            name = comp.get("name", "Unnamed")
+            keywords = comp.get("keywords", [])
+            keywords_str = ", ".join(keywords) if keywords else "no keywords"
+            lines.append(f"- **{name}**: `{keywords_str}`")
+
+        return "\n".join(lines)
+
     def _build_prompt(self, messages: Sequence[Message], rag_context: str = "") -> str:
-        """Build LLM prompt from message batch with optional RAG context.
+        """Build LLM prompt from message batch with optional RAG context and project context.
 
         Groups messages by thread to preserve conversation structure.
+        Injects project-specific context (keywords, glossary, components) when available.
 
         Args:
             messages: Messages to analyze
@@ -629,10 +672,53 @@ class KnowledgeOrchestrator:
 
         messages_text = "\n\n".join(sections)
 
+        # Build project context section if available
+        project_context_section = ""
+        if self.project_config:
+            keywords_str = ", ".join(self.project_config.keywords)
+
+            # Format priority rules
+            priority_section = ""
+            if self.project_config.priority_rules:
+                critical_kw = self.project_config.priority_rules.get("critical_keywords", [])
+                high_kw = self.project_config.priority_rules.get("high_keywords", [])
+
+                if critical_kw or high_kw:
+                    priority_section = "\n**Priority Detection Rules:**\n"
+                    if critical_kw:
+                        priority_section += f"- Critical (0.9+ confidence): {', '.join(critical_kw)}\n"
+                    if high_kw:
+                        priority_section += f"- High (0.8+ confidence): {', '.join(high_kw)}\n"
+
+            project_context_section = f"""
+## Project Context: {self.project_config.name}
+
+**Description:** {self.project_config.description}
+
+**Domain Keywords:**
+{keywords_str}
+
+**Glossary of Terms:**
+{self._format_glossary(self.project_config.glossary)}
+
+**System Components:**
+{self._format_components(self.project_config.components)}
+{priority_section}
+Use this project context to:
+- Recognize domain-specific terminology from glossary
+- Identify component-related discussions from keywords
+- Apply correct technical terms when extracting knowledge
+- Maintain consistency with project terminology
+- Assign higher confidence to atoms matching critical/high priority keywords
+
+---
+
+"""
+
         # Build RAG context section if available
-        context_section = ""
+        rag_context_section = ""
         if rag_context:
-            context_section = f"""
+            rag_context_section = f"""
 ## Historical Context (RAG)
 
 {rag_context}
@@ -643,10 +729,12 @@ Use the above context to:
 - Link new atoms to related existing knowledge
 - Reference past decisions when relevant
 
+---
+
 """
 
         prompt = f"""Analyze the following {len(messages)} messages and extract knowledge.
-{context_section}
+{project_context_section}{rag_context_section}
 ## Messages to Analyze
 
 {messages_text}

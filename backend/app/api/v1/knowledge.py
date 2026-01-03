@@ -44,6 +44,9 @@ class KnowledgeExtractionRequest(BaseModel):
         default=None, description="Period-based message selection. Mutually exclusive with message_ids."
     )
     agent_config_id: UUID = Field(description="Agent Config UUID to use for extraction")
+    project_config_id: UUID | None = Field(
+        default=None, description="Optional ProjectConfig UUID for domain-specific context injection"
+    )
 
     @model_validator(mode="after")
     def validate_message_selection(self) -> "KnowledgeExtractionRequest":
@@ -140,8 +143,16 @@ async def trigger_knowledge_extraction(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=f"No messages found for the selected {period_desc}"
             )
 
+    # Convert int IDs to UUIDs for task
+    from uuid import UUID as UUIDType
+
+    message_uuids = [UUIDType(int=msg_id) if isinstance(msg_id, int) else msg_id for msg_id in message_ids]
+
     await extract_knowledge_from_messages_task.kiq(
-        message_ids=message_ids, agent_config_id=str(request.agent_config_id), created_by="api_trigger"
+        message_ids=message_uuids,  # type: ignore[arg-type]
+        agent_config_id=str(request.agent_config_id),
+        created_by="api_trigger",
+        project_config_id=str(request.project_config_id) if request.project_config_id else None,
     )
 
     return KnowledgeExtractionResponse(

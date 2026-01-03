@@ -11,7 +11,11 @@ import {
   Textarea,
   Spinner,
   Badge,
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
 } from '@/shared/ui'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { FormField } from '@/shared/patterns'
 import { JsonResponseViewer } from '@/shared/components/JsonResponseViewer'
 import { AgentConfig } from '@/features/agents/types'
@@ -48,6 +52,13 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
   const { t } = useTranslation('agents')
   const [prompt, setPrompt] = useState('')
   const [result, setResult] = useState<TestResult | null>(null)
+  const [isPromptExpanded, setIsPromptExpanded] = useState(false)
+
+  // Compose the full prompt (base system prompt + user input)
+  // TODO: In future, this should include project-specific context from API
+  const composedPrompt = agent
+    ? `${agent.system_prompt}\n\n---\n\nUser message:\n${prompt || '(empty)'}`
+    : ''
 
   const testMutation = useMutation({
     mutationFn: (promptText: string) => {
@@ -159,6 +170,30 @@ const AgentTestDialog = ({ agent, open, onClose }: AgentTestDialogProps) => {
               ))}
             </div>
           </div>
+
+          {/* View Full Prompt - Collapsible */}
+          <Collapsible open={isPromptExpanded} onOpenChange={setIsPromptExpanded}>
+            <CollapsibleTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+              >
+                {isPromptExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+                {t('testDialog.actions.viewFullPrompt', 'View full prompt')}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2">
+              <pre className="bg-muted p-4 rounded-md text-sm overflow-auto max-h-60 whitespace-pre-wrap break-words font-mono">
+                {composedPrompt}
+              </pre>
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Test Results */}
           {testMutation.isPending && (
