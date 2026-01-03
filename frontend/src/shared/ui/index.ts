@@ -120,3 +120,12 @@ export {
   BreadcrumbSeparator,
   BreadcrumbEllipsis,
 } from './breadcrumb'
+export { TruncatedText, TruncatedTitle } from './truncated-text'
+export {
+  CardHeaderWithActions,
+  CompactCardHeader,
+  type CardHeaderLayout,
+  type DropdownAction,
+  type CardHeaderWithActionsProps,
+  type CompactCardHeaderProps,
+} from './card-header-with-actions'

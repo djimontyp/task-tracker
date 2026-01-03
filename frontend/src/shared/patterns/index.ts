@@ -59,3 +59,51 @@ export {
   type IllustratedEmptyStateProps,
   type LoadingEmptyStateProps,
 } from './EmptyState';
+
+// Data list patterns
+export {
+  DataList,
+  InlineDataList,
+  KeyValueGrid,
+  StatGrid,
+  type DataListProps,
+  type DataListItem,
+  type DataListDensity,
+  type InlineDataListProps,
+  type KeyValueGridProps,
+  type StatGridProps,
+  type StatGridStat,
+} from './DataList';
+
+// Card actions patterns
+export {
+  CardActions,
+  IconButtonGroup,
+  ResponsiveActions,
+  type CardActionsProps,
+  type CardActionsLayout,
+  type DropdownActionItem,
+  type IconButtonAction,
+  type IconButtonGroupProps,
+  type ResponsiveActionsProps,
+  type ResponsiveActionsConfig,
+} from './CardActions';
+
+// Compact card pattern (mobile-first)
+export {
+  CompactCard,
+  CompactCardLoading,
+  CompactCardError,
+  CompactCardEmpty,
+  type CompactCardProps,
+  type CompactCardAction,
+} from './CompactCard';
+
+// Expanded card pattern (desktop-first)
+export {
+  ExpandedCard,
+  ExpandedCardLoading,
+  ExpandedCardError,
+  ExpandedCardEmpty,
+  type ExpandedCardProps,
+} from './ExpandedCard';
