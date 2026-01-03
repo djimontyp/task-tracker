@@ -28,8 +28,8 @@ export function BotInfoCard() {
           <Bot className="h-6 w-6 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm">{BOT_NAME}</p>
-          <p className="text-sm text-muted-foreground">{BOT_USERNAME}</p>
+          <p className="font-medium text-sm truncate">{BOT_NAME}</p>
+          <p className="text-sm text-muted-foreground truncate">{BOT_USERNAME}</p>
         </div>
         <Button
           variant="ghost"
