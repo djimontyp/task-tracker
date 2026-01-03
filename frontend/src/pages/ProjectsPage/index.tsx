@@ -87,9 +87,7 @@ const ProjectsPage = () => {
       setFormOpen(false)
       setSelectedProject(undefined)
     },
-    onError: (error: Error) => {
-      toast.error(error.message || tCommon('toast.error.createFailed', { entity: tCommon('toast.entities.project') }))
-    },
+    // onError removed — form handles errors now
   })
 
   const updateMutation = useMutation({
@@ -102,9 +100,7 @@ const ProjectsPage = () => {
       setFormOpen(false)
       setSelectedProject(undefined)
     },
-    onError: (error: Error) => {
-      toast.error(error.message || tCommon('toast.error.updateFailed', { entity: tCommon('toast.entities.project') }))
-    },
+    // onError removed — form handles errors now
   })
 
   const deleteMutation = useMutation({
@@ -135,11 +131,11 @@ const ProjectsPage = () => {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSubmit = (data: any) => {
+  const handleSubmit = async (data: any) => {
     if (selectedProject) {
-      updateMutation.mutate({ id: selectedProject.id, data })
+      await updateMutation.mutateAsync({ id: selectedProject.id, data })
     } else {
-      createMutation.mutate(data)
+      await createMutation.mutateAsync(data)
     }
   }
 
