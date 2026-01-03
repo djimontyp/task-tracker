@@ -82,6 +82,17 @@
     --semantic-info: var(--color-blue);
 
     /* ═══════════════════════════════════════════════════════════════
+       CARD TYPOGRAPHY COLORS - WCAG AA Compliant
+       Based on Material Design 3 contrast principles
+       All values tested against white card background (#FFFFFF)
+       ═══════════════════════════════════════════════════════════════ */
+    --card-title: var(--foreground);         /* 19.4:1 - Primary heading */
+    --card-body: 220 12% 26%;                /* 10.5:1 - Body text, APCA Lc~88 */
+    --card-label: 220 8% 38%;                /* 6.5:1  - Field labels (uppercase) */
+    --card-value: 220 14% 20%;               /* 13.4:1 - Data values (emphasis) */
+    --card-muted: 220 6% 42%;                /* 5.5:1  - Secondary info, min 14px */
+
+    /* ═══════════════════════════════════════════════════════════════
        SHADOWS & EFFECTS
        ═══════════════════════════════════════════════════════════════ */
     --shadow-color: 222.2 47.4% 11.2%;
@@ -167,6 +178,16 @@
     --sidebar-active-indicator: 172 66% 40%;  /* Teal bar for active nav item */
 
     /* Semantic colors inherit from base (defined above) */
+
+    /* ═══════════════════════════════════════════════════════════════
+       CARD TYPOGRAPHY COLORS - Dark Mode (WCAG AA Compliant)
+       All values tested against dark card background (#0D0B09)
+       ═══════════════════════════════════════════════════════════════ */
+    --card-title: var(--foreground);         /* 18.5:1 - Primary heading */
+    --card-body: 220 6% 82%;                 /* 12.5:1 - Body text, APCA Lc~90 */
+    --card-label: 220 5% 72%;                /* 8.8:1  - Field labels */
+    --card-value: 220 6% 90%;                /* 15.8:1 - Data values (emphasis) */
+    --card-muted: 220 5% 68%;                /* 7.6:1  - Secondary info, min 14px */
 
     /* ═══════════════════════════════════════════════════════════════
        SHADOWS & EFFECTS - Dark Mode
