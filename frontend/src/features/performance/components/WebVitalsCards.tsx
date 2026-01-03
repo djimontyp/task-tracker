@@ -27,7 +27,7 @@ export const WebVitalsCards = ({ vitals }: WebVitalsCardsProps) => {
         const Icon = METRIC_ICONS[name];
 
         return (
-          <Card key={name} className="hover:shadow-lg transition-shadow">
+          <Card key={name} className="card-interactive">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
