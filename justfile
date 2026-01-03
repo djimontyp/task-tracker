@@ -450,3 +450,44 @@ wifi:
         echo "📱 Access from other devices:"
         echo "   http://$(ipconfig getifaddr en0 || echo 'N/A')"
     fi
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PROJECT GENERATION
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Generate project from YAML fixture
+[group: 'Project Generation']
+generate-project FIXTURE OUTPUT=".":
+    @echo "🚀 Generating project from fixture..."
+    uv run python scripts/project-generator/generator.py {{FIXTURE}} {{OUTPUT}}
+
+# Generate FeodalMe project
+[group: 'Project Generation']
+generate-feudalme OUTPUT="../":
+    @echo "🏰 Generating FeodalMe project..."
+    uv run python scripts/project-generator/generator.py scripts/project-generator/fixtures/feudalme.yaml {{OUTPUT}}
+    @echo ""
+    @echo "✅ FeodalMe project created!"
+    @echo "📂 Location: {{OUTPUT}}/feudalme"
+
+# List available fixtures
+[group: 'Project Generation']
+list-fixtures:
+    @echo "📋 Available project fixtures:"
+    @ls -1 scripts/project-generator/fixtures/*.yaml | xargs basename -s .yaml
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATABASE PROJECTS SEED
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Seed FeodalMe project into database
+[group: 'Database']
+db-seed-feudalme:
+    @echo "🏰 Seeding FeodalMe project..."
+    cd backend && uv run python scripts/seed_feudalme_project.py
+
+# Delete FeodalMe project from database
+[group: 'Database']
+db-delete-feudalme:
+    @echo "🗑️  Deleting FeodalMe project..."
+    cd backend && uv run python scripts/seed_feudalme_project.py --delete
