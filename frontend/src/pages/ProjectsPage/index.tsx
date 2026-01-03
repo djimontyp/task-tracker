@@ -217,7 +217,7 @@ const ProjectsPage = () => {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-4 md:gap-6">
           {filteredProjects.map((project) => (
             <ProjectCard
               key={project.id}
