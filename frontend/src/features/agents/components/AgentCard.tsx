@@ -1,38 +1,88 @@
+import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Card, CardContent, Button, Badge } from '@/shared/ui'
+import { Card, CardContent, Button, Badge, Spinner } from '@/shared/ui'
+import { cn } from '@/shared/lib'
 import { AgentConfig } from '@/features/agents/types'
-import { Pencil, Trash2, Settings, TestTube2, Copy } from 'lucide-react'
+import { Pencil, Trash2, Settings, TestTube2, Copy, AlertCircle, RefreshCw } from 'lucide-react'
 
 interface AgentCardProps {
   agent: AgentConfig
+  className?: string
   onEdit: (agent: AgentConfig) => void
   onCopy: (agent: AgentConfig) => void
   onDelete: (id: string) => void
   onManageTasks: (agent: AgentConfig) => void
   onTest: (agent: AgentConfig) => void
   isDeleting?: boolean
+  isLoading?: boolean
+  isError?: boolean
+  error?: Error
+  onRetry?: () => void
 }
 
-const AgentCard = ({
-  agent,
-  onEdit,
-  onCopy,
-  onDelete,
-  onManageTasks,
-  onTest,
-  isDeleting = false,
-}: AgentCardProps) => {
-  const { t } = useTranslation('agents')
+const AgentCard = React.forwardRef<HTMLDivElement, AgentCardProps>(
+  (
+    {
+      agent,
+      className,
+      onEdit,
+      onCopy,
+      onDelete,
+      onManageTasks,
+      onTest,
+      isDeleting = false,
+      isLoading = false,
+      isError = false,
+      error,
+      onRetry,
+    },
+    ref
+  ) => {
+    const { t } = useTranslation('agents')
 
-  return (
-    <Card className="hover:shadow-lg transition-shadow">
+    if (isError) {
+      return (
+        <Card ref={ref}>
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center justify-center gap-4 text-center">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+              <div className="space-y-2">
+                <p className="text-sm font-medium">{t('card.error.title', 'Failed to load')}</p>
+                {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
+              </div>
+              {onRetry && (
+                <Button variant="outline" size="sm" onClick={onRetry}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  {t('card.error.retry', 'Retry')}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )
+    }
+
+    if (isLoading) {
+      return (
+        <Card ref={ref}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-center">
+              <Spinner className="h-6 w-6" />
+            </div>
+          </CardContent>
+        </Card>
+      )
+    }
+
+    return (
+      <Card ref={ref} className={cn('card-interactive', className)}>
       <CardContent className="pt-6">
         <div className="space-y-4">
           <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg">{agent.name}</h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg truncate">{agent.name}</h3>
               {agent.description && (
-                <p className="text-sm text-muted-foreground mt-2">{agent.description}</p>
+                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{agent.description}</p>
               )}
             </div>
             <div className="flex gap-2">
@@ -81,12 +131,12 @@ const AgentCard = ({
           </div>
 
           <div className="space-y-2 text-sm">
-            <div>
+            <div className="min-w-0">
               <span className="text-muted-foreground">{t('card.fields.model')}</span>
-              <p className="font-mono text-xs">{agent.model_name}</p>
+              <p className="font-mono text-xs truncate">{agent.model_name}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {agent.temperature !== undefined && (
                 <div>
                   <span className="text-muted-foreground">{t('card.fields.temperature')}</span>
@@ -117,6 +167,8 @@ const AgentCard = ({
       </CardContent>
     </Card>
   )
-}
+})
+
+AgentCard.displayName = 'AgentCard'
 
 export { AgentCard }

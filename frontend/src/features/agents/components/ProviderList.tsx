@@ -164,7 +164,7 @@ const ProviderList = () => {
           </div>
         ) : (
           providers?.map((provider) => (
-            <Card key={provider.id} className="hover:shadow-lg transition-shadow">
+            <Card key={provider.id} className="card-interactive">
               <CardContent className="pt-6">
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">

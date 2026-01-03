@@ -117,7 +117,7 @@ const AgentTasksPage = () => {
           </Card>
         ) : (
           tasks?.map((task) => (
-            <Card key={task.id} className="hover:shadow-lg transition-shadow">
+            <Card key={task.id} className="card-interactive">
               <CardContent className="pt-6">
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
