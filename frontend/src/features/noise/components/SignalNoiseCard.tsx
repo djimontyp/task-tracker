@@ -27,6 +27,8 @@ import {
   Check,
   X,
   MoreHorizontal,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -57,6 +59,9 @@ interface BaseCardProps {
   expanded?: boolean;
   onToggleExpand?: (id: string) => void;
   className?: string;
+  isError?: boolean;
+  error?: Error;
+  onRetry?: () => void;
 }
 
 /**
@@ -157,10 +162,36 @@ export const SignalCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
       expanded = false,
       onToggleExpand,
       className,
+      isError = false,
+      error,
+      onRetry,
     },
     ref
   ) => {
     const { t } = useTranslation('messages');
+
+    if (isError) {
+      return (
+        <Card ref={ref} className={cn('p-4', className)}>
+          <CardContent className="p-0">
+            <div className="flex flex-col items-center justify-center gap-4 text-center py-6">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+              <div className="space-y-2">
+                <p className="text-sm font-medium">{t('noise.card.error.title', 'Failed to load')}</p>
+                {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
+              </div>
+              {onRetry && (
+                <Button variant="outline" size="sm" onClick={onRetry}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  {t('noise.card.error.retry', 'Retry')}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
     const isExpandable = message.content.length > 200;
     const displayContent = expanded
       ? message.content
@@ -216,7 +247,7 @@ export const SignalCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                   variant="ghost"
                   size="sm"
                   onClick={() => onToggleExpand(message.id)}
-                  className="h-8 text-xs"
+                  className="h-11 text-xs"
                 >
                   {expanded ? (
                     <>
@@ -239,7 +270,7 @@ export const SignalCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                   variant="ghost"
                   size="sm"
                   onClick={() => onReject(message.id)}
-                  className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                  className="h-11 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
                   <X className="h-3 w-3 mr-2" />
                   {t('noise.card.reject')}
@@ -250,7 +281,7 @@ export const SignalCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                   variant="default"
                   size="sm"
                   onClick={() => onApprove(message.id)}
-                  className="h-8 text-xs"
+                  className="h-11 text-xs"
                 >
                   <Check className="h-3 w-3 mr-2" />
                   {t('noise.card.approve')}
@@ -280,10 +311,36 @@ export const NoiseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
       expanded = false,
       onToggleExpand,
       className,
+      isError = false,
+      error,
+      onRetry,
     },
     ref
   ) => {
     const { t } = useTranslation('messages');
+
+    if (isError) {
+      return (
+        <Card ref={ref} className={cn('p-4', className)}>
+          <CardContent className="p-0">
+            <div className="flex flex-col items-center justify-center gap-4 text-center py-6">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+              <div className="space-y-2">
+                <p className="text-sm font-medium">{t('noise.card.error.title', 'Failed to load')}</p>
+                {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
+              </div>
+              {onRetry && (
+                <Button variant="outline" size="sm" onClick={onRetry}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  {t('noise.card.error.retry', 'Retry')}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
     const isExpandable = message.content.length > 150;
     const displayContent = expanded
       ? message.content
@@ -327,7 +384,7 @@ export const NoiseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                   variant="ghost"
                   size="sm"
                   onClick={() => onToggleExpand(message.id)}
-                  className="h-8 text-xs text-muted-foreground"
+                  className="h-11 text-xs text-muted-foreground"
                 >
                   {expanded ? (
                     <>
@@ -350,8 +407,8 @@ export const NoiseCard = React.forwardRef<HTMLDivElement, BaseCardProps>(
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
+                    size="icon"
+                    className="h-11 w-11"
                     aria-label={t('noise.card.moreActions')}
                   >
                     <MoreHorizontal className="h-4 w-4" />

@@ -1,16 +1,46 @@
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
+import { Button } from '@/shared/ui/button'
+import { AlertCircle, RefreshCw } from 'lucide-react'
 import type { TaskMetrics } from '../types'
 
 interface HealthCardsProps {
   metrics: TaskMetrics[]
+  isError?: boolean
+  error?: Error
+  onRetry?: () => void
 }
 
-export const HealthCards = ({ metrics }: HealthCardsProps) => {
+export const HealthCards = ({ metrics, isError = false, error, onRetry }: HealthCardsProps) => {
+  const { t } = useTranslation('monitoring')
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center justify-center gap-4 text-center">
+            <AlertCircle className="h-8 w-8 text-destructive" />
+            <div className="space-y-2">
+              <p className="text-sm font-medium">{t('healthCards.error.title', 'Failed to load')}</p>
+              {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
+            </div>
+            {onRetry && (
+              <Button variant="outline" size="sm" onClick={onRetry}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                {t('healthCards.error.retry', 'Retry')}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   if (metrics.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Немає даних про виконання задач
+        {t('healthCards.empty', 'No task execution data')}
       </div>
     )
   }
@@ -18,7 +48,7 @@ export const HealthCards = ({ metrics }: HealthCardsProps) => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {metrics.map((metric) => (
-        <Card key={metric.task_name} className="hover:shadow-lg transition-shadow">
+        <Card key={metric.task_name} className="card-interactive">
           <CardHeader className="pb-4">
             <CardTitle className="text-sm font-medium text-muted-foreground truncate" title={metric.task_name}>
               {formatTaskName(metric.task_name)}
