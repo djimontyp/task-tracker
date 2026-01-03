@@ -13,6 +13,8 @@ These tests capture screenshots of key UI components and pages to detect uninten
 | `dashboard-visual.spec.ts` | Dashboard page with metrics, trends, atoms |
 | `navbar-visual.spec.ts` | Navbar, SearchBar states, responsive menu |
 | `components-visual.spec.ts` | Badges, cards, buttons, empty states |
+| `cards.spec.ts` | CompactCard/ExpandedCard: states, responsive, interactions (17 scenarios) |
+| `searchbar-visual.spec.ts` | Search bar visual states |
 
 ## Coverage
 
