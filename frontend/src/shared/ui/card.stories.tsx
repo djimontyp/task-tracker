@@ -114,7 +114,7 @@ export const WithIconAndBadge: Story = {
 // Clickable card
 export const Clickable: Story = {
   render: () => (
-    <Card className="w-[350px] cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.01]">
+    <Card className="w-[350px] card-interactive">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle>Clickable Card</CardTitle>
@@ -132,7 +132,7 @@ export const Clickable: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Interactive card with hover effects. Use `hover:shadow-lg hover:scale-[1.01]` for subtle feedback.',
+        story: 'Interactive card using `.card-interactive` class. Provides ambient glow with enhanced glow on hover.',
       },
     },
   },
@@ -195,8 +195,8 @@ export const EmptyState: Story = {
 export const WithHoverGlow: Story = {
   render: () => (
     <div className="p-8 bg-background">
-      <p className="text-sm text-muted-foreground mb-4">Hover to see glow effect</p>
-      <Card className="w-[350px] cursor-pointer transition-all duration-300 hover:shadow-glow-hover hover:scale-[1.01]">
+      <p className="text-sm text-muted-foreground mb-4">Hover to see glow effect (uses .card-interactive)</p>
+      <Card className="w-[350px] card-interactive">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -220,7 +220,7 @@ export const WithHoverGlow: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Card with subtle glow effect on hover. Used for important/featured items that need visual emphasis.',
+        story: 'Card with glow effect using `.card-interactive` class. Standard pattern for clickable cards.',
       },
     },
   },

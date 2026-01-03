@@ -270,6 +270,24 @@
    * shadcn/ui components use focus-visible:ring-2 focus-visible:ring-ring.
    * No global outline - prevents double focus indicators.
    */
+
+  /**
+   * Interactive Card Pattern
+   *
+   * Use for cards with click handlers. Applies:
+   * - Ambient glow shadow at rest
+   * - Enhanced glow on hover
+   * - Smooth transition
+   * - Pointer cursor
+   *
+   * @example
+   * <Card className="card-interactive" onClick={handleClick}>
+   *   ...
+   * </Card>
+   */
+  .card-interactive {
+    @apply shadow-glow hover:shadow-glow-hover transition-all duration-300 cursor-pointer;
+  }
 }
 
 /* Logo animations - 2 full rotations (720°) */
