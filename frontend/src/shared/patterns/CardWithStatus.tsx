@@ -128,9 +128,7 @@ export function CardWithStatus({
       className={cn(
         'flex flex-col h-full',
         interactive && [
-          'cursor-pointer',
-          'transition-all duration-200',
-          'hover:shadow-lg hover:scale-[1.01]',
+          'card-interactive',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         ],
         className
@@ -148,7 +146,7 @@ export function CardWithStatus({
         {/* Title and status */}
         <div className="flex-1 min-w-0">
           <div className={cn('flex items-center flex-wrap', gap.sm, 'mb-2')}>
-            <h3 className="font-semibold text-lg leading-none">{title}</h3>
+            <h3 className="font-semibold text-lg leading-none truncate">{title}</h3>
             <Badge variant="outline" className={config.badgeClass}>
               <StatusIcon className="h-3.5 w-3.5" />
               {label}
