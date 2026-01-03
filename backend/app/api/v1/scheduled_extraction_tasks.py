@@ -20,6 +20,7 @@ from app.models import (
     ScheduledExtractionTaskPublic,
     ScheduledExtractionTaskUpdate,
 )
+from app.services.extraction_scheduler_service import extraction_scheduler_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/scheduled-extraction-tasks", tags=["scheduled-extraction-tasks"])
@@ -72,6 +73,14 @@ async def create_task(
     await session.refresh(task)
 
     logger.info(f"Created scheduled extraction task '{task.name}' with ID {task.id}")
+
+    # Register with scheduler if active
+    if task.is_active:
+        try:
+            await extraction_scheduler_service.schedule_task(task)
+        except Exception as e:
+            logger.warning(f"Failed to schedule task {task.id}: {e}")
+
     return ScheduledExtractionTaskPublic.model_validate(task)
 
 
@@ -204,6 +213,10 @@ async def update_task(
             detail=f"Scheduled extraction task with ID '{task_id}' not found",
         )
 
+    # Track if is_active or cron_schedule changed
+    was_active = task.is_active
+    old_cron = task.cron_schedule
+
     # If updating agent_id, verify agent exists
     if update_data.agent_id is not None:
         agent_result = await session.execute(
@@ -225,6 +238,24 @@ async def update_task(
     await session.refresh(task)
 
     logger.info(f"Updated scheduled extraction task '{task.name}' (ID: {task.id})")
+
+    # Update scheduler based on changes
+    try:
+        schedule_changed = (
+            task.cron_schedule != old_cron
+            or task.is_active != was_active
+            or "cron_schedule" in update_dict
+            or "is_active" in update_dict
+        )
+
+        if schedule_changed:
+            if task.is_active:
+                await extraction_scheduler_service.schedule_task(task)
+            else:
+                await extraction_scheduler_service.unschedule_task(task.id)
+    except Exception as e:
+        logger.warning(f"Failed to update schedule for task {task.id}: {e}")
+
     return ScheduledExtractionTaskPublic.model_validate(task)
 
 
@@ -259,7 +290,45 @@ async def delete_task(
             detail=f"Scheduled extraction task with ID '{task_id}' not found",
         )
 
+    # Remove from scheduler first
+    try:
+        await extraction_scheduler_service.unschedule_task(task_id)
+    except Exception as e:
+        logger.warning(f"Failed to unschedule task {task_id}: {e}")
+
     await session.delete(task)
     await session.commit()
 
     logger.info(f"Deleted scheduled extraction task (ID: {task_id})")
+
+
+@router.post(
+    "/{task_id}/trigger",
+    summary="Manually trigger scheduled extraction task",
+    description="Manually trigger a scheduled extraction task to run immediately.",
+)
+async def trigger_task(
+    task_id: UUID,
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    """Manually trigger a scheduled extraction task.
+
+    Args:
+        task_id: Task UUID
+        session: Database session
+
+    Returns:
+        Trigger result with status
+
+    Raises:
+        HTTPException 404: Task not found
+    """
+    result = await extraction_scheduler_service.trigger_task(session, task_id)
+
+    if result.get("status") == "error" and result.get("reason") == "task_not_found":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Scheduled extraction task with ID '{task_id}' not found",
+        )
+
+    return result

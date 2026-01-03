@@ -1,6 +1,11 @@
 import uuid
 from datetime import datetime, timedelta
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from app.models.scheduled_extraction_task import ScheduledExtractionTask
 from uuid import UUID
 
 from core.taskiq_config import nats_broker
@@ -168,7 +173,7 @@ async def extract_knowledge_from_messages_task(
             else:
                 logger.warning(f"ProjectConfig {project_config_id} not found, proceeding without project context")
 
-        stmt = select(Message).where(Message.id.in_(message_ids))  # type: ignore[union-attr]
+        stmt = select(Message).where(Message.id.in_(message_ids))  # type: ignore[attr-defined]
         result = await db.execute(stmt)
         messages = list(result.scalars().all())
 
@@ -348,7 +353,7 @@ async def scheduled_knowledge_extraction_task() -> dict[str, Any]:
             count_stmt = (
                 select(func.count())
                 .select_from(Message)
-                .where(Message.topic_id.is_(None), Message.sent_at >= cutoff_time)  # type: ignore[union-attr]
+                .where(Message.topic_id.is_(None), Message.sent_at >= cutoff_time)  # type: ignore[arg-type,union-attr]
             )
             result = await db.execute(count_stmt)
             unprocessed_count = result.scalar() or 0
@@ -359,7 +364,7 @@ async def scheduled_knowledge_extraction_task() -> dict[str, Any]:
 
             agent_config_stmt = (
                 select(AgentConfig)
-                .where(AgentConfig.is_active == True, AgentConfig.name == "knowledge_extractor")  # noqa: E712
+                .where(AgentConfig.is_active == True, AgentConfig.name == "knowledge_extractor")  # type: ignore[arg-type]  # noqa: E712
                 .limit(1)
             )
             agent_config_result = await db.execute(agent_config_stmt)
@@ -370,7 +375,7 @@ async def scheduled_knowledge_extraction_task() -> dict[str, Any]:
                 return {"status": "error", "reason": "no_agent", "count": 0}
 
             messages_stmt = (
-                select(Message.id)
+                select(Message.id)  # type: ignore[call-overload]
                 .where(Message.topic_id.is_(None), Message.sent_at >= cutoff_time)  # type: ignore[union-attr]
                 .order_by(Message.sent_at)
                 .limit(100)
@@ -402,28 +407,255 @@ async def scheduled_knowledge_extraction_task() -> dict[str, Any]:
 
 
 @nats_broker.task
-async def scheduled_auto_approval_task() -> dict[str, Any]:
+async def scheduled_auto_approval_task(
+    task_id: str | None = None,
+) -> dict[str, Any]:
     """
-    Scheduled task for applying auto-approval rules to pending versions.
+    Scheduled task for applying auto-approval rules to pending atoms.
 
-    Currently a placeholder as TopicVersion/AtomVersion models don't yet have
-    confidence/similarity scores. This will be implemented when versioning
-    system adds LLM confidence scoring.
+    Processes atoms that:
+    - Have user_approved=False (pending review)
+    - Have confidence >= threshold (from ScheduledExtractionTask config)
+    - Match allowed atom types (if specified)
 
-    This task is designed to be called by the scheduler service on a cron schedule
-    (e.g., hourly).
+    Args:
+        task_id: Optional ScheduledExtractionTask UUID. If None, processes
+                 all active extraction tasks with auto_approve_enabled=True.
 
     Returns:
-        Dictionary with approval results and statistics
+        Dictionary with approval results.
     """
-    logger.info("🔄 Scheduled auto-approval task started")
+    logger.info("Auto-approval task started")
 
-    logger.info("Auto-approval system pending - awaiting versioning confidence scores")
+    try:
+        async with AsyncSessionLocal() as db:
+            from app.models import Atom
+            from app.models.scheduled_extraction_task import ScheduledExtractionTask
 
-    return {
-        "status": "pending",
-        "reason": "awaiting_confidence_scores",
-        "message": "TopicVersion/AtomVersion models need confidence/similarity fields",
-    }
+            if task_id:
+                task = await db.get(ScheduledExtractionTask, UUID(task_id))
+                if not task:
+                    logger.warning(f"ScheduledExtractionTask {task_id} not found")
+                    return {"status": "error", "reason": "task_not_found", "approved_count": 0}
+                tasks = [task] if task.auto_approve_enabled else []
+            else:
+                stmt = select(ScheduledExtractionTask).where(
+                    ScheduledExtractionTask.is_active == True,  # type: ignore[arg-type]  # noqa: E712
+                    ScheduledExtractionTask.auto_approve_enabled == True,  # type: ignore[arg-type]  # noqa: E712
+                )
+                result = await db.execute(stmt)
+                tasks = list(result.scalars().all())
+
+            if not tasks:
+                logger.info("No extraction tasks with auto-approve enabled")
+                return {"status": "skipped", "reason": "no_auto_approve_tasks", "approved_count": 0}
+
+            total_approved = 0
+            details: list[dict[str, Any]] = []
+
+            for extraction_task in tasks:
+                task_approved = await _process_auto_approval_for_task(db=db, extraction_task=extraction_task)
+                total_approved += task_approved
+                details.append({
+                    "task_id": str(extraction_task.id),
+                    "task_name": extraction_task.name,
+                    "approved_count": task_approved,
+                    "confidence_threshold": extraction_task.confidence_threshold,
+                    "allowed_atom_types": extraction_task.allowed_atom_types,
+                })
+
+            logger.info(f"Auto-approval completed: {total_approved} atoms approved across {len(tasks)} task(s)")
+
+            if total_approved > 0:
+                await websocket_manager.broadcast(
+                    "knowledge",
+                    {"type": "knowledge.auto_approval_completed", "data": {"approved_count": total_approved, "tasks_processed": len(tasks)}},
+                )
+
+            return {"status": "success", "approved_count": total_approved, "tasks_processed": len(tasks), "details": details}
+
+    except Exception as e:
+        logger.error(f"Scheduled auto-approval failed: {e}", exc_info=True)
+        return {"status": "error", "reason": str(e), "approved_count": 0}
 
 
+async def _process_auto_approval_for_task(
+    db: "AsyncSession",
+    extraction_task: "ScheduledExtractionTask",
+) -> int:
+    """
+    Process auto-approval for a single ScheduledExtractionTask.
+
+    Finds atoms matching criteria and marks them as approved.
+
+    Args:
+        db: Database session
+        extraction_task: The extraction task with auto-approve config
+
+    Returns:
+        Number of atoms approved
+    """
+    from app.models import Atom
+
+    threshold = extraction_task.confidence_threshold or 0.8
+    allowed_types = extraction_task.allowed_atom_types
+
+    logger.info(f"Processing auto-approval for task '{extraction_task.name}': threshold={threshold}, allowed_types={allowed_types}")
+
+    query = (
+        select(Atom)
+        .where(
+            Atom.user_approved == False,  # type: ignore[arg-type]  # noqa: E712
+            Atom.archived == False,  # type: ignore[arg-type]  # noqa: E712
+            Atom.confidence.isnot(None),  # type: ignore[union-attr]
+            Atom.confidence >= threshold,  # type: ignore[arg-type, operator]
+        )
+    )
+
+    if allowed_types and len(allowed_types) > 0:
+        query = query.where(Atom.type.in_(allowed_types))  # type: ignore[attr-defined]
+
+    result = await db.execute(query)
+    atoms = list(result.scalars().all())
+
+    if not atoms:
+        logger.info(f"No atoms matching auto-approval criteria for task '{extraction_task.name}'")
+        return 0
+
+    approved_count = 0
+    for atom in atoms:
+        atom.user_approved = True
+        db.add(atom)
+        approved_count += 1
+        if atom.confidence:
+            logger.debug(f"Auto-approved atom '{atom.title}' (type={atom.type}, confidence={atom.confidence:.2f})")
+
+    await db.commit()
+    logger.info(f"Auto-approved {approved_count} atoms for task '{extraction_task.name}'")
+
+    return approved_count
+
+
+
+
+@nats_broker.task
+async def run_scheduled_extraction(scheduled_task_id: str) -> dict[str, Any]:
+    """
+    Execute a scheduled extraction task by its ID.
+
+    This task is triggered by the TaskIQ scheduler based on cron expressions
+    defined in ScheduledExtractionTask. It loads the task configuration from DB,
+    finds matching messages, and triggers knowledge extraction.
+
+    Args:
+        scheduled_task_id: UUID of ScheduledExtractionTask as string
+
+    Returns:
+        Dictionary with execution status and statistics
+    """
+    from datetime import UTC
+
+    from app.models.scheduled_extraction_task import ScheduledExtractionTask
+
+    logger.info(f"Running scheduled extraction task: {scheduled_task_id}")
+
+    try:
+        async with AsyncSessionLocal() as db:
+            # Load scheduled task configuration
+            task = await db.get(ScheduledExtractionTask, UUID(scheduled_task_id))
+            if not task:
+                logger.error(f"ScheduledExtractionTask {scheduled_task_id} not found")
+                return {"status": "error", "reason": "task_not_found"}
+
+            if not task.is_active:
+                logger.warning(f"ScheduledExtractionTask {task.name} is inactive, skipping")
+                return {"status": "skipped", "reason": "task_inactive"}
+
+            # Load agent config
+            agent_config = await db.get(AgentConfig, task.agent_id)
+            if not agent_config:
+                logger.error(f"AgentConfig {task.agent_id} not found for task {task.name}")
+                return {"status": "error", "reason": "agent_not_found"}
+
+            if not agent_config.is_active:
+                logger.warning(f"Agent {agent_config.name} is inactive, skipping")
+                return {"status": "skipped", "reason": "agent_inactive"}
+
+            # Build query for unprocessed messages
+            cutoff_time = datetime.now(UTC) - timedelta(hours=task.lookback_hours)
+
+            query = select(Message.id).where(  # type: ignore[call-overload]
+                Message.topic_id.is_(None),  # type: ignore[union-attr]
+                Message.sent_at >= cutoff_time,  
+            )
+
+            # Apply channel filter if specified
+            if task.channel_ids:
+                query = query.where(Message.source_channel_id.in_(task.channel_ids))  # type: ignore[union-attr]
+
+            # Apply minimum score filter if specified
+            if task.min_score is not None:
+                query = query.where(Message.importance_score >= task.min_score)  # type: ignore[operator]
+
+            query = query.order_by(Message.sent_at).limit(100)
+
+            result = await db.execute(query)
+            message_ids = [row[0] for row in result.all()]
+
+            if not message_ids:
+                logger.info(f"No matching messages for task {task.name}, skipping")
+                # Update last_run_at even if no messages
+                task.last_run_at = datetime.now(UTC)
+                await db.commit()
+                return {"status": "skipped", "reason": "no_messages", "task_name": task.name}
+
+            logger.info(f"Found {len(message_ids)} messages for task {task.name}")
+
+            # Update last_run_at
+            task.last_run_at = datetime.now(UTC)
+            await db.commit()
+
+            # Queue extraction task
+            await extract_knowledge_from_messages_task.kiq(
+                message_ids=message_ids,
+                agent_config_id=str(agent_config.id),
+                created_by=f"scheduled:{task.name}",
+            )
+
+            # Broadcast WebSocket event
+            await websocket_manager.broadcast(
+                "scheduler",
+                {
+                    "type": "scheduled_extraction.started",
+                    "data": {
+                        "task_id": str(task.id),
+                        "task_name": task.name,
+                        "message_count": len(message_ids),
+                        "agent_name": agent_config.name,
+                    },
+                },
+            )
+
+            return {
+                "status": "success",
+                "task_id": str(task.id),
+                "task_name": task.name,
+                "message_count": len(message_ids),
+                "agent_name": agent_config.name,
+            }
+
+    except Exception as e:
+        logger.error(f"Scheduled extraction task failed: {e}", exc_info=True)
+
+        await websocket_manager.broadcast(
+            "scheduler",
+            {
+                "type": "scheduled_extraction.failed",
+                "data": {
+                    "task_id": scheduled_task_id,
+                    "error": str(e),
+                },
+            },
+        )
+
+        return {"status": "error", "reason": str(e)}
