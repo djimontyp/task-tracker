@@ -6,6 +6,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, Badge, Button, Separator, Spinner } from '@/shared/ui'
 import { CardContent } from '@/shared/ui/card'
+import { CompactCard, type CompactCardAction } from '@/shared/patterns'
 import { cn } from '@/shared/lib'
 import { Pencil, Trash2, AlertCircle, RefreshCw } from 'lucide-react'
 import type { ProjectConfig } from '../types'
@@ -59,8 +60,56 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
       )
     }
 
+    // Build actions for CompactCard
+    const primaryAction: CompactCardAction | undefined = onEdit
+      ? {
+          label: t('card.actions.edit', 'Edit'),
+          icon: <Pencil className="h-4 w-4" />,
+          onClick: () => onEdit(project),
+        }
+      : undefined
+
+    const secondaryActions: CompactCardAction[] = []
+    if (onDelete) {
+      secondaryActions.push({
+        label: t('card.actions.delete', 'Delete'),
+        icon: <Trash2 className="h-4 w-4" />,
+        onClick: () => onDelete(project.id),
+        variant: 'destructive',
+      })
+    }
+
+    const statusBadge = (
+      <Badge
+        variant="outline"
+        className={
+          project.is_active
+            ? 'bg-semantic-success text-white border-semantic-success'
+            : 'bg-muted text-muted-foreground border-border'
+        }
+      >
+        {project.is_active ? t('status.active', 'Active') : t('status.inactive', 'Inactive')}
+      </Badge>
+    )
+
+    const compactContent = project.description ? (
+      <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
+    ) : null
+
     return (
-      <Card ref={ref} className={cn('p-4 hover:shadow-md transition-shadow', className)}>
+      <>
+        {/* Compact variant - mobile only (hidden on sm and above) */}
+        <CompactCard
+          title={project.name}
+          badge={statusBadge}
+          primaryAction={primaryAction}
+          secondaryActions={secondaryActions.length > 0 ? secondaryActions : undefined}
+          content={compactContent}
+          className={className}
+        />
+
+        {/* Default variant - desktop (hidden below sm) */}
+        <Card ref={ref} className={cn('p-4 hover:shadow-md transition-shadow hidden sm:block', className)}>
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
@@ -231,6 +280,7 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
         )}
       </div>
     </Card>
+    </>
   )
 })
 

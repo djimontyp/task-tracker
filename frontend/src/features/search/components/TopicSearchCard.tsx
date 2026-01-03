@@ -4,6 +4,7 @@ import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Spinner } from '@/shared/ui'
+import { CompactCard } from '@/shared/patterns'
 import { cn } from '@/shared/lib'
 import { AlertCircle, RefreshCw } from 'lucide-react'
 import type { TopicSearchResult } from '../types'
@@ -69,41 +70,69 @@ export const TopicSearchCard = ({ result, className, isLoading = false, isError 
     navigate(`/topics/${topic.id}`)
   }
 
-  return (
-    <Card
-      className={cn('transition-all hover:shadow-md hover:border-primary/50 cursor-pointer', className)}
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      aria-label={`Topic: ${topic.name}`}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          handleClick()
-        }
-      }}
+  const topicBadge = (
+    <div
+      className="w-8 h-8 flex items-center justify-center rounded-md flex-shrink-0"
+      style={{ backgroundColor: topic.color || '#e5e7eb' }}
     >
-      <CardContent className="p-4">
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-lg" style={{ backgroundColor: topic.color || '#e5e7eb' }}>
-            {renderIcon(topic.icon)}
-          </div>
+      {renderIcon(topic.icon)}
+    </div>
+  )
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <h3 className="font-semibold text-base truncate">{topic.name}</h3>
-              <Badge variant="outline" className="text-xs">
-                {formatSimilarity(similarity_score)} match
-              </Badge>
+  const compactContent = topic.description ? (
+    <p className="text-sm text-muted-foreground line-clamp-2">
+      {topic.description}
+    </p>
+  ) : null
+
+  return (
+    <>
+      {/* Compact variant - mobile only (hidden on sm and above) */}
+      <CompactCard
+        title={topic.name}
+        badge={topicBadge}
+        content={compactContent}
+        onClick={handleClick}
+        aria-label={`Topic: ${topic.name}`}
+        className={className}
+      />
+
+      {/* Default variant - desktop (hidden below sm) */}
+      <Card
+        className={cn('hidden sm:block transition-all hover:shadow-md hover:border-primary/50 cursor-pointer', className)}
+        onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        aria-label={`Topic: ${topic.name}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            handleClick()
+          }
+        }}
+      >
+        <CardContent className="p-4">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-lg" style={{ backgroundColor: topic.color || '#e5e7eb' }}>
+              {renderIcon(topic.icon)}
             </div>
-            {topic.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {topic.description}
-              </p>
-            )}
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <h3 className="font-semibold text-base truncate">{topic.name}</h3>
+                <Badge variant="outline" className="text-xs">
+                  {formatSimilarity(similarity_score)} match
+                </Badge>
+              </div>
+              {topic.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {topic.description}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </>
   )
 }
