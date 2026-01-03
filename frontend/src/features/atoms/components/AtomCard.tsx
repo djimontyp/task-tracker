@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Card, Badge, Button } from '@/shared/ui'
+import { Card, CardContent, Badge, Button } from '@/shared/ui'
+import { cn } from '@/shared/lib'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import {
   Clock,
@@ -10,7 +11,8 @@ import {
   HelpCircle,
   Lightbulb,
   Cog,
-  FileText
+  FileText,
+  RefreshCw
 } from 'lucide-react'
 import { VersionHistoryList } from '@/features/knowledge/components/VersionHistoryList'
 import { LanguageMismatchBadge } from '@/shared/components/LanguageMismatchBadge'
@@ -20,7 +22,11 @@ import type { Atom, AtomType } from '../types'
 
 interface AtomCardProps {
   atom: Atom
+  className?: string
   onClick?: () => void
+  isError?: boolean
+  error?: Error
+  onRetry?: () => void
 }
 
 const atomTypeIcons: Record<AtomType, React.ComponentType<{ className?: string }>> = {
@@ -33,10 +39,33 @@ const atomTypeIcons: Record<AtomType, React.ComponentType<{ className?: string }
   requirement: FileText,
 }
 
-const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
-  const { t } = useTranslation('atoms')
-  const { projectLanguage } = useProjectLanguage()
-  const [showVersionHistory, setShowVersionHistory] = useState(false)
+const AtomCard = React.forwardRef<HTMLDivElement, AtomCardProps>(
+  ({ atom, className, onClick, isError, error, onRetry }, ref) => {
+    const { t } = useTranslation('atoms')
+    const { projectLanguage } = useProjectLanguage()
+    const [showVersionHistory, setShowVersionHistory] = useState(false)
+
+    if (isError) {
+      return (
+        <Card ref={ref} className="p-4">
+          <CardContent className="p-0">
+            <div className="flex flex-col items-center justify-center gap-4 text-center py-6">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+              <div className="space-y-2">
+                <p className="text-sm font-medium">{t('card.error.title', 'Failed to load')}</p>
+                {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
+              </div>
+              {onRetry && (
+                <Button variant="outline" size="sm" onClick={onRetry}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  {t('card.error.retry', 'Retry')}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )
+    }
 
   // Map atom types to translation keys where available, fallback to capitalized type
   const getTypeLabel = (type: AtomType): string => {
@@ -65,7 +94,13 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
 
   return (
     <Card
-      className={`p-4 transition-all duration-300 ${glowClass} ${onClick ? 'cursor-pointer' : ''}`}
+      ref={ref}
+      className={cn(
+        'p-4 transition-all duration-300',
+        glowClass,
+        onClick && 'cursor-pointer',
+        className
+      )}
       onClick={onClick}
     >
       <div className="space-y-4">
@@ -113,7 +148,7 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs"
+              className="h-11 text-xs"
               onClick={(e) => {
                 e.stopPropagation()
                 setShowVersionHistory(true)
@@ -144,6 +179,8 @@ const AtomCard: React.FC<AtomCardProps> = ({ atom, onClick }) => {
       </Dialog>
     </Card>
   )
-}
+})
+
+AtomCard.displayName = 'AtomCard'
 
 export { AtomCard }
