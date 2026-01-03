@@ -3,37 +3,76 @@
  */
 
 import React from 'react'
-import { Card, Badge, Button, Separator } from '@/shared/ui'
-import { Pencil, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { Card, Badge, Button, Separator, Spinner } from '@/shared/ui'
+import { CardContent } from '@/shared/ui/card'
+import { cn } from '@/shared/lib'
+import { Pencil, Trash2, AlertCircle, RefreshCw } from 'lucide-react'
 import type { ProjectConfig } from '../types'
 
 interface ProjectCardProps {
   project: ProjectConfig
+  className?: string
   onEdit?: (project: ProjectConfig) => void
   onDelete?: (projectId: string) => void
   isLoading?: boolean
+  isError?: boolean
+  error?: Error
+  onRetry?: () => void
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({
-  project,
-  onEdit,
-  onDelete,
-  isLoading,
-}) => {
-  return (
-    <Card className="p-4 hover:shadow-md transition-shadow">
+export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
+  ({ project, className, onEdit, onDelete, isLoading, isError, error, onRetry }, ref) => {
+    const { t } = useTranslation('projects')
+
+    if (isError) {
+      return (
+        <Card ref={ref}>
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center justify-center gap-4 text-center">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+              <div className="space-y-2">
+                <p className="text-sm font-medium">{t('card.error.title', 'Failed to load')}</p>
+                {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
+              </div>
+              {onRetry && (
+                <Button variant="outline" size="sm" onClick={onRetry}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  {t('card.error.retry', 'Retry')}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )
+    }
+
+    if (isLoading) {
+      return (
+        <Card ref={ref}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-center">
+              <Spinner className="h-6 w-6" />
+            </div>
+          </CardContent>
+        </Card>
+      )
+    }
+
+    return (
+      <Card ref={ref} className={cn('p-4 hover:shadow-md transition-shadow', className)}>
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-lg font-semibold">{project.name}</h3>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2 min-w-0">
+              <h3 className="text-lg font-semibold truncate">{project.name}</h3>
               <Badge variant="outline" className={project.is_active ? 'bg-semantic-success text-white border-semantic-success' : 'bg-muted text-muted-foreground border-border'}>
                 {project.is_active ? 'Active' : 'Inactive'}
               </Badge>
             </div>
             {project.description && (
-              <p className="text-sm text-muted-foreground">{project.description}</p>
+              <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
             )}
           </div>
         </div>
@@ -91,9 +130,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             <div className="text-sm font-medium">Glossary</div>
             <div className="space-y-2 text-xs text-muted-foreground">
               {Object.entries(project.glossary).map(([term, definition]) => (
-                <div key={term} className="flex gap-2">
-                  <span className="font-medium text-foreground">{term}:</span>
-                  <span>{definition}</span>
+                <div key={term} className="flex gap-2 min-w-0">
+                  <span className="font-medium text-foreground flex-shrink-0">{term}:</span>
+                  <span className="line-clamp-1">{definition}</span>
                 </div>
               ))}
             </div>
@@ -193,4 +232,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       </div>
     </Card>
   )
-}
+})
+
+ProjectCard.displayName = 'ProjectCard'
