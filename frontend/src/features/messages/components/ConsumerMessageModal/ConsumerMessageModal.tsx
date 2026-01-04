@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,7 @@ import { formatFullDate } from '@/shared/utils/date'
 import { API_ENDPOINTS } from '@/shared/config/api'
 
 export function ConsumerMessageModal({ messageId, onClose }: ConsumerMessageModalProps) {
+  const { t } = useTranslation('messages')
   const [isLoading, setIsLoading] = useState(true)
   const [messageData, setMessageData] = useState<ConsumerMessageData | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -51,7 +53,7 @@ export function ConsumerMessageModal({ messageId, onClose }: ConsumerMessageModa
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
         setError(errorMessage)
-        toast.error('Failed to load message details', {
+        toast.error(t('consumerModal.toast.loadError'), {
           description: errorMessage,
         })
       } finally {
@@ -60,6 +62,7 @@ export function ConsumerMessageModal({ messageId, onClose }: ConsumerMessageModa
     }
 
     fetchMessageDetails()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messageId])
 
   useEffect(() => {
@@ -74,22 +77,22 @@ export function ConsumerMessageModal({ messageId, onClose }: ConsumerMessageModa
   }, [onClose])
 
   const handleArchive = () => {
-    toast.info('Archive functionality will be implemented in a future task')
+    toast.info(t('consumerModal.toast.archiveNotImplemented'))
   }
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] md:max-w-2xl lg:max-w-3xl flex flex-col p-0" aria-describedby="consumer-message-description">
         <DialogHeader className="px-6 pt-6 pb-4 border-b">
-          <DialogTitle className="text-lg font-semibold">Message Details</DialogTitle>
-          <p id="consumer-message-description" className="sr-only">View and read message content with author details and related messages</p>
+          <DialogTitle className="text-lg font-semibold">{t('consumerModal.title')}</DialogTitle>
+          <p id="consumer-message-description" className="sr-only">{t('consumerModal.description')}</p>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {isLoading && (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" role="status" aria-label="Loading">
-                <span className="sr-only">Loading...</span>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" role="status" aria-label={t('consumerModal.loading')}>
+                <span className="sr-only">{t('consumerModal.loading')}</span>
               </div>
             </div>
           )}
@@ -97,11 +100,11 @@ export function ConsumerMessageModal({ messageId, onClose }: ConsumerMessageModa
           {error && !messageData && (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
               <div className="text-center">
-                <h3 className="text-lg font-medium text-foreground mb-2">Failed to load message</h3>
+                <h3 className="text-lg font-medium text-foreground mb-2">{t('consumerModal.error.title')}</h3>
                 <p className="text-sm text-muted-foreground">{error}</p>
               </div>
               <Button onClick={() => window.location.reload()} variant="outline">
-                Retry
+                {t('consumerModal.error.retry')}
               </Button>
             </div>
           )}
@@ -144,14 +147,14 @@ export function ConsumerMessageModal({ messageId, onClose }: ConsumerMessageModa
 
                 <div className="prose prose-sm max-w-none">
                   <p className="whitespace-pre-wrap break-words text-base">
-                    {messageData.message.content || '(Empty message)'}
+                    {messageData.message.content || t('consumerModal.emptyMessage')}
                   </p>
                 </div>
               </Card>
 
               {messageData.relatedMessages && messageData.relatedMessages.length > 0 && (
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-muted-foreground">Related Messages</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground">{t('consumerModal.relatedMessages')}</h3>
                   <div className="space-y-2">
                     {messageData.relatedMessages.map((relatedMsg) => (
                       <Card key={relatedMsg.id} className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
@@ -189,10 +192,10 @@ export function ConsumerMessageModal({ messageId, onClose }: ConsumerMessageModa
             disabled={!messageData}
             className="hidden sm:flex"
           >
-            Archive
+            {t('consumerModal.archive')}
           </Button>
           <Button variant="outline" onClick={onClose} className="ml-auto">
-            Close
+            {t('consumerModal.close')}
           </Button>
         </DialogFooter>
       </DialogContent>

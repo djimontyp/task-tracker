@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { MessageInspectData } from './types'
 
 interface HistoryTabProps {
@@ -5,19 +6,21 @@ interface HistoryTabProps {
 }
 
 export function HistoryTab({ data }: HistoryTabProps) {
+  const { t } = useTranslation('messages')
+
   return (
     <div className="space-y-4 p-4">
       <div className="rounded-lg border border-border bg-muted p-4">
         <h3 className="mb-2 text-sm font-medium text-foreground">
-          Placeholder: Classification History
+          {t('historyTab.placeholder.title')}
         </h3>
         <p className="text-sm text-muted-foreground">
-          This tab will display a timeline of classification changes with diffs.
+          {t('historyTab.placeholder.description')}
         </p>
         <div className="mt-4 space-y-2 text-xs text-muted-foreground">
-          <div>History Events: {data.length}</div>
+          <div>{t('historyTab.historyEvents', { count: data.length })}</div>
           {data.length > 0 && (
-            <div>Last Action: {data[data.length - 1].action}</div>
+            <div>{t('historyTab.lastAction', { action: data[data.length - 1].action })}</div>
           )}
         </div>
       </div>

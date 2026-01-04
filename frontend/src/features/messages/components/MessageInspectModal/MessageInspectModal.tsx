@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ import { toast } from 'sonner'
 import { API_ENDPOINTS } from '@/shared/config/api'
 
 export function MessageInspectModal({ messageId, onClose }: MessageInspectModalProps) {
+  const { t } = useTranslation('messages')
   const [activeTab, setActiveTab] = useState<TabValue>('classification')
   const [isLoading, setIsLoading] = useState(true)
   const [messageData, setMessageData] = useState<MessageInspectData | null>(null)
@@ -39,7 +41,7 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
         setError(errorMessage)
-        toast.error('Failed to load message details', {
+        toast.error(t('inspectModal.toast.loadError'), {
           description: errorMessage,
         })
       } finally {
@@ -48,6 +50,7 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
     }
 
     fetchMessageDetails()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messageId])
 
   useEffect(() => {
@@ -72,7 +75,7 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
   }, [])
 
   const handleReassignTopic = () => {
-    toast.info('Reassign topic functionality will be implemented in a future task')
+    toast.info(t('inspectModal.toast.reassignNotImplemented'))
   }
 
   const formatDate = (dateString: string) => {
@@ -97,7 +100,7 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <DialogTitle className="text-lg font-semibold mb-2">
-                Message Details
+                {t('inspectModal.title')}
               </DialogTitle>
               {messageData && (
                 <div className="space-y-2">
@@ -106,14 +109,14 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
                   </p>
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant={messageData.message.source === 'telegram' ? 'default' : 'secondary'}>
-                      {messageData.message.source === 'telegram' ? 'Telegram' : 'Manual'}
+                      {messageData.message.source === 'telegram' ? t('inspectModal.source.telegram') : t('inspectModal.source.manual')}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
                       {formatDate(messageData.message.created_at)}
                     </span>
                     {messageData.message.telegram_message_id && (
                       <span className="text-xs text-muted-foreground">
-                        ID: {messageData.message.telegram_message_id}
+                        {t('inspectModal.telegramId', { id: messageData.message.telegram_message_id })}
                       </span>
                     )}
                   </div>
@@ -126,8 +129,8 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
         <div className="flex-1 overflow-hidden">
           {isLoading && (
             <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" role="status" aria-label="Loading">
-                <span className="sr-only">Loading...</span>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" role="status" aria-label={t('inspectModal.loading')}>
+                <span className="sr-only">{t('inspectModal.loading')}</span>
               </div>
             </div>
           )}
@@ -135,11 +138,11 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
           {error && !messageData && (
             <div className="flex flex-col items-center justify-center h-full gap-4 p-6">
               <div className="text-center">
-                <h3 className="text-lg font-medium text-foreground mb-2">Failed to load message</h3>
+                <h3 className="text-lg font-medium text-foreground mb-2">{t('inspectModal.error.title')}</h3>
                 <p className="text-sm text-muted-foreground">{error}</p>
               </div>
               <Button onClick={() => window.location.reload()} variant="outline">
-                Retry
+                {t('inspectModal.error.retry')}
               </Button>
             </div>
           )}
@@ -147,9 +150,9 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
           {messageData && (
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabValue)} className="h-full flex flex-col">
               <TabsList className="mx-6">
-                <TabsTrigger value="classification">Classification</TabsTrigger>
-                <TabsTrigger value="atoms">Atoms</TabsTrigger>
-                <TabsTrigger value="history">History</TabsTrigger>
+                <TabsTrigger value="classification">{t('inspectModal.tabs.classification')}</TabsTrigger>
+                <TabsTrigger value="atoms">{t('inspectModal.tabs.atoms')}</TabsTrigger>
+                <TabsTrigger value="history">{t('inspectModal.tabs.history')}</TabsTrigger>
               </TabsList>
 
               <div className="flex-1 overflow-y-auto">
@@ -171,10 +174,10 @@ export function MessageInspectModal({ messageId, onClose }: MessageInspectModalP
 
         <DialogFooter className="px-6 py-4 border-t flex flex-row justify-between items-center">
           <Button variant="secondary" onClick={handleReassignTopic} disabled={!messageData}>
-            Reassign Topic
+            {t('inspectModal.reassignTopic')}
           </Button>
           <Button variant="outline" onClick={onClose}>
-            Close
+            {t('inspectModal.close')}
           </Button>
         </DialogFooter>
       </DialogContent>
