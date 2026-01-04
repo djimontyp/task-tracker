@@ -117,7 +117,9 @@
     "details": "Деталі",
     "noData": "Немає даних",
     "noResults": "Результатів не знайдено",
-    "unknown": "Невідомо"
+    "unknown": "Невідомо",
+    "id": "ID:",
+    "taskPrefix": "TASK-"
   },
   "time": {
     "today": "Сьогодні",
@@ -266,7 +268,11 @@
     "breadcrumb": "Навігація",
     "loading": "Завантаження",
     "more": "Більше",
-    "toggleSidebar": "Перемкнути бічну панель"
+    "toggleSidebar": "Перемкнути бічну панель",
+    "toggle": "Перемкнути",
+    "select": "Вибрати",
+    "filter": "Фільтрувати",
+    "dataTable": "Таблиця даних"
   },
   "command": {
     "menuTitle": "Меню команд",
@@ -312,7 +318,29 @@
     "legend": {
       "less": "Менше",
       "more": "Більше"
+    },
+    "sources": {
+      "telegram": "Telegram",
+      "slack": "Slack",
+      "email": "Email"
+    },
+    "months": {
+      "jan": "Січ",
+      "feb": "Лют",
+      "mar": "Бер",
+      "apr": "Кві",
+      "may": "Тра",
+      "jun": "Чер",
+      "jul": "Лип",
+      "aug": "Сер",
+      "sep": "Вер",
+      "oct": "Жов",
+      "nov": "Лис",
+      "dec": "Гру"
     }
+  },
+  "format": {
+    "hourSuffix": ":00"
   },
   "adminFeatureBadge": {
     "text": "Тільки для адмінів",

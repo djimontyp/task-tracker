@@ -38,6 +38,7 @@
     "approveSelected": "Approve Selected",
     "rejectSelected": "Reject Selected",
     "selectAll": "Select All",
+    "selectAriaLabel": "Select {{title}}",
     "clear": "Clear",
     "selected": "{{count}} selected",
     "cancel": "Cancel"

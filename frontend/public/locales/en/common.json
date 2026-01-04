@@ -114,7 +114,9 @@
     "details": "Details",
     "noData": "No data",
     "noResults": "No results found",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "id": "ID:",
+    "taskPrefix": "TASK-"
   },
   "time": {
     "today": "Today",
@@ -281,7 +283,29 @@
     "legend": {
       "less": "Less",
       "more": "More"
+    },
+    "sources": {
+      "telegram": "Telegram",
+      "slack": "Slack",
+      "email": "Email"
+    },
+    "months": {
+      "jan": "Jan",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Apr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Aug",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Dec"
     }
+  },
+  "format": {
+    "hourSuffix": ":00"
   },
   "adminFeatureBadge": {
     "text": "Admin Only",
@@ -314,7 +338,11 @@
     "breadcrumb": "Breadcrumb",
     "loading": "Loading",
     "more": "More",
-    "toggleSidebar": "Toggle Sidebar"
+    "toggleSidebar": "Toggle Sidebar",
+    "toggle": "Toggle",
+    "select": "Select",
+    "filter": "Filter",
+    "dataTable": "Data table"
   },
   "command": {
     "menuTitle": "Command Menu",
