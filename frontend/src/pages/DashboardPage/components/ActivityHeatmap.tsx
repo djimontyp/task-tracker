@@ -1,44 +1,10 @@
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/shared/ui'
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, Skeleton } from '@/shared/ui'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
 import { format, subDays, eachDayOfInterval, getDay, getMonth } from 'date-fns'
 import { uk, enUS } from 'date-fns/locale'
-
-interface ActivityDay {
-    date: Date
-    count: number
-    level: 0 | 1 | 2 | 3 | 4
-}
-
-// Generate mock data for the last 6 months
-const generateMockData = (): ActivityDay[] => {
-    const today = new Date()
-    const startDate = subDays(today, 180) // Last ~6 months
-    const days = eachDayOfInterval({ start: startDate, end: today })
-
-    return days.map(day => {
-        const rand = Math.random()
-        let count = 0
-        let level: 0 | 1 | 2 | 3 | 4 = 0
-
-        if (rand > 0.8) {
-            count = Math.floor(Math.random() * 50) + 10
-            level = 4
-        } else if (rand > 0.6) {
-            count = Math.floor(Math.random() * 20) + 5
-            level = 3
-        } else if (rand > 0.4) {
-            count = Math.floor(Math.random() * 10) + 1
-            level = 2
-        } else if (rand > 0.2) {
-            count = Math.floor(Math.random() * 5) + 1
-            level = 1
-        }
-
-        return { date: day, count, level }
-    })
-}
+import type { ActivityDay } from '../types'
 
 const getLevelColor = (level: number) => {
     switch (level) {
@@ -56,17 +22,48 @@ const getSundayFirstDayIndex = (date: Date): number => {
     return jsDay // Keep as is: 0=Sun, 1=Mon, ..., 6=Sat
 }
 
+/**
+ * Generate fallback data for the last 6 months when no API data
+ */
+const generateFallbackData = (): ActivityDay[] => {
+    const today = new Date()
+    const startDate = subDays(today, 180)
+    const days = eachDayOfInterval({ start: startDate, end: today })
+
+    return days.map(day => ({
+        date: day,
+        count: 0,
+        level: 0 as const,
+    }))
+}
+
 interface ActivityHeatmapProps {
+    /** Activity data from API */
+    data?: ActivityDay[]
+    /** Loading state */
+    isLoading?: boolean
     /** Compact mode - hides header, smaller cell size */
     compact?: boolean
     /** Embedded mode - removes Card wrapper */
     embedded?: boolean
 }
 
-export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = false, embedded = false }) => {
+export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
+    data: propData,
+    isLoading = false,
+    compact = false,
+    embedded = false,
+}) => {
     const { t, i18n } = useTranslation('dashboard')
-    const data = useMemo(() => generateMockData(), [])
     const dateLocale = i18n.language === 'uk' ? uk : enUS
+
+    // Use provided data or fallback to empty data
+    const data = useMemo(() => {
+        if (propData && propData.length > 0) {
+            return propData
+        }
+        return generateFallbackData()
+    }, [propData])
 
     // Day labels (Monday first - normal order)
     const dayLabels = [
@@ -136,14 +133,22 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
             <CardContent className={compact ? 'px-3 pb-2 pt-6 h-full flex items-center justify-center relative overflow-hidden' : 'flex-1 flex flex-col justify-center'}>
                 {/* Compact specific: Overlay label */}
                 {compact && (
-                    <div className="absolute top-2 left-3 z-10 pointer-events-none max-w-[calc(100%-1.5rem)]">
+                    <div className="absolute top-2 left-3 z-dropdown pointer-events-none max-w-[calc(100%-1.5rem)]">
                         <div className="text-[9px] font-semibold text-muted-foreground tracking-wider opacity-60 truncate">
                             {t('activityHeatmap.title', 'Activity')}
                         </div>
                     </div>
                 )}
 
-                <div className={`flex flex-col ${compact ? '' : 'gap-2 w-full'}`}>
+                {/* Loading skeleton */}
+                {isLoading && (
+                    <div className="w-full h-full flex items-center justify-center">
+                        <Skeleton className={compact ? 'w-full h-16 rounded' : 'w-full h-24 rounded'} />
+                    </div>
+                )}
+
+                {/* Content */}
+                {!isLoading && <div className={`flex flex-col ${compact ? '' : 'gap-2 w-full'}`}>
                     {/* Month labels row - Hide in compact mode to prevent overlap */}
                     {!compact && (
                         <div className="flex h-4 relative mb-1">
@@ -209,12 +214,12 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
                                                             className={`${cellSize} w-full rounded-[1px] transition-colors ${getLevelColor(day.level)} hover:ring-1 hover:ring-foreground/20 cursor-default`}
                                                         />
                                                     </TooltipTrigger>
-                                                    <TooltipContent side="top" align="center" className="z-[10000]">
+                                                    <TooltipContent side="top" align="center" className="z-max">
                                                         <p className="text-xs font-medium">
                                                             {format(day.date, 'd MMM', { locale: dateLocale })}
                                                         </p>
                                                         <p className="text-[10px] text-muted-foreground">
-                                                            <span className="font-bold text-foreground">{day.count}</span> tasks
+                                                            <span className="font-bold text-foreground">{day.count}</span> {t('heatmap.tooltip.tasks', 'tasks')}
                                                         </p>
                                                     </TooltipContent>
                                                 </Tooltip>
@@ -237,7 +242,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
                             <span>{t('heatmap.legend.more')}</span>
                         </div>
                     )}
-                </div>
+                </div>}
             </CardContent>
         </Wrapper>
     )

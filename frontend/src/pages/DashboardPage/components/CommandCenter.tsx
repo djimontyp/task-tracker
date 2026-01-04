@@ -3,18 +3,30 @@ import { ZoomableCard } from '@/shared/ui/zoomable-card'
 import { TrendChart } from './TrendChart'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { useTranslation } from 'react-i18next'
+import type { MessageTrendPoint, ActivityDay } from '../types'
 
 interface CommandCenterProps {
     greeting: string
     subtitle: string
+    trendData?: MessageTrendPoint[]
+    trendLoading?: boolean
+    activityData?: ActivityDay[]
+    activityLoading?: boolean
 }
 
-export const CommandCenter: React.FC<CommandCenterProps> = ({ greeting, subtitle }) => {
+export const CommandCenter: React.FC<CommandCenterProps> = ({
+    greeting,
+    subtitle,
+    trendData,
+    trendLoading,
+    activityData,
+    activityLoading,
+}) => {
     const { t } = useTranslation('dashboard')
     return (
         <Card className="w-full min-h-[160px] flex flex-col md:flex-row overflow-hidden relative mb-8 animate-fade-in-up">
             {/* Left Section: Greeting & Status */}
-            <div className="flex-1 p-6 flex flex-col justify-center relative z-10">
+            <div className="flex-1 p-6 flex flex-col justify-center relative z-dropdown">
                 <div className="mb-6">
                     <h1 className="text-3xl font-bold tracking-tight mb-1">{greeting}</h1>
                     <p className="text-muted-foreground">{subtitle}</p>
@@ -31,8 +43,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ greeting, subtitle
                         <span className="text-lg font-bold text-primary">16</span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-sm font-semibold">Active Signals</span>
-                        <span className="text-xs text-primary">System Status: Optimal</span>
+                        <span className="text-sm font-semibold">{t('commandCenter.activeSignals')}</span>
+                        <span className="text-xs text-primary">{t('commandCenter.systemStatus')}</span>
                     </div>
                 </div>
             </div>
@@ -47,32 +59,32 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ greeting, subtitle
                     <ZoomableCard
                         trigger="click"
                         className="w-full h-full !cursor-pointer hover:bg-transparent"
-                        preview={<TrendChart embedded compact />}
+                        preview={<TrendChart data={trendData} isLoading={trendLoading} embedded compact />}
                         full={
                             <div className="h-[400px] w-full p-6">
-                                <TrendChart />
+                                <TrendChart data={trendData} isLoading={trendLoading} />
                             </div>
                         }
                     />
                 </div>
 
                 {/* Activity Heatmap - Subtle Overlay at bottom right */}
-                <div className="absolute bottom-4 right-4 z-10 bg-background/80 backdrop-blur-sm rounded-md border border-border/50 p-2 shadow-sm transition-transform hover:scale-105 cursor-pointer">
+                <div className="absolute bottom-4 right-4 z-dropdown bg-background/80 backdrop-blur-sm rounded-md border border-border/50 p-2 shadow-sm transition-transform hover:scale-105 cursor-pointer">
                     <ZoomableCard
                         trigger="click"
                         className="cursor-pointer"
                         preview={
                             <>
                                 <div className="flex items-center gap-2 mb-1 px-1">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <div className="w-1.5 h-1.5 rounded-full bg-status-connected animate-pulse" />
                                     <span className="text-[10px] font-medium text-muted-foreground tracking-wider">{t('activityHeatmap.compactTitle')}</span>
                                 </div>
-                                <ActivityHeatmap embedded compact />
+                                <ActivityHeatmap data={activityData} isLoading={activityLoading} embedded compact />
                             </>
                         }
                         full={
                             <div className="h-[400px] w-full p-6 flex flex-col justify-center bg-card">
-                                <ActivityHeatmap />
+                                <ActivityHeatmap data={activityData} isLoading={activityLoading} />
                             </div>
                         }
                     />

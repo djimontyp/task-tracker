@@ -32,6 +32,10 @@ export function DashboardPresenter({
   insights,
   topics,
   focusAtoms,
+  trendData,
+  trendLoading,
+  activityData,
+  activityLoading,
   hasNoData,
   isAnyLoading,
   showOnboarding,
@@ -75,7 +79,14 @@ export function DashboardPresenter({
       )}
 
       {/* Hero Section - Command Center (Unified HUD) */}
-      <CommandCenter greeting={greeting} subtitle={subtitle} />
+      <CommandCenter
+        greeting={greeting}
+        subtitle={subtitle}
+        trendData={trendData}
+        trendLoading={trendLoading}
+        activityData={activityData}
+        activityLoading={activityLoading}
+      />
 
       {/* Row 1: Metrics (3 cards) */}
       <div

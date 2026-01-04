@@ -106,6 +106,9 @@
     "legend": {
       "less": "Less",
       "more": "More"
+    },
+    "tooltip": {
+      "tasks": "tasks"
     }
   },
   "recentActivity": {
@@ -160,5 +163,9 @@
       "requirement": "Requirement",
       "atom": "Atom"
     }
+  },
+  "commandCenter": {
+    "activeSignals": "Active Signals",
+    "systemStatus": "System Status: Optimal"
   }
 }

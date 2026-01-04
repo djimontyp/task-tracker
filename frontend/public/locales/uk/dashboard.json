@@ -106,6 +106,9 @@
     "legend": {
       "less": "Менше",
       "more": "Більше"
+    },
+    "tooltip": {
+      "tasks": "задач"
     }
   },
   "recentActivity": {
@@ -160,5 +163,9 @@
       "requirement": "Вимога",
       "atom": "Атом"
     }
+  },
+  "commandCenter": {
+    "activeSignals": "Активні сигнали",
+    "systemStatus": "Статус системи: Оптимальний"
   }
 }
