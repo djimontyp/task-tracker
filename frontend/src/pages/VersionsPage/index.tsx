@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Input, Button, Badge, Spinner } from '@/shared/ui'
 import { Card } from '@/shared/components'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
@@ -32,6 +33,7 @@ type UnifiedVersion = {
 }
 
 const VersionsPage = () => {
+  const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
   const queryClient = useQueryClient()
 
@@ -159,11 +161,11 @@ const VersionsPage = () => {
   const getStatusBadge = (status: VersionStatus) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline" className="bg-status-pending/10 text-status-pending border-status-pending/30">Pending</Badge>
+        return <Badge variant="outline" className="bg-status-pending/10 text-status-pending border-status-pending/30">{t('common:status.pending')}</Badge>
       case 'approved':
-        return <Badge variant="outline" className="bg-status-connected/10 text-status-connected border-status-connected/30">Approved</Badge>
+        return <Badge variant="outline" className="bg-status-connected/10 text-status-connected border-status-connected/30">{t('common:status.approved')}</Badge>
       case 'rejected':
-        return <Badge variant="outline" className="bg-status-error/10 text-status-error border-status-error/30">Rejected</Badge>
+        return <Badge variant="outline" className="bg-status-error/10 text-status-error border-status-error/30">{t('common:status.rejected')}</Badge>
     }
   }
 
