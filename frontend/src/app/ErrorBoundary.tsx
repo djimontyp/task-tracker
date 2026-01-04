@@ -1,8 +1,9 @@
 import React, { Component, ReactNode } from 'react'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import { AlertTriangle, RotateCw, Home } from 'lucide-react'
 import { logger } from '@/shared/utils/logger'
 
-interface ErrorBoundaryProps {
+interface ErrorBoundaryProps extends WithTranslation {
   children: ReactNode
 }
 
@@ -16,7 +17,7 @@ interface ErrorBoundaryState {
  * Global Error Boundary to catch React errors and prevent full app crashes
  * Provides user-friendly error UI with retry and navigation options
  */
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class ErrorBoundaryClass extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props)
     this.state = {
@@ -55,6 +56,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   render(): ReactNode {
+    const { t } = this.props
+
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -67,28 +70,28 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-foreground">
-                Oops! Something went wrong
+                {t('errors:boundary.title')}
               </h1>
               <p className="text-muted-foreground">
-                We encountered an unexpected error. Don&apos;t worry, we&apos;ve logged it and will look into it.
+                {t('errors:boundary.description')}
               </p>
             </div>
 
             {import.meta.env.MODE === 'development' && this.state.error && (
               <details className="text-left bg-muted/50 rounded-lg p-4 border border-border">
                 <summary className="cursor-pointer font-semibold text-sm text-foreground hover:text-primary transition-colors">
-                  Error Details (Development Only)
+                  {t('errors:boundary.detailsSummary')}
                 </summary>
                 <div className="mt-4 space-y-2 text-xs font-mono">
                   <div>
-                    <strong className="text-destructive">Error:</strong>
+                    <strong className="text-destructive">{t('errors:boundary.errorLabel')}</strong>
                     <pre className="mt-2 overflow-auto bg-background p-2 rounded border border-border text-muted-foreground">
                       {this.state.error.toString()}
                     </pre>
                   </div>
                   {this.state.errorInfo && (
                     <div>
-                      <strong className="text-destructive">Component Stack:</strong>
+                      <strong className="text-destructive">{t('errors:boundary.componentStackLabel')}</strong>
                       <pre className="mt-2 overflow-auto bg-background p-2 rounded border border-border text-muted-foreground max-h-48">
                         {this.state.errorInfo.componentStack}
                       </pre>
@@ -102,23 +105,23 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <button
                 onClick={this.handleRetry}
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                aria-label="Retry the previous action"
+                aria-label={t('errors:boundary.tryAgainAriaLabel')}
               >
                 <RotateCw className="h-4 w-4" aria-hidden="true" />
-                Try Again
+                {t('errors:boundary.tryAgain')}
               </button>
               <button
                 onClick={this.handleGoHome}
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-md font-medium hover:bg-secondary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                aria-label="Go back to home page"
+                aria-label={t('errors:boundary.goHomeAriaLabel')}
               >
                 <Home className="h-4 w-4" aria-hidden="true" />
-                Go Home
+                {t('errors:boundary.goHome')}
               </button>
             </div>
 
             <p className="text-xs text-muted-foreground">
-              If this problem persists, please contact support or refresh the page.
+              {t('errors:boundary.persistsMessage')}
             </p>
           </div>
         </div>
@@ -128,3 +131,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return this.props.children
   }
 }
+
+// Export wrapped component with translation HOC
+export const ErrorBoundary = withTranslation(['errors'])(ErrorBoundaryClass)
