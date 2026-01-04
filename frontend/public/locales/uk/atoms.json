@@ -38,6 +38,7 @@
     "approveSelected": "Затвердити обрані",
     "rejectSelected": "Відхилити обрані",
     "selectAll": "Обрати все",
+    "selectAriaLabel": "Вибрати {{title}}",
     "clear": "Очистити",
     "selected": "{{count}} обрано",
     "cancel": "Скасувати"

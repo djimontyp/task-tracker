@@ -13,12 +13,15 @@
   },
   "dataSources": {
     "jira": {
+      "title": "Jira",
       "description": "Відстеження завдань та управління проектами"
     },
     "slack": {
+      "title": "Slack",
       "description": "Командна комунікація та канали"
     },
     "email": {
+      "title": "Email",
       "description": "Моніторинг електронної пошти"
     }
   },
@@ -39,6 +42,7 @@
   },
   "sourceCard": {
     "settings": "Налаштування",
+    "toggleAriaLabel": "Перемкнути {{name}}",
     "error": {
       "title": "Не вдалося завантажити",
       "retry": "Повторити"
@@ -75,7 +79,9 @@
       "title": "Режим адміністратора",
       "description": "Увімкніть для доступу до розширених функцій",
       "enable": "Увімкнути режим адміністратора",
-      "shortcut": "Швидкий доступ"
+      "shortcut": "Швидкий доступ",
+      "shortcutMac": "(Mac)",
+      "shortcutOther": "(Windows/Linux)"
     }
   },
   "sources": {
@@ -94,6 +100,12 @@
   },
   "telegram": {
     "integration": "Інтеграція з Telegram",
+    "disableDialog": {
+      "title": "Вимкнути Telegram webhook?",
+      "description": "Це видалить webhook з Telegram і припинить обробку вхідних повідомлень. Ви зможете увімкнути його пізніше.",
+      "cancel": "Скасувати",
+      "confirm": "Вимкнути webhook"
+    },
     "configureDescription": "Налаштуйте URL вебхука Telegram бота та керуйте групами для моніторингу повідомлень",
     "wizard": {
       "welcome": {

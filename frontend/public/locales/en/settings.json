@@ -13,12 +13,15 @@
   },
   "dataSources": {
     "jira": {
+      "title": "Jira",
       "description": "Issue tracking and project management"
     },
     "slack": {
+      "title": "Slack",
       "description": "Team communication and channels"
     },
     "email": {
+      "title": "Email",
       "description": "Email inbox monitoring"
     }
   },
@@ -39,6 +42,7 @@
   },
   "sourceCard": {
     "settings": "Settings",
+    "toggleAriaLabel": "Toggle {{name}}",
     "error": {
       "title": "Failed to load",
       "retry": "Retry"
@@ -75,7 +79,9 @@
       "title": "Administrator mode",
       "description": "Enable to access advanced features",
       "enable": "Enable administrator mode",
-      "shortcut": "Shortcut"
+      "shortcut": "Shortcut",
+      "shortcutMac": "(Mac)",
+      "shortcutOther": "(Windows/Linux)"
     }
   },
   "sources": {
@@ -94,6 +100,12 @@
   },
   "telegram": {
     "integration": "Telegram Integration",
+    "disableDialog": {
+      "title": "Disable Telegram webhook?",
+      "description": "This will remove the webhook from Telegram and stop processing incoming messages. You can re-enable it anytime.",
+      "cancel": "Cancel",
+      "confirm": "Disable webhook"
+    },
     "configureDescription": "Configure your Telegram bot webhook URL and manage monitored groups for message tracking",
     "wizard": {
       "welcome": {
