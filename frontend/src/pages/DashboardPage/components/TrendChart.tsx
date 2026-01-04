@@ -80,10 +80,10 @@ export const TrendChart: React.FC<TrendChartProps> = ({ compact = false }) => {
                     </div>
                 </CardHeader>
             )}
-            <CardContent className={`flex-1 ${compact ? 'px-3 py-2 relative overflow-hidden' : 'p-6'}`}>
+            <CardContent className={`flex-1 ${compact ? 'px-3 pb-2 pt-6 relative overflow-hidden' : 'p-6'}`}>
                 {/* Compact Background Label */}
                 {compact && (
-                    <div className="absolute top-1.5 left-3 z-10 pointer-events-none max-w-[calc(100%-1.5rem)]">
+                    <div className="absolute top-2 left-3 z-10 pointer-events-none max-w-[calc(100%-1.5rem)]">
                         <div className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider opacity-60 truncate">
                             {t('trendChart.signal', 'Productivity')}
                         </div>
@@ -95,10 +95,10 @@ export const TrendChart: React.FC<TrendChartProps> = ({ compact = false }) => {
                         <AreaChart
                             data={data}
                             margin={{
-                                top: compact ? 5 : 10,
-                                right: 12, // Increased for dot visibility
+                                top: compact ? 0 : 10, // Content is pushed by padding now, so 0 top margin
+                                right: 10,
                                 left: 10,
-                                bottom: 10, // Added padding to prevent bottom clipping
+                                bottom: 5,
                             }}
                         >
                             <defs>
@@ -131,7 +131,8 @@ export const TrendChart: React.FC<TrendChartProps> = ({ compact = false }) => {
                                     dy={10}
                                 />
                             )}
-                            <YAxis hide domain={['dataMin - 5', 'dataMax + 10']} />
+                            {/* Use modest domain padding to prevent clipping without wasting space */}
+                            <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
 
                             {!compact && (
                                 <Tooltip
