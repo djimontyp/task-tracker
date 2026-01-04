@@ -136,10 +136,10 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
 
         <div className="space-y-4 py-4">
           {fetchingGroups ? (
-            <div className="text-center py-4">{t('ingestion.loading', 'Loading groups...')}</div>
+            <div className="text-center py-4">{t('ingestion.loading')}</div>
           ) : groups.length === 0 ? (
             <div className="text-center py-4 text-muted-foreground">
-              {t('ingestion.noGroups', 'No groups configured. Please add groups in Settings first.')}
+              {t('ingestion.noGroups')}
             </div>
           ) : (
             <>
@@ -151,7 +151,7 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
                     onCheckedChange={toggleAll}
                   />
                   <Label htmlFor="select-all" className="font-medium cursor-pointer">
-                    {t('ingestion.selectAll', 'Select All')} ({groups.length} {t('ingestion.groups', 'groups')})
+                    {t('ingestion.selectAll')} ({groups.length} {t('ingestion.groups')})
                   </Label>
                 </div>
 
@@ -175,8 +175,8 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
               </div>
 
               <FormField
-                label={t('ingestion.limitLabel', 'Messages limit per group')}
-                description={t('ingestion.limitDescription', 'Maximum number of messages to fetch from each group (1-10000)')}
+                label={t('ingestion.limitLabel')}
+                description={t('ingestion.limitDescription')}
               >
                 <Input
                   id="limit"
@@ -199,7 +199,7 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
             onClick={handleSubmit}
             disabled={loading || selectedGroups.size === 0 || groups.length === 0}
           >
-            {loading ? t('ingestion.starting', 'Starting...') : t('ingestion.submit')}
+            {loading ? t('ingestion.starting') : t('ingestion.submit')}
           </Button>
         </DialogFooter>
       </DialogContent>
