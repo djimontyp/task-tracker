@@ -60,7 +60,7 @@
     "preview": "vite preview",
     "generate:api": "orval",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx --max-warnings 70",
+    "lint": "eslint src --ext .ts,.tsx --max-warnings 40",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "lint:strict": "eslint src --ext .ts,.tsx --max-warnings 0",
     "test": "vitest",

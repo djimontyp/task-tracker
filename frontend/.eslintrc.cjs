@@ -10,6 +10,10 @@
 
 module.exports = {
   root: true,
+  ignorePatterns: [
+    '**/ExampleTokenUsage.tsx',
+    '**/*.stories.tsx',
+  ],
   env: {
     browser: true,
     es2022: true,

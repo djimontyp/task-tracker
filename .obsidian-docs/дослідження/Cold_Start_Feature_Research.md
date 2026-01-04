@@ -128,7 +128,7 @@ Success → return to Settings
 │  [Icon: Info] Counts fetched from Telegram. May vary slightly.   │
 │                                                                  │
 │  > [!warning] "All available" may hit Telegram API rate limits  │
-│  > and take 15-30 minutes to process with AI analysis.          │
+│  > and require longer processing time for AI analysis.           │
 │                                                                  │
 │  ┌─────────────────────────────────────────────────────────────┐│
 │  │  [Icon: Play]  Start Import                          (h-11) ││
@@ -179,10 +179,13 @@ Success → return to Settings
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
 │  │   Fetched   │  │   Stored    │  │   Skipped   │              │
 │  │     234     │  │     220     │  │      14     │              │
-│  │ text-muted  │  │ text-green  │  │ text-muted  │              │
+│  │ (from API)  │  │   (new)     │  │(duplicates) │              │
 │  └─────────────┘  └─────────────┘  └─────────────┘              │
 │                                                                  │
-│  Elapsed: 1:23 | Remaining: ~0:45                                │
+│  **Skipped** = дублікати (external_message_id вже є в БД)        │
+│  Сценарії: re-import, overlap з real-time, часткові імпорти      │
+│                                                                  │
+│  Elapsed: 1:23                                                   │
 │                                                                  │
 │  [Cancel Import]                                                 │
 └──────────────────────────────────────────────────────────────────┘
