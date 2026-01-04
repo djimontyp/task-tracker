@@ -10,13 +10,11 @@ import { Inbox, Settings } from 'lucide-react'
 import { OnboardingWizard } from '@/features/onboarding'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
-import { ZoomableCard } from '@/shared/ui/zoomable-card'
 import { PageWrapper } from '@/shared/primitives'
 
 import {
   DashboardMetrics,
-  ActivityHeatmap,
-  TrendChart,
+  CommandCenter,
   RecentInsights,
   TopTopics,
   TodaysFocus,
@@ -76,45 +74,8 @@ export function DashboardPresenter({
         </Card>
       )}
 
-      {/* Hero Section - Compact Flex Row */}
-      <div className="flex flex-col lg:flex-row gap-6 mb-8 h-auto lg:h-28 animate-fade-in-up">
-        {/* Greeting (Auto width) - Only takes necessary space */}
-        <div className="flex flex-col justify-center shrink-0 min-w-0 max-w-full lg:max-w-[40%]">
-          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight truncate" title={greeting}>
-            {greeting}
-          </h1>
-          <p className="text-muted-foreground mt-1 truncate" title={subtitle}>
-            {subtitle}
-          </p>
-        </div>
-
-        {/* Charts (Fill remaining space 50/50) */}
-        <div className="flex-1 grid grid-cols-2 gap-4 min-w-0 h-28 lg:h-full">
-          {/* Compact Trend Chart */}
-          <ZoomableCard
-            trigger="hover"
-            className="h-full min-w-0"
-            preview={<TrendChart compact />}
-            full={
-              <div className="h-[350px] w-full p-4">
-                <TrendChart />
-              </div>
-            }
-          />
-
-          {/* Compact Heatmap */}
-          <ZoomableCard
-            trigger="hover"
-            className="h-full min-w-0"
-            preview={<ActivityHeatmap compact />}
-            full={
-              <div className="h-[350px] w-full p-4 flex flex-col justify-center">
-                <ActivityHeatmap />
-              </div>
-            }
-          />
-        </div>
-      </div>
+      {/* Hero Section - Command Center (Unified HUD) */}
+      <CommandCenter greeting={greeting} subtitle={subtitle} />
 
       {/* Row 1: Metrics (3 cards) */}
       <div
