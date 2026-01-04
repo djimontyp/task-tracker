@@ -1,0 +1,64 @@
+import React from 'react'
+import { Card } from '@/shared/ui/card'
+import { TrendChart } from './TrendChart'
+import { ActivityHeatmap } from './ActivityHeatmap'
+
+interface CommandCenterProps {
+    greeting: string
+    subtitle: string
+}
+
+export const CommandCenter: React.FC<CommandCenterProps> = ({ greeting, subtitle }) => {
+    return (
+        <Card className="w-full min-h-[160px] flex flex-col md:flex-row overflow-hidden relative mb-8 animate-fade-in-up">
+            {/* Left Section: Greeting & Status */}
+            <div className="flex-1 p-6 flex flex-col justify-center relative z-10">
+                <div className="mb-6">
+                    <h1 className="text-3xl font-bold tracking-tight mb-1">{greeting}</h1>
+                    <p className="text-muted-foreground">{subtitle}</p>
+                </div>
+
+                {/* System Status Indicator - The "HUD" Element */}
+                <div className="flex items-center gap-4">
+                    <div className="relative flex items-center justify-center w-12 h-12">
+                        {/* Glowing Ring */}
+                        <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-pulse-slow" />
+                        <div className="absolute inset-0 rounded-full border-t-2 border-primary animate-spin-slow opacity-60" />
+
+                        {/* Icon/Number */}
+                        <span className="text-lg font-bold text-primary">16</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-sm font-semibold">Active Signals</span>
+                        <span className="text-xs text-primary">System Status: Optimal</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Section: Integrated Visualizations */}
+            <div className="flex-[1.5] relative min-h-[200px] md:min-h-0 md:h-auto border-t md:border-t-0 md:border-l border-border/40">
+                {/* Background Grid/Pattern for "High Tech" feel */}
+                <div className="absolute inset-0 bg-grid-white/[0.02]" />
+
+                {/* Trend Chart - Dominant Layer */}
+                <div className="absolute inset-0 pb-12 pt-4 pr-0">
+                    {/* We use specific embedded mode to strip the card */}
+                    <TrendChart embedded compact />
+                </div>
+
+                {/* Activity Heatmap - Subtle Overlay at bottom right */}
+                <div className="absolute bottom-4 right-4 z-10 bg-background/80 backdrop-blur-sm rounded-md border border-border/50 p-2 shadow-sm">
+                    <div className="flex items-center gap-2 mb-1 px-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Pulse</span>
+                    </div>
+                    <ActivityHeatmap embedded compact />
+                </div>
+
+                {/* Fade overlays for smooth edges */}
+                <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-card to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card to-transparent pointer-events-none" />
+            </div>
+        </Card>
+    )
+}
