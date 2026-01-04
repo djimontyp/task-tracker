@@ -128,40 +128,33 @@ export function DashboardPresenter({
         />
       </div>
 
-      {/* Row 2: Recent Insights */}
+      {/* Row 2: Focus | Topics (side by side) */}
+      <div
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-up"
+        style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}
+      >
+        <TodaysFocus
+          atoms={focusAtoms.data ?? []}
+          isLoading={focusAtoms.isLoading}
+        />
+        <TopTopics
+          data={topics.data}
+          isLoading={topics.isLoading}
+          error={topics.error}
+          limit={5}
+        />
+      </div>
+
+      {/* Row 3: Recent Insights (full width) */}
       <div
         className="animate-fade-in-up"
-        style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}
+        style={{ animationDelay: '0.35s', animationFillMode: 'backwards' }}
       >
         <RecentInsights
           data={insights.data}
           isLoading={insights.isLoading}
           error={insights.error}
           onViewAll={onNavigateToTopics}
-        />
-      </div>
-
-      {/* Row 3.5: Today's Focus (pending review atoms) */}
-      <div
-        className="animate-fade-in-up"
-        style={{ animationDelay: '0.35s', animationFillMode: 'backwards' }}
-      >
-        <TodaysFocus
-          atoms={focusAtoms.data ?? []}
-          isLoading={focusAtoms.isLoading}
-        />
-      </div>
-
-      {/* Row 4: Top Topics */}
-      <div
-        className="animate-fade-in-up"
-        style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}
-      >
-        <TopTopics
-          data={topics.data}
-          isLoading={topics.isLoading}
-          error={topics.error}
-          limit={5}
         />
       </div>
     </PageWrapper>
