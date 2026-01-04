@@ -145,7 +145,7 @@ export function SettingsCard({
 
   if (isError) {
     return (
-      <Card className={cn('p-5', className)}>
+      <Card className={cn('p-6', className)}>
         <div className="flex flex-col items-center justify-center gap-4 text-center">
           <AlertCircle className="h-8 w-8 text-destructive" />
           <div className="space-y-2">
@@ -222,7 +222,7 @@ export function SettingsCard({
           {config && StatusIcon && (
             <Badge
               variant="outline"
-              className={cn('flex items-center gap-1.5 px-2.5 py-1', config.badgeClass)}
+              className={cn('flex items-center gap-2 px-3 py-1', config.badgeClass)}
             >
               <StatusIcon
                 className={cn(
