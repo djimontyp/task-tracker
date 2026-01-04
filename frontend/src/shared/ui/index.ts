@@ -135,3 +135,4 @@ export {
   CollapsibleContent,
 } from './collapsible'
 export { MultiSelect, type MultiSelectOption, type MultiSelectProps } from './multi-select'
+export { ZoomableCard } from './zoomable-card'
