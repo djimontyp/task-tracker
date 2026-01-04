@@ -61,8 +61,8 @@ http {
         listen [::]:80;
 
         # Dynamic server_name from HOST environment variable
-        # Supports: localhost, 192.168.x.x, custom domains
-        server_name ${HOST};
+        # Supports: localhost, 192.168.x.x, custom domains, ngrok tunnels (dev)
+        server_name ${HOST} *.ngrok-free.app;
 
         # Security Headers
         # Note: CSP is permissive for Vite development mode (uses inline scripts/styles)
