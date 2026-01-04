@@ -85,10 +85,10 @@ describe('Logo Component', () => {
     const svg = screen.getByRole('link').querySelector('svg')
 
     // Gradients use CSS variables
-    const sweepGradient = svg?.querySelector('#sweepGradient')
+    const sweepGradient = svg?.querySelector('#ringGradient')
     expect(sweepGradient).toBeInTheDocument()
 
-    const centerGradient = svg?.querySelector('#centerGradient')
+    const centerGradient = svg?.querySelector('#coreGradient')
     expect(centerGradient).toBeInTheDocument()
   })
 
@@ -99,23 +99,21 @@ describe('Logo Component', () => {
     expect(link).toHaveClass(customClass)
   })
 
-  test('renders all radar elements (circles, line, orbits)', () => {
+  test('renders all radar elements (rings, core)', () => {
     renderLogo()
     const svg = screen.getByRole('link').querySelector('svg')
 
-    // 3 concentric circles (radar rings)
-    const circles = svg?.querySelectorAll('circle')
-    expect(circles?.length).toBeGreaterThanOrEqual(6) // rings + center + orbiting atoms
+    // Rings
+    const rings = svg?.querySelectorAll('circle')
+    expect(rings?.length).toBeGreaterThanOrEqual(3) // ring + static ring + core
 
-    // Radar sweep line in group
-    const sweepGroup = svg?.querySelector('.sweep-group')
-    expect(sweepGroup).toBeInTheDocument()
-    const line = sweepGroup?.querySelector('line')
-    expect(line).toBeInTheDocument()
+    // Core element
+    const core = svg?.querySelector('.logo-core')
+    expect(core).toBeInTheDocument()
 
-    // Orbit groups for atoms
-    const orbitGroups = svg?.querySelectorAll('.orbit-group')
-    expect(orbitGroups?.length).toBe(3)
+    // Ring element
+    const ring = svg?.querySelector('.logo-ring')
+    expect(ring).toBeInTheDocument()
   })
 
   test('has data-testid for E2E testing', () => {

@@ -7,6 +7,7 @@
       "automation": "АВТОМАТИЗАЦІЯ",
       "monitoring": "МОНІТОРИНГ"
     },
+    "mainNavigation": "Головна навігація",
     "items": {
       "overview": "Огляд",
       "executiveSummary": "Резюме",
@@ -161,7 +162,11 @@
     "rowsPerPage": "Рядків на сторінку",
     "showing": "Показано",
     "to": "до",
-    "entries": "записів"
+    "entries": "записів",
+    "goToPrevious": "Перейти на попередню сторінку",
+    "goToNext": "Перейти на наступну сторінку",
+    "morePages": "Більше сторінок",
+    "ariaLabel": "Навігація сторінками"
   },
   "search": {
     "placeholder": "Що ви шукаєте? Натисніть / для фокусу",
@@ -181,6 +186,7 @@
   },
   "navbar": {
     "toggleSidebar": "Згорнути бічну панель",
+    "homeLink": "{{appName}} головна",
     "pageInfo": "Інформація про сторінку",
     "openSearch": "Відкрити пошук",
     "theme": {
@@ -207,12 +213,150 @@
     }
   },
   "dataTable": {
+    "noResults": "Немає результатів.",
     "rowsSelected": "{{selected}} з {{total}} рядків вибрано",
     "goToPage": "Перейти на сторінку",
     "goToNextPage": "Перейти на наступну сторінку",
     "goToLastPage": "Перейти на останню сторінку",
     "selected": "{{count}} вибрано",
-    "clearFilters": "Очистити фільтри"
+    "clearFilters": "Очистити фільтри",
+    "columnHeader": {
+      "asc": "За зростанням",
+      "desc": "За спаданням"
+    },
+    "toolbar": {
+      "filter": "Фільтрувати...",
+      "view": "Вигляд",
+      "searchColumns": "Пошук колонок...",
+      "noColumnsFound": "Колонок не знайдено."
+    }
+  },
+  "metricCard": {
+    "status": {
+      "critical": "Критично",
+      "warning": "Увага",
+      "good": "Добре"
+    },
+    "trend": {
+      "increased": "Зросло",
+      "decreased": "Зменшилось",
+      "noChange": "Без змін"
+    }
+  },
+  "saveStatus": {
+    "saving": "Збереження...",
+    "saved": "Збережено",
+    "saveFailed": "Помилка збереження",
+    "unsavedChanges": "Незбережені зміни",
+    "allChangesSaved": "Усі зміни збережено",
+    "timeAgo": {
+      "justNow": "щойно",
+      "secondsAgo": "{{seconds}} сек тому",
+      "minutesAgo": "{{minutes}} хв тому"
+    }
+  },
+  "searchDropdown": {
+    "noResultsFor": "Немає результатів для \"{{query}}\"",
+    "tryBroaderKeywords": "Спробуйте ширші ключові слова або перевірте написання",
+    "messages": "Повідомлення ({{count}})",
+    "atoms": "Атоми ({{count}})",
+    "topics": "Теми ({{count}})"
+  },
+  "aria": {
+    "breadcrumb": "Навігація",
+    "loading": "Завантаження",
+    "more": "Більше",
+    "toggleSidebar": "Перемкнути бічну панель"
+  },
+  "command": {
+    "menuTitle": "Меню команд",
+    "menuDescription": "Шукайте команди та навігуйте за допомогою клавіатури"
+  },
+  "sidebarMobile": {
+    "title": "Бічна панель",
+    "description": "Відображає мобільну бічну панель."
+  },
+  "cardStates": {
+    "error": {
+      "title": "Не вдалося завантажити вміст",
+      "retry": "Повторити",
+      "retryAriaLabel": "Повторити завантаження вмісту"
+    },
+    "empty": {
+      "default": "Вміст відсутній",
+      "compact": "Немає вмісту"
+    },
+    "actions": {
+      "moreActions": "Більше дій"
+    }
+  },
+  "activityHeatmap": {
+    "title": "Теплова карта активності повідомлень",
+    "tooltip": {
+      "messages": "Повідомлень",
+      "source": "Джерело"
+    },
+    "tabs": {
+      "week": "Тиждень",
+      "month": "Місяць"
+    },
+    "days": {
+      "mon": "Пн",
+      "tue": "Вт",
+      "wed": "Ср",
+      "thu": "Чт",
+      "fri": "Пт",
+      "sat": "Сб",
+      "sun": "Нд"
+    },
+    "legend": {
+      "less": "Менше",
+      "more": "Більше"
+    }
+  },
+  "adminFeatureBadge": {
+    "text": "Тільки для адмінів",
+    "tooltip": "Ця функція доступна лише в режимі адміністратора",
+    "ariaLabel": "Функція тільки для адміністраторів"
+  },
+  "adminPanel": {
+    "title": "Панель адміністратора",
+    "shortcut": "(Cmd+Shift+A для перемикання)",
+    "ariaLabel": "Панель адміністратора"
+  },
+  "bulkActions": {
+    "selected": "{{count}} вибрано",
+    "approve": "Схвалити",
+    "archive": "Архівувати",
+    "delete": "Видалити",
+    "clear": "Очистити"
+  },
+  "autoSave": {
+    "label": "Автозбереження"
+  },
+  "colorPicker": {
+    "changeColor": "Змінити колір",
+    "changeTopicColor": "Змінити колір теми",
+    "autoPick": "Автовибір",
+    "save": "Зберегти",
+    "hexColorCode": "Hex код кольору"
+  },
+  "a11y": {
+    "skipToMainContent": "Перейти до основного вмісту"
+  },
+  "layout": {
+    "adminToolsPlaceholder": "Інструменти адміністратора будуть додані у фазі 2-6"
+  },
+  "mobileSearch": {
+    "title": "Пошук"
+  },
+  "searchCard": {
+    "error": {
+      "title": "Помилка завантаження"
+    },
+    "match": "{{score}} збіг",
+    "messageAriaLabel": "Повідомлення від користувача {{user}}",
+    "topicAriaLabel": "Тема: {{name}}"
   },
   "toast": {
     "success": {
@@ -286,6 +430,56 @@
     "admin": {
       "enabled": "Режим адміністратора увімкнено",
       "disabled": "Режим адміністратора вимкнено"
+    }
+  },
+  "searchPage": {
+    "title": "Семантичний пошук",
+    "hint": "Використовуйте рядок пошуку вище або натисніть",
+    "hintContinue": "щоб почати пошук повідомлень",
+    "crossLanguage": "Підтримує крос-мовний пошук (українська + англійська)",
+    "searching": "Пошук \"{{query}}\"...",
+    "aiPowered": "Використовується AI-семантичний пошук",
+    "error": "Помилка пошуку",
+    "errorGeneric": "Під час пошуку сталася помилка",
+    "resultsFor": "Результати пошуку для \"{{query}}\"",
+    "resultsCount_one": "{{count}} результат знайдено",
+    "resultsCount_few": "{{count}} результати знайдено",
+    "resultsCount_many": "{{count}} результатів знайдено",
+    "semanticSimilarity": "семантична схожість",
+    "noResults": "Результатів не знайдено",
+    "noResultsDescription": "Жодна тема чи повідомлення не відповідає вашому пошуку \"{{query}}\". Спробуйте інші ключові слова або перевірте написання.",
+    "topics": "Теми ({{count}})",
+    "messages": "Повідомлення ({{count}})"
+  },
+  "versionsPage": {
+    "searchPlaceholder": "Пошук за назвою сутності...",
+    "selectAll": "Вибрати все",
+    "deselectAll": "Скасувати вибір",
+    "filters": {
+      "all": "Всі",
+      "topics": "Теми",
+      "atoms": "Атоми"
+    },
+    "empty": {
+      "noPending": "Немає версій на розгляді",
+      "noStatus": "Немає {{status}} версій",
+      "allReviewed": "Все переглянуто! Усі версії перевірено.",
+      "tryFilters": "Спробуйте змінити фільтри."
+    },
+    "version": "Версія {{version}}",
+    "confidence": "Впевненість: {{value}}%",
+    "entityTypes": {
+      "topic": "Тема",
+      "atom": "Атом"
+    },
+    "dialog": {
+      "title": "Порівняння версій - {{name}}"
+    },
+    "toast": {
+      "approved": "Версію схвалено",
+      "rejected": "Версію відхилено",
+      "approveFailed": "Не вдалося схвалити версію",
+      "rejectFailed": "Не вдалося відхилити версію"
     }
   }
 }

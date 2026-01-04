@@ -40,6 +40,7 @@
  */
 
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardFooter, CardHeader } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
@@ -139,6 +140,7 @@ function ExpandedCardError({
   onRetry,
   className,
 }: ExpandedCardErrorProps) {
+  const { t } = useTranslation('common');
   return (
     <Card className={cn('hidden sm:block', className)}>
       <CardContent className="p-4">
@@ -154,7 +156,7 @@ function ExpandedCardError({
             />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-base">Failed to load content</p>
+            <p className="font-medium text-base">{t('cardStates.error.title')}</p>
             {error && (
               <p className="mt-1 text-sm text-muted-foreground truncate">
                 {error.message}
@@ -167,10 +169,10 @@ function ExpandedCardError({
               size="default"
               className="h-11 px-4 flex-shrink-0"
               onClick={onRetry}
-              aria-label="Retry loading content"
+              aria-label={t('cardStates.error.retryAriaLabel')}
             >
               <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
-              Retry
+              {t('cardStates.error.retry')}
             </Button>
           )}
         </div>
@@ -189,9 +191,11 @@ interface ExpandedCardEmptyProps {
 }
 
 function ExpandedCardEmpty({
-  message = 'No content available',
+  message,
   className,
 }: ExpandedCardEmptyProps) {
+  const { t } = useTranslation('common');
+  const displayMessage = message || t('cardStates.empty.default');
   return (
     <Card className={cn('hidden sm:block', className)}>
       <CardContent className="p-4">
@@ -202,7 +206,7 @@ function ExpandedCardEmpty({
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
             <Inbox className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">{message}</p>
+          <p className="mt-4 text-sm text-muted-foreground">{displayMessage}</p>
         </div>
       </CardContent>
     </Card>

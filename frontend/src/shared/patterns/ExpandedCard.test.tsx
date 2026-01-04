@@ -19,7 +19,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { ExpandedCard } from './ExpandedCard';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
-import { Activity, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import type { DataListItem } from './DataList';
 
 // ===================================================================

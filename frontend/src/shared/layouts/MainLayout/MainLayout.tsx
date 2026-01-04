@@ -1,5 +1,6 @@
 import { ReactNode, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { SidebarProvider, SidebarInset } from '@/shared/ui/sidebar'
 import { Sheet, SheetContent } from '@/shared/ui/sheet'
@@ -19,6 +20,7 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children }: MainLayoutProps) => {
+  const { t } = useTranslation()
   const { sidebarOpen, setSidebarOpen } = useUiStore()
   const { isAdminMode, toggleAdminMode } = useAdminMode()
   const isDesktop = useMediaQuery('(min-width: 768px)')
@@ -98,7 +100,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-modal focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-4"
       >
-        Skip to main content
+        {t('a11y.skipToMainContent')}
       </a>
 
       {isDesktop ? (
@@ -130,7 +132,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           {/* Admin Panel */}
           <AdminPanel visible={isAdminMode}>
             <div className="text-sm text-muted-foreground">
-              Admin tools will be added in Phase 2-6
+              {t('layout.adminToolsPlaceholder')}
             </div>
           </AdminPanel>
         </div>
@@ -158,7 +160,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
             <AdminPanel visible={isAdminMode}>
               <div className="text-sm text-muted-foreground">
-                Admin tools will be added in Phase 2-6
+                {t('layout.adminToolsPlaceholder')}
               </div>
             </AdminPanel>
           </div>

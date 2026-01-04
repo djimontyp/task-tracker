@@ -92,8 +92,8 @@ export const Large: Story = {
 }
 
 /**
- * Animated radar sweep on hover.
- * The radar sweep line rotates when you hover over the icon.
+ * Animated ring rotation on hover.
+ * The outer ring rotates smoothly while the core pulses.
  * Try hovering over the logo to see the animation!
  */
 export const Animated: Story = {
@@ -101,7 +101,7 @@ export const Animated: Story = {
     size: 'md',
     showText: true,
     collapsed: false,
-    animated: true, // Radar sweep rotates on hover
+    animated: true, // Ring rotates on hover
   },
 }
 

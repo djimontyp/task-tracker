@@ -59,28 +59,28 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
     },
     ref
   ) => {
-    const { t } = useTranslation('dashboard')
+    const { t } = useTranslation('common')
     const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>(period)
 
     // Localized days - reversed so newer days are on left
     const DAYS_SHORT = useMemo(() => [
-      t('heatmap.days.sun'),
-      t('heatmap.days.sat'),
-      t('heatmap.days.fri'),
-      t('heatmap.days.thu'),
-      t('heatmap.days.wed'),
-      t('heatmap.days.tue'),
-      t('heatmap.days.mon'),
+      t('activityHeatmap.days.sun'),
+      t('activityHeatmap.days.sat'),
+      t('activityHeatmap.days.fri'),
+      t('activityHeatmap.days.thu'),
+      t('activityHeatmap.days.wed'),
+      t('activityHeatmap.days.tue'),
+      t('activityHeatmap.days.mon'),
     ], [t])
 
     const DAYS_FULL = useMemo(() => [
-      t('heatmap.days.sun'),
-      t('heatmap.days.sat'),
-      t('heatmap.days.fri'),
-      t('heatmap.days.thu'),
-      t('heatmap.days.wed'),
-      t('heatmap.days.tue'),
-      t('heatmap.days.mon'),
+      t('activityHeatmap.days.sun'),
+      t('activityHeatmap.days.sat'),
+      t('activityHeatmap.days.fri'),
+      t('activityHeatmap.days.thu'),
+      t('activityHeatmap.days.wed'),
+      t('activityHeatmap.days.tue'),
+      t('activityHeatmap.days.mon'),
     ], [t])
     const [selectedSources, setSelectedSources] = useState<
       Record<'telegram' | 'slack' | 'email', boolean>
@@ -237,8 +237,8 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
           <div className="flex flex-wrap items-center gap-4">
             <Tabs value={selectedPeriod} onValueChange={(v) => setSelectedPeriod(v as 'week' | 'month')}>
               <TabsList variant="pill">
-                <TabsTrigger variant="pill" value="week">{t('heatmap.tabs.week')}</TabsTrigger>
-                <TabsTrigger variant="pill" value="month">{t('heatmap.tabs.month')}</TabsTrigger>
+                <TabsTrigger variant="pill" value="week">{t('activityHeatmap.tabs.week')}</TabsTrigger>
+                <TabsTrigger variant="pill" value="month">{t('activityHeatmap.tabs.month')}</TabsTrigger>
               </TabsList>
             </Tabs>
 
@@ -375,11 +375,11 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                                   {(hour + 1).toString().padStart(2, '0')}:00
                                 </div>
                                 <div className="mt-2">
-                                  Messages: <span className="font-semibold">{count}</span>
+                                  {t('activityHeatmap.tooltip.messages')}: <span className="font-semibold">{count}</span>
                                 </div>
                                 {cellData && (
                                   <div className="capitalize">
-                                    Source: <span className="font-semibold">{cellData.source}</span>
+                                    {t('activityHeatmap.tooltip.source')}: <span className="font-semibold">{cellData.source}</span>
                                   </div>
                                 )}
                               </div>
@@ -394,7 +394,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
 
               <div className="mt-6 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>{t('heatmap.legend.less')}</span>
+                  <span>{t('activityHeatmap.legend.less')}</span>
                   <div className="flex gap-2">
                     {[0, 0.25, 0.5, 0.75, 1].map((intensity, i) => (
                       <div
@@ -409,7 +409,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                       />
                     ))}
                   </div>
-                  <span>{t('heatmap.legend.more')}</span>
+                  <span>{t('activityHeatmap.legend.more')}</span>
                 </div>
 
                 <div className="flex items-center gap-4 text-xs">

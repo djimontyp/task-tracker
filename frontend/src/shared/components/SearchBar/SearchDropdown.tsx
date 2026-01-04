@@ -1,4 +1,5 @@
 import { SearchX } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   Command,
   CommandEmpty,
@@ -31,6 +32,7 @@ export function SearchDropdown({
   onSelectAtom,
   onSelectTopic,
 }: SearchDropdownProps) {
+  const { t } = useTranslation('common')
   const showLoading = isLoading || isDebouncing
   const hasResults = data && data.total_results > 0
   const hasNoResults = data && data.total_results === 0 && !showLoading
@@ -75,9 +77,9 @@ export function SearchDropdown({
           <CommandEmpty className="py-6">
             <div className="flex flex-col items-center gap-2 text-center">
               <SearchX className="h-8 w-8 text-muted-foreground" />
-              <p className="text-sm font-medium">No results for &quot;{query}&quot;</p>
+              <p className="text-sm font-medium">{t('searchDropdown.noResultsFor', { query })}</p>
               <p className="text-xs text-muted-foreground">
-                Try broader keywords or check spelling
+                {t('searchDropdown.tryBroaderKeywords')}
               </p>
             </div>
           </CommandEmpty>
@@ -88,7 +90,7 @@ export function SearchDropdown({
           <>
             {/* Messages */}
             {data.messages.length > 0 && (
-              <CommandGroup heading={`Messages (${data.messages.length})`}>
+              <CommandGroup heading={t('searchDropdown.messages', { count: data.messages.length })}>
                 {data.messages.map((message) => (
                   <MessageSearchItem
                     key={message.id}
@@ -103,7 +105,7 @@ export function SearchDropdown({
             {data.atoms.length > 0 && (
               <>
                 {data.messages.length > 0 && <CommandSeparator />}
-                <CommandGroup heading={`Atoms (${data.atoms.length})`}>
+                <CommandGroup heading={t('searchDropdown.atoms', { count: data.atoms.length })}>
                   {data.atoms.map((atom) => (
                     <AtomSearchItem
                       key={atom.id}
@@ -119,7 +121,7 @@ export function SearchDropdown({
             {data.topics.length > 0 && (
               <>
                 {(data.messages.length > 0 || data.atoms.length > 0) && <CommandSeparator />}
-                <CommandGroup heading={`Topics (${data.topics.length})`}>
+                <CommandGroup heading={t('searchDropdown.topics', { count: data.topics.length })}>
                   {data.topics.map((topic) => (
                     <TopicSearchItem
                       key={topic.id}

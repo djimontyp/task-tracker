@@ -1,5 +1,6 @@
 import { Column } from '@tanstack/react-table'
 import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui'
@@ -21,6 +22,8 @@ export function DataTableColumnHeader<TData, TValue>({
   title,
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
+  const { t } = useTranslation('common')
+
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>
   }
@@ -50,14 +53,14 @@ export function DataTableColumnHeader<TData, TValue>({
             column.toggleSorting(false)
           }}>
             <ArrowUp className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Asc
+            {t('dataTable.columnHeader.asc')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={(e) => {
             e.preventDefault()
             column.toggleSorting(true)
           }}>
             <ArrowDown className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Desc
+            {t('dataTable.columnHeader.desc')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -8,9 +8,9 @@ export interface UseWebSocketOptions {
   onMessage?: (data: unknown) => void
   onConnect?: () => void
   onDisconnect?: () => void
-  reconnect?: boolean
-  reconnectInterval?: number
-  maxReconnectAttempts?: number
+  _reconnect?: boolean
+  _reconnectInterval?: number
+  _maxReconnectAttempts?: number
 }
 
 /**

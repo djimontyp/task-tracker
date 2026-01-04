@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Search, X, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Input } from '@/shared/ui/input'
 import { Button } from '@/shared/ui/button'
 import { Popover, PopoverContent, PopoverAnchor } from '@/shared/ui/popover'
@@ -74,6 +75,7 @@ export function SearchBar({
   className,
   placeholder,
 }: SearchBarProps) {
+  const { t } = useTranslation('common')
   const [isOpen, setIsOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -154,7 +156,7 @@ export function SearchBar({
             onKeyDown={handleKeyDown}
             onFocus={() => shouldShowDropdown && setIsOpen(true)}
             className={`pl-10 w-full border border-border/40 bg-muted/30 shadow-none transition-colors hover:border-border/60 hover:bg-muted/50 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 focus-visible:border-border focus-visible:bg-muted/50 [&::placeholder]:text-center [&::placeholder]:text-muted-foreground/70 ${query.length > 0 ? 'pr-10 [&::placeholder]:text-left' : ''}`}
-            aria-label="Search topics, messages, and atoms"
+            aria-label={t('search.label')}
             autoComplete="off"
           />
           {query.length > 0 && (
@@ -163,7 +165,7 @@ export function SearchBar({
               size="icon"
               className="absolute right-1 top-1/2 -translate-y-1/2 h-11 w-11"
               onClick={handleClear}
-              aria-label="Clear search"
+              aria-label={t('search.clear')}
             >
               <X className="h-4 w-4" />
             </Button>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { AdminFeatureBadge } from '@/shared/components/AdminFeatureBadge'
@@ -14,6 +15,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   children,
   onToggle,
 }) => {
+  const { t } = useTranslation('common')
   const [isExpanded, setIsExpanded] = useState(true)
 
   if (!visible) return null
@@ -30,7 +32,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         "transition-all duration-300 ease-in-out"
       )}
       role="region"
-      aria-label="Admin Panel"
+      aria-label={t('adminPanel.ariaLabel')}
     >
       <button
         onClick={handleToggle}
@@ -44,9 +46,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         aria-controls="admin-panel-content"
       >
         <span className="flex items-center gap-2">
-          <span className="text-semantic-warning">Admin Panel</span>
+          <span className="text-semantic-warning">{t('adminPanel.title')}</span>
           <AdminFeatureBadge variant="inline" size="sm" className="ml-0" />
-          <span className="text-xs text-muted-foreground">(Cmd+Shift+A to toggle)</span>
+          <span className="text-xs text-muted-foreground">{t('adminPanel.shortcut')}</span>
         </span>
         {isExpanded ? (
           <ChevronUp className="h-4 w-4 text-muted-foreground" aria-hidden="true" />

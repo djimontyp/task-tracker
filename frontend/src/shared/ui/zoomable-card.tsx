@@ -217,7 +217,7 @@ function ZoomedOverlay({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center"
+      className="fixed inset-0 z-max flex items-center justify-center"
       onClick={allowClose ? onClose : undefined} // Click backdrop = close (only after animation)
     >
       {/* Backdrop */}

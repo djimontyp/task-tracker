@@ -40,7 +40,7 @@ export function NavMain({ groups, currentPath }: NavMainProps) {
   const isCollapsed = state === 'collapsed'
 
   return (
-    <nav aria-label="Main navigation">
+    <nav aria-label={t('sidebar.mainNavigation')}>
       {groups.map((group) => {
         const groupKey = getGroupKey(group)
         const hasNestedRoutes = group.items.length > 1 && group.items.some((item) => item.path !== '/')
@@ -174,7 +174,7 @@ function MenuItems({ items, currentPath, isCollapsed, t }: MenuItemsProps) {
                 'relative transition-all duration-200',
                 // Expanded state
                 !isCollapsed && [
-                  'h-10',
+                  'h-10 pl-7',
                   isActive && [
                     'bg-sidebar-accent text-primary-bright font-medium',
                     'before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2',

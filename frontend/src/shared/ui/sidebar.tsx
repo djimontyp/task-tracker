@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
+import { useTranslation } from "react-i18next"
 import { useIsMobile } from "@/shared/hooks/use-mobile"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/button"
@@ -153,6 +154,43 @@ const SidebarProvider = React.forwardRef<
 )
 SidebarProvider.displayName = "SidebarProvider"
 
+const SidebarMobileSheet = ({
+  open,
+  onOpenChange,
+  side,
+  children,
+  ...props
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  side: "left" | "right"
+  children: React.ReactNode
+} & Omit<React.ComponentProps<"div">, "children">) => {
+  const { t } = useTranslation("common")
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange} {...props}>
+      <SheetContent
+        data-sidebar="sidebar"
+        data-mobile="true"
+        className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+        style={
+          {
+            "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+          } as React.CSSProperties
+        }
+        side={side}
+      >
+        <SheetHeader className="sr-only">
+          <SheetTitle>{t("sidebarMobile.title")}</SheetTitle>
+          <SheetDescription>{t("sidebarMobile.description")}</SheetDescription>
+        </SheetHeader>
+        <div className="flex h-full w-full flex-col">{children}</div>
+      </SheetContent>
+    </Sheet>
+  )
+}
+SidebarMobileSheet.displayName = "SidebarMobileSheet"
+
 const Sidebar = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
@@ -191,25 +229,14 @@ const Sidebar = React.forwardRef<
 
     if (isMobile) {
       return (
-        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-          <SheetContent
-            data-sidebar="sidebar"
-            data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-            style={
-              {
-                "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-              } as React.CSSProperties
-            }
-            side={side}
-          >
-            <SheetHeader className="sr-only">
-              <SheetTitle>Sidebar</SheetTitle>
-              <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-            </SheetHeader>
-            <div className="flex h-full w-full flex-col">{children}</div>
-          </SheetContent>
-        </Sheet>
+        <SidebarMobileSheet
+          open={openMobile}
+          onOpenChange={setOpenMobile}
+          side={side}
+          {...props}
+        >
+          {children}
+        </SidebarMobileSheet>
       )
     }
 
@@ -265,6 +292,7 @@ const SidebarTrigger = React.forwardRef<
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
   const { toggleSidebar } = useSidebar()
+  const { t } = useTranslation("common")
 
   return (
     <Button
@@ -280,7 +308,7 @@ const SidebarTrigger = React.forwardRef<
       {...props}
     >
       <PanelLeft className="h-4 w-4" />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">{t("aria.toggleSidebar")}</span>
     </Button>
   )
 })
@@ -291,6 +319,7 @@ const SidebarRail = React.forwardRef<
   React.ComponentProps<"button">
 >(({ className, ...props }, ref) => {
   const { toggleSidebar, state } = useSidebar()
+  const { t } = useTranslation("common")
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -299,16 +328,18 @@ const SidebarRail = React.forwardRef<
     }
   }
 
+  const toggleLabel = t("aria.toggleSidebar")
+
   return (
     <button
       ref={ref}
       data-sidebar="rail"
-      aria-label="Toggle Sidebar"
+      aria-label={toggleLabel}
       tabIndex={0}
       aria-expanded={state === "expanded"}
       onClick={toggleSidebar}
       onKeyDown={handleKeyDown}
-      title="Toggle Sidebar"
+      title={toggleLabel}
       className={cn(
         "absolute inset-y-0 z-sticky hidden w-6 -translate-x-1/2 rounded-full bg-sidebar border border-sidebar-border/60 shadow-sm transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-4 sm:flex",
         "[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize",
