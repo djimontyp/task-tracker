@@ -80,17 +80,17 @@ export const TrendChart: React.FC<TrendChartProps> = ({ compact = false }) => {
                     </div>
                 </CardHeader>
             )}
-            <CardContent className={`flex-1 ${compact ? 'p-0 relative' : 'p-6'}`}>
+            <CardContent className={`flex-1 ${compact ? 'px-3 py-2 relative overflow-hidden' : 'p-6'}`}>
                 {/* Compact Background Label */}
                 {compact && (
-                    <div className="absolute top-2 left-3 z-10 pointer-events-none">
-                        <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider opacity-70">
+                    <div className="absolute top-1.5 left-3 z-10 pointer-events-none max-w-[calc(100%-1.5rem)]">
+                        <div className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider opacity-60 truncate">
                             {t('trendChart.signal', 'Productivity')}
                         </div>
                     </div>
                 )}
 
-                <div className="w-full h-full min-h-[60px]">
+                <div className={`w-full h-full ${compact ? 'min-h-[70px]' : 'min-h-[60px]'}`}>
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart
                             data={data}

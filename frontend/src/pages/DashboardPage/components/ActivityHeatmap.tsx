@@ -112,15 +112,15 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
     }, [data, dateLocale])
 
     // In compact mode, show fewer weeks to fit nicely
-    const visibleWeeks = compact ? weeks.slice(-14) : weeks
+    const visibleWeeks = compact ? weeks.slice(-12) : weeks
 
     // Calculate smart labels to prevent overlapping
     const visibleMonthLabels = useMemo(() => {
         const relevantLabels = monthLabels.filter(m =>
-            compact ? m.weekIndex >= weeks.length - 14 : true
+            compact ? m.weekIndex >= weeks.length - 12 : true
         ).map(m => ({
             ...m,
-            weekIndex: m.weekIndex - (compact ? weeks.length - 14 : 0)
+            weekIndex: m.weekIndex - (compact ? weeks.length - 12 : 0)
         }))
 
         // Filter out labels that are too close to each other
@@ -150,39 +150,37 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
             )}
 
             {/* Center content vertically in full mode */}
-            <CardContent className={compact ? 'p-0 pt-6 h-full flex items-center justify-center relative' : 'flex-1 flex flex-col justify-center'}>
+            <CardContent className={compact ? 'px-3 py-2 h-full flex items-center justify-center relative overflow-hidden' : 'flex-1 flex flex-col justify-center'}>
                 {/* Compact specific: Overlay label */}
                 {compact && (
-                    <div className="absolute top-2 left-3 z-10 pointer-events-none">
-                        <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider opacity-70">
+                    <div className="absolute top-1.5 left-3 z-10 pointer-events-none max-w-[calc(100%-1.5rem)]">
+                        <div className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider opacity-60 truncate">
                             {t('activityHeatmap.title', 'Activity')}
                         </div>
                     </div>
                 )}
 
-                <div className={`flex flex-col ${compact ? 'w-full px-3' : 'gap-2'}`}>
+                <div className={`flex flex-col ${compact ? '' : 'gap-2 w-full'}`}>
                     {/* Month labels row - Hide in compact mode to prevent overlap */}
                     {!compact && (
-                        <div className="flex h-4 relative">
+                        <div className="flex h-4 relative mb-1">
                             {/* Spacer for day labels column */}
                             <div className="w-8 shrink-0" />
-                            <div className={`flex ${gapSize} relative overflow-hidden flex-1`}>
-                                {visibleMonthLabels.map((month, index) => (
-                                    <div
-                                        key={index}
-                                        className="absolute text-[10px] text-muted-foreground font-medium"
-                                        style={{
-                                            left: `${month.weekIndex * 14}px`, // approximate width
-                                        }}
-                                    >
-                                        {month.label}
-                                    </div>
-                                ))}
+                            <div className={`flex ${gapSize} flex-1`}>
+                                {/* Render month labels aligned with weeks */}
+                                {visibleWeeks.map((_, weekIndex) => {
+                                    const monthLabel = visibleMonthLabels.find(m => m.weekIndex === weekIndex)
+                                    return (
+                                        <div key={weekIndex} className="flex-1 text-[10px] text-muted-foreground font-medium">
+                                            {monthLabel?.label || ''}
+                                        </div>
+                                    )
+                                })}
                             </div>
                         </div>
                     )}
 
-                    <div className="flex w-full">
+                    <div className={compact ? 'flex justify-center' : 'flex w-full'}>
                         {/* Day labels column - Show ALL in full mode, NONE in compact mode */}
                         {!compact && (
                             <div className="flex flex-col gap-0.5 mr-2 shrink-0 w-8 justify-center">
@@ -198,23 +196,24 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
                             </div>
                         )}
 
-                        {/* Compact mode spacer if needed, or just hidden */}
-                        {compact && (
-                            <div className="w-0" />
-                        )}
-
                         {/* Heatmap grid */}
-                        <div className={`flex ${gapSize} items-start justify-between flex-1`}>
+                        <div className={compact
+                            ? `inline-flex ${gapSize}`
+                            : `flex ${gapSize} items-start justify-between flex-1`
+                        }>
                             {visibleWeeks.map((week, wIndex) => (
-                                <div key={wIndex} className={`flex flex-col ${gapSize} flex-1`}>
+                                <div key={wIndex} className={compact
+                                    ? `flex flex-col ${gapSize}`
+                                    : `flex flex-col ${gapSize} flex-1 items-center`
+                                }>
                                     {week.map((day, dIndex) =>
                                         day === null ? (
-                                            <div key={dIndex} className={`${cellSize} rounded-[1px] opacity-0 w-full`} />
+                                            <div key={dIndex} className={`${cellSize} shrink-0 rounded-[1px] opacity-0`} />
                                         ) : compact ? (
-                                            // Compact: No tooltip, just visual
+                                            // Compact: No tooltip, fixed size square cells
                                             <div
                                                 key={dIndex}
-                                                className={`${cellSize} w-full rounded-[1px] ${getLevelColor(day.level)}`}
+                                                className={`${cellSize} shrink-0 rounded-[1px] ${getLevelColor(day.level)}`}
                                             />
                                         ) : (
                                             // Full: Tooltip enabled

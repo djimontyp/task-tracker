@@ -77,7 +77,7 @@ export function DashboardPresenter({
       )}
 
       {/* Hero Section - Compact Flex Row */}
-      <div className="flex flex-col lg:flex-row gap-6 mb-8 h-auto lg:h-24 animate-fade-in-up">
+      <div className="flex flex-col lg:flex-row gap-6 mb-8 h-auto lg:h-28 animate-fade-in-up">
         {/* Greeting (Auto width) - Only takes necessary space */}
         <div className="flex flex-col justify-center shrink-0 min-w-0 max-w-full lg:max-w-[40%]">
           <h1 className="text-2xl lg:text-3xl font-bold tracking-tight truncate" title={greeting}>
@@ -89,7 +89,7 @@ export function DashboardPresenter({
         </div>
 
         {/* Charts (Fill remaining space 50/50) */}
-        <div className="flex-1 grid grid-cols-2 gap-4 min-w-0 h-24 lg:h-full">
+        <div className="flex-1 grid grid-cols-2 gap-4 min-w-0 h-28 lg:h-full">
           {/* Compact Trend Chart */}
           <ZoomableCard
             trigger="hover"
