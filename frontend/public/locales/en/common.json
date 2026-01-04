@@ -80,6 +80,8 @@
     "success": "Success",
     "error": "Error",
     "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
     "completed": "Completed",
     "failed": "Failed",
     "active": "Active",
