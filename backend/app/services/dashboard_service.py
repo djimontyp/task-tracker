@@ -11,6 +11,8 @@ from app.api.v1.schemas.dashboard import (
     AtomStats,
     DashboardMetricsResponse,
     MessageStats,
+    MessageTrendPoint,
+    MessageTrendsResponse,
     TopicStats,
     TrendData,
     TrendItem,
@@ -272,4 +274,65 @@ class DashboardService:
         return TrendsResponse(
             trends=trends,
             period=period,  # type: ignore[arg-type]
+        )
+
+    async def get_message_trends(self, days: int = 30) -> MessageTrendsResponse:
+        """Get daily signal/noise message counts for trend chart.
+
+        Args:
+            days: Number of days to include (7-90)
+
+        Returns:
+            MessageTrendsResponse with daily breakdown
+        """
+        now = datetime.utcnow()
+        today_start = datetime.combine(now.date(), time.min)
+        period_start = today_start - timedelta(days=days - 1)
+
+        # Query messages grouped by date and noise_classification
+        day_col = func.date(Message.sent_at).label("day")
+        count_col = func.count().label("cnt")
+        query = (
+            select(day_col, Message.noise_classification, count_col)  # type: ignore[call-overload]
+            .where(Message.sent_at >= period_start)
+            .group_by(day_col, Message.noise_classification)
+        )
+        result = await self.session.execute(query)
+        rows = result.all()
+
+        # Aggregate by date
+        date_counts: dict[str, dict[str, int]] = {}
+        for row in rows:
+            day_str = row.day.isoformat() if row.day else None
+            if day_str is None:
+                continue
+
+            if day_str not in date_counts:
+                date_counts[day_str] = {"signal": 0, "noise": 0}
+
+            classification = row.noise_classification
+            count = row.cnt or 0
+
+            if classification == "signal":
+                date_counts[day_str]["signal"] += count
+            elif classification in ("noise", "spam", "low_quality"):
+                date_counts[day_str]["noise"] += count
+
+        # Build response with all days (fill gaps with zeros)
+        data: list[MessageTrendPoint] = []
+        for i in range(days):
+            day = period_start + timedelta(days=i)
+            day_str = day.date().isoformat()
+            counts = date_counts.get(day_str, {"signal": 0, "noise": 0})
+            data.append(
+                MessageTrendPoint(
+                    date=day_str,
+                    signal=counts["signal"],
+                    noise=counts["noise"],
+                )
+            )
+
+        return MessageTrendsResponse(
+            period_days=days,
+            data=data,
         )

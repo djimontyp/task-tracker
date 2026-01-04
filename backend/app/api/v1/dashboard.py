@@ -5,7 +5,11 @@ from typing import Literal
 from fastapi import APIRouter, Query
 
 from app.api.deps import DatabaseDep
-from app.api.v1.schemas.dashboard import DashboardMetricsResponse, TrendsResponse
+from app.api.v1.schemas.dashboard import (
+    DashboardMetricsResponse,
+    MessageTrendsResponse,
+    TrendsResponse,
+)
 from app.services.dashboard_service import DashboardService
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
@@ -67,3 +71,27 @@ async def get_dashboard_trends(
     """
     service = DashboardService(db)
     return await service.get_trends(period, limit)
+
+
+@router.get(
+    "/message-trends",
+    response_model=MessageTrendsResponse,
+    summary="Get message trends",
+    response_description="Daily signal/noise breakdown for trend chart",
+)
+async def get_message_trends(
+    db: DatabaseDep,
+    days: int = Query(30, ge=7, le=90, description="Number of days to include"),
+) -> MessageTrendsResponse:
+    """
+    Get daily signal/noise message counts for TrendChart visualization.
+
+    Returns:
+    - **period_days**: Number of days in the response
+    - **data**: Array of daily counts with date, signal, and noise fields
+
+    Data is sorted from oldest to newest date.
+    Days with no messages are included with signal=0 and noise=0.
+    """
+    service = DashboardService(db)
+    return await service.get_message_trends(days)
