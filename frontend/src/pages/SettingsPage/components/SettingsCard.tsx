@@ -141,7 +141,7 @@ export function SettingsCard({
   onRetry,
   className,
 }: SettingsCardProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('settings');
 
   if (isError) {
     return (
@@ -149,13 +149,13 @@ export function SettingsCard({
         <div className="flex flex-col items-center justify-center gap-4 text-center">
           <AlertCircle className="h-8 w-8 text-destructive" />
           <div className="space-y-2">
-            <p className="text-sm font-medium">{t('settingsCard.error.title', 'Failed to load')}</p>
+            <p className="text-sm font-medium">{t('settingsCard.error.title')}</p>
             {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
           </div>
           {onRetry && (
             <Button variant="outline" size="sm" onClick={onRetry}>
               <RefreshCw className="mr-2 h-4 w-4" />
-              {t('settingsCard.error.retry', 'Retry')}
+              {t('settingsCard.error.retry')}
             </Button>
           )}
         </div>
@@ -203,7 +203,7 @@ export function SettingsCard({
           : undefined
       }
     >
-      <div className="flex items-center gap-4 p-5">
+      <div className="flex items-center gap-4 p-4">
         {/* Icon container */}
         <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
           <Icon className="h-6 w-6 text-primary" />
@@ -243,7 +243,7 @@ export function SettingsCard({
       {footer && (
         <>
           <Separator />
-          <div className="flex items-center justify-between px-5 py-3">
+          <div className="flex items-center justify-between px-4 py-3">
             {onClick && (
               <Button
                 variant="ghost"
@@ -290,7 +290,7 @@ export function SettingsCard({
 
 export function SettingsCardSkeleton() {
   return (
-    <Card className="p-5">
+    <Card className="p-4">
       <div className="flex items-center gap-4">
         <Skeleton className="h-12 w-12 rounded-xl flex-shrink-0" />
         <div className="flex-1 space-y-2">
@@ -340,7 +340,7 @@ export function AddSettingsCard({
         }
       }}
     >
-      <div className="flex items-center justify-center gap-3 p-5 text-muted-foreground hover:text-foreground transition-colors">
+      <div className="flex items-center justify-center gap-3 p-4 text-muted-foreground hover:text-foreground transition-colors">
         <div className="h-10 w-10 rounded-xl border-2 border-dashed border-current flex items-center justify-center">
           <span className="text-xl font-light">+</span>
         </div>

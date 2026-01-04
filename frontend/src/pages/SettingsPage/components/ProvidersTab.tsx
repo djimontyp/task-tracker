@@ -20,7 +20,7 @@ const POLLING_INTERVAL_MS = 1000
 const MAX_POLLING_ATTEMPTS = 15
 
 const ProvidersTab = () => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('settings')
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingProvider, setEditingProvider] = useState<LLMProvider | null>(null)
@@ -39,7 +39,7 @@ const ProvidersTab = () => {
   const pollValidationStatus = async (providerId: string, action: 'created' | 'updated') => {
     // Use toast ID to update the same toast instead of creating multiple
     const toastId = `provider-validation-${providerId}`
-    toast.loading(t('toast.info.validating', { entity: t('toast.entities.provider'), action: t(`toast.actions.${action}`) }), { id: toastId })
+    toast.loading(t('common:toast.info.validating', { entity: t('common:toast.entities.provider'), action: t(`common:toast.actions.${action}`) }), { id: toastId })
 
     for (let attempt = 0; attempt < MAX_POLLING_ATTEMPTS; attempt++) {
       await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS))
@@ -49,22 +49,22 @@ const ProvidersTab = () => {
       const provider = providers?.find(p => p.id === providerId)
 
       if (!provider) {
-        toast.error(t('toast.error.notFound', { entity: t('toast.entities.provider') }), { id: toastId })
+        toast.error(t('common:toast.error.notFound', { entity: t('common:toast.entities.provider') }), { id: toastId })
         return
       }
 
       if (provider.validation_status === ValidationStatusEnum.CONNECTED) {
-        toast.success(t('toast.success.validated', { entity: t('toast.entities.provider') }), { id: toastId })
+        toast.success(t('common:toast.success.validated', { entity: t('common:toast.entities.provider') }), { id: toastId })
         return
       }
 
       if (provider.validation_status === ValidationStatusEnum.ERROR) {
-        toast.error(t('toast.error.validationFailed', { error: provider.validation_error || t('labels.unknown') }), { id: toastId })
+        toast.error(t('common:toast.error.validationFailed', { error: provider.validation_error || t('common:labels.unknown') }), { id: toastId })
         return
       }
     }
 
-    toast.error(t('toast.error.validationTimeout', { entity: t('toast.entities.provider') }), { id: toastId })
+    toast.error(t('common:toast.error.validationTimeout', { entity: t('common:toast.entities.provider') }), { id: toastId })
   }
 
   const createMutation = useMutation({
@@ -75,7 +75,7 @@ const ProvidersTab = () => {
       await pollValidationStatus(createdProvider.id, 'created')
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('toast.error.createFailed', { entity: t('toast.entities.provider') }))
+      toast.error(error.message || t('common:toast.error.createFailed', { entity: t('common:toast.entities.provider') }))
     },
   })
 
@@ -89,7 +89,7 @@ const ProvidersTab = () => {
       await pollValidationStatus(id, 'updated')
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('toast.error.updateFailed', { entity: t('toast.entities.provider') }))
+      toast.error(error.message || t('common:toast.error.updateFailed', { entity: t('common:toast.entities.provider') }))
     },
   })
 
@@ -97,10 +97,10 @@ const ProvidersTab = () => {
     mutationFn: (id: string) => providerService.deleteProvider(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['providers'] })
-      toast.success(t('toast.success.deleted', { entity: t('toast.entities.provider') }))
+      toast.success(t('common:toast.success.deleted', { entity: t('common:toast.entities.provider') }))
     },
     onError: (error: Error) => {
-      toast.error(error.message || t('toast.error.deleteFailed', { entity: t('toast.entities.provider') }))
+      toast.error(error.message || t('common:toast.error.deleteFailed', { entity: t('common:toast.entities.provider') }))
     },
   })
 
@@ -115,7 +115,7 @@ const ProvidersTab = () => {
   }
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this provider?')) {
+    if (window.confirm(t('providersTab.confirmDelete'))) {
       deleteMutation.mutate(id)
     }
   }
@@ -140,14 +140,14 @@ const ProvidersTab = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium">LLM Providers</h3>
+          <h3 className="text-lg font-medium">{t('providersTab.title')}</h3>
           <p className="text-sm text-muted-foreground">
-            Configure LLM providers including OpenAI, Anthropic, and Ollama instances
+            {t('providersTab.description')}
           </p>
         </div>
         <Button onClick={handleCreate} size="sm">
           <Plus className="mr-2 h-4 w-4" />
-          Add Provider
+          {t('providersTab.addProvider')}
         </Button>
       </div>
 
@@ -156,7 +156,7 @@ const ProvidersTab = () => {
           <Card className="col-span-full">
             <CardContent className="py-8">
               <p className="text-center text-muted-foreground">
-                No providers found. Create one to get started.
+                {t('providersTab.noProviders')}
               </p>
             </CardContent>
           </Card>
@@ -177,7 +177,7 @@ const ProvidersTab = () => {
                         size="icon"
                         variant="ghost"
                         onClick={() => handleEdit(provider)}
-                        aria-label="Edit provider"
+                        aria-label={t('providersTab.editProvider')}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -185,7 +185,7 @@ const ProvidersTab = () => {
                         size="icon"
                         variant="ghost"
                         onClick={() => handleDelete(provider.id)}
-                        aria-label="Delete provider"
+                        aria-label={t('providersTab.deleteProvider')}
                         disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -196,13 +196,13 @@ const ProvidersTab = () => {
                   <div className="space-y-2 text-sm">
                     {provider.base_url && (
                       <div>
-                        <span className="text-muted-foreground">Base URL:</span>
+                        <span className="text-muted-foreground">{t('providersTab.baseUrl')}:</span>
                         <p className="font-mono text-xs break-all">{provider.base_url}</p>
                       </div>
                     )}
 
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Status:</span>
+                      <span className="text-muted-foreground">{t('providersTab.status')}:</span>
                       <ValidationStatus
                         status={provider.validation_status}
                         error={provider.validation_error}
@@ -211,14 +211,14 @@ const ProvidersTab = () => {
 
                     {provider.validated_at && (
                       <div className="text-xs text-muted-foreground">
-                        Validated: {formatFullDate(provider.validated_at)}
+                        {t('providersTab.validated')}: {formatFullDate(provider.validated_at)}
                       </div>
                     )}
 
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Active:</span>
+                      <span className="text-muted-foreground">{t('providersTab.active')}:</span>
                       <Badge variant="outline" className={provider.is_active ? 'bg-semantic-success text-white border-semantic-success' : 'bg-muted text-muted-foreground border-border'}>
-                        {provider.is_active ? 'Yes' : 'No'}
+                        {provider.is_active ? t('common:labels.yes') : t('common:labels.no')}
                       </Badge>
                     </div>
                   </div>

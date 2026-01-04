@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MessageSquare, Bot, Sparkles } from 'lucide-react';
 import { SettingsCard, AddSettingsCard } from './SettingsCard';
 

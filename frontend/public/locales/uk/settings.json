@@ -5,6 +5,58 @@
     "providers": "Провайдери",
     "prompts": "Промпти"
   },
+  "sections": {
+    "dataSources": "Джерела даних"
+  },
+  "status": {
+    "soon": "Незабаром"
+  },
+  "dataSources": {
+    "jira": {
+      "description": "Відстеження завдань та управління проектами"
+    },
+    "slack": {
+      "description": "Командна комунікація та канали"
+    },
+    "email": {
+      "description": "Моніторинг електронної пошти"
+    }
+  },
+  "settingsCard": {
+    "settings": "Налаштування",
+    "status": {
+      "connected": "Підключено",
+      "active": "Активний",
+      "setup": "Потребує налаштування",
+      "error": "Помилка",
+      "disabled": "Вимкнено",
+      "loading": "Завантаження..."
+    },
+    "error": {
+      "title": "Не вдалося завантажити",
+      "retry": "Повторити"
+    }
+  },
+  "sourceCard": {
+    "settings": "Налаштування",
+    "error": {
+      "title": "Не вдалося завантажити",
+      "retry": "Повторити"
+    }
+  },
+  "providersTab": {
+    "title": "LLM Провайдери",
+    "description": "Налаштуйте LLM провайдерів, включаючи OpenAI, Anthropic та екземпляри Ollama",
+    "addProvider": "Додати провайдера",
+    "noProviders": "Провайдерів не знайдено. Створіть одного для початку.",
+    "confirmDelete": "Ви впевнені, що хочете видалити цього провайдера?",
+    "editProvider": "Редагувати провайдера",
+    "deleteProvider": "Видалити провайдера",
+    "baseUrl": "Базовий URL",
+    "status": "Статус",
+    "validated": "Перевірено",
+    "active": "Активний"
+  },
   "general": {
     "title": "Загальні налаштування",
     "appearance": {
@@ -23,7 +75,7 @@
       "title": "Режим адміністратора",
       "description": "Увімкніть для доступу до розширених функцій",
       "enable": "Увімкнути режим адміністратора",
-      "shortcut": "Швидкий доступ: Ctrl+Shift+A"
+      "shortcut": "Швидкий доступ"
     }
   },
   "sources": {
@@ -43,6 +95,90 @@
   "telegram": {
     "integration": "Інтеграція з Telegram",
     "configureDescription": "Налаштуйте URL вебхука Telegram бота та керуйте групами для моніторингу повідомлень",
+    "wizard": {
+      "welcome": {
+        "title": "Ласкаво просимо до інтеграції з Telegram",
+        "description": "Виконайте ці кроки, щоб підключити ваші Telegram канали до Pulse Radar."
+      },
+      "instructions": {
+        "title": "Як підключити Telegram",
+        "addBot": {
+          "title": "Додайте бота до каналу",
+          "description": "Додайте @PulseRadarBot як адміністратора до вашого Telegram каналу або групи"
+        },
+        "grantPermissions": {
+          "title": "Надайте дозволи",
+          "description": "Переконайтесь, що бот має дозвіл читати повідомлення в каналі"
+        },
+        "configureWebhook": {
+          "title": "Налаштуйте вебхук",
+          "description": "Введіть URL вашого сервера нижче для отримання повідомлень з Telegram"
+        },
+        "testConnection": {
+          "title": "Перевірте з'єднання",
+          "description": "Надішліть тестове повідомлення в канал, щоб перевірити, чи працює інтеграція"
+        }
+      },
+      "webhook": {
+        "title": "Налаштування URL вебхука",
+        "description": "Введіть домен вашого сервера. Telegram надсилатиме повідомлення на цей URL.",
+        "hostLabel": "Хост вебхука",
+        "hostDescription": "Потрібен HTTPS. Автоматично додає {{path}}",
+        "hostPlaceholder": "your-domain.ngrok.io",
+        "fullUrlLabel": "Повний URL вебхука:",
+        "httpsNotice": "Telegram вимагає HTTPS для URL вебхуків. Використовуйте сервіс типу ngrok для локальної розробки.",
+        "activating": "Активація...",
+        "activate": "Активувати вебхук"
+      },
+      "verify": {
+        "title": "Перевірка з'єднання",
+        "description": "Перевірте з'єднання вебхука, щоб переконатися, що все працює правильно.",
+        "webhookActivated": {
+          "title": "Вебхук активовано",
+          "description": "Ваш вебхук зареєстровано в Telegram"
+        },
+        "webhookNotConfigured": {
+          "title": "Вебхук не налаштовано",
+          "description": "Поверніться назад, щоб спочатку налаштувати URL вебхука"
+        },
+        "testTitle": "Перевірка з'єднання",
+        "testDescription": "Натисніть кнопку нижче, щоб перевірити, чи Telegram може досягти вашого URL вебхука.",
+        "whatsNext": {
+          "title": "Що далі?",
+          "addBotToChannels": "Додайте бота до ваших Telegram каналів як адміністратора",
+          "addChannelIds": "Додайте ID каналів для початку моніторингу повідомлень",
+          "messagesAppear": "Повідомлення автоматично з'являтимуться на вашій панелі"
+        }
+      },
+      "connection": {
+        "errorTitle": "Помилка з'єднання",
+        "errorDescription": "Ваш URL вебхука налаштовано, але наразі недоступний. Переконайтесь, що ngrok або ваш тунельний сервіс запущено.",
+        "urlLabel": "URL:",
+        "errorLabel": "Помилка:",
+        "checking": "Перевірка...",
+        "retryConnection": "Повторити з'єднання"
+      },
+      "test": {
+        "testing": "Перевірка з'єднання...",
+        "testConnection": "Перевірити з'єднання",
+        "success": "З'єднання успішне",
+        "failed": "З'єднання не вдалось",
+        "webhookLabel": "Вебхук:",
+        "pendingUpdates": "Очікуючі оновлення:",
+        "lastError": "Остання помилка:"
+      },
+      "steps": {
+        "botInfo": "Інформація про бота",
+        "webhook": "Вебхук",
+        "verify": "Перевірка"
+      },
+      "navigation": {
+        "stepOf": "Крок {{current}} з {{total}}",
+        "back": "Назад",
+        "continue": "Продовжити",
+        "finishSetup": "Завершити налаштування"
+      }
+    },
     "status": {
       "connected": "Підключено",
       "pending": "Очікування",

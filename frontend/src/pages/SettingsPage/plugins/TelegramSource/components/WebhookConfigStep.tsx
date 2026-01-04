@@ -30,7 +30,8 @@ export function WebhookConfigStep({
   isSaving,
   onActivate,
 }: WebhookConfigStepProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('settings')
+  const { t: tCommon } = useTranslation()
   const [hostValidationError, setHostValidationError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
@@ -46,26 +47,26 @@ export function WebhookConfigStep({
     try {
       await navigator.clipboard.writeText(computedWebhookUrl)
       setCopied(true)
-      toast.success(t('toast.success.copied', { text: t('toast.entities.webhookUrl') }))
+      toast.success(tCommon('toast.success.copied', { text: tCommon('toast.entities.webhookUrl') }))
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      toast.error(t('toast.error.copyFailed'))
+      toast.error(tCommon('toast.error.copyFailed'))
     }
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Configure Webhook URL</h3>
+        <h3 className="text-lg font-semibold mb-2">{t('telegram.wizard.webhook.title')}</h3>
         <p className="text-sm text-muted-foreground">
-          Enter your server domain. Telegram will send messages to this URL.
+          {t('telegram.wizard.webhook.description')}
         </p>
       </div>
 
       <FormField
-        label="Webhook Host"
+        label={t('telegram.wizard.webhook.hostLabel')}
         id="wizard-webhook-url"
-        description={`HTTPS required. Auto-appends ${WEBHOOK_PATH}`}
+        description={t('telegram.wizard.webhook.hostDescription', { path: WEBHOOK_PATH })}
         error={hostValidationError || undefined}
       >
         <div className="flex items-center gap-2">
@@ -75,11 +76,11 @@ export function WebhookConfigStep({
             </span>
             <Input
               id="wizard-webhook-url"
-              placeholder={defaultBaseUrl?.replace(/^https?:\/\//, '') || 'your-domain.ngrok.io'}
+              placeholder={defaultBaseUrl?.replace(/^https?:\/\//, '') || t('telegram.wizard.webhook.hostPlaceholder')}
               value={webhookBaseUrl.replace(/^https?:\/\//, '')}
               onChange={(e) => handleHostChange(e.target.value)}
               autoComplete="off"
-              aria-label="Webhook host domain"
+              aria-label={t('telegram.wizard.webhook.hostLabel')}
               className={cn(
                 'flex-1 text-sm rounded-l-none',
                 hostValidationError && 'border-semantic-error focus-visible:ring-semantic-error'
@@ -93,7 +94,7 @@ export function WebhookConfigStep({
             onClick={handleCopyUrl}
             disabled={!computedWebhookUrl}
             className="shrink-0"
-            aria-label={copied ? 'Copied' : 'Copy webhook URL'}
+            aria-label={copied ? tCommon('common.copied') : tCommon('common.copy')}
           >
             {copied ? <Check className="h-4 w-4" /> : <Clipboard className="h-4 w-4" />}
           </Button>
@@ -103,7 +104,7 @@ export function WebhookConfigStep({
       {/* Preview */}
       {computedWebhookUrl && !hostValidationError && (
         <div className="p-4 rounded-md bg-muted/50 border">
-          <p className="text-xs text-muted-foreground mb-2">Full webhook URL:</p>
+          <p className="text-xs text-muted-foreground mb-2">{t('telegram.wizard.webhook.fullUrlLabel')}</p>
           <p className="text-sm font-mono break-all">{computedWebhookUrl}</p>
         </div>
       )}
@@ -112,7 +113,7 @@ export function WebhookConfigStep({
       <div className="flex items-start gap-2 p-4 rounded-md bg-semantic-warning/10 border border-semantic-warning/20">
         <AlertTriangle className="h-4 w-4 text-semantic-warning flex-shrink-0 mt-0.5" />
         <p className="text-sm text-muted-foreground">
-          Telegram requires HTTPS for webhook URLs. Use a service like ngrok for local development.
+          {t('telegram.wizard.webhook.httpsNotice')}
         </p>
       </div>
 
@@ -123,7 +124,7 @@ export function WebhookConfigStep({
           onClick={onActivate}
           disabled={isSaving || isSettingWebhook || !isValidBaseUrl || !!hostValidationError}
         >
-          {isSaving || isSettingWebhook ? 'Activating...' : 'Activate Webhook'}
+          {isSaving || isSettingWebhook ? t('telegram.wizard.webhook.activating') : t('telegram.wizard.webhook.activate')}
         </Button>
       </div>
     </div>

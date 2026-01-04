@@ -1,49 +1,57 @@
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
-import { Bot, MessageSquare, CheckCircle, Users } from 'lucide-react'
-import { BOT_USERNAME } from '../types'
+import { Bot, MessageSquare, CheckCircle, Users, type LucideIcon } from 'lucide-react'
 
-const INSTRUCTIONS = [
+interface Instruction {
+  icon: LucideIcon
+  titleKey: string
+  descriptionKey: string
+}
+
+const INSTRUCTIONS: Instruction[] = [
   {
     icon: Bot,
-    title: 'Add bot to your channel',
-    description: `Add ${BOT_USERNAME} as an administrator to your Telegram channel or group`,
+    titleKey: 'telegram.wizard.instructions.addBot.title',
+    descriptionKey: 'telegram.wizard.instructions.addBot.description',
   },
   {
     icon: Users,
-    title: 'Grant permissions',
-    description: 'Ensure the bot has permission to read messages in the channel',
+    titleKey: 'telegram.wizard.instructions.grantPermissions.title',
+    descriptionKey: 'telegram.wizard.instructions.grantPermissions.description',
   },
   {
     icon: MessageSquare,
-    title: 'Configure webhook',
-    description: 'Enter your server URL below to receive messages from Telegram',
+    titleKey: 'telegram.wizard.instructions.configureWebhook.title',
+    descriptionKey: 'telegram.wizard.instructions.configureWebhook.description',
   },
   {
     icon: CheckCircle,
-    title: 'Test connection',
-    description: 'Send a test message in your channel to verify the integration works',
+    titleKey: 'telegram.wizard.instructions.testConnection.title',
+    descriptionKey: 'telegram.wizard.instructions.testConnection.description',
   },
 ]
 
 export function InstructionsCard() {
+  const { t } = useTranslation('settings')
+
   return (
     <Card>
       <CardHeader className="pb-4">
-        <CardTitle className="text-base">How to connect Telegram</CardTitle>
+        <CardTitle className="text-base">{t('telegram.wizard.instructions.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <ol className="space-y-4">
           {INSTRUCTIONS.map((step, index) => (
-            <li key={step.title} className="flex gap-4">
+            <li key={step.titleKey} className="flex gap-4">
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <span className="text-sm font-medium text-primary">{index + 1}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium flex items-center gap-2 text-sm">
                   <step.icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  {step.title}
+                  {t(step.titleKey)}
                 </p>
-                <p className="text-sm text-muted-foreground mt-0.5">{step.description}</p>
+                <p className="text-sm text-muted-foreground mt-0.5">{t(step.descriptionKey)}</p>
               </div>
             </li>
           ))}

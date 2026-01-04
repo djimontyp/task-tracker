@@ -5,6 +5,58 @@
     "providers": "Providers",
     "prompts": "Prompts"
   },
+  "sections": {
+    "dataSources": "Data Sources"
+  },
+  "status": {
+    "soon": "Soon"
+  },
+  "dataSources": {
+    "jira": {
+      "description": "Issue tracking and project management"
+    },
+    "slack": {
+      "description": "Team communication and channels"
+    },
+    "email": {
+      "description": "Email inbox monitoring"
+    }
+  },
+  "settingsCard": {
+    "settings": "Settings",
+    "status": {
+      "connected": "Connected",
+      "active": "Active",
+      "setup": "Setup Required",
+      "error": "Error",
+      "disabled": "Disabled",
+      "loading": "Loading..."
+    },
+    "error": {
+      "title": "Failed to load",
+      "retry": "Retry"
+    }
+  },
+  "sourceCard": {
+    "settings": "Settings",
+    "error": {
+      "title": "Failed to load",
+      "retry": "Retry"
+    }
+  },
+  "providersTab": {
+    "title": "LLM Providers",
+    "description": "Configure LLM providers including OpenAI, Anthropic, and Ollama instances",
+    "addProvider": "Add Provider",
+    "noProviders": "No providers found. Create one to get started.",
+    "confirmDelete": "Are you sure you want to delete this provider?",
+    "editProvider": "Edit provider",
+    "deleteProvider": "Delete provider",
+    "baseUrl": "Base URL",
+    "status": "Status",
+    "validated": "Validated",
+    "active": "Active"
+  },
   "general": {
     "title": "General settings",
     "appearance": {
@@ -23,7 +75,7 @@
       "title": "Administrator mode",
       "description": "Enable to access advanced features",
       "enable": "Enable administrator mode",
-      "shortcut": "Shortcut: Ctrl+Shift+A"
+      "shortcut": "Shortcut"
     }
   },
   "sources": {
@@ -43,6 +95,90 @@
   "telegram": {
     "integration": "Telegram Integration",
     "configureDescription": "Configure your Telegram bot webhook URL and manage monitored groups for message tracking",
+    "wizard": {
+      "welcome": {
+        "title": "Welcome to Telegram Integration",
+        "description": "Follow these steps to connect your Telegram channels to Pulse Radar."
+      },
+      "instructions": {
+        "title": "How to connect Telegram",
+        "addBot": {
+          "title": "Add bot to your channel",
+          "description": "Add @PulseRadarBot as an administrator to your Telegram channel or group"
+        },
+        "grantPermissions": {
+          "title": "Grant permissions",
+          "description": "Ensure the bot has permission to read messages in the channel"
+        },
+        "configureWebhook": {
+          "title": "Configure webhook",
+          "description": "Enter your server URL below to receive messages from Telegram"
+        },
+        "testConnection": {
+          "title": "Test connection",
+          "description": "Send a test message in your channel to verify the integration works"
+        }
+      },
+      "webhook": {
+        "title": "Configure Webhook URL",
+        "description": "Enter your server domain. Telegram will send messages to this URL.",
+        "hostLabel": "Webhook Host",
+        "hostDescription": "HTTPS required. Auto-appends {{path}}",
+        "hostPlaceholder": "your-domain.ngrok.io",
+        "fullUrlLabel": "Full webhook URL:",
+        "httpsNotice": "Telegram requires HTTPS for webhook URLs. Use a service like ngrok for local development.",
+        "activating": "Activating...",
+        "activate": "Activate Webhook"
+      },
+      "verify": {
+        "title": "Verify Connection",
+        "description": "Test your webhook connection to ensure everything is working correctly.",
+        "webhookActivated": {
+          "title": "Webhook Activated",
+          "description": "Your webhook has been registered with Telegram"
+        },
+        "webhookNotConfigured": {
+          "title": "Webhook Not Configured",
+          "description": "Go back to configure your webhook URL first"
+        },
+        "testTitle": "Test Connection",
+        "testDescription": "Click the button below to verify that Telegram can reach your webhook URL.",
+        "whatsNext": {
+          "title": "What's Next?",
+          "addBotToChannels": "Add the bot to your Telegram channels as an admin",
+          "addChannelIds": "Add channel IDs to start monitoring messages",
+          "messagesAppear": "Messages will appear in your dashboard automatically"
+        }
+      },
+      "connection": {
+        "errorTitle": "Connection Error",
+        "errorDescription": "Your webhook URL is configured but currently not reachable. Make sure ngrok or your tunnel service is running.",
+        "urlLabel": "URL:",
+        "errorLabel": "Error:",
+        "checking": "Checking...",
+        "retryConnection": "Retry Connection"
+      },
+      "test": {
+        "testing": "Testing Connection...",
+        "testConnection": "Test Connection",
+        "success": "Connection Successful",
+        "failed": "Connection Failed",
+        "webhookLabel": "Webhook:",
+        "pendingUpdates": "Pending updates:",
+        "lastError": "Last error:"
+      },
+      "steps": {
+        "botInfo": "Bot Info",
+        "webhook": "Webhook",
+        "verify": "Verify"
+      },
+      "navigation": {
+        "stepOf": "Step {{current}} of {{total}}",
+        "back": "Back",
+        "continue": "Continue",
+        "finishSetup": "Finish Setup"
+      }
+    },
     "status": {
       "connected": "Connected",
       "pending": "Pending",

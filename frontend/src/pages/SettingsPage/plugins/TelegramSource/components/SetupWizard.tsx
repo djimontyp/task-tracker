@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/ui/button'
 import { Progress } from '@/shared/ui/progress'
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react'
@@ -34,6 +35,7 @@ export function SetupWizard({
   onTestConnection,
   onComplete,
 }: SetupWizardProps) {
+  const { t } = useTranslation('settings')
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [completedSteps, setCompletedSteps] = useState<Set<SetupStepId>>(new Set())
   const [webhookActivated, setWebhookActivated] = useState(false)
@@ -68,14 +70,23 @@ export function SetupWizard({
     onComplete()
   }
 
+  const getStepTitle = (stepId: SetupStepId): string => {
+    const stepTitleKeys: Record<SetupStepId, string> = {
+      'bot-info': 'telegram.wizard.steps.botInfo',
+      'webhook': 'telegram.wizard.steps.webhook',
+      'verify': 'telegram.wizard.steps.verify',
+    }
+    return t(stepTitleKeys[stepId])
+  }
+
   return (
     <div className="space-y-6">
       {/* Progress Indicator */}
       <div className="space-y-4">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-medium">{currentStep.title}</span>
+          <span className="font-medium">{getStepTitle(currentStep.id)}</span>
           <span className="text-muted-foreground">
-            Step {currentStepIndex + 1} of {SETUP_STEPS.length}
+            {t('telegram.wizard.navigation.stepOf', { current: currentStepIndex + 1, total: SETUP_STEPS.length })}
           </span>
         </div>
         <Progress value={progress} className="h-2" />
@@ -106,7 +117,7 @@ export function SetupWizard({
                   index + 1
                 )}
               </div>
-              <span className="hidden sm:inline text-xs">{step.title}</span>
+              <span className="hidden sm:inline text-xs">{getStepTitle(step.id)}</span>
             </div>
           ))}
         </div>
@@ -146,19 +157,19 @@ export function SetupWizard({
           disabled={isFirstStep}
         >
           <ChevronLeft className="h-4 w-4 mr-2" />
-          Back
+          {t('telegram.wizard.navigation.back')}
         </Button>
 
         {currentStep.id === 'bot-info' && (
           <Button type="button" onClick={handleNext}>
-            Continue
+            {t('telegram.wizard.navigation.continue')}
             <ChevronRight className="h-4 w-4 ml-2" />
           </Button>
         )}
 
         {currentStep.id === 'verify' && (
           <Button type="button" onClick={handleFinish}>
-            Finish Setup
+            {t('telegram.wizard.navigation.finishSetup')}
             <Check className="h-4 w-4 ml-2" />
           </Button>
         )}

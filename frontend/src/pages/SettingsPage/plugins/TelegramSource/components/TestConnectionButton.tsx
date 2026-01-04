@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/ui/button'
 import { Card } from '@/shared/ui/card'
 import { RefreshCw, CheckCircle, XCircle, Info } from 'lucide-react'
@@ -19,6 +20,7 @@ interface TestConnectionButtonProps {
 }
 
 export function TestConnectionButton({ onTest, disabled }: TestConnectionButtonProps) {
+  const { t } = useTranslation('settings')
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<TestResult | null>(null)
 
@@ -45,12 +47,12 @@ export function TestConnectionButton({ onTest, disabled }: TestConnectionButtonP
         {isLoading ? (
           <>
             <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-            Testing Connection...
+            {t('telegram.wizard.test.testing')}
           </>
         ) : (
           <>
             <RefreshCw className="h-4 w-4 mr-2" />
-            Test Connection
+            {t('telegram.wizard.test.testConnection')}
           </>
         )}
       </Button>
@@ -73,27 +75,27 @@ export function TestConnectionButton({ onTest, disabled }: TestConnectionButtonP
                 'font-medium text-sm',
                 result.success ? 'text-semantic-success' : 'text-semantic-error'
               )}>
-                {result.success ? 'Connection Successful' : 'Connection Failed'}
+                {result.success ? t('telegram.wizard.test.success') : t('telegram.wizard.test.failed')}
               </p>
 
               {result.webhookUrl && (
                 <div className="flex items-start gap-2">
                   <Info className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-muted-foreground break-all">
-                    Webhook: {result.webhookUrl}
+                    {t('telegram.wizard.test.webhookLabel')} {result.webhookUrl}
                   </p>
                 </div>
               )}
 
               {typeof result.pendingUpdateCount === 'number' && (
                 <p className="text-xs text-muted-foreground">
-                  Pending updates: {result.pendingUpdateCount}
+                  {t('telegram.wizard.test.pendingUpdates')} {result.pendingUpdateCount}
                 </p>
               )}
 
               {result.lastErrorMessage && (
                 <p className="text-xs text-semantic-error">
-                  Last error: {result.lastErrorMessage}
+                  {t('telegram.wizard.test.lastError')} {result.lastErrorMessage}
                 </p>
               )}
 
