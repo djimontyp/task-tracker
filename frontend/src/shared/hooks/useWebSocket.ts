@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useMemo } from 'react'
 import { useWebSocketContext, type WebSocketState } from '@/shared/providers/WebSocketProvider'
 
 export type { WebSocketState }
@@ -34,6 +34,9 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   const subscriptionIdRef = useRef<string | null>(null)
   const prevConnectedRef = useRef<boolean>(false)
 
+  // Stable key for topics array to avoid complex expression in deps
+  const topicsKey = useMemo(() => topics.join(','), [topics])
+
   // Stable callback for message handling
   const handleMessage = useCallback(
     (data: unknown) => {
@@ -56,7 +59,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         subscriptionIdRef.current = null
       }
     }
-  }, [topics.join(','), subscribe, unsubscribe, handleMessage])
+  }, [topics, topicsKey, subscribe, unsubscribe, handleMessage])
 
   // Call onConnect/onDisconnect callbacks on state changes
   useEffect(() => {

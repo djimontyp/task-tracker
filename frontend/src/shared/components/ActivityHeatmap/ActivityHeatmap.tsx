@@ -103,6 +103,10 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
       [selectedSources]
     )
 
+    const daysInMonth = useMemo(() => {
+      return new Date(selectedYear, selectedMonth + 1, 0).getDate()
+    }, [selectedMonth, selectedYear])
+
     const processedData = useMemo(() => {
       const dataMap: ProcessedData = {}
 
@@ -139,11 +143,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
       })
 
       return dataMap
-    }, [data, activeSources, selectedPeriod, selectedMonth, selectedYear])
-
-    const daysInMonth = useMemo(() => {
-      return new Date(selectedYear, selectedMonth + 1, 0).getDate()
-    }, [selectedMonth, selectedYear])
+    }, [data, activeSources, selectedPeriod, selectedMonth, selectedYear, daysInMonth])
 
     useMemo(() => {
       const result: HeatmapCell[] = []
@@ -252,13 +252,24 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(
-                      (month, i) => (
-                        <SelectItem key={i} value={i.toString()}>
-                          {month}
-                        </SelectItem>
-                      )
-                    )}
+                    {[
+                      t('activityHeatmap.months.jan'),
+                      t('activityHeatmap.months.feb'),
+                      t('activityHeatmap.months.mar'),
+                      t('activityHeatmap.months.apr'),
+                      t('activityHeatmap.months.may'),
+                      t('activityHeatmap.months.jun'),
+                      t('activityHeatmap.months.jul'),
+                      t('activityHeatmap.months.aug'),
+                      t('activityHeatmap.months.sep'),
+                      t('activityHeatmap.months.oct'),
+                      t('activityHeatmap.months.nov'),
+                      t('activityHeatmap.months.dec'),
+                    ].map((month, i) => (
+                      <SelectItem key={i} value={i.toString()}>
+                        {month}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
@@ -287,21 +298,21 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                   }
                 />
                 <Label htmlFor="telegram" className="text-sm cursor-pointer">
-                  Telegram
+                  {t('activityHeatmap.sources.telegram')}
                 </Label>
               </div>
 
               <div className="flex items-center gap-2 opacity-50">
                 <Checkbox id="slack" checked={selectedSources.slack} disabled />
                 <Label htmlFor="slack" className="text-sm cursor-not-allowed">
-                  Slack
+                  {t('activityHeatmap.sources.slack')}
                 </Label>
               </div>
 
               <div className="flex items-center gap-2 opacity-50">
                 <Checkbox id="email" checked={selectedSources.email} disabled />
                 <Label htmlFor="email" className="text-sm cursor-not-allowed">
-                  Email
+                  {t('activityHeatmap.sources.email')}
                 </Label>
               </div>
             </div>
@@ -339,7 +350,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                   return (
                     <div key={hour} className="flex items-center mb-2">
                       <div className="w-12 flex-shrink-0 text-xs text-right pr-2 text-muted-foreground">
-                        {hour.toString().padStart(2, '0')}:00
+                        {hour.toString().padStart(2, '0')}{t('format.hourSuffix')}
                       </div>
 
                       {Array.from({ length: numDays }, (_, dayIndex) => {
@@ -371,15 +382,15 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                               <div className="text-xs">
                                 <div className="font-semibold">{dayLabel}</div>
                                 <div>
-                                  {hour.toString().padStart(2, '0')}:00 -{' '}
-                                  {(hour + 1).toString().padStart(2, '0')}:00
+                                  {hour.toString().padStart(2, '0')}{t('format.hourSuffix')} -{' '}
+                                  {(hour + 1).toString().padStart(2, '0')}{t('format.hourSuffix')}
                                 </div>
                                 <div className="mt-2">
                                   {t('activityHeatmap.tooltip.messages')}: <span className="font-semibold">{count}</span>
                                 </div>
                                 {cellData && (
-                                  <div className="capitalize">
-                                    {t('activityHeatmap.tooltip.source')}: <span className="font-semibold">{cellData.source}</span>
+                                  <div>
+                                    {t('activityHeatmap.tooltip.source')}: <span className="font-semibold">{t(`activityHeatmap.sources.${cellData.source}`)}</span>
                                   </div>
                                 )}
                               </div>
@@ -421,7 +432,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                           backgroundColor: `hsl(var(--heatmap-${source}))`,
                         }}
                       />
-                      <span className="capitalize text-muted-foreground">{source}</span>
+                      <span className="text-muted-foreground">{t(`activityHeatmap.sources.${source}`)}</span>
                     </div>
                   ))}
                 </div>
