@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { TelegramIcon } from '@/shared/icons'
 import {
   AlertDialog,
@@ -15,6 +16,7 @@ import TelegramSettingsSheet from '@/pages/SettingsPage/plugins/TelegramSource/T
 import { useTelegramSettings } from '@/pages/SettingsPage/plugins/TelegramSource/useTelegramSettings'
 
 const TelegramCard = () => {
+  const { t } = useTranslation('settings')
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
 
@@ -67,15 +69,15 @@ const TelegramCard = () => {
       <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Disable Telegram webhook?</AlertDialogTitle>
+            <AlertDialogTitle>{t('telegram.disableDialog.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove the webhook from Telegram and stop processing incoming messages. You can re-enable it anytime.
+              {t('telegram.disableDialog.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('telegram.disableDialog.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmDisable}>
-              Disable webhook
+              {t('telegram.disableDialog.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

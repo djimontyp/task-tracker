@@ -31,7 +31,7 @@ export function DataSourcesSection() {
       {/* Jira - coming soon */}
       <SettingsCard
         icon={JiraIcon}
-        title="Jira"
+        title={t('dataSources.jira.title')}
         description={t('dataSources.jira.description')}
         status="disabled"
         statusLabel={t('status.soon')}
@@ -40,7 +40,7 @@ export function DataSourcesSection() {
       {/* Slack - coming soon */}
       <SettingsCard
         icon={SlackIcon}
-        title="Slack"
+        title={t('dataSources.slack.title')}
         description={t('dataSources.slack.description')}
         status="disabled"
         statusLabel={t('status.soon')}
@@ -49,7 +49,7 @@ export function DataSourcesSection() {
       {/* Email - coming soon */}
       <SettingsCard
         icon={Mail}
-        title="Email"
+        title={t('dataSources.email.title')}
         description={t('dataSources.email.description')}
         status="disabled"
         statusLabel={t('status.soon')}

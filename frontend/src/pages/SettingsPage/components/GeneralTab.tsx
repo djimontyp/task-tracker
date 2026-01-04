@@ -96,11 +96,11 @@ const GeneralTab = () => {
               <kbd className="px-2 py-2 text-xs font-semibold bg-background border border-border rounded">
                 Cmd+Shift+A
               </kbd>{' '}
-              (Mac) /{' '}
+              {t('general.admin.shortcutMac')} /{' '}
               <kbd className="px-2 py-2 text-xs font-semibold bg-background border border-border rounded">
                 Ctrl+Shift+A
               </kbd>{' '}
-              (Windows/Linux)
+              {t('general.admin.shortcutOther')}
             </p>
           </div>
         </CardContent>

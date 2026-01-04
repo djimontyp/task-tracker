@@ -16,8 +16,9 @@ export const statusIconConfig: Record<string, { icon: React.ComponentType<{ clas
 }
 
 type TFunction = ReturnType<typeof useTranslation<'topics'>>['t']
+type TCommonFunction = ReturnType<typeof useTranslation>['t']
 
-export const createColumns = (t: TFunction): ColumnDef<Task>[] => [
+export const createColumns = (t: TFunction, tCommon?: TCommonFunction): ColumnDef<Task>[] => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -39,7 +40,8 @@ export const createColumns = (t: TFunction): ColumnDef<Task>[] => [
     header: t('table.task'),
     cell: ({ row }) => {
       const id = row.getValue<number | string>('id')
-      return <div className="w-[80px] text-xs font-medium text-muted-foreground">TASK-{String(id).padStart(4, '0')}</div>
+      const prefix = tCommon ? tCommon('labels.taskPrefix') : 'TASK-'
+      return <div className="w-[80px] text-xs font-medium text-muted-foreground">{prefix}{String(id).padStart(4, '0')}</div>
     },
     enableSorting: false,
     enableHiding: false,

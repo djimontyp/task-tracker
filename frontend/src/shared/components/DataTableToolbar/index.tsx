@@ -50,7 +50,7 @@ export function DataTableToolbar<TData>({
           value={globalFilter}
           onChange={(e) => onGlobalFilterChange(e.target.value)}
           className="max-w-sm"
-          aria-label="Filter"
+          aria-label={t('aria.filter')}
         />
         {children}
       </div>

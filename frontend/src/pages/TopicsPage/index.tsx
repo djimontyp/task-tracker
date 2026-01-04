@@ -26,6 +26,7 @@ type ViewMode = 'grid' | 'list'
 
 const TopicsPage = () => {
   const { t } = useTranslation('topics')
+  const { t: tCommon } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { filterMode, setFilterMode } = useTopicFilterParams()
@@ -179,7 +180,8 @@ const TopicsPage = () => {
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <Card className="p-6 border-destructive">
           <div className="flex items-start gap-4">
-            <div className="text-destructive text-lg">⚠️</div>
+            {/* eslint-disable-next-line local-rules/no-hardcoded-text */}
+            <div className="text-destructive text-lg" aria-hidden="true">⚠️</div>
             <div>
               <p className="font-semibold text-destructive mb-2">{t('error.loading', 'Error loading data')}</p>
               <p className="text-sm text-muted-foreground">
@@ -295,7 +297,7 @@ const TopicsPage = () => {
                   <p className="text-sm text-muted-foreground mb-4">{topic.description}</p>
 
                   <div className="text-xs text-muted-foreground">
-                    ID: {topic.id} | {t('detail.created')}: {new Date(topic.created_at).toLocaleDateString()}
+                    {tCommon('labels.id')} {topic.id} | {t('detail.created')}: {new Date(topic.created_at).toLocaleDateString()}
                   </div>
                 </Card>
               ))}
@@ -317,7 +319,7 @@ const TopicsPage = () => {
                   </div>
                   <div className="flex items-center gap-4 flex-shrink-0">
                     <span className="text-xs text-muted-foreground hidden md:block">
-                      ID: {topic.id}
+                      {tCommon('labels.id')} {topic.id}
                     </span>
                     <span className="text-xs text-muted-foreground hidden lg:block">
                       {new Date(topic.created_at).toLocaleDateString()}

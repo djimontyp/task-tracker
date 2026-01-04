@@ -70,7 +70,7 @@ export function DataTable<TData>({
     <div className="w-full min-w-0 overflow-x-auto rounded-md border">
       <Table
         role="grid"
-        aria-label="Data table"
+        aria-label={t('aria.dataTable')}
         className="w-full"
         style={isResizingEnabled ? {
           minWidth: columnTotalSize,
