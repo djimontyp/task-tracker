@@ -49,8 +49,15 @@ export function AutomationTrendsChart() {
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
         ) : trends && trends.length > 0 ? (
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={trends}>
+          <>
+            {(() => {
+              const reversedTrends = React.useMemo(() => 
+                [...trends].reverse(), 
+                [trends]
+              )
+              return (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={reversedTrends}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="date"
@@ -96,6 +103,9 @@ export function AutomationTrendsChart() {
               />
             </LineChart>
           </ResponsiveContainer>
+              )
+            })()}
+          </>
         ) : (
           <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
             {t('automation.trends.noData')}
