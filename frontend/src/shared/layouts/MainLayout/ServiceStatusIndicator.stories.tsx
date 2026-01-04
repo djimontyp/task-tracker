@@ -47,6 +47,14 @@ export const Healthy: Story = {
   },
 };
 
+/** Healthy status with pulse animation - indicates active WebSocket connection. */
+export const HealthyWithPulse: Story = {
+  args: {
+    status: 'healthy',
+    pulse: true,
+  },
+};
+
 /** Warning status - yellow dot indicating service instability. */
 export const Warning: Story = {
   args: {
@@ -90,12 +98,12 @@ export const AllStatuses: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-8">
-        <ServiceStatusIndicator status="healthy" showLabel />
+        <ServiceStatusIndicator status="healthy" pulse showLabel />
         <ServiceStatusIndicator status="warning" showLabel />
         <ServiceStatusIndicator status="error" showLabel />
       </div>
       <div className="flex items-center gap-8">
-        <ServiceStatusIndicator status="healthy" />
+        <ServiceStatusIndicator status="healthy" pulse />
         <ServiceStatusIndicator status="warning" />
         <ServiceStatusIndicator status="error" />
       </div>

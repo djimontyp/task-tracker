@@ -33,6 +33,7 @@ export function Navbar({
   theme,
   onThemeChange,
   serviceStatus,
+  serviceStatusPulse = false,
   isAdminMode,
   onToggleAdminMode,
   user,
@@ -99,7 +100,7 @@ export function Navbar({
 
         {/* ACTIONS ZONE: Status + Theme + User (right, pushed to end) */}
         <div className="flex items-center gap-2 shrink-0 ml-auto">
-          <ServiceStatusIndicator status={serviceStatus} className="hidden sm:flex" />
+          <ServiceStatusIndicator status={serviceStatus} pulse={serviceStatusPulse} className="hidden sm:flex" />
 
           <TooltipIconButton
             icon={<UniversalThemeIcon theme={theme} className="h-5 w-5" />}
@@ -145,7 +146,7 @@ export function Navbar({
               <Search className="h-5 w-5" />
             </Button>
 
-            <ServiceStatusIndicator status={serviceStatus} className="hidden xs:flex" />
+            <ServiceStatusIndicator status={serviceStatus} pulse={serviceStatusPulse} className="hidden xs:flex" />
 
             <TooltipIconButton
               icon={<UniversalThemeIcon theme={theme} className="h-5 w-5" />}
