@@ -12,6 +12,7 @@ export interface TrendChartProps extends React.HTMLAttributes<HTMLDivElement> {
   config: ChartConfig
   showGrid?: boolean
   showYAxis?: boolean
+  reverseData?: boolean
   height?: string | number
 }
 
@@ -25,12 +26,17 @@ export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
       config,
       showGrid = true,
       showYAxis = false,
+      reverseData = false,
       height = 300,
       className,
       ...props
     },
     ref
   ) => {
+    const chartData = React.useMemo(() => 
+      reverseData ? [...data].reverse() : data, 
+      [data, reverseData]
+    )
     return (
       <Card ref={ref} className={className} {...props}>
         {title && (
@@ -40,7 +46,7 @@ export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
         )}
         <CardContent className={cn(!title && 'pt-6')}>
           <ChartContainer config={config} className={cn('w-full')} style={{ height }}>
-            <AreaChart data={data} accessibilityLayer>
+            <AreaChart data={chartData} accessibilityLayer>
               {showGrid && <CartesianGrid vertical={false} strokeDasharray="3 3" />}
               <XAxis
                 dataKey={xAxisKey}
