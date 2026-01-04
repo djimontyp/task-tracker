@@ -17,6 +17,8 @@ export interface ServiceStatusIndicatorProps {
   showLabel?: boolean;
   /** Custom className for container */
   className?: string;
+  /** Enable pulse animation for 'healthy' status */
+  pulse?: boolean;
 }
 
 type StatusConfigItem = {
@@ -63,6 +65,7 @@ export function ServiceStatusIndicator({
   ariaLabel,
   showLabel = false,
   className,
+  pulse = false,
 }: ServiceStatusIndicatorProps) {
   const { t } = useTranslation();
   const config = statusConfig[status];
@@ -70,6 +73,8 @@ export function ServiceStatusIndicator({
   const title = t(config.titleKey);
   const label = t(config.labelKey);
   const effectiveAriaLabel = ariaLabel ?? title;
+
+  const shouldPulse = pulse && status === 'healthy';
 
   return (
     <TooltipProvider>
@@ -81,7 +86,10 @@ export function ServiceStatusIndicator({
             aria-label={effectiveAriaLabel}
           >
             <div className="flex items-center gap-2 px-2 py-2 rounded-md">
-              <Icon className={`h-4 w-4 ${iconClass}`} aria-hidden="true" />
+              <Icon
+                className={`h-4 w-4 ${iconClass} ${shouldPulse ? 'animate-pulse' : ''}`}
+                aria-hidden="true"
+              />
               {showLabel && (
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {label}

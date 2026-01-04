@@ -40,7 +40,7 @@ export function useNavbarData(
 ): Omit<NavbarProps, 'isDesktop' | 'onMobileSidebarToggle' | 'searchComponent'> {
   const { fetchTopicById } = config;
   const { setTheme, theme } = useTheme();
-  const { indicator } = useServiceStatus();
+  const { indicator, connectionState } = useServiceStatus();
   const { isAdminMode, toggleAdminMode } = useAdminMode();
   const location = useLocation();
 
@@ -79,6 +79,7 @@ export function useNavbarData(
     theme: theme as ThemeOption,
     onThemeChange: cycleTheme,
     serviceStatus: indicator,
+    serviceStatusPulse: connectionState === 'connected',
     isAdminMode,
     onToggleAdminMode: toggleAdminMode,
     user: {

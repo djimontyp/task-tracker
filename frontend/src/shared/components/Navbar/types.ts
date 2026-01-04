@@ -39,6 +39,7 @@ export interface NavbarProps {
 
   // Service status
   serviceStatus: IndicatorStatus;
+  serviceStatusPulse?: boolean;
 
   // Admin mode
   isAdminMode: boolean;
