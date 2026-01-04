@@ -1,0 +1,6 @@
+# Demo and example files
+**/ExampleTokenUsage.tsx
+
+# Storybook files (already have separate lint rules)
+**/*.stories.tsx
+**/*.story.tsx
