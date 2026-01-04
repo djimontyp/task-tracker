@@ -316,7 +316,8 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
                   <ul className="space-y-2">
                     {reasoning.keyIndicators.map((indicator, index) => (
                       <li key={index} className="flex items-start gap-2 text-sm text-foreground">
-                        <span className="text-semantic-success mt-0.5">{'\u2713'}</span>
+                        {/* eslint-disable-next-line local-rules/no-hardcoded-text */}
+                        <span className="text-semantic-success mt-0.5" aria-hidden="true">{'\u2713'}</span>
                         <span>{indicator}</span>
                       </li>
                     ))}
@@ -324,15 +325,18 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
                 ) : (
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2 text-sm text-foreground">
-                      <span className="text-semantic-success mt-0.5">{'\u2713'}</span>
+                      {/* eslint-disable-next-line local-rules/no-hardcoded-text */}
+                      <span className="text-semantic-success mt-0.5" aria-hidden="true">{'\u2713'}</span>
                       <span>{t('classification.defaultIndicators.matchedCriteria')}</span>
                     </li>
                     <li className="flex items-start gap-2 text-sm text-foreground">
-                      <span className="text-semantic-success mt-0.5">{'\u2713'}</span>
+                      {/* eslint-disable-next-line local-rules/no-hardcoded-text */}
+                      <span className="text-semantic-success mt-0.5" aria-hidden="true">{'\u2713'}</span>
                       <span>{t('classification.defaultIndicators.signalRatio')}</span>
                     </li>
                     <li className="flex items-start gap-2 text-sm text-foreground">
-                      <span className="text-semantic-success mt-0.5">{'\u2713'}</span>
+                      {/* eslint-disable-next-line local-rules/no-hardcoded-text */}
+                      <span className="text-semantic-success mt-0.5" aria-hidden="true">{'\u2713'}</span>
                       <span>{t('classification.defaultIndicators.semanticSimilarity')}</span>
                     </li>
                   </ul>

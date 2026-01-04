@@ -153,7 +153,8 @@ const ProjectsPage = () => {
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <Card className="p-6 border-destructive">
           <div className="flex items-start gap-4">
-            <div className="text-destructive text-lg">⚠️</div>
+            {/* eslint-disable-next-line local-rules/no-hardcoded-text */}
+            <div className="text-destructive text-lg" aria-hidden="true">⚠️</div>
             <div>
               <p className="font-semibold text-destructive mb-2">{t('errors.loadingFailed')}</p>
               <p className="text-sm text-muted-foreground">

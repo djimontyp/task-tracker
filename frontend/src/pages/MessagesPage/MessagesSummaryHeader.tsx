@@ -48,7 +48,8 @@ export function MessagesSummaryHeader({ stats }: MessagesSummaryHeaderProps) {
       <div className="flex items-center gap-2 text-muted-foreground">
         <span className="text-base">{t(`summary.greeting.${greetingKey}`)}</span>
         <span className="text-base">{t('summary.noMessages')}</span>
-        <span className="text-lg" role="img" aria-label="coffee">
+        {/* eslint-disable-next-line local-rules/no-hardcoded-text */}
+        <span className="text-lg" aria-hidden="true">
           ☕️
         </span>
       </div>
@@ -82,7 +83,7 @@ export function MessagesSummaryHeader({ stats }: MessagesSummaryHeaderProps) {
           <Badge variant="secondary" className="gap-2">
             <Sparkles className="h-3.5 w-3.5 text-status-connected" />
             <span>{t('summary.allClear')}</span>
-            <span role="img" aria-label="sparkles">
+            <span aria-hidden="true">
               ✨
             </span>
           </Badge>

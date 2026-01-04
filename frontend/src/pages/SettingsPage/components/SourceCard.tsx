@@ -59,7 +59,7 @@ const SourceCard = ({
             <Icon className="h-7 w-7 text-primary" />
           </div>
           <h3 className="font-semibold text-lg leading-tight flex-1 truncate">{name}</h3>
-          <Switch checked={enabled} onCheckedChange={onToggle} aria-label={`Toggle ${name}`} />
+          <Switch checked={enabled} onCheckedChange={onToggle} aria-label={t('sourceCard.toggleAriaLabel', { name })} />
         </div>
 
         {/* Description */}

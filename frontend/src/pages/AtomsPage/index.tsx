@@ -379,7 +379,7 @@ const AtomsPage: React.FC = () => {
                         <Checkbox
                           checked={selectedAtoms.has(String(atom.id))}
                           onCheckedChange={() => toggleSelection(String(atom.id))}
-                          aria-label={`Select ${atom.title}`}
+                          aria-label={t('actions.selectAriaLabel', { title: atom.title })}
                         />
                       </div>
 
