@@ -11,7 +11,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { CompactCard } from './CompactCard';
-import { Badge } from '@/shared/ui/badge';
 import { Pencil, Copy } from 'lucide-react';
 import { TooltipProvider } from '@/shared/ui/tooltip';
 

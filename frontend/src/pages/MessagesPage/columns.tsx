@@ -186,7 +186,6 @@ export const createColumns = (callbacks: ColumnsCallbacks): ColumnDef<Message>[]
         <Badge
           variant={config.variant}
           className={config.className}
-          aria-label={`Message status: ${config.label}`}
         >
           {config.label}
         </Badge>
@@ -221,7 +220,6 @@ export const createColumns = (callbacks: ColumnsCallbacks): ColumnDef<Message>[]
                 <Badge
                   variant={config.variant}
                   className={`inline-flex items-center gap-2 ${config.className}`}
-                  aria-label={`Importance: ${config.label} (${percentage}%)`}
                 >
                   {config.label}
                   {row.original.noise_factors && (
@@ -284,7 +282,6 @@ export const createColumns = (callbacks: ColumnsCallbacks): ColumnDef<Message>[]
         <Badge
           variant={config.variant}
           className={config.className}
-          aria-label={`Classification: ${config.label}`}
         >
           {config.label}
         </Badge>

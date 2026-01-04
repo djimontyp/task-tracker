@@ -420,7 +420,7 @@ const MessagesPage = () => {
   if (isLoading) {
     return (
       <PageWrapper variant="fullWidth">
-        <div className="flex items-center justify-between" role="status" aria-label="Loading messages" aria-live="polite">
+        <div className="flex items-center justify-between" role="status" aria-live="polite">
           <Skeleton className="h-8 w-32" />
           <div className="flex gap-2">
             <Skeleton className="h-9 w-24" />

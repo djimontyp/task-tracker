@@ -396,7 +396,7 @@ describe('ExpandedCard - Accessibility', () => {
   });
 
   it('error state has role="alert" and aria-live', () => {
-    const { container } = render(<ExpandedCard header={mockHeader} isError />);
+    render(<ExpandedCard header={mockHeader} isError />);
 
     const alert = screen.getByRole('alert');
     expect(alert).toHaveAttribute('aria-live', 'polite');
