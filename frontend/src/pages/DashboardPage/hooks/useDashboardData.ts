@@ -6,6 +6,9 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
+import { format, parseISO } from 'date-fns'
+import type { Locale } from 'date-fns'
+import { enUS } from 'date-fns/locale'
 import { apiClient } from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
 import { dashboardService, type DashboardMetricsResponse } from '@/shared/api/dashboard'
@@ -15,6 +18,8 @@ import type {
   RecentInsight,
   TopTopic,
   DashboardPeriod,
+  MessageTrendPoint,
+  ActivityDay,
 } from '../types'
 import { isEmptyDashboard } from '../mocks/dashboardMocks'
 
@@ -138,6 +143,86 @@ export function useDashboardTopics(limit = 5) {
         messageCount: 0, // TODO: Add message_count to topics endpoint
         lastActivityAt: topic.updated_at as string,
       }))
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+/**
+ * Transform backend message trends to frontend format
+ */
+function transformMessageTrends(
+  data: Array<{ date: string; signal: number; noise: number }>,
+  locale: Locale
+): MessageTrendPoint[] {
+  return data.map((item) => {
+    const date = parseISO(item.date)
+    return {
+      date: item.date,
+      displayDate: format(date, 'd MMM', { locale }),
+      signal: item.signal,
+      noise: item.noise,
+    }
+  }).reverse() // Reverse so newest is at the end (right side of chart)
+}
+
+/**
+ * Fetch message trends for TrendChart
+ * API: GET /api/v1/dashboard/message-trends?days=30
+ */
+export function useMessageTrends(days: number = 30, locale: Locale = enUS) {
+  return useQuery({
+    queryKey: [...dashboardKeys.all, 'message-trends', days],
+    queryFn: async (): Promise<MessageTrendPoint[]> => {
+      const response = await apiClient.get(API_ENDPOINTS.dashboard.messageTrends, {
+        params: { days },
+      })
+      return transformMessageTrends(response.data.data || [], locale)
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+/**
+ * Transform activity API response to ActivityDay format
+ */
+function transformActivityData(
+  data: Array<{ date: string; count: number }>
+): ActivityDay[] {
+  return data.map((item) => {
+    const count = item.count
+    let level: 0 | 1 | 2 | 3 | 4 = 0
+
+    if (count >= 50) {
+      level = 4
+    } else if (count >= 20) {
+      level = 3
+    } else if (count >= 10) {
+      level = 2
+    } else if (count > 0) {
+      level = 1
+    }
+
+    return {
+      date: parseISO(item.date),
+      count,
+      level,
+    }
+  })
+}
+
+/**
+ * Fetch activity heatmap data
+ * API: GET /api/v1/activity?period=week
+ */
+export function useActivityHeatmap(period: 'week' | 'month' = 'week') {
+  return useQuery({
+    queryKey: [...dashboardKeys.all, 'activity', period],
+    queryFn: async (): Promise<ActivityDay[]> => {
+      const response = await apiClient.get(API_ENDPOINTS.activity, {
+        params: { period },
+      })
+      return transformActivityData(response.data.data || response.data || [])
     },
     staleTime: 5 * 60 * 1000,
   })

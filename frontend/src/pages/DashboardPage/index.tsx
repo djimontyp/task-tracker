@@ -8,8 +8,9 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { uk, enUS } from 'date-fns/locale'
 
-import { useDashboardData } from './hooks/useDashboardData'
+import { useDashboardData, useMessageTrends, useActivityHeatmap } from './hooks/useDashboardData'
 import { DashboardPresenter } from './DashboardPresenter'
 import type { FocusAtom } from './types'
 
@@ -90,11 +91,19 @@ function useHeroSubtitle(
  */
 const DashboardPage = () => {
   const navigate = useNavigate()
+  const { i18n } = useTranslation()
   const [showOnboarding, setShowOnboarding] = useState(false)
+
+  // Determine date locale
+  const dateLocale = i18n.language === 'uk' ? uk : enUS
 
   // Data fetching
   const { metrics, insights, topics, hasNoData, isAnyLoading } =
     useDashboardData('today')
+
+  // Chart data fetching
+  const { data: trendData, isLoading: trendLoading } = useMessageTrends(30, dateLocale)
+  const { data: activityData, isLoading: activityLoading } = useActivityHeatmap('week')
 
   // Computed greeting and subtitle
   const greeting = useGreeting()
@@ -153,6 +162,10 @@ const DashboardPage = () => {
         isLoading: false,
         error: null,
       }}
+      trendData={trendData}
+      trendLoading={trendLoading}
+      activityData={activityData}
+      activityLoading={activityLoading}
       hasNoData={hasNoData}
       isAnyLoading={isAnyLoading}
       showOnboarding={showOnboarding}

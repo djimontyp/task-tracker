@@ -149,6 +149,35 @@ export interface TopTopicsProps {
  * Props for DashboardPresenter (Container/Presenter pattern)
  * Pure component that receives all data as props
  */
+/**
+ * Message trend data point for TrendChart
+ * API: GET /api/v1/dashboard/message-trends?days=30
+ */
+export interface MessageTrendPoint {
+  date: string // ISO date string (YYYY-MM-DD)
+  displayDate: string // Formatted date (d MMM)
+  signal: number
+  noise: number
+}
+
+/**
+ * Backend response for message trends
+ */
+export interface MessageTrendsResponse {
+  period_days: number
+  data: Array<{ date: string; signal: number; noise: number }>
+}
+
+/**
+ * Activity day for ActivityHeatmap
+ * API: GET /api/v1/activity?period=week
+ */
+export interface ActivityDay {
+  date: Date
+  count: number
+  level: 0 | 1 | 2 | 3 | 4
+}
+
 export interface DashboardPresenterProps {
   // Data from useDashboardData hook
   metrics: {
@@ -171,6 +200,12 @@ export interface DashboardPresenterProps {
     isLoading: boolean
     error: Error | null
   }
+
+  // Chart data
+  trendData?: MessageTrendPoint[]
+  trendLoading?: boolean
+  activityData?: ActivityDay[]
+  activityLoading?: boolean
 
   // Derived state
   hasNoData: boolean
