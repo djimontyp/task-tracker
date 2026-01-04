@@ -12,6 +12,7 @@ interface CommandCenterProps {
     trendLoading?: boolean
     activityData?: ActivityDay[]
     activityLoading?: boolean
+    activeSignalsCount?: number
 }
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({
@@ -21,6 +22,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
     trendLoading,
     activityData,
     activityLoading,
+    activeSignalsCount = 0,
 }) => {
     const { t } = useTranslation('dashboard')
     return (
@@ -40,7 +42,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                         <div className="absolute inset-0 rounded-full border-t-2 border-primary animate-spin-slow opacity-60" />
 
                         {/* Icon/Number */}
-                        <span className="text-lg font-bold text-primary">16</span>
+                        <span className="text-lg font-bold text-primary">{activeSignalsCount}</span>
                     </div>
                     <div className="flex flex-col">
                         <span className="text-sm font-semibold">{t('commandCenter.activeSignals')}</span>

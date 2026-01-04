@@ -231,6 +231,7 @@ export interface DashboardPresenterProps {
   step2Status: StepStatus
   step3Status: StepStatus
   step4Status: StepStatus
+  isWizardCompleted: boolean
 
   // ProjectForm modal
   projectFormOpen: boolean

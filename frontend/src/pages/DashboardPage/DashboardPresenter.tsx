@@ -47,6 +47,7 @@ export function DashboardPresenter({
   step2Status,
   step3Status,
   step4Status,
+  isWizardCompleted,
   projectFormOpen,
   onProjectFormClose,
   onProjectSubmit,
@@ -56,6 +57,12 @@ export function DashboardPresenter({
   // Note: _onNavigateToMessages, onNavigateToProjects reserved for future use
   void _onNavigateToMessages;
   void onNavigateToProjects;
+
+  // Calculate total active signals
+  const activeSignalsCount = (metrics.data?.critical?.count ?? 0) +
+    (metrics.data?.ideas?.count ?? 0) +
+    (metrics.data?.decisions?.count ?? 0) +
+    (metrics.data?.questions?.count ?? 0)
 
   return (
     <PageWrapper variant="fullWidth">
@@ -70,6 +77,7 @@ export function DashboardPresenter({
           onConnectSource={onNavigateToSettings}
           onCreateProject={onCreateProject}
           onActivateAgent={onNavigateToAgents}
+          collapsed={isWizardCompleted}
         />
       )}
 
@@ -89,6 +97,7 @@ export function DashboardPresenter({
         trendLoading={trendLoading}
         activityData={activityData}
         activityLoading={activityLoading}
+        activeSignalsCount={activeSignalsCount}
       />
 
       {/* Row 1: Metrics (3 cards) */}
