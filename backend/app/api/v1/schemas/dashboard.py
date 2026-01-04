@@ -78,3 +78,23 @@ class DashboardMetricsResponse(BaseModel):
         description="Trends for messages, atoms, topics",
     )
     generated_at: datetime = Field(description="When metrics were generated")
+
+
+class MessageTrendPoint(BaseModel):
+    """Single data point for message trends chart."""
+
+    date: str = Field(
+        description="Date in ISO format YYYY-MM-DD",
+        json_schema_extra={"example": "2024-01-15"},
+    )
+    signal: int = Field(ge=0, description="Number of signal messages on this date")
+    noise: int = Field(ge=0, description="Number of noise messages on this date")
+
+
+class MessageTrendsResponse(BaseModel):
+    """Response for message trends endpoint."""
+
+    period_days: int = Field(ge=7, le=90, description="Number of days in the period")
+    data: list[MessageTrendPoint] = Field(
+        description="Daily signal/noise counts, sorted oldest to newest"
+    )
