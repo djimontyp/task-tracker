@@ -11,6 +11,7 @@ import {
   flexRender,
   Table as TableType,
 } from '@tanstack/react-table'
+import { useTranslation } from 'react-i18next'
 import { useIsMobile } from '@/shared/hooks/use-mobile'
 import { cn } from '@/shared/lib/index'
 import type { DataTableColumnMeta } from './types'
@@ -27,12 +28,15 @@ interface DataTableProps<TData> {
 export function DataTable<TData>({
   table,
   columns,
-  emptyMessage = 'No results.',
+  emptyMessage,
   renderMobileCard,
   onRowClick,
   enableResizing = true,
 }: DataTableProps<TData>) {
+  const { t } = useTranslation('common')
   const isMobile = useIsMobile()
+
+  const displayEmptyMessage = emptyMessage ?? t('dataTable.noResults')
 
   if (isMobile && renderMobileCard) {
     return (
@@ -49,7 +53,7 @@ export function DataTable<TData>({
           ))
         ) : (
           <div className="flex items-center justify-center h-24 text-center text-muted-foreground">
-            {emptyMessage}
+            {displayEmptyMessage}
           </div>
         )}
       </div>
@@ -152,7 +156,7 @@ export function DataTable<TData>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                {emptyMessage}
+                {displayEmptyMessage}
               </TableCell>
             </TableRow>
           )}

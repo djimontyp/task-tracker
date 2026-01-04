@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Sheet,
   SheetContent,
@@ -13,15 +14,17 @@ interface MobileSearchProps {
 }
 
 export const MobileSearch = ({ open, onOpenChange, children }: MobileSearchProps) => {
+  const { t } = useTranslation()
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="top"
         className="h-auto"
-        aria-label="Mobile search"
+        aria-label={t('mobileSearch.title')}
       >
         <SheetHeader>
-          <SheetTitle className="sr-only">Search</SheetTitle>
+          <SheetTitle className="sr-only">{t('mobileSearch.title')}</SheetTitle>
         </SheetHeader>
         <div className="py-4">
           {children}

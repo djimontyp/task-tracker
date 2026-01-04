@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Input,
   Button,
@@ -27,10 +28,13 @@ export function DataTableToolbar<TData>({
   table,
   globalFilter,
   onGlobalFilterChange,
-  searchPlaceholder = 'Filter...',
+  searchPlaceholder,
   children,
 }: DataTableToolbarProps<TData>) {
+  const { t } = useTranslation('common')
   const [open, setOpen] = React.useState(false)
+
+  const displayPlaceholder = searchPlaceholder ?? t('dataTable.toolbar.filter')
 
   const hidableColumns = table
     .getAllColumns()
@@ -42,7 +46,7 @@ export function DataTableToolbar<TData>({
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full max-w-full overflow-x-hidden">
       <div className="flex w-full items-center gap-2 flex-wrap max-w-full overflow-x-hidden">
         <Input
-          placeholder={searchPlaceholder}
+          placeholder={displayPlaceholder}
           value={globalFilter}
           onChange={(e) => onGlobalFilterChange(e.target.value)}
           className="max-w-sm"
@@ -53,7 +57,7 @@ export function DataTableToolbar<TData>({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" className="flex-shrink-0">
-            View
+            {t('dataTable.toolbar.view')}
             {visibleCount < hidableColumns.length && (
               <span className="ml-2 rounded bg-muted px-2 text-xs">
                 {visibleCount}/{hidableColumns.length}
@@ -64,9 +68,9 @@ export function DataTableToolbar<TData>({
         </PopoverTrigger>
         <PopoverContent align="end" className="w-48 p-0">
           <Command>
-            <CommandInput placeholder="Search columns..." />
+            <CommandInput placeholder={t('dataTable.toolbar.searchColumns')} />
             <CommandList>
-              <CommandEmpty>No columns found.</CommandEmpty>
+              <CommandEmpty>{t('dataTable.toolbar.noColumnsFound')}</CommandEmpty>
               {hidableColumns.map((column) => (
                 <CommandItem
                   key={column.id}

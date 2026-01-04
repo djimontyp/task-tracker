@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/ui/button'
 import { Checkbox } from '@/shared/ui/checkbox'
 import { cn } from '@/shared/lib/utils'
@@ -30,6 +31,7 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
   onDelete,
   className,
 }) => {
+  const { t } = useTranslation('common')
   const hasSelection = selectedCount > 0
   const allSelected = selectedCount === totalCount && totalCount > 0
   const someSelected = selectedCount > 0 && selectedCount < totalCount
@@ -56,7 +58,7 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
           htmlFor="select-all"
           className="text-sm font-medium cursor-pointer select-none"
         >
-          {selectedCount} selected
+          {t('bulkActions.selected', { count: selectedCount })}
         </label>
         <AdminFeatureBadge variant="inline" size="sm" />
       </div>
@@ -67,14 +69,14 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
           {onApprove && (
             <Button size="sm" variant="default" onClick={onApprove}>
               <Check className="mr-2 h-4 w-4" />
-              Approve
+              {t('bulkActions.approve')}
             </Button>
           )}
 
           {onArchive && (
             <Button size="sm" variant="outline" onClick={onArchive}>
               <Archive className="mr-2 h-4 w-4" />
-              Archive
+              {t('bulkActions.archive')}
             </Button>
           )}
 
@@ -85,7 +87,7 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
               onClick={onDelete}
             >
               <Trash className="mr-2 h-4 w-4" />
-              Delete
+              {t('bulkActions.delete')}
             </Button>
           )}
 
@@ -95,7 +97,7 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
             onClick={onClearSelection}
           >
             <X className="mr-2 h-4 w-4" />
-            Clear
+            {t('bulkActions.clear')}
           </Button>
         </div>
       )}

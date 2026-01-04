@@ -35,12 +35,12 @@ export function JsonResponseViewer({ response, maxHeight = '300px' }: JsonRespon
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">{t('testDialog.results.response')}</span>
         {isJson ? (
-          <Badge variant="default" className="flex items-center gap-1.5">
+          <Badge variant="default" className="flex items-center gap-1">
             <CheckCircle2 className="h-3 w-3" />
             {t('testDialog.results.jsonValid')}
           </Badge>
         ) : (
-          <Badge variant="secondary" className="flex items-center gap-1.5 bg-semantic-warning/10 text-semantic-warning border-semantic-warning/20">
+          <Badge variant="secondary" className="flex items-center gap-1 bg-semantic-warning/10 text-semantic-warning border-semantic-warning/20">
             <AlertCircle className="h-3 w-3" />
             {t('testDialog.results.textOnly')}
           </Badge>

@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { cn } from '@/shared/lib'
@@ -34,14 +35,14 @@ const getStatusBadgeVariant = (
   }
 }
 
-const getStatusBadgeLabel = (status: MetricStatus): string => {
+const getStatusBadgeLabelKey = (status: MetricStatus): string => {
   switch (status) {
     case 'critical':
-      return 'Critical'
+      return 'metricCard.status.critical'
     case 'warning':
-      return 'Warning'
+      return 'metricCard.status.warning'
     case 'optimal':
-      return 'Good'
+      return 'metricCard.status.good'
   }
 }
 
@@ -69,6 +70,8 @@ const getCardBorderColor = (status: MetricStatus): string => {
 
 export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
   ({ title, value, subtitle, trend, icon: Icon, iconColor, className, onClick, loading = false, emptyMessage, status, ...props }, ref) => {
+    const { t } = useTranslation('common')
+
     const getTrendIcon = () => {
       if (!trend) return null
       switch (trend.direction) {
@@ -178,7 +181,7 @@ export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
                   variant={getStatusBadgeVariant(status)}
                   className={cn('text-xs', getStatusBadgeColor(status))}
                 >
-                  {getStatusBadgeLabel(status)}
+                  {t(getStatusBadgeLabelKey(status))}
                 </Badge>
               )}
             </div>
@@ -188,7 +191,7 @@ export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
             {shouldShowTrend && (
               <div
                 className={cn('flex items-center gap-2 text-sm font-medium', getTrendColor())}
-                aria-label={`${trend.direction === 'up' ? 'Increased' : trend.direction === 'down' ? 'Decreased' : 'No change'} by ${Math.abs(trend.value)} percent`}
+                aria-label={`${trend.direction === 'up' ? t('metricCard.trend.increased') : trend.direction === 'down' ? t('metricCard.trend.decreased') : t('metricCard.trend.noChange')} by ${Math.abs(trend.value)} percent`}
               >
                 {getTrendIcon()}
                 <span aria-hidden="true">{Math.abs(trend.value)}%</span>

@@ -159,7 +159,11 @@
     "rowsPerPage": "Rows per page",
     "showing": "Showing",
     "to": "to",
-    "entries": "entries"
+    "entries": "entries",
+    "goToPrevious": "Go to previous page",
+    "goToNext": "Go to next page",
+    "morePages": "More pages",
+    "ariaLabel": "Pagination"
   },
   "search": {
     "placeholder": "What are you looking for? Press / to focus",
@@ -179,6 +183,7 @@
   },
   "navbar": {
     "toggleSidebar": "Toggle sidebar",
+    "homeLink": "{{appName}} home",
     "pageInfo": "Page info",
     "openSearch": "Open search",
     "theme": {
@@ -205,12 +210,150 @@
     }
   },
   "dataTable": {
+    "noResults": "No results.",
     "rowsSelected": "{{selected}} of {{total}} row(s) selected",
     "goToPage": "Go to page",
     "goToNextPage": "Go to next page",
     "goToLastPage": "Go to last page",
     "selected": "{{count}} selected",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "columnHeader": {
+      "asc": "Asc",
+      "desc": "Desc"
+    },
+    "toolbar": {
+      "filter": "Filter...",
+      "view": "View",
+      "searchColumns": "Search columns...",
+      "noColumnsFound": "No columns found."
+    }
+  },
+  "metricCard": {
+    "status": {
+      "critical": "Critical",
+      "warning": "Warning",
+      "good": "Good"
+    },
+    "trend": {
+      "increased": "Increased",
+      "decreased": "Decreased",
+      "noChange": "No change"
+    }
+  },
+  "saveStatus": {
+    "saving": "Saving...",
+    "saved": "Saved",
+    "saveFailed": "Save failed",
+    "unsavedChanges": "Unsaved changes",
+    "allChangesSaved": "All changes saved",
+    "timeAgo": {
+      "justNow": "just now",
+      "secondsAgo": "{{seconds}}s ago",
+      "minutesAgo": "{{minutes}}m ago"
+    }
+  },
+  "searchDropdown": {
+    "noResultsFor": "No results for \"{{query}}\"",
+    "tryBroaderKeywords": "Try broader keywords or check spelling",
+    "messages": "Messages ({{count}})",
+    "atoms": "Atoms ({{count}})",
+    "topics": "Topics ({{count}})"
+  },
+  "activityHeatmap": {
+    "title": "Message Activity Heatmap",
+    "tooltip": {
+      "messages": "Messages",
+      "source": "Source"
+    },
+    "tabs": {
+      "week": "Week",
+      "month": "Month"
+    },
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "legend": {
+      "less": "Less",
+      "more": "More"
+    }
+  },
+  "adminFeatureBadge": {
+    "text": "Admin Only",
+    "tooltip": "This feature is only available in Admin Mode",
+    "ariaLabel": "Admin only feature"
+  },
+  "adminPanel": {
+    "title": "Admin Panel",
+    "shortcut": "(Cmd+Shift+A to toggle)",
+    "ariaLabel": "Admin Panel"
+  },
+  "bulkActions": {
+    "selected": "{{count}} selected",
+    "approve": "Approve",
+    "archive": "Archive",
+    "delete": "Delete",
+    "clear": "Clear"
+  },
+  "autoSave": {
+    "label": "Auto-save"
+  },
+  "colorPicker": {
+    "changeColor": "Change color",
+    "changeTopicColor": "Change topic color",
+    "autoPick": "Auto-pick",
+    "save": "Save",
+    "hexColorCode": "Hex color code"
+  },
+  "aria": {
+    "breadcrumb": "Breadcrumb",
+    "loading": "Loading",
+    "more": "More",
+    "toggleSidebar": "Toggle Sidebar"
+  },
+  "command": {
+    "menuTitle": "Command Menu",
+    "menuDescription": "Search for commands and navigate with keyboard"
+  },
+  "sidebarMobile": {
+    "title": "Sidebar",
+    "description": "Displays the mobile sidebar."
+  },
+  "cardStates": {
+    "error": {
+      "title": "Failed to load content",
+      "retry": "Retry",
+      "retryAriaLabel": "Retry loading content"
+    },
+    "empty": {
+      "default": "No content available",
+      "compact": "No content"
+    },
+    "actions": {
+      "moreActions": "More actions"
+    }
+  },
+  "a11y": {
+    "skipToMainContent": "Skip to main content"
+  },
+  "layout": {
+    "adminToolsPlaceholder": "Admin tools will be added in Phase 2-6"
+  },
+  "mobileSearch": {
+    "title": "Search"
+  },
+  "searchCard": {
+    "error": {
+      "title": "Failed to load"
+    },
+    "match": "{{score}} match",
+    "messageAriaLabel": "Message from user {{user}}",
+    "topicAriaLabel": "Topic: {{name}}"
   },
   "toast": {
     "success": {
@@ -284,6 +427,55 @@
     "admin": {
       "enabled": "Admin Mode Enabled",
       "disabled": "Admin Mode Disabled"
+    }
+  },
+  "searchPage": {
+    "title": "Semantic Search",
+    "hint": "Use the search bar above or press",
+    "hintContinue": "to begin searching messages",
+    "crossLanguage": "Supports cross-language search (Ukrainian + English)",
+    "searching": "Searching for \"{{query}}\"...",
+    "aiPowered": "Using AI-powered semantic search",
+    "error": "Search Error",
+    "errorGeneric": "An error occurred while searching",
+    "resultsFor": "Search Results for \"{{query}}\"",
+    "resultsCount_one": "{{count}} result found",
+    "resultsCount_other": "{{count}} results found",
+    "semanticSimilarity": "semantic similarity",
+    "noResults": "No results found",
+    "noResultsDescription": "No topics or messages match your search for \"{{query}}\". Try different keywords or check your spelling.",
+    "topics": "Topics ({{count}})",
+    "messages": "Messages ({{count}})"
+  },
+  "versionsPage": {
+    "searchPlaceholder": "Search by entity name...",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "filters": {
+      "all": "All",
+      "topics": "Topics",
+      "atoms": "Atoms"
+    },
+    "empty": {
+      "noPending": "No pending versions",
+      "noStatus": "No {{status}} versions",
+      "allReviewed": "All caught up! All versions have been reviewed.",
+      "tryFilters": "Try adjusting your filters."
+    },
+    "version": "Version {{version}}",
+    "confidence": "Confidence: {{value}}%",
+    "entityTypes": {
+      "topic": "Topic",
+      "atom": "Atom"
+    },
+    "dialog": {
+      "title": "Version Comparison - {{name}}"
+    },
+    "toast": {
+      "approved": "Version approved",
+      "rejected": "Version rejected",
+      "approveFailed": "Failed to approve version",
+      "rejectFailed": "Failed to reject version"
     }
   }
 }

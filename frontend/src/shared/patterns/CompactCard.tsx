@@ -34,6 +34,7 @@
  */
 
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
@@ -157,7 +158,10 @@ interface OverflowMenuProps {
 /**
  * Overflow dropdown menu for secondary actions
  */
-function OverflowMenu({ actions, label = 'More actions' }: OverflowMenuProps) {
+function OverflowMenu({ actions, label }: OverflowMenuProps) {
+  const { t } = useTranslation('common');
+  const menuLabel = label || t('cardStates.actions.moreActions');
+
   if (actions.length === 0) return null;
 
   return (
@@ -169,14 +173,14 @@ function OverflowMenu({ actions, label = 'More actions' }: OverflowMenuProps) {
               variant="ghost"
               size="icon"
               className="h-11 w-11 flex-shrink-0"
-              aria-label={label}
+              aria-label={menuLabel}
               onClick={(e) => e.stopPropagation()}
             >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
         </TooltipTrigger>
-        <TooltipContent>{label}</TooltipContent>
+        <TooltipContent>{menuLabel}</TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
         {actions.map((action, index) => (
@@ -231,19 +235,20 @@ interface CompactCardErrorProps {
 }
 
 function CompactCardError({ error, onRetry }: CompactCardErrorProps) {
+  const { t } = useTranslation('common');
   return (
     <Card className="sm:hidden">
       <CardContent className="p-3">
         <div className="flex items-center gap-2">
           <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
-          <span className="text-sm font-medium truncate">Failed to load</span>
+          <span className="text-sm font-medium truncate">{t('cardStates.error.title')}</span>
           {onRetry && (
             <Button
               variant="ghost"
               size="icon"
               className="h-11 w-11 ml-auto flex-shrink-0"
               onClick={onRetry}
-              aria-label="Retry"
+              aria-label={t('cardStates.error.retryAriaLabel')}
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
@@ -267,13 +272,15 @@ interface CompactCardEmptyProps {
   message?: string;
 }
 
-function CompactCardEmpty({ message = 'No content' }: CompactCardEmptyProps) {
+function CompactCardEmpty({ message }: CompactCardEmptyProps) {
+  const { t } = useTranslation('common');
+  const displayMessage = message || t('cardStates.empty.compact');
   return (
     <Card className="sm:hidden">
       <CardContent className="p-3">
         <div className="flex items-center gap-2 text-muted-foreground">
           <Inbox className="h-5 w-5 flex-shrink-0" />
-          <span className="text-sm truncate">{message}</span>
+          <span className="text-sm truncate">{displayMessage}</span>
         </div>
       </CardContent>
     </Card>

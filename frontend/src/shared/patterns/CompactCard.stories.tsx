@@ -5,7 +5,7 @@
  * All stories demonstrate the component at mobile viewport.
  */
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { CompactCard } from './CompactCard';
 import { Badge } from '@/shared/ui/badge';
 import { Pencil, Copy, Settings, Trash2, TestTube2, Lightbulb, X, MoreHorizontal } from 'lucide-react';

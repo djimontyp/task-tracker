@@ -5,7 +5,7 @@
  * All stories demonstrate the component at desktop viewport.
  */
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ExpandedCard } from './ExpandedCard';
 import { CardActions } from './CardActions';
 import { Badge } from '@/shared/ui/badge';

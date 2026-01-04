@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next'
+
 interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg'
   className?: string
 }
 
 const Spinner = ({ size = 'md', className = '' }: SpinnerProps) => {
+  const { t } = useTranslation('common')
   const sizeStyles = {
     sm: 'h-4 w-4',
     md: 'h-8 w-8',
@@ -11,7 +14,7 @@ const Spinner = ({ size = 'md', className = '' }: SpinnerProps) => {
   }
 
   return (
-    <div className={`flex items-center justify-center ${className}`} role="status" aria-label="Loading">
+    <div className={`flex items-center justify-center ${className}`} role="status" aria-label={t('aria.loading')}>
       <svg
         className={`animate-spin text-primary-600 ${sizeStyles[size]}`}
         xmlns="http://www.w3.org/2000/svg"

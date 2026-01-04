@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { TruncatedText, TruncatedTitle } from './truncated-text';
 import { TooltipProvider } from './tooltip';
 
@@ -12,7 +12,7 @@ class MockResizeObserver {
   observe = vi.fn();
   unobserve = vi.fn();
   disconnect = vi.fn();
-  constructor(callback: ResizeObserverCallback) {
+  constructor(_callback: ResizeObserverCallback) {
     // Store callback if needed for testing
   }
 }

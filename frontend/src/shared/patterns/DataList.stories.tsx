@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DataList, InlineDataList, KeyValueGrid, StatGrid } from './DataList';
 import { TooltipProvider } from '@/shared/ui/tooltip';
 import { Badge } from '@/shared/ui/badge';

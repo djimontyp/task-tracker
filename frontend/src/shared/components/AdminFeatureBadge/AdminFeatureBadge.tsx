@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Badge } from '@/shared/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/tooltip'
 import { ShieldCheck } from 'lucide-react'
@@ -16,11 +17,14 @@ export interface AdminFeatureBadgeProps {
 export const AdminFeatureBadge: React.FC<AdminFeatureBadgeProps> = ({
   variant = 'inline',
   size = 'default',
-  text = 'Admin Only',
-  tooltip = 'This feature is only available in Admin Mode',
+  text,
+  tooltip,
   className,
   showIcon = true,
 }) => {
+  const { t } = useTranslation('common')
+  const displayText = text ?? t('adminFeatureBadge.text')
+  const displayTooltip = tooltip ?? t('adminFeatureBadge.tooltip')
   const isAdminMode = useUiStore((state) => state.isAdminMode)
 
   if (!isAdminMode) return null
@@ -52,12 +56,12 @@ export const AdminFeatureBadge: React.FC<AdminFeatureBadgeProps> = ({
       variant="secondary"
       className={badgeClasses}
       role="status"
-      aria-label="Admin only feature"
+      aria-label={t('adminFeatureBadge.ariaLabel')}
     >
       {showIcon && (
         <ShieldCheck className={cn(iconSizes[size], 'flex-shrink-0')} aria-hidden="true" />
       )}
-      <span>{text}</span>
+      <span>{displayText}</span>
     </Badge>
   )
 
@@ -67,7 +71,7 @@ export const AdminFeatureBadge: React.FC<AdminFeatureBadgeProps> = ({
         {badge}
       </TooltipTrigger>
       <TooltipContent>
-        <p>{tooltip}</p>
+        <p>{displayTooltip}</p>
       </TooltipContent>
     </Tooltip>
   )

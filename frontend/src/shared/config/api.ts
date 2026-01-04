@@ -91,6 +91,7 @@ export const API_ENDPOINTS = {
   dashboard: {
     metrics: buildApiPath('dashboard/metrics'),
     trends: buildApiPath('dashboard/trends'),
+    messageTrends: buildApiPath('dashboard/message-trends'),
   },
 
   // Metrics endpoints

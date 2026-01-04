@@ -37,5 +37,17 @@
     "uploadFailed": "Failed to upload file",
     "tooLarge": "File is too large",
     "invalidType": "Invalid file type"
+  },
+  "boundary": {
+    "title": "Oops! Something went wrong",
+    "description": "We encountered an unexpected error. Don't worry, we've logged it and will look into it.",
+    "detailsSummary": "Error Details (Development Only)",
+    "errorLabel": "Error:",
+    "componentStackLabel": "Component Stack:",
+    "tryAgain": "Try Again",
+    "goHome": "Go Home",
+    "tryAgainAriaLabel": "Retry the previous action",
+    "goHomeAriaLabel": "Go back to home page",
+    "persistsMessage": "If this problem persists, please contact support or refresh the page."
   }
 }
