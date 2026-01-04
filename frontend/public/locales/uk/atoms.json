@@ -137,6 +137,45 @@
       "topicsIdentified": "Виявлено {{count}} тем"
     }
   },
+  "createDialog": {
+    "title": "Створити новий атом",
+    "description": "Атом буде автоматично прив'язаний до поточного топіка",
+    "fields": {
+      "type": {
+        "label": "Тип атома",
+        "placeholder": "Оберіть тип"
+      },
+      "title": {
+        "label": "Заголовок",
+        "placeholder": "Короткий опис атома"
+      },
+      "content": {
+        "label": "Зміст",
+        "placeholder": "Детальний опис атома (мінімум 10 символів)"
+      },
+      "confidence": {
+        "label": "Впевненість (необов'язково)",
+        "ariaLabel": "Рівень впевненості"
+      }
+    },
+    "types": {
+      "problem": "Проблема",
+      "solution": "Рішення",
+      "decision": "Рішення",
+      "question": "Питання",
+      "insight": "Інсайт",
+      "pattern": "Патерн",
+      "requirement": "Вимога"
+    },
+    "actions": {
+      "creating": "Створення...",
+      "create": "Створити атом"
+    },
+    "errors": {
+      "unknown": "Невідома помилка",
+      "createFailed": "Помилка створення атома: {{error}}"
+    }
+  },
   "versions": {
     "awaiting_one": "1 версія очікує затвердження",
     "awaiting_few": "{{count}} версії очікують затвердження ({{topics}} тем, {{atoms}} атомів)",

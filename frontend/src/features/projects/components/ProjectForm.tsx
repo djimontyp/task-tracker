@@ -186,11 +186,11 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   const handleAddKeyword = () => {
     const trimmed = keywordInput.trim()
     if (!trimmed) {
-      toast.error('Ключове слово не може бути порожнім')
+      toast.error(t('form.validation.keywordEmpty'))
       return
     }
     if (formData.keywords?.includes(trimmed)) {
-      toast.warning('Таке ключове слово вже додано')
+      toast.warning(t('form.validation.keywordDuplicate'))
       return
     }
     setValue('keywords', [...(formData.keywords || []), trimmed])
@@ -208,7 +208,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   const handleAddComponent = () => {
     const trimmedName = componentNameInput.trim()
     if (!trimmedName) {
-      toast.error('Назва компонента обов\'язкова')
+      toast.error(t('form.validation.componentNameRequired'))
       return
     }
 
@@ -227,7 +227,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     setComponentNameInput('')
     setComponentKeywordsInput('')
     setComponentDescriptionInput('')
-    toast.success(`Компонент "${trimmedName}" додано`)
+    toast.success(t('form.validation.componentAdded', { name: trimmedName }))
   }
 
   const handleRemoveComponent = (index: number) => {
@@ -240,16 +240,16 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   const handleAddAssignee = () => {
     const trimmed = assigneeInput.trim()
     if (!trimmed) {
-      toast.error('ID виконавця не може бути порожнім')
+      toast.error(t('form.validation.assigneeEmpty'))
       return
     }
     const numericValue = Number(trimmed)
     if (Number.isNaN(numericValue) || numericValue < 1) {
-      toast.error('ID виконавця має бути числом >= 1')
+      toast.error(t('form.validation.assigneeInvalid'))
       return
     }
     if (formData.default_assignee_ids?.includes(numericValue)) {
-      toast.warning('Цей виконавець вже доданий')
+      toast.warning(t('form.validation.assigneeDuplicate'))
       return
     }
     setValue('default_assignee_ids', [...(formData.default_assignee_ids || []), numericValue])
@@ -271,7 +271,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     const trimmedDef = glossaryDefinitionInput.trim()
 
     if (!trimmedTerm || !trimmedDef) {
-      toast.error('Термін і визначення обов\'язкові')
+      toast.error(t('form.validation.glossaryRequired'))
       return
     }
 
@@ -281,7 +281,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     })
     setGlossaryTermInput('')
     setGlossaryDefinitionInput('')
-    toast.success(`Термін "${trimmedTerm}" додано до глосарію`)
+    toast.success(t('form.validation.glossaryAdded', { term: trimmedTerm }))
   }
 
   const handleRemoveGlossaryEntry = (term: string) => {
@@ -345,10 +345,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         await result
       }
     } catch (error: unknown) {
-      console.error('ProjectForm submit error:', error)
-      console.error('Error type:', typeof error)
-      console.error('Error keys:', error && typeof error === 'object' ? Object.keys(error) : 'not an object')
-
       // Handle Axios errors with server response
       if (error && typeof error === 'object' && 'response' in error) {
         const responseError = error as {
@@ -364,15 +360,11 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         const message = responseError.response?.data?.message
         const status = responseError.response?.status
 
-        console.log('Server response:', { detail, message, status })
-
         // FastAPI/Pydantic validation errors (422)
         if (Array.isArray(detail)) {
-          console.log('Validation errors detected:', detail)
           let hasFieldErrors = false
           detail.forEach((err: { loc?: string[]; msg?: string; type?: string }) => {
             const field = err.loc?.[err.loc.length - 1]
-            console.log('Processing validation error:', { field, msg: err.msg, loc: err.loc })
             if (field && err.msg) {
               hasFieldErrors = true
               // Map server field names to form field names
@@ -383,23 +375,18 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               }
               const formField = fieldMap[field]
               if (formField) {
-                console.log('Setting error on field:', formField, err.msg)
                 setError(formField, { message: err.msg })
-              } else {
-                console.warn('No form field mapping for:', field)
               }
             }
           })
           if (hasFieldErrors) {
-            toast.error('Виправте помилки у формі')
+            toast.error(t('form.errors.fixErrors'))
           } else {
-            toast.error('Помилка валідації даних')
+            toast.error(t('form.errors.validationFailed'))
           }
         }
         // String detail or message - try to map to specific field
         else if (typeof detail === 'string') {
-          console.log('String error detail:', detail)
-
           // Try to extract field from error message
           const detailLower = detail.toLowerCase()
           let fieldMapped = false
@@ -408,23 +395,19 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
           if (detailLower.includes('keyword') || detailLower.includes('keywords')) {
             setKeywordsError(detail)
             fieldMapped = true
-            console.log('Set keywords error:', detail)
           } else if (detailLower.includes('name') && detailLower.includes('already exists')) {
             setError('name', { message: detail })
             fieldMapped = true
-            console.log('Set name error:', detail)
           } else if (detailLower.includes('pm') || detailLower.includes('manager')) {
             setError('pm_user_id', { message: detail })
             fieldMapped = true
-            console.log('Set pm_user_id error:', detail)
           } else if (detailLower.includes('description')) {
             setError('description', { message: detail })
             fieldMapped = true
-            console.log('Set description error:', detail)
           }
 
           if (fieldMapped) {
-            toast.error('Виправте помилки у формі')
+            toast.error(t('form.errors.fixErrors'))
           } else {
             toast.error(detail)
           }
@@ -433,16 +416,16 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         }
         // Generic HTTP error
         else if (status) {
-          toast.error(`Помилка сервера (HTTP ${status})`)
+          toast.error(t('form.errors.serverError', { status }))
         } else {
-          toast.error('Невідома помилка сервера')
+          toast.error(t('form.errors.unknownServerError'))
         }
       }
       // Generic error
       else if (error instanceof Error) {
         toast.error(error.message)
       } else {
-        toast.error('Невідома помилка')
+        toast.error(t('form.errors.unknownError'))
       }
     }
   }
@@ -545,7 +528,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     type="button"
                     onClick={() => handleRemoveKeyword(keyword)}
                     className="ml-2 hover:text-destructive"
-                    aria-label={`Видалити ${keyword}`}
+                    aria-label={t('form.actions.removeKeyword', { keyword })}
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -595,7 +578,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                       type="button"
                       onClick={() => handleRemoveComponent(index)}
                       className="text-muted-foreground hover:text-destructive"
-                      aria-label={`Видалити компонент ${component.name}`}
+                      aria-label={t('form.actions.removeComponent', { name: component.name })}
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -645,7 +628,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     type="button"
                     onClick={() => handleRemoveAssignee(assigneeId)}
                     className="ml-2 hover:text-destructive"
-                    aria-label={`Видалити виконавця ${assigneeId}`}
+                    aria-label={t('form.actions.removeAssignee', { id: assigneeId })}
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -684,7 +667,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     type="button"
                     onClick={() => handleRemoveGlossaryEntry(term)}
                     className="text-muted-foreground hover:text-destructive"
-                    aria-label={`Видалити термін ${term}`}
+                    aria-label={t('form.actions.removeGlossaryEntry', { term })}
                   >
                     <X className="h-4 w-4" />
                   </button>

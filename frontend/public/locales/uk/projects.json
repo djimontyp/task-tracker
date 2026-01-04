@@ -20,6 +20,36 @@
   "confirmation": {
     "delete": "Ви впевнені, що хочете видалити цей проєкт?"
   },
+  "status": {
+    "active": "Активний",
+    "inactive": "Неактивний"
+  },
+  "card": {
+    "keywords": "Ключові слова",
+    "components": "Компоненти",
+    "glossary": "Глосарій",
+    "priorityRules": "Правила пріоритетів",
+    "priority": {
+      "critical": "Критичний",
+      "high": "Високий",
+      "medium": "Середній",
+      "low": "Низький"
+    },
+    "defaultAssignees": "Виконавці за замовчуванням",
+    "none": "Немає",
+    "projectManager": "Менеджер проєкту",
+    "user": "Користувач #{{id}}",
+    "version": "Версія {{version}}",
+    "updated": "Оновлено {{date}}",
+    "actions": {
+      "edit": "Редагувати",
+      "delete": "Видалити"
+    },
+    "error": {
+      "title": "Помилка завантаження",
+      "retry": "Повторити"
+    }
+  },
   "form": {
     "title": {
       "create": "Створити проект",
@@ -87,7 +117,29 @@
       "cancel": "Скасувати",
       "saving": "Збереження...",
       "update": "Оновити проект",
-      "create": "Створити проект"
+      "create": "Створити проект",
+      "removeKeyword": "Видалити ключове слово {{keyword}}",
+      "removeComponent": "Видалити компонент {{name}}",
+      "removeAssignee": "Видалити виконавця {{id}}",
+      "removeGlossaryEntry": "Видалити термін глосарію {{term}}"
+    },
+    "validation": {
+      "keywordEmpty": "Ключове слово не може бути порожнім",
+      "keywordDuplicate": "Таке ключове слово вже додано",
+      "componentNameRequired": "Назва компонента обов'язкова",
+      "componentAdded": "Компонент \"{{name}}\" додано",
+      "assigneeEmpty": "ID виконавця не може бути порожнім",
+      "assigneeInvalid": "ID виконавця має бути числом >= 1",
+      "assigneeDuplicate": "Цей виконавець вже доданий",
+      "glossaryRequired": "Термін і визначення обов'язкові",
+      "glossaryAdded": "Термін \"{{term}}\" додано до глосарію"
+    },
+    "errors": {
+      "fixErrors": "Виправте помилки у формі",
+      "validationFailed": "Помилка валідації даних",
+      "serverError": "Помилка сервера (HTTP {{status}})",
+      "unknownServerError": "Невідома помилка сервера",
+      "unknownError": "Невідома помилка"
     }
   }
 }

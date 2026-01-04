@@ -20,6 +20,36 @@
   "confirmation": {
     "delete": "Are you sure you want to delete this project?"
   },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "card": {
+    "keywords": "Keywords",
+    "components": "Components",
+    "glossary": "Glossary",
+    "priorityRules": "Priority Rules",
+    "priority": {
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "defaultAssignees": "Default Assignees",
+    "none": "None",
+    "projectManager": "Project Manager",
+    "user": "User #{{id}}",
+    "version": "Version {{version}}",
+    "updated": "Updated {{date}}",
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "error": {
+      "title": "Failed to load",
+      "retry": "Retry"
+    }
+  },
   "form": {
     "title": {
       "create": "Create Project",
@@ -87,7 +117,29 @@
       "cancel": "Cancel",
       "saving": "Saving...",
       "update": "Update Project",
-      "create": "Create Project"
+      "create": "Create Project",
+      "removeKeyword": "Remove keyword {{keyword}}",
+      "removeComponent": "Remove component {{name}}",
+      "removeAssignee": "Remove assignee {{id}}",
+      "removeGlossaryEntry": "Remove glossary term {{term}}"
+    },
+    "validation": {
+      "keywordEmpty": "Keyword cannot be empty",
+      "keywordDuplicate": "This keyword is already added",
+      "componentNameRequired": "Component name is required",
+      "componentAdded": "Component \"{{name}}\" added",
+      "assigneeEmpty": "Assignee ID cannot be empty",
+      "assigneeInvalid": "Assignee ID must be a number >= 1",
+      "assigneeDuplicate": "This assignee is already added",
+      "glossaryRequired": "Term and definition are required",
+      "glossaryAdded": "Term \"{{term}}\" added to glossary"
+    },
+    "errors": {
+      "fixErrors": "Please fix form errors",
+      "validationFailed": "Data validation error",
+      "serverError": "Server error (HTTP {{status}})",
+      "unknownServerError": "Unknown server error",
+      "unknownError": "Unknown error"
     }
   }
 }

@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -27,14 +28,14 @@ import { FormField } from '@/shared/patterns'
 import { atomService } from '../api/atomService'
 import { AtomType, type Atom } from '../types'
 
-const ATOM_TYPE_LABELS: Record<AtomType, string> = {
-  [AtomType.Problem]: 'Проблема',
-  [AtomType.Solution]: 'Рішення',
-  [AtomType.Decision]: 'Рішення',
-  [AtomType.Question]: 'Питання',
-  [AtomType.Insight]: 'Інсайт',
-  [AtomType.Pattern]: 'Патерн',
-  [AtomType.Requirement]: 'Вимога',
+const ATOM_TYPE_KEYS: Record<AtomType, string> = {
+  [AtomType.Problem]: 'problem',
+  [AtomType.Solution]: 'solution',
+  [AtomType.Decision]: 'decision',
+  [AtomType.Question]: 'question',
+  [AtomType.Insight]: 'insight',
+  [AtomType.Pattern]: 'pattern',
+  [AtomType.Requirement]: 'requirement',
 }
 
 const createAtomSchema = z.object({
@@ -67,6 +68,7 @@ export function CreateAtomDialog({
   topicId,
   onAtomCreated,
 }: CreateAtomDialogProps) {
+  const { t } = useTranslation('atoms')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [confidenceValue, setConfidenceValue] = useState<number>(0.8)
 
@@ -112,15 +114,15 @@ export function CreateAtomDialog({
 
       await atomService.linkAtomToTopic(newAtom.id, topicId)
 
-      toast.success('Атом успішно створено')
+      toast.success(t('messages.created'))
 
       onAtomCreated?.(newAtom)
       reset()
       setConfidenceValue(0.8)
       onOpenChange(false)
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Невідома помилка'
-      toast.error(`Помилка створення атома: ${message}`)
+      const message = error instanceof Error ? error.message : t('createDialog.errors.unknown')
+      toast.error(t('createDialog.errors.createFailed', { error: message }))
       console.error('Failed to create atom:', error)
     } finally {
       setIsSubmitting(false)
@@ -137,42 +139,42 @@ export function CreateAtomDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Створити новий атом</DialogTitle>
+          <DialogTitle>{t('createDialog.title')}</DialogTitle>
           <DialogDescription>
-            Атом буде автоматично прив&apos;язаний до поточного топіка
+            {t('createDialog.description')}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <FormField label="Тип атома" required error={errors.type?.message}>
+          <FormField label={t('createDialog.fields.type.label')} required error={errors.type?.message}>
             <Select value={selectedType} onValueChange={handleTypeChange}>
-              <SelectTrigger id="type" aria-label="Тип атома">
-                <SelectValue placeholder="Оберіть тип" />
+              <SelectTrigger id="type" aria-label={t('createDialog.fields.type.label')}>
+                <SelectValue placeholder={t('createDialog.fields.type.placeholder')} />
               </SelectTrigger>
               <SelectContent>
                 {Object.values(AtomType).map((type) => (
                   <SelectItem key={type} value={type}>
-                    {ATOM_TYPE_LABELS[type]}
+                    {t(`createDialog.types.${ATOM_TYPE_KEYS[type]}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </FormField>
 
-          <FormField label="Заголовок" required error={errors.title?.message}>
+          <FormField label={t('createDialog.fields.title.label')} required error={errors.title?.message}>
             <Input
               id="title"
               {...register('title')}
-              placeholder="Короткий опис атома"
+              placeholder={t('createDialog.fields.title.placeholder')}
               maxLength={200}
             />
           </FormField>
 
-          <FormField label="Зміст" required error={errors.content?.message}>
+          <FormField label={t('createDialog.fields.content.label')} required error={errors.content?.message}>
             <Textarea
               id="content"
               {...register('content')}
-              placeholder="Детальний опис атома (мінімум 10 символів)"
+              placeholder={t('createDialog.fields.content.placeholder')}
               rows={8}
               className="resize-y"
             />
@@ -180,7 +182,7 @@ export function CreateAtomDialog({
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label htmlFor="confidence">Впевненість (необов&apos;язково)</Label>
+              <Label htmlFor="confidence">{t('createDialog.fields.confidence.label')}</Label>
               <span className="text-sm font-medium text-muted-foreground">
                 {Math.round(confidenceValue * 100)}%
               </span>
@@ -192,7 +194,7 @@ export function CreateAtomDialog({
               step={0.01}
               value={[confidenceValue]}
               onValueChange={handleConfidenceChange}
-              aria-label="Рівень впевненості"
+              aria-label={t('createDialog.fields.confidence.ariaLabel')}
               className="w-full"
             />
           </div>
@@ -204,10 +206,10 @@ export function CreateAtomDialog({
               onClick={handleCancel}
               disabled={isSubmitting}
             >
-              Скасувати
+              {t('actions.cancel')}
             </Button>
             <Button type="submit" loading={isSubmitting} disabled={isSubmitting}>
-              {isSubmitting ? 'Створення...' : 'Створити атом'}
+              {isSubmitting ? t('createDialog.actions.creating') : t('createDialog.actions.create')}
             </Button>
           </DialogFooter>
         </form>

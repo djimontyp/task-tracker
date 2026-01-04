@@ -135,6 +135,45 @@
       "topicsIdentified": "{{count}} topics identified"
     }
   },
+  "createDialog": {
+    "title": "Create new atom",
+    "description": "The atom will be automatically linked to the current topic",
+    "fields": {
+      "type": {
+        "label": "Atom type",
+        "placeholder": "Select type"
+      },
+      "title": {
+        "label": "Title",
+        "placeholder": "Short description of the atom"
+      },
+      "content": {
+        "label": "Content",
+        "placeholder": "Detailed description of the atom (minimum 10 characters)"
+      },
+      "confidence": {
+        "label": "Confidence (optional)",
+        "ariaLabel": "Confidence level"
+      }
+    },
+    "types": {
+      "problem": "Problem",
+      "solution": "Solution",
+      "decision": "Decision",
+      "question": "Question",
+      "insight": "Insight",
+      "pattern": "Pattern",
+      "requirement": "Requirement"
+    },
+    "actions": {
+      "creating": "Creating...",
+      "create": "Create atom"
+    },
+    "errors": {
+      "unknown": "Unknown error",
+      "createFailed": "Failed to create atom: {{error}}"
+    }
+  },
   "versions": {
     "awaiting_one": "1 version awaiting approval",
     "awaiting_other": "{{count}} versions awaiting approval ({{topics}} topics, {{atoms}} atoms)",

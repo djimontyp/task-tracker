@@ -117,7 +117,7 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
             <div className="flex items-center gap-2 mb-2 min-w-0">
               <h3 className="text-lg font-semibold truncate">{project.name}</h3>
               <Badge variant="outline" className={project.is_active ? 'bg-semantic-success text-white border-semantic-success' : 'bg-muted text-muted-foreground border-border'}>
-                {project.is_active ? 'Active' : 'Inactive'}
+                {project.is_active ? t('status.active') : t('status.inactive')}
               </Badge>
             </div>
             {project.description && (
@@ -129,7 +129,7 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
         {/* Keywords */}
         {project.keywords.length > 0 && (
           <div>
-            <div className="text-sm font-medium mb-2">Keywords</div>
+            <div className="text-sm font-medium mb-2">{t('card.keywords')}</div>
             <div className="flex flex-wrap gap-2">
               {project.keywords.map((keyword, index) => (
                 <Badge key={index} variant="outline" className="text-xs">
@@ -143,7 +143,7 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
         {/* Components */}
         {project.components.length > 0 && (
           <div className="space-y-2">
-            <div className="text-sm font-medium">Components</div>
+            <div className="text-sm font-medium">{t('card.components')}</div>
             <div className="space-y-2">
               {project.components.map((component, index) => (
                 <div
@@ -176,7 +176,7 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
         {/* Glossary */}
         {Object.keys(project.glossary).length > 0 && (
           <div className="space-y-2">
-            <div className="text-sm font-medium">Glossary</div>
+            <div className="text-sm font-medium">{t('card.glossary')}</div>
             <div className="space-y-2 text-xs text-muted-foreground">
               {Object.entries(project.glossary).map(([term, definition]) => (
                 <div key={term} className="flex gap-2 min-w-0">
@@ -191,17 +191,17 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
         {/* Priority Rules */}
         {project.priority_rules && Object.keys(project.priority_rules).length > 0 && (
           <div className="space-y-2">
-            <div className="text-sm font-medium">Priority Rules</div>
+            <div className="text-sm font-medium">{t('card.priorityRules')}</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
               {(['critical_keywords', 'high_keywords', 'medium_keywords', 'low_keywords'] as const).map(
                 (key) => {
                   const keywords = project.priority_rules?.[key] ?? []
                   if (!keywords.length) return null
                   const labelMap: Record<typeof key, string> = {
-                    critical_keywords: 'Critical',
-                    high_keywords: 'High',
-                    medium_keywords: 'Medium',
-                    low_keywords: 'Low',
+                    critical_keywords: t('card.priority.critical'),
+                    high_keywords: t('card.priority.high'),
+                    medium_keywords: t('card.priority.medium'),
+                    low_keywords: t('card.priority.low'),
                   }
                   return (
                     <div key={key} className="space-y-2">
@@ -224,10 +224,10 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
         {/* Assignees & PM */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
-            <div className="text-sm font-medium mb-2">Default Assignees</div>
+            <div className="text-sm font-medium mb-2">{t('card.defaultAssignees')}</div>
             <div className="flex flex-wrap gap-2">
               {project.default_assignee_ids.length === 0 ? (
-                <span className="text-muted-foreground">None</span>
+                <span className="text-muted-foreground">{t('card.none')}</span>
               ) : (
                 project.default_assignee_ids.map((id) => (
                   <Badge key={id} variant="outline" className="text-2xs bg-accent/10">
@@ -238,17 +238,17 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
             </div>
           </div>
           <div>
-            <div className="text-sm font-medium mb-2">Project Manager</div>
+            <div className="text-sm font-medium mb-2">{t('card.projectManager')}</div>
             <Badge variant="outline" className="text-2xs">
-              User #{project.pm_user_id}
+              {t('card.user', { id: project.pm_user_id })}
             </Badge>
           </div>
         </div>
 
         <Separator className="my-2" />
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Version {project.version}</span>
-          <span>Updated {new Date(project.updated_at).toLocaleString()}</span>
+          <span>{t('card.version', { version: project.version })}</span>
+          <span>{t('card.updated', { date: new Date(project.updated_at).toLocaleString() })}</span>
         </div>
 
         {/* Actions */}
@@ -263,7 +263,7 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                 className="flex-1"
               >
                 <Pencil className="h-4 w-4 mr-2" />
-                Edit
+                {t('card.actions.edit')}
               </Button>
             )}
             {onDelete && (
@@ -272,6 +272,7 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                 variant="destructive"
                 onClick={() => onDelete(project.id)}
                 disabled={isLoading}
+                aria-label={t('card.actions.delete')}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
