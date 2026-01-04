@@ -174,7 +174,7 @@ export const useMessagesFeed = ({ limit = 50 }: UseMessagesFeedOptions = {}) => 
   const { connectionState, isConnected } = useWebSocket({
     topics: ['messages'],
     onMessage: handleMessageEvent,
-    reconnect: true,
+    _reconnect: true,
   })
 
   const refresh = useCallback(() => {

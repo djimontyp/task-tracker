@@ -70,9 +70,9 @@ export const useTaskEventsWebSocket = (options: UseTaskEventsWebSocketOptions = 
   const { isConnected, connectionState } = useWebSocket({
     topics: ['monitoring'],
     onMessage: handleMessage,
-    reconnect: true,
-    reconnectInterval: 1000,
-    maxReconnectAttempts: 5,
+    _reconnect: true,
+    _reconnectInterval: 1000,
+    _maxReconnectAttempts: 5,
   })
 
   const clearEvents = useCallback(() => {

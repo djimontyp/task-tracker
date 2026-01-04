@@ -52,7 +52,7 @@ const NoiseFilteringDashboard = () => {
         }
       }
     },
-    reconnect: true,
+    _reconnect: true,
   })
 
   const scoreBatchMutation = useMutation({

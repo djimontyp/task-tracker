@@ -134,7 +134,7 @@ const MessagesPage = () => {
         }
       }
     },
-    reconnect: true,
+    _reconnect: true,
   })
 
   // Handle highlight param from search navigation
