@@ -50,15 +50,20 @@ const LastPointDot = (props: {
 interface TrendChartProps {
     /** Compact mode - hides header, reduces height */
     compact?: boolean
+    /** Embedded mode - removes Card wrapper for integration in other containers */
+    embedded?: boolean
 }
 
-export const TrendChart: React.FC<TrendChartProps> = ({ compact = false }) => {
+export const TrendChart: React.FC<TrendChartProps> = ({ compact = false, embedded = false }) => {
     const { t, i18n } = useTranslation('dashboard')
     const dateLocale = i18n.language === 'uk' ? uk : enUS
     const data = useMemo(() => generateTrendData(dateLocale), [dateLocale])
 
+    const Wrapper = embedded ? 'div' : Card
+    const wrapperClasses = embedded ? 'h-full flex flex-col overflow-hidden' : 'h-full flex flex-col overflow-hidden'
+
     return (
-        <Card className="h-full flex flex-col overflow-hidden">
+        <Wrapper className={wrapperClasses}>
             {!compact && (
                 <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
@@ -193,6 +198,6 @@ export const TrendChart: React.FC<TrendChartProps> = ({ compact = false }) => {
                     </ResponsiveContainer>
                 </div>
             </CardContent>
-        </Card>
+        </Wrapper>
     )
 }
