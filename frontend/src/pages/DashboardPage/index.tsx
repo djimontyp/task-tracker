@@ -57,7 +57,8 @@ function useHeroSubtitle(
   hasNoData: boolean,
   isLoading: boolean,
   criticalCount: number,
-  pendingCount: number
+  pendingCount: number,
+  connectionStatus: string
 ): string {
   const { t } = useTranslation(['dashboard'])
 
@@ -67,6 +68,9 @@ function useHeroSubtitle(
     }
 
     if (hasNoData) {
+      if (connectionStatus === 'connected') {
+        return t('subtitle.listening', 'Слухаємо ефір... Збираємо перші дані.')
+      }
       return t('subtitle.empty', 'Тиша в ефірі ☕️ Підключіть джерела даних.')
     }
 
@@ -148,7 +152,7 @@ const DashboardPage = () => {
   const greeting = useGreeting()
   const criticalCount = metrics.data?.critical?.count ?? 0
   const pendingCount = insights.data?.filter((i) => i.importance && i.importance >= 0.7).length ?? 0
-  const subtitle = useHeroSubtitle(hasNoData, isAnyLoading, criticalCount, pendingCount)
+  const subtitle = useHeroSubtitle(hasNoData, isAnyLoading, criticalCount, pendingCount, connectionStatus)
 
   // Compute wizard step statuses
   const step1Completed = connectionStatus === 'connected' || connectionStatus === 'warning'
@@ -170,6 +174,10 @@ const DashboardPage = () => {
     if (step3Status !== 'completed') return 'locked'
     return hasAtoms ? 'completed' : 'pending'
   }, [step3Status, hasAtoms])
+
+  // Wizard is "visually completed" when user finishes all manual steps (1-3).
+  // Step 4 is passive waiting, so we show the "Analyzing..." banner.
+  const isWizardCompleted = step3Status === 'completed'
 
   // Show onboarding wizard for new users
   useEffect(() => {
@@ -264,6 +272,7 @@ const DashboardPage = () => {
       step2Status={step2Status}
       step3Status={step3Status}
       step4Status={step4Status}
+      isWizardCompleted={isWizardCompleted}
       projectFormOpen={projectFormOpen}
       onProjectFormClose={handleCloseProjectForm}
       onProjectSubmit={handleProjectSubmit}

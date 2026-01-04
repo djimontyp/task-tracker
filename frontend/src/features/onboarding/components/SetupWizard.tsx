@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { MessageSquare, FolderPlus, Bot, Lightbulb, Check } from 'lucide-react';
+import { MessageSquare, FolderPlus, Bot, Lightbulb, Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/shared/ui/button';
 import { SetupStep } from './SetupStep';
@@ -32,7 +32,8 @@ export function SetupWizard({
   onConnectSource,
   onCreateProject,
   onActivateAgent,
-}: SetupWizardProps) {
+  collapsed = false,
+}: SetupWizardProps & { collapsed?: boolean }) {
   const { t } = useTranslation('onboarding');
   const { connectionStatus } = useTelegramStore();
 
@@ -43,6 +44,27 @@ export function SetupWizard({
   const handleSlackClick = () => {
     toast.info(t('wizard.actions.slackComingSoon'));
   };
+
+  if (collapsed) {
+    return (
+      <div className="w-full bg-gradient-to-r from-status-connected/10 to-transparent border border-status-connected/20 rounded-lg p-4 mb-6 flex items-center gap-4 animate-fade-in">
+        <div className="h-8 w-8 rounded-full bg-status-connected/20 flex items-center justify-center shrink-0">
+          <Check className="h-4 w-4 text-status-connected" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-sm font-medium text-foreground">
+            {t('steps.complete.title', 'All set!')}
+          </h3>
+          <div className="flex items-center gap-2 mt-0.5">
+            <Loader2 className="h-3 w-3 text-status-connected animate-spin" />
+            <p className="text-xs text-muted-foreground">
+              {t('steps.complete.content', 'System is analyzing data...')}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
