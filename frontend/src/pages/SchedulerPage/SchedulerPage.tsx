@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/ui/button'
 import { PageWrapper } from '@/shared/primitives'
 import { JobsTable } from '@/features/automation/components/JobsTable'
@@ -6,6 +7,7 @@ import { CreateEditJobDialog } from '@/features/automation/components/CreateEdit
 import type { SchedulerJob } from '@/features/automation/types'
 
 export default function SchedulerPage() {
+  const { t } = useTranslation('automation')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingJob, setEditingJob] = useState<SchedulerJob | undefined>()
 
@@ -28,12 +30,12 @@ export default function SchedulerPage() {
     <PageWrapper variant="fullWidth" className="p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Scheduled Jobs</h1>
+          <h1 className="text-2xl font-bold">{t('scheduler.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Manage automated tasks and schedules
+            {t('scheduler.description')}
           </p>
         </div>
-        <Button onClick={handleCreateNew}>Create Job</Button>
+        <Button onClick={handleCreateNew}>{t('scheduler.createJob')}</Button>
       </div>
 
       <JobsTable onEdit={handleEdit} />

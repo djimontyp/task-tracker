@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Search as SearchIcon, Sparkles } from 'lucide-react'
 import { searchService } from '@/features/search'
 import { MessageSearchCard, TopicSearchCard } from '@/features/search/components'
@@ -8,6 +9,7 @@ import { EmptyState } from '@/shared/patterns'
 import { PageWrapper, Center, Stack, Inline } from '@/shared/primitives'
 
 const SearchPage = () => {
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const query = searchParams.get('q') || ''
 
@@ -43,12 +45,12 @@ const SearchPage = () => {
               <SearchIcon className="h-16 w-16 text-muted-foreground" aria-hidden="true" />
               <Sparkles className="h-6 w-6 text-primary absolute -top-2 -right-2" aria-hidden="true" />
             </div>
-            <h1 className="text-2xl font-bold">Semantic Search</h1>
+            <h1 className="text-2xl font-bold">{t('searchPage.title')}</h1>
             <p className="text-muted-foreground">
-              Use the search bar above or press <kbd className="px-2 py-2 bg-muted rounded border">/</kbd> to begin searching messages
+              {t('searchPage.hint')} <kbd className="px-2 py-2 bg-muted rounded border">/</kbd> {t('searchPage.hintContinue')}
             </p>
             <p className="text-sm text-muted-foreground">
-              Supports cross-language search (Ukrainian + English)
+              {t('searchPage.crossLanguage')}
             </p>
           </Stack>
         </Center>
@@ -62,8 +64,8 @@ const SearchPage = () => {
         <Center fullHeight className="min-h-[50vh]">
           <Stack gap="md" align="center">
             <Spinner size="lg" />
-            <p className="text-muted-foreground">Searching for &quot;{query}&quot;...</p>
-            <p className="text-xs text-muted-foreground">Using AI-powered semantic search</p>
+            <p className="text-muted-foreground">{t('searchPage.searching', { query })}</p>
+            <p className="text-xs text-muted-foreground">{t('searchPage.aiPowered')}</p>
           </Stack>
         </Center>
       </PageWrapper>
@@ -75,9 +77,9 @@ const SearchPage = () => {
       <PageWrapper variant="search">
         <Center fullHeight className="min-h-[50vh] text-center">
           <Stack gap="sm" align="center">
-            <h1 className="text-2xl font-bold text-destructive">Search Error</h1>
+            <h1 className="text-2xl font-bold text-destructive">{t('searchPage.error')}</h1>
             <p className="text-muted-foreground max-w-md">
-              {error instanceof Error ? error.message : 'An error occurred while searching'}
+              {error instanceof Error ? error.message : t('searchPage.errorGeneric')}
             </p>
           </Stack>
         </Center>
@@ -96,21 +98,21 @@ const SearchPage = () => {
         <header>
           <Inline gap="sm" align="center" className="mb-2">
             <h1 className="text-3xl font-bold">
-              Search Results for &quot;{query}&quot;
+              {t('searchPage.resultsFor', { query })}
             </h1>
             <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
           </Inline>
           <p className="text-muted-foreground">
-            {totalResults} {totalResults === 1 ? 'result' : 'results'} found
-            <span className="text-xs ml-2">(semantic similarity)</span>
+            {t('searchPage.resultsCount', { count: totalResults })}
+            <span className="text-xs ml-2">({t('searchPage.semanticSimilarity')})</span>
           </p>
         </header>
 
         {!hasResults && (
           <EmptyState
             icon={SearchIcon}
-            title="No results found"
-            description={`No topics or messages match your search for "${query}". Try different keywords or check your spelling.`}
+            title={t('searchPage.noResults')}
+            description={t('searchPage.noResultsDescription', { query })}
             iconSize="lg"
           />
         )}
@@ -118,7 +120,7 @@ const SearchPage = () => {
         {hasTopics && (
           <section aria-labelledby="topics-heading">
             <h2 id="topics-heading" className="text-2xl font-semibold mb-4">
-              Topics ({topicResults.length})
+              {t('searchPage.topics', { count: topicResults.length })}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {topicResults.map((result) => (
@@ -131,7 +133,7 @@ const SearchPage = () => {
         {hasMessages && (
           <section aria-labelledby="messages-heading">
             <h2 id="messages-heading" className="text-2xl font-semibold mb-4">
-              Messages ({messageResults.length})
+              {t('searchPage.messages', { count: messageResults.length })}
             </h2>
             <Stack gap="md">
               {messageResults.map((result) => (
