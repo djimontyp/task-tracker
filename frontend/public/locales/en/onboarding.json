@@ -64,21 +64,21 @@
         "description": "Link your Telegram or Slack to start receiving messages"
       },
       "2": {
-        "title": "First Project",
-        "description": "Create a project to organize your knowledge"
+        "title": "Organize Workspace",
+        "description": "Create a home for your knowledge"
       },
       "3": {
-        "title": "Activate Agent",
-        "description": "Enable AI analysis to extract insights from messages"
+        "title": "Enable AI Analyst",
+        "description": "Let AI find insights for you"
       },
       "4": {
         "title": "First Insight",
-        "description": "Your first AI-extracted knowledge will appear here"
+        "description": "Insights will appear automatically"
       }
     },
     "status": {
       "pending": "Pending",
-      "active": "Ready",
+      "active": "Active",
       "completed": "Done",
       "locked": "Locked"
     },
