@@ -6,6 +6,7 @@
  */
 
 import { OnboardingWizard, SetupWizard } from '@/features/onboarding'
+import { ProjectForm } from '@/features/projects'
 import { PageWrapper } from '@/shared/primitives'
 
 import {
@@ -43,9 +44,18 @@ export function DashboardPresenter({
   onNavigateToTopics,
   onNavigateToProjects,
   onNavigateToAgents,
+  step2Status,
+  step3Status,
+  step4Status,
+  projectFormOpen,
+  onProjectFormClose,
+  onProjectSubmit,
+  projectFormLoading,
+  onCreateProject,
 }: DashboardPresenterProps) {
-  // Note: _onNavigateToMessages reserved for future use (e.g., empty state actions)
+  // Note: _onNavigateToMessages, onNavigateToProjects reserved for future use
   void _onNavigateToMessages;
+  void onNavigateToProjects;
 
   return (
     <PageWrapper variant="fullWidth">
@@ -54,14 +64,22 @@ export function DashboardPresenter({
       {/* Cold Start Empty State - SetupWizard */}
       {hasNoData && !isAnyLoading && (
         <SetupWizard
-          step2Status="locked"
-          step3Status="locked"
-          step4Status="locked"
+          step2Status={step2Status}
+          step3Status={step3Status}
+          step4Status={step4Status}
           onConnectSource={onNavigateToSettings}
-          onCreateProject={onNavigateToProjects}
+          onCreateProject={onCreateProject}
           onActivateAgent={onNavigateToAgents}
         />
       )}
+
+      {/* ProjectForm Modal */}
+      <ProjectForm
+        open={projectFormOpen}
+        onOpenChange={onProjectFormClose}
+        onSubmit={onProjectSubmit}
+        isLoading={projectFormLoading}
+      />
 
       {/* Hero Section - Command Center (Unified HUD) */}
       <CommandCenter

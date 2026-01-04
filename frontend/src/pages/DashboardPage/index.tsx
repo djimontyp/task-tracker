@@ -9,10 +9,18 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { uk, enUS } from 'date-fns/locale'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import { useDashboardData, useMessageTrends, useActivityHeatmap } from './hooks/useDashboardData'
 import { DashboardPresenter } from './DashboardPresenter'
 import type { FocusAtom } from './types'
+import type { StepStatus } from '@/features/onboarding/types/wizard'
+import type { CreateProjectConfig } from '@/features/projects/types'
+import { projectService } from '@/features/projects/api/projectService'
+import { agentService } from '@/features/agents/api/agentService'
+import { atomService } from '@/features/atoms/api/atomService'
+import { useTelegramStore } from '@/pages/SettingsPage/plugins/TelegramSource/useTelegramStore'
 
 // Mock data for focusAtoms until API endpoint is ready
 // TODO: Replace with useQuery for GET /api/v1/atoms?status=pending_review&limit=3
@@ -93,9 +101,40 @@ const DashboardPage = () => {
   const navigate = useNavigate()
   const { i18n } = useTranslation()
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [projectFormOpen, setProjectFormOpen] = useState(false)
+  const queryClient = useQueryClient()
 
   // Determine date locale
   const dateLocale = i18n.language === 'uk' ? uk : enUS
+
+  // Wizard step data queries
+  const { connectionStatus } = useTelegramStore()
+  const { data: projectsData } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => projectService.listProjects(),
+  })
+  const { data: agentsData } = useQuery({
+    queryKey: ['agents'],
+    queryFn: () => agentService.listAgents(),
+  })
+  const { data: atomsData } = useQuery({
+    queryKey: ['atoms', 'count'],
+    queryFn: () => atomService.listAtoms(0, 1), // limit=1, only need total
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  // ProjectForm mutation
+  const createProjectMutation = useMutation({
+    mutationFn: projectService.createProject,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      setProjectFormOpen(false)
+      toast.success('Project created successfully')
+    },
+    onError: (error) => {
+      toast.error(`Failed to create project: ${error.message}`)
+    },
+  })
 
   // Data fetching
   const { metrics, insights, topics, hasNoData, isAnyLoading } =
@@ -110,6 +149,27 @@ const DashboardPage = () => {
   const criticalCount = metrics.data?.critical?.count ?? 0
   const pendingCount = insights.data?.filter((i) => i.importance && i.importance >= 0.7).length ?? 0
   const subtitle = useHeroSubtitle(hasNoData, isAnyLoading, criticalCount, pendingCount)
+
+  // Compute wizard step statuses
+  const step1Completed = connectionStatus === 'connected' || connectionStatus === 'warning'
+  const hasProjects = (projectsData?.items?.length ?? 0) > 0
+  const hasActiveAgent = agentsData && agentsData.length > 0 && agentsData.some((a) => a.is_active)
+  const hasAtoms = (atomsData?.total ?? 0) > 0
+
+  const step2Status: StepStatus = useMemo(() => {
+    if (!step1Completed) return 'locked'
+    return hasProjects ? 'completed' : 'active'
+  }, [step1Completed, hasProjects])
+
+  const step3Status: StepStatus = useMemo(() => {
+    if (step2Status !== 'completed') return 'locked'
+    return hasActiveAgent ? 'completed' : 'active'
+  }, [step2Status, hasActiveAgent])
+
+  const step4Status: StepStatus = useMemo(() => {
+    if (step3Status !== 'completed') return 'locked'
+    return hasAtoms ? 'completed' : 'pending'
+  }, [step3Status, hasAtoms])
 
   // Show onboarding wizard for new users
   useEffect(() => {
@@ -148,6 +208,22 @@ const DashboardPage = () => {
     navigate('/agents')
   }, [navigate])
 
+  // ProjectForm callbacks
+  const handleOpenProjectForm = useCallback(() => {
+    setProjectFormOpen(true)
+  }, [])
+
+  const handleCloseProjectForm = useCallback(() => {
+    setProjectFormOpen(false)
+  }, [])
+
+  const handleProjectSubmit = useCallback(
+    async (data: CreateProjectConfig) => {
+      await createProjectMutation.mutateAsync(data)
+    },
+    [createProjectMutation]
+  )
+
   return (
     <DashboardPresenter
       metrics={{
@@ -185,6 +261,14 @@ const DashboardPage = () => {
       onNavigateToTopics={handleNavigateToTopics}
       onNavigateToProjects={handleNavigateToProjects}
       onNavigateToAgents={handleNavigateToAgents}
+      step2Status={step2Status}
+      step3Status={step3Status}
+      step4Status={step4Status}
+      projectFormOpen={projectFormOpen}
+      onProjectFormClose={handleCloseProjectForm}
+      onProjectSubmit={handleProjectSubmit}
+      projectFormLoading={createProjectMutation.isPending}
+      onCreateProject={handleOpenProjectForm}
     />
   )
 }

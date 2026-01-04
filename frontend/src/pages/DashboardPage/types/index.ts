@@ -5,6 +5,9 @@
  * Used with mock data initially, then real API endpoints.
  */
 
+import type { StepStatus } from '@/features/onboarding/types/wizard'
+import type { CreateProjectConfig } from '@/features/projects/types'
+
 // Atom types matching backend AtomType enum (backend/app/models/atom.py)
 export type AtomType =
   | 'PROBLEM'
@@ -223,4 +226,16 @@ export interface DashboardPresenterProps {
   onNavigateToTopics: () => void
   onNavigateToProjects?: () => void
   onNavigateToAgents?: () => void
+
+  // Wizard step statuses
+  step2Status: StepStatus
+  step3Status: StepStatus
+  step4Status: StepStatus
+
+  // ProjectForm modal
+  projectFormOpen: boolean
+  onProjectFormClose: () => void
+  onProjectSubmit: (data: CreateProjectConfig) => Promise<void>
+  projectFormLoading: boolean
+  onCreateProject: () => void
 }
