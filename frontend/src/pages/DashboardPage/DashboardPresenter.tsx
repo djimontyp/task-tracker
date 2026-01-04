@@ -5,11 +5,7 @@
  * No data fetching, no side effects, easy to test in Storybook.
  */
 
-import { useTranslation } from 'react-i18next'
-import { Inbox, Settings } from 'lucide-react'
-import { OnboardingWizard } from '@/features/onboarding'
-import { Card, CardContent } from '@/shared/ui/card'
-import { Button } from '@/shared/ui/button'
+import { OnboardingWizard, SetupWizard } from '@/features/onboarding'
 import { PageWrapper } from '@/shared/primitives'
 
 import {
@@ -43,39 +39,29 @@ export function DashboardPresenter({
   subtitle,
   onCloseOnboarding,
   onNavigateToSettings,
-  onNavigateToMessages,
+  onNavigateToMessages: _onNavigateToMessages,
   onNavigateToTopics,
+  onNavigateToProjects,
+  onNavigateToAgents,
 }: DashboardPresenterProps) {
-  const { t } = useTranslation('dashboard')
+  // Note: _onNavigateToMessages reserved for future use (e.g., empty state actions)
+  void _onNavigateToMessages;
 
   return (
     <PageWrapper variant="fullWidth">
       <OnboardingWizard open={showOnboarding} onClose={onCloseOnboarding} />
 
-      {/* Cold Start Empty State */}
+      {/* Cold Start Empty State - SetupWizard */}
       {hasNoData && !isAnyLoading && (
-        <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
-          <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 text-center">
-            <div className="w-16 h-16 mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <Inbox className="h-8 w-8 text-primary" aria-hidden="true" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">
-              {t('coldStart.title')}
-            </h3>
-            <p className="text-muted-foreground mb-6 max-w-md">
-              {t('coldStart.description')}
-            </p>
-            <div className="flex gap-4 flex-wrap justify-center">
-              <Button onClick={onNavigateToSettings} size="lg">
-                <Settings className="mr-2 h-5 w-5" aria-hidden="true" />
-                {t('coldStart.setupTelegram')}
-              </Button>
-              <Button onClick={onNavigateToMessages} variant="outline" size="lg">
-                {t('coldStart.viewMessages')}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <SetupWizard
+          step1Status="active"
+          step2Status="locked"
+          step3Status="locked"
+          step4Status="locked"
+          onConnectSource={onNavigateToSettings}
+          onCreateProject={onNavigateToProjects}
+          onActivateAgent={onNavigateToAgents}
+        />
       )}
 
       {/* Hero Section - Command Center (Unified HUD) */}

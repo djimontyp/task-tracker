@@ -140,6 +140,14 @@ const DashboardPage = () => {
     navigate('/topics')
   }, [navigate])
 
+  const handleNavigateToProjects = useCallback(() => {
+    navigate('/projects')
+  }, [navigate])
+
+  const handleNavigateToAgents = useCallback(() => {
+    navigate('/agents')
+  }, [navigate])
+
   return (
     <DashboardPresenter
       metrics={{
@@ -175,6 +183,8 @@ const DashboardPage = () => {
       onNavigateToSettings={handleNavigateToSettings}
       onNavigateToMessages={handleNavigateToMessages}
       onNavigateToTopics={handleNavigateToTopics}
+      onNavigateToProjects={handleNavigateToProjects}
+      onNavigateToAgents={handleNavigateToAgents}
     />
   )
 }
