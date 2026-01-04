@@ -114,29 +114,6 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
     // In compact mode, show more weeks (20) to fill the card better
     const visibleWeeks = compact ? weeks.slice(-20) : weeks
 
-    // Calculate smart labels to prevent overlapping
-    const visibleMonthLabels = useMemo(() => {
-        const relevantLabels = monthLabels.filter(m =>
-            compact ? m.weekIndex >= weeks.length - 20 : true
-        ).map(m => ({
-            ...m,
-            weekIndex: m.weekIndex - (compact ? weeks.length - 20 : 0)
-        }))
-
-        // Filter out labels that are too close to each other
-        // Minimum week distance to display next label (reduced to allow more months)
-        const minDistance = 3
-        let lastWeekIndex = -minDistance
-
-        return relevantLabels.filter((label) => {
-            if (label.weekIndex - lastWeekIndex >= minDistance) {
-                lastWeekIndex = label.weekIndex
-                return true
-            }
-            return false
-        })
-    }, [monthLabels, compact, weeks.length])
-
     const cellSize = compact ? 'w-2 h-2' : 'w-3 h-3'
     const gapSize = 'gap-0.5'
 
