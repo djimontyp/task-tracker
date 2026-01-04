@@ -10,6 +10,7 @@ import { Inbox, Settings } from 'lucide-react'
 import { OnboardingWizard } from '@/features/onboarding'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
+import { ZoomableCard } from '@/shared/ui/zoomable-card'
 import { PageWrapper } from '@/shared/primitives'
 
 import {
@@ -75,16 +76,43 @@ export function DashboardPresenter({
         </Card>
       )}
 
-      <div className="flex items-center justify-between mb-8 animate-fade-in-up">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{greeting}</h1>
-          <p className="text-muted-foreground mt-2">{subtitle}</p>
+      {/* Hero Section - Compact Flex Row */}
+      <div className="flex flex-col lg:flex-row gap-6 mb-8 h-auto lg:h-24 animate-fade-in-up">
+        {/* Greeting (Auto width) - Only takes necessary space */}
+        <div className="flex flex-col justify-center shrink-0 min-w-0 max-w-full lg:max-w-[40%]">
+          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight truncate" title={greeting}>
+            {greeting}
+          </h1>
+          <p className="text-muted-foreground mt-1 truncate" title={subtitle}>
+            {subtitle}
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={onNavigateToSettings}>
-            <Settings className="w-4 h-4 mr-2" />
-            {t('settings')}
-          </Button>
+
+        {/* Charts (Fill remaining space 50/50) */}
+        <div className="flex-1 grid grid-cols-2 gap-4 min-w-0 h-24 lg:h-full">
+          {/* Compact Trend Chart */}
+          <ZoomableCard
+            trigger="hover"
+            className="h-full min-w-0"
+            preview={<TrendChart compact />}
+            full={
+              <div className="h-[350px] w-full p-4">
+                <TrendChart />
+              </div>
+            }
+          />
+
+          {/* Compact Heatmap */}
+          <ZoomableCard
+            trigger="hover"
+            className="h-full min-w-0"
+            preview={<ActivityHeatmap compact />}
+            full={
+              <div className="h-[350px] w-full p-4 flex flex-col justify-center">
+                <ActivityHeatmap />
+              </div>
+            }
+          />
         </div>
       </div>
 
@@ -100,15 +128,7 @@ export function DashboardPresenter({
         />
       </div>
 
-      {/* Row 2: Trends Chart */}
-      <div
-        className="animate-fade-in-up"
-        style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}
-      >
-        <TrendChart />
-      </div>
-
-      {/* Row 3: Recent Insights */}
+      {/* Row 2: Recent Insights */}
       <div
         className="animate-fade-in-up"
         style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}
@@ -132,12 +152,11 @@ export function DashboardPresenter({
         />
       </div>
 
-      {/* Row 4: Activity Heatmap + Top Topics (2 columns on desktop) */}
+      {/* Row 4: Top Topics */}
       <div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-up"
+        className="animate-fade-in-up"
         style={{ animationDelay: '0.4s', animationFillMode: 'backwards' }}
       >
-        <ActivityHeatmap />
         <TopTopics
           data={topics.data}
           isLoading={topics.isLoading}
