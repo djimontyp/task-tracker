@@ -221,4 +221,6 @@ export interface DashboardPresenterProps {
   onNavigateToSettings: () => void
   onNavigateToMessages: () => void
   onNavigateToTopics: () => void
+  onNavigateToProjects?: () => void
+  onNavigateToAgents?: () => void
 }
