@@ -4,6 +4,7 @@ default:
 # Aliases
 alias ss := services
 alias st := services-stop
+alias sr := restart
 alias sc := services-clean
 alias sca := services-clean-all
 alias dbc := db-clear
@@ -76,6 +77,12 @@ rebuild SERVICE:
     @echo "Rebuilding {{SERVICE}}..."
     COMPOSE_BAKE=true docker compose build {{SERVICE}} --no-cache
     docker compose up -d {{SERVICE}}
+
+# Restart specific service (useful for nginx DNS cache refresh)
+[group: 'Services']
+restart SERVICE:
+    @echo "Restarting {{SERVICE}}..."
+    docker compose restart {{SERVICE}}
 
 # Stop services
 [group: 'Services']
