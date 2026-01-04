@@ -50,10 +50,10 @@ const getLevelColor = (level: number) => {
     }
 }
 
-// Convert JS day (0=Sun, 1=Mon, ..., 6=Sat) to Monday-first (0=Mon, 1=Tue, ..., 6=Sun)
-const getMondayFirstDayIndex = (date: Date): number => {
+// Convert JS day (0=Sun, 1=Mon, ..., 6=Sat) to Sunday-first (0=Sun, 1=Sat, ..., 6=Mon)
+const getSundayFirstDayIndex = (date: Date): number => {
     const jsDay = getDay(date) // 0=Sun, 1=Mon, ..., 6=Sat
-    return jsDay === 0 ? 6 : jsDay - 1 // Convert to 0=Mon, ..., 6=Sun
+    return jsDay // Keep as is: 0=Sun, 1=Mon, ..., 6=Sat
 }
 
 interface ActivityHeatmapProps {
@@ -68,7 +68,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
     const data = useMemo(() => generateMockData(), [])
     const dateLocale = i18n.language === 'uk' ? uk : enUS
 
-    // Day labels (Monday first)
+    // Day labels (Monday first - normal order)
     const dayLabels = [
         t('heatmap.days.mon'),
         t('heatmap.days.tue'),
@@ -88,7 +88,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
         const months: { weekIndex: number; label: string }[] = []
 
         data.forEach((day, index) => {
-            const dayIndex = getMondayFirstDayIndex(day.date)
+            const dayIndex = getSundayFirstDayIndex(day.date)
             const month = getMonth(day.date)
 
             // Track month changes for labels
@@ -103,7 +103,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
             // Place day in correct position
             currentWeek[dayIndex] = day
 
-            // If it's Sunday or last day, push the week
+            // If it's Monday (day 6 in reversed order) or last day, push the week
             if (dayIndex === 6 || index === data.length - 1) {
                 weeksArray.push(currentWeek)
                 currentWeek = Array(7).fill(null)
@@ -114,7 +114,8 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
     }, [data, dateLocale])
 
     // In compact mode, show more weeks (20) to fill the card better
-    const visibleWeeks = compact ? weeks.slice(-20) : weeks
+    // Also reverse the order so newer weeks are on the left
+    const visibleWeeks = compact ? weeks.slice(-20).reverse() : weeks.reverse()
 
     const cellSize = compact ? 'w-2 h-2' : 'w-3 h-3'
     const gapSize = 'gap-0.5'
@@ -150,13 +151,10 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
                             <div className="w-8 shrink-0" />
                             <div className={`flex ${gapSize} flex-1`}>
                                 {/* Render month labels aligned with weeks */}
-                                {weeks.map((_, weekIndex) => {
-                                    // Logic for full mode labels remains same...
-                                    // We need to restore the logic if we want full mode to work correct
-                                    // For now focusing on Compact Fix
-                                    const m = monthLabels.find(l => l.weekIndex === weekIndex)
-                                    // Filter logic was removed? I should put it back for FULL mode.
-                                    // But for now, let's just make compact work.
+                                {visibleWeeks.map((_, weekIndex) => {
+                                    // Since weeks are reversed, we need to find the original index
+                                    const originalWeekIndex = weeks.length - 1 - weekIndex
+                                    const m = monthLabels.find(l => l.weekIndex === originalWeekIndex)
                                     return (
                                         <div key={weekIndex} className="flex-1 text-[10px] text-muted-foreground font-medium">
                                             {m?.label || ''}
