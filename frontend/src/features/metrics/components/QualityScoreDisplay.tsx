@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Badge } from '@/shared/ui/badge'
 import {
   Tooltip,
@@ -14,10 +15,10 @@ const getScoreColor = (score: number): string => {
   return 'bg-semantic-error text-white border-semantic-error'
 }
 
-const getScoreLabel = (score: number): string => {
-  if (score >= 71) return 'Good'
-  if (score >= 41) return 'Fair'
-  return 'Poor'
+const getScoreLabelKey = (score: number): string => {
+  if (score >= 71) return 'qualityScore.labels.good'
+  if (score >= 41) return 'qualityScore.labels.fair'
+  return 'qualityScore.labels.poor'
 }
 
 export const QualityScoreDisplay = ({
@@ -25,6 +26,8 @@ export const QualityScoreDisplay = ({
   topicName,
   showTooltip = true,
 }: QualityScoreProps) => {
+  const { t } = useTranslation('monitoring')
+
   const scoreContent = (
     <div className="flex items-center gap-2">
       <Badge
@@ -33,7 +36,7 @@ export const QualityScoreDisplay = ({
           'text-xs font-semibold px-2 py-2',
           getScoreColor(score)
         )}
-        aria-label={`Quality score: ${score} out of 100, ${getScoreLabel(score)}`}
+        aria-label={t('qualityScore.ariaLabel', { score, label: t(getScoreLabelKey(score)) })}
       >
         {score}
       </Badge>
@@ -55,12 +58,12 @@ export const QualityScoreDisplay = ({
         </TooltipTrigger>
         <TooltipContent>
           <div className="text-xs space-y-2">
-            <p className="font-semibold">Quality Score: {score}/100</p>
-            <p className="text-muted-foreground">Based on:</p>
+            <p className="font-semibold">{t('qualityScore.tooltip.title', { score })}</p>
+            <p className="text-muted-foreground">{t('qualityScore.tooltip.basedOn')}</p>
             <ul className="list-disc list-inside space-y-0.5 text-muted-foreground">
-              <li>Message relevance</li>
-              <li>Atom completeness</li>
-              <li>Topic coherence</li>
+              <li>{t('qualityScore.tooltip.factors.relevance')}</li>
+              <li>{t('qualityScore.tooltip.factors.completeness')}</li>
+              <li>{t('qualityScore.tooltip.factors.coherence')}</li>
             </ul>
           </div>
         </TooltipContent>

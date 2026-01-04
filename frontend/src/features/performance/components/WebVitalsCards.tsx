@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { VitalsStatusBadge } from './VitalsStatusBadge';
 import { VITALS_THRESHOLDS, formatValue } from '../utils/thresholds';
@@ -19,6 +20,8 @@ const METRIC_ICONS: Record<MetricName, React.ElementType> = {
 const METRICS: MetricName[] = ['LCP', 'INP', 'CLS', 'FCP', 'TTFB'];
 
 export const WebVitalsCards = ({ vitals }: WebVitalsCardsProps) => {
+  const { t } = useTranslation('monitoring');
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {METRICS.map((name) => {
@@ -43,9 +46,7 @@ export const WebVitalsCards = ({ vitals }: WebVitalsCardsProps) => {
                 {metric ? formatValue(name, metric.value) : '--'}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Good: {'<'}
-                {threshold.good}
-                {threshold.unit}
+                {t('webVitals.cards.goodThreshold', { value: threshold.good, unit: threshold.unit })}
               </p>
             </CardContent>
           </Card>

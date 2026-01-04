@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   BarChart3,
@@ -90,14 +91,14 @@ const getStatusBadgeVariant = (
   }
 }
 
-const getStatusBadgeLabel = (status: MetricStatus): string => {
+const getStatusBadgeLabel = (status: MetricStatus, t: (key: string) => string): string => {
   switch (status) {
     case 'critical':
-      return 'Critical'
+      return t('metricsDashboard.status.critical')
     case 'warning':
-      return 'Warning'
+      return t('metricsDashboard.status.warning')
     case 'optimal':
-      return 'Good'
+      return t('metricsDashboard.status.good')
   }
 }
 
@@ -132,6 +133,7 @@ const mapTrendDirection = (
 const NOTIFICATION_STORAGE_KEY = 'metrics-notifications-shown'
 
 export const MetricsDashboard = () => {
+  const { t } = useTranslation('monitoring')
   const { isAdminMode } = useAdminMode()
   const queryClient = useQueryClient()
   const [usePolling, setUsePolling] = useState(false)
@@ -183,8 +185,8 @@ export const MetricsDashboard = () => {
     const accuracyStatus = getMetricStatus('classificationAccuracy', metrics.classificationAccuracy)
 
     if (topicQualityStatus === 'critical' && !shownNotifications.topicQualityScore) {
-      toast.error('Topic Quality Score is Critical', {
-        description: `Quality score dropped to ${metrics.topicQualityScore}/100. Review and approve pending topics to improve quality.`,
+      toast.error(t('metricsDashboard.toast.topicQuality.title'), {
+        description: t('metricsDashboard.toast.topicQuality.description', { score: metrics.topicQualityScore }),
         duration: 10000,
       })
       shownNotifications.topicQualityScore = true
@@ -193,8 +195,8 @@ export const MetricsDashboard = () => {
     }
 
     if (noiseRatioStatus === 'critical' && !shownNotifications.noiseRatio) {
-      toast.warning('High Noise Ratio Detected', {
-        description: `Over ${metrics.noiseRatio}% of messages are filtered as noise. Consider adjusting classification thresholds.`,
+      toast.warning(t('metricsDashboard.toast.noiseRatio.title'), {
+        description: t('metricsDashboard.toast.noiseRatio.description', { ratio: metrics.noiseRatio }),
         duration: 10000,
       })
       shownNotifications.noiseRatio = true
@@ -203,8 +205,8 @@ export const MetricsDashboard = () => {
     }
 
     if (accuracyStatus === 'critical' && !shownNotifications.classificationAccuracy) {
-      toast.error('Classification Accuracy is Critical', {
-        description: `Accuracy dropped to ${metrics.classificationAccuracy}%. Review classification model and training data.`,
+      toast.error(t('metricsDashboard.toast.classificationAccuracy.title'), {
+        description: t('metricsDashboard.toast.classificationAccuracy.description', { accuracy: metrics.classificationAccuracy }),
         duration: 10000,
       })
       shownNotifications.classificationAccuracy = true
@@ -223,9 +225,9 @@ export const MetricsDashboard = () => {
     return (
       <Card className="border-destructive">
         <CardContent className="p-4 flex items-center justify-between">
-          <span className="text-destructive">Failed to load metrics: {String(error)}</span>
+          <span className="text-destructive">{t('metricsDashboard.loadingError', { error: String(error) })}</span>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            Retry
+            {t('metricsDashboard.retry')}
           </Button>
         </CardContent>
       </Card>
@@ -235,7 +237,7 @@ export const MetricsDashboard = () => {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">System metrics</h2>
+        <h2 className="text-xl font-semibold">{t('metricsDashboard.title')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(4)].map((_, i) => (
             <Card key={i}>
@@ -264,7 +266,7 @@ export const MetricsDashboard = () => {
 
   if (topicQualityStatus === 'critical') {
     criticalMetrics.push({
-      name: 'Topic Quality Score',
+      name: t('metricsDashboard.metrics.topicQualityScore.title'),
       value: `${metrics.topicQualityScore}/100`,
       status: 'critical',
     })
@@ -272,7 +274,7 @@ export const MetricsDashboard = () => {
 
   if (noiseRatioStatus === 'critical') {
     criticalMetrics.push({
-      name: 'Noise Ratio',
+      name: t('noiseStats.title'),
       value: `${metrics.noiseRatio}%`,
       status: 'critical',
     })
@@ -280,7 +282,7 @@ export const MetricsDashboard = () => {
 
   if (accuracyStatus === 'critical') {
     criticalMetrics.push({
-      name: 'Classification Accuracy',
+      name: t('metricsDashboard.metrics.classificationAccuracy.title'),
       value: `${metrics.classificationAccuracy}%`,
       status: 'critical',
     })
@@ -292,7 +294,7 @@ export const MetricsDashboard = () => {
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <h2 className="text-xl font-semibold">System metrics</h2>
+          <h2 className="text-xl font-semibold">{t('metricsDashboard.title')}</h2>
           <AdminFeatureBadge variant="inline" size="sm" />
         </div>
         <div className="flex items-center gap-4">
@@ -300,12 +302,12 @@ export const MetricsDashboard = () => {
             <>
               <Badge variant="outline" className="gap-2 border-status-connected text-status-connected">
                 <Signal className="w-3.5 h-3.5" />
-                Live
+                {t('metricsDashboard.connection.live')}
               </Badge>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-status-connected animate-pulse" />
                 <span className="text-xs text-muted-foreground">
-                  Real-time updates
+                  {t('metricsDashboard.connection.realTimeUpdates')}
                 </span>
               </div>
             </>
@@ -313,12 +315,12 @@ export const MetricsDashboard = () => {
             <>
               <Badge variant="outline" className="gap-2 border-status-validating text-status-validating">
                 <SignalLow className="w-3.5 h-3.5" />
-                Polling
+                {t('metricsDashboard.connection.polling')}
               </Badge>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-status-validating animate-pulse" />
                 <span className="text-xs text-muted-foreground">
-                  {connectionState === 'reconnecting' ? 'Reconnecting...' : 'Auto-refresh every 30s'}
+                  {connectionState === 'reconnecting' ? t('metricsDashboard.connection.reconnecting') : t('metricsDashboard.connection.autoRefresh')}
                 </span>
               </div>
             </>
@@ -329,12 +331,12 @@ export const MetricsDashboard = () => {
       {hasCriticalMetrics && (
         <Alert variant="destructive" className="animate-fade-in">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Critical Metrics Detected</AlertTitle>
+          <AlertTitle>{t('metricsDashboard.criticalAlert.title')}</AlertTitle>
           <AlertDescription>
             <ul className="list-disc pl-4 mt-2 space-y-2">
               {criticalMetrics.map((metric) => (
                 <li key={metric.name}>
-                  <span className="font-medium">{metric.name}:</span> {metric.value} (Critical)
+                  <span className="font-medium">{metric.name}:</span> {metric.value} ({t('metricsDashboard.status.critical')})
                 </li>
               ))}
             </ul>
@@ -345,7 +347,7 @@ export const MetricsDashboard = () => {
                 onClick={() => setAlertDismissed(true)}
                 className="bg-background"
               >
-                Dismiss
+                {t('metricsDashboard.criticalAlert.dismiss')}
               </Button>
             </div>
           </AlertDescription>
@@ -358,7 +360,7 @@ export const MetricsDashboard = () => {
           'animate-fade-in-up'
         )}
         role="region"
-        aria-label="System metrics dashboard"
+        aria-label={t('metricsDashboard.ariaLabel')}
       >
         <Card
           className={cn(
@@ -373,14 +375,14 @@ export const MetricsDashboard = () => {
                 <div className="flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-primary" />
                   <p className="text-sm font-medium text-muted-foreground">
-                    Topic Quality Score
+                    {t('metricsDashboard.metrics.topicQualityScore.title')}
                   </p>
                 </div>
                 <Badge
                   variant={getStatusBadgeVariant(topicQualityStatus)}
                   className={cn('text-xs', getStatusBadgeColor(topicQualityStatus))}
                 >
-                  {getStatusBadgeLabel(topicQualityStatus)}
+                  {getStatusBadgeLabel(topicQualityStatus, t)}
                 </Badge>
               </div>
               <div className="flex items-baseline justify-between">
@@ -394,8 +396,10 @@ export const MetricsDashboard = () => {
               </div>
               {metrics.trends.topicQualityScore.direction !== 'stable' && (
                 <p className="text-sm text-muted-foreground">
-                  {metrics.trends.topicQualityScore.direction === 'up' ? '↑' : '↓'}{' '}
-                  {Math.abs(metrics.trends.topicQualityScore.change).toFixed(1)}% vs last week
+                  {t('metricsDashboard.trend.vsLastWeek', {
+                    direction: metrics.trends.topicQualityScore.direction === 'up' ? '↑' : '↓',
+                    change: Math.abs(metrics.trends.topicQualityScore.change).toFixed(1)
+                  })}
                 </p>
               )}
             </div>
@@ -411,9 +415,9 @@ export const MetricsDashboard = () => {
         />
 
         <MetricCard
-          title="Classification Accuracy"
+          title={t('metricsDashboard.metrics.classificationAccuracy.title')}
           value={`${metrics.classificationAccuracy}%`}
-          subtitle="model performance"
+          subtitle={t('metricsDashboard.metrics.classificationAccuracy.subtitle')}
           trend={{
             value: Math.abs(metrics.trends.classificationAccuracy.change),
             direction: mapTrendDirection(metrics.trends.classificationAccuracy.direction),
@@ -424,9 +428,9 @@ export const MetricsDashboard = () => {
         />
 
         <MetricCard
-          title="Active Analysis Runs"
+          title={t('metricsDashboard.metrics.activeAnalysisRuns.title')}
           value={metrics.activeAnalysisRuns}
-          subtitle="currently processing"
+          subtitle={t('metricsDashboard.metrics.activeAnalysisRuns.subtitle')}
           trend={{
             value: Math.abs(metrics.trends.activeAnalysisRuns.change),
             direction: mapTrendDirection(metrics.trends.activeAnalysisRuns.direction),

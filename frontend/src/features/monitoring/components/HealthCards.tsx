@@ -60,38 +60,38 @@ export const HealthCards = ({ metrics, isError = false, error, onRetry }: Health
                 <Badge variant="default" className="bg-status-validating hover:bg-status-validating/80">
                   <span className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    Виконується: {metric.running}
+                    {t('healthCards.badges.running', { count: metric.running })}
                   </span>
                 </Badge>
               )}
               {metric.pending > 0 && (
                 <Badge variant="secondary">
-                  В черзі: {metric.pending}
+                  {t('healthCards.badges.pending', { count: metric.pending })}
                 </Badge>
               )}
               {metric.success > 0 && (
                 <Badge variant="success">
-                  ✓ {metric.success}
+                  {metric.success}
                 </Badge>
               )}
               {metric.failed > 0 && (
                 <Badge variant="destructive">
-                  ✗ {metric.failed}
+                  {metric.failed}
                 </Badge>
               )}
             </div>
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Всього:</span>
+                <span className="text-muted-foreground">{t('healthCards.metrics.total')}</span>
                 <span className="font-medium">{metric.total_executions}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Середня тривалість:</span>
+                <span className="text-muted-foreground">{t('healthCards.metrics.avgDuration')}</span>
                 <span className="font-medium">{formatDuration(metric.avg_duration_ms)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Успішність:</span>
+                <span className="text-muted-foreground">{t('healthCards.metrics.successRate')}</span>
                 <span className={`font-medium ${getSuccessRateColor(metric.success_rate)}`}>
                   {metric.success_rate.toFixed(1)}%
                 </span>
