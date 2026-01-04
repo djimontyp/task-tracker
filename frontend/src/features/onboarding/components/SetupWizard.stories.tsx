@@ -1,5 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SetupWizard } from './SetupWizard';
+import { useTelegramStore } from '@/pages/SettingsPage/plugins/TelegramSource/useTelegramStore';
+
+/**
+ * Helper to set Telegram connection status for stories.
+ * Must be called at module level before stories render.
+ */
+const setTelegramStatus = (status: 'unknown' | 'checking' | 'connected' | 'warning' | 'error') => {
+  useTelegramStore.setState({ connectionStatus: status });
+};
 
 const meta: Meta<typeof SetupWizard> = {
   title: 'Features/Onboarding/SetupWizard',
@@ -15,14 +24,14 @@ const meta: Meta<typeof SetupWizard> = {
 Displays a 2x2 grid of setup steps on desktop (1 column on mobile).
 
 **Steps:**
-1. Connect Sources - Link Telegram/Slack
+1. Connect Sources - Link Telegram/Slack (status derived from Telegram connection)
 2. First Project - Create organizational structure
 3. Activate Agent - Enable AI analysis
 4. First Insight - Auto-completes when AI extracts knowledge
 
 **Features:**
 - Responsive grid (2x2 desktop, 1 col mobile)
-- Step status indicators (pending, active, completed, locked)
+- Step 1 status derived from real Telegram connection state
 - Locked state with visual overlay
 - Touch-friendly buttons (44px)
 - Semantic tokens only
@@ -31,11 +40,6 @@ Displays a 2x2 grid of setup steps on desktop (1 column on mobile).
     },
   },
   argTypes: {
-    step1Status: {
-      control: 'select',
-      options: ['pending', 'active', 'completed', 'locked'],
-      description: 'Status for Connect Sources step',
-    },
     step2Status: {
       control: 'select',
       options: ['pending', 'active', 'completed', 'locked'],
@@ -63,19 +67,24 @@ export default meta;
 type Story = StoryObj<typeof SetupWizard>;
 
 // ═══════════════════════════════════════════════════════════════
-// INITIAL STATE
+// INITIAL STATE (Telegram not connected)
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * All steps pending - fresh start state
+ * Initial state - Telegram not connected, Step 1 active
  */
-export const AllPending: Story = {
+export const InitialState: Story = {
   args: {
-    step1Status: 'active',
     step2Status: 'locked',
     step3Status: 'locked',
     step4Status: 'locked',
   },
+  decorators: [
+    (Story) => {
+      setTelegramStatus('unknown');
+      return <Story />;
+    },
+  ],
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -83,15 +92,37 @@ export const AllPending: Story = {
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * Step 1 completed, Step 2 now active
+ * Telegram connected, Step 1 completed, Step 2 now active
  */
-export const Step1Completed: Story = {
+export const TelegramConnected: Story = {
   args: {
-    step1Status: 'completed',
     step2Status: 'active',
     step3Status: 'locked',
     step4Status: 'locked',
   },
+  decorators: [
+    (Story) => {
+      setTelegramStatus('connected');
+      return <Story />;
+    },
+  ],
+};
+
+/**
+ * Telegram with warning status - still counts as connected
+ */
+export const TelegramWarning: Story = {
+  args: {
+    step2Status: 'active',
+    step3Status: 'locked',
+    step4Status: 'locked',
+  },
+  decorators: [
+    (Story) => {
+      setTelegramStatus('warning');
+      return <Story />;
+    },
+  ],
 };
 
 /**
@@ -99,11 +130,16 @@ export const Step1Completed: Story = {
  */
 export const Step2Completed: Story = {
   args: {
-    step1Status: 'completed',
     step2Status: 'completed',
     step3Status: 'active',
     step4Status: 'locked',
   },
+  decorators: [
+    (Story) => {
+      setTelegramStatus('connected');
+      return <Story />;
+    },
+  ],
 };
 
 /**
@@ -111,11 +147,16 @@ export const Step2Completed: Story = {
  */
 export const Step3Completed: Story = {
   args: {
-    step1Status: 'completed',
     step2Status: 'completed',
     step3Status: 'completed',
     step4Status: 'pending',
   },
+  decorators: [
+    (Story) => {
+      setTelegramStatus('connected');
+      return <Story />;
+    },
+  ],
 };
 
 /**
@@ -123,11 +164,16 @@ export const Step3Completed: Story = {
  */
 export const AllCompleted: Story = {
   args: {
-    step1Status: 'completed',
     step2Status: 'completed',
     step3Status: 'completed',
     step4Status: 'completed',
   },
+  decorators: [
+    (Story) => {
+      setTelegramStatus('connected');
+      return <Story />;
+    },
+  ],
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -139,11 +185,16 @@ export const AllCompleted: Story = {
  */
 export const MobileLayout: Story = {
   args: {
-    step1Status: 'completed',
     step2Status: 'active',
     step3Status: 'locked',
     step4Status: 'locked',
   },
+  decorators: [
+    (Story) => {
+      setTelegramStatus('connected');
+      return <Story />;
+    },
+  ],
   parameters: {
     viewport: {
       defaultViewport: 'mobile1',
@@ -156,11 +207,16 @@ export const MobileLayout: Story = {
  */
 export const TabletLayout: Story = {
   args: {
-    step1Status: 'completed',
     step2Status: 'completed',
     step3Status: 'active',
     step4Status: 'locked',
   },
+  decorators: [
+    (Story) => {
+      setTelegramStatus('connected');
+      return <Story />;
+    },
+  ],
   parameters: {
     viewport: {
       defaultViewport: 'tablet',
@@ -173,25 +229,35 @@ export const TabletLayout: Story = {
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * All locked - unusual state for testing
+ * Telegram error state - Step 1 remains active
  */
-export const AllLocked: Story = {
+export const TelegramError: Story = {
   args: {
-    step1Status: 'locked',
     step2Status: 'locked',
     step3Status: 'locked',
     step4Status: 'locked',
   },
+  decorators: [
+    (Story) => {
+      setTelegramStatus('error');
+      return <Story />;
+    },
+  ],
 };
 
 /**
- * Multiple active steps - parallel execution possible
+ * Telegram checking state - Step 1 remains active
  */
-export const MultipleActive: Story = {
+export const TelegramChecking: Story = {
   args: {
-    step1Status: 'active',
-    step2Status: 'active',
-    step3Status: 'pending',
+    step2Status: 'locked',
+    step3Status: 'locked',
     step4Status: 'locked',
   },
+  decorators: [
+    (Story) => {
+      setTelegramStatus('checking');
+      return <Story />;
+    },
+  ],
 };

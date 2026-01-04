@@ -85,7 +85,10 @@
     "actions": {
       "connectSource": "Connect Source",
       "createProject": "Create Project",
-      "activateAgent": "Activate Agent"
+      "activateAgent": "Activate Agent",
+      "telegram": "Telegram",
+      "slack": "Slack (Coming Soon)",
+      "slackComingSoon": "Slack integration coming soon!"
     }
   }
 }
