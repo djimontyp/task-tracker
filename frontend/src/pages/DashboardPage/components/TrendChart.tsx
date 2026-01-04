@@ -60,7 +60,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({ compact = false, embedde
     const data = useMemo(() => generateTrendData(dateLocale), [dateLocale])
 
     const Wrapper = embedded ? 'div' : Card
-    const wrapperClasses = embedded ? 'h-full flex flex-col overflow-hidden' : 'h-full flex flex-col overflow-hidden'
+    const wrapperClasses = embedded ? 'h-full flex flex-col overflow-hidden !cursor-pointer' : 'h-full flex flex-col overflow-hidden'
 
     return (
         <Wrapper className={wrapperClasses}>
@@ -89,8 +89,8 @@ export const TrendChart: React.FC<TrendChartProps> = ({ compact = false, embedde
                 {/* Compact Background Label */}
                 {compact && (
                     <div className="absolute top-2 left-3 z-10 pointer-events-none max-w-[calc(100%-1.5rem)]">
-                        <div className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider opacity-60 truncate">
-                            {t('trendChart.signal', 'Productivity')}
+                        <div className="text-[9px] font-semibold text-muted-foreground tracking-wider opacity-60 truncate">
+                            {t('trendChart.title')}
                         </div>
                     </div>
                 )}
