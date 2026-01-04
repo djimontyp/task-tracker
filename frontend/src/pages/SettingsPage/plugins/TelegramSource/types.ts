@@ -38,5 +38,5 @@ export interface WizardState {
   isFirstTimeSetup: boolean
 }
 
-export const BOT_USERNAME = '@PulseRadarBot'
-export const BOT_NAME = 'Pulse Radar Bot'
+export const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '@PulseRadarBot'
+export const BOT_NAME = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'Pulse Radar Bot'
