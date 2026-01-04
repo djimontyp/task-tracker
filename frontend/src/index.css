@@ -311,57 +311,48 @@
   }
 }
 
-/* Logo animations - 2 full rotations (720°) */
-@keyframes radar-sweep {
+/* Logo animations - Smooth Rotation & Pulse */
+@keyframes ring-rotate {
   0% { transform: rotate(0deg); }
-  100% { transform: rotate(720deg); }
+  100% { transform: rotate(360deg); }
 }
 
-@keyframes orbit-fast {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(720deg); }
+@keyframes pulse-core {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.85); opacity: 0.8; }
 }
 
-@keyframes orbit-reverse {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(-720deg); }
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(0.9); }
 }
 
 /* Logo base styles */
-.logo-svg .sweep-group,
-.logo-svg .orbit-group {
+.logo-ring {
   transform-origin: 16px 16px;
   will-change: transform;
 }
 
-/* Hover + animating states */
-.logo-container:hover .logo-svg .sweep-group,
-.logo-svg.animating .sweep-group {
-  animation: radar-sweep 3s linear infinite;  /* 2 rotations in 3s */
+.logo-core {
+  transform-origin: 16px 16px;
+  will-change: transform, opacity;
 }
 
-/* Atom 1 - same direction as sweep, faster */
-.logo-container:hover .logo-svg .orbit-1,
-.logo-svg.animating .orbit-1 {
-  animation: orbit-fast 2.5s linear infinite;  /* faster than sweep */
+/* Animating states */
+.logo-container:hover .logo-ring,
+.logo-svg.animating .logo-ring {
+  animation: ring-rotate 8s linear infinite;
 }
 
-/* Atom 2 - REVERSE direction, slower */
-.logo-container:hover .logo-svg .orbit-2,
-.logo-svg.animating .orbit-2 {
-  animation: orbit-reverse 5s linear infinite;  /* opposite, slower */
-}
-
-/* Atom 3 - same direction, medium */
-.logo-container:hover .logo-svg .orbit-3,
-.logo-svg.animating .orbit-3 {
-  animation: orbit-fast 4s linear infinite;  /* medium speed */
+.logo-container:hover .logo-core,
+.logo-svg.animating .logo-core {
+  animation: pulse-core 2s ease-in-out infinite;
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .logo-svg .sweep-group,
-  .logo-svg .orbit-group {
+  .logo-ring,
+  .logo-core {
     animation: none !important;
   }
 }
