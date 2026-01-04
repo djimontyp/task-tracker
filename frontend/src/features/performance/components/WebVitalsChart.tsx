@@ -23,13 +23,13 @@ const chartConfig: ChartConfig = {
 export const WebVitalsChart = ({ data }: WebVitalsChartProps) => {
   const formattedData = useMemo(
     () =>
-      data.map((entry) => ({
+      [...data].map((entry) => ({
         ...entry,
         time: new Date(entry.timestamp).toLocaleTimeString('uk-UA', {
           hour: '2-digit',
           minute: '2-digit',
         }),
-      })),
+      })).reverse(),
     [data]
   );
 
