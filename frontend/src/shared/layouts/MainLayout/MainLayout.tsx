@@ -62,7 +62,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         queryClient.invalidateQueries({ queryKey: ['sidebar-counts'] })
       }
     },
-    reconnect: true,
+    _reconnect: true,
   })
 
   // Admin Mode toggle: Cmd+Shift+A (macOS) / Ctrl+Shift+A (Win/Linux)
