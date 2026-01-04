@@ -59,9 +59,11 @@ const getMondayFirstDayIndex = (date: Date): number => {
 interface ActivityHeatmapProps {
     /** Compact mode - hides header, smaller cell size */
     compact?: boolean
+    /** Embedded mode - removes Card wrapper */
+    embedded?: boolean
 }
 
-export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = false }) => {
+export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = false, embedded = false }) => {
     const { t, i18n } = useTranslation('dashboard')
     const data = useMemo(() => generateMockData(), [])
     const dateLocale = i18n.language === 'uk' ? uk : enUS
@@ -117,8 +119,11 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
     const cellSize = compact ? 'w-2 h-2' : 'w-3 h-3'
     const gapSize = 'gap-0.5'
 
+    const Wrapper = embedded ? 'div' : Card
+    const wrapperClasses = embedded ? 'h-full flex flex-col overflow-hidden' : 'h-full flex flex-col overflow-hidden'
+
     return (
-        <Card className="h-full flex flex-col overflow-hidden">
+        <Wrapper className={wrapperClasses}>
             {!compact && (
                 <CardHeader>
                     <CardTitle>{t('activityHeatmap.title')}</CardTitle>
@@ -236,6 +241,6 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
                     )}
                 </div>
             </CardContent>
-        </Card>
+        </Wrapper>
     )
 }
