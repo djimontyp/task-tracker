@@ -62,7 +62,8 @@
     "all": "All",
     "active": "Active",
     "archived": "Archived",
-    "search": "Search topics..."
+    "search": "Search topics...",
+    "clearSearch": "Clear search"
   },
   "smartFilters": {
     "ariaLabel": "Topic filters",
@@ -75,7 +76,9 @@
     "edit": "Edit",
     "delete": "Delete",
     "archive": "Archive",
-    "unarchive": "Unarchive"
+    "unarchive": "Unarchive",
+    "viewMessages": "View Messages",
+    "runAnalysis": "Run Analysis"
   },
   "form": {
     "name": "Topic name",
@@ -101,5 +104,52 @@
     "atoms": "Atoms",
     "messages": "Messages",
     "lastActivity": "Last activity"
+  },
+  "table": {
+    "selectAll": "Select all",
+    "selectRow": "Select row",
+    "task": "Task",
+    "title": "Title",
+    "status": "Status",
+    "priority": "Priority",
+    "created": "Created",
+    "actions": "Actions",
+    "taskActionsFor": "Task actions for {{title}}",
+    "openMenu": "Open menu",
+    "copyTaskId": "Copy task ID",
+    "view": "View"
+  },
+  "sort": {
+    "newestFirst": "Newest First",
+    "oldestFirst": "Oldest First",
+    "nameAZ": "Name A-Z",
+    "nameZA": "Name Z-A",
+    "recentlyUpdated": "Recently Updated"
+  },
+  "view": {
+    "grid": "Switch to grid view",
+    "list": "Switch to list view",
+    "gridLabel": "Grid",
+    "listLabel": "List"
+  },
+  "search": {
+    "found": "Found {{count}} topics",
+    "noResults": "No matching topics",
+    "noResultsFor": "No topics found matching",
+    "tryClear": "Try searching with different keywords or clear the search to see all topics."
+  },
+  "pagination": {
+    "showing": "Showing {{start}}-{{end}} of {{total}} topics"
+  },
+  "error": {
+    "loading": "Error loading data",
+    "unknown": "Unknown error"
+  },
+  "colorPicker": {
+    "hexColorCode": "Hex Color Code",
+    "invalidHex": "Please enter a valid hex color (e.g., #FF5733)",
+    "quickSelect": "Quick Select",
+    "selectColor": "Select {{color}} color",
+    "copy": "Copy"
   }
 }

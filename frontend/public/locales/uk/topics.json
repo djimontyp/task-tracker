@@ -62,7 +62,8 @@
     "all": "Всі",
     "active": "Активні",
     "archived": "Архівовані",
-    "search": "Пошук тем..."
+    "search": "Пошук тем...",
+    "clearSearch": "Очистити пошук"
   },
   "smartFilters": {
     "ariaLabel": "Фільтри тем",
@@ -75,7 +76,9 @@
     "edit": "Редагувати",
     "delete": "Видалити",
     "archive": "Архівувати",
-    "unarchive": "Розархівувати"
+    "unarchive": "Розархівувати",
+    "viewMessages": "Переглянути повідомлення",
+    "runAnalysis": "Запустити аналіз"
   },
   "form": {
     "name": "Назва теми",
@@ -102,5 +105,52 @@
     "atoms": "Атомів",
     "messages": "Повідомлень",
     "lastActivity": "Остання активність"
+  },
+  "table": {
+    "selectAll": "Обрати все",
+    "selectRow": "Обрати рядок",
+    "task": "Задача",
+    "title": "Назва",
+    "status": "Статус",
+    "priority": "Пріоритет",
+    "created": "Створено",
+    "actions": "Дії",
+    "taskActionsFor": "Дії з задачею {{title}}",
+    "openMenu": "Відкрити меню",
+    "copyTaskId": "Копіювати ID задачі",
+    "view": "Переглянути"
+  },
+  "sort": {
+    "newestFirst": "Спочатку нові",
+    "oldestFirst": "Спочатку старі",
+    "nameAZ": "Назва А-Я",
+    "nameZA": "Назва Я-А",
+    "recentlyUpdated": "Нещодавно оновлені"
+  },
+  "view": {
+    "grid": "Перемкнути на сітку",
+    "list": "Перемкнути на список",
+    "gridLabel": "Сітка",
+    "listLabel": "Список"
+  },
+  "search": {
+    "found": "Знайдено {{count}} тем",
+    "noResults": "Теми не знайдено",
+    "noResultsFor": "Теми не знайдено за запитом",
+    "tryClear": "Спробуйте змінити пошуковий запит або очистіть пошук, щоб побачити всі теми."
+  },
+  "pagination": {
+    "showing": "Показано {{start}}-{{end}} з {{total}} тем"
+  },
+  "error": {
+    "loading": "Помилка завантаження даних",
+    "unknown": "Невідома помилка"
+  },
+  "colorPicker": {
+    "hexColorCode": "Hex код кольору",
+    "invalidHex": "Введіть коректний hex колір (напр., #FF5733)",
+    "quickSelect": "Швидкий вибір",
+    "selectColor": "Обрати колір {{color}}",
+    "copy": "Копіювати"
   }
 }

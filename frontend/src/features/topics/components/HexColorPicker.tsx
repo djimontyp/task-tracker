@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { HexColorPicker, HexColorInput } from 'react-colorful'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/ui'
 
 interface HexColorPickerComponentProps {
@@ -13,6 +14,7 @@ const HexColorPickerComponent: React.FC<HexColorPickerComponentProps> = ({
   onColorChange,
   className = ''
 }) => {
+  const { t } = useTranslation('topics')
   const [color, setColor] = useState<string>(selectedColor || '#6b7280')
   const [isValidHex, setIsValidHex] = useState<boolean>(true)
 
@@ -85,7 +87,7 @@ const HexColorPickerComponent: React.FC<HexColorPickerComponentProps> = ({
       {/* Color Input */}
       <div className="space-y-2">
         <label htmlFor="hex-input" className="block text-sm font-medium text-foreground">
-          Hex Color Code
+          {t('colorPicker.hexColorCode')}
         </label>
         <div className="relative">
           <HexColorInput
@@ -107,13 +109,13 @@ const HexColorPickerComponent: React.FC<HexColorPickerComponentProps> = ({
           />
         </div>
         {!isValidHex && (
-          <p className="text-xs text-destructive">Please enter a valid hex color (e.g., #FF5733)</p>
+          <p className="text-xs text-destructive">{t('colorPicker.invalidHex')}</p>
         )}
       </div>
 
       {/* Preset Colors */}
       <div className="space-y-2">
-        <p className="text-sm font-medium text-foreground">Quick Select</p>
+        <p className="text-sm font-medium text-foreground">{t('colorPicker.quickSelect')}</p>
         <div className="grid grid-cols-6 gap-2">
           {presetColors.map((presetColor) => (
             <button
@@ -129,7 +131,7 @@ const HexColorPickerComponent: React.FC<HexColorPickerComponentProps> = ({
               `}
               style={{ backgroundColor: presetColor }}
               title={presetColor}
-              aria-label={`Select ${presetColor} color`}
+              aria-label={t('colorPicker.selectColor', { color: presetColor })}
             />
           ))}
         </div>
@@ -152,7 +154,7 @@ const HexColorPickerComponent: React.FC<HexColorPickerComponentProps> = ({
           onClick={() => navigator.clipboard.writeText(color)}
           className="text-xs"
         >
-          Copy
+          {t('colorPicker.copy')}
         </Button>
       </div>
     </div>

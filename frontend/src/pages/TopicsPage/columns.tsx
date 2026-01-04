@@ -1,5 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal, Database, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import type { Task } from '@/shared/types'
 import { Checkbox, Button, Badge, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/shared/ui'
@@ -14,18 +15,20 @@ export const statusIconConfig: Record<string, { icon: React.ComponentType<{ clas
   pending: { icon: Clock },
 }
 
-export const columns: ColumnDef<Task>[] = [
+type TFunction = ReturnType<typeof useTranslation<'topics'>>['t']
+
+export const createColumns = (t: TFunction): ColumnDef<Task>[] => [
   {
     id: 'select',
     header: ({ table }) => (
       <Checkbox
         checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label={t('table.selectAll')}
       />
     ),
     cell: ({ row }) => (
-      <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
+      <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label={t('table.selectRow')} />
     ),
     enableSorting: false,
     enableHiding: false,
@@ -33,7 +36,7 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: 'id',
-    header: 'Task',
+    header: t('table.task'),
     cell: ({ row }) => {
       const id = row.getValue<number | string>('id')
       return <div className="w-[80px] text-xs font-medium text-muted-foreground">TASK-{String(id).padStart(4, '0')}</div>
@@ -44,7 +47,7 @@ export const columns: ColumnDef<Task>[] = [
   {
     accessorKey: 'title',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Title" />
+      <DataTableColumnHeader column={column} title={t('table.title')} />
     ),
     cell: ({ row }) => {
       const title = row.getValue<string>('title')
@@ -60,7 +63,7 @@ export const columns: ColumnDef<Task>[] = [
   {
     accessorKey: 'status',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title={t('table.status')} />
     ),
     cell: ({ row }) => {
       const status = row.getValue<string>('status') as TaskStatus
@@ -83,7 +86,7 @@ export const columns: ColumnDef<Task>[] = [
   {
     accessorKey: 'priority',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Priority" />
+      <DataTableColumnHeader column={column} title={t('table.priority')} />
     ),
     cell: ({ row }) => {
       const priority = row.getValue<string>('priority') as TaskPriority
@@ -103,7 +106,7 @@ export const columns: ColumnDef<Task>[] = [
   {
     accessorKey: 'created_at',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Created" />
+      <DataTableColumnHeader column={column} title={t('table.created')} />
     ),
     cell: ({ row }) => {
       const d = row.getValue<string>('created_at') || (row.original as Task).createdAt
@@ -112,28 +115,31 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     id: 'actions',
-    header: () => <span className="sr-only">Actions</span>,
+    header: () => <span className="sr-only">{t('table.actions')}</span>,
     enableHiding: false,
     cell: ({ row }) => {
       const task = row.original
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-11 w-11 p-0" aria-label={`Task actions for ${task.title || `Task ${task.id}`}`}>
-              <span className="sr-only">Open menu</span>
+            <Button variant="ghost" className="h-11 w-11 p-0" aria-label={t('table.taskActionsFor', { title: task.title || `Task ${task.id}` })}>
+              <span className="sr-only">{t('table.openMenu')}</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel>{t('table.actions')}</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => navigator.clipboard.writeText(String(task.id))}>
-              Copy task ID
+              {t('table.copyTaskId')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View</DropdownMenuItem>
+            <DropdownMenuItem>{t('table.view')}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
     },
   },
 ]
+
+/** @deprecated Use createColumns(t) instead for i18n support */
+export const columns: ColumnDef<Task>[] = createColumns(((key: string) => key) as unknown as TFunction)
