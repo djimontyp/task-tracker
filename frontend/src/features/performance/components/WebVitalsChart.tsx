@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Legend } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import {
@@ -14,13 +15,15 @@ interface WebVitalsChartProps {
   data: PerformanceHistoryEntry[];
 }
 
-const chartConfig: ChartConfig = {
-  LCP: { label: 'LCP (ms)', color: 'hsl(var(--chart-1))' },
-  FCP: { label: 'FCP (ms)', color: 'hsl(var(--chart-2))' },
-  TTFB: { label: 'TTFB (ms)', color: 'hsl(var(--chart-3))' },
-};
-
 export const WebVitalsChart = ({ data }: WebVitalsChartProps) => {
+  const { t } = useTranslation('monitoring');
+
+  const chartConfig: ChartConfig = {
+    LCP: { label: t('webVitals.chart.metrics.LCP'), color: 'hsl(var(--chart-1))' },
+    FCP: { label: t('webVitals.chart.metrics.FCP'), color: 'hsl(var(--chart-2))' },
+    TTFB: { label: t('webVitals.chart.metrics.TTFB'), color: 'hsl(var(--chart-3))' },
+  };
+
   const formattedData = useMemo(
     () =>
       [...data].map((entry) => ({
@@ -39,11 +42,11 @@ export const WebVitalsChart = ({ data }: WebVitalsChartProps) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" aria-hidden="true" />
-            Web Vitals History
+            {t('webVitals.chart.historyTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center py-12 text-muted-foreground">
-          No performance data collected yet. Navigate through the app to generate metrics.
+          {t('webVitals.chart.noData')}
         </CardContent>
       </Card>
     );
@@ -54,7 +57,7 @@ export const WebVitalsChart = ({ data }: WebVitalsChartProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" aria-hidden="true" />
-          Web Vitals Trend
+          {t('webVitals.chart.trendTitle')}
         </CardTitle>
       </CardHeader>
       <CardContent>

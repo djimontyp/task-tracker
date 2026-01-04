@@ -1,4 +1,20 @@
 {
+  "healthCards": {
+    "error": {
+      "title": "Failed to load",
+      "retry": "Retry"
+    },
+    "empty": "No task execution data",
+    "badges": {
+      "running": "Running: {{count}}",
+      "pending": "In queue: {{count}}"
+    },
+    "metrics": {
+      "total": "Total:",
+      "avgDuration": "Avg duration:",
+      "successRate": "Success rate:"
+    }
+  },
   "scoringAccuracy": {
     "title": "Classification Accuracy",
     "description": "Quality metrics for message importance scoring system",
@@ -29,5 +45,117 @@
       "description": "It is recommended to review the importance scoring system and validation dataset"
     },
     "updated": "Updated: {{date}}"
+  },
+  "metricsDashboard": {
+    "title": "System metrics",
+    "loadingError": "Failed to load metrics: {{error}}",
+    "retry": "Retry",
+    "ariaLabel": "System metrics dashboard",
+    "connection": {
+      "live": "Live",
+      "polling": "Polling",
+      "realTimeUpdates": "Real-time updates",
+      "reconnecting": "Reconnecting...",
+      "autoRefresh": "Auto-refresh every 30s"
+    },
+    "status": {
+      "critical": "Critical",
+      "warning": "Warning",
+      "good": "Good"
+    },
+    "criticalAlert": {
+      "title": "Critical Metrics Detected",
+      "dismiss": "Dismiss"
+    },
+    "metrics": {
+      "topicQualityScore": {
+        "title": "Topic Quality Score"
+      },
+      "classificationAccuracy": {
+        "title": "Classification Accuracy",
+        "subtitle": "model performance"
+      },
+      "activeAnalysisRuns": {
+        "title": "Active Analysis Runs",
+        "subtitle": "currently processing"
+      }
+    },
+    "trend": {
+      "vsLastWeek": "{{direction}} {{change}}% vs last week"
+    },
+    "toast": {
+      "topicQuality": {
+        "title": "Topic Quality Score is Critical",
+        "description": "Quality score dropped to {{score}}/100. Review and approve pending topics to improve quality."
+      },
+      "noiseRatio": {
+        "title": "High Noise Ratio Detected",
+        "description": "Over {{ratio}}% of messages are filtered as noise. Consider adjusting classification thresholds."
+      },
+      "classificationAccuracy": {
+        "title": "Classification Accuracy is Critical",
+        "description": "Accuracy dropped to {{accuracy}}%. Review classification model and training data."
+      }
+    }
+  },
+  "noiseStats": {
+    "title": "Noise Filtering",
+    "status": {
+      "low": "Low",
+      "moderate": "Moderate",
+      "high": "High"
+    },
+    "messagesFiltered": "{{noisy}} of {{total}} messages filtered",
+    "trend": {
+      "vsYesterday": "{{change}}% vs yesterday",
+      "ariaLabel": "Noise ratio {{direction}} by {{change}}%"
+    },
+    "chart": {
+      "dayLabel": "Day {{day}}: {{value}}% noise ratio",
+      "legend": "Last 7 days trend"
+    }
+  },
+  "qualityScore": {
+    "ariaLabel": "Quality score: {{score}} out of 100, {{label}}",
+    "labels": {
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor"
+    },
+    "tooltip": {
+      "title": "Quality Score: {{score}}/100",
+      "basedOn": "Based on:",
+      "factors": {
+        "relevance": "Message relevance",
+        "completeness": "Atom completeness",
+        "coherence": "Topic coherence"
+      }
+    }
+  },
+  "performance": {
+    "title": "Performance Monitoring",
+    "description": "Core Web Vitals tracking for optimal user experience",
+    "lastUpdated": "Last updated: {{time}}",
+    "clearHistory": "Clear History",
+    "legend": {
+      "good": "Good - Excellent UX",
+      "needsImprovement": "Needs Improvement",
+      "poor": "Poor - Action Required"
+    }
+  },
+  "webVitals": {
+    "cards": {
+      "goodThreshold": "Good: <{{value}}{{unit}}"
+    },
+    "chart": {
+      "historyTitle": "Web Vitals History",
+      "trendTitle": "Web Vitals Trend",
+      "noData": "No performance data collected yet. Navigate through the app to generate metrics.",
+      "metrics": {
+        "LCP": "LCP (ms)",
+        "FCP": "FCP (ms)",
+        "TTFB": "TTFB (ms)"
+      }
+    }
   }
 }

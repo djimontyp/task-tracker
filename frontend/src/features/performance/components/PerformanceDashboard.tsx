@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { WebVitalsCards } from './WebVitalsCards';
 import { WebVitalsChart } from './WebVitalsChart';
 import { useWebVitals, loadWebVitalsHistory, clearWebVitalsHistory } from '../hooks/useWebVitals';
@@ -7,6 +8,7 @@ import { RefreshCw, Activity } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 
 export const PerformanceDashboard = () => {
+  const { t } = useTranslation('monitoring');
   const vitals = useWebVitals();
   const [history, setHistory] = useState<PerformanceHistoryEntry[]>([]);
 
@@ -46,21 +48,21 @@ export const PerformanceDashboard = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Activity className="h-8 w-8" aria-hidden="true" />
-            Performance Monitoring
+            {t('performance.title')}
           </h1>
           <p className="text-muted-foreground mt-2">
-            Core Web Vitals tracking for optimal user experience
+            {t('performance.description')}
           </p>
         </div>
         <div className="flex items-center gap-4">
           {vitals.lastUpdated && (
             <span className="text-sm text-muted-foreground">
-              Last updated: {new Date(vitals.lastUpdated).toLocaleTimeString('uk-UA')}
+              {t('performance.lastUpdated', { time: new Date(vitals.lastUpdated).toLocaleTimeString('uk-UA') })}
             </span>
           )}
           <Button variant="outline" size="sm" onClick={handleClearHistory}>
             <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
-            Clear History
+            {t('performance.clearHistory')}
           </Button>
         </div>
       </div>
@@ -76,21 +78,21 @@ export const PerformanceDashboard = () => {
             className="w-3 h-3 rounded-full bg-semantic-success"
             aria-hidden="true"
           />
-          <span>Good - Excellent UX</span>
+          <span>{t('performance.legend.good')}</span>
         </div>
         <div className="flex items-center gap-2">
           <span
             className="w-3 h-3 rounded-full bg-semantic-warning"
             aria-hidden="true"
           />
-          <span>Needs Improvement</span>
+          <span>{t('performance.legend.needsImprovement')}</span>
         </div>
         <div className="flex items-center gap-2">
           <span
             className="w-3 h-3 rounded-full bg-semantic-error"
             aria-hidden="true"
           />
-          <span>Poor - Action Required</span>
+          <span>{t('performance.legend.poor')}</span>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ArrowUp, ArrowDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
@@ -13,10 +14,10 @@ const getNoiseColor = (noiseRatio: number): string => {
   return 'text-semantic-error'
 }
 
-const getNoiseStatus = (noiseRatio: number): string => {
-  if (noiseRatio <= 20) return 'Low'
-  if (noiseRatio <= 40) return 'Moderate'
-  return 'High'
+const getNoiseStatusKey = (noiseRatio: number): string => {
+  if (noiseRatio <= 20) return 'noiseStats.status.low'
+  if (noiseRatio <= 40) return 'noiseStats.status.moderate'
+  return 'noiseStats.status.high'
 }
 
 const getStatusBadgeVariant = (
@@ -32,14 +33,14 @@ const getStatusBadgeVariant = (
   }
 }
 
-const getStatusBadgeLabel = (status: MetricStatus): string => {
+const getStatusBadgeLabelKey = (status: MetricStatus): string => {
   switch (status) {
     case 'critical':
-      return 'Critical'
+      return 'metricsDashboard.status.critical'
     case 'warning':
-      return 'Warning'
+      return 'metricsDashboard.status.warning'
     case 'optimal':
-      return 'Good'
+      return 'metricsDashboard.status.good'
   }
 }
 
@@ -76,6 +77,8 @@ export const NoiseStatsDisplay = ({
   trendData,
   status = 'optimal',
 }: NoiseStatsDisplayProps) => {
+  const { t } = useTranslation('monitoring')
+
   const trendDirection = useMemo(() => {
     if (!trendData || trendData.length < 2) return null
     const recent = trendData[trendData.length - 1]
@@ -103,13 +106,13 @@ export const NoiseStatsDisplay = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Noise Filtering
+            {t('noiseStats.title')}
           </CardTitle>
           <Badge
             variant={getStatusBadgeVariant(status)}
             className={cn('text-xs', getStatusBadgeColor(status))}
           >
-            {getStatusBadgeLabel(status)}
+            {t(getStatusBadgeLabelKey(status))}
           </Badge>
         </div>
       </CardHeader>
@@ -120,11 +123,11 @@ export const NoiseStatsDisplay = ({
               {noiseRatio.toFixed(1)}%
             </span>
             <span className={cn('text-sm font-medium', getNoiseColor(noiseRatio))}>
-              {getNoiseStatus(noiseRatio)}
+              {t(getNoiseStatusKey(noiseRatio))}
             </span>
           </div>
           <p className="text-sm text-muted-foreground">
-            {noisyMessages.toLocaleString()} of {totalMessages.toLocaleString()} messages filtered
+            {t('noiseStats.messagesFiltered', { noisy: noisyMessages.toLocaleString(), total: totalMessages.toLocaleString() })}
           </p>
         </div>
 
@@ -134,14 +137,14 @@ export const NoiseStatsDisplay = ({
               'flex items-center gap-2 text-sm font-medium',
               trendDirection === 'up' ? 'text-semantic-error' : 'text-semantic-success'
             )}
-            aria-label={`Noise ratio ${trendDirection === 'up' ? 'increased' : 'decreased'} by ${trendChange.toFixed(1)}%`}
+            aria-label={t('noiseStats.trend.ariaLabel', { direction: trendDirection === 'up' ? 'increased' : 'decreased', change: trendChange.toFixed(1) })}
           >
             {trendDirection === 'up' ? (
               <ArrowUp className="w-4 h-4" aria-hidden="true" />
             ) : (
               <ArrowDown className="w-4 h-4" aria-hidden="true" />
             )}
-            <span>{trendChange.toFixed(1)}% vs yesterday</span>
+            <span>{t('noiseStats.trend.vsYesterday', { change: trendChange.toFixed(1) })}</span>
           </div>
         )}
 
@@ -156,13 +159,13 @@ export const NoiseStatsDisplay = ({
                     getNoiseColor(value).replace('text-', 'bg-').replace('-600', '-200')
                   )}
                   style={{ height: `${(value / 100) * 100}%` }}
-                  title={`Day ${index + 1}: ${value.toFixed(1)}%`}
-                  aria-label={`Day ${index + 1}: ${value.toFixed(1)}% noise ratio`}
+                  title={t('noiseStats.chart.dayLabel', { day: index + 1, value: value.toFixed(1) })}
+                  aria-label={t('noiseStats.chart.dayLabel', { day: index + 1, value: value.toFixed(1) })}
                 />
               ))}
             </div>
             <p className="text-xs text-muted-foreground text-center mt-2">
-              Last 7 days trend
+              {t('noiseStats.chart.legend')}
             </p>
           </div>
         )}

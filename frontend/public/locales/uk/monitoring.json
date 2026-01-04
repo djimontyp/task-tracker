@@ -1,4 +1,20 @@
 {
+  "healthCards": {
+    "error": {
+      "title": "Не вдалося завантажити",
+      "retry": "Повторити"
+    },
+    "empty": "Немає даних про виконання задач",
+    "badges": {
+      "running": "Виконується: {{count}}",
+      "pending": "В черзі: {{count}}"
+    },
+    "metrics": {
+      "total": "Всього:",
+      "avgDuration": "Середня тривалість:",
+      "successRate": "Успішність:"
+    }
+  },
   "scoringAccuracy": {
     "title": "Точність класифікації",
     "description": "Метрики якості системи оцінки важливості повідомлень",
@@ -29,5 +45,117 @@
       "description": "Рекомендується перевірити систему оцінки важливості та валідаційний датасет"
     },
     "updated": "Оновлено: {{date}}"
+  },
+  "metricsDashboard": {
+    "title": "Системні метрики",
+    "loadingError": "Не вдалося завантажити метрики: {{error}}",
+    "retry": "Повторити",
+    "ariaLabel": "Панель системних метрик",
+    "connection": {
+      "live": "Наживо",
+      "polling": "Опитування",
+      "realTimeUpdates": "Оновлення в реальному часі",
+      "reconnecting": "Перепідключення...",
+      "autoRefresh": "Автооновлення кожні 30с"
+    },
+    "status": {
+      "critical": "Критично",
+      "warning": "Попередження",
+      "good": "Добре"
+    },
+    "criticalAlert": {
+      "title": "Виявлено критичні метрики",
+      "dismiss": "Закрити"
+    },
+    "metrics": {
+      "topicQualityScore": {
+        "title": "Оцінка якості топіків"
+      },
+      "classificationAccuracy": {
+        "title": "Точність класифікації",
+        "subtitle": "продуктивність моделі"
+      },
+      "activeAnalysisRuns": {
+        "title": "Активні аналізи",
+        "subtitle": "зараз обробляються"
+      }
+    },
+    "trend": {
+      "vsLastWeek": "{{direction}} {{change}}% за тиждень"
+    },
+    "toast": {
+      "topicQuality": {
+        "title": "Критична оцінка якості топіків",
+        "description": "Оцінка якості впала до {{score}}/100. Перегляньте та затвердьте топіки в очікуванні."
+      },
+      "noiseRatio": {
+        "title": "Виявлено високий рівень шуму",
+        "description": "Понад {{ratio}}% повідомлень фільтруються як шум. Розгляньте корекцію порогів класифікації."
+      },
+      "classificationAccuracy": {
+        "title": "Критична точність класифікації",
+        "description": "Точність впала до {{accuracy}}%. Перевірте модель класифікації та навчальні дані."
+      }
+    }
+  },
+  "noiseStats": {
+    "title": "Фільтрація шуму",
+    "status": {
+      "low": "Низький",
+      "moderate": "Помірний",
+      "high": "Високий"
+    },
+    "messagesFiltered": "{{noisy}} з {{total}} повідомлень відфільтровано",
+    "trend": {
+      "vsYesterday": "{{change}}% порівняно з вчора",
+      "ariaLabel": "Рівень шуму {{direction}} на {{change}}%"
+    },
+    "chart": {
+      "dayLabel": "День {{day}}: {{value}}% шуму",
+      "legend": "Тренд за останні 7 днів"
+    }
+  },
+  "qualityScore": {
+    "ariaLabel": "Оцінка якості: {{score}} зі 100, {{label}}",
+    "labels": {
+      "good": "Добре",
+      "fair": "Задовільно",
+      "poor": "Погано"
+    },
+    "tooltip": {
+      "title": "Оцінка якості: {{score}}/100",
+      "basedOn": "На основі:",
+      "factors": {
+        "relevance": "Релевантність повідомлень",
+        "completeness": "Повнота атомів",
+        "coherence": "Узгодженість топіків"
+      }
+    }
+  },
+  "performance": {
+    "title": "Моніторинг продуктивності",
+    "description": "Відстеження Core Web Vitals для оптимального досвіду користувача",
+    "lastUpdated": "Останнє оновлення: {{time}}",
+    "clearHistory": "Очистити історію",
+    "legend": {
+      "good": "Добре - Відмінний UX",
+      "needsImprovement": "Потребує покращення",
+      "poor": "Погано - Потрібні дії"
+    }
+  },
+  "webVitals": {
+    "cards": {
+      "goodThreshold": "Добре: <{{value}}{{unit}}"
+    },
+    "chart": {
+      "historyTitle": "Історія Web Vitals",
+      "trendTitle": "Тренд Web Vitals",
+      "noData": "Дані продуктивності ще не зібрані. Перейдіть по застосунку для генерації метрик.",
+      "metrics": {
+        "LCP": "LCP (мс)",
+        "FCP": "FCP (мс)",
+        "TTFB": "TTFB (мс)"
+      }
+    }
   }
 }
