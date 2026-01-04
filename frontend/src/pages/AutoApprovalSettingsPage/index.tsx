@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/shared/ui/card';
 import { Label } from '@/shared/ui/label';
@@ -26,11 +26,7 @@ export default function AutoApprovalSettingsPage() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewCount, setPreviewCount] = useState<number | null>(null);
 
-  useEffect(() => {
-    loadRule();
-  }, []);
-
-  const loadRule = async () => {
+  const loadRule = useCallback(async () => {
     setLoading(true);
     try {
       const fetchedRule = await versioningService.getAutoApprovalRule();
@@ -41,7 +37,11 @@ export default function AutoApprovalSettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    loadRule();
+  }, [loadRule]);
 
   const handleSave = async () => {
     if (rule.confidence_threshold < rule.similarity_threshold) {

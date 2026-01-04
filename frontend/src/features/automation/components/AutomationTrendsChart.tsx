@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Skeleton } from '@/shared/ui/skeleton'
@@ -19,6 +19,11 @@ export function AutomationTrendsChart() {
   const { t } = useTranslation('settings')
   const [period, setPeriod] = useState<'7d' | '30d' | '90d'>('30d')
   const { data: trends, isLoading } = useAutomationTrends(period)
+
+  const reversedTrends = React.useMemo(() => 
+    trends ? [...trends].reverse() : [], 
+    [trends]
+  )
 
   const periodLabels = {
     '7d': t('automation.trends.periods.7d'),
@@ -48,16 +53,9 @@ export function AutomationTrendsChart() {
       <CardContent>
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
-        ) : trends && trends.length > 0 ? (
-          <>
-            {(() => {
-              const reversedTrends = React.useMemo(() => 
-                [...trends].reverse(), 
-                [trends]
-              )
-              return (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={reversedTrends}>
+        ) : reversedTrends.length > 0 ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={reversedTrends}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="date"
@@ -103,9 +101,6 @@ export function AutomationTrendsChart() {
               />
             </LineChart>
           </ResponsiveContainer>
-              )
-            })()}
-          </>
         ) : (
           <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
             {t('automation.trends.noData')}

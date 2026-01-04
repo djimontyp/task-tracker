@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/ui/button'
 import { PageWrapper } from '@/shared/primitives'
 import { RuleTemplatesLibrary } from '@/features/automation/components/RuleTemplatesLibrary'
@@ -8,6 +9,7 @@ import { RulePerformanceTable } from '@/features/automation/components/RulePerfo
 import type { AutomationRule, RuleTemplate, RuleCondition } from '@/features/automation/types'
 
 export default function AutomationRulesPage() {
+  const { t } = useTranslation('automation')
   const [selectedTemplate, setSelectedTemplate] = useState<RuleTemplate | undefined>()
   const [editingRule, setEditingRule] = useState<AutomationRule | undefined>()
   const [showForm, setShowForm] = useState(false)
@@ -58,13 +60,13 @@ export default function AutomationRulesPage() {
     <PageWrapper variant="fullWidth" className="p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Automation Rules</h1>
+          <h1 className="text-2xl font-bold">{t('rules.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Create and manage automation rules for knowledge approval
+            {t('rules.description')}
           </p>
         </div>
         {!showForm && (
-          <Button onClick={handleCreateNew}>Create New Rule</Button>
+          <Button onClick={handleCreateNew}>{t('rules.createNew')}</Button>
         )}
       </div>
 
@@ -94,7 +96,7 @@ export default function AutomationRulesPage() {
       ) : (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-semibold mb-4">Active Rules</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('rules.activeRules')}</h2>
             <RulePerformanceTable onEdit={handleEditRule} />
           </div>
         </div>
