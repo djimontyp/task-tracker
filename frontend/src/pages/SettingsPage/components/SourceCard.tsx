@@ -35,13 +35,13 @@ const SourceCard = ({
           <div className="flex flex-col items-center justify-center gap-4 text-center">
             <AlertCircle className="h-8 w-8 text-destructive" />
             <div className="space-y-2">
-              <p className="text-sm font-medium">{t('sourceCard.error.title', 'Failed to load')}</p>
+              <p className="text-sm font-medium">{t('sourceCard.error.title')}</p>
               {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
             </div>
             {onRetry && (
               <Button variant="outline" size="sm" onClick={onRetry}>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                {t('sourceCard.error.retry', 'Retry')}
+                {t('sourceCard.error.retry')}
               </Button>
             )}
           </div>
@@ -68,7 +68,7 @@ const SourceCard = ({
 
       <CardContent className="pt-0">
         <Button variant="outline" size="sm" onClick={onSettings}>
-          Settings
+          {t('sourceCard.settings')}
         </Button>
       </CardContent>
     </Card>

@@ -24,7 +24,7 @@ export function DataSourcesSection() {
   const { t } = useTranslation('settings');
 
   return (
-    <SettingsSection title={t('sections.dataSources', 'Data Sources')}>
+    <SettingsSection title={t('sections.dataSources')}>
       {/* Telegram - uses existing TelegramCard with full functionality */}
       <TelegramCard />
 
@@ -32,27 +32,27 @@ export function DataSourcesSection() {
       <SettingsCard
         icon={JiraIcon}
         title="Jira"
-        description=""
+        description={t('dataSources.jira.description')}
         status="disabled"
-        statusLabel={t('status.soon', 'Soon')}
+        statusLabel={t('status.soon')}
       />
 
       {/* Slack - coming soon */}
       <SettingsCard
         icon={SlackIcon}
         title="Slack"
-        description=""
+        description={t('dataSources.slack.description')}
         status="disabled"
-        statusLabel={t('status.soon', 'Soon')}
+        statusLabel={t('status.soon')}
       />
 
       {/* Email - coming soon */}
       <SettingsCard
         icon={Mail}
         title="Email"
-        description=""
+        description={t('dataSources.email.description')}
         status="disabled"
-        statusLabel={t('status.soon', 'Soon')}
+        statusLabel={t('status.soon')}
       />
     </SettingsSection>
   );

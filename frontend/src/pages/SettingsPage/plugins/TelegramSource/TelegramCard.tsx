@@ -35,8 +35,8 @@ const TelegramCard = () => {
       // Check if we have a valid production URL to activate
       // localhost/127.0.0.1 are not valid for Telegram webhooks
       const effectiveUrl = webhookBaseUrl || defaultBaseUrl
-      const isLocalhost = effectiveUrl?.includes('localhost') || effectiveUrl?.includes('127.0.0.1')
-      const hasValidUrl = effectiveUrl && !isLocalhost
+      const _isLocalhost = effectiveUrl?.includes('localhost') || effectiveUrl?.includes('127.0.0.1')
+      const hasValidUrl = effectiveUrl && !_isLocalhost
 
       if (!hasValidUrl) {
         // No valid URL - open settings sheet for configuration
