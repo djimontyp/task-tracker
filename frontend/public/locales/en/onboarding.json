@@ -56,5 +56,36 @@
     "back": "Back",
     "continue": "Continue",
     "getStarted": "Get started"
+  },
+  "wizard": {
+    "setupStep": {
+      "1": {
+        "title": "Connect Sources",
+        "description": "Link your Telegram or Slack to start receiving messages"
+      },
+      "2": {
+        "title": "First Project",
+        "description": "Create a project to organize your knowledge"
+      },
+      "3": {
+        "title": "Activate Agent",
+        "description": "Enable AI analysis to extract insights from messages"
+      },
+      "4": {
+        "title": "First Insight",
+        "description": "Your first AI-extracted knowledge will appear here"
+      }
+    },
+    "status": {
+      "pending": "Pending",
+      "active": "Ready",
+      "completed": "Done",
+      "locked": "Locked"
+    },
+    "actions": {
+      "connectSource": "Connect Source",
+      "createProject": "Create Project",
+      "activateAgent": "Activate Agent"
+    }
   }
 }
