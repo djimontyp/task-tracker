@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { PageWrapper } from '@/shared/primitives'
 import { AutomationStatsCards } from '@/features/automation/components/AutomationStatsCards'
@@ -9,6 +10,7 @@ import { useWebSocket } from '@/shared/hooks'
 import { isAutomationEvent, type AutomationEvent } from '@/shared/types/websocket'
 
 export default function AutomationDashboardPage() {
+  const { t } = useTranslation('automation')
   const queryClient = useQueryClient()
 
   const { connectionState } = useWebSocket({
@@ -21,7 +23,7 @@ export default function AutomationDashboardPage() {
       if (event.event === 'job_completed') {
         queryClient.invalidateQueries({ queryKey: ['automation-stats'] })
         queryClient.invalidateQueries({ queryKey: ['scheduler-jobs'] })
-        toast.success('Scheduler job completed')
+        toast.success(t('dashboard.jobCompleted'))
       }
 
       if (event.event === 'rule_triggered') {
@@ -40,9 +42,9 @@ export default function AutomationDashboardPage() {
     <PageWrapper variant="fullWidth" className="p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Automation Dashboard</h1>
+          <h1 className="text-2xl font-bold">{t('dashboard.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Monitor automation performance and scheduler status
+            {t('dashboard.description')}
           </p>
         </div>
         {connectionState === 'connected' && (
@@ -51,7 +53,7 @@ export default function AutomationDashboardPage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-semantic-success opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-semantic-success"></span>
             </span>
-            Live updates active
+            {t('dashboard.liveUpdates')}
           </div>
         )}
       </div>
@@ -69,7 +71,7 @@ export default function AutomationDashboardPage() {
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold mb-4">Rule Performance</h2>
+        <h2 className="text-lg font-semibold mb-4">{t('dashboard.rulePerformance')}</h2>
         <RulePerformanceTable />
       </div>
     </PageWrapper>

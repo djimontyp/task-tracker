@@ -1,1 +1,20 @@
-{}
+{
+  "dashboard": {
+    "title": "Automation Dashboard",
+    "description": "Monitor automation performance and scheduler status",
+    "liveUpdates": "Live updates active",
+    "jobCompleted": "Scheduler job completed",
+    "rulePerformance": "Rule Performance"
+  },
+  "rules": {
+    "title": "Automation Rules",
+    "description": "Create and manage automation rules for knowledge approval",
+    "createNew": "Create New Rule",
+    "activeRules": "Active Rules"
+  },
+  "scheduler": {
+    "title": "Scheduled Jobs",
+    "description": "Manage automated tasks and schedules",
+    "createJob": "Create Job"
+  }
+}
