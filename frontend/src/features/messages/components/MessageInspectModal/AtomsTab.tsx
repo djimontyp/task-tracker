@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import {
   Card,
   CardContent,
@@ -22,15 +23,16 @@ interface AtomsTabProps {
 }
 
 export function AtomsTab({ data }: AtomsTabProps) {
+  const { t } = useTranslation('messages')
   const handleSearchEntity = (entity: string, type: string) => {
-    toast.info('Search feature', {
-      description: `Searching for messages with "${entity}" (${type}) - coming soon`,
+    toast.info(t('atomsTab.toast.searchFeature'), {
+      description: t('atomsTab.toast.searchEntityDescription', { entity, type }),
     })
   }
 
   const handleSearchKeyword = (keyword: string) => {
-    toast.info('Keyword search', {
-      description: `Searching for messages with "${keyword}" - coming soon`,
+    toast.info(t('atomsTab.toast.keywordSearch'), {
+      description: t('atomsTab.toast.searchKeywordDescription', { keyword }),
     })
   }
 
@@ -57,23 +59,23 @@ export function AtomsTab({ data }: AtomsTabProps) {
   }
 
   const renderEntityCard = (
-    title: string,
+    titleKey: string,
     entities: string[],
     type: string,
     colorClass: string
   ) => (
     <Card key={type}>
       <CardHeader>
-        <CardTitle className="font-semibold">{title}</CardTitle>
+        <CardTitle className="font-semibold">{t(titleKey)}</CardTitle>
         <CardDescription>
           {entities.length === 0
-            ? `No ${type.toLowerCase()} detected`
-            : `${entities.length} detected`}
+            ? t('atomsTab.entities.noneDetected', { type: t(`atomsTab.entities.types.${type.toLowerCase()}`) })
+            : t('atomsTab.entities.detected', { count: entities.length })}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {entities.length === 0 ? (
-          <p className="text-sm text-muted-foreground italic">No {type.toLowerCase()} found</p>
+          <p className="text-sm text-muted-foreground italic">{t('atomsTab.entities.noneFound', { type: t(`atomsTab.entities.types.${type.toLowerCase()}`) })}</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {entities.map((entity) => (
@@ -96,39 +98,39 @@ export function AtomsTab({ data }: AtomsTabProps) {
     <div className="space-y-8 p-6">
       <section aria-labelledby="entities-heading">
         <h2 id="entities-heading" className="text-xl font-semibold mb-4">
-          Extracted Entities
+          {t('atomsTab.extractedEntities')}
         </h2>
 
         {!hasEntities ? (
           <Card>
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground text-center">
-                No entities detected in this message
+                {t('atomsTab.noEntitiesDetected')}
               </p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {renderEntityCard(
-              'People',
+              'atomsTab.entities.people',
               data.entities.people,
               'People',
               'bg-semantic-info/10 text-semantic-info hover:bg-semantic-info/20'
             )}
             {renderEntityCard(
-              'Places',
+              'atomsTab.entities.places',
               data.entities.places,
               'Places',
               'bg-semantic-success/10 text-semantic-success hover:bg-semantic-success/20'
             )}
             {renderEntityCard(
-              'Organizations',
+              'atomsTab.entities.organizations',
               data.entities.organizations,
               'Organizations',
               'bg-accent/10 text-accent-foreground hover:bg-accent/20'
             )}
             {renderEntityCard(
-              'Concepts',
+              'atomsTab.entities.concepts',
               data.entities.concepts,
               'Concepts',
               'bg-semantic-warning/10 text-semantic-warning hover:bg-semantic-warning/20'
@@ -139,23 +141,23 @@ export function AtomsTab({ data }: AtomsTabProps) {
 
       <section aria-labelledby="keywords-heading">
         <h2 id="keywords-heading" className="text-xl font-semibold mb-4">
-          Keywords
+          {t('atomsTab.keywords.title')}
         </h2>
 
         {!hasKeywords ? (
           <Card>
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground text-center">
-                No keywords extracted from this message
+                {t('atomsTab.keywords.noKeywords')}
               </p>
             </CardContent>
           </Card>
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle>Extracted Keywords ({data.keywords.length})</CardTitle>
+              <CardTitle>{t('atomsTab.keywords.extracted', { count: data.keywords.length })}</CardTitle>
               <CardDescription>
-                Sorted by relevance (larger = more relevant)
+                {t('atomsTab.keywords.sortedByRelevance')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -178,7 +180,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
                             </Badge>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Relevance: {keyword.relevance}%</p>
+                            <p>{t('atomsTab.keywords.relevance', { value: keyword.relevance })}</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -192,28 +194,28 @@ export function AtomsTab({ data }: AtomsTabProps) {
 
       <section aria-labelledby="embeddings-heading">
         <h2 id="embeddings-heading" className="text-xl font-semibold mb-4">
-          Semantic Similarity
+          {t('atomsTab.semanticSimilarity.title')}
         </h2>
 
         {!hasEmbedding ? (
           <Card>
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground text-center">
-                No embedding data available for this message
+                {t('atomsTab.semanticSimilarity.noEmbedding')}
               </p>
             </CardContent>
           </Card>
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle>Vector embedding</CardTitle>
+              <CardTitle>{t('atomsTab.semanticSimilarity.vectorEmbedding')}</CardTitle>
               <CardDescription>
-                {data.embedding?.length || 0} dimensions
+                {t('atomsTab.semanticSimilarity.dimensions', { count: data.embedding?.length || 0 })}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <Label className="text-sm font-medium">Vector Norm:</Label>
+                <Label className="text-sm font-medium">{t('atomsTab.semanticSimilarity.vectorNorm')}</Label>
                 <div className="mt-2">
                   <Progress value={calculateVectorNorm() * 100} className="h-2" />
                   <p className="text-xs text-muted-foreground mt-2">
@@ -223,7 +225,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
               </div>
 
               <div>
-                <Label className="text-sm font-medium">Top 5 Dimensions:</Label>
+                <Label className="text-sm font-medium">{t('atomsTab.semanticSimilarity.topDimensions')}</Label>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {getTopDimensions(5).map((val, idx) => (
                     <Badge key={idx} variant="secondary" className="font-mono text-xs">
@@ -236,7 +238,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
               {data.similarMessages && data.similarMessages.length > 0 && (
                 <div>
                   <Label className="text-sm font-medium">
-                    Similar Messages (Top {data.similarMessages.length}):
+                    {t('atomsTab.semanticSimilarity.similarMessages', { count: data.similarMessages.length })}
                   </Label>
                   <div className="mt-2 space-y-2">
                     {data.similarMessages.map((msg) => (
@@ -244,8 +246,8 @@ export function AtomsTab({ data }: AtomsTabProps) {
                         key={msg.id}
                         className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                         onClick={() =>
-                          toast.info('Message details', {
-                            description: `Opening message ${msg.id} - coming soon`,
+                          toast.info(t('atomsTab.toast.messageDetails'), {
+                            description: t('atomsTab.toast.openingMessage', { id: msg.id }),
                           })
                         }
                       >
@@ -263,7 +265,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
 
               {(!data.similarMessages || data.similarMessages.length === 0) && (
                 <div className="text-sm text-muted-foreground text-center py-4 border rounded-lg bg-muted">
-                  No similar messages found
+                  {t('atomsTab.semanticSimilarity.noSimilarMessages')}
                 </div>
               )}
             </CardContent>
