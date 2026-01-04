@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -42,14 +42,7 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
   const [loading, setLoading] = useState(false)
   const [fetchingGroups, setFetchingGroups] = useState(false)
 
-  useEffect(() => {
-    logger.debug('IngestionModal open state changed:', open)
-    if (open) {
-      fetchGroups()
-    }
-  }, [open])
-
-  const fetchGroups = async () => {
+  const fetchGroups = useCallback(async () => {
     setFetchingGroups(true)
     try {
       const response = await apiClient.get(API_ENDPOINTS.webhookSettings)
@@ -74,7 +67,14 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
     } finally {
       setFetchingGroups(false)
     }
-  }
+  }, [t])
+
+  useEffect(() => {
+    logger.debug('IngestionModal open state changed:', open)
+    if (open) {
+      fetchGroups()
+    }
+  }, [open, fetchGroups])
 
   const toggleGroup = (chatId: string) => {
     const newSelected = new Set(selectedGroups)

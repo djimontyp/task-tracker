@@ -215,7 +215,7 @@ export const MetricsDashboard = () => {
     }
 
     localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(shownNotifications))
-  }, [metrics])
+  }, [metrics, t])
 
   if (!isAdminMode) {
     return null
