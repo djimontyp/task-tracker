@@ -62,25 +62,25 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
     const { t } = useTranslation('dashboard')
     const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>(period)
 
-    // Localized days
+    // Localized days - reversed so newer days are on left
     const DAYS_SHORT = useMemo(() => [
-      t('heatmap.days.mon'),
-      t('heatmap.days.tue'),
-      t('heatmap.days.wed'),
-      t('heatmap.days.thu'),
-      t('heatmap.days.fri'),
-      t('heatmap.days.sat'),
       t('heatmap.days.sun'),
+      t('heatmap.days.sat'),
+      t('heatmap.days.fri'),
+      t('heatmap.days.thu'),
+      t('heatmap.days.wed'),
+      t('heatmap.days.tue'),
+      t('heatmap.days.mon'),
     ], [t])
 
     const DAYS_FULL = useMemo(() => [
-      t('heatmap.days.mon'),
-      t('heatmap.days.tue'),
-      t('heatmap.days.wed'),
-      t('heatmap.days.thu'),
-      t('heatmap.days.fri'),
-      t('heatmap.days.sat'),
       t('heatmap.days.sun'),
+      t('heatmap.days.sat'),
+      t('heatmap.days.fri'),
+      t('heatmap.days.thu'),
+      t('heatmap.days.wed'),
+      t('heatmap.days.tue'),
+      t('heatmap.days.mon'),
     ], [t])
     const [selectedSources, setSelectedSources] = useState<
       Record<'telegram' | 'slack' | 'email', boolean>
@@ -122,11 +122,14 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
         let key: string
         if (selectedPeriod === 'week') {
           const day = date.getDay()
-          const dayIndex = day === 0 ? 6 : day - 1
+          // Reversed: Sunday (0) = 0, Monday (1) = 6, Tuesday (2) = 5, etc.
+          const dayIndex = day === 0 ? 0 : 7 - day
           key = `${dayIndex}-${hour}`
         } else {
           const dayOfMonth = date.getDate()
-          key = `${dayOfMonth - 1}-${hour}`
+          // Reverse: day 1 should be at the end (right), last day at the beginning (left)
+          const reversedDayIndex = daysInMonth - dayOfMonth
+          key = `${reversedDayIndex}-${hour}`
         }
 
         if (!dataMap[key]) {
@@ -320,7 +323,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                           {day}
                         </div>
                       ))
-                    : Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => (
+                    : Array.from({ length: daysInMonth }, (_, i) => daysInMonth - i).map((day) => (
                         <div
                           key={day}
                           className="flex-1 text-center text-xs font-medium text-muted-foreground px-2 min-w-[20px] sm:min-w-[26px] md:min-w-[30px]"
@@ -347,7 +350,7 @@ const ActivityHeatmap = React.forwardRef<HTMLDivElement, ActivityHeatmapProps>(
                         const dayLabel =
                           selectedPeriod === 'week'
                             ? DAYS_FULL[dayIndex]
-                            : `${selectedMonth + 1}/${dayIndex + 1}/${selectedYear}`
+                            : `${selectedMonth + 1}/${daysInMonth - dayIndex}/${selectedYear}`
 
                         return (
                           <Tooltip key={dayIndex}>

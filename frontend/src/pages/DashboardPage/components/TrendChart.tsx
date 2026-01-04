@@ -33,10 +33,10 @@ const LastPointDot = (props: {
     cx?: number
     cy?: number
     index?: number
-    dataLength?: number
 }) => {
-    const { cx, cy, index, dataLength } = props
-    if (index !== (dataLength ?? 0) - 1) return null
+    const { cx, cy, index } = props
+    // Show dot on the first point (today) since data is reversed
+    if (index !== 0) return null
     if (cx === undefined || cy === undefined) return null
 
     return (
@@ -57,7 +57,7 @@ interface TrendChartProps {
 export const TrendChart: React.FC<TrendChartProps> = ({ compact = false, embedded = false }) => {
     const { t, i18n } = useTranslation('dashboard')
     const dateLocale = i18n.language === 'uk' ? uk : enUS
-    const data = useMemo(() => generateTrendData(dateLocale), [dateLocale])
+    const data = useMemo(() => [...generateTrendData(dateLocale)].reverse(), [dateLocale])
 
     const Wrapper = embedded ? 'div' : Card
     const wrapperClasses = embedded ? 'h-full flex flex-col overflow-hidden !cursor-pointer' : 'h-full flex flex-col overflow-hidden'
@@ -191,7 +191,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({ compact = false, embedde
                                 dataKey="signal"
                                 stroke="transparent"
                                 fill="transparent"
-                                dot={(props) => <LastPointDot {...props} dataLength={data.length} />}
+                                dot={(props) => <LastPointDot {...props} />}
                                 isAnimationActive={false}
                             />
                         </AreaChart>
