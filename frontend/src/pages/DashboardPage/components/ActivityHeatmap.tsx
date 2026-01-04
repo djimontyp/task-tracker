@@ -136,7 +136,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ compact = fals
                 {/* Compact specific: Overlay label */}
                 {compact && (
                     <div className="absolute top-2 left-3 z-10 pointer-events-none max-w-[calc(100%-1.5rem)]">
-                        <div className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider opacity-60 truncate">
+                        <div className="text-[9px] font-semibold text-muted-foreground tracking-wider opacity-60 truncate">
                             {t('activityHeatmap.title', 'Activity')}
                         </div>
                     </div>

@@ -1,7 +1,8 @@
-import React from 'react'
 import { Card } from '@/shared/ui/card'
+import { ZoomableCard } from '@/shared/ui/zoomable-card'
 import { TrendChart } from './TrendChart'
 import { ActivityHeatmap } from './ActivityHeatmap'
+import { useTranslation } from 'react-i18next'
 
 interface CommandCenterProps {
     greeting: string
@@ -9,6 +10,7 @@ interface CommandCenterProps {
 }
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({ greeting, subtitle }) => {
+    const { t } = useTranslation('dashboard')
     return (
         <Card className="w-full min-h-[160px] flex flex-col md:flex-row overflow-hidden relative mb-8 animate-fade-in-up">
             {/* Left Section: Greeting & Status */}
@@ -41,18 +43,39 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({ greeting, subtitle
                 <div className="absolute inset-0 bg-grid-white/[0.02]" />
 
                 {/* Trend Chart - Dominant Layer */}
-                <div className="absolute inset-0 pb-12 pt-4 pr-0">
-                    {/* We use specific embedded mode to strip the card */}
-                    <TrendChart embedded compact />
+                <div className="absolute inset-0 pb-12 pt-4 pr-0 cursor-pointer">
+                    <ZoomableCard
+                        trigger="click"
+                        className="w-full h-full !cursor-pointer hover:bg-transparent"
+                        preview={<TrendChart embedded compact />}
+                        full={
+                            <div className="h-[400px] w-full p-6">
+                                <TrendChart />
+                            </div>
+                        }
+                    />
                 </div>
 
                 {/* Activity Heatmap - Subtle Overlay at bottom right */}
-                <div className="absolute bottom-4 right-4 z-10 bg-background/80 backdrop-blur-sm rounded-md border border-border/50 p-2 shadow-sm">
-                    <div className="flex items-center gap-2 mb-1 px-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Pulse</span>
-                    </div>
-                    <ActivityHeatmap embedded compact />
+                <div className="absolute bottom-4 right-4 z-10 bg-background/80 backdrop-blur-sm rounded-md border border-border/50 p-2 shadow-sm transition-transform hover:scale-105 cursor-pointer">
+                    <ZoomableCard
+                        trigger="click"
+                        className="cursor-pointer"
+                        preview={
+                            <>
+                                <div className="flex items-center gap-2 mb-1 px-1">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <span className="text-[10px] font-medium text-muted-foreground tracking-wider">{t('activityHeatmap.compactTitle')}</span>
+                                </div>
+                                <ActivityHeatmap embedded compact />
+                            </>
+                        }
+                        full={
+                            <div className="h-[400px] w-full p-6 flex flex-col justify-center bg-card">
+                                <ActivityHeatmap />
+                            </div>
+                        }
+                    />
                 </div>
 
                 {/* Fade overlays for smooth edges */}

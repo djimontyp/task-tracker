@@ -63,12 +63,13 @@
     "activityHeatmap": "Activity heatmap"
   },
   "activityHeatmap": {
-    "title": "Activity Pulse",
+    "title": "Monthly Activity Pulse",
+    "compactTitle": "Pulse",
     "description": "Message intensity over the last 6 months",
     "messages": "messages"
   },
   "trendChart": {
-    "title": "Message Dynamics",
+    "title": "Daily Signals",
     "description": "Signal to noise ratio (14 days)",
     "signal": "Signal",
     "noise": "Noise"
