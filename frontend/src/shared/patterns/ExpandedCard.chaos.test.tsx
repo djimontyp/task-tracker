@@ -459,7 +459,7 @@ describe('ExpandedCard - Accessibility Edge Cases', () => {
   });
 
   it('handles error state aria-live attribute', () => {
-    const { container } = render(<ExpandedCard header={mockHeader} isError />);
+    render(<ExpandedCard header={mockHeader} isError />);
 
     const alert = screen.getByRole('alert');
     expect(alert).toHaveAttribute('aria-live', 'polite');
