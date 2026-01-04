@@ -62,12 +62,25 @@
     "starred": "Зіркові",
     "archived": "Архівовані",
     "source": "Джерело",
+    "status": "Статус",
     "dateRange": "Період",
     "importance": "Важливість",
     "classification": "Класифікація",
     "signal": "Сигнал",
     "noise": "Шум",
-    "clear": "Очистити фільтри"
+    "clear": "Очистити фільтри",
+    "search": "Пошук повідомлень..."
+  },
+  "importanceFilter": {
+    "title": "Фільтр важливості",
+    "reset": "Скинути",
+    "showUnscored": "Показувати неоцінені повідомлення",
+    "scoreRange": "Діапазон оцінок",
+    "quickFilters": "Швидкі фільтри:",
+    "scoredOnly": "тільки оцінені",
+    "noise": "Шум (<30%)",
+    "neutral": "Нейтрал (30-70%)",
+    "signal": "Сигнал (>70%)"
   },
   "card": {
     "author": "Автор",
@@ -76,6 +89,12 @@
     "importance": "Важливість",
     "atoms": "Атоми",
     "viewDetails": "Детальніше",
+    "emptyMessage": "(Порожнє повідомлення)",
+    "unknownAuthor": "Невідомий",
+    "error": {
+      "title": "Не вдалося завантажити",
+      "retry": "Повторити"
+    },
     "actions": {
       "createAtom": "Створити атом",
       "dismiss": "Ігнорувати",
@@ -98,14 +117,23 @@
     "star": "Додати зірку",
     "unstar": "Прибрати зірку",
     "markAsRead": "Позначити як прочитане",
-    "markAsUnread": "Позначити як непрочитане"
+    "markAsUnread": "Позначити як непрочитане",
+    "refresh": "Оновити",
+    "updateAuthors": "Оновити авторів"
   },
   "ingestion": {
     "title": "Імпорт повідомлень",
-    "description": "Імпортуйте повідомлення з файлу або вставте текст",
+    "description": "Виберіть групи Telegram для імпорту повідомлень",
     "paste": "Вставити текст",
     "upload": "Завантажити файл",
-    "submit": "Імпортувати"
+    "submit": "Імпортувати",
+    "loading": "Завантаження груп...",
+    "noGroups": "Групи не налаштовані. Спочатку додайте групи в Налаштуваннях.",
+    "selectAll": "Вибрати всі",
+    "groups": "груп",
+    "limitLabel": "Ліміт повідомлень на групу",
+    "limitDescription": "Максимальна кількість повідомлень для отримання з кожної групи (1-10000)",
+    "starting": "Запуск..."
   },
   "smartFilters": {
     "all": "Усі",
@@ -115,6 +143,10 @@
     "allAriaLabel": "Усі повідомлення, {{count}} загалом",
     "signalsAriaLabel": "Сигнальні повідомлення, {{count}} елементів",
     "noiseAriaLabel": "Шумові повідомлення, {{count}} елементів"
+  },
+  "viewMode": {
+    "feed": "Режим стрічки",
+    "table": "Режим таблиці"
   },
   "classification": {
     "overallConfidence": "Загальна впевненість",
@@ -226,5 +258,105 @@
       "markAsSignal": "Позначити як сигнал",
       "confirmAsNoise": "Підтвердити як шум"
     }
+  },
+  "consumerModal": {
+    "title": "Деталі повідомлення",
+    "description": "Перегляд змісту повідомлення з деталями автора та пов'язаними повідомленнями",
+    "loading": "Завантаження...",
+    "emptyMessage": "(Порожнє повідомлення)",
+    "relatedMessages": "Пов'язані повідомлення",
+    "archive": "Архівувати",
+    "close": "Закрити",
+    "error": {
+      "title": "Не вдалося завантажити повідомлення",
+      "retry": "Повторити"
+    },
+    "toast": {
+      "loadError": "Не вдалося завантажити деталі повідомлення",
+      "archiveNotImplemented": "Функція архівування буде реалізована в майбутньому"
+    }
+  },
+  "inspectModal": {
+    "title": "Деталі повідомлення",
+    "loading": "Завантаження...",
+    "reassignTopic": "Перепризначити тему",
+    "close": "Закрити",
+    "telegramId": "ID: {{id}}",
+    "source": {
+      "telegram": "Telegram",
+      "manual": "Вручну"
+    },
+    "tabs": {
+      "classification": "Класифікація",
+      "atoms": "Атоми",
+      "history": "Історія"
+    },
+    "error": {
+      "title": "Не вдалося завантажити повідомлення",
+      "retry": "Повторити"
+    },
+    "toast": {
+      "loadError": "Не вдалося завантажити деталі повідомлення",
+      "reassignNotImplemented": "Функція перепризначення теми буде реалізована в майбутньому"
+    }
+  },
+  "atomsTab": {
+    "extractedEntities": "Витягнуті сутності",
+    "noEntitiesDetected": "У цьому повідомленні не виявлено сутностей",
+    "entities": {
+      "people": "Люди",
+      "places": "Місця",
+      "organizations": "Організації",
+      "concepts": "Концепції",
+      "types": {
+        "people": "людей",
+        "places": "місць",
+        "organizations": "організацій",
+        "concepts": "концепцій"
+      },
+      "noneDetected": "{{type}} не виявлено",
+      "detected": "Виявлено: {{count}}",
+      "noneFound": "{{type}} не знайдено"
+    },
+    "keywords": {
+      "title": "Ключові слова",
+      "noKeywords": "З цього повідомлення не витягнуто ключових слів",
+      "extracted": "Витягнуті ключові слова ({{count}})",
+      "sortedByRelevance": "Відсортовано за релевантністю (більше = релевантніше)",
+      "relevance": "Релевантність: {{value}}%"
+    },
+    "semanticSimilarity": {
+      "title": "Семантична схожість",
+      "noEmbedding": "Дані ембедінгів для цього повідомлення недоступні",
+      "vectorEmbedding": "Векторний ембедінг",
+      "dimensions": "{{count}} вимірів",
+      "vectorNorm": "Норма вектора:",
+      "topDimensions": "Топ-5 вимірів:",
+      "similarMessages": "Схожі повідомлення (Топ {{count}}):",
+      "noSimilarMessages": "Схожих повідомлень не знайдено"
+    },
+    "toast": {
+      "searchFeature": "Функція пошуку",
+      "searchEntityDescription": "Пошук повідомлень з \"{{entity}}\" ({{type}}) - незабаром",
+      "keywordSearch": "Пошук за ключовим словом",
+      "searchKeywordDescription": "Пошук повідомлень з \"{{keyword}}\" - незабаром",
+      "messageDetails": "Деталі повідомлення",
+      "openingMessage": "Відкриття повідомлення {{id}} - незабаром"
+    }
+  },
+  "historyTab": {
+    "placeholder": {
+      "title": "Заглушка: Історія класифікації",
+      "description": "На цій вкладці буде відображатися хронологія змін класифікації з порівняннями."
+    },
+    "historyEvents": "Подій в історії: {{count}}",
+    "lastAction": "Остання дія: {{action}}"
+  },
+  "errorBoundary": {
+    "title": "Не вдалося завантажити повідомлення",
+    "description": "Щось пішло не так під час завантаження повідомлень",
+    "tryAgain": "Спробувати ще",
+    "retryAriaLabel": "Повторити завантаження повідомлень",
+    "errorDetails": "Деталі помилки (тільки для розробників)"
   }
 }

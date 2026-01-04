@@ -488,8 +488,8 @@ const MessagesPage = () => {
             size="icon"
             variant={viewMode === 'feed' ? 'secondary' : 'ghost'}
             onClick={() => setViewMode('feed')}
-            title="Feed View"
-            aria-label="Feed View"
+            title={t('viewMode.feed')}
+            aria-label={t('viewMode.feed')}
           >
             <LayoutGrid className="h-4 w-4" />
           </Button>
@@ -497,8 +497,8 @@ const MessagesPage = () => {
             size="icon"
             variant={viewMode === 'table' ? 'secondary' : 'ghost'}
             onClick={() => setViewMode('table')}
-            title="Table View"
-            aria-label="Table View"
+            title={t('viewMode.table')}
+            aria-label={t('viewMode.table')}
           >
             <List className="h-4 w-4" />
           </Button>
@@ -508,11 +508,11 @@ const MessagesPage = () => {
         <div className="flex flex-wrap gap-2">
           <Button onClick={handleRefreshMessages} size="sm" variant="outline">
             <RotateCw className="mr-2 h-4 w-4" />
-            {t('actions.refresh', 'Refresh')}
+            {t('actions.refresh')}
           </Button>
           <Button onClick={handleUpdateAuthors} size="sm" variant="outline">
             <User className="mr-2 h-4 w-4" />
-            {t('actions.updateAuthors', 'Update Authors')}
+            {t('actions.updateAuthors')}
           </Button>
           <Button onClick={handleIngestMessages} size="sm">
             <Download className="mr-2 h-4 w-4" />
@@ -538,7 +538,7 @@ const MessagesPage = () => {
           table={table}
           globalFilter={globalFilter}
           onGlobalFilterChange={setGlobalFilter}
-          searchPlaceholder={t('filters.search', 'Search messages...')}
+          searchPlaceholder={t('filters.search')}
         >
           <DataTableFacetedFilter
             column={table.getColumn('source_name')}
@@ -551,7 +551,7 @@ const MessagesPage = () => {
           />
           <DataTableFacetedFilter
             column={table.getColumn('analyzed')}
-            title={t('filters.status', 'Status')}
+            title={t('filters.status')}
             options={[
               { value: 'analyzed', label: getMessageAnalysisBadge(true).label || 'Analyzed' },
               { value: 'pending', label: getMessageAnalysisBadge(false).label || 'Pending' },
@@ -586,7 +586,7 @@ const MessagesPage = () => {
                 <div className="flex flex-col items-center gap-2">
                   <Button onClick={handleIngestMessages}>
                     <Download className="mr-2 h-4 w-4" />
-                    {t('ingestion.submit', 'Import')}
+                    {t('ingestion.submit')}
                   </Button>
                   <span className="text-xs text-muted-foreground">{t('list.emptyHint')}</span>
                 </div>
@@ -617,7 +617,7 @@ const MessagesPage = () => {
                   <div className="flex flex-col items-center gap-2">
                     <Button onClick={handleIngestMessages} size="sm">
                       <Download className="mr-2 h-4 w-4" />
-                      {t('ingestion.submit', 'Import')}
+                      {t('ingestion.submit')}
                     </Button>
                     <span className="text-xs text-muted-foreground">{t('list.emptyHint')}</span>
                   </div>

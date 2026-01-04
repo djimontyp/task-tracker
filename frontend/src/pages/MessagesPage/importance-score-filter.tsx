@@ -1,4 +1,5 @@
 import { Column } from '@tanstack/react-table'
+import { useTranslation } from 'react-i18next'
 import { Slider } from '@/shared/ui/slider'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover'
 import { Button } from '@/shared/ui/button'
@@ -20,6 +21,7 @@ export function ImportanceScoreFilter<TData, TValue>({
   column,
   title,
 }: ImportanceScoreFilterProps<TData, TValue>) {
+  const { t } = useTranslation('messages')
   const filterValue = (column?.getFilterValue() as ImportanceFilterValue | undefined) ?? DEFAULT_FILTER
 
   // Check if any filter is active
@@ -79,7 +81,7 @@ export function ImportanceScoreFilter<TData, TValue>({
               )}
               {hasUnscoredFilter && (
                 <div className="rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                  scored only
+                  {t('importanceFilter.scoredOnly')}
                 </div>
               )}
             </div>
@@ -90,7 +92,7 @@ export function ImportanceScoreFilter<TData, TValue>({
         <div className="space-y-4">
           {/* Header with Reset */}
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium">Importance Filter</h4>
+            <h4 className="text-sm font-medium">{t('importanceFilter.title')}</h4>
             {hasFilter && (
               <Button
                 variant="ghost"
@@ -99,7 +101,7 @@ export function ImportanceScoreFilter<TData, TValue>({
                 className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
               >
                 <X className="mr-2 h-3 w-3" />
-                Reset
+                {t('importanceFilter.reset')}
               </Button>
             )}
           </div>
@@ -115,14 +117,14 @@ export function ImportanceScoreFilter<TData, TValue>({
               htmlFor="show-unscored"
               className="flex-1 text-sm font-medium leading-none cursor-pointer"
             >
-              Show unscored messages
+              {t('importanceFilter.showUnscored')}
             </label>
           </div>
 
           {/* Score range section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Score range</span>
+              <span className="text-sm text-muted-foreground">{t('importanceFilter.scoreRange')}</span>
               {hasRangeFilter && (
                 <Button
                   variant="ghost"
@@ -152,7 +154,7 @@ export function ImportanceScoreFilter<TData, TValue>({
 
             {/* Quick filters */}
             <div className="space-y-2 border-t pt-2">
-              <div className="text-xs text-muted-foreground">Quick filters:</div>
+              <div className="text-xs text-muted-foreground">{t('importanceFilter.quickFilters')}</div>
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant={hasRangeFilter && displayRange[0] === 0 && displayRange[1] === 0.3 ? "default" : "outline"}
@@ -160,7 +162,7 @@ export function ImportanceScoreFilter<TData, TValue>({
                   onClick={() => setRange([0, 0.3])}
                   className="h-6 text-xs"
                 >
-                  Noise (&lt;30%)
+                  {t('importanceFilter.noise')}
                 </Button>
                 <Button
                   variant={hasRangeFilter && displayRange[0] === 0.3 && displayRange[1] === 0.7 ? "default" : "outline"}
@@ -168,7 +170,7 @@ export function ImportanceScoreFilter<TData, TValue>({
                   onClick={() => setRange([0.3, 0.7])}
                   className="h-6 text-xs"
                 >
-                  Neutral (30-70%)
+                  {t('importanceFilter.neutral')}
                 </Button>
                 <Button
                   variant={hasRangeFilter && displayRange[0] === 0.7 && displayRange[1] === 1 ? "default" : "outline"}
@@ -176,7 +178,7 @@ export function ImportanceScoreFilter<TData, TValue>({
                   onClick={() => setRange([0.7, 1])}
                   className="h-6 text-xs"
                 >
-                  Signal (&gt;70%)
+                  {t('importanceFilter.signal')}
                 </Button>
               </div>
             </div>

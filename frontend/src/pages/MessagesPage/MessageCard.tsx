@@ -41,13 +41,13 @@ export const MessageCard: React.FC<MessageCardProps> = ({
           <div className="flex flex-col items-center justify-center gap-4 text-center">
             <AlertCircle className="h-8 w-8 text-destructive" />
             <div className="space-y-2">
-              <p className="text-sm font-medium">{t('card.error.title', 'Failed to load')}</p>
+              <p className="text-sm font-medium">{t('card.error.title')}</p>
               {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
             </div>
             {onRetry && (
               <Button variant="outline" size="sm" onClick={onRetry}>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                {t('card.error.retry', 'Retry')}
+                {t('card.error.retry')}
               </Button>
             )}
           </div>
@@ -90,7 +90,7 @@ export const MessageCard: React.FC<MessageCardProps> = ({
     })
   }
 
-  const authorName = message.author_name || message.author || 'Unknown'
+  const authorName = message.author_name || message.author || t('card.unknownAuthor')
 
   const compactBadge = importanceBadge ? (
     <Badge variant={importanceBadge.variant} className={importanceBadge.className}>
@@ -101,7 +101,7 @@ export const MessageCard: React.FC<MessageCardProps> = ({
   const compactContent = isEmpty ? (
     <div className="flex items-center gap-2 text-muted-foreground/50 italic text-sm">
       <Mail className="h-4 w-4 flex-shrink-0" />
-      <span className="truncate">(Empty message)</span>
+      <span className="truncate">{t('card.emptyMessage')}</span>
     </div>
   ) : (
     <p className="text-sm line-clamp-2 break-words">{content}</p>
@@ -162,7 +162,7 @@ export const MessageCard: React.FC<MessageCardProps> = ({
         {isEmpty ? (
           <div className="flex items-center gap-2 text-muted-foreground/50 italic text-sm">
             <Mail className="h-4 w-4 flex-shrink-0" />
-            <span className="truncate">(Empty message)</span>
+            <span className="truncate">{t('card.emptyMessage')}</span>
           </div>
         ) : (
           <p className="text-sm line-clamp-3 break-words">{content}</p>

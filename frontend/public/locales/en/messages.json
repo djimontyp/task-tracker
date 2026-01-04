@@ -60,12 +60,25 @@
     "starred": "Starred",
     "archived": "Archived",
     "source": "Source",
+    "status": "Status",
     "dateRange": "Date range",
     "importance": "Importance",
     "classification": "Classification",
     "signal": "Signal",
     "noise": "Noise",
-    "clear": "Clear filters"
+    "clear": "Clear filters",
+    "search": "Search messages..."
+  },
+  "importanceFilter": {
+    "title": "Importance Filter",
+    "reset": "Reset",
+    "showUnscored": "Show unscored messages",
+    "scoreRange": "Score range",
+    "quickFilters": "Quick filters:",
+    "scoredOnly": "scored only",
+    "noise": "Noise (<30%)",
+    "neutral": "Neutral (30-70%)",
+    "signal": "Signal (>70%)"
   },
   "card": {
     "author": "Author",
@@ -74,6 +87,12 @@
     "importance": "Importance",
     "atoms": "Atoms",
     "viewDetails": "View details",
+    "emptyMessage": "(Empty message)",
+    "unknownAuthor": "Unknown",
+    "error": {
+      "title": "Failed to load",
+      "retry": "Retry"
+    },
     "actions": {
       "createAtom": "Create atom",
       "dismiss": "Dismiss",
@@ -96,14 +115,23 @@
     "star": "Star",
     "unstar": "Unstar",
     "markAsRead": "Mark as Read",
-    "markAsUnread": "Mark as Unread"
+    "markAsUnread": "Mark as Unread",
+    "refresh": "Refresh",
+    "updateAuthors": "Update Authors"
   },
   "ingestion": {
     "title": "Import messages",
-    "description": "Import messages from a file or paste text",
+    "description": "Select Telegram groups to import messages from",
     "paste": "Paste text",
     "upload": "Upload file",
-    "submit": "Import"
+    "submit": "Import",
+    "loading": "Loading groups...",
+    "noGroups": "No groups configured. Please add groups in Settings first.",
+    "selectAll": "Select All",
+    "groups": "groups",
+    "limitLabel": "Messages limit per group",
+    "limitDescription": "Maximum number of messages to fetch from each group (1-10000)",
+    "starting": "Starting..."
   },
   "smartFilters": {
     "all": "All",
@@ -113,6 +141,10 @@
     "allAriaLabel": "All messages, {{count}} total",
     "signalsAriaLabel": "Signal messages, {{count}} items",
     "noiseAriaLabel": "Noise messages, {{count}} items"
+  },
+  "viewMode": {
+    "feed": "Feed View",
+    "table": "Table View"
   },
   "classification": {
     "overallConfidence": "Overall confidence",
@@ -224,5 +256,105 @@
       "markAsSignal": "Mark as Signal",
       "confirmAsNoise": "Confirm as Noise"
     }
+  },
+  "consumerModal": {
+    "title": "Message Details",
+    "description": "View and read message content with author details and related messages",
+    "loading": "Loading...",
+    "emptyMessage": "(Empty message)",
+    "relatedMessages": "Related Messages",
+    "archive": "Archive",
+    "close": "Close",
+    "error": {
+      "title": "Failed to load message",
+      "retry": "Retry"
+    },
+    "toast": {
+      "loadError": "Failed to load message details",
+      "archiveNotImplemented": "Archive functionality will be implemented in a future task"
+    }
+  },
+  "inspectModal": {
+    "title": "Message Details",
+    "loading": "Loading...",
+    "reassignTopic": "Reassign Topic",
+    "close": "Close",
+    "telegramId": "ID: {{id}}",
+    "source": {
+      "telegram": "Telegram",
+      "manual": "Manual"
+    },
+    "tabs": {
+      "classification": "Classification",
+      "atoms": "Atoms",
+      "history": "History"
+    },
+    "error": {
+      "title": "Failed to load message",
+      "retry": "Retry"
+    },
+    "toast": {
+      "loadError": "Failed to load message details",
+      "reassignNotImplemented": "Reassign topic functionality will be implemented in a future task"
+    }
+  },
+  "atomsTab": {
+    "extractedEntities": "Extracted Entities",
+    "noEntitiesDetected": "No entities detected in this message",
+    "entities": {
+      "people": "People",
+      "places": "Places",
+      "organizations": "Organizations",
+      "concepts": "Concepts",
+      "types": {
+        "people": "people",
+        "places": "places",
+        "organizations": "organizations",
+        "concepts": "concepts"
+      },
+      "noneDetected": "No {{type}} detected",
+      "detected": "{{count}} detected",
+      "noneFound": "No {{type}} found"
+    },
+    "keywords": {
+      "title": "Keywords",
+      "noKeywords": "No keywords extracted from this message",
+      "extracted": "Extracted Keywords ({{count}})",
+      "sortedByRelevance": "Sorted by relevance (larger = more relevant)",
+      "relevance": "Relevance: {{value}}%"
+    },
+    "semanticSimilarity": {
+      "title": "Semantic Similarity",
+      "noEmbedding": "No embedding data available for this message",
+      "vectorEmbedding": "Vector embedding",
+      "dimensions": "{{count}} dimensions",
+      "vectorNorm": "Vector Norm:",
+      "topDimensions": "Top 5 Dimensions:",
+      "similarMessages": "Similar Messages (Top {{count}}):",
+      "noSimilarMessages": "No similar messages found"
+    },
+    "toast": {
+      "searchFeature": "Search feature",
+      "searchEntityDescription": "Searching for messages with \"{{entity}}\" ({{type}}) - coming soon",
+      "keywordSearch": "Keyword search",
+      "searchKeywordDescription": "Searching for messages with \"{{keyword}}\" - coming soon",
+      "messageDetails": "Message details",
+      "openingMessage": "Opening message {{id}} - coming soon"
+    }
+  },
+  "historyTab": {
+    "placeholder": {
+      "title": "Placeholder: Classification History",
+      "description": "This tab will display a timeline of classification changes with diffs."
+    },
+    "historyEvents": "History Events: {{count}}",
+    "lastAction": "Last Action: {{action}}"
+  },
+  "errorBoundary": {
+    "title": "Failed to load messages",
+    "description": "Something went wrong while loading messages",
+    "tryAgain": "Try Again",
+    "retryAriaLabel": "Retry loading messages",
+    "errorDetails": "Error Details (Dev Only)"
   }
 }
