@@ -44,10 +44,10 @@ export interface WizardStep {
 
 /**
  * Props for SetupWizard component
+ *
+ * Note: step1Status is derived internally from Telegram connection state
  */
 export interface SetupWizardProps {
-  /** Status for step 1: Connect Sources */
-  step1Status: StepStatus;
   /** Status for step 2: First Project */
   step2Status: StepStatus;
   /** Status for step 3: Activate Agent */

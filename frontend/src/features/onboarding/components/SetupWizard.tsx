@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { MessageSquare, FolderPlus, Bot, Lightbulb } from 'lucide-react';
+import { MessageSquare, FolderPlus, Bot, Lightbulb, Check } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/shared/ui/button';
 import { SetupStep } from './SetupStep';
+import { useTelegramStore } from '@/pages/SettingsPage/plugins/TelegramSource/useTelegramStore';
 import type { SetupWizardProps } from '../types/wizard';
 
 /**
@@ -24,7 +26,6 @@ import type { SetupWizardProps } from '../types/wizard';
  * - Status: icon + text (not color only)
  */
 export function SetupWizard({
-  step1Status,
   step2Status,
   step3Status,
   step4Status,
@@ -33,6 +34,15 @@ export function SetupWizard({
   onActivateAgent,
 }: SetupWizardProps) {
   const { t } = useTranslation('onboarding');
+  const { connectionStatus } = useTelegramStore();
+
+  // Derive step1 status from real Telegram connection state
+  const telegramConnected = connectionStatus === 'connected' || connectionStatus === 'warning';
+  const step1Status = telegramConnected ? 'completed' : 'active';
+
+  const handleSlackClick = () => {
+    toast.info(t('wizard.actions.slackComingSoon'));
+  };
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
@@ -44,11 +54,24 @@ export function SetupWizard({
         status={step1Status}
         icon={<MessageSquare className="h-6 w-6" />}
       >
-        {step1Status === 'active' && onConnectSource && (
-          <Button onClick={onConnectSource} className="h-11">
-            {t('wizard.actions.connectSource')}
+        <div className="flex gap-2">
+          <Button
+            onClick={onConnectSource}
+            variant={telegramConnected ? 'outline' : 'default'}
+            className="h-11"
+          >
+            {telegramConnected && <Check className="mr-2 h-4 w-4" />}
+            {t('wizard.actions.telegram')}
           </Button>
-        )}
+          <Button
+            onClick={handleSlackClick}
+            variant="outline"
+            disabled
+            className="h-11"
+          >
+            {t('wizard.actions.slack')}
+          </Button>
+        </div>
       </SetupStep>
 
       {/* Step 2: First Project */}

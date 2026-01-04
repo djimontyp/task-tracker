@@ -85,7 +85,10 @@
     "actions": {
       "connectSource": "Підключити джерело",
       "createProject": "Створити проєкт",
-      "activateAgent": "Активувати агента"
+      "activateAgent": "Активувати агента",
+      "telegram": "Telegram",
+      "slack": "Slack (Скоро)",
+      "slackComingSoon": "Інтеграція Slack скоро буде доступна!"
     }
   }
 }

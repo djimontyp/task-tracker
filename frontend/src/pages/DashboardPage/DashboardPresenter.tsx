@@ -54,7 +54,6 @@ export function DashboardPresenter({
       {/* Cold Start Empty State - SetupWizard */}
       {hasNoData && !isAnyLoading && (
         <SetupWizard
-          step1Status="active"
           step2Status="locked"
           step3Status="locked"
           step4Status="locked"
