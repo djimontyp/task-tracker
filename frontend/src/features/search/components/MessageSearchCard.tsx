@@ -19,7 +19,7 @@ interface MessageSearchCardProps {
 }
 
 export const MessageSearchCard = ({ result, className, isLoading = false, isError = false, error, onRetry }: MessageSearchCardProps) => {
-  const { t } = useTranslation('search')
+  const { t } = useTranslation('common')
 
   if (isError) {
     return (
@@ -28,13 +28,13 @@ export const MessageSearchCard = ({ result, className, isLoading = false, isErro
           <div className="flex flex-col items-center justify-center gap-4 text-center">
             <AlertCircle className="h-8 w-8 text-destructive" />
             <div className="space-y-2">
-              <p className="text-sm font-medium">{t('card.error.title', 'Failed to load')}</p>
+              <p className="text-sm font-medium">{t('searchCard.error.title')}</p>
               {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
             </div>
             {onRetry && (
               <Button variant="outline" size="sm" onClick={onRetry}>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                {t('card.error.retry', 'Retry')}
+                {t('actions.retry')}
               </Button>
             )}
           </div>
@@ -76,7 +76,7 @@ export const MessageSearchCard = ({ result, className, isLoading = false, isErro
   return (
     <Card
       className={cn('transition-all hover:shadow-md hover:border-primary/50', className)}
-      aria-label={`Message from user ${message.telegram_profile_id || message.author_id}`}
+      aria-label={t('searchCard.messageAriaLabel', { user: message.telegram_profile_id || message.author_id })}
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
@@ -95,7 +95,7 @@ export const MessageSearchCard = ({ result, className, isLoading = false, isErro
                 {formatTimestamp(message.sent_at)}
               </span>
               <Badge variant="outline" className="text-xs">
-                {formatSimilarity(similarity_score)} match
+                {t('searchCard.match', { score: formatSimilarity(similarity_score) })}
               </Badge>
               {message.classification && (
                 <Badge variant="secondary" className="text-xs">

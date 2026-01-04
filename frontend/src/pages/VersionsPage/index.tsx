@@ -176,7 +176,7 @@ const VersionsPage = () => {
           <div className="relative flex-1">
             <Search className="absolute left-4 top-2/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by entity name..."
+              placeholder={t('versionsPage.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -197,24 +197,24 @@ const VersionsPage = () => {
               size="sm"
               onClick={handleSelectAll}
             >
-              {selectedVersions.length === filteredVersions.length ? 'Deselect All' : 'Select All'}
+              {selectedVersions.length === filteredVersions.length ? t('versionsPage.deselectAll') : t('versionsPage.selectAll')}
             </Button>
           )}
         </div>
 
         <Tabs value={entityType} onValueChange={(v) => setEntityType(v as EntityType)}>
           <TabsList variant="pill">
-            <TabsTrigger variant="pill" value="all">All</TabsTrigger>
-            <TabsTrigger variant="pill" value="topic">Topics</TabsTrigger>
-            <TabsTrigger variant="pill" value="atom">Atoms</TabsTrigger>
+            <TabsTrigger variant="pill" value="all">{t('versionsPage.filters.all')}</TabsTrigger>
+            <TabsTrigger variant="pill" value="topic">{t('versionsPage.filters.topics')}</TabsTrigger>
+            <TabsTrigger variant="pill" value="atom">{t('versionsPage.filters.atoms')}</TabsTrigger>
           </TabsList>
         </Tabs>
 
         <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as VersionStatus)}>
           <TabsList variant="pill">
-            <TabsTrigger variant="pill" value="pending">Pending</TabsTrigger>
-            <TabsTrigger variant="pill" value="approved">Approved</TabsTrigger>
-            <TabsTrigger variant="pill" value="rejected">Rejected</TabsTrigger>
+            <TabsTrigger variant="pill" value="pending">{t('common:status.pending')}</TabsTrigger>
+            <TabsTrigger variant="pill" value="approved">{t('common:status.approved')}</TabsTrigger>
+            <TabsTrigger variant="pill" value="rejected">{t('common:status.rejected')}</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -234,10 +234,10 @@ const VersionsPage = () => {
         ) : filteredVersions.length === 0 ? (
           <EmptyState
             icon={statusFilter === 'pending' ? CheckCircle : AlertTriangle}
-            title={statusFilter === 'pending' ? 'No pending versions' : `No ${statusFilter} versions`}
+            title={statusFilter === 'pending' ? t('versionsPage.empty.noPending') : t('versionsPage.empty.noStatus', { status: t(`common:status.${statusFilter}`) })}
             description={statusFilter === 'pending'
-              ? 'All caught up! All versions have been reviewed.'
-              : `No ${statusFilter} versions found. Try adjusting your filters.`}
+              ? t('versionsPage.empty.allReviewed')
+              : t('versionsPage.empty.tryFilters')}
           />
         ) : (
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -263,14 +263,14 @@ const VersionsPage = () => {
                     )}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-sm truncate">{version.entityName}</h3>
-                      <p className="text-xs text-muted-foreground">Version {version.version}</p>
+                      <p className="text-xs text-muted-foreground">{t('versionsPage.version', { version: version.version })}</p>
                     </div>
                     {getStatusBadge(version.status)}
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Confidence: {Math.round(version.confidence * 100)}%</span>
-                    <span className="capitalize">{version.entityType}</span>
+                    <span>{t('versionsPage.confidence', { value: Math.round(version.confidence * 100) })}</span>
+                    <span className="capitalize">{t(`versionsPage.entityTypes.${version.entityType}`)}</span>
                   </div>
 
                   <div className="text-xs text-muted-foreground/70">
@@ -287,7 +287,7 @@ const VersionsPage = () => {
         <Dialog open={!!dialogVersion} onOpenChange={() => setDialogVersion(null)}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Version Comparison - {dialogVersion.entityName}</DialogTitle>
+              <DialogTitle>{t('versionsPage.dialog.title', { name: dialogVersion.entityName })}</DialogTitle>
             </DialogHeader>
             <VersionDiffViewer
               entityType={dialogVersion.entityType}
@@ -302,12 +302,12 @@ const VersionsPage = () => {
                       dialogVersion.version
                     )
                   }
-                  toast.success('Version approved')
+                  toast.success(t('versionsPage.toast.approved'))
                   queryClient.invalidateQueries({ queryKey: ['topic-versions'] })
                   queryClient.invalidateQueries({ queryKey: ['pending-versions-count'] })
                   setDialogVersion(null)
                 } catch {
-                  toast.error('Failed to approve version')
+                  toast.error(t('versionsPage.toast.approveFailed'))
                 }
               }}
               onReject={async () => {
@@ -318,12 +318,12 @@ const VersionsPage = () => {
                       dialogVersion.version
                     )
                   }
-                  toast.success('Version rejected')
+                  toast.success(t('versionsPage.toast.rejected'))
                   queryClient.invalidateQueries({ queryKey: ['topic-versions'] })
                   queryClient.invalidateQueries({ queryKey: ['pending-versions-count'] })
                   setDialogVersion(null)
                 } catch {
-                  toast.error('Failed to reject version')
+                  toast.error(t('versionsPage.toast.rejectFailed'))
                 }
               }}
             />

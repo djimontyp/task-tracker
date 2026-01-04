@@ -20,7 +20,7 @@ interface TopicSearchCardProps {
 
 export const TopicSearchCard = ({ result, className, isLoading = false, isError = false, error, onRetry }: TopicSearchCardProps) => {
   const navigate = useNavigate()
-  const { t } = useTranslation('search')
+  const { t } = useTranslation('common')
 
   if (isError) {
     return (
@@ -29,13 +29,13 @@ export const TopicSearchCard = ({ result, className, isLoading = false, isError 
           <div className="flex flex-col items-center justify-center gap-4 text-center">
             <AlertCircle className="h-8 w-8 text-destructive" />
             <div className="space-y-2">
-              <p className="text-sm font-medium">{t('card.error.title', 'Failed to load')}</p>
+              <p className="text-sm font-medium">{t('searchCard.error.title')}</p>
               {error && <p className="text-xs text-muted-foreground">{error.message}</p>}
             </div>
             {onRetry && (
               <Button variant="outline" size="sm" onClick={onRetry}>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                {t('card.error.retry', 'Retry')}
+                {t('actions.retry')}
               </Button>
             )}
           </div>
@@ -93,7 +93,7 @@ export const TopicSearchCard = ({ result, className, isLoading = false, isError 
         badge={topicBadge}
         content={compactContent}
         onClick={handleClick}
-        aria-label={`Topic: ${topic.name}`}
+        aria-label={t('searchCard.topicAriaLabel', { name: topic.name })}
         className={className}
       />
 
@@ -103,7 +103,7 @@ export const TopicSearchCard = ({ result, className, isLoading = false, isError 
         onClick={handleClick}
         role="button"
         tabIndex={0}
-        aria-label={`Topic: ${topic.name}`}
+        aria-label={t('searchCard.topicAriaLabel', { name: topic.name })}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
@@ -121,7 +121,7 @@ export const TopicSearchCard = ({ result, className, isLoading = false, isError 
               <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <h3 className="font-semibold text-base truncate">{topic.name}</h3>
                 <Badge variant="outline" className="text-xs">
-                  {formatSimilarity(similarity_score)} match
+                  {t('searchCard.match', { score: formatSimilarity(similarity_score) })}
                 </Badge>
               </div>
               {topic.description && (
