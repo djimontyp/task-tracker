@@ -107,9 +107,9 @@ export const WithTrailing: Story = {
 export const WithTimestamp: Story = {
   args: {
     avatar: {
-      fallback: 'SB',
+      fallback: 'PA',
     },
-    title: 'System Bot',
+    title: 'Pulse Assistant',
     subtitle: 'New message in #general',
     meta: <Badge variant="outline">Bot</Badge>,
     trailing: <span className="text-xs text-muted-foreground">2m ago</span>,
@@ -257,8 +257,8 @@ export const MessageFeed: Story = {
           onClick={() => {}}
         />
         <ListItemWithAvatar
-          avatar={{ fallback: 'SB' }}
-          title="System Bot"
+          avatar={{ fallback: 'PA' }}
+          title="Pulse Assistant"
           subtitle="Build #234 passed successfully"
           meta={<Badge variant="outline" className="text-xs">Bot</Badge>}
           trailing={<span className="text-xs text-muted-foreground">1h</span>}
