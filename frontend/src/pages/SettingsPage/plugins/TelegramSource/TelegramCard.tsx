@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Download } from 'lucide-react'
 import { TelegramIcon } from '@/shared/icons'
 import {
   AlertDialog,
@@ -10,15 +11,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  Button,
 } from '@/shared/ui'
 import SourceCard from '@/pages/SettingsPage/components/SourceCard'
 import TelegramSettingsSheet from '@/pages/SettingsPage/plugins/TelegramSource/TelegramSettingsSheet'
+import { HistoryImportDialog } from '@/pages/SettingsPage/plugins/TelegramSource/components/HistoryImportDialog'
 import { useTelegramSettings } from '@/pages/SettingsPage/plugins/TelegramSource/useTelegramSettings'
 
 const TelegramCard = () => {
   const { t } = useTranslation('settings')
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
 
   const {
     isActive,
@@ -63,8 +67,25 @@ const TelegramCard = () => {
         enabled={isActive && !isDeletingWebhook && !isSettingWebhook}
         onToggle={handleToggle}
         onSettings={() => setIsSheetOpen(true)}
+        actions={
+          isActive && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsImportDialogOpen(true)}
+              aria-label={t('telegram.historyImport.buttonAriaLabel')}
+            >
+              <Download className="h-4 w-4 mr-2" aria-hidden="true" />
+              {t('telegram.historyImport.button')}
+            </Button>
+          )
+        }
       />
       <TelegramSettingsSheet open={isSheetOpen} onOpenChange={setIsSheetOpen} />
+      <HistoryImportDialog
+        open={isImportDialogOpen}
+        onClose={() => setIsImportDialogOpen(false)}
+      />
 
       <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
         <AlertDialogContent>

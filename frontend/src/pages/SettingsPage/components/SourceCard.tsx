@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Button, Card, CardContent, CardHeader, Switch } from '@/shared/ui'
 import { AlertCircle, RefreshCw } from 'lucide-react'
-import type { ComponentType } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 
 export interface SourceCardProps {
   icon: ComponentType<{ className?: string }>
@@ -13,6 +13,7 @@ export interface SourceCardProps {
   isError?: boolean
   error?: Error
   onRetry?: () => void
+  actions?: ReactNode
 }
 
 const SourceCard = ({
@@ -25,6 +26,7 @@ const SourceCard = ({
   isError = false,
   error,
   onRetry,
+  actions,
 }: SourceCardProps) => {
   const { t } = useTranslation('settings')
 
@@ -67,9 +69,12 @@ const SourceCard = ({
       </CardHeader>
 
       <CardContent className="pt-0">
-        <Button variant="outline" size="sm" onClick={onSettings}>
-          {t('sourceCard.settings')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={onSettings}>
+            {t('sourceCard.settings')}
+          </Button>
+          {actions}
+        </div>
       </CardContent>
     </Card>
   )
