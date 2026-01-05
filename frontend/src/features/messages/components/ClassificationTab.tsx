@@ -156,7 +156,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-foreground">{t('classification.overallConfidence')}</h3>
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-foreground">{data.confidence}%</span>
+            <span className="text-2xl font-bold text-foreground">{Math.round(data.confidence)}%</span>
             <Badge variant={overallConfig.badgeVariant}>{t(overallConfig.labelKey)}</Badge>
           </div>
         </div>
@@ -212,7 +212,7 @@ export function ClassificationTab({ data }: ClassificationTabProps) {
             <div key={dimension.labelKey} className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-foreground">{t(dimension.labelKey)}</span>
-                <span className="text-sm font-semibold text-foreground">{dimension.value}%</span>
+                <span className="text-sm font-semibold text-foreground">{Math.round(displayValue)}%</span>
               </div>
 
               <TooltipProvider>

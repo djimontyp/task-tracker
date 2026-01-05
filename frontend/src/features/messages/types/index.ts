@@ -90,6 +90,10 @@ export interface MessageInspectData {
     content: string
     source: 'telegram' | 'manual'
     created_at: string
+    sent_at?: string
+    author_name?: string
+    avatar_url?: string
+    topic_name?: string
     telegram_message_id?: number
   }
   classification: {
@@ -99,6 +103,8 @@ export interface MessageInspectData {
     topic_title: string
     noise_score: number
     urgency_score: number
+    importance_score?: number
+    noise_classification?: string
   }
   atoms: {
     entities: {
@@ -128,6 +134,8 @@ export interface MessageInspectData {
 export interface MessageInspectModalProps {
   messageId: string
   onClose: () => void
+  onNext?: () => void
+  onPrev?: () => void
 }
 
 export type TabValue = 'classification' | 'atoms' | 'history'
@@ -157,7 +165,16 @@ export interface ConsumerMessageData {
   }>
 }
 
+
 export interface ConsumerMessageModalProps {
   messageId: string
   onClose: () => void
+}
+
+export interface MessageQueryParams {
+  page?: number
+  limit?: number
+  search?: string
+  topics?: string[]
+  importance?: (string | number)[]
 }

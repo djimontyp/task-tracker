@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import type { MessageInspectData } from './types'
+import type { MessageInspectData } from '@/features/messages/types'
 
 interface HistoryTabProps {
   data: MessageInspectData['history']

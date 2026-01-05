@@ -42,6 +42,8 @@ export interface MessageInspectData {
 export interface MessageInspectModalProps {
   messageId: string
   onClose: () => void
+  onNext?: () => void
+  onPrev?: () => void
 }
 
 export type TabValue = 'classification' | 'atoms' | 'history'
