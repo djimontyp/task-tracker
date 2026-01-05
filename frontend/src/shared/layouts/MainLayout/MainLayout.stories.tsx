@@ -48,7 +48,6 @@ const defaultNavbarProps: Omit<NavbarProps, 'isDesktop' | 'onMobileSidebarToggle
   pageTooltip: 'Dashboard - Your workspace overview',
   theme: 'system',
   onThemeChange: () => console.log('Theme changed'),
-  serviceStatus: 'healthy',
   isAdminMode: false,
   onToggleAdminMode: () => console.log('Admin mode toggled'),
   user: {

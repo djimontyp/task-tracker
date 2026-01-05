@@ -8,7 +8,6 @@ import { NavUser } from '@/shared/components/NavUser';
 import { UniversalThemeIcon, TooltipIconButton } from '@/shared/components';
 import { MobileSearch } from '@/shared/components/MobileSearch';
 import { NavBreadcrumbs } from '@/shared/layouts/MainLayout/NavBreadcrumbs';
-import { ServiceStatusIndicator } from '@/shared/layouts/MainLayout/ServiceStatusIndicator';
 import type { NavbarProps } from './types';
 
 /**
@@ -32,8 +31,6 @@ export function Navbar({
   pageHint,
   theme,
   onThemeChange,
-  serviceStatus,
-  serviceStatusPulse = false,
   isAdminMode,
   onToggleAdminMode,
   user,
@@ -97,10 +94,8 @@ export function Navbar({
           </div>
         )}
 
-        {/* ACTIONS ZONE: Status + Theme + User (right, pushed to end) */}
+        {/* ACTIONS ZONE: Theme + User (right, pushed to end) */}
         <div className="flex items-center gap-2 shrink-0 ml-auto">
-          <ServiceStatusIndicator status={serviceStatus} pulse={serviceStatusPulse} className="hidden sm:flex" />
-
           <TooltipIconButton
             icon={<UniversalThemeIcon theme={theme} className="h-5 w-5" />}
             label={t('navbar.theme.change')}
@@ -133,7 +128,7 @@ export function Navbar({
             </Button>
           </div>
 
-          {/* Right: Search + Status + Theme + User */}
+          {/* Right: Search + Theme + User */}
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -144,8 +139,6 @@ export function Navbar({
             >
               <Search className="h-5 w-5" />
             </Button>
-
-            <ServiceStatusIndicator status={serviceStatus} pulse={serviceStatusPulse} className="hidden xs:flex" />
 
             <TooltipIconButton
               icon={<UniversalThemeIcon theme={theme} className="h-5 w-5" />}

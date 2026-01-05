@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import type { BreadcrumbSegment } from '@/shared/layouts/MainLayout/useBreadcrumbs';
-import type { IndicatorStatus } from '@/shared/hooks';
 
 /**
  * Theme options
@@ -36,10 +35,6 @@ export interface NavbarProps {
   // Theme
   theme: ThemeOption;
   onThemeChange: () => void;
-
-  // Service status
-  serviceStatus: IndicatorStatus;
-  serviceStatusPulse?: boolean;
 
   // Admin mode
   isAdminMode: boolean;

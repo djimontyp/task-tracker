@@ -40,7 +40,6 @@ const defaultNavbarProps: Omit<NavbarProps, 'isDesktop' | 'onMobileSidebarToggle
   pageTooltip: 'Dashboard - Your workspace overview',
   theme: 'system',
   onThemeChange: () => console.log('Theme changed'),
-  serviceStatus: 'healthy',
   isAdminMode: false,
   onToggleAdminMode: () => console.log('Admin mode toggled'),
   user: {
@@ -145,63 +144,6 @@ export const Mobile: Story = {
       description: {
         story:
           'Mobile view with hamburger menu and mobile-optimized breadcrumbs. Fixed position with two rows.',
-      },
-    },
-  },
-};
-
-/**
- * Navbar with healthy service status (green indicator).
- */
-export const StatusHealthy: Story = {
-  args: {
-    ...defaultNavbarProps,
-    isDesktop: true,
-    serviceStatus: 'healthy',
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Service status indicator showing healthy state (green dot, no pulse).',
-      },
-    },
-  },
-};
-
-/**
- * Navbar with warning service status (yellow pulsing indicator).
- */
-export const StatusWarning: Story = {
-  args: {
-    ...defaultNavbarProps,
-    isDesktop: true,
-    serviceStatus: 'warning',
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Service status indicator showing warning state (yellow dot with pulse animation).',
-      },
-    },
-  },
-};
-
-/**
- * Navbar with error service status (red pulsing indicator).
- */
-export const StatusError: Story = {
-  args: {
-    ...defaultNavbarProps,
-    isDesktop: true,
-    serviceStatus: 'error',
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Service status indicator showing error state (red dot with pulse animation).',
       },
     },
   },

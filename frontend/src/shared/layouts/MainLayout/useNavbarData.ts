@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/shared/components/ThemeProvider';
-import { useServiceStatus, useAdminMode } from '@/shared/hooks';
+import { useAdminMode } from '@/shared/hooks';
 import { useBreadcrumbs, type DynamicLabels } from './useBreadcrumbs';
 import type { NavbarProps, ThemeOption } from '@/shared/components/Navbar';
 
@@ -40,7 +40,6 @@ export function useNavbarData(
 ): Omit<NavbarProps, 'isDesktop' | 'onMobileSidebarToggle' | 'searchComponent'> {
   const { fetchTopicById } = config;
   const { setTheme, theme } = useTheme();
-  const { indicator, connectionState } = useServiceStatus();
   const { isAdminMode, toggleAdminMode } = useAdminMode();
   const location = useLocation();
 
@@ -78,8 +77,6 @@ export function useNavbarData(
     pageTooltip: tooltip,
     theme: theme as ThemeOption,
     onThemeChange: cycleTheme,
-    serviceStatus: indicator,
-    serviceStatusPulse: connectionState === 'connected',
     isAdminMode,
     onToggleAdminMode: toggleAdminMode,
     user: {
