@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { Progress } from '@/shared/ui/progress'
 import { Check, Rocket, MessageSquare, Cpu, FileDown } from 'lucide-react'
+import { HistoryImportSection } from './HistoryImportSection'
+import { ImportProgress as ImportProgressDisplay } from './ImportProgress'
+import { useHistoryImport } from '../hooks/useHistoryImport'
+import type { ImportDepth } from '../types'
 
 const STEP_IDS = ['welcome', 'telegram', 'agent', 'import', 'complete'] as const
 type StepId = (typeof STEP_IDS)[number]
@@ -38,6 +42,12 @@ export function OnboardingWizard({ open: controlledOpen, onClose, onComplete }: 
   const stepId = STEP_IDS[currentStep]
   const StepIcon = STEP_ICONS[stepId]
 
+  const { status, progress: importProgress, isImporting, isStarting, startImport, cancelImport } = useHistoryImport({
+    onComplete: useCallback(() => {
+      setCurrentStep((prev) => prev + 1)
+    }, [])
+  })
+
   const handleNext = () => {
     if (currentStep === totalSteps - 1) {
       localStorage.setItem('onboarding_completed', 'true')
@@ -63,6 +73,14 @@ export function OnboardingWizard({ open: controlledOpen, onClose, onComplete }: 
     if (!open) {
       onClose?.()
     }
+  }
+
+  const handleStartImport = (depth: ImportDepth) => {
+    if (depth === 'skip') {
+      handleNext()
+      return
+    }
+    startImport(depth)
   }
 
   const stepTitle = t(`steps.${stepId}.title`)
@@ -124,13 +142,12 @@ export function OnboardingWizard({ open: controlledOpen, onClose, onComplete }: 
             )}
 
             {stepId === 'import' && (
-              <div className="text-left space-y-4 w-full max-w-md mx-auto p-6 bg-muted/30 rounded-lg border border-border">
-                <p className="text-sm">{t('steps.import.instructions.title')}</p>
-                <ol className="text-sm space-y-2 list-decimal list-inside">
-                  {(t('steps.import.instructions.steps', { returnObjects: true }) as string[]).map((step, index) => (
-                    <li key={index}>{step}</li>
-                  ))}
-                </ol>
+              <div className="w-full max-w-lg mx-auto">
+                {!isImporting ? (
+                  <HistoryImportSection onStartImport={handleStartImport} disabled={isStarting} />
+                ) : (
+                  <ImportProgressDisplay progress={importProgress} status={status} onCancel={cancelImport} />
+                )}
               </div>
             )}
 
@@ -153,10 +170,10 @@ export function OnboardingWizard({ open: controlledOpen, onClose, onComplete }: 
         </div>
 
         <div className="flex justify-between pt-4 border-t border-border">
-          <Button variant="outline" onClick={handleBack} disabled={currentStep === 0}>
+          <Button variant="outline" onClick={handleBack} disabled={currentStep === 0 || isImporting}>
             {t('actions.back')}
           </Button>
-          <Button onClick={handleNext} size="lg">
+          <Button onClick={handleNext} size="lg" disabled={isImporting}>
             {currentStep === totalSteps - 1 ? t('actions.getStarted') : t('actions.continue')}
           </Button>
         </div>

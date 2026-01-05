@@ -6,6 +6,7 @@ export {
   MessageCountDisplay,
   SetupWizard,
   SetupStep,
+  SetupBanner,
 } from './components';
 
 // Hooks
