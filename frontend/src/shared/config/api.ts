@@ -12,8 +12,8 @@ export const API_ENDPOINTS = {
   configScoring: buildApiPath('config/scoring'),
 
   messages: buildApiPath('messages'),
-  message: (messageId: number) => buildApiPath(`messages/${messageId}`),
-  messageInspect: (messageId: number) => buildApiPath(`messages/${messageId}/inspect`),
+  message: (messageId: number | string) => buildApiPath(`messages/${messageId}`),
+  messageInspect: (messageId: number | string) => buildApiPath(`messages/${messageId}/inspect`),
   updateAuthors: (chatId: string) => buildApiPath(`messages/update-authors?chat_id=${chatId}`),
 
   tasks: buildApiPath('tasks'),
