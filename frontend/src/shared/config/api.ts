@@ -38,6 +38,10 @@ export const API_ENDPOINTS = {
   // Ingestion
   ingestion: {
     telegram: buildApiPath('ingestion/telegram'),
+    telegramEstimate: buildApiPath('ingestion/telegram/estimate'),
+    telegramImport: buildApiPath('ingestion/telegram/import'),
+    telegramImportCancel: (jobId: string) =>
+      buildApiPath(`ingestion/telegram/import/${jobId}/cancel`),
     jobs: buildApiPath('ingestion/jobs'),
     job: (jobId: number) => buildApiPath(`ingestion/jobs/${jobId}`),
   },
