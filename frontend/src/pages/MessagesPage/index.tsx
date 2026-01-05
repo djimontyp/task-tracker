@@ -71,7 +71,7 @@ const MessagesPage = () => {
     sent_at: false,
   })
   const [globalFilter, setGlobalFilter] = React.useState('')
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [rowSelection, setRowSelection] = React.useState<Record<string, boolean>>({})
 
   // Construct API params from state
   const queryParams = useMemo<MessageQueryParams>(() => {
@@ -246,17 +246,37 @@ const MessagesPage = () => {
     }
   }
 
-  // Keyboard Navigation for List (J/K)
+  // Keyboard Navigation for List (J/K) & Selection (X)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
       if (e.key === 'j' || e.key === 'ArrowDown') {
         e.preventDefault()
-        handleNextMessage()
+        if (!selectedMessageId && messages.length > 0) {
+          setSelectedMessageId(String(messages[0].id))
+        } else {
+          handleNextMessage()
+        }
       } else if (e.key === 'k' || e.key === 'ArrowUp') {
         e.preventDefault()
         handlePrevMessage()
+      } else if (e.key === 'x') {
+        // Toggle selection for current item
+        if (selectedMessageId) {
+          e.preventDefault()
+          const isSelected = !!rowSelection[selectedMessageId]
+          setRowSelection(prev => {
+            const newSelection = { ...prev }
+            if (isSelected) {
+              delete newSelection[selectedMessageId]
+            } else {
+              newSelection[selectedMessageId] = true
+            }
+            return newSelection
+          })
+          // Optional: Auto-advance after selection like Gmail? Maybe later.
+        }
       } else if (e.key === 'Escape') {
         handleClosePanel()
       } else if (e.key === ']' && e.shiftKey) { // Shift+] to toggle layout
@@ -264,11 +284,9 @@ const MessagesPage = () => {
       }
     }
 
-    if (selectedMessageId) {
-      window.addEventListener('keydown', handleKeyDown)
-      return () => window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [selectedMessageId, messages]) // Depend on messages
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedMessageId, messages, rowSelection])
 
   // Topics options
   const topicOptions = useMemo(() => {
@@ -354,6 +372,7 @@ const MessagesPage = () => {
               messages={messages}
               isLoading={isLoading}
               selectedId={selectedMessageId}
+              selectedIds={rowSelection}
               onSelect={handleMessageSelect}
               onToggleSelect={(id, checked) => setRowSelection(prev => ({ ...prev, [id]: checked }))}
               onCreateAtom={handleCreateAtom}
@@ -380,18 +399,18 @@ const MessagesPage = () => {
       {/* Floating Bulk Actions Bar */}
       {Object.keys(rowSelection).length > 0 && (
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 animate-in fade-in slide-in-from-bottom-4 duration-200">
-          <div className="bg-foreground text-background rounded-full shadow-xl px-4 py-2 flex items-center gap-4">
-            <span className="text-sm font-medium whitespace-nowrap pl-1">
+          <div className="bg-background/90 backdrop-blur-md border border-border rounded-full shadow-xl px-4 py-2 flex items-center gap-4">
+            <span className="text-sm font-medium whitespace-nowrap pl-2 text-foreground">
               {Object.keys(rowSelection).length} {t('selection.selected', 'selected')}
             </span>
 
-            <div className="h-4 w-px bg-background/20" />
+            <div className="h-4 w-px bg-border" />
 
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 rounded-full text-background hover:bg-background/20 hover:text-background px-3"
+                className="h-8 rounded-full hover:bg-primary/10 hover:text-primary px-3 text-muted-foreground transition-colors"
                 onClick={() => {
                   toast.info(`Creating atom from ${Object.keys(rowSelection).length} messages`)
                   setRowSelection({})
@@ -404,7 +423,7 @@ const MessagesPage = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 rounded-full text-background hover:bg-red-500/20 hover:text-red-300 px-3"
+                className="h-8 rounded-full hover:bg-destructive/10 hover:text-destructive px-3 text-muted-foreground transition-colors"
                 onClick={() => {
                   toast.success(`${Object.keys(rowSelection).length} messages dismissed`)
                   setRowSelection({})
@@ -415,16 +434,16 @@ const MessagesPage = () => {
               </Button>
             </div>
 
-            <div className="h-4 w-px bg-background/20" />
+            <div className="h-4 w-px bg-border" />
 
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 rounded-full text-background/50 hover:bg-background/20 hover:text-background"
+              className="h-6 w-6 rounded-full text-muted-foreground hover:bg-muted"
               onClick={() => setRowSelection({})}
               title={t('actions.clearSelection', 'Clear selection')}
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>

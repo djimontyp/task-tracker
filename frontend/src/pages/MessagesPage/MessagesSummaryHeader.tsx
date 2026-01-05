@@ -59,29 +59,68 @@ export function MessagesSummaryHeader({ stats }: MessagesSummaryHeaderProps) {
 
   // Legend Content Component
   const LegendContent = (
-    <PopoverContent className="w-64 p-3" align="end">
-      <h4 className="font-semibold mb-2 text-xs uppercase tracking-wider text-muted-foreground">
-        {t('legend.title', 'Signal Quality')}
-      </h4>
-      <div className="space-y-2 text-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-1.5 h-4 bg-red-500 rounded-sm shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
-          <span className="font-medium">Critical Signal</span>
-          <span className="ml-auto text-xs text-muted-foreground">&gt;80</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-1.5 h-4 bg-yellow-500 rounded-sm shadow-[0_0_8px_rgba(234,179,8,0.4)]" />
-          <span className="font-medium">Medium Signal</span>
-          <span className="ml-auto text-xs text-muted-foreground">&gt;50</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-1.5 h-4 bg-green-500 rounded-sm shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
-          <span className="font-medium">Valid Signal</span>
-          <span className="ml-auto text-xs text-muted-foreground">Base</span>
-        </div>
-        <div className="flex items-center gap-3 opacity-60">
-          <div className="w-1.5 h-4 bg-muted-foreground/20 rounded-sm" />
-          <span>Noise / Low Info</span>
+    <PopoverContent className="w-80 p-0 overflow-hidden shadow-lg border-border/60" align="end">
+      <div className="bg-muted/30 px-4 py-3 border-b border-border/40">
+        <h4 className="font-semibold text-xs uppercase tracking-wider text-foreground">
+          {t('legend.title', 'Signal Quality & Scoring')}
+        </h4>
+        <p className="text-[10px] text-muted-foreground mt-0.5">
+          How AI analyzes message value
+        </p>
+      </div>
+      <div className="p-4 space-y-4">
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)] mt-1.5 shrink-0" />
+            <div className="flex-1 space-y-0.5">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-foreground">Critical Signal</span>
+                <span className="text-[10px] font-mono bg-red-500/10 text-red-600 px-1.5 rounded-sm">&gt;80</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-snug">
+                Highly important updates, blockers, or key decisions. Requires immediate attention.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.4)] mt-1.5 shrink-0" />
+            <div className="flex-1 space-y-0.5">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-foreground">Medium Signal</span>
+                <span className="text-[10px] font-mono bg-yellow-500/10 text-yellow-600 px-1.5 rounded-sm">&gt;50</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-snug">
+                Valuable context, progress updates, or relevant discussions.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)] mt-1.5 shrink-0" />
+            <div className="flex-1 space-y-0.5">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-foreground">Valid Signal</span>
+                <span className="text-[10px] font-mono bg-green-500/10 text-green-600 px-1.5 rounded-sm">Base</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-snug">
+                Meaningful communication contributing to the project knowledge.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 opacity-60">
+            <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 mt-1.5 shrink-0" />
+            <div className="flex-1 space-y-0.5">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-foreground">Noise</span>
+                <span className="text-[10px] font-mono bg-muted px-1.5 rounded-sm">&lt;10</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-snug">
+                Casual chatter, logistics, or low-context messages.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </PopoverContent>
