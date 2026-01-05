@@ -15,18 +15,23 @@ tags:
 
 ## Overview
 
-Pulse Radar has a clear 3-layer entity hierarchy:
+Pulse Radar implements a **Zettelkasten-inspired** knowledge management system, designed to automatically transform chaotic communication streams into structured, interlinked knowledge.
+
+> **Philosophy:** A single message is often "noise" or lacks context. Real value emerges from **connections**—groups of messages over time (a day, a week) or by topic. Processing messages individually is both costly and ineffective. We aggregate them into batches (min 10 messages or time-based) to extract meaningful **Atoms**.
+
+### The 3-Layer Hierarchy
 
 ```
 ┌─────────────────────────────────────────────────────┐
 │                      TOPICS                          │
-│        (верхній рівень: Mobile, Frontend, Backend)   │
+│        (Top Level: Context & Categories)             │
 │  ┌─────────────────────────────────────────────────┐│
 │  │                    ATOMS                        ││
-│  │    (знання: problems, decisions, insights)      ││
+│  │    (The Units: Problems, Decisions, Insights)   ││
+│  │    * Zettelkasten Notes / Wiki-links *          ││
 │  │  ┌─────────────────────────────────────────┐   ││
 │  │  │              MESSAGES                   │   ││
-│  │  │         (raw data, hidden layer)        │   ││
+│  │  │   (Raw Stream: Expensive, Low Context)  │   ││
 │  │  └─────────────────────────────────────────┘   ││
 │  └─────────────────────────────────────────────────┘│
 └─────────────────────────────────────────────────────┘
@@ -101,11 +106,15 @@ DRAFT → PENDING_REVIEW → APPROVED / REJECTED (archived)
 - Search across all atoms
 - Link atoms to each other (relationships)
 
-## Messages (Hidden Layer)
+## Messages (The Stream)
 
-**Purpose:** Raw data from communication channels. Not for daily use.
+**Purpose:** Raw data stream. Used for "Investigative Drill-down" when Atoms lack sufficient detail.
 
-**Source:** Telegram, Slack, API (future)
+**UX Pattern: "Investigator Mode"**
+*   **Split View:** List on the left (Context), Detail on the right (Content Deep Dive).
+*   **Infinite Scroll:** No pagination. Mimics a natural feed (Telegram/Twitter style).
+*   **Temporal Anchoring:** Sticky Date Headers provide "when" context as you scroll.
+*   **Visual Hierarchy:** Icons and colors distinguish Signal from Noise instantly.
 
 **Processing Pipeline:**
 ```
@@ -115,13 +124,12 @@ Message → ImportanceScorer → classification (signal/noise)
 ```
 
 **User Interaction:**
-- **End User:** Does NOT interact with messages
-- **Admin:** Debug access when extraction fails or needs tuning
+*   **End User:** Uses it to "fact check" Atoms or explore the raw stream for missed context.
+*   **Admin:** Debugs extraction logic.
 
 **Visibility:**
-- NOT in main sidebar
-- Access via Admin Panel or Settings → Debug
-- Like logs — you don't read them until something breaks
+*   **Primary Sidebar:** Yes (as "Messages" or "Stream").
+*   **Access:** Direct access allowed, but secondary to Atoms.
 
 ## UI Implications
 

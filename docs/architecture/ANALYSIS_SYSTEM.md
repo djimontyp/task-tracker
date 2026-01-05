@@ -39,7 +39,8 @@ stateDiagram-v2
     PENDING --> RUNNING: Start Processing
 
     RUNNING --> Prefilter: Remove duplicates
-    Prefilter --> Batch: Create batches
+    Prefilter --> Batch: Create batches (min 10 msgs)
+    note right of Batch: Contextual Grouping by Author/Topic
     Batch --> Embeddings: Generate if RAG
     Embeddings --> Context: Build RAG context
     Context --> LLM: Classify with AI
