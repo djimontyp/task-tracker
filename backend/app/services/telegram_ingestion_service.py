@@ -36,6 +36,7 @@ class TelegramIngestionService:
         chat_id: str,
         limit: int = 100,
         offset_id: int = 0,
+        offset_date: datetime | None = None,
     ) -> list[dict[str, Any]]:
         """
         Fetch historical messages from a Telegram chat using Telethon Client API.
@@ -49,11 +50,13 @@ class TelegramIngestionService:
             chat_id: Telegram chat ID (e.g., -1002988379206)
             limit: Number of messages to fetch
             offset_id: Message ID to start from (0 = latest)
+            offset_date: Only fetch messages newer than this date
 
         Returns:
             List of message objects
         """
-        logger.info(f"Attempting to fetch {limit} messages from chat {chat_id}")
+        date_filter = f" (after {offset_date})" if offset_date else ""
+        logger.info(f"Attempting to fetch {limit} messages from chat {chat_id}{date_filter}")
 
         try:
             # Get Telegram Client service
@@ -62,10 +65,11 @@ class TelegramIngestionService:
             # Connect to Telegram (will use existing session if available)
             await client_service.connect()
 
-            # Fetch messages
+            # Fetch messages with optional time filter
             messages = await client_service.fetch_group_history(
                 chat_id=int(chat_id),
                 limit=limit,
+                offset_date=offset_date,
             )
 
             logger.info(f"Successfully fetched {len(messages)} messages from chat {chat_id}")

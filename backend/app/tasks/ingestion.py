@@ -235,6 +235,7 @@ async def ingest_telegram_messages_task(
     job_id: int,
     chat_ids: list[str],
     limit: int = 1000,
+    offset_date_iso: str | None = None,
 ) -> str:
     """
     Background task for ingesting messages from Telegram chats.
@@ -243,7 +244,16 @@ async def ingest_telegram_messages_task(
         job_id: MessageIngestionJob ID for tracking
         chat_ids: List of Telegram chat IDs or usernames
         limit: Total messages to fetch per chat
+        offset_date_iso: ISO format datetime string for time-based filtering.
+            If provided, only fetches messages newer than this date.
     """
+    # Parse offset_date from ISO string if provided
+    offset_date: datetime | None = None
+    if offset_date_iso:
+        try:
+            offset_date = datetime.fromisoformat(offset_date_iso)
+        except ValueError:
+            logger.warning(f"Invalid offset_date_iso: {offset_date_iso}, ignoring")
     try:
         async with AsyncSessionLocal() as db:
             # Retrieve ingestion job or return error
@@ -287,11 +297,12 @@ async def ingest_telegram_messages_task(
                 messages_from_chat = 0
 
                 while messages_from_chat < limit:
-                    # Fetch messages in batches
+                    # Fetch messages in batches with optional time filter
                     messages = await telegram_ingestion_service.fetch_chat_history(
                         chat_id=chat_id,
                         limit=min(batch_size, limit - messages_from_chat),
                         offset_id=offset_id,
+                        offset_date=offset_date,
                     )
 
                     if not messages:
