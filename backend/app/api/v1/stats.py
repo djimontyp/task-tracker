@@ -56,7 +56,7 @@ def calculate_trend(current: int, previous: int) -> TrendData:
 )
 async def get_activity_data(
     db: DatabaseDep,
-    period: Literal["week", "month"] = Query("week", description="Period type: 'week' or 'month'"),
+    period: Literal["week", "month", "6months"] = Query("week", description="Period type: 'week', 'month', or '6months'"),
     month: int | None = Query(None, description="Month (0-11, for month period)"),
     year: int | None = Query(None, description="Year (for month period)"),
 ) -> ActivityDataResponse:
@@ -66,7 +66,10 @@ async def get_activity_data(
     Returns activity data points with timestamp, source, and count,
     grouped by hour and day for the specified period.
     """
-    if period == "month":
+    if period == "6months":
+        end_date = datetime.utcnow()
+        start_date = end_date - timedelta(days=180)
+    elif period == "month":
         target_month = month if month is not None else datetime.utcnow().month - 1
         target_year = year if year is not None else datetime.utcnow().year
 
@@ -75,7 +78,7 @@ async def get_activity_data(
             end_date = datetime(target_year + 1, 1, 1) - timedelta(seconds=1)
         else:
             end_date = datetime(target_year, target_month + 2, 1) - timedelta(seconds=1)
-    else:
+    else:  # week
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=7)
 
