@@ -34,17 +34,6 @@
         "https://mcp.linear.app/mcp"
       ]
     },
-    "task-master-ai": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "task-master-ai@latest"
-      ],
-      "env": {
-        "TASK_MASTER_TOOLS": "all"
-      }
-    },
     "storybook": {
       "command": "storybook-mcp-server",
       "args": [],
