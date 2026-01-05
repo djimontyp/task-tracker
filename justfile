@@ -16,6 +16,10 @@ alias dbtr := db-topics-reset
 alias dbac := db-analysis-clear
 alias dbas := db-analysis-seed
 alias dbar := db-analysis-reset
+alias dbsc := db-seed-config
+alias dbcd := db-clean-demo
+alias dbsd := db-seed-demo
+alias dbrd := db-reset-demo
 alias dbfs := db-full-seed
 alias dbfr := db-full-reset
 alias dbnr := db-nuclear-reset
@@ -301,6 +305,36 @@ db-analysis-reset RUNS="10" PROPOSALS="30":
     @echo "Resetting Analysis System with {{RUNS}} runs, {{PROPOSALS}} proposals..."
     cd backend && uv run python scripts/seed_analysis_system.py --clear --seed --runs {{RUNS}} --proposals {{PROPOSALS}}
 
+# Seed config data (Users, Source, Provider, Agent, Project, Topics)
+[group: 'Database']
+db-seed-config:
+    @echo "🔧 Seeding config data (critical for system operation)..."
+    cd backend && uv run python scripts/seed_config.py
+    @echo "✅ Config data seeded!"
+
+# Clean demo data (topics, atoms, messages) - preserving config
+[group: 'Database']
+db-clean-demo:
+    @echo "🗑️  Cleaning demo data..."
+    cd backend && uv run python scripts/db_clean_all.py
+    @echo "✅ Demo data cleaned!"
+
+# Seed demo data (anonymized Ukrainian messages + atoms)
+[group: 'Database']
+db-seed-demo:
+    @echo "🎭 Seeding demo data (75 messages, 25 atoms, 7 topics)..."
+    cd backend && uv run python scripts/seed_demo_uk.py
+    @echo "✅ Demo data seeded!"
+
+# Clean and reseed demo data (quick reset)
+[group: 'Database']
+db-reset-demo:
+    @echo "🔄 Resetting demo data..."
+    @just db-clean-demo
+    @just db-seed-config
+    @just db-seed-demo
+    @echo "✅ Demo data reset complete!"
+
 # Seed EVERYTHING: tasks + topics + analysis system
 [group: 'Database']
 db-full-seed:
@@ -310,18 +344,18 @@ db-full-seed:
     @just db-analysis-seed 10 30
     @echo "✅ Complete database populated!"
 
-# Clear and seed EVERYTHING (nuclear reset)
+# Clear and seed EVERYTHING (nuclear reset + config + demo)
 [group: 'Database']
 db-full-reset:
     @echo "🗑️  Nuclear database reset..."
     @just db-clear
     @just db-topics-clear
     @just db-analysis-clear
-    @echo "🌱 Reseeding everything..."
-    @just db-seed 50
-    @just db-topics-seed 5 10 20
-    @just db-analysis-seed 10 30
-    @echo "✅ Complete database reset finished!"
+    @echo "🔧 Seeding config..."
+    @just db-seed-config
+    @echo "🎭 Seeding demo data..."
+    @just db-seed-demo
+    @echo "✅ Complete database reset with demo data finished!"
 
 # Run tests
 [group: 'Testing']
