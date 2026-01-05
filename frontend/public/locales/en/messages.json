@@ -295,7 +295,13 @@
     },
     "toast": {
       "loadError": "Failed to load message details",
-      "reassignNotImplemented": "Reassign topic functionality will be implemented in a future task"
+      "reassignNotImplemented": "Reassign topic functionality will be implemented in a future task",
+      "approved": "Approved",
+      "autoNext": "Moving to next message"
+    },
+    "panels": {
+      "rawData": "Raw Data",
+      "analysis": "Analysis"
     }
   },
   "atomsTab": {
