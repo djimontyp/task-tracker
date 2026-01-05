@@ -128,7 +128,7 @@ export function DashboardPresenter({
           data={topics.data}
           isLoading={topics.isLoading}
           error={topics.error}
-          limit={5}
+          limit={3}
         />
       </div>
 

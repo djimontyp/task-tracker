@@ -83,7 +83,7 @@ const TopicItem = ({
 
 const TopTopicsSkeleton = () => (
   <div className="space-y-2">
-    {[1, 2, 3, 4, 5].map((i) => (
+    {[1, 2, 3].map((i) => (
       <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
         <Skeleton className="h-9 w-9 rounded-full shrink-0" />
         <div className="flex-1 space-y-2">
