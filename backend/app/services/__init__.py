@@ -5,6 +5,7 @@ from .agent_registry import AgentRegistry
 from .assignment_crud import AssignmentCRUD
 from .atom_crud import AtomCRUD
 from .credential_encryption import CredentialEncryption
+from .data_wipe_service import DataWipeService
 from .embedding_service import EmbeddingService
 from .message_crud import MessageCRUD
 from .message_inspect_service import MessageInspectService
@@ -26,6 +27,7 @@ __all__ = [
     "AssignmentCRUD",
     "AtomCRUD",
     "CredentialEncryption",
+    "DataWipeService",
     "EmbeddingService",
     "MessageCRUD",
     "MessageInspectService",

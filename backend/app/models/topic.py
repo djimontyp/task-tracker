@@ -244,6 +244,8 @@ class TopicPublic(SQLModel):
     color: str | None
     created_at: str
     updated_at: str
+    atoms_count: int = Field(default=0, description="Number of atoms linked to this topic")
+    message_count: int = Field(default=0, description="Number of messages linked to this topic")
 
 
 class TopicCreate(SQLModel):

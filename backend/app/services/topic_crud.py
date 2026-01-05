@@ -41,7 +41,7 @@ class TopicCRUD(BaseCRUD[Topic]):
         super().__init__(Topic, session)
 
     async def get(self, topic_id: uuid.UUID) -> TopicPublic | None:  # type: ignore[override]
-        """Get topic by ID.
+        """Get topic by ID with counts.
 
         Args:
             topic_id: Topic UUID to retrieve
@@ -49,21 +49,37 @@ class TopicCRUD(BaseCRUD[Topic]):
         Returns:
             Topic or None if not found
         """
-        topic = await super().get(topic_id)
+        # Query with aggregations for atoms_count and message_count
+        query = select(  # type: ignore[call-overload]
+            Topic.id,
+            Topic.name,
+            Topic.description,
+            Topic.icon,
+            Topic.color,
+            Topic.created_at,
+            Topic.updated_at,
+            sa_func.count(sa_func.distinct(TopicAtom.atom_id)).label("atoms_count"),
+            sa_func.count(sa_func.distinct(Message.id)).label("message_count"),
+        ).where(Topic.id == topic_id).outerjoin(TopicAtom, TopicAtom.topic_id == Topic.id).outerjoin(Message, Message.topic_id == Topic.id).group_by(Topic.id, Topic.name, Topic.description, Topic.icon, Topic.color, Topic.created_at, Topic.updated_at)
 
-        if not topic:
+        result = await self.session.execute(query)
+        row = result.one_or_none()
+
+        if not row:
             return None
 
-        color = convert_to_hex_if_needed(topic.color) if topic.color else None
+        color = convert_to_hex_if_needed(row.color) if row.color else None
 
         return TopicPublic(
-            id=topic.id,
-            name=topic.name,
-            description=topic.description,
-            icon=topic.icon,
+            id=row.id,
+            name=row.name,
+            description=row.description,
+            icon=row.icon,
             color=color,
-            created_at=topic.created_at.isoformat() if topic.created_at else "",
-            updated_at=topic.updated_at.isoformat() if topic.updated_at else "",
+            created_at=row.created_at.isoformat() if row.created_at else "",
+            updated_at=row.updated_at.isoformat() if row.updated_at else "",
+            atoms_count=row.atoms_count,
+            message_count=row.message_count,
         )
 
     async def list(
@@ -89,45 +105,69 @@ class TopicCRUD(BaseCRUD[Topic]):
         Returns:
             Tuple of (list of topics, total count)
         """
-        base_query = select(Topic)
-
+        # Count query for total (without joins for performance)
+        count_base = select(Topic)
         if search:
             search_filter = search.strip()
-            base_query = base_query.where(
+            count_base = count_base.where(
                 (Topic.name.ilike(f"%{search_filter}%")) | (Topic.description.ilike(f"%{search_filter}%"))  # type: ignore[attr-defined]
             )
-
-        count_query = select(func.count()).select_from(base_query.subquery())
+        count_query = select(func.count()).select_from(count_base.subquery())
         count_result = await self.session.execute(count_query)
         total = count_result.scalar_one()
 
-        if sort_by == "name_asc":
-            base_query = base_query.order_by(Topic.name)
-        elif sort_by == "name_desc":
-            base_query = base_query.order_by(desc(Topic.name))
-        elif sort_by == "created_asc":
-            base_query = base_query.order_by(Topic.created_at)  # type: ignore[arg-type]
-        elif sort_by == "updated_desc":
-            base_query = base_query.order_by(desc(Topic.updated_at))  # type: ignore[arg-type]
-        else:
-            base_query = base_query.order_by(desc(Topic.created_at))  # type: ignore[arg-type]
+        # Main query with aggregations for atoms_count and message_count
+        query = select(  # type: ignore[call-overload]
+            Topic.id,
+            Topic.name,
+            Topic.description,
+            Topic.icon,
+            Topic.color,
+            Topic.created_at,
+            Topic.updated_at,
+            sa_func.count(sa_func.distinct(TopicAtom.atom_id)).label("atoms_count"),
+            sa_func.count(sa_func.distinct(Message.id)).label("message_count"),
+        ).outerjoin(TopicAtom, TopicAtom.topic_id == Topic.id).outerjoin(Message, Message.topic_id == Topic.id)
 
-        query = base_query.offset(skip).limit(limit)
+        if search:
+            search_filter = search.strip()
+            query = query.where(
+                (Topic.name.ilike(f"%{search_filter}%")) | (Topic.description.ilike(f"%{search_filter}%"))  # type: ignore[attr-defined]
+            )
+
+        # Group by all topic columns
+        query = query.group_by(Topic.id, Topic.name, Topic.description, Topic.icon, Topic.color, Topic.created_at, Topic.updated_at)
+
+        # Apply sorting
+        if sort_by == "name_asc":
+            query = query.order_by(Topic.name)
+        elif sort_by == "name_desc":
+            query = query.order_by(desc(Topic.name))
+        elif sort_by == "created_asc":
+            query = query.order_by(Topic.created_at)  # type: ignore[arg-type]
+        elif sort_by == "updated_desc":
+            query = query.order_by(desc(Topic.updated_at))  # type: ignore[arg-type]
+        else:
+            query = query.order_by(desc(Topic.created_at))  # type: ignore[arg-type]
+
+        query = query.offset(skip).limit(limit)
         result = await self.session.execute(query)
-        topics = result.scalars().all()
+        rows = result.all()
 
         public_topics = []
-        for topic in topics:
-            color = convert_to_hex_if_needed(topic.color) if topic.color else None
+        for row in rows:
+            color = convert_to_hex_if_needed(row.color) if row.color else None
             public_topics.append(
                 TopicPublic(
-                    id=topic.id,
-                    name=topic.name,
-                    description=topic.description,
-                    icon=topic.icon,
+                    id=row.id,
+                    name=row.name,
+                    description=row.description,
+                    icon=row.icon,
                     color=color,
-                    created_at=topic.created_at.isoformat() if topic.created_at else "",
-                    updated_at=topic.updated_at.isoformat() if topic.updated_at else "",
+                    created_at=row.created_at.isoformat() if row.created_at else "",
+                    updated_at=row.updated_at.isoformat() if row.updated_at else "",
+                    atoms_count=row.atoms_count,
+                    message_count=row.message_count,
                 )
             )
 
@@ -159,6 +199,7 @@ class TopicCRUD(BaseCRUD[Topic]):
 
         color = convert_to_hex_if_needed(topic.color) if topic.color else None
 
+        # New topic has 0 atoms and messages
         return TopicPublic(
             id=topic.id,
             name=topic.name,
@@ -167,6 +208,8 @@ class TopicCRUD(BaseCRUD[Topic]):
             color=color,
             created_at=topic.created_at.isoformat() if topic.created_at else "",
             updated_at=topic.updated_at.isoformat() if topic.updated_at else "",
+            atoms_count=0,
+            message_count=0,
         )
 
     async def update(self, topic_id: uuid.UUID, topic_data: TopicUpdate) -> TopicPublic | None:  # type: ignore[override]
@@ -188,19 +231,10 @@ class TopicCRUD(BaseCRUD[Topic]):
         if "color" in update_data and update_data["color"]:
             update_data["color"] = convert_to_hex_if_needed(update_data["color"])
 
-        topic = await super().update(topic, update_data)
+        await super().update(topic, update_data)
 
-        color = convert_to_hex_if_needed(topic.color) if topic.color else None
-
-        return TopicPublic(
-            id=topic.id,
-            name=topic.name,
-            description=topic.description,
-            icon=topic.icon,
-            color=color,
-            created_at=topic.created_at.isoformat() if topic.created_at else "",
-            updated_at=topic.updated_at.isoformat() if topic.updated_at else "",
-        )
+        # Fetch updated topic with counts using the get() method
+        return await self.get(topic_id)
 
     async def get_recent_topics(
         self,

@@ -46,6 +46,14 @@ from .automation_rule import (
 )
 from .base import IDMixin, TimestampMixin
 from .classification_feedback import ClassificationFeedback, ClassificationFeedbackPublic
+from .confirmation_token import (
+    ConfirmationToken,
+    DataWipeConfirmation,
+    DataWipeExecuteRequest,
+    DataWipeRequest,
+    DataWipeResult,
+    DataWipeScope,
+)
 from .enums import (
     AnalysisRunStatus,
     AnalysisStatus,
@@ -264,4 +272,11 @@ __all__ = [
     "TopicVersionPublic",
     "AtomVersion",
     "AtomVersionPublic",
+    # Confirmation Token (Admin)
+    "ConfirmationToken",
+    "DataWipeScope",
+    "DataWipeRequest",
+    "DataWipeConfirmation",
+    "DataWipeExecuteRequest",
+    "DataWipeResult",
 ]
