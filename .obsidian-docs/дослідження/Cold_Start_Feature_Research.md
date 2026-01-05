@@ -35,10 +35,12 @@ status: completed
 | Компонент | Статус | Файл |
 |-----------|--------|------|
 | `POST /api/v1/ingestion/telegram` | ✅ Готовий | `backend/app/api/v1/ingestion.py` |
+| `GET /api/v1/ingestion/telegram/estimate` | ✅ Готовий | `backend/app/api/v1/ingestion.py` (task-tracker-et8q) |
 | `MessageIngestionJob` model | ✅ Готовий | `backend/app/models/message_ingestion.py` |
+| `TelegramSourceAdapter` | ✅ Готовий | `backend/app/services/source_adapters/telegram.py` |
 | `TelegramIngestionService` | ✅ Готовий | `backend/app/services/telegram_ingestion_service.py` |
 | WebSocket events | ✅ Готовий | `ingestion.started/progress/completed` |
-| Time-based depth | ❌ Потрібно | Додати `time_since` filter |
+| Time-based depth | ✅ Готовий | `depth` parameter: skip/24h/7d/30d/all (task-tracker-pwro) |
 | Data Wipe endpoint | ❌ Потрібно | З confirmation token |
 
 ### Поточний стан Frontend
@@ -47,7 +49,11 @@ status: completed
 |-----------|--------|----------|
 | Admin Mode toggle | ✅ Готовий | `useAdminMode()` hook, Cmd+Shift+A |
 | SetupWizard | ❌ Потрібно | Epic [[task-tracker-hk8]] |
-| History Import UI | ❌ Потрібно | Wizard Step 1 |
+| History Import UI | ✅ Готовий | Agent aadb70d: types, hooks, components, 26 tests |
+| `useMessageEstimate` hook | ✅ Готовий | `frontend/src/features/onboarding/hooks/` |
+| `useHistoryImport` hook | ✅ Готовий | WebSocket integration |
+| `HistoryImportSection` | ✅ Готовий | RadioGroup з depth + counts |
+| `ImportProgress` | ✅ Готовий | Progress bar + 3 metrics |
 | Data Wipe UI | ❌ Потрібно | Settings (admin only) |
 
 ### Admin Mode
@@ -216,9 +222,11 @@ Success → return to Settings
 - **Skip** — пропустити імпорт (може немає історії або хочеться тільки нові)
 - При "All" — попередження про rate limits та довгу обробку
 
-### Source Adapter Abstraction (NEW)
+### Source Adapter Abstraction (✅ Реалізовано)
 
 **Вимога:** Фетчити реальну кількість повідомлень перед імпортом.
+
+**Статус:** ✅ Існує в `backend/app/services/source_adapters/`
 
 ```python
 class SourceAdapter(ABC):
@@ -237,6 +245,7 @@ class MessageCountResult:
     count: int | None      # None якщо не вдалось
     is_estimate: bool      # True якщо приблизна оцінка
     error: str | None      # Повідомлення про помилку
+    source_id: str         # Chat ID для відповідності
 ```
 
 **Error handling:**
@@ -284,23 +293,26 @@ class MessageCountResult:
 
 ### Backend (змінити)
 
-| Файл | Зміни |
-|------|-------|
-| `backend/app/api/v1/ingestion.py` | Add time-based depth + estimate endpoint |
-| `backend/app/api/v1/router.py` | Include admin router |
+| Файл | Зміни | Статус |
+|------|-------|--------|
+| `backend/app/api/v1/ingestion.py` | Add time-based depth + estimate endpoint | ✅ Завершено (et8q, pwro) |
+| `backend/app/api/v1/router.py` | Include admin router | ❌ Потрібно |
+| `backend/tests/api/v1/test_ingestion.py` | Tests for estimate + depth | ✅ Завершено (45 tests) |
 
 ### Frontend (створити)
 
 **Onboarding:**
-| Файл | Призначення |
-|------|-------------|
-| `frontend/src/features/onboarding/components/HistoryImportSection.tsx` | Import UI with counts |
-| `frontend/src/features/onboarding/components/ImportProgress.tsx` | Progress tracking |
-| `frontend/src/features/onboarding/components/MessageCountDisplay.tsx` | Show estimate/error |
-| `frontend/src/features/onboarding/hooks/useHistoryImport.ts` | TanStack Query + WS |
-| `frontend/src/features/onboarding/hooks/useMessageEstimate.ts` | Fetch message counts |
-| `frontend/src/features/onboarding/__tests__/HistoryImportSection.test.tsx` | Component tests |
-| `frontend/src/features/onboarding/__tests__/useMessageEstimate.test.ts` | Hook tests |
+| Файл | Призначення | Статус |
+|------|-------------|--------|
+| `frontend/src/features/onboarding/components/HistoryImportSection.tsx` | Import UI with counts | ✅ Створено (aadb70d) |
+| `frontend/src/features/onboarding/components/ImportProgress.tsx` | Progress tracking | ✅ Створено (aadb70d) |
+| `frontend/src/features/onboarding/components/MessageCountDisplay.tsx` | Show estimate/error | ✅ Створено (aadb70d) |
+| `frontend/src/features/onboarding/hooks/useHistoryImport.ts` | TanStack Query + WS | ✅ Створено (aadb70d) |
+| `frontend/src/features/onboarding/hooks/useMessageEstimate.ts` | Fetch message counts | ✅ Створено (aadb70d) |
+| `frontend/src/features/onboarding/__tests__/HistoryImportSection.test.tsx` | Component tests | ✅ Створено (10 tests) |
+| `frontend/src/features/onboarding/__tests__/ImportProgress.test.tsx` | Component tests | ✅ Створено (11 tests) |
+| `frontend/src/features/onboarding/__tests__/useMessageEstimate.test.ts` | Hook tests | ✅ Створено (5 tests) |
+| `frontend/src/features/onboarding/types/index.ts` | TypeScript types | ✅ Створено (aadb70d) |
 
 **Data Wipe:**
 | Файл | Призначення |
@@ -324,11 +336,27 @@ class MessageCountResult:
 
 ## Висновки
 
-1. **Backend 90% готовий** — потрібно тільки time-based depth та Data Wipe endpoint
-2. **Admin Mode існує** — використати `useAdminMode()` hook
-3. **Import = Wizard Step 1** — після підключення Telegram
-4. **3-step confirmation** — стандарт для destructive operations
-5. **Keep sources** — wipe видаляє дані, не налаштування
+1. **Backend готовий** — ✅ time-based depth (et8q, pwro), estimate endpoint, 45 tests. Залишилось: Data Wipe endpoint
+2. **Frontend History Import готовий** — ✅ компоненти, хуки, types, 26 tests (aadb70d)
+3. **Admin Mode існує** — використати `useAdminMode()` hook
+4. **Import = Wizard Step 1** — після підключення Telegram (інтеграція з SetupWizard)
+5. **3-step confirmation** — стандарт для destructive operations
+6. **Keep sources** — wipe видаляє дані, не налаштування
+
+## Залишилось
+
+**Backend:**
+- Data Wipe endpoint з confirmation token (admin only)
+- Admin router integration
+
+**Frontend:**
+- Data Wipe UI (Settings → Telegram → Danger Zone)
+- SetupWizard integration (epic task-tracker-hk8)
+- i18n translations для History Import UI
+
+**Testing:**
+- E2E tests для повного import flow з Playwright
+- Integration tests з real WebSocket events
 
 ## Пов'язане
 
