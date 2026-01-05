@@ -5,7 +5,7 @@
  * No data fetching, no side effects, easy to test in Storybook.
  */
 
-import { OnboardingWizard, SetupWizard } from '@/features/onboarding'
+import { OnboardingWizard, SetupBanner } from '@/features/onboarding'
 import { ProjectForm } from '@/features/projects'
 import { PageWrapper } from '@/shared/primitives'
 
@@ -47,16 +47,18 @@ export function DashboardPresenter({
   step2Status,
   step3Status,
   step4Status,
-  isWizardCompleted,
+  isWizardCompleted: _isWizardCompleted,
   projectFormOpen,
   onProjectFormClose,
   onProjectSubmit,
   projectFormLoading,
   onCreateProject,
+  connectionStatus,
 }: DashboardPresenterProps) {
-  // Note: _onNavigateToMessages, onNavigateToProjects reserved for future use
+  // Note: Reserved for future use
   void _onNavigateToMessages;
   void onNavigateToProjects;
+  void _isWizardCompleted;
 
   // Calculate total active signals
   const activeSignalsCount = (metrics.data?.critical?.count ?? 0) +
@@ -68,16 +70,16 @@ export function DashboardPresenter({
     <PageWrapper variant="fullWidth">
       <OnboardingWizard open={showOnboarding} onClose={onCloseOnboarding} />
 
-      {/* Cold Start Empty State - SetupWizard */}
+      {/* Cold Start Empty State - SetupBanner */}
       {hasNoData && !isAnyLoading && (
-        <SetupWizard
+        <SetupBanner
           step2Status={step2Status}
           step3Status={step3Status}
           step4Status={step4Status}
           onConnectSource={onNavigateToSettings}
           onCreateProject={onCreateProject}
           onActivateAgent={onNavigateToAgents}
-          collapsed={isWizardCompleted}
+          onShowHelp={onCloseOnboarding} // Will open OnboardingWizard
         />
       )}
 
@@ -98,6 +100,7 @@ export function DashboardPresenter({
         activityData={activityData}
         activityLoading={activityLoading}
         activeSignalsCount={activeSignalsCount}
+        connectionStatus={connectionStatus}
       />
 
       {/* Row 1: Metrics (3 cards) */}

@@ -3,6 +3,7 @@ import { ZoomableCard } from '@/shared/ui/zoomable-card'
 import { TrendChart } from './TrendChart'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { useTranslation } from 'react-i18next'
+import { cn } from '@/shared/lib/utils'
 import type { MessageTrendPoint, ActivityDay } from '../types'
 
 interface CommandCenterProps {
@@ -13,6 +14,7 @@ interface CommandCenterProps {
     activityData?: ActivityDay[]
     activityLoading?: boolean
     activeSignalsCount?: number
+    connectionStatus?: 'healthy' | 'warning' | 'error'
 }
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({
@@ -23,8 +25,16 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
     activityData,
     activityLoading,
     activeSignalsCount = 0,
+    connectionStatus = 'healthy',
 }) => {
     const { t } = useTranslation('dashboard')
+
+    // Connection status indicator logic
+    const isHealthy = connectionStatus === 'healthy'
+    const dotClass = isHealthy ? 'bg-status-connected' : 'bg-status-error'
+    const statusText = isHealthy
+        ? t('activityHeatmap.compactTitle')
+        : t('activityHeatmap.compactTitleError')
     return (
         <Card className="w-full min-h-[160px] flex flex-col md:flex-row overflow-hidden relative mb-8 animate-fade-in-up">
             {/* Left Section: Greeting & Status */}
@@ -78,8 +88,8 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                         preview={
                             <>
                                 <div className="flex items-center gap-2 mb-1 px-1">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-status-connected animate-pulse" />
-                                    <span className="text-[10px] font-medium text-muted-foreground tracking-wider">{t('activityHeatmap.compactTitle')}</span>
+                                    <div className={cn('w-1.5 h-1.5 rounded-full animate-pulse', dotClass)} />
+                                    <span className="text-[10px] font-medium text-muted-foreground tracking-wider">{statusText}</span>
                                 </div>
                                 <ActivityHeatmap data={activityData} isLoading={activityLoading} embedded compact />
                             </>

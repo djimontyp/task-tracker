@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
-import { format, parseISO } from 'date-fns'
+import { format, parseISO, eachDayOfInterval, subDays } from 'date-fns'
 import type { Locale } from 'date-fns'
 import { enUS } from 'date-fns/locale'
 import { apiClient } from '@/shared/lib/api/client'
@@ -139,8 +139,8 @@ export function useDashboardTopics(limit = 5) {
         name: topic.name,
         icon: topic.icon || 'Folder',
         color: topic.color || '#6B7280',
-        atomCount: 0, // TODO: Add atoms_count to topics endpoint
-        messageCount: 0, // TODO: Add message_count to topics endpoint
+        atomCount: (topic.atoms_count as number) || 0,
+        messageCount: (topic.message_count as number) || 0,
         lastActivityAt: topic.updated_at as string,
       }))
     },
@@ -185,14 +185,31 @@ export function useMessageTrends(days: number = 30, locale: Locale = enUS) {
 
 /**
  * Transform activity API response to ActivityDay format
+ * Backend returns individual messages with timestamps, we aggregate by date
+ * and fill in missing days with zero counts for complete 6-month grid
  */
 function transformActivityData(
-  data: Array<{ date: string; count: number }>
+  data: Array<{ timestamp: string; source: string; count: number }>
 ): ActivityDay[] {
-  return data.map((item) => {
-    const count = item.count
-    let level: 0 | 1 | 2 | 3 | 4 = 0
+  // Group messages by date
+  const grouped = data.reduce((acc, item) => {
+    // Extract date part from timestamp (YYYY-MM-DD)
+    const date = item.timestamp.split('T')[0]
+    acc[date] = (acc[date] || 0) + 1
+    return acc
+  }, {} as Record<string, number>)
 
+  // Generate all days for the last 6 months
+  const today = new Date()
+  const startDate = subDays(today, 180)
+  const allDays = eachDayOfInterval({ start: startDate, end: today })
+
+  // Map each day to ActivityDay format
+  return allDays.map((date) => {
+    const dateStr = format(date, 'yyyy-MM-dd')
+    const count = grouped[dateStr] || 0
+
+    let level: 0 | 1 | 2 | 3 | 4 = 0
     if (count >= 50) {
       level = 4
     } else if (count >= 20) {
@@ -204,7 +221,7 @@ function transformActivityData(
     }
 
     return {
-      date: parseISO(item.date),
+      date,
       count,
       level,
     }
@@ -213,9 +230,9 @@ function transformActivityData(
 
 /**
  * Fetch activity heatmap data
- * API: GET /api/v1/activity?period=week
+ * API: GET /api/v1/activity?period={week|month|6months}
  */
-export function useActivityHeatmap(period: 'week' | 'month' = 'week') {
+export function useActivityHeatmap(period: 'week' | 'month' | '6months' = '6months') {
   return useQuery({
     queryKey: [...dashboardKeys.all, 'activity', period],
     queryFn: async (): Promise<ActivityDay[]> => {

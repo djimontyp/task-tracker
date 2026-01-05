@@ -21,6 +21,7 @@ import { projectService } from '@/features/projects/api/projectService'
 import { agentService } from '@/features/agents/api/agentService'
 import { atomService } from '@/features/atoms/api/atomService'
 import { useTelegramStore } from '@/pages/SettingsPage/plugins/TelegramSource/useTelegramStore'
+import { useServiceStatus } from '@/shared/hooks'
 
 // Mock data for focusAtoms until API endpoint is ready
 // TODO: Replace with useQuery for GET /api/v1/atoms?status=pending_review&limit=3
@@ -89,7 +90,7 @@ function useHeroSubtitle(
     }
 
     return t('subtitle.stable', 'Проєкт рухається стабільно 🚀')
-  }, [t, hasNoData, isLoading, criticalCount, pendingCount])
+  }, [t, hasNoData, isLoading, criticalCount, pendingCount, connectionStatus])
 }
 
 /**
@@ -110,6 +111,9 @@ const DashboardPage = () => {
 
   // Determine date locale
   const dateLocale = i18n.language === 'uk' ? uk : enUS
+
+  // Service status for Pulse indicator
+  const { indicator: serviceConnectionStatus } = useServiceStatus()
 
   // Wizard step data queries
   const { connectionStatus } = useTelegramStore()
@@ -146,7 +150,7 @@ const DashboardPage = () => {
 
   // Chart data fetching
   const { data: trendData, isLoading: trendLoading } = useMessageTrends(30, dateLocale)
-  const { data: activityData, isLoading: activityLoading } = useActivityHeatmap('week')
+  const { data: activityData, isLoading: activityLoading } = useActivityHeatmap() // Uses default '6months'
 
   // Computed greeting and subtitle
   const greeting = useGreeting()
@@ -278,6 +282,7 @@ const DashboardPage = () => {
       onProjectSubmit={handleProjectSubmit}
       projectFormLoading={createProjectMutation.isPending}
       onCreateProject={handleOpenProjectForm}
+      connectionStatus={serviceConnectionStatus}
     />
   )
 }

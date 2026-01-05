@@ -7,6 +7,7 @@
 
 import type { StepStatus } from '@/features/onboarding/types/wizard'
 import type { CreateProjectConfig } from '@/features/projects/types'
+import type { IndicatorStatus } from '@/shared/hooks'
 
 // Atom types matching backend AtomType enum (backend/app/models/atom.py)
 export type AtomType =
@@ -239,4 +240,7 @@ export interface DashboardPresenterProps {
   onProjectSubmit: (data: CreateProjectConfig) => Promise<void>
   projectFormLoading: boolean
   onCreateProject: () => void
+
+  // Connection status for Pulse indicator
+  connectionStatus: IndicatorStatus
 }

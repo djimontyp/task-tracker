@@ -219,7 +219,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
                                                             {format(day.date, 'd MMM', { locale: dateLocale })}
                                                         </p>
                                                         <p className="text-[10px] text-muted-foreground">
-                                                            <span className="font-bold text-foreground">{day.count}</span> {t('heatmap.tooltip.tasks', 'tasks')}
+                                                            <span className="font-bold text-foreground">{day.count}</span> {t('heatmap.tooltip.messages', 'messages')}
                                                         </p>
                                                     </TooltipContent>
                                                 </Tooltip>
