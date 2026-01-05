@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1 import (
+    admin,
     agents,
     assignments,
     atoms,
@@ -59,3 +60,4 @@ api_router.include_router(scheduled_extraction_tasks.router)
 api_router.include_router(automation.router)
 api_router.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
 api_router.include_router(prompts.router)
+api_router.include_router(admin.router)
