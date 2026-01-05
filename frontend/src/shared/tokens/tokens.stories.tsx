@@ -9,11 +9,11 @@ import {
   Lightbulb,
   HelpCircle,
   Target,
-  Layers,
   FileText,
   TrendingUp,
   TrendingDown,
   Minus,
+  Sparkles,
 } from 'lucide-react';
 import { Badge } from '@/shared/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
@@ -378,13 +378,13 @@ export const AtomTypeColors: Story = {
           <p className="text-xs text-muted-foreground">Key observations</p>
         </div>
 
-        {/* Pattern */}
+        {/* Idea */}
         <div className="space-y-2">
-          <Badge variant="outline" className={badges.atom.pattern}>
-            <Layers className="h-3.5 w-3.5" />
-            Pattern
+          <Badge variant="outline" className={badges.atom.idea}>
+            <Sparkles className="h-3.5 w-3.5" />
+            Idea
           </Badge>
-          <p className="text-xs text-muted-foreground">Recurring themes</p>
+          <p className="text-xs text-muted-foreground">Creative concepts</p>
         </div>
 
         {/* Requirement */}

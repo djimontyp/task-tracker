@@ -7,27 +7,36 @@
     /* ═══════════════════════════════════════════════════════════════
        BASE COLORS (Source of Truth) - Light Mode
        ═══════════════════════════════════════════════════════════════ */
-    --color-green: 130 65% 45%;       /* Shifted from 142° for teal separation */
+    --color-green: 130 65% 45%;
+    /* Shifted from 142° for teal separation */
     --color-red: 0 78% 54%;
-    --color-blue: 217 85% 42%;      /* WCAG AA compliant (was 51%) */
+    --color-blue: 217 85% 42%;
+    /* WCAG AA compliant (was 51%) */
     --color-amber: 38 92% 50%;
-    --color-purple: 280 65% 48%;    /* WCAG AA compliant (was 58%) */
+    --color-purple: 280 65% 48%;
+    /* WCAG AA compliant (was 58%) */
     --color-cyan: 197 71% 45%;
     --color-violet: 260 65% 55%;
-    --color-indigo: 230 65% 50%;      /* Between blue (217°) and violet (260°) */
+    --color-indigo: 230 65% 50%;
+    /* Between blue (217°) and violet (260°) */
 
     /* ═══════════════════════════════════════════════════════════════
        LIGHT THEME - Elevation & Structure
        ═══════════════════════════════════════════════════════════════ */
-    --background: 220 14% 96%;      /* Soft cool gray (was pure #FFF) */
+    --background: 220 14% 96%;
+    /* Soft cool gray (was pure #FFF) */
     --foreground: 20 14.3% 4.1%;
-    --card: 0 0% 100%;              /* Pure white for elevation */
+    --card: 0 0% 100%;
+    /* Pure white for elevation */
     --card-foreground: 20 14.3% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 14.3% 4.1%;
-    --primary: 172 66% 28%;           /* Teal - darker for WCAG AA (was 40%) */
-    --primary-foreground: 0 0% 100%;  /* White text - now 4.5:1 contrast */
-    --primary-bright: 172 66% 36%;    /* Active nav/tabs - balanced visibility */
+    --primary: 172 66% 28%;
+    /* Teal - darker for WCAG AA (was 40%) */
+    --primary-foreground: 0 0% 100%;
+    /* White text - now 4.5:1 contrast */
+    --primary-bright: 172 66% 36%;
+    /* Active nav/tabs - balanced visibility */
     --secondary: 60 4.8% 95.9%;
     --secondary-foreground: 24 9.8% 10%;
     --muted: 60 4.8% 95.9%;
@@ -40,24 +49,31 @@
     --accent-glow: 38 51% 50% / 0.45;
     --destructive: 0 84.2% 40.1%;
     --destructive-foreground: 60 9.1% 97.8%;
-    --border: 220 13% 82%;          /* More visible (was 90%) */
-    --input: 220 13% 82%;           /* Match border */
-    --ring: 172 66% 35%;              /* Teal focus ring - darker for visibility */
+    --border: 220 13% 82%;
+    /* More visible (was 90%) */
+    --input: 220 13% 82%;
+    /* Match border */
+    --ring: 172 66% 35%;
+    /* Teal focus ring - darker for visibility */
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --sidebar-background: 220 14% 94%;  /* Differentiated (was 98%) */
+    --sidebar-background: 220 14% 94%;
+    /* Differentiated (was 98%) */
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 172 66% 28%;      /* Teal - WCAG AA */
+    --sidebar-primary: 172 66% 28%;
+    /* Teal - WCAG AA */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 82%;      /* Match border */
+    --sidebar-border: 220 13% 82%;
+    /* Match border */
     --sidebar-ring: 172 66% 35%;
-    --sidebar-active-indicator: 172 66% 35%;  /* Teal bar for active nav item */
+    --sidebar-active-indicator: 172 66% 35%;
+    /* Teal bar for active nav item */
 
     /* ═══════════════════════════════════════════════════════════════
        SEMANTIC COLORS (Aliases → Base)
@@ -68,7 +84,9 @@
     --atom-decision: var(--color-blue);
     --atom-question: var(--color-amber);
     --atom-insight: var(--color-purple);
-    --atom-pattern: var(--color-indigo);  /* Was cyan, now indigo for teal separation */
+    --atom-idea: var(--color-cyan);
+    --atom-blocker: var(--color-red);
+    --atom-risk: var(--color-indigo);
     --atom-requirement: var(--color-violet);
     /* Status indicator colors */
     --status-connected: var(--color-green);
@@ -86,18 +104,24 @@
        Based on Material Design 3 contrast principles
        All values tested against white card background (#FFFFFF)
        ═══════════════════════════════════════════════════════════════ */
-    --card-title: var(--foreground);         /* 19.4:1 - Primary heading */
-    --card-body: 220 12% 26%;                /* 10.5:1 - Body text, APCA Lc~88 */
-    --card-label: 220 8% 38%;                /* 6.5:1  - Field labels (uppercase) */
-    --card-value: 220 14% 20%;               /* 13.4:1 - Data values (emphasis) */
-    --card-muted: 220 6% 42%;                /* 5.5:1  - Secondary info, min 14px */
+    --card-title: var(--foreground);
+    /* 19.4:1 - Primary heading */
+    --card-body: 220 12% 26%;
+    /* 10.5:1 - Body text, APCA Lc~88 */
+    --card-label: 220 8% 38%;
+    /* 6.5:1  - Field labels (uppercase) */
+    --card-value: 220 14% 20%;
+    /* 13.4:1 - Data values (emphasis) */
+    --card-muted: 220 6% 42%;
+    /* 5.5:1  - Secondary info, min 14px */
 
     /* ═══════════════════════════════════════════════════════════════
        SHADOWS & EFFECTS
        ═══════════════════════════════════════════════════════════════ */
     --shadow-color: 222.2 47.4% 11.2%;
     --shadow-card: 0 2px 8px hsl(var(--shadow-color) / 0.08),
-                   0 1px 3px hsl(var(--shadow-color) / 0.05);  /* Stronger */
+      0 1px 3px hsl(var(--shadow-color) / 0.05);
+    /* Stronger */
 
     /* ═══════════════════════════════════════════════════════════════
        CHART & VISUALIZATION
@@ -126,14 +150,16 @@
     /* ═══════════════════════════════════════════════════════════════
        BASE COLORS (Source of Truth) - Dark Mode (brighter for dark bg)
        ═══════════════════════════════════════════════════════════════ */
-    --color-green: 130 65% 59%;       /* Shifted from 142° to match light mode */
+    --color-green: 130 65% 59%;
+    /* Shifted from 142° to match light mode */
     --color-red: 0 78% 65%;
     --color-blue: 217 85% 62%;
     --color-amber: 38 92% 60%;
     --color-purple: 280 65% 68%;
     --color-cyan: 197 71% 56%;
     --color-violet: 260 65% 66%;
-    --color-indigo: 230 65% 60%;      /* Brighter for dark mode */
+    --color-indigo: 230 65% 60%;
+    /* Brighter for dark mode */
 
     /* ═══════════════════════════════════════════════════════════════
        DARK THEME - Elevation & Structure
@@ -144,9 +170,12 @@
     --card-foreground: 60 9.1% 97.8%;
     --popover: 20 14.3% 4.1%;
     --popover-foreground: 60 9.1% 97.8%;
-    --primary: 172 66% 38%;            /* Teal - WCAG AA compliant for white text */
-    --primary-foreground: 0 0% 100%;   /* White text - 4.5:1 contrast */
-    --primary-bright: 172 66% 45%;     /* Active nav/tabs - balanced visibility */
+    --primary: 172 66% 38%;
+    /* Teal - WCAG AA compliant for white text */
+    --primary-foreground: 0 0% 100%;
+    /* White text - 4.5:1 contrast */
+    --primary-bright: 172 66% 45%;
+    /* Active nav/tabs - balanced visibility */
     --secondary: 12 6.5% 15.1%;
     --secondary-foreground: 60 9.1% 97.8%;
     --muted: 12 6.5% 15.1%;
@@ -161,7 +190,8 @@
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 12 6.5% 15.1%;
     --input: 12 6.5% 15.1%;
-    --ring: 172 66% 40%;               /* Teal focus ring - visible on dark bg */
+    --ring: 172 66% 40%;
+    /* Teal focus ring - visible on dark bg */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -169,13 +199,15 @@
     --chart-5: 340 75% 55%;
     --sidebar-background: 20 14.3% 4.1%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 172 66% 38%;      /* Teal - WCAG AA */
+    --sidebar-primary: 172 66% 38%;
+    /* Teal - WCAG AA */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 172 66% 40%;
-    --sidebar-active-indicator: 172 66% 40%;  /* Teal bar for active nav item */
+    --sidebar-active-indicator: 172 66% 40%;
+    /* Teal bar for active nav item */
 
     /* Semantic colors inherit from base (defined above) */
 
@@ -183,18 +215,23 @@
        CARD TYPOGRAPHY COLORS - Dark Mode (WCAG AA Compliant)
        All values tested against dark card background (#0D0B09)
        ═══════════════════════════════════════════════════════════════ */
-    --card-title: var(--foreground);         /* 18.5:1 - Primary heading */
-    --card-body: 220 6% 82%;                 /* 12.5:1 - Body text, APCA Lc~90 */
-    --card-label: 220 5% 72%;                /* 8.8:1  - Field labels */
-    --card-value: 220 6% 90%;                /* 15.8:1 - Data values (emphasis) */
-    --card-muted: 220 5% 68%;                /* 7.6:1  - Secondary info, min 14px */
+    --card-title: var(--foreground);
+    /* 18.5:1 - Primary heading */
+    --card-body: 220 6% 82%;
+    /* 12.5:1 - Body text, APCA Lc~90 */
+    --card-label: 220 5% 72%;
+    /* 8.8:1  - Field labels */
+    --card-value: 220 6% 90%;
+    /* 15.8:1 - Data values (emphasis) */
+    --card-muted: 220 5% 68%;
+    /* 7.6:1  - Secondary info, min 14px */
 
     /* ═══════════════════════════════════════════════════════════════
        SHADOWS & EFFECTS - Dark Mode
        ═══════════════════════════════════════════════════════════════ */
     --shadow-color: 210 40% 98%;
     --shadow-card: 0 1px 3px hsl(var(--shadow-color) / 0.04),
-                   0 1px 2px hsl(var(--shadow-color) / 0.02);
+      0 1px 2px hsl(var(--shadow-color) / 0.02);
 
     /* ═══════════════════════════════════════════════════════════════
        CHART & VISUALIZATION - Dark Mode
@@ -265,6 +302,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -276,9 +314,13 @@
 }
 
 @layer base {
+
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       transition-duration: 0.01ms !important;
     }
@@ -313,18 +355,41 @@
 
 /* Logo animations - Smooth Rotation & Pulse */
 @keyframes ring-rotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse-core {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(0.85); opacity: 0.8; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(0.85);
+    opacity: 0.8;
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 0.2; transform: scale(0.9); }
+
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.2;
+    transform: scale(0.9);
+  }
 }
 
 /* Logo base styles */
@@ -351,8 +416,19 @@
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+
   .logo-ring,
   .logo-core {
     animation: none !important;
+  }
+}
+
+@layer utilities {
+
+  /* Message Inspector Monospace Font */
+  .font-mono-message {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
 }

@@ -4,7 +4,9 @@ export enum AtomType {
   Decision = 'decision',
   Question = 'question',
   Insight = 'insight',
-  Pattern = 'pattern',
+  Idea = 'idea',
+  Blocker = 'blocker',
+  Risk = 'risk',
   Requirement = 'requirement',
 }
 

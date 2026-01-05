@@ -10,7 +10,9 @@ import {
   Diamond,
   HelpCircle,
   Lightbulb,
-  Cog,
+  Sparkles,
+  Ban,
+  AlertTriangle,
   FileText,
   RefreshCw
 } from 'lucide-react'
@@ -35,7 +37,9 @@ const atomTypeIcons: Record<AtomType, React.ComponentType<{ className?: string }
   decision: Diamond,
   question: HelpCircle,
   insight: Lightbulb,
-  pattern: Cog,
+  idea: Sparkles,
+  blocker: Ban,
+  risk: AlertTriangle,
   requirement: FileText,
 }
 

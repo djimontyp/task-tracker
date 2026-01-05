@@ -34,7 +34,9 @@ const ATOM_TYPE_KEYS: Record<AtomType, string> = {
   [AtomType.Decision]: 'decision',
   [AtomType.Question]: 'question',
   [AtomType.Insight]: 'insight',
-  [AtomType.Pattern]: 'pattern',
+  [AtomType.Idea]: 'idea',
+  [AtomType.Blocker]: 'blocker',
+  [AtomType.Risk]: 'risk',
   [AtomType.Requirement]: 'requirement',
 }
 

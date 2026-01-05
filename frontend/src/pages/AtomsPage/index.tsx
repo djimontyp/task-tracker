@@ -17,7 +17,9 @@ import {
   Diamond,
   HelpCircle,
   Lightbulb,
-  Cog,
+  Sparkles,
+  Ban,
+  AlertTriangle,
   FileText,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -37,7 +39,9 @@ const atomTypeConfig: Record<AtomType, { icon: React.ComponentType<{ className?:
   decision: { icon: Diamond, labelKey: 'typeLabel.decision', color: 'text-semantic-info' },
   question: { icon: HelpCircle, labelKey: 'typeLabel.question', color: 'text-semantic-warning' },
   insight: { icon: Lightbulb, labelKey: 'typeLabel.insight', color: 'text-primary' },
-  pattern: { icon: Cog, labelKey: 'typeLabel.pattern', color: 'text-muted-foreground' },
+  idea: { icon: Sparkles, labelKey: 'typeLabel.idea', color: 'text-atom-idea' },
+  blocker: { icon: Ban, labelKey: 'typeLabel.blocker', color: 'text-semantic-error' },
+  risk: { icon: AlertTriangle, labelKey: 'typeLabel.risk', color: 'text-atom-risk' },
   requirement: { icon: FileText, labelKey: 'typeLabel.requirement', color: 'text-foreground' },
 }
 

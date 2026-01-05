@@ -92,10 +92,20 @@ export const badges = {
       'border-atom-insight text-atom-insight',
       'bg-atom-insight/10'
     ),
-    pattern: cn(
+    idea: cn(
       'flex items-center gap-2',
-      'border-atom-pattern text-atom-pattern',
-      'bg-atom-pattern/10'
+      'border-atom-idea text-atom-idea',
+      'bg-atom-idea/10'
+    ),
+    blocker: cn(
+      'flex items-center gap-2',
+      'border-atom-blocker text-atom-blocker',
+      'bg-atom-blocker/10'
+    ),
+    risk: cn(
+      'flex items-center gap-2',
+      'border-atom-risk text-atom-risk',
+      'bg-atom-risk/10'
     ),
     requirement: cn(
       'flex items-center gap-2',

@@ -136,20 +136,20 @@ export const Insight: Story = {
   },
 };
 
-export const Pattern: Story = {
+export const Idea: Story = {
   args: {
     atom: {
       ...baseAtom,
       id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567896',
-      type: AtomType.Pattern,
-      title: 'Repository pattern for data access',
-      content: 'All services use repository classes to abstract database operations, making testing easier.',
+      type: AtomType.Idea,
+      title: 'New onboarding flow concept',
+      content: 'We could implement a wizard-style onboarding that guides users through setup step by step.',
     },
   },
   parameters: {
     docs: {
       description: {
-        story: 'Pattern atom with accent color (`bg-accent`)',
+        story: 'Idea atom with cyan accent color',
       },
     },
   },
