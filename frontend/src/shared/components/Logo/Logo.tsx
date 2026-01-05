@@ -69,7 +69,7 @@ export function Logo({
       to="/"
       className={cn(
         'logo-container flex items-center gap-4 rounded-md',
-        'hover:bg-sidebar-accent/50 transition-colors',
+        'transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         // Ensure 44px touch target
         'min-h-11',
