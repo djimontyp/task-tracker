@@ -8,8 +8,9 @@
     "evening": "Good evening"
   },
   "subtitle": {
-    "loading": "Analyzing data...",
-    "empty": "All quiet. Connect your data sources.",
+    "loading": "Listening to the air...",
+    "empty": "Silence on Air. Connect data sources.",
+    "listening": "Listening to the air... Gathering first data.",
     "attention": "{{count}} signals need your attention",
     "pending": "{{count}} insights pending review",
     "stable": "Project is moving steadily"
@@ -63,8 +64,9 @@
     "activityHeatmap": "Activity heatmap"
   },
   "activityHeatmap": {
-    "title": "Monthly Activity Pulse",
-    "compactTitle": "Pulse",
+    "title": "Activity by Months",
+    "compactTitle": "PULSE",
+    "compactTitleError": "Server connection lost",
     "description": "Message intensity over the last 6 months",
     "messages": "messages"
   },
@@ -108,7 +110,7 @@
       "more": "More"
     },
     "tooltip": {
-      "tasks": "tasks"
+      "messages": "messages"
     }
   },
   "recentActivity": {

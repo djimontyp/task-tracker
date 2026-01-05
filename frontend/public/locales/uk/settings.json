@@ -100,6 +100,13 @@
   },
   "telegram": {
     "integration": "Інтеграція з Telegram",
+    "historyImport": {
+      "button": "Імпорт історії",
+      "buttonAriaLabel": "Імпортувати історію повідомлень з Telegram",
+      "title": "Імпорт історії повідомлень",
+      "description": "Імпортуйте історичні повідомлення з ваших Telegram каналів для наповнення бази знань.",
+      "completed": "Імпорт історії успішно завершено"
+    },
     "disableDialog": {
       "title": "Вимкнути Telegram webhook?",
       "description": "Це видалить webhook з Telegram і припинить обробку вхідних повідомлень. Ви зможете увімкнути його пізніше.",
