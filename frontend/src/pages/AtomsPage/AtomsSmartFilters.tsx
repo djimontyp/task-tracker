@@ -36,19 +36,15 @@ export function AtomsSmartFilters({
       value={activeFilter}
       onValueChange={(value) => onFilterChange(value as AtomStatusFilter)}
     >
-      <TabsList
-        variant="pill"
-        aria-label={t('smartFilters.ariaLabel', 'Filter atoms by status')}
-      >
+      <TabsList aria-label={t('smartFilters.ariaLabel', 'Filter atoms by status')}>
         {/* All atoms tab */}
         <TabsTrigger
-          variant="pill"
           value="all"
           aria-label={t('smartFilters.allAriaLabel', {
             count: counts.all,
             defaultValue: '{{count}} atoms total',
           })}
-          className="h-11 gap-2 px-4"
+          className="gap-2"
         >
           {t('smartFilters.all', 'All')}
           <Badge variant="secondary" className="ml-2">
@@ -58,13 +54,12 @@ export function AtomsSmartFilters({
 
         {/* Pending tab */}
         <TabsTrigger
-          variant="pill"
           value="pending"
           aria-label={t('smartFilters.pendingAriaLabel', {
             count: counts.pending,
             defaultValue: '{{count}} pending atoms',
           })}
-          className="h-11 gap-2 px-4"
+          className="gap-2"
         >
           <Inbox className="h-4 w-4" />
           {t('smartFilters.pending', 'Pending')}
@@ -78,13 +73,12 @@ export function AtomsSmartFilters({
 
         {/* Approved tab */}
         <TabsTrigger
-          variant="pill"
           value="approved"
           aria-label={t('smartFilters.approvedAriaLabel', {
             count: counts.approved,
             defaultValue: '{{count}} approved atoms',
           })}
-          className="h-11 gap-2 px-4"
+          className="gap-2"
         >
           <CheckCircle className="h-4 w-4" />
           {t('smartFilters.approved', 'Approved')}
@@ -98,13 +92,12 @@ export function AtomsSmartFilters({
 
         {/* Rejected tab */}
         <TabsTrigger
-          variant="pill"
           value="rejected"
           aria-label={t('smartFilters.rejectedAriaLabel', {
             count: counts.rejected,
             defaultValue: '{{count}} rejected atoms',
           })}
-          className="h-11 gap-2 px-4"
+          className="gap-2"
         >
           <XCircle className="h-4 w-4" />
           {t('smartFilters.rejected', 'Rejected')}

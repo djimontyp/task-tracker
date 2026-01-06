@@ -71,119 +71,119 @@ const AtomCard = React.forwardRef<HTMLDivElement, AtomCardProps>(
       )
     }
 
-  // Map atom types to translation keys where available, fallback to capitalized type
-  const getTypeLabel = (type: AtomType): string => {
-    const typeKeyMap: Partial<Record<AtomType, string>> = {
-      decision: 'type.decision',
-      question: 'type.question',
-      insight: 'type.insight',
+    // Map atom types to translation keys where available, fallback to capitalized type
+    const getTypeLabel = (type: AtomType): string => {
+      const typeKeyMap: Partial<Record<AtomType, string>> = {
+        decision: 'type.decision',
+        question: 'type.question',
+        insight: 'type.insight',
+      }
+      const key = typeKeyMap[type]
+      if (key) {
+        return t(key)
+      }
+      // Fallback for types not in translation file
+      return type.charAt(0).toUpperCase() + type.slice(1)
     }
-    const key = typeKeyMap[type]
-    if (key) {
-      return t(key)
-    }
-    // Fallback for types not in translation file
-    return type.charAt(0).toUpperCase() + type.slice(1)
-  }
 
-  // pending_versions_count comes from backend now (no N+1 queries!)
-  const pendingVersionsCount = atom.pending_versions_count ?? 0
+    // pending_versions_count comes from backend now (no N+1 queries!)
+    const pendingVersionsCount = atom.pending_versions_count ?? 0
 
-  const isFeatured = atom.confidence !== null && atom.confidence > 0.8
-  // Featured atoms: always glow + stronger on hover
-  // Regular atoms: glow only on hover
-  const glowClass = isFeatured
-    ? 'shadow-glow-sm hover:shadow-glow-hover'
-    : 'hover:shadow-glow-sm'
+    const isFeatured = atom.confidence !== null && atom.confidence > 0.8
+    // Featured atoms: always glow + stronger on hover
+    // Regular atoms: no glow by default, subtle glow on hover
+    const glowClass = isFeatured
+      ? 'shadow-glow-sm hover:shadow-glow-md border-primary/50'
+      : 'hover:shadow-glow-sm hover:border-primary/30'
 
-  return (
-    <Card
-      ref={ref}
-      className={cn(
-        'p-4 transition-all duration-300',
-        glowClass,
-        onClick && 'cursor-pointer',
-        className
-      )}
-      onClick={onClick}
-    >
-      <div className="space-y-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant="outline" className={badges.atom[atom.type]}>
-              {React.createElement(atomTypeIcons[atom.type], { className: 'h-3.5 w-3.5' })}
-              {getTypeLabel(atom.type)}
-            </Badge>
-            <LanguageMismatchBadge
-              detectedLanguage={atom.detected_language ?? undefined}
-              expectedLanguage={projectLanguage}
-            />
+    return (
+      <Card
+        ref={ref}
+        className={cn(
+          'p-4 transition-all duration-300',
+          glowClass,
+          onClick && 'cursor-pointer',
+          className
+        )}
+        onClick={onClick}
+      >
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant="outline" className={badges.atom[atom.type]}>
+                {React.createElement(atomTypeIcons[atom.type], { className: 'h-3.5 w-3.5' })}
+                {getTypeLabel(atom.type)}
+              </Badge>
+              <LanguageMismatchBadge
+                detectedLanguage={atom.detected_language ?? undefined}
+                expectedLanguage={projectLanguage}
+              />
+            </div>
+            {atom.confidence !== null && (
+              <span className="text-xs text-muted-foreground">
+                {Math.round(atom.confidence * 100)}%
+              </span>
+            )}
           </div>
-          {atom.confidence !== null && (
-            <span className="text-xs text-muted-foreground">
-              {Math.round(atom.confidence * 100)}%
-            </span>
+
+          <div>
+            <h3 className="font-semibold text-base mb-2 line-clamp-2">{atom.title}</h3>
+            <p className="text-sm text-muted-foreground line-clamp-3">{atom.content}</p>
+          </div>
+
+          {atom.user_approved && (
+            <div className="flex items-center gap-2 text-semantic-success">
+              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="text-xs font-medium">{t('status.approved')}</span>
+            </div>
+          )}
+
+          {pendingVersionsCount > 0 && (
+            <div className="flex items-center gap-2 pt-2 border-t border-border">
+              <Badge className="text-xs bg-semantic-warning text-white hover:bg-semantic-warning/90">
+                {t('card.pendingVersions', { count: pendingVersionsCount, defaultValue: `${pendingVersionsCount} pending version${pendingVersionsCount > 1 ? 's' : ''}` })}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-11 text-xs"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowVersionHistory(true)
+                }}
+                aria-label={t('card.viewHistory', 'View version history')}
+              >
+                <Clock className="h-3 w-3 mr-2" />
+                {t('card.viewHistory', 'View History')}
+              </Button>
+            </div>
           )}
         </div>
 
-        <div>
-          <h3 className="font-semibold text-base mb-2 line-clamp-2">{atom.title}</h3>
-          <p className="text-sm text-muted-foreground line-clamp-3">{atom.content}</p>
-        </div>
-
-        {atom.user_approved && (
-          <div className="flex items-center gap-2 text-semantic-success">
-            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span className="text-xs font-medium">{t('status.approved')}</span>
-          </div>
-        )}
-
-        {pendingVersionsCount > 0 && (
-          <div className="flex items-center gap-2 pt-2 border-t border-border">
-            <Badge className="text-xs bg-semantic-warning text-white hover:bg-semantic-warning/90">
-              {t('card.pendingVersions', { count: pendingVersionsCount, defaultValue: `${pendingVersionsCount} pending version${pendingVersionsCount > 1 ? 's' : ''}` })}
-            </Badge>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-11 text-xs"
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowVersionHistory(true)
+        <Dialog open={showVersionHistory} onOpenChange={setShowVersionHistory}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{t('card.versionHistoryTitle', { title: atom.title, defaultValue: `Version History - ${atom.title}` })}</DialogTitle>
+            </DialogHeader>
+            <VersionHistoryList
+              entityType="atom"
+              entityId={atom.id}
+              enableBulkActions={true}
+              onSelectVersion={(_version) => {
+                // Version selected - implementation pending
               }}
-              aria-label={t('card.viewHistory', 'View version history')}
-            >
-              <Clock className="h-3 w-3 mr-2" />
-              {t('card.viewHistory', 'View History')}
-            </Button>
-          </div>
-        )}
-      </div>
-
-      <Dialog open={showVersionHistory} onOpenChange={setShowVersionHistory}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{t('card.versionHistoryTitle', { title: atom.title, defaultValue: `Version History - ${atom.title}` })}</DialogTitle>
-          </DialogHeader>
-          <VersionHistoryList
-            entityType="atom"
-            entityId={atom.id}
-            enableBulkActions={true}
-            onSelectVersion={(_version) => {
-              // Version selected - implementation pending
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-    </Card>
-  )
-})
+            />
+          </DialogContent>
+        </Dialog>
+      </Card>
+    )
+  })
 
 AtomCard.displayName = 'AtomCard'
 

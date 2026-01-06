@@ -29,6 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { EmptyState } from '@/shared/patterns'
 import { atomService } from '@/features/atoms/api/atomService'
 import { AtomCard } from '@/features/atoms/components/AtomCard'
+import { AtomDetailsSheet } from '@/features/atoms/components/AtomDetailsSheet'
 import type { Atom, AtomType } from '@/features/atoms/types'
 import { AtomsSmartFilters, type AtomCounts } from './AtomsSmartFilters'
 import { useAtomFilterParams } from './useAtomFilterParams'
@@ -51,6 +52,7 @@ const AtomsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedAtoms, setSelectedAtoms] = useState<Set<string>>(new Set())
   const [expandedAtomId, setExpandedAtomId] = useState<string | null>(null)
+  const [viewAtom, setViewAtom] = useState<Atom | null>(null)
   const atomRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
   // Smart Filters - URL-synchronized status filter
@@ -289,7 +291,7 @@ const AtomsPage: React.FC = () => {
               className="gap-2"
             >
               <CheckCircle className="h-4 w-4" />
-              {t('actions.approveSelected', 'Approve Selected')}
+              <span className="hidden sm:inline">{t('actions.approveSelected', 'Approve Selected')}</span>
             </Button>
             <Button
               size="sm"
@@ -299,7 +301,7 @@ const AtomsPage: React.FC = () => {
               className="gap-2"
             >
               <XCircle className="h-4 w-4" />
-              {t('actions.rejectSelected', 'Reject Selected')}
+              <span className="hidden sm:inline">{t('actions.rejectSelected', 'Reject Selected')}</span>
             </Button>
           </div>
         ) : (
@@ -311,7 +313,7 @@ const AtomsPage: React.FC = () => {
               className="gap-2"
             >
               <CheckCircle className="h-4 w-4" />
-              {t('actions.approveAll', 'Approve All')}
+              <span className="hidden sm:inline">{t('actions.approveAll', 'Approve All')}</span>
             </Button>
             <Button
               size="sm"
@@ -321,7 +323,7 @@ const AtomsPage: React.FC = () => {
               className="gap-2"
             >
               <XCircle className="h-4 w-4" />
-              {t('actions.rejectAll', 'Reject All')}
+              <span className="hidden sm:inline">{t('actions.rejectAll', 'Reject All')}</span>
             </Button>
           </div>
         )}
@@ -340,88 +342,107 @@ const AtomsPage: React.FC = () => {
 
       {/* Grouped atoms */}
       {atoms.length > 0 && (
-      <div className="space-y-6 mt-6">
-        {Object.entries(groupedAtoms).map(([type, groupAtoms]) => {
-          const config = atomTypeConfig[type as AtomType]
-          const Icon = config?.icon || AlertCircle
+        <div className="space-y-6 mt-6">
+          {Object.entries(groupedAtoms).map(([type, groupAtoms]) => {
+            const config = atomTypeConfig[type as AtomType]
+            const Icon = config?.icon || AlertCircle
 
-          return (
-            <Card key={type}>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Icon className={`h-5 w-5 ${config?.color || ''}`} />
-                    {config ? t(config.labelKey) : type}
-                    <Badge variant="secondary" className="ml-2">
-                      {groupAtoms.length}
-                    </Badge>
-                  </CardTitle>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => selectAllInGroup(groupAtoms)}
-                  >
-                    {t('actions.selectAll', 'Select All')}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {groupAtoms.map(atom => (
-                    <div
-                      key={atom.id}
-                      ref={(el) => {
-                        if (el) atomRefs.current.set(String(atom.id), el)
-                        else atomRefs.current.delete(String(atom.id))
-                      }}
-                      className={`relative transition-all duration-300 ${
-                        expandedAtomId === String(atom.id) ? 'scale-[1.02]' : ''
-                      }`}
+            return (
+              <Card key={type}>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Icon className={`h-5 w-5 ${config?.color || ''}`} />
+                      {config ? t(config.labelKey) : type}
+                      <Badge variant="secondary" className="ml-2">
+                        {groupAtoms.length}
+                      </Badge>
+                    </CardTitle>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => selectAllInGroup(groupAtoms)}
                     >
-                      {/* Selection checkbox */}
-                      <div className="absolute top-2 right-2 z-dropdown">
-                        <Checkbox
-                          checked={selectedAtoms.has(String(atom.id))}
-                          onCheckedChange={() => toggleSelection(String(atom.id))}
-                          aria-label={t('actions.selectAriaLabel', { title: atom.title })}
-                        />
-                      </div>
+                      <span className="hidden sm:inline">{t('actions.selectAll', 'Select All')}</span>
+                      <span className="sm:hidden">{t('actions.select', 'Select')}</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-2">
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {groupAtoms.map(atom => (
+                      <div
+                        key={atom.id}
+                        ref={(el) => {
+                          if (el) atomRefs.current.set(String(atom.id), el)
+                          else atomRefs.current.delete(String(atom.id))
+                        }}
+                        className={`relative transition-all duration-300 ${expandedAtomId === String(atom.id) ? 'scale-[1.02]' : ''
+                          }`}
+                      >
+                        {/* Selection checkbox */}
+                        <div className="absolute top-2 right-2 z-dropdown">
+                          <Checkbox
+                            checked={selectedAtoms.has(String(atom.id))}
+                            onCheckedChange={() => toggleSelection(String(atom.id))}
+                            aria-label={t('actions.selectAriaLabel', { title: atom.title })}
+                          />
+                        </div>
 
-                      {/* Atom card with approve/reject actions */}
-                      <div className="pr-8">
-                        <AtomCard atom={atom} />
-                      </div>
+                        {/* Atom card with approve/reject actions */}
+                        <div className="pr-8">
+                          <AtomCard
+                            atom={atom}
+                            onClick={() => setViewAtom(atom)}
+                          />
+                        </div>
 
-                      {/* Action buttons */}
-                      <div className="flex justify-end gap-2 mt-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleApprove(String(atom.id))}
-                          className="h-8 gap-2 text-semantic-success hover:text-semantic-success hover:bg-semantic-success/10"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                          {t('actions.approve')}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleReject(String(atom.id))}
-                          className="h-8 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <XCircle className="h-4 w-4" />
-                          {t('actions.reject')}
-                        </Button>
+                        {/* Action buttons - Only for pending atoms */}
+                        {(!atom.user_approved && !atom.archived) && (
+                          <div className="flex justify-end gap-2 mt-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleApprove(String(atom.id))}
+                              className="h-8 gap-2 text-semantic-success hover:text-semantic-success hover:bg-semantic-success/10"
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                              {t('actions.approve')}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleReject(String(atom.id))}
+                              className="h-8 gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <XCircle className="h-4 w-4" />
+                              {t('actions.reject')}
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
       )}
+
+      <AtomDetailsSheet
+        atom={viewAtom}
+        isOpen={!!viewAtom}
+        onClose={() => setViewAtom(null)}
+        onApprove={(id) => {
+          handleApprove(id)
+          setViewAtom(null)
+        }}
+        onReject={(id) => {
+          handleReject(id)
+          setViewAtom(null)
+        }}
+      />
     </PageWrapper>
   )
 }

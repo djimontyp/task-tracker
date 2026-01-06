@@ -136,3 +136,4 @@ export {
 } from './collapsible'
 export { MultiSelect, type MultiSelectOption, type MultiSelectProps } from './multi-select'
 export { ZoomableCard } from './zoomable-card'
+export { ScrollArea, ScrollBar } from './scroll-area'
