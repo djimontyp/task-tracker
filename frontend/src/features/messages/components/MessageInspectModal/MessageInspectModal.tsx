@@ -226,20 +226,18 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7"
                                 onClick={onPrev}
                                 disabled={!onPrev}
-                                title="Previous (K)"
+                                aria-label="Previous message (K)"
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7"
                                 onClick={onNext}
                                 disabled={!onNext}
-                                title="Next (J)"
+                                aria-label="Next message (J)"
                             >
                                 <ChevronRight className="h-4 w-4" />
                             </Button>

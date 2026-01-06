@@ -71,11 +71,11 @@ export function MessagesSummaryHeader({ stats }: MessagesSummaryHeaderProps) {
       <div className="p-4 space-y-4">
         <div className="space-y-3">
           <div className="flex items-start gap-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)] mt-1.5 shrink-0" />
+            <div className="w-1.5 h-1.5 rounded-full bg-status-error shadow-[0_0_8px_hsl(var(--status-error)/0.4)] mt-2 shrink-0" />
             <div className="flex-1 space-y-0.5">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-foreground">Critical Signal</span>
-                <span className="text-[10px] font-mono bg-red-500/10 text-red-600 px-1.5 rounded-sm">&gt;80</span>
+                <span className="text-[10px] font-mono bg-status-error/10 text-status-error px-2 rounded-sm">&gt;80</span>
               </div>
               <p className="text-xs text-muted-foreground leading-snug">
                 Highly important updates, blockers, or key decisions. Requires immediate attention.
@@ -84,11 +84,11 @@ export function MessagesSummaryHeader({ stats }: MessagesSummaryHeaderProps) {
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.4)] mt-1.5 shrink-0" />
+            <div className="w-1.5 h-1.5 rounded-full bg-status-pending shadow-[0_0_8px_hsl(var(--status-pending)/0.4)] mt-2 shrink-0" />
             <div className="flex-1 space-y-0.5">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-foreground">Medium Signal</span>
-                <span className="text-[10px] font-mono bg-yellow-500/10 text-yellow-600 px-1.5 rounded-sm">&gt;50</span>
+                <span className="text-[10px] font-mono bg-status-pending/10 text-status-pending px-2 rounded-sm">&gt;50</span>
               </div>
               <p className="text-xs text-muted-foreground leading-snug">
                 Valuable context, progress updates, or relevant discussions.
@@ -97,11 +97,11 @@ export function MessagesSummaryHeader({ stats }: MessagesSummaryHeaderProps) {
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)] mt-1.5 shrink-0" />
+            <div className="w-1.5 h-1.5 rounded-full bg-status-connected shadow-[0_0_8px_hsl(var(--status-connected)/0.4)] mt-2 shrink-0" />
             <div className="flex-1 space-y-0.5">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-foreground">Valid Signal</span>
-                <span className="text-[10px] font-mono bg-green-500/10 text-green-600 px-1.5 rounded-sm">Base</span>
+                <span className="text-[10px] font-mono bg-status-connected/10 text-status-connected px-2 rounded-sm">Base</span>
               </div>
               <p className="text-xs text-muted-foreground leading-snug">
                 Meaningful communication contributing to the project knowledge.
@@ -110,11 +110,11 @@ export function MessagesSummaryHeader({ stats }: MessagesSummaryHeaderProps) {
           </div>
 
           <div className="flex items-start gap-3 opacity-60">
-            <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 mt-1.5 shrink-0" />
+            <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 mt-2 shrink-0" />
             <div className="flex-1 space-y-0.5">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-foreground">Noise</span>
-                <span className="text-[10px] font-mono bg-muted px-1.5 rounded-sm">&lt;10</span>
+                <span className="text-[10px] font-mono bg-muted px-2 rounded-sm">&lt;10</span>
               </div>
               <p className="text-xs text-muted-foreground leading-snug">
                 Casual chatter, logistics, or low-context messages.

@@ -8,7 +8,7 @@ import {
 } from '@/shared/ui/tooltip'
 import { toast } from 'sonner'
 import type { MessageInspectData } from '@/features/messages/types'
-import { Hash, MapPin, Building, Users, Lightbulb } from 'lucide-react'
+import { MapPin, Building, Users, Lightbulb } from 'lucide-react'
 
 interface AtomsTabProps {
   data: MessageInspectData['atoms']
@@ -44,12 +44,12 @@ export function AtomsTab({ data }: AtomsTabProps) {
     if (entities.length === 0) return null
     return (
       <div className="mb-3 last:mb-0">
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1">
           {entities.map(entity => (
             <Badge
               key={entity}
               variant="secondary"
-              className={`text-[10px] px-1.5 py-0.5 font-normal cursor-pointer hover:opacity-80 gap-1 ${colorClass}`}
+              className={`text-[10px] px-1 py-0.5 font-normal cursor-pointer hover:opacity-80 gap-1 ${colorClass}`}
               onClick={() => handleSearchEntity(entity, type)}
             >
               <Icon className="w-3 h-3 opacity-70" /> {entity}
@@ -65,10 +65,10 @@ export function AtomsTab({ data }: AtomsTabProps) {
       {/* Entities */}
       {hasEntities && (
         <div className="space-y-2">
-          {renderEntityGroup(data.entities.people, 'People', 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 hover:bg-blue-500/20', Users)}
-          {renderEntityGroup(data.entities.places, 'Places', 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/20', MapPin)}
-          {renderEntityGroup(data.entities.organizations, 'Orgs', 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 hover:bg-orange-500/20', Building)}
-          {renderEntityGroup(data.entities.concepts, 'Concepts', 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 hover:bg-purple-500/20', Lightbulb)}
+          {renderEntityGroup(data.entities.people, 'People', 'bg-semantic-info/10 text-semantic-info border-semantic-info/20 hover:bg-semantic-info/20', Users)}
+          {renderEntityGroup(data.entities.places, 'Places', 'bg-semantic-success/10 text-semantic-success border-semantic-success/20 hover:bg-semantic-success/20', MapPin)}
+          {renderEntityGroup(data.entities.organizations, 'Orgs', 'bg-semantic-warning/10 text-semantic-warning border-semantic-warning/20 hover:bg-semantic-warning/20', Building)}
+          {renderEntityGroup(data.entities.concepts, 'Concepts', 'bg-atom-insight/10 text-atom-insight border-atom-insight/20 hover:bg-atom-insight/20', Lightbulb)}
         </div>
       )}
 
@@ -76,7 +76,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
       {hasKeywords && (
         <div className="pt-2 border-t border-border/50">
           <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-2 block">Keywords</span>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1">
             {data.keywords
               .sort((a, b) => b.relevance - a.relevance)
               .slice(0, 8) // Limit keywords to top 8 to avoid clutter
@@ -85,8 +85,8 @@ export function AtomsTab({ data }: AtomsTabProps) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Badge
-                        variant="outline"
-                        className="text-[10px] px-1.5 py-0 border-dashed text-muted-foreground hover:bg-muted cursor-help"
+                        variant="secondary"
+                        className="text-[10px] px-1.5 py-0.5 border border-border/40 hover:bg-muted/80 cursor-help bg-muted/30 text-foreground/80 font-normal transition-colors"
                       >
                         {keyword.text}
                       </Badge>

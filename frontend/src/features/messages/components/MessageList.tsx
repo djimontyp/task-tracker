@@ -18,6 +18,7 @@ interface MessageListProps {
     onToggleSelect: (id: string, checked: boolean) => void
     onCreateAtom?: (id: string) => void
     onDismiss?: (id: string) => void
+    onPrefetch?: (id: string) => void
     isError?: boolean
     error?: Error | null
     onRetry?: () => void
@@ -35,6 +36,7 @@ export const MessageList: React.FC<MessageListProps> = ({
     onToggleSelect,
     onCreateAtom,
     onDismiss,
+    onPrefetch,
     isError,
     error,
     onRetry,
@@ -44,10 +46,10 @@ export const MessageList: React.FC<MessageListProps> = ({
 }) => {
     const { t, i18n } = useTranslation('messages')
 
-    // Bottom infinite scroll trigger
+    // Bottom infinite scroll trigger - aggressive prefetch to prevent skeleton flicker
     const { ref: loadMoreRef, inView } = useInView({
-        threshold: 0.1,
-        rootMargin: '200px', // Preload before hitting bottom
+        threshold: 0,
+        rootMargin: '600px', // Preload well before hitting bottom (3-4 viewport heights)
     })
 
     // Top sentinel for "Scroll to Top" button visibility
@@ -188,7 +190,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                 {Object.entries(groupedMessages).map(([dateLabel, msgs]) => (
                     <div key={dateLabel}>
                         {/* Sticky Date Header */}
-                        <div className="sticky top-0 z-30 bg-background/98 backdrop-blur-sm shadow-sm py-1.5 px-4 border-b border-border/50 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2 transition-all duration-200">
+                        <div className="sticky top-0 z-fixed bg-background/98 backdrop-blur-sm shadow-sm py-2 px-4 border-b border-border/50 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2 transition-all duration-200">
                             <Calendar className="w-3 h-3 opacity-70" />
                             {dateLabel}
                         </div>
@@ -207,6 +209,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                                         onSelect={(checked, shiftKey) => handleToggleSelect(String(message.id), checked, shiftKey)}
                                         onCreateAtom={() => onCreateAtom?.(String(message.id))}
                                         onDismiss={() => onDismiss?.(String(message.id))}
+                                        onMouseEnter={() => onPrefetch?.(String(message.id))}
                                     />
                                 </div>
                             ))}
@@ -234,7 +237,7 @@ export const MessageList: React.FC<MessageListProps> = ({
 
             {/* Scroll to Top Button */}
             {!isAtTop && (
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 animate-in fade-in slide-in-from-bottom-4 duration-200">
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-sticky animate-in fade-in slide-in-from-bottom-4 duration-200">
                     <Button
                         variant="secondary"
                         size="sm"

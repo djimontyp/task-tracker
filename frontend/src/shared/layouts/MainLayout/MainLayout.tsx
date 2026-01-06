@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from 'react'
+import { ReactNode, useMemo, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -24,6 +24,15 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const { sidebarOpen, setSidebarOpen } = useUiStore()
   const { isAdminMode, toggleAdminMode } = useAdminMode()
   const isDesktop = useMediaQuery('(min-width: 768px)')
+  const initialMountRef = useRef(true)
+
+  // Close sidebar on mobile on initial mount (prevents overlay blocking content)
+  useEffect(() => {
+    if (initialMountRef.current && !isDesktop && sidebarOpen) {
+      setSidebarOpen(false)
+    }
+    initialMountRef.current = false
+  }, [isDesktop, sidebarOpen, setSidebarOpen])
   const location = useLocation()
   const queryClient = useQueryClient()
 
@@ -118,11 +127,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               searchComponent={<SearchContainer />}
             />
 
-            {/* Row 2: Main content (fills remaining space, full-width per design system) */}
+            {/* Row 2: Main content (fills remaining space, max-width for 4K readability) */}
             <SidebarInset className="overflow-auto">
               <main
                 id="main-content"
-                className="px-4 lg:px-6 xl:px-8 2xl:px-10 py-4 w-full"
+                className="px-4 lg:px-6 xl:px-8 2xl:px-10 py-4 w-full max-w-screen-2xl mx-auto"
               >
                 {children}
               </main>

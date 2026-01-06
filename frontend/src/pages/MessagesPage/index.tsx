@@ -99,7 +99,7 @@ const MessagesPage = () => {
     return params
   }, [sorting, columnFilters, globalFilter])
 
-  // Infinite Query
+  // Infinite Query with keepPreviousData to prevent skeleton flicker
   const {
     data,
     fetchNextPage,
@@ -118,6 +118,10 @@ const MessagesPage = () => {
       }
       return undefined
     },
+    // Keep previous data during refetch to prevent skeleton flicker
+    placeholderData: (previousData) => previousData,
+    // Refetch in background without showing loading state
+    refetchOnWindowFocus: false,
   })
 
   // Flatten messages
@@ -139,13 +143,19 @@ const MessagesPage = () => {
   }, [messages])
 
   // WebSocket for real-time message scoring updates
+  // Use refetchType: 'none' to prevent skeleton flicker - data updates silently in background
   useWebSocket({
     topics: ['noise_filtering'],
     onMessage: (data) => {
       const message = data as { topic: string; event: string }
       if (message.topic === 'noise_filtering') {
         if (message.event === 'message_scored' || message.event === 'batch_scored') {
-          queryClient.invalidateQueries({ queryKey: ['messages'] })
+          // Soft invalidation - marks data as stale but keeps showing it
+          // Next user interaction will trigger background refetch
+          queryClient.invalidateQueries({
+            queryKey: ['messages'],
+            refetchType: 'none' // Don't auto-refetch, just mark stale
+          })
         }
       }
     },
@@ -211,6 +221,39 @@ const MessagesPage = () => {
     onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
   })
+
+  // Prefetch message inspect data to prevent skeleton flicker on navigation
+  const prefetchMessageInspect = useCallback((messageId: string) => {
+    queryClient.prefetchQuery({
+      queryKey: ['messageInspect', messageId],
+      queryFn: async () => {
+        const response = await fetch(API_ENDPOINTS.messageInspect(messageId))
+        if (!response.ok) throw new Error('Failed to prefetch')
+        return response.json()
+      },
+      staleTime: 30_000,
+    })
+  }, [queryClient])
+
+  // Prefetch adjacent messages when current selection changes
+  useEffect(() => {
+    if (!selectedMessageId || messages.length === 0) return
+
+    const idx = messages.findIndex(m => String(m.id) === selectedMessageId)
+    if (idx === -1) return
+
+    // Prefetch next 2 messages
+    if (idx < messages.length - 1) {
+      prefetchMessageInspect(String(messages[idx + 1].id))
+    }
+    if (idx < messages.length - 2) {
+      prefetchMessageInspect(String(messages[idx + 2].id))
+    }
+    // Prefetch previous message
+    if (idx > 0) {
+      prefetchMessageInspect(String(messages[idx - 1].id))
+    }
+  }, [selectedMessageId, messages, prefetchMessageInspect])
 
   // Handlers for Master-Detail interactions
   const handleMessageSelect = (id: string, _shiftKey: boolean) => {
@@ -299,7 +342,7 @@ const MessagesPage = () => {
 
 
   return (
-    <PageWrapper className="h-[calc(100vh-4rem)] overflow-hidden flex flex-col p-4 md:p-6 gap-4">
+    <PageWrapper className="h-[calc(100vh-56px-2rem)] overflow-hidden flex flex-col gap-4">
       {/* Header Area */}
       <div className="flex flex-col gap-4 flex-shrink-0">
         <MessagesSummaryHeader stats={signalNoiseStats} />
@@ -338,7 +381,8 @@ const MessagesPage = () => {
                 size="sm"
                 className="h-8 px-2"
                 onClick={() => setLayoutMode('list')}
-                title="List View"
+                aria-label={t('layout.listView', 'List View')}
+                aria-pressed={layoutMode === 'list'}
               >
                 <List className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">List</span>
@@ -348,7 +392,8 @@ const MessagesPage = () => {
                 size="sm"
                 className="h-8 px-2"
                 onClick={() => setLayoutMode('split')}
-                title="Split View"
+                aria-label={t('layout.splitView', 'Split View')}
+                aria-pressed={layoutMode === 'split'}
               >
                 <Columns className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Split</span>
@@ -363,11 +408,11 @@ const MessagesPage = () => {
         <div
           className={`
                 h-full grid transition-all duration-300 ease-in-out divide-x
-                ${layoutMode === 'split' ? 'grid-cols-1 lg:grid-cols-[320px_1fr]' : 'grid-cols-1'}
+                ${layoutMode === 'split' ? 'grid-cols-1 lg:grid-cols-[480px_1fr]' : 'grid-cols-1'}
             `}
         >
           {/* Left Pane - Message List */}
-          <div className={`h-full overflow-hidden flex flex-col`}>
+          <div className={`h-full overflow-hidden flex flex-col ${layoutMode === 'split' ? 'hidden lg:flex' : 'flex'}`}>
             <MessageList
               messages={messages}
               isLoading={isLoading}
@@ -377,6 +422,7 @@ const MessagesPage = () => {
               onToggleSelect={(id, checked) => setRowSelection(prev => ({ ...prev, [id]: checked }))}
               onCreateAtom={handleCreateAtom}
               onDismiss={handleDismiss}
+              onPrefetch={prefetchMessageInspect}
               isError={isError}
               error={error as Error} // Cast to Error
               hasMore={hasNextPage}
@@ -386,7 +432,7 @@ const MessagesPage = () => {
           </div>
 
           {/* Right Pane - Detail Panel */}
-          <div className={`h-full overflow-hidden bg-background ${layoutMode === 'list' ? 'hidden' : 'block'}`}>
+          <div className={`h-full w-full overflow-hidden bg-background ${layoutMode === 'list' ? 'hidden' : 'flex'}`}>
             <MessageDetailPanel
               messageId={selectedMessageId || ''}
               onClose={handleClosePanel}
@@ -398,7 +444,7 @@ const MessagesPage = () => {
       </div>
       {/* Floating Bulk Actions Bar */}
       {Object.keys(rowSelection).length > 0 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-fixed animate-in fade-in slide-in-from-bottom-4 duration-200">
           <div className="bg-background/90 backdrop-blur-md border border-border rounded-full shadow-xl px-4 py-2 flex items-center gap-4">
             <span className="text-sm font-medium whitespace-nowrap pl-2 text-foreground">
               {Object.keys(rowSelection).length} {t('selection.selected', 'selected')}
@@ -439,11 +485,11 @@ const MessagesPage = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 rounded-full text-muted-foreground hover:bg-muted"
+              className="rounded-full text-muted-foreground hover:bg-muted"
               onClick={() => setRowSelection({})}
-              title={t('actions.clearSelection', 'Clear selection')}
+              aria-label={t('actions.clearSelection', 'Clear selection')}
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
