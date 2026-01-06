@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SetupWizard } from './SetupWizard';
-import { useTelegramStore } from '@/pages/SettingsPage/plugins/TelegramSource/useTelegramStore';
+import { useTelegramStore } from '@/shared/store/useTelegramStore';
 
 /**
  * Helper to set Telegram connection status for stories.

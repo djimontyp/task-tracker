@@ -5,7 +5,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
   SheetFooter,
   Badge,
   Button,
@@ -25,7 +24,6 @@ import {
   AlertTriangle,
   FileText,
   Calendar,
-  User,
   MessageSquare,
 } from 'lucide-react'
 import { badges } from '@/shared/tokens/patterns'

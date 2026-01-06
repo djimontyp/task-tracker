@@ -3,7 +3,7 @@ import { MessageSquare, FolderPlus, Bot, Lightbulb, Check, Loader2 } from 'lucid
 import { toast } from 'sonner';
 import { Button } from '@/shared/ui/button';
 import { SetupStep } from './SetupStep';
-import { useTelegramStore } from '@/pages/SettingsPage/plugins/TelegramSource/useTelegramStore';
+import { useTelegramStore } from '@/shared/store/useTelegramStore';
 import type { SetupWizardProps } from '../types/wizard';
 
 /**

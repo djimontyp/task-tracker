@@ -86,7 +86,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
                     <TooltipTrigger asChild>
                       <Badge
                         variant="secondary"
-                        className="text-[10px] px-1.5 py-0.5 border border-border/40 hover:bg-muted/80 cursor-help bg-muted/30 text-foreground/80 font-normal transition-colors"
+                        className="text-[10px] px-1 py-0.5 border border-border/40 hover:bg-muted/80 cursor-help bg-muted/30 text-foreground/80 font-normal transition-colors"
                       >
                         {keyword.text}
                       </Badge>

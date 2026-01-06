@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { Check, MessageSquare, FolderPlus, Cpu, Download, ChevronDown, ChevronUp, HelpCircle, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Progress } from '@/shared/ui/progress'
-import { useTelegramStore } from '@/pages/SettingsPage/plugins/TelegramSource/useTelegramStore'
+import { useTelegramStore } from '@/shared/store/useTelegramStore'
 import type { SetupWizardProps, StepStatus } from '../types/wizard'
 
 type BannerState = 'expanded' | 'collapsed' | 'completed'

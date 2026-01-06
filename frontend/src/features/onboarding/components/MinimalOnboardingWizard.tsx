@@ -234,7 +234,7 @@ export function MinimalOnboardingWizard({
                       {/* Pending state (Step 4) */}
                       {step.status === 'pending' && (
                         <p className="text-xs text-muted-foreground italic">
-                          З'явиться автоматично після аналізу
+                          З&apos;явиться автоматично після аналізу
                         </p>
                       )}
                     </div>

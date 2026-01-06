@@ -99,7 +99,7 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
         <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="w-[95vw] h-[90vh] max-w-none flex flex-col p-0 gap-0" aria-describedby="message-inspect-description">
                 {/* Header */}
-                <DialogHeader className="px-6 py-4 border-b flex-shrink-0 bg-background/95 backdrop-blur z-10">
+                <DialogHeader className="px-6 py-4 border-b flex-shrink-0 bg-background/95 backdrop-blur sticky top-0">
                     <div className="flex items-center justify-between">
                         <DialogTitle className="text-lg font-semibold flex items-center gap-2">
                             {t('inspectModal.title')}
@@ -138,9 +138,9 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
                         <div className="grid grid-cols-2 h-full divide-x">
                             {/* LEFT PANEL - Raw Data */}
                             <div className="h-full overflow-hidden bg-muted/5 flex flex-col border-r">
-                                <div className="px-5 py-3 border-b flex justify-between items-center bg-background/50 backdrop-blur-sm sticky top-0 z-10">
+                                <div className="px-6 py-3 border-b flex justify-between items-center bg-background/50 backdrop-blur-sm sticky top-0">
                                     <span className="text-xs font-semibold text-muted-foreground">{t('inspectModal.panels.rawData')}</span>
-                                    <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-mono text-muted-foreground/70">RO</Badge>
+                                    <Badge variant="outline" className="text-[10px] h-5 px-1 font-mono text-muted-foreground/70">RO</Badge>
                                 </div>
                                 <ScrollArea className="flex-1">
                                     <div className="p-6">
@@ -155,7 +155,7 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
 
                             {/* RIGHT PANEL - Analysis Tools */}
                             <div className="h-full overflow-y-auto bg-background flex flex-col">
-                                <div className="px-5 py-3 border-b flex items-center bg-background/95 backdrop-blur-sm sticky top-0 z-10">
+                                <div className="px-6 py-3 border-b flex items-center bg-background/95 backdrop-blur-sm sticky top-0">
                                     <span className="text-xs font-semibold text-muted-foreground">{t('inspectModal.panels.analysis')}</span>
                                 </div>
                                 <div className="p-6 space-y-8">
@@ -163,7 +163,7 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
                                     <section>
                                         <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
                                             {t('inspectModal.tabs.classification')}
-                                            <span className="text-xs font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Auto</span>
+                                            <span className="text-xs font-normal text-muted-foreground bg-muted px-1 py-0.5 rounded">Auto</span>
                                         </h3>
                                         <ClassificationTab data={messageData.classification} />
                                     </section>
@@ -172,7 +172,7 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
                                     <section>
                                         <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
                                             {t('inspectModal.tabs.atoms')}
-                                            <span className="text-xs font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Editable</span>
+                                            <span className="text-xs font-normal text-muted-foreground bg-muted px-1 py-0.5 rounded">Editable</span>
                                         </h3>
                                         <div className="bg-card rounded-lg border shadow-sm">
                                             <AtomsTab data={messageData.atoms} />
