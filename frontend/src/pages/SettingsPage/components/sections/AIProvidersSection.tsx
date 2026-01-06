@@ -12,6 +12,7 @@ import { Bot, Cpu, Plus, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/shared/ui/button';
+import { getHardwareAlias } from '@/shared/utils/hardwareAlias';
 
 import { providerService } from '@/features/providers/api';
 import {
@@ -226,22 +227,26 @@ export function AIProvidersSection() {
           />
         ) : (
           <>
-            {providers?.map((provider) => (
-              <SettingsCard
-                key={provider.id}
-                icon={getProviderIcon(provider.type)}
-                title={provider.name}
-                description={
-                  provider.type.charAt(0).toUpperCase() + provider.type.slice(1)
-                }
-                status={mapValidationStatus(provider.validation_status)}
-                statusLabel={getStatusLabel(
-                  provider.validation_status,
-                  provider.is_active
-                )}
-                onClick={() => handleProviderClick(provider)}
-              />
-            ))}
+            {providers?.map((provider) => {
+              const alias = getHardwareAlias(provider.name);
+              return (
+                <SettingsCard
+                  key={provider.id}
+                  icon={getProviderIcon(provider.type)}
+                  title={alias.displayName}
+                  titleTooltip={alias.isAlias ? alias.technicalName : undefined}
+                  description={
+                    provider.type.charAt(0).toUpperCase() + provider.type.slice(1)
+                  }
+                  status={mapValidationStatus(provider.validation_status)}
+                  statusLabel={getStatusLabel(
+                    provider.validation_status,
+                    provider.is_active
+                  )}
+                  onClick={() => handleProviderClick(provider)}
+                />
+              );
+            })}
             <AddSettingsCard
               label={t('providers.addProvider', 'Add Provider')}
               onClick={handleAddProvider}

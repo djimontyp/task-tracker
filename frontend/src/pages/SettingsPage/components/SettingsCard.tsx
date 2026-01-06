@@ -23,6 +23,11 @@ import { Switch } from '@/shared/ui/switch';
 import { Separator } from '@/shared/ui/separator';
 import { Skeleton } from '@/shared/ui/skeleton';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/shared/ui/tooltip';
+import {
   CheckCircle,
   Clock,
   XCircle,
@@ -50,6 +55,8 @@ export interface SettingsCardProps {
   icon: ComponentType<{ className?: string }>;
   /** Card title */
   title: string;
+  /** Tooltip text for title (shown on hover when different from title) */
+  titleTooltip?: string;
   /** Brief description or current value */
   description: string;
   /** Current status */
@@ -130,6 +137,7 @@ const statusConfig: Record<SettingsCardStatus, StatusConfigItem> = {
 export function SettingsCard({
   icon: Icon,
   title,
+  titleTooltip,
   description,
   status,
   statusLabel,
@@ -211,7 +219,20 @@ export function SettingsCard({
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="font-medium text-base mb-1 truncate">{title}</div>
+          {titleTooltip ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="font-medium text-base mb-1 truncate cursor-help">
+                  {title}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{titleTooltip}</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <div className="font-medium text-base mb-1 truncate">{title}</div>
+          )}
           <div className="text-sm text-muted-foreground line-clamp-2">
             {description}
           </div>
