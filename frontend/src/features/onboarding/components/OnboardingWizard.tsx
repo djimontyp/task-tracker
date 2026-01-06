@@ -169,7 +169,7 @@ export function OnboardingWizard({ open: controlledOpen, onClose, onComplete }: 
           </div>
         </div>
 
-        <div className="flex justify-between pt-4 border-t border-border">
+        <div className="sticky bottom-0 bg-background border-t border-border pt-4 flex justify-between">
           <Button variant="outline" onClick={handleBack} disabled={currentStep === 0 || isImporting}>
             {t('actions.back')}
           </Button>

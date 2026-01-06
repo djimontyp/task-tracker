@@ -70,8 +70,8 @@ export function DashboardPresenter({
     <PageWrapper variant="fullWidth">
       <OnboardingWizard open={showOnboarding} onClose={onCloseOnboarding} />
 
-      {/* Cold Start Empty State - SetupBanner */}
-      {hasNoData && !isAnyLoading && (
+      {/* Cold Start Empty State - SetupBanner (hidden when wizard is open) */}
+      {hasNoData && !isAnyLoading && !showOnboarding && (
         <SetupBanner
           step2Status={step2Status}
           step3Status={step3Status}

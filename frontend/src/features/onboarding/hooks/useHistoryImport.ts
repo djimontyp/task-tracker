@@ -175,13 +175,23 @@ export function useHistoryImport(
   const handleStartImport = useCallback(
     (depth: ImportDepth) => {
       if (depth === 'skip') {
-        // Skip import - just mark as completed
+        // Skip import - mark as completed and notify parent
         setStatus('completed');
+        onComplete?.({
+          type: 'import_completed',
+          job_id: 'manual_skip',
+          summary: {
+            total_fetched: 0,
+            total_stored: 0,
+            total_skipped: 0,
+            duration_seconds: 0,
+          },
+        });
         return;
       }
       startMutation.mutate({ depth });
     },
-    [startMutation]
+    [startMutation, onComplete]
   );
 
   const handleCancelImport = useCallback(() => {

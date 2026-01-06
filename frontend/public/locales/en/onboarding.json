@@ -88,7 +88,60 @@
       "activateAgent": "Activate Agent",
       "telegram": "Telegram",
       "slack": "Slack (Coming Soon)",
-      "slackComingSoon": "Slack integration coming soon!"
+      "slackComingSoon": "Slack integration coming soon!",
+      "importHistory": "Import History",
+      "skip": "Skip"
+    }
+  },
+  "import": {
+    "title": "Import History",
+    "description": "Load your first batch of messages",
+    "depth": {
+      "label": "Select import period",
+      "skip": "Skip import",
+      "24h": "Last 24 hours",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "all": "All available",
+      "recommended": "Recommended",
+      "longProcessing": "This may take a while"
+    },
+    "actions": {
+      "start": "Start Import",
+      "starting": "Starting...",
+      "startAnyway": "Import Anyway",
+      "cancel": "Cancel",
+      "cancelling": "Cancelling..."
+    },
+    "estimate": {
+      "info": "Estimates based on recent message activity",
+      "retry": "Retry",
+      "canImportAnyway": "You can still import messages even if estimates fail",
+      "unavailable": "Estimate unavailable"
+    },
+    "error": {
+      "rateLimited": "Rate limited. Retry in {{seconds}} seconds",
+      "fetchFailed": "Failed to fetch message estimates"
+    },
+    "warning": {
+      "all": "Importing all messages may take several hours"
+    },
+    "progress": {
+      "importing": "Importing...",
+      "completed": "Import completed",
+      "failed": "Import failed",
+      "cancelled": "Import cancelled",
+      "pending": "Pending",
+      "progress": "Progress",
+      "progressLabel": "{{percent}}% complete",
+      "fetched": "Fetched",
+      "fetchedDesc": "messages retrieved",
+      "stored": "Stored",
+      "storedDesc": "messages saved",
+      "skipped": "Skipped",
+      "skippedDesc": "duplicates/errors",
+      "skippedTooltip": "Messages that were skipped",
+      "elapsed": "Elapsed time"
     }
   }
 }
