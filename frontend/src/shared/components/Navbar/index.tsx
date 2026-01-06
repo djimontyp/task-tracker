@@ -57,7 +57,7 @@ export function Navbar({
     <nav
       className={cn(
         'z-modal w-full',
-        'bg-card shadow-sm dark:shadow-[0_1px_3px_rgba(0,0,0,0.2)]',
+        'bg-background border-b border-border',
         !isDesktop && 'fixed top-0 left-0 right-0'
       )}
     >

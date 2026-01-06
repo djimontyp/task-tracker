@@ -3,6 +3,7 @@
 import { AlertCircle, AlertTriangle, CheckCircle, Info } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Toaster as Sonner } from "sonner"
+import { zIndex } from "@/shared/tokens"
 
 type ToasterProps = React.ComponentProps<typeof Sonner>
 
@@ -19,6 +20,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      style={{ zIndex: zIndex.toast }}
       duration={TOAST_DURATION_MS}
       icons={{
         success: <CheckCircle className="h-5 w-5 text-semantic-success" />,
