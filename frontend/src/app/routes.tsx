@@ -44,6 +44,8 @@ export const AppRoutes = () => {
         <Route element={<MainLayout><AgentsPage /></MainLayout>} path="/agents" />
         <Route element={<MainLayout><AgentTasksPage /></MainLayout>} path="/agent-tasks" />
         <Route element={<Navigate to="/settings" replace />} path="/providers" />
+        {/* DORMANT: Analysis runs page - redirect to dashboard until implemented */}
+        <Route element={<Navigate to="/dashboard" replace />} path="/analysis" />
         <Route element={<MainLayout><ProjectsPage /></MainLayout>} path="/projects" />
         <Route element={<MainLayout><NoiseFilteringDashboard /></MainLayout>} path="/noise-filtering" />
         <Route element={<MainLayout><SettingsPage /></MainLayout>} path="/settings" />
