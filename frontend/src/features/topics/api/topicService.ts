@@ -60,6 +60,16 @@ class TopicService {
     return response.data
   }
 
+  async archiveTopic(topicId: string): Promise<Topic> {
+    const response = await apiClient.patch<Topic>(`${API_ENDPOINTS.topics}/${topicId}/archive`)
+    return response.data
+  }
+
+  async restoreTopic(topicId: string): Promise<Topic> {
+    const response = await apiClient.patch<Topic>(`${API_ENDPOINTS.topics}/${topicId}/restore`)
+    return response.data
+  }
+
   /**
    * Get similar topics using semantic search
    * Uses the topic's name and description as query for similarity search

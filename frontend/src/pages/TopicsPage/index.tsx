@@ -17,8 +17,9 @@ import {
 import { topicService } from '@/features/topics/api/topicService'
 import type { TopicListResponse, TopicSortBy } from '@/features/topics/types'
 import { renderTopicIcon } from '@/features/topics/utils/renderIcon'
-import { Folder, MessageSquare, Search, X, LayoutGrid, List, ChevronRight } from 'lucide-react'
+import { Folder, MessageSquare, Search, X, LayoutGrid, List, ChevronRight, MoreVertical, Archive, RefreshCw } from 'lucide-react'
 import { PageWrapper } from '@/shared/primitives'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu'
 import { TopicsSmartFilters } from './TopicsSmartFilters'
 import { useTopicFilterParams } from './useTopicFilterParams'
 
@@ -167,6 +168,30 @@ const TopicsPage = () => {
     updateColorMutation.mutate({ topicId, color })
   }
 
+  const archiveMutation = useMutation({
+    mutationFn: (topicId: string) => topicService.archiveTopic(topicId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['topics'] })
+      queryClient.invalidateQueries({ queryKey: ['topics-count'] })
+    },
+  })
+
+  const restoreMutation = useMutation({
+    mutationFn: (topicId: string) => topicService.restoreTopic(topicId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['topics'] })
+      queryClient.invalidateQueries({ queryKey: ['topics-count'] })
+    },
+  })
+
+  const handleArchiveToggle = (topicId: string, isCurrentlyActive: boolean) => {
+    if (isCurrentlyActive) {
+      archiveMutation.mutate(topicId)
+    } else {
+      restoreMutation.mutate(topicId)
+    }
+  }
+
   const handleAutoPickColor = async (topicId: string) => {
     try {
       const result = await topicService.suggestColor(topicId)
@@ -305,14 +330,34 @@ const TopicsPage = () => {
                     <div className="text-primary flex-shrink-0">
                       {renderTopicIcon(topic.icon, 'h-5 w-5', topic.color)}
                     </div>
-                    <h3 className="text-lg font-semibold flex-1">{topic.name}</h3>
-                    <div onClick={(e) => e.stopPropagation()}>
+                    <h3 className="text-lg font-semibold flex-1 mb-0">{topic.name}</h3>
+                    <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-1">
                       <ColorPickerPopover
                         color={topic.color || '#64748B'}
                         onColorChange={(color) => handleColorChange(topic.id, color)}
                         onAutoPickClick={() => handleAutoPickColor(topic.id)}
                         disabled={updateColorMutation.isPending}
                       />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleArchiveToggle(topic.id, topic.is_active)}>
+                            {topic.is_active ? (
+                              <>
+                                <Archive className="mr-2 h-4 w-4" /> {t('actions.archive', 'Archive')}
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="mr-2 h-4 w-4" /> {t('actions.restore', 'Restore')}
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
 
@@ -353,6 +398,28 @@ const TopicsPage = () => {
                         onAutoPickClick={() => handleAutoPickColor(topic.id)}
                         disabled={updateColorMutation.isPending}
                       />
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleArchiveToggle(topic.id, topic.is_active)}>
+                            {topic.is_active ? (
+                              <>
+                                <Archive className="mr-2 h-4 w-4" /> {t('actions.archive', 'Archive')}
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="mr-2 h-4 w-4" /> {t('actions.restore', 'Restore')}
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </div>
