@@ -8,7 +8,7 @@ import logging
 import time
 from uuid import UUID
 
-from pydantic_ai import Agent as PydanticAgent
+from pydantic_ai import Agent as PydanticAgent, PromptedOutput
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.settings import ModelSettings
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -207,12 +207,26 @@ class AgentTestService:
         start_time = time.time()
 
         try:
-            pydantic_agent = PydanticAgent(
-                model=model,
-                system_prompt=system_prompt,
-                output_type=KnowledgeExtractionOutput,
-                output_retries=5,
-            )
+            # Use PromptedOutput for Ollama to avoid Python repr parsing issues
+            # Ollama models work better with prompted mode than tool-based structured output
+            if provider.type == ProviderType.ollama:
+                logger.debug(
+                    f"Using PromptedOutput for Ollama provider '{provider.name}' "
+                    f"to ensure reliable JSON parsing"
+                )
+                pydantic_agent = PydanticAgent(
+                    model=model,
+                    system_prompt=system_prompt,
+                    output_type=PromptedOutput(KnowledgeExtractionOutput),
+                    output_retries=5,
+                )
+            else:
+                pydantic_agent = PydanticAgent(
+                    model=model,
+                    system_prompt=system_prompt,
+                    output_type=KnowledgeExtractionOutput,
+                    output_retries=5,
+                )
 
             # Build model settings
             model_settings_obj: ModelSettings | None = None
@@ -231,8 +245,8 @@ class AgentTestService:
 
             elapsed_time = time.time() - start_time
 
-            # Extract response text
-            response_text = str(result.output)
+            # Extract response text as proper JSON
+            response_text = result.output.model_dump_json()
 
             logger.info(f"Successfully tested agent '{agent.name}' (elapsed: {elapsed_time:.2f}s)")
 

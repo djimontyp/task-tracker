@@ -8,7 +8,7 @@ from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
-from pydantic_ai import Agent as PydanticAgent
+from pydantic_ai import Agent as PydanticAgent, PromptedOutput
 from pydantic_ai.settings import ModelSettings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -178,6 +178,11 @@ class KnowledgeOrchestrator:
     ) -> KnowledgeExtractionOutput:
         """Run single extraction attempt with given prompt.
 
+        Uses PromptedOutput for Ollama providers to ensure reliable JSON parsing.
+        Ollama models often return Python repr instead of JSON when using tool-based
+        structured output, so we use prompted mode which injects JSON schema into
+        the system prompt.
+
         Args:
             model: Configured LLM model
             system_prompt: System prompt for extraction
@@ -189,12 +194,30 @@ class KnowledgeOrchestrator:
         Raises:
             Exception: If LLM request fails
         """
-        agent = PydanticAgent(
-            model=model,
-            system_prompt=system_prompt,
-            output_type=KnowledgeExtractionOutput,
-            output_retries=5,
-        )
+        # Use PromptedOutput for Ollama to avoid Python repr parsing issues
+        # Ollama models work better with prompted mode than tool-based structured output
+        from app.models import ProviderType
+
+        use_prompted_output = self.provider.type == ProviderType.ollama
+
+        if use_prompted_output:
+            logger.debug(
+                f"Using PromptedOutput for Ollama provider '{self.provider.name}' "
+                f"to ensure reliable JSON parsing"
+            )
+            agent = PydanticAgent(
+                model=model,
+                system_prompt=system_prompt,
+                output_type=PromptedOutput(KnowledgeExtractionOutput),
+                output_retries=5,
+            )
+        else:
+            agent = PydanticAgent(
+                model=model,
+                system_prompt=system_prompt,
+                output_type=KnowledgeExtractionOutput,
+                output_retries=5,
+            )
 
         model_settings_obj: ModelSettings | None = None
         if self.agent_config.temperature is not None or self.agent_config.max_tokens is not None:
@@ -557,7 +580,7 @@ class KnowledgeOrchestrator:
         Returns:
             Number of messages updated
         """
-        message_id_to_topic: dict[int, int] = {}
+        message_id_to_topic: dict[uuid.UUID, uuid.UUID] = {}
 
         for extracted_topic in extracted_topics:
             if extracted_topic.name not in topic_map:

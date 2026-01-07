@@ -191,15 +191,15 @@ class EmbeddingService:
                 if self.provider.base_url.endswith("/v1")
                 else self.provider.base_url
             )
-            embed_url = f"{base_url}/api/embed"
+            embed_url = f"{base_url}/api/embeddings"
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     embed_url,
-                    json={"model": settings.embedding.ollama_embedding_model, "input": text},
+                    json={"model": settings.embedding.ollama_embedding_model, "prompt": text},
                 )
                 response.raise_for_status()
                 data = response.json()
-                embedding: list[float] = data["embeddings"][0]
+                embedding: list[float] = data["embedding"]
                 return await self._validate_embedding(embedding)
         except httpx.HTTPError as e:
             logger.error(f"Ollama embedding generation failed for provider '{self.provider.name}': {e}", exc_info=True)
