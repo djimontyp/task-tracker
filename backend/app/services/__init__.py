@@ -3,7 +3,7 @@
 from .agent_crud import AgentCRUD
 from .agent_registry import AgentRegistry
 from .assignment_crud import AssignmentCRUD
-from .atom_crud import AtomCRUD
+from .atom_crud import AtomCRUD, DeduplicationAction, DeduplicationResult
 from .credential_encryption import CredentialEncryption
 from .data_wipe_service import DataWipeService
 from .embedding_service import EmbeddingService
@@ -17,7 +17,7 @@ from .rag_context_builder import RAGContext, RAGContextBuilder
 from .schema_generator import SchemaGenerator
 from .semantic_search_service import SemanticSearchService
 from .task_crud import TaskCRUD
-from .topic_crud import TopicCRUD
+from .topic_crud import FindOrCreateResult, TopicCRUD
 from .vector_query_builder import VectorQueryBuilder
 from .websocket_manager import websocket_manager
 
@@ -26,9 +26,12 @@ __all__ = [
     "AgentRegistry",
     "AssignmentCRUD",
     "AtomCRUD",
+    "DeduplicationAction",
+    "DeduplicationResult",
     "CredentialEncryption",
     "DataWipeService",
     "EmbeddingService",
+    "FindOrCreateResult",
     "MessageCRUD",
     "MessageInspectService",
     "OllamaService",
