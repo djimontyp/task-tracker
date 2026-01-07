@@ -19,7 +19,9 @@ if TYPE_CHECKING:
 from app.config.ai_config import ai_config
 from app.models import AgentConfig, Atom, AtomLink, LLMProvider, Message, ProjectConfig, Topic, TopicAtom
 from app.models.topic import auto_select_color, auto_select_icon
+from app.services.atom_crud import AtomCRUD, DeduplicationAction
 from app.services.credential_encryption import CredentialEncryption
+from app.services.embedding_service import EmbeddingService
 from app.services.knowledge.knowledge_schemas import (
     ExtractedAtom,
     ExtractedTopic,
@@ -33,6 +35,8 @@ from app.services.knowledge.llm_agents import (
     validate_output_language,
 )
 from app.services.rag_context_builder import RAGContextBuilder
+from app.services.semantic_search_service import SemanticSearchService
+from app.services.topic_crud import TopicCRUD
 from app.services.versioning import VersioningService
 
 logger = logging.getLogger(__name__)
@@ -316,7 +320,20 @@ class KnowledgeOrchestrator:
         if confidence_threshold is None:
             confidence_threshold = ai_config.knowledge_extraction.confidence_threshold
 
+        topic_crud = TopicCRUD(session)
         versioning_service = VersioningService()
+        
+        # Initialize semantic services
+        try:
+            embedding_service = EmbeddingService(self.provider)
+            search_service = SemanticSearchService(embedding_service)
+            use_semantic_search = True
+        except ValueError as e:
+            logger.warning(f"Semantic search unavailable for topic dedup: {e}")
+            use_semantic_search = False
+            embedding_service = None
+            search_service = None
+
         topic_map: dict[str, Topic] = {}
         version_created_topic_ids: list[int] = []
 
@@ -328,58 +345,86 @@ class KnowledgeOrchestrator:
                 )
                 continue
 
-            result = await session.execute(select(Topic).where(Topic.name == extracted_topic.name))  # type: ignore[arg-type]
-            existing_topic = result.scalar_one_or_none()
+            # Prepare topic data
+            icon = auto_select_icon(extracted_topic.name, extracted_topic.description)
+            color = auto_select_color(icon)
+            
+            from app.models import TopicCreate
+            topic_data = TopicCreate(
+                name=extracted_topic.name,
+                description=extracted_topic.description,
+                icon=icon,
+                color=color
+            )
 
-            if existing_topic:
-                logger.info(
-                    f"Topic '{extracted_topic.name}' already exists (ID: {existing_topic.id}), "
-                    "creating version snapshot"
+            # Use semantic dedup if available
+            if use_semantic_search and embedding_service and search_service:
+                result = await topic_crud.find_or_create(
+                    topic_data=topic_data,
+                    embedding_service=embedding_service,
+                    search_service=search_service,
+                    threshold=0.85
                 )
-
-                icon = auto_select_icon(extracted_topic.name, extracted_topic.description)
-                color = auto_select_color(icon)
-
-                version_data = {
-                    "name": extracted_topic.name,
-                    "description": extracted_topic.description,
-                    "icon": icon,
-                    "color": color,
-                }
-
-                await versioning_service.create_topic_version(
-                    db=session,
-                    topic_id=existing_topic.id,
-                    data=version_data,
-                    created_by=created_by or "knowledge_extraction",
-                )
-
-                if existing_topic.id is not None:
-                    version_created_topic_ids.append(existing_topic.id)
-
-                topic_map[extracted_topic.name] = existing_topic
+                
+                # Convert TopicPublic back to Topic model for map (simplified)
+                # We need the ID to map it
+                topic_id = result.topic.id
+                
+                # We need the actual ORM object for the map if possible, or just enough for save_atoms
+                # Re-fetch the ORM object ensures we have what we need
+                topic_orm = await session.get(Topic, topic_id)
+                if topic_orm:
+                    topic_map[extracted_topic.name] = topic_orm
+                    if result.was_merged:
+                         # Optional: Create version snapshot if we want to track updates to existing topics
+                         # For now, we assume "merged" means "reused" without change.
+                         pass
+                    else:
+                        logger.info(f"Created new topic '{extracted_topic.name}' (ID: {topic_id})")
+                
             else:
-                icon = auto_select_icon(extracted_topic.name, extracted_topic.description)
-                color = auto_select_color(icon)
+                # Fallback to exact name match (legacy logic)
+                result = await session.execute(select(Topic).where(Topic.name == extracted_topic.name))  # type: ignore[arg-type]
+                existing_topic = result.scalar_one_or_none()
 
-                new_topic = Topic(
-                    name=extracted_topic.name,
-                    description=extracted_topic.description,
-                    icon=icon,
-                    color=color,
-                )
-                session.add(new_topic)
-                await session.flush()
-
-                logger.info(
-                    f"Created topic '{extracted_topic.name}' (ID: {new_topic.id}, "
-                    f"confidence: {extracted_topic.confidence:.2f})"
-                )
-                topic_map[extracted_topic.name] = new_topic
+                if existing_topic:
+                    logger.info(
+                        f"Topic '{extracted_topic.name}' already exists (ID: {existing_topic.id}), "
+                        "creating version snapshot"
+                    )
+                    version_data = {
+                        "name": extracted_topic.name,
+                        "description": extracted_topic.description,
+                        "icon": icon,
+                        "color": color,
+                    }
+                    await versioning_service.create_topic_version(
+                        db=session,
+                        topic_id=existing_topic.id,
+                        data=version_data,
+                        created_by=created_by or "knowledge_extraction",
+                    )
+                    if existing_topic.id is not None:
+                        version_created_topic_ids.append(existing_topic.id)
+                    topic_map[extracted_topic.name] = existing_topic
+                else:
+                    new_topic = Topic(
+                        name=extracted_topic.name,
+                        description=extracted_topic.description,
+                        icon=icon,
+                        color=color,
+                    )
+                    session.add(new_topic)
+                    await session.flush()
+                    logger.info(
+                        f"Created topic '{extracted_topic.name}' (ID: {new_topic.id}, "
+                        f"confidence: {extracted_topic.confidence:.2f})"
+                    )
+                    topic_map[extracted_topic.name] = new_topic
 
         await session.commit()
         logger.info(
-            f"Saved {len(topic_map)} topics to database ({len(version_created_topic_ids)} had versions created)"
+            f"Saved {len(topic_map)} topics to database"
         )
         return topic_map, version_created_topic_ids
 
@@ -411,7 +456,20 @@ class KnowledgeOrchestrator:
         if confidence_threshold is None:
             confidence_threshold = ai_config.knowledge_extraction.confidence_threshold
 
-        versioning_service = VersioningService()
+        atom_crud = AtomCRUD(session)
+        topic_crud = TopicCRUD(session)
+        
+        # Initialize semantic services
+        try:
+            embedding_service = EmbeddingService(self.provider)
+            search_service = SemanticSearchService(embedding_service)
+            use_semantic_dedup = True
+        except ValueError as e:
+            logger.warning(f"Semantic search unavailable for atom dedup: {e}")
+            use_semantic_dedup = False
+            embedding_service = None
+            search_service = None
+
         saved_atoms: list[Atom] = []
         version_created_atom_ids: list[uuid.UUID] = []
 
@@ -430,58 +488,96 @@ class KnowledgeOrchestrator:
                 )
                 continue
 
-            result = await session.execute(select(Atom).where(Atom.title == extracted_atom.title))  # type: ignore[arg-type]
-            existing_atom = result.scalar_one_or_none()
+            topic = topic_map[extracted_atom.topic_name]
 
-            if existing_atom:
-                logger.info(
-                    f"Atom '{extracted_atom.title}' already exists (ID: {existing_atom.id}), creating version snapshot"
+            # Prepare atom data
+            from app.models import AtomCreate
+            atom_data = AtomCreate(
+                type=extracted_atom.type,
+                title=extracted_atom.title,
+                content=extracted_atom.content,
+                confidence=extracted_atom.confidence,
+                user_approved=False,
+                meta={"source": "llm_extraction", "message_ids": [str(mid) for mid in extracted_atom.related_message_ids]}
+            )
+
+            current_atom = None
+
+            # Use semantic dedup
+            if use_semantic_dedup and embedding_service and search_service:
+                dedup_result = await atom_crud.create_with_dedup(
+                    atom_data=atom_data,
+                    embedding_service=embedding_service,
+                    search_service=search_service,
+                    threshold_high=0.95,
+                    threshold_mid=0.85,
+                    created_by=created_by or "knowledge_extraction"
                 )
-
-                version_data = {
-                    "type": extracted_atom.type,
-                    "title": extracted_atom.title,
-                    "content": extracted_atom.content,
-                    "confidence": extracted_atom.confidence,
-                    "meta": {"source": "llm_extraction", "message_ids": [str(mid) for mid in extracted_atom.related_message_ids]},
-                }
-
-                await versioning_service.create_atom_version(
-                    db=session,
-                    atom_id=existing_atom.id,
-                    data=version_data,
-                    created_by=created_by or "knowledge_extraction",
-                )
-
-                if existing_atom.id is not None:
-                    version_created_atom_ids.append(existing_atom.id)
-
-                saved_atoms.append(existing_atom)
+                
+                # Fetch ORM object
+                current_atom = await session.get(Atom, uuid.UUID(dedup_result.atom.id))
+                
+                if dedup_result.action == DeduplicationAction.CREATED_VERSION:
+                    version_created_atom_ids.append(uuid.UUID(dedup_result.atom.id))
+                    logger.info(f"Created version for existing atom {dedup_result.atom.id} (similarity: {dedup_result.similarity_score:.3f})")
+                elif dedup_result.action == DeduplicationAction.CREATED_SIMILAR:
+                    logger.info(f"Created new atom {dedup_result.atom.id} marked similar to {dedup_result.similar_atom_id}")
+                else:
+                    logger.info(f"Created new unique atom {dedup_result.atom.id}")
+            
             else:
-                new_atom = Atom(
-                    type=extracted_atom.type,
-                    title=extracted_atom.title,
-                    content=extracted_atom.content,
-                    confidence=extracted_atom.confidence,
-                    user_approved=False,
-                    meta={"source": "llm_extraction", "message_ids": [str(mid) for mid in extracted_atom.related_message_ids]},
-                )
-                session.add(new_atom)
-                await session.flush()
+                # Fallback to legacy exact match
+                result = await session.execute(select(Atom).where(Atom.title == extracted_atom.title))
+                existing_atom = result.scalar_one_or_none()
 
-                topic = topic_map[extracted_atom.topic_name]
-                topic_atom = TopicAtom(
+                if existing_atom:
+                    logger.info(f"Atom '{extracted_atom.title}' already exists, creating version (legacy)")
+                    versioning_service = VersioningService() # Local import if needed
+                    version_data = {
+                        "type": extracted_atom.type,
+                        "title": extracted_atom.title,
+                        "content": extracted_atom.content,
+                        "confidence": extracted_atom.confidence,
+                        "meta": atom_data.meta
+                    }
+                    await versioning_service.create_atom_version(
+                        db=session, atom_id=existing_atom.id, data=version_data, created_by="knowledge_extraction"
+                    )
+                    version_created_atom_ids.append(existing_atom.id)
+                    current_atom = existing_atom
+                else:
+                    new_atom = Atom(
+                        type=extracted_atom.type,
+                        title=extracted_atom.title,
+                        content=extracted_atom.content,
+                        confidence=extracted_atom.confidence,
+                        user_approved=False,
+                        meta=atom_data.meta,
+                    )
+                    session.add(new_atom)
+                    await session.flush()
+                    current_atom = new_atom
+
+            if current_atom:
+                saved_atoms.append(current_atom)
+                
+                # Link to PRIMARY topic (from prompt)
+                # Note: create_with_dedup doesn't link topics, we do it here
+                await atom_crud.link_to_topic(
+                    atom_id=current_atom.id,
                     topic_id=topic.id,
-                    atom_id=new_atom.id,
-                    note=f"Auto-extracted with confidence {extracted_atom.confidence:.2f}",
+                    note=f"Extracted prompt assignment (confidence: {extracted_atom.confidence:.2f})"
                 )
-                session.add(topic_atom)
-
-                logger.info(
-                    f"Created atom '{extracted_atom.title}' (ID: {new_atom.id}, type: {extracted_atom.type}, "
-                    f"topic: {extracted_atom.topic_name}, confidence: {extracted_atom.confidence:.2f})"
-                )
-                saved_atoms.append(new_atom)
+                
+                # AUTO-LINK to other semantically similar topics
+                # But only for NEW atoms (to avoid spamming links on every extraction of old atoms)
+                # Or maybe check if links exist? auto_link_atom checks existence internally.
+                if use_semantic_dedup:
+                    await topic_crud.auto_link_atom(
+                        atom_id=current_atom.id,
+                        atom_content=f"{current_atom.title}\n\n{current_atom.content}",
+                        threshold=0.80
+                    )
 
         await session.commit()
         logger.info(

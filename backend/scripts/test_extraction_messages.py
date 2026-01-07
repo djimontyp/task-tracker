@@ -152,8 +152,8 @@ async def load_messages_to_db(messages: list[ParsedMessage], source_name: str = 
                 first_name = name_parts[0][:100] if name_parts else "Unknown"
                 last_name = name_parts[1][:100] if len(name_parts) > 1 else None
 
-                # Check if user exists by first_name
-                result = await db.execute(select(User).where(User.first_name == first_name))
+                # Check if user exists by first_name (use first to handle duplicates)
+                result = await db.execute(select(User).where(User.first_name == first_name).limit(1))
                 user = result.scalar_one_or_none()
 
                 if not user:
@@ -245,7 +245,11 @@ async def trigger_extraction(message_ids: list[uuid.UUID]) -> None:
 
 async def main() -> None:
     """Main entry point."""
-    file_path = Path(__file__).parent / "sample_chat_messages.txt"
+    # Support CLI argument for file path
+    if len(sys.argv) > 1:
+        file_path = Path(sys.argv[1])
+    else:
+        file_path = Path(__file__).parent / "sample_chat_messages.txt"
 
     if not file_path.exists():
         print(f"❌ File not found: {file_path}")
