@@ -44,6 +44,7 @@ export interface ListTopicsParams {
   page_size?: number
   search?: string
   sort_by?: TopicSortBy
+  is_active?: boolean
 }
 
 export interface RecentTopic extends Topic {

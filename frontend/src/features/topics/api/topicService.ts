@@ -20,6 +20,10 @@ class TopicService {
       queryParams.sort_by = params.sort_by
     }
 
+    if (params?.is_active !== undefined) {
+      queryParams.is_active = params.is_active.toString()
+    }
+
     const response = await apiClient.get<TopicListResponse>(API_ENDPOINTS.topics, {
       params: queryParams,
     })

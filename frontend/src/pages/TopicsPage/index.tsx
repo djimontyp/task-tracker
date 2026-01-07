@@ -56,17 +56,22 @@ const TopicsPage = () => {
     setCurrentPage(1)
   }, [debouncedSearch, sortBy, filterMode])
 
+  // Convert filterMode to is_active param for API
+  const isActiveParam = filterMode === 'all' ? undefined : filterMode === 'active'
+
   const { data: topics, isLoading, error } = useQuery<TopicListResponse>({
     queryKey: ['topics', {
       page: currentPage,
       search: debouncedSearch,
-      sort_by: sortBy
+      sort_by: sortBy,
+      is_active: isActiveParam,
     }],
     queryFn: () => topicService.listTopics({
       page: currentPage,
       page_size: pageSize,
       search: debouncedSearch || undefined,
       sort_by: sortBy,
+      is_active: isActiveParam,
     }),
   })
 
@@ -76,36 +81,53 @@ const TopicsPage = () => {
     }
   }, [topics, debouncedSearch])
 
-  // Calculate filter counts from topics
-  // Note: Backend doesn't have archived field yet, so all topics are treated as active
-  // When backend adds archived support, update Topic type and filter logic
-  const filterCounts = useMemo(() => {
-    const total = topics?.total || 0
-    // TODO: When backend adds archived field, use: topics?.items.filter(t => t.archived).length
-    const archivedCount = 0
-    return {
-      all: total,
-      active: total - archivedCount,
-      archived: archivedCount,
-    }
-  }, [topics])
+  // Fetch counts for each filter tab (all, active, archived)
+  const { data: allCount } = useQuery<TopicListResponse, Error, number>({
+    queryKey: ['topics-count', 'all', debouncedSearch],
+    queryFn: () => topicService.listTopics({
+      page: 1,
+      page_size: 1,
+      search: debouncedSearch || undefined,
+    }),
+    select: (data) => data.total,
+  })
 
-  // Filter topics based on filterMode
-  // Note: Currently all topics are active since backend doesn't have archived field
-  const filteredTopics = useMemo(() => {
-    if (!topics?.items) return []
-    // TODO: When backend adds archived field:
-    // if (filterMode === 'active') return topics.items.filter(t => !t.archived)
-    // if (filterMode === 'archived') return topics.items.filter(t => t.archived)
-    if (filterMode === 'archived') return []
-    return topics.items
-  }, [topics?.items, filterMode])
+  const { data: activeCount } = useQuery<TopicListResponse, Error, number>({
+    queryKey: ['topics-count', 'active', debouncedSearch],
+    queryFn: () => topicService.listTopics({
+      page: 1,
+      page_size: 1,
+      search: debouncedSearch || undefined,
+      is_active: true,
+    }),
+    select: (data) => data.total,
+  })
+
+  const { data: archivedCount } = useQuery<TopicListResponse, Error, number>({
+    queryKey: ['topics-count', 'archived', debouncedSearch],
+    queryFn: () => topicService.listTopics({
+      page: 1,
+      page_size: 1,
+      search: debouncedSearch || undefined,
+      is_active: false,
+    }),
+    select: (data) => data.total,
+  })
+
+  const filterCounts = useMemo(() => ({
+    all: allCount ?? 0,
+    active: activeCount ?? 0,
+    archived: archivedCount ?? 0,
+  }), [allCount, activeCount, archivedCount])
+
+  // Topics are already filtered by API based on filterMode
+  const filteredTopics = topics?.items ?? []
 
   const updateColorMutation = useMutation({
     mutationFn: ({ topicId, color }: { topicId: string; color: string }) =>
       topicService.updateTopicColor(topicId, color),
     onMutate: async ({ topicId, color }) => {
-      const queryKey = ['topics', { page: currentPage, search: debouncedSearch, sort_by: sortBy }]
+      const queryKey = ['topics', { page: currentPage, search: debouncedSearch, sort_by: sortBy, is_active: isActiveParam }]
       await queryClient.cancelQueries({ queryKey })
 
       const previousTopics = queryClient.getQueryData<TopicListResponse>(queryKey)
@@ -123,7 +145,7 @@ const TopicsPage = () => {
       return { previousTopics, queryKey }
     },
     onSuccess: (updatedTopic, { topicId }) => {
-      const queryKey = ['topics', { page: currentPage, search: debouncedSearch, sort_by: sortBy }]
+      const queryKey = ['topics', { page: currentPage, search: debouncedSearch, sort_by: sortBy, is_active: isActiveParam }]
       queryClient.setQueryData<TopicListResponse>(queryKey, (old) => {
         if (!old) return old
         return {
