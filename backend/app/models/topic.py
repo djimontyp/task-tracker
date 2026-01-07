@@ -229,6 +229,11 @@ class Topic(TimestampMixin, SQLModel, table=True):
         sa_column=Column(Vector(1536)),
         description="Vector embedding for semantic search (1536 dimensions)",
     )
+    is_active: bool = Field(
+        default=True,
+        index=True,
+        description="Whether this topic is active (soft delete support)",
+    )
 
     # Versioning relationship
     versions: list["TopicVersion"] = Relationship(back_populates="topic", sa_relationship_kwargs={"lazy": "select"})  # type: ignore[name-defined]
@@ -244,6 +249,7 @@ class TopicPublic(SQLModel):
     color: str | None
     created_at: str
     updated_at: str
+    is_active: bool = Field(default=True, description="Whether this topic is active")
     atoms_count: int = Field(default=0, description="Number of atoms linked to this topic")
     message_count: int = Field(default=0, description="Number of messages linked to this topic")
 

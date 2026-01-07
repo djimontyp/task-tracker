@@ -12,18 +12,16 @@ from sqlmodel import SQLModel
 
 # Ensure project root is on sys.path so that `from src...` imports work
 THIS_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = THIS_DIR.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+BACKEND_ROOT = THIS_DIR.parent  # backend/
+PROJECT_ROOT = BACKEND_ROOT.parent  # project root
 
-# Import all models (new agent management + legacy task tracker)
-try:
-    import backend.app.models  # type: ignore[import-not-found]  # noqa: F401, E402
-    from backend.core.config import settings  # type: ignore[import-not-found]  # noqa: E402
-except ModuleNotFoundError:
-    # Running in Docker container where structure is flat
-    import app.models  # noqa: F401, E402
-    from core.config import settings  # noqa: E402
+# Add backend directory to sys.path first to ensure app.* imports work
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
+
+# Import all models
+import app.models  # noqa: F401, E402
+from core.config import settings  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -38,7 +36,7 @@ target_metadata = SQLModel.metadata
 
 
 def get_url() -> str:
-    return settings.database.migration_database_url  # type: ignore[no-any-return]
+    return settings.database.migration_database_url
 
 
 def get_offline_url() -> str:

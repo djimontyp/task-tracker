@@ -193,6 +193,12 @@ class TopicAtom(TimestampMixin, SQLModel, table=True):
         sa_type=Text,
         description="Contextual note about why this atom belongs to this topic",
     )
+    similarity_score: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Semantic similarity score between topic and atom embeddings (0-1)",
+    )
 
 
 class AtomPublic(SQLModel):
@@ -361,6 +367,7 @@ class TopicAtomPublic(SQLModel):
     atom_id: uuid.UUID
     position: int | None
     note: str | None
+    similarity_score: float | None
     created_at: datetime
     updated_at: datetime
 
