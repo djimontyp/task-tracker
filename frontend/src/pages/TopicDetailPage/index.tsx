@@ -14,6 +14,7 @@ import { AtomCard, CreateAtomDialog } from '@/features/atoms/components'
 import { VersionHistoryList, VersionDiffViewer, KnowledgeExtractionPanel } from '@/features/knowledge'
 import { ConsumerMessageModal } from '@/features/messages/components'
 import { renderTopicIcon } from '@/features/topics/utils/renderIcon'
+import { SimilarTopicsSection } from '@/features/topics/components'
 import { useDebounce } from '@/shared/hooks'
 import { useWebSocket } from '@/shared/hooks'
 import type { Topic } from '@/features/topics/types'
@@ -518,6 +519,18 @@ const TopicDetailPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Similar Topics Section */}
+      <SimilarTopicsSection
+        topic={topic}
+        onMergeClick={(targetTopic) => {
+          // TODO: Implement merge dialog
+          toast.info(t('detailPage.similarTopics.mergeNotImplemented', {
+            name: targetTopic.name,
+            defaultValue: `Merge with "${targetTopic.name}" - feature coming soon`,
+          }))
+        }}
+      />
 
       <div className="space-y-6">
         <div>

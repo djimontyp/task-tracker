@@ -1,6 +1,6 @@
 import apiClient from '@/shared/lib/api/client'
 import { API_ENDPOINTS } from '@/shared/config/api'
-import type { ListTopicsParams, Topic, TopicListResponse, UpdateTopic } from '../types'
+import type { ListTopicsParams, Topic, TopicListResponse, UpdateTopic, SimilarTopic } from '../types'
 
 class TopicService {
   async listTopics(params?: ListTopicsParams): Promise<TopicListResponse> {
@@ -58,6 +58,29 @@ class TopicService {
   async updateTopicColor(topicId: string, color: string): Promise<Topic> {
     const response = await apiClient.patch<Topic>(`${API_ENDPOINTS.topics}/${topicId}`, { color })
     return response.data
+  }
+
+  /**
+   * Get similar topics using semantic search
+   * Uses the topic's name and description as query for similarity search
+   */
+  async getSimilarTopics(
+    topicId: string,
+    query: string,
+    providerId: string,
+    limit: number = 5,
+    threshold: number = 0.7
+  ): Promise<SimilarTopic[]> {
+    const response = await apiClient.get<SimilarTopic[]>(API_ENDPOINTS.search.topics, {
+      params: {
+        query,
+        provider_id: providerId,
+        limit,
+        threshold,
+      },
+    })
+    // Filter out the current topic from results
+    return response.data.filter((item) => item.topic.id !== topicId)
   }
 }
 

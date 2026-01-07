@@ -89,6 +89,8 @@ export const API_ENDPOINTS = {
     topics: buildApiPath('search/topics'),
     messageSimilar: (messageId: number) => buildApiPath(`search/messages/${messageId}/similar`),
     messageDuplicates: (messageId: number) => buildApiPath(`search/messages/${messageId}/duplicates`),
+    topicSimilar: (_topicId: string, providerId: string) =>
+      buildApiPath(`search/topics?query=&provider_id=${encodeURIComponent(providerId)}`),
   },
 
   // Dashboard endpoints

@@ -57,3 +57,11 @@ export interface RecentTopicsResponse {
   items: RecentTopic[]
   total: number
 }
+
+/**
+ * Similar topic result from semantic search
+ */
+export interface SimilarTopic {
+  topic: Topic
+  similarity_score: number
+}
