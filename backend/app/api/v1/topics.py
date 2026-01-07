@@ -46,7 +46,7 @@ class TimePeriod(str, Enum):
     "",
     response_model=TopicListResponse,
     summary="List topics",
-    description="Get list of all topics with pagination, search, and sorting.",
+    description="Get list of all topics with pagination, search, sorting, and active filter.",
 )
 async def list_topics(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
@@ -56,9 +56,10 @@ async def list_topics(
         "created_desc",
         description="Sort criteria: name_asc, name_desc, created_desc, created_asc, updated_desc",
     ),
+    is_active: bool | None = Query(None, description="Filter by active status. None returns all topics."),
     session: AsyncSession = Depends(get_session),
 ) -> TopicListResponse:
-    """List all topics with pagination, search, and sorting.
+    """List all topics with pagination, search, sorting, and active filter.
 
     Returns topics with optional search filtering and customizable sorting.
     Topics are used for categorizing messages and tasks.
@@ -68,6 +69,7 @@ async def list_topics(
         limit: Maximum number of records to return
         search: Optional search query for name or description
         sort_by: Sort order (default: created_desc)
+        is_active: Filter by active status. None returns all topics.
         session: Database session
 
     Returns:
@@ -79,6 +81,7 @@ async def list_topics(
         limit=limit,
         search=search,
         sort_by=sort_by,
+        is_active=is_active,
     )
     page = (skip // limit) + 1 if limit else 1
     return TopicListResponse(
@@ -357,3 +360,82 @@ async def get_topic_messages(
 
     crud = MessageCRUD(session)
     return await crud.list_by_topic(topic_id, skip=skip, limit=limit)
+
+
+@router.patch(
+    "/{topic_id}/archive",
+    response_model=TopicPublic,
+    summary="Archive topic",
+    description="Archive a topic by setting is_active to false.",
+)
+async def archive_topic(
+    topic_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+) -> TopicPublic:
+    """Archive a topic.
+
+    Sets is_active to False, effectively soft-deleting the topic.
+    Archived topics can be filtered out from list queries.
+
+    Args:
+        topic_id: Topic ID to archive
+        session: Database session
+
+    Returns:
+        Updated topic with is_active=False
+
+    Raises:
+        HTTPException: 404 if topic not found
+    """
+    crud = TopicCRUD(session)
+    topic = await crud.archive(topic_id)
+
+    if not topic:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Topic with ID {topic_id} not found",
+        )
+
+    # Broadcast metrics update to WebSocket clients
+    await metrics_broadcaster.broadcast_on_topic_change(session)
+
+    return topic
+
+
+@router.patch(
+    "/{topic_id}/restore",
+    response_model=TopicPublic,
+    summary="Restore archived topic",
+    description="Restore an archived topic by setting is_active to true.",
+)
+async def restore_topic(
+    topic_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+) -> TopicPublic:
+    """Restore an archived topic.
+
+    Sets is_active to True, restoring the topic to active state.
+
+    Args:
+        topic_id: Topic ID to restore
+        session: Database session
+
+    Returns:
+        Updated topic with is_active=True
+
+    Raises:
+        HTTPException: 404 if topic not found
+    """
+    crud = TopicCRUD(session)
+    topic = await crud.restore(topic_id)
+
+    if not topic:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Topic with ID {topic_id} not found",
+        )
+
+    # Broadcast metrics update to WebSocket clients
+    await metrics_broadcaster.broadcast_on_topic_change(session)
+
+    return topic

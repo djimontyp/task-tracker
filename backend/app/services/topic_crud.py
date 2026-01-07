@@ -56,11 +56,12 @@ class TopicCRUD(BaseCRUD[Topic]):
             Topic.description,
             Topic.icon,
             Topic.color,
+            Topic.is_active,
             Topic.created_at,
             Topic.updated_at,
             sa_func.count(sa_func.distinct(TopicAtom.atom_id)).label("atoms_count"),
             sa_func.count(sa_func.distinct(Message.id)).label("message_count"),
-        ).where(Topic.id == topic_id).outerjoin(TopicAtom, TopicAtom.topic_id == Topic.id).outerjoin(Message, Message.topic_id == Topic.id).group_by(Topic.id, Topic.name, Topic.description, Topic.icon, Topic.color, Topic.created_at, Topic.updated_at)
+        ).where(Topic.id == topic_id).outerjoin(TopicAtom, TopicAtom.topic_id == Topic.id).outerjoin(Message, Message.topic_id == Topic.id).group_by(Topic.id, Topic.name, Topic.description, Topic.icon, Topic.color, Topic.is_active, Topic.created_at, Topic.updated_at)
 
         result = await self.session.execute(query)
         row = result.one_or_none()
@@ -76,6 +77,7 @@ class TopicCRUD(BaseCRUD[Topic]):
             description=row.description,
             icon=row.icon,
             color=color,
+            is_active=row.is_active,
             created_at=row.created_at.isoformat() if row.created_at else "",
             updated_at=row.updated_at.isoformat() if row.updated_at else "",
             atoms_count=row.atoms_count,
@@ -88,6 +90,7 @@ class TopicCRUD(BaseCRUD[Topic]):
         limit: int = 100,
         search: str | None = None,
         sort_by: str | None = "created_desc",
+        is_active: bool | None = None,
     ) -> tuple[list[TopicPublic], int]:
         """List topics with pagination, search, and sorting.
 
@@ -101,12 +104,15 @@ class TopicCRUD(BaseCRUD[Topic]):
                 - "created_desc": Sort by created_at descending (default)
                 - "created_asc": Sort by created_at ascending
                 - "updated_desc": Sort by updated_at descending
+            is_active: Filter by active status. None returns all topics.
 
         Returns:
             Tuple of (list of topics, total count)
         """
         # Count query for total (without joins for performance)
         count_base = select(Topic)
+        if is_active is not None:
+            count_base = count_base.where(Topic.is_active == is_active)
         if search:
             search_filter = search.strip()
             count_base = count_base.where(
@@ -123,11 +129,15 @@ class TopicCRUD(BaseCRUD[Topic]):
             Topic.description,
             Topic.icon,
             Topic.color,
+            Topic.is_active,
             Topic.created_at,
             Topic.updated_at,
             sa_func.count(sa_func.distinct(TopicAtom.atom_id)).label("atoms_count"),
             sa_func.count(sa_func.distinct(Message.id)).label("message_count"),
         ).outerjoin(TopicAtom, TopicAtom.topic_id == Topic.id).outerjoin(Message, Message.topic_id == Topic.id)
+
+        if is_active is not None:
+            query = query.where(Topic.is_active == is_active)
 
         if search:
             search_filter = search.strip()
@@ -136,7 +146,7 @@ class TopicCRUD(BaseCRUD[Topic]):
             )
 
         # Group by all topic columns
-        query = query.group_by(Topic.id, Topic.name, Topic.description, Topic.icon, Topic.color, Topic.created_at, Topic.updated_at)
+        query = query.group_by(Topic.id, Topic.name, Topic.description, Topic.icon, Topic.color, Topic.is_active, Topic.created_at, Topic.updated_at)
 
         # Apply sorting
         if sort_by == "name_asc":
@@ -164,6 +174,7 @@ class TopicCRUD(BaseCRUD[Topic]):
                     description=row.description,
                     icon=row.icon,
                     color=color,
+                    is_active=row.is_active,
                     created_at=row.created_at.isoformat() if row.created_at else "",
                     updated_at=row.updated_at.isoformat() if row.updated_at else "",
                     atoms_count=row.atoms_count,
@@ -206,6 +217,7 @@ class TopicCRUD(BaseCRUD[Topic]):
             description=topic.description,
             icon=topic.icon,
             color=color,
+            is_active=topic.is_active,
             created_at=topic.created_at.isoformat() if topic.created_at else "",
             updated_at=topic.updated_at.isoformat() if topic.updated_at else "",
             atoms_count=0,
@@ -329,3 +341,41 @@ class TopicCRUD(BaseCRUD[Topic]):
         ]
 
         return RecentTopicsResponse(items=items, total=len(items))
+
+    async def archive(self, topic_id: uuid.UUID) -> TopicPublic | None:
+        """Archive a topic by setting is_active to False.
+
+        Args:
+            topic_id: Topic UUID to archive
+
+        Returns:
+            Updated topic or None if not found
+        """
+        topic = await super().get(topic_id)
+        if not topic:
+            return None
+
+        topic.is_active = False
+        await self.session.commit()
+        await self.session.refresh(topic)
+
+        return await self.get(topic_id)
+
+    async def restore(self, topic_id: uuid.UUID) -> TopicPublic | None:
+        """Restore an archived topic by setting is_active to True.
+
+        Args:
+            topic_id: Topic UUID to restore
+
+        Returns:
+            Updated topic or None if not found
+        """
+        topic = await super().get(topic_id)
+        if not topic:
+            return None
+
+        topic.is_active = True
+        await self.session.commit()
+        await self.session.refresh(topic)
+
+        return await self.get(topic_id)
