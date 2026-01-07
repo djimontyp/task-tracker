@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Card, CardContent, Badge, Button } from '@/shared/ui'
+import { Card, CardContent, Badge, Button, Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/shared/ui'
 import { cn } from '@/shared/lib'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import {
@@ -14,12 +14,15 @@ import {
   Ban,
   AlertTriangle,
   FileText,
-  RefreshCw
+  RefreshCw,
+  GitMerge,
+  Link2,
 } from 'lucide-react'
 import { VersionHistoryList } from '@/features/knowledge/components/VersionHistoryList'
 import { LanguageMismatchBadge } from '@/shared/components/LanguageMismatchBadge'
 import { useProjectLanguage } from '@/shared/hooks/useProjectLanguage'
 import { badges } from '@/shared/tokens/patterns'
+import { MergeAtomDialog } from './MergeAtomDialog'
 import type { Atom, AtomType } from '../types'
 
 interface AtomCardProps {
@@ -48,6 +51,15 @@ const AtomCard = React.forwardRef<HTMLDivElement, AtomCardProps>(
     const { t } = useTranslation('atoms')
     const { projectLanguage } = useProjectLanguage()
     const [showVersionHistory, setShowVersionHistory] = useState(false)
+    const [showMergeDialog, setShowMergeDialog] = useState(false)
+
+    // Check if atom has similar_to in meta (similarity 0.85-0.95)
+    const similarAtomId = atom.meta?.similar_to as string | undefined
+    const hasSimilar = !!similarAtomId
+
+    // Check for similarity score from auto-linking
+    const similarityScore = atom.similarity_score
+    const isAutoLinked = similarityScore !== undefined && similarityScore !== null
 
     if (isError) {
       return (
@@ -118,6 +130,38 @@ const AtomCard = React.forwardRef<HTMLDivElement, AtomCardProps>(
                 detectedLanguage={atom.detected_language ?? undefined}
                 expectedLanguage={projectLanguage}
               />
+              {isAutoLinked && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          similarityScore >= 0.9 ? badges.semantic.success :
+                          similarityScore >= 0.8 ? badges.semantic.info :
+                          badges.semantic.warning,
+                          'cursor-default'
+                        )}
+                      >
+                        <Link2 className="h-3.5 w-3.5" />
+                        {t('card.percentMatch', '{{percent}}% match', { percent: Math.round(similarityScore * 100) })}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{t('card.autoLinkedTooltip', 'Auto-linked based on semantic similarity')}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              {hasSimilar && !isAutoLinked && (
+                <Badge
+                  variant="outline"
+                  className={cn(badges.semantic.warning, 'cursor-default')}
+                >
+                  <Link2 className="h-3.5 w-3.5" />
+                  {t('card.similar', 'Similar')}
+                </Badge>
+              )}
             </div>
             {atom.confidence !== null && (
               <span className="text-xs text-muted-foreground">
@@ -164,6 +208,24 @@ const AtomCard = React.forwardRef<HTMLDivElement, AtomCardProps>(
               </Button>
             </div>
           )}
+
+          {hasSimilar && (
+            <div className="flex items-center gap-2 pt-2 border-t border-border">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-11 text-xs"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowMergeDialog(true)
+                }}
+                aria-label={t('card.mergeAtom', 'Merge with similar atom')}
+              >
+                <GitMerge className="h-3 w-3 mr-2" />
+                {t('card.merge', 'Merge')}
+              </Button>
+            </div>
+          )}
         </div>
 
         <Dialog open={showVersionHistory} onOpenChange={setShowVersionHistory}>
@@ -181,6 +243,15 @@ const AtomCard = React.forwardRef<HTMLDivElement, AtomCardProps>(
             />
           </DialogContent>
         </Dialog>
+
+        {hasSimilar && similarAtomId && (
+          <MergeAtomDialog
+            open={showMergeDialog}
+            onOpenChange={setShowMergeDialog}
+            sourceAtom={atom}
+            similarAtomId={similarAtomId}
+          />
+        )}
       </Card>
     )
   })

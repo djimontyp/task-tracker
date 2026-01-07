@@ -34,6 +34,8 @@ export interface Atom {
   pending_versions_count: number
   /** AI-detected language of content (ISO 639-1). Used for language mismatch warnings. */
   detected_language?: string | null
+  /** Similarity score from topic auto-linking (0.0-1.0). Optional - only present when atom is auto-linked. */
+  similarity_score?: number | null
   created_at: string
   updated_at: string
 }
@@ -83,6 +85,8 @@ export interface TopicAtom {
   atom_id: string
   position: number | null
   note: string | null
+  /** Similarity score for auto-linked atoms (0.0-1.0) */
+  similarity_score: number | null
   created_at: string
 }
 

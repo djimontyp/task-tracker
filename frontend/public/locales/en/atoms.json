@@ -88,7 +88,22 @@
     "source": "Source",
     "topic": "Topic",
     "created": "Created",
-    "confidence": "Confidence"
+    "confidence": "Confidence",
+    "similar": "Similar",
+    "merge": "Merge",
+    "mergeAtom": "Merge with similar atom",
+    "percentMatch": "{{percent}}% match",
+    "autoLinkedTooltip": "Auto-linked based on semantic similarity"
+  },
+  "merge": {
+    "title": "Merge Similar Atoms",
+    "description": "These atoms appear to be similar. Choose which one to keep - the other will be deleted.",
+    "similarity": "Similarity",
+    "vs": "VS",
+    "keepThis": "Keep this",
+    "success": "Atoms merged successfully",
+    "error": "Failed to merge atoms: {{error}}",
+    "loadError": "Failed to load similar atom"
   },
   "empty": {
     "title": "No atoms",
