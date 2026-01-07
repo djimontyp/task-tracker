@@ -22,12 +22,14 @@ import { createColumns } from './columns'
 import { useScoringConfig } from '@/shared/api/scoringConfig'
 import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
 import { DataTableFacetedFilter } from '@/shared/components/DataTableFacetedFilter'
-import { Columns, List, AlertCircle, HelpCircle, CheckCircle2, Siren, X, Lightbulb } from 'lucide-react'
+import { Columns, List, AlertCircle, HelpCircle, CheckCircle2, Siren, X, Lightbulb, Sparkles } from 'lucide-react'
 import { MessageList } from '@/features/messages/components/MessageList'
 import { MessageDetailPanel } from '@/features/messages/components/MessageDetailPanel'
 import { MessagesSummaryHeader } from './MessagesSummaryHeader'
 import { messageService } from '@/features/messages/api/messageService'
 import type { MessageQueryParams } from '@/features/messages/types'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui'
+import { KnowledgeExtractionPanel } from '@/features/knowledge/components/KnowledgeExtractionPanel'
 
 type LayoutMode = 'list' | 'split'
 
@@ -45,6 +47,7 @@ const MessagesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('list')
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null)
+  const [showExtractionDialog, setShowExtractionDialog] = useState(false)
 
   // Fetch scoring config for dynamic thresholds
   const { data: scoringConfig } = useScoringConfig()
@@ -469,6 +472,19 @@ const MessagesPage = () => {
               <Button
                 variant="ghost"
                 size="sm"
+                className="h-8 rounded-full hover:bg-violet-500/10 hover:text-violet-600 px-3 text-muted-foreground transition-colors"
+                onClick={() => {
+                  // This should trigger the extraction dialog
+                  setShowExtractionDialog(true)
+                }}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                {t('actions.extract', 'Extract')}
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
                 className="h-8 rounded-full hover:bg-destructive/10 hover:text-destructive px-3 text-muted-foreground transition-colors"
                 onClick={() => {
                   toast.success(`${Object.keys(rowSelection).length} messages dismissed`)
@@ -494,6 +510,23 @@ const MessagesPage = () => {
           </div>
         </div>
       )}
+
+      <Dialog open={showExtractionDialog} onOpenChange={setShowExtractionDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t('extraction.fromSelectedMessages', 'Extract Knowledge from Selection')}</DialogTitle>
+          </DialogHeader>
+          <KnowledgeExtractionPanel
+            messageIds={Object.keys(rowSelection).map(Number)}
+            onComplete={() => {
+              setShowExtractionDialog(false)
+              setRowSelection({})
+              queryClient.invalidateQueries({ queryKey: ['topics'] })
+              queryClient.invalidateQueries({ queryKey: ['atoms'] })
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </PageWrapper>
   )
 }

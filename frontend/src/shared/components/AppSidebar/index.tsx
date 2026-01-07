@@ -21,6 +21,7 @@ import type { SidebarCounts } from '@/shared/api/statsService'
 import { Logo } from '@/shared/components/Logo'
 import { NavMain } from './NavMain'
 import type { NavGroup } from './types'
+import { GlobalKnowledgeExtractionDialog } from '@/features/knowledge/components/GlobalKnowledgeExtractionDialog'
 
 // Helper to get unique key for React (prefer labelKey, fallback to label)
 function getGroupKey(group: NavGroup): string {
@@ -143,6 +144,12 @@ export function AppSidebar({ mobile = false, counts: _counts, currentPath, class
 
       <SidebarContent>
         <NavMain groups={groups} currentPath={currentPath} />
+        {/* Enable Knowledge Extraction globally */}
+        <div className="mt-auto px-4 pb-4">
+          <div className="pt-4 border-t border-sidebar-border">
+            <GlobalKnowledgeExtractionDialog />
+          </div>
+        </div>
       </SidebarContent>
 
     </Sidebar>
