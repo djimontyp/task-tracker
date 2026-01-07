@@ -59,10 +59,35 @@
 - Think/no-think mode (`/think`, `/no_think`)
 - Fits in 16GB VRAM
 
-### Pending
-- [ ] User downloading qwen3:30b-a3b
-- [ ] Test Ukrainian extraction with qwen3
-- [ ] Re-run extraction to verify message-topic links
+### Completed ✅ (Phase 2)
+- [x] Tested qwen3:30b-a3b - too slow (>60s timeout)
+- [x] Increased Nginx timeout to 180s
+- [x] Switched to qwen3:14b - works! (~35s per request)
+- [x] Re-run extraction with Ukrainian
+- [x] Verified Dashboard shows Ukrainian topics/atoms
+
+### Final Results (qwen3:14b)
+- **Topics**: 3 (українською)
+  1. Управління станом чатів
+  2. Дизайн інтерфейсу чатів
+  3. Архівування чатів
+- **Atoms**: 7 (3 problems + 3 solutions + 1 requirement)
+- **Language**: 🇺🇦 Ukrainian ✅
+- **Model**: qwen3:14b @ 4070 Ti Super
+- **Time**: ~35s per test, ~1m for batch extraction
+
+### Qwen3 Setup (applied)
+```bash
+# Update agents to qwen3
+curl -X PUT "localhost/api/v1/agents/898a69db-f2e3-4a0d-9912-8b438e34faad" \
+  -H "Content-Type: application/json" \
+  -d '{"model_name": "qwen3:30b-a3b"}'
+
+curl -X PUT "localhost/api/v1/agents/41f6033c-693e-494d-9092-5ef643501df8" \
+  -H "Content-Type: application/json" \
+  -d '{"model_name": "qwen3:30b-a3b"}'
+```
+Think mode: add `/no_think` to system_prompt if needed
 
 ### SaaS Considerations
 - Language should be configurable per tenant
