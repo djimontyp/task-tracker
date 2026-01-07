@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import logging
 import uuid
+from dataclasses import dataclass
 from datetime import UTC
+from enum import Enum
+from typing import TYPE_CHECKING
 
 from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
@@ -25,7 +28,30 @@ from app.models.atom import (
 from app.models.atom_version import AtomVersion
 from app.services.base_crud import BaseCRUD
 
+if TYPE_CHECKING:
+    from app.services.embedding_service import EmbeddingService
+    from app.services.semantic_search_service import SemanticSearchService
+
 logger = logging.getLogger(__name__)
+
+
+class DeduplicationAction(str, Enum):
+    """Result of deduplication check."""
+
+    CREATED_NEW = "created_new"  # New unique atom created
+    CREATED_SIMILAR = "created_similar"  # New atom with similar_to reference
+    CREATED_VERSION = "created_version"  # Created version of existing atom
+
+
+@dataclass
+class DeduplicationResult:
+    """Result of create_with_dedup operation."""
+
+    action: DeduplicationAction
+    atom: AtomPublic
+    similar_atom_id: uuid.UUID | None = None
+    similarity_score: float | None = None
+    version_id: int | None = None
 
 
 class AtomCRUD(BaseCRUD[Atom]):
@@ -448,3 +474,142 @@ class AtomCRUD(BaseCRUD[Atom]):
             await self.session.delete(topic_atom)
 
         await self.session.flush()
+
+    async def create_with_dedup(
+        self,
+        atom_data: AtomCreate,
+        embedding_service: "EmbeddingService",
+        search_service: "SemanticSearchService",
+        threshold_high: float = 0.95,
+        threshold_mid: float = 0.85,
+        created_by: str | None = None,
+    ) -> DeduplicationResult:
+        """Create atom with semantic deduplication.
+
+        Checks for similar existing atoms using vector similarity:
+        - >threshold_high (0.95): Creates AtomVersion for existing atom (pending approval)
+        - threshold_mid to threshold_high (0.85-0.95): Creates new atom with similar_to metadata
+        - <threshold_mid (0.85): Creates new unique atom
+
+        Args:
+            atom_data: Atom creation data
+            embedding_service: Service for generating embeddings
+            search_service: Service for semantic search
+            threshold_high: Similarity threshold for version creation (default: 0.95)
+            threshold_mid: Similarity threshold for similar_to reference (default: 0.85)
+            created_by: User identifier for version attribution
+
+        Returns:
+            DeduplicationResult with action taken, atom, and similarity info
+
+        Raises:
+            ValueError: If embedding generation fails
+            SQLAlchemyError: If database operation fails
+
+        Example:
+            >>> result = await atom_crud.create_with_dedup(
+            ...     atom_data=AtomCreate(type="problem", title="Bug", content="..."),
+            ...     embedding_service=embedding_svc,
+            ...     search_service=search_svc,
+            ... )
+            >>> if result.action == DeduplicationAction.CREATED_VERSION:
+            ...     print(f"Created version for existing atom {result.similar_atom_id}")
+        """
+        from app.services.versioning_service import VersioningService
+
+        # 1. Generate embedding for new atom content
+        text_for_embedding = f"{atom_data.title}\n\n{atom_data.content}"
+        try:
+            embedding = await embedding_service.generate_embedding(text_for_embedding)
+        except Exception as e:
+            logger.error(f"Failed to generate embedding for deduplication: {e}")
+            raise ValueError(f"Embedding generation failed: {e}") from e
+
+        # 2. Search for similar atoms using the embedding
+        similar_atoms = await search_service.search_atoms_by_vector(
+            session=self.session,
+            embedding=embedding,
+            limit=5,
+            threshold=threshold_mid,  # Search with lower threshold to get candidates
+        )
+
+        # 3. Check similarity and decide action
+        if similar_atoms:
+            top_match, top_score = similar_atoms[0]
+
+            if top_score > threshold_high:
+                # High similarity: create version instead of new atom
+                logger.info(
+                    f"High similarity ({top_score:.3f}) found with atom {top_match.id}. "
+                    f"Creating version instead of new atom."
+                )
+
+                versioning_service = VersioningService()
+                version_data = {
+                    "type": atom_data.type,
+                    "title": atom_data.title,
+                    "content": atom_data.content,
+                    "confidence": atom_data.confidence,
+                    "meta": atom_data.meta or {},
+                }
+
+                # Note: VersioningService has wrong type hint (int instead of UUID)
+                version = await versioning_service.create_atom_version(
+                    db=self.session,
+                    atom_id=top_match.id,  # type: ignore[arg-type]
+                    data=version_data,
+                    created_by=created_by or "deduplication",
+                )
+
+                # Return the existing atom as the result
+                atom_public = await self.get_atom(top_match.id)
+                if atom_public is None:
+                    # Should not happen, but handle gracefully
+                    raise ValueError(f"Atom {top_match.id} not found after version creation")
+
+                return DeduplicationResult(
+                    action=DeduplicationAction.CREATED_VERSION,
+                    atom=atom_public,
+                    similar_atom_id=top_match.id,
+                    similarity_score=top_score,
+                    version_id=version.id,
+                )
+
+            elif top_score > threshold_mid:
+                # Medium similarity: create new atom with similar_to reference
+                logger.info(
+                    f"Medium similarity ({top_score:.3f}) found with atom {top_match.id}. "
+                    f"Creating new atom with similar_to reference."
+                )
+
+                # Merge similar_to into meta
+                meta = atom_data.meta.copy() if atom_data.meta else {}
+                meta["similar_to"] = str(top_match.id)
+                meta["similarity_score"] = round(top_score, 4)
+
+                # Create new atom with reference
+                atom_dict = atom_data.model_dump()
+                atom_dict["meta"] = meta
+                atom_dict["embedding"] = embedding
+
+                atom = await self.create(atom_dict)
+
+                return DeduplicationResult(
+                    action=DeduplicationAction.CREATED_SIMILAR,
+                    atom=self._to_public(atom),
+                    similar_atom_id=top_match.id,
+                    similarity_score=top_score,
+                )
+
+        # 4. No significant similarity: create new unique atom
+        logger.info("No similar atoms found. Creating new unique atom.")
+
+        atom_dict = atom_data.model_dump()
+        atom_dict["embedding"] = embedding
+
+        atom = await self.create(atom_dict)
+
+        return DeduplicationResult(
+            action=DeduplicationAction.CREATED_NEW,
+            atom=self._to_public(atom),
+        )

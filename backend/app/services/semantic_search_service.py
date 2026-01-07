@@ -363,6 +363,97 @@ class SemanticSearchService:
 
         return atoms_with_scores
 
+    async def search_atoms_by_vector(
+        self,
+        session: AsyncSession,
+        embedding: list[float],
+        limit: int = 10,
+        threshold: float | None = None,
+        exclude_atom_id: str | None = None,
+    ) -> list[tuple[Atom, float]]:
+        """Search atoms by direct vector similarity (no text-to-embedding conversion).
+
+        Use this method when you already have an embedding vector and want to find
+        similar atoms without generating a new embedding from text.
+
+        Args:
+            session: Database session
+            embedding: Pre-computed embedding vector (1536 dimensions)
+            limit: Maximum number of results to return
+            threshold: Minimum similarity score (default: from config)
+            exclude_atom_id: Optional atom ID to exclude from results (for dedup)
+
+        Returns:
+            List of (atom, similarity_score) tuples, ordered by similarity (highest first)
+
+        Raises:
+            ValueError: If embedding is empty or has wrong dimensions
+            Exception: If search fails
+
+        Example:
+            >>> embedding = await embedding_service.generate_embedding("some text")
+            >>> results = await service.search_atoms_by_vector(session, embedding, limit=5)
+            >>> for atom, score in results:
+            ...     print(f"{score:.3f}: {atom.title}")
+        """
+        if threshold is None:
+            threshold = ai_config.vector_search.semantic_search_threshold
+
+        if not embedding or len(embedding) == 0:
+            raise ValueError("Embedding vector cannot be empty")
+
+        query_vector = str(embedding)
+
+        # Get the raw asyncpg connection
+        conn = await session.connection()
+        raw_conn = await conn.get_raw_connection()
+        driver_conn = raw_conn.driver_connection
+        assert driver_conn is not None, "Driver connection is None"
+
+        # Build SQL with optional exclusion and execute
+        if exclude_atom_id:
+            sql = """
+                SELECT
+                    a.*,
+                    1 - (a.embedding <=> $1::vector) / 2 AS similarity
+                FROM atoms a
+                WHERE
+                    a.embedding IS NOT NULL
+                    AND a.id != $2::uuid
+                    AND (1 - (a.embedding <=> $1::vector) / 2) >= $3
+                ORDER BY a.embedding <=> $1::vector
+                LIMIT $4
+            """
+            rows = await driver_conn.fetch(sql, query_vector, exclude_atom_id, threshold, limit)
+        else:
+            sql = """
+                SELECT
+                    a.*,
+                    1 - (a.embedding <=> $1::vector) / 2 AS similarity
+                FROM atoms a
+                WHERE
+                    a.embedding IS NOT NULL
+                    AND (1 - (a.embedding <=> $1::vector) / 2) >= $2
+                ORDER BY a.embedding <=> $1::vector
+                LIMIT $3
+            """
+            rows = await driver_conn.fetch(sql, query_vector, threshold, limit)
+
+        atoms_with_scores: list[tuple[Atom, float]] = []
+        for row in rows:
+            atom_dict = dict(row)
+            similarity = atom_dict.pop("similarity")
+
+            atom = Atom(**atom_dict)
+            atoms_with_scores.append((atom, float(similarity)))
+
+        logger.info(
+            f"Found {len(atoms_with_scores)} atoms by vector search "
+            f"(threshold={threshold}, exclude={exclude_atom_id})"
+        )
+
+        return atoms_with_scores
+
     async def search_topics(
         self,
         session: AsyncSession,
