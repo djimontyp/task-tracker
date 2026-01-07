@@ -44,25 +44,12 @@ http {
         server dashboard:3000;
     }
 
-    # Default server block - catches requests with invalid Host headers
-    # Returns 444 (connection closed without response) for security
+    # Main server block (accepts any host for local dev)
+    # For production: add separate default_server with return 444 for security
     server {
         listen 80 default_server;
         listen [::]:80 default_server;
         server_name _;
-
-        # Close connection without response for invalid Host headers
-        return 444;
-    }
-
-    # Main server block
-    server {
-        listen 80;
-        listen [::]:80;
-
-        # Dynamic server_name from HOST environment variable
-        # Supports: localhost, 192.168.x.x, custom domains, ngrok tunnels (dev)
-        server_name ${HOST} *.ngrok-free.app;
 
         # Security Headers
         # Note: CSP is permissive for Vite development mode (uses inline scripts/styles)
