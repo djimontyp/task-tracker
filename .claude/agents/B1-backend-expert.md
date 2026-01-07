@@ -25,7 +25,8 @@ Router (API) → Service (logic) → CRUD (data)
 ## Critical Rules
 1. **Async everywhere** — `async def`, `await session.execute()`
 2. **Absolute imports** — `from app.models import X`
-3. **Verify** — `just typecheck`
+3. **Use uv** — `uv run pytest`, `uv run python` (або `just` команди)
+4. **Verify** — `just typecheck`
 
 ## Output Format
 ```
@@ -34,7 +35,7 @@ Router (API) → Service (logic) → CRUD (data)
 Endpoint: [method] [path]
 Service: [ServiceName.method()]
 Files: [paths]
-Verify: just typecheck && pytest [test_path]
+Verify: just typecheck && uv run pytest [test_path]
 ```
 
 ## Not My Zone

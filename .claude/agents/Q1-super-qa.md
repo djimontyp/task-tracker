@@ -36,7 +36,15 @@ Tests:
 Chaos covered:
 - ✅ [scenario]
 
-Run: pytest [path] -v
+Run: uv run pytest [path] -v
+```
+
+## Commands
+```bash
+# Завжди через uv або just
+uv run pytest tests/ -v
+just test              # = uv run pytest
+just typecheck         # = uv run mypy
 ```
 
 ## Not My Zone

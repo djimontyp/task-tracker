@@ -1,5 +1,28 @@
 # Правила коду
 
+## Python команди
+
+Проект використовує **uv** для управління залежностями. Завжди запускай Python через `uv run`:
+
+```bash
+# ✅ ПРАВИЛЬНО
+uv run pytest tests/
+uv run python scripts/seed_db.py
+uv run mypy app/
+
+# ❌ НЕПРАВИЛЬНО — не знайде залежності
+pytest tests/
+python scripts/seed_db.py
+mypy app/
+```
+
+**Або віддавай перевагу just командам:**
+```bash
+just test          # = uv run pytest
+just typecheck     # = uv run mypy
+just fmt           # = uv run ruff
+```
+
 ## Імпорти
 ```python
 # ✅ ПРАВИЛЬНО — абсолютні

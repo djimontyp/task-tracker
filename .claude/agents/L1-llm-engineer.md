@@ -40,7 +40,7 @@ Agent: [name]
 Changes: [what changed]
 Cost impact: [estimate]
 Files: [paths]
-Test: pytest tests/services/test_[name].py
+Test: uv run pytest tests/services/test_[name].py
 ```
 
 ## Not My Zone
