@@ -44,7 +44,7 @@ async def create_task_config(
     """
     try:
         crud = TaskCRUD(session)
-        task = await crud.create(task_data.model_dump(exclude_unset=True))
+        task = await crud.create_task(task_data)
         logger.info(f"Created task config '{task.name}' with ID {task.id}")
         return task
     except ValueError as e:
@@ -88,7 +88,7 @@ async def list_task_configs(
         List of task configurations with Pydantic schemas
     """
     crud = TaskCRUD(session)
-    tasks = await crud.list(skip=skip, limit=limit, active_only=active_only)
+    tasks = await crud.list_tasks(skip=skip, limit=limit, active_only=active_only)
     return tasks
 
 
@@ -115,7 +115,7 @@ async def get_task_config(
         HTTPException 404: Task not found
     """
     crud = TaskCRUD(session)
-    task = await crud.get(task_id)
+    task = await crud.get_task(task_id)
 
     if not task:
         raise HTTPException(
@@ -153,7 +153,7 @@ async def update_task_config(
     """
     try:
         crud = TaskCRUD(session)
-        task = await crud.update(task_id, update_data)
+        task = await crud.update_task(task_id, update_data)
 
         if not task:
             raise HTTPException(
@@ -195,7 +195,7 @@ async def delete_task_config(
         HTTPException 404: Task not found
     """
     crud = TaskCRUD(session)
-    deleted = await crud.delete(task_id)
+    deleted = await crud.delete_task(task_id)
 
     if not deleted:
         raise HTTPException(

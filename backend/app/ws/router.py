@@ -80,7 +80,7 @@ async def websocket_endpoint(
 
             try:
                 message = json.loads(data)
-                action = message.get("action")
+                action = message.get("action") or message.get("type")
                 topic = message.get("topic")
 
                 if action == "pong":
