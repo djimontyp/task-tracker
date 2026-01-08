@@ -10,67 +10,16 @@ import type {
 // Query key for message estimates
 export const MESSAGE_ESTIMATE_QUERY_KEY = ['telegram', 'message-estimate'] as const;
 
-// Single chat estimate response from GET endpoint
-interface ChatEstimateResult {
-  chat_id: string;
-  count: number | null;
-  is_estimate: boolean;
-  error: string | null;
-}
-
 /**
  * Fetch message count estimates from Telegram API
- * Fetches estimates for all depths (24h, 7d, 30d, all) in parallel
- *
- * @param chatIds - List of chat IDs to estimate (required)
+ * Returns estimated message counts for each import depth option
  */
-async function fetchMessageEstimate(chatIds: string[]): Promise<MessageEstimateResponse> {
-  if (chatIds.length === 0) {
-    // Return empty response if no chat IDs provided
-    return {
-      estimates: [],
-      total_groups: 0,
-      last_updated: new Date().toISOString(),
-    };
-  }
-
-  // Build query string with chat_ids[] parameter
-  const params = new URLSearchParams();
-  chatIds.forEach((id) => params.append('chat_ids[]', id));
-  const baseParams = params.toString();
-
-  // Fetch all depths in parallel
-  const depths: ImportDepth[] = ['24h', '7d', '30d', 'all'];
-
-  const responses = await Promise.all(
-    depths.map((depth) =>
-      apiClient
-        .get<ChatEstimateResult[]>(
-          `${API_ENDPOINTS.ingestion.telegramEstimate}?${baseParams}&depth=${depth}`
-        )
-        .then((res) => ({ depth, data: res.data }))
-    )
-  );
-
-  // Sum counts for each depth
-  const estimates = responses.map(({ depth, data }) => {
-    const totalCount = data.reduce((sum, item) => {
-      return sum + (item.count ?? 0);
-    }, 0);
-    return { depth, count: totalCount };
-  });
-
-  return {
-    estimates,
-    total_groups: chatIds.length,
-    last_updated: new Date().toISOString(),
-  };
+async function fetchMessageEstimate(): Promise<MessageEstimateResponse> {
+  const response = await apiClient.get<MessageEstimateResponse>(API_ENDPOINTS.ingestion.telegramEstimate);
+  return response.data;
 }
 
 export interface UseMessageEstimateOptions {
-  /** List of chat IDs to estimate */
-  chatIds?: string[];
-  /** Whether the query is enabled (default: true, but won't fetch without chatIds) */
   enabled?: boolean;
   refetchOnMount?: boolean;
 }
@@ -98,9 +47,7 @@ export interface UseMessageEstimateReturn {
  * Hook for fetching message count estimates from Telegram
  *
  * @example
- * const { data, isLoading, isRateLimited, getCountForDepth } = useMessageEstimate({
- *   chatIds: ['-1002531774047'],
- * });
+ * const { data, isLoading, isRateLimited, getCountForDepth } = useMessageEstimate();
  *
  * // Get count for 7 days
  * const count7d = getCountForDepth('7d'); // e.g., 312
@@ -108,15 +55,12 @@ export interface UseMessageEstimateReturn {
 export function useMessageEstimate(
   options: UseMessageEstimateOptions = {}
 ): UseMessageEstimateReturn {
-  const { chatIds = [], enabled = true, refetchOnMount = true } = options;
-
-  // Only fetch if we have chat IDs
-  const shouldFetch = enabled && chatIds.length > 0;
+  const { enabled = true, refetchOnMount = true } = options;
 
   const query = useQuery({
-    queryKey: [...MESSAGE_ESTIMATE_QUERY_KEY, chatIds],
-    queryFn: () => fetchMessageEstimate(chatIds),
-    enabled: shouldFetch,
+    queryKey: MESSAGE_ESTIMATE_QUERY_KEY,
+    queryFn: fetchMessageEstimate,
+    enabled,
     refetchOnMount,
     staleTime: 5 * 60 * 1000, // 5 minutes - estimates don't change frequently
     retry: (failureCount, error) => {

@@ -69,63 +69,36 @@ class TelegramSourceAdapter(SourceAdapter):
 
             total = messages.total
 
-            # If since is provided, count messages after that date
+            # If since is provided, we need to estimate count
             if since:
-                logger.info(f"Counting messages since {since} for chat {chat_id}")
+                # Telethon doesn't have direct "count since date" API
+                # So we fetch small batch and extrapolate
+                # This is approximate - set is_estimate=True
+                logger.info(f"Estimating message count since {since} for chat {chat_id}")
 
-                try:
-                    # Step 1: Find first message after 'since' using reverse iteration
-                    # With reverse=True, offset_date returns messages AFTER the date
-                    first_msg_after = await self.client_service.client.get_messages(
-                        int(chat_id),
-                        limit=1,
-                        offset_date=since,
-                        reverse=True,
-                    )
+                # Fetch small sample (100 messages)
+                sample_messages = await self.client_service.client.get_messages(
+                    int(chat_id),
+                    limit=100,
+                    offset_date=since,
+                )
 
-                    # If no messages found after since, count is 0
-                    if not first_msg_after or len(first_msg_after) == 0:
-                        return MessageCountResult(
-                            count=0,
-                            is_estimate=False,
-                            error=None,
-                            source_id=chat_id,
-                        )
+                # If we got less than 100, that's the exact count
+                if len(sample_messages) < 100:
+                    count = len(sample_messages)
+                    is_estimate = False
+                else:
+                    # More than 100 - use total as upper bound
+                    # This is rough estimate
+                    count = total
+                    is_estimate = True
 
-                    # Step 2: Get newest message to calculate count via ID difference
-                    first_msg_id = first_msg_after[0].id
-
-                    newest = await self.client_service.client.get_messages(
-                        int(chat_id),
-                        limit=1,
-                    )
-                    newest_id = newest[0].id if newest else first_msg_id
-
-                    # Count = newest_id - first_msg_id + 1
-                    # This is an estimate (gaps in IDs possible, but rare)
-                    count = newest_id - first_msg_id + 1
-
-                    logger.info(f"Estimated {count} messages since {since} (IDs {first_msg_id}-{newest_id})")
-
-                    return MessageCountResult(
-                        count=count,
-                        is_estimate=True,  # ID-based estimate
-                        error=None,
-                        source_id=chat_id,
-                    )
-
-                except FloodWaitError:
-                    # Re-raise to be handled by outer except
-                    raise
-                except Exception as e:
-                    # If time-based count fails, fallback to total
-                    logger.warning(f"Failed to count messages since {since}, using total: {e}")
-                    return MessageCountResult(
-                        count=total,
-                        is_estimate=True,
-                        error=None,
-                        source_id=chat_id,
-                    )
+                return MessageCountResult(
+                    count=count,
+                    is_estimate=is_estimate,
+                    error=None,
+                    source_id=chat_id,
+                )
 
             # No time filter - return total
             return MessageCountResult(
