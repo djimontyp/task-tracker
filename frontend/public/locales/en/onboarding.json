@@ -96,6 +96,14 @@
   "import": {
     "title": "Import History",
     "description": "Load your first batch of messages",
+    "chatId": {
+      "label": "Telegram Chat IDs",
+      "placeholder": "Paste URL or chat ID (e.g., -1002531774047)",
+      "help": "Paste Telegram Web URL or enter chat ID directly",
+      "addButton": "Add chat",
+      "removeButton": "Remove {{id}}",
+      "listLabel": "Added chats"
+    },
     "depth": {
       "label": "Select import period",
       "skip": "Skip import",
@@ -110,14 +118,21 @@
       "start": "Start Import",
       "starting": "Starting...",
       "startAnyway": "Import Anyway",
+      "addChatFirst": "Add chat ID first",
       "cancel": "Cancel",
       "cancelling": "Cancelling..."
     },
     "estimate": {
       "info": "Estimates based on recent message activity",
       "retry": "Retry",
+      "retryIn": "Retry in {{seconds}}s",
       "canImportAnyway": "You can still import messages even if estimates fail",
-      "unavailable": "Estimate unavailable"
+      "unavailable": "Estimate unavailable",
+      "unknown": "—",
+      "loading": "Loading...",
+      "messagesLabel": "messages",
+      "totalMessages": "Total messages",
+      "refresh": "Refresh count"
     },
     "error": {
       "rateLimited": "Rate limited. Retry in {{seconds}} seconds",

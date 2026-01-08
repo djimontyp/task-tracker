@@ -96,6 +96,14 @@
   "import": {
     "title": "Імпорт історії",
     "description": "Завантажте перші повідомлення",
+    "chatId": {
+      "label": "Telegram Chat ID",
+      "placeholder": "Вставте URL або chat ID (напр., -1002531774047)",
+      "help": "Вставте URL з Telegram Web або введіть chat ID напряму",
+      "addButton": "Додати чат",
+      "removeButton": "Видалити {{id}}",
+      "listLabel": "Додані чати"
+    },
     "depth": {
       "label": "Оберіть період імпорту",
       "skip": "Пропустити імпорт",
@@ -110,14 +118,21 @@
       "start": "Почати імпорт",
       "starting": "Запуск...",
       "startAnyway": "Імпортувати все одно",
+      "addChatFirst": "Спочатку додайте чат",
       "cancel": "Скасувати",
       "cancelling": "Скасування..."
     },
     "estimate": {
       "info": "Оцінка на основі активності",
       "retry": "Повторити",
+      "retryIn": "Повторити через {{seconds}}с",
       "canImportAnyway": "Можна імпортувати навіть без оцінки",
-      "unavailable": "Оцінка недоступна"
+      "unavailable": "Оцінка недоступна",
+      "unknown": "—",
+      "loading": "Завантаження...",
+      "messagesLabel": "повідомлень",
+      "totalMessages": "Всього повідомлень",
+      "refresh": "Оновити кількість"
     },
     "error": {
       "rateLimited": "Ліміт. Повторіть через {{seconds}} сек",

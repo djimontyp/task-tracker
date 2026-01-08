@@ -19,11 +19,11 @@ export interface ImportDepthOption {
 }
 
 export const IMPORT_DEPTH_OPTIONS: ImportDepthOption[] = [
-  { value: 'skip', labelKey: 'onboarding.import.depth.skip' },
-  { value: '24h', labelKey: 'onboarding.import.depth.24h' },
-  { value: '7d', labelKey: 'onboarding.import.depth.7d', isRecommended: true },
-  { value: '30d', labelKey: 'onboarding.import.depth.30d' },
-  { value: 'all', labelKey: 'onboarding.import.depth.all', isWarning: true },
+  { value: 'skip', labelKey: 'import.depth.skip' },
+  { value: '24h', labelKey: 'import.depth.24h' },
+  { value: '7d', labelKey: 'import.depth.7d', isRecommended: true },
+  { value: '30d', labelKey: 'import.depth.30d' },
+  { value: 'all', labelKey: 'import.depth.all', isWarning: true },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -108,7 +108,7 @@ export type ImportWebSocketEvent =
 
 export interface StartImportRequest {
   depth: ImportDepth;
-  group_ids?: string[];
+  chat_ids: string[];
 }
 
 export interface CancelImportRequest {

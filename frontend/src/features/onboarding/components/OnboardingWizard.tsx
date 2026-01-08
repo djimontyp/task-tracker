@@ -75,12 +75,12 @@ export function OnboardingWizard({ open: controlledOpen, onClose, onComplete }: 
     }
   }
 
-  const handleStartImport = (depth: ImportDepth) => {
+  const handleStartImport = (depth: ImportDepth, chatIds: string[]) => {
     if (depth === 'skip') {
       handleNext()
       return
     }
-    startImport(depth)
+    startImport(depth, chatIds)
   }
 
   const stepTitle = t(`steps.${stepId}.title`)
