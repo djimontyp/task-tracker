@@ -74,6 +74,92 @@ class KnowledgeOrchestrator:
         self.project_config = project_config
         self.encryptor = CredentialEncryption()
 
+    @staticmethod
+    async def fetch_messages_with_context(
+        session: AsyncSession,
+        message_ids: Sequence[uuid.UUID],
+        include_context: bool = False,
+        context_window: int = 5,
+    ) -> Sequence[Message]:
+        """Fetch messages by IDs, optionally including surrounding context.
+
+        If include_context is True, for each target message, fetches 'context_window'
+        messages before and after within the same thread. Deduplicates results.
+
+        Args:
+            session: Database session
+            message_ids: IDs of core messages to analyze
+            include_context: Whether to fetch surrounding messages
+            context_window: Number of messages to include before/after (default 5)
+
+        Returns:
+            List of unique Message objects sorted by sent_at
+        """
+        # Fetch target messages first
+        stmt = select(Message).where(Message.id.in_(message_ids))
+        result = await session.execute(stmt)
+        target_messages = list(result.scalars().all())
+
+        if not include_context or not target_messages:
+            return sorted(target_messages, key=lambda m: m.sent_at)
+
+        # Context expansion logic
+        # We need to find neighbors for each message in its thread
+        # To avoid N+1 queries for large batches, we could optimize, but
+        # for typical batch sizes (10-50), individual queries per thread group are acceptable.
+        
+        # Group by thread to optimize queries
+        thread_map: dict[str, list[Message]] = {}
+        for msg in target_messages:
+            thread_id = msg.source_thread_id or "general"
+            if thread_id not in thread_map:
+                thread_map[thread_id] = []
+            thread_map[thread_id].append(msg)
+
+        all_messages_map: dict[uuid.UUID, Message] = {m.id: m for m in target_messages if m.id}
+
+        for thread_id, msgs in thread_map.items():
+            # For each message in thread, get window
+            # We can optimize by getting the min/max time range for the thread's messages
+            # but gaps in time might miss context. Safer to query neighbors per message.
+            
+            # Optimization: If many messages in same thread are close, ranges overlap.
+            # But simple neighbor query is robust.
+            
+            for msg in msgs:
+                # Get N messages before
+                prev_stmt = (
+                    select(Message)
+                    .where(
+                        Message.source_thread_id == (None if thread_id == "general" else thread_id),
+                        Message.sent_at < msg.sent_at
+                    )
+                    .order_by(Message.sent_at.desc())
+                    .limit(context_window)
+                )
+                prev_res = await session.execute(prev_stmt)
+                for pm in prev_res.scalars():
+                    if pm.id not in all_messages_map:
+                        all_messages_map[pm.id] = pm # type: ignore[index]
+
+                # Get N messages after
+                next_stmt = (
+                    select(Message)
+                    .where(
+                        Message.source_thread_id == (None if thread_id == "general" else thread_id),
+                        Message.sent_at > msg.sent_at
+                    )
+                    .order_by(Message.sent_at.asc())
+                    .limit(context_window)
+                )
+                next_res = await session.execute(next_stmt)
+                for nm in next_res.scalars():
+                    if nm.id not in all_messages_map:
+                        all_messages_map[nm.id] = nm # type: ignore[index]
+
+        return sorted(all_messages_map.values(), key=lambda m: m.sent_at)
+
+
     async def extract_knowledge(
         self,
         messages: Sequence[Message],

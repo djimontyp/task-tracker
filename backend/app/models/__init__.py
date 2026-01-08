@@ -138,6 +138,12 @@ from .topic import (
 )
 from .topic_version import TopicVersion, TopicVersionPublic
 from .user import User
+from .knowledge_extraction_run import (
+    ExtractionStatus,
+    KnowledgeExtractionRun,
+    KnowledgeExtractionRunCreate,
+    KnowledgeExtractionRunPublic,
+)
 
 __all__ = [
     # Base
@@ -279,4 +285,9 @@ __all__ = [
     "DataWipeConfirmation",
     "DataWipeExecuteRequest",
     "DataWipeResult",
+    # Knowledge Extraction Run
+    "ExtractionStatus",
+    "KnowledgeExtractionRun",
+    "KnowledgeExtractionRunCreate",
+    "KnowledgeExtractionRunPublic",
 ]

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -14,12 +14,96 @@ from sqlalchemy import func, select
 
 from app.config.ai_config import ai_config
 from app.database import AsyncSessionLocal, get_db_session_context
-from app.models import AgentConfig, LLMProvider, Message, ProjectConfig
+from app.models import (
+    AgentConfig,
+    ExtractionStatus,
+    KnowledgeExtractionRun,
+    LLMProvider,
+    Message,
+    ProjectConfig,
+)
 from app.services.embedding_service import EmbeddingService
 from app.services.knowledge.knowledge_orchestrator import KnowledgeOrchestrator as KnowledgeExtractionService
 from app.services.rag_context_builder import RAGContextBuilder
 from app.services.semantic_search_service import SemanticSearchService
 from app.services.websocket_manager import websocket_manager
+
+
+async def check_cancellation(db: "AsyncSession", run_id: str) -> bool:
+    """Check if extraction run has cancellation requested.
+
+    Args:
+        db: Database session
+        run_id: Extraction run UUID as string
+
+    Returns:
+        True if cancellation was requested, False otherwise
+    """
+    extraction_run = await db.get(KnowledgeExtractionRun, UUID(run_id))
+    if extraction_run is None:
+        logger.warning(f"Extraction run {run_id} not found during cancellation check")
+        return False
+    return extraction_run.cancel_requested
+
+
+async def handle_cancellation(db: "AsyncSession", run_id: str, checkpoint: str) -> dict[str, int]:
+    """Handle extraction cancellation - update status and broadcast event.
+
+    Args:
+        db: Database session
+        run_id: Extraction run UUID as string
+        checkpoint: Name of the checkpoint where cancellation occurred
+
+    Returns:
+        Empty result dictionary indicating cancelled state
+    """
+    extraction_run = await db.get(KnowledgeExtractionRun, UUID(run_id))
+    if extraction_run:
+        extraction_run.status = ExtractionStatus.cancelled
+        extraction_run.cancelled_at = datetime.now(UTC)
+        db.add(extraction_run)
+        await db.commit()
+
+        logger.info(f"Extraction {run_id} cancelled at checkpoint: {checkpoint}")
+
+        await websocket_manager.broadcast(
+            "knowledge",
+            {
+                "type": "knowledge.extraction_cancelled",
+                "data": {
+                    "extraction_id": run_id,
+                    "checkpoint": checkpoint,
+                    "topics_created": extraction_run.topics_created,
+                    "atoms_created": extraction_run.atoms_created,
+                },
+            },
+        )
+
+    return {"topics_created": 0, "atoms_created": 0, "links_created": 0, "messages_updated": 0, "cancelled": True}
+
+
+async def update_extraction_run_status(
+    db: "AsyncSession",
+    run_id: str,
+    status: ExtractionStatus,
+    **kwargs: Any,
+) -> None:
+    """Update extraction run status and optional fields.
+
+    Args:
+        db: Database session
+        run_id: Extraction run UUID as string
+        status: New status
+        **kwargs: Additional fields to update (topics_created, atoms_created, etc.)
+    """
+    extraction_run = await db.get(KnowledgeExtractionRun, UUID(run_id))
+    if extraction_run:
+        extraction_run.status = status
+        for key, value in kwargs.items():
+            if hasattr(extraction_run, key):
+                setattr(extraction_run, key, value)
+        db.add(extraction_run)
+        await db.commit()
 
 
 @nats_broker.task
@@ -117,6 +201,9 @@ async def extract_knowledge_from_messages_task(
     created_by: str | None = None,
     language: str = "uk",
     project_config_id: str | None = None,
+    extraction_run_id: str | None = None,
+    include_context: bool = False,
+    context_window: int = 5,
 ) -> dict[str, int]:
     """Background task for extracting knowledge (topics and atoms) from message batches.
 
@@ -130,12 +217,18 @@ async def extract_knowledge_from_messages_task(
     Optionally injects project-specific context (keywords, glossary, components) when
     project_config_id is provided.
 
+    Supports cooperative cancellation via extraction_run_id - checks DB flag at
+    3 checkpoints and exits gracefully if cancellation requested.
+
     Args:
         message_ids: IDs of messages to analyze (10-50 recommended for best results)
         agent_config_id: AgentConfig UUID as string
         created_by: User ID who triggered extraction (default: "system")
         language: ISO 639-1 language code for AI output (default: "uk" for Ukrainian)
         project_config_id: Optional ProjectConfig UUID for domain-specific context
+        extraction_run_id: Optional extraction run UUID for cancellation support
+        include_context: Whether to include surrounding messages (CAG)
+        context_window: Number of messages to fetch before/after targets
 
     Returns:
         Statistics dictionary with:
@@ -143,6 +236,7 @@ async def extract_knowledge_from_messages_task(
             - atoms_created: Number of new atoms created
             - links_created: Number of atom links created
             - messages_updated: Number of messages assigned to topics
+            - cancelled: True if extraction was cancelled (optional)
 
     Example:
         >>> task = await extract_knowledge_from_messages_task.kiq([1, 2, 3], str(agent_config_id))
@@ -156,6 +250,12 @@ async def extract_knowledge_from_messages_task(
     db = await anext(db_context)
 
     try:
+        # Update extraction run status to running
+        if extraction_run_id:
+            await update_extraction_run_status(
+                db, extraction_run_id, ExtractionStatus.running, started_at=datetime.now(UTC)
+            )
+
         agent_config = await db.get(AgentConfig, UUID(agent_config_id))
         if not agent_config:
             raise ValueError(f"Agent config {agent_config_id} not found")
@@ -173,12 +273,20 @@ async def extract_knowledge_from_messages_task(
             else:
                 logger.warning(f"ProjectConfig {project_config_id} not found, proceeding without project context")
 
-        stmt = select(Message).where(Message.id.in_(message_ids))  # type: ignore[attr-defined]
-        result = await db.execute(stmt)
-        messages = list(result.scalars().all())
+        # Use intelligent fetch with context
+        messages = await KnowledgeExtractionService.fetch_messages_with_context(
+            session=db,
+            message_ids=message_ids,
+            include_context=include_context,
+            context_window=context_window
+        )
 
         if len(messages) == 0:
             logger.warning("No messages found for extraction")
+            if extraction_run_id:
+                await update_extraction_run_status(
+                    db, extraction_run_id, ExtractionStatus.completed, completed_at=datetime.now(UTC)
+                )
             return {"topics_created": 0, "atoms_created": 0, "links_created": 0, "messages_updated": 0}
 
         logger.info(f"Found {len(messages)} messages to process")
@@ -191,9 +299,14 @@ async def extract_knowledge_from_messages_task(
                     "message_count": len(messages),
                     "agent_config_id": agent_config_id,
                     "agent_name": agent_config.name,
+                    "extraction_id": extraction_run_id,
                 },
             },
         )
+
+        # CHECKPOINT 1: Before LLM call
+        if extraction_run_id and await check_cancellation(db, extraction_run_id):
+            return await handle_cancellation(db, extraction_run_id, "before_llm")
 
         # Build RAG context builder for semantic knowledge injection
         embedding_service = EmbeddingService(provider)
@@ -215,9 +328,22 @@ async def extract_knowledge_from_messages_task(
             f"LLM extraction completed: {len(extraction_output.topics)} topics, {len(extraction_output.atoms)} atoms"
         )
 
+        # CHECKPOINT 2: After LLM, before save
+        if extraction_run_id and await check_cancellation(db, extraction_run_id):
+            return await handle_cancellation(db, extraction_run_id, "after_llm")
+
         topic_map, version_created_topic_ids = await service.save_topics(
             extraction_output.topics, db, created_by=created_by or "system"
         )
+
+        # CHECKPOINT 3: After topics, before atoms
+        if extraction_run_id and await check_cancellation(db, extraction_run_id):
+            # Update partial progress before cancelling
+            await update_extraction_run_status(
+                db, extraction_run_id, ExtractionStatus.cancelling, topics_created=len(topic_map)
+            )
+            return await handle_cancellation(db, extraction_run_id, "after_topics")
+
         saved_atoms, version_created_atom_ids = await service.save_atoms(
             extraction_output.atoms, topic_map, db, created_by=created_by or "system"
         )
@@ -231,6 +357,19 @@ async def extract_knowledge_from_messages_task(
             f"{len(version_created_topic_ids)} topic versions created, "
             f"{len(version_created_atom_ids)} atom versions created"
         )
+
+        # Update extraction run with final stats
+        if extraction_run_id:
+            await update_extraction_run_status(
+                db,
+                extraction_run_id,
+                ExtractionStatus.completed,
+                completed_at=datetime.now(UTC),
+                topics_created=len(topic_map),
+                atoms_created=len(saved_atoms),
+                links_created=links_created,
+                messages_processed=len(messages),
+            )
 
         # Embed new atoms (messages are embedded during scoring for RAG)
         if version_created_atom_ids:
@@ -249,6 +388,7 @@ async def extract_knowledge_from_messages_task(
                     "messages_updated": messages_updated,
                     "topic_versions_created": len(version_created_topic_ids),
                     "atom_versions_created": len(version_created_atom_ids),
+                    "extraction_id": extraction_run_id,
                 },
             },
         )
@@ -317,12 +457,23 @@ async def extract_knowledge_from_messages_task(
     except Exception as e:
         logger.error(f"Knowledge extraction task failed: {e!r}", exc_info=True)
 
+        # Update extraction run with error
+        if extraction_run_id:
+            await update_extraction_run_status(
+                db,
+                extraction_run_id,
+                ExtractionStatus.failed,
+                error=str(e)[:2000],
+                completed_at=datetime.now(UTC),
+            )
+
         await websocket_manager.broadcast(
             "knowledge",
             {
                 "type": "knowledge.extraction_failed",
                 "data": {
                     "error": str(e),
+                    "extraction_id": extraction_run_id,
                 },
             },
         )
@@ -344,7 +495,7 @@ async def scheduled_knowledge_extraction_task() -> dict[str, Any]:
     Returns:
         Dictionary with extraction results and statistics
     """
-    logger.info("🔄 Scheduled knowledge extraction task started")
+    logger.info("Scheduled knowledge extraction task started")
 
     try:
         async with AsyncSessionLocal() as db:
@@ -386,7 +537,7 @@ async def scheduled_knowledge_extraction_task() -> dict[str, Any]:
             if len(message_ids) == 0:
                 return {"status": "skipped", "reason": "no_messages", "count": 0}
 
-            logger.info(f"🧠 Processing {len(message_ids)} unprocessed messages")
+            logger.info(f"Processing {len(message_ids)} unprocessed messages")
 
             await extract_knowledge_from_messages_task.kiq(
                 message_ids=message_ids,
@@ -553,8 +704,6 @@ async def run_scheduled_extraction(scheduled_task_id: str) -> dict[str, Any]:
     Returns:
         Dictionary with execution status and statistics
     """
-    from datetime import UTC
-
     from app.models.scheduled_extraction_task import ScheduledExtractionTask
 
     logger.info(f"Running scheduled extraction task: {scheduled_task_id}")
@@ -586,7 +735,7 @@ async def run_scheduled_extraction(scheduled_task_id: str) -> dict[str, Any]:
 
             query = select(Message.id).where(  # type: ignore[call-overload]
                 Message.topic_id.is_(None),  # type: ignore[union-attr]
-                Message.sent_at >= cutoff_time,  
+                Message.sent_at >= cutoff_time,
             )
 
             # Apply channel filter if specified
