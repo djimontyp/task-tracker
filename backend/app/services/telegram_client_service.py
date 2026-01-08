@@ -83,6 +83,7 @@ class TelegramClientService:
         self,
         chat_id: int | str,
         limit: int = 100,
+        offset_id: int = 0,
         offset_date: datetime | None = None,
     ) -> list[dict[str, Any]]:
         """
@@ -91,28 +92,31 @@ class TelegramClientService:
         Args:
             chat_id: Group chat ID (e.g., -1002988379206)
             limit: Number of messages to fetch
-            offset_date: Fetch messages after this date (oldest first)
+            offset_id: Message ID to start from (0 = latest, for pagination)
+            offset_date: Only fetch messages newer than this date (local filtering)
 
         Returns:
-            List of message dictionaries (sorted oldest to newest when offset_date is set)
+            List of message dictionaries (newest first, filtered by offset_date if provided)
         """
         if not self.client:
             raise RuntimeError("Client not connected. Call connect() first.")
 
-        logger.info(f"Fetching {limit} messages from chat {chat_id}")
+        logger.info(f"Fetching {limit} messages from chat {chat_id}, offset_id={offset_id}")
 
         messages = []
         try:
             # Fetch messages using Telethon
-            # When offset_date is set, use reverse=True to get messages AFTER the date
-            # (without reverse, offset_date returns messages BEFORE the date)
+            # Use offset_id for pagination (NOT offset_date or reverse which are incompatible)
+            # Filter by date locally to avoid Telethon reverse=True issues
             async for message in self.client.iter_messages(
                 chat_id,
                 limit=limit,
-                offset_date=offset_date,
-                reverse=True if offset_date else False,
+                offset_id=offset_id,
             ):
                 if message.text:  # Only text messages for now
+                    # Local filtering by date
+                    if offset_date and message.date < offset_date:
+                        break  # Reached messages older than offset_date, stop
                     messages.append(self._convert_message(message))
 
             logger.info(f"✅ Fetched {len(messages)} messages from chat {chat_id}")

@@ -251,7 +251,7 @@ async def test_get_message_count_client_not_connected(telegram_adapter, mock_cli
 
 @pytest.mark.asyncio
 async def test_fetch_history_success(telegram_adapter, mock_client_service, mock_telethon_client, mock_telethon_message):
-    """Test successful historical message fetching without time filter (reverse=False)."""
+    """Test successful historical message fetching without time filter."""
     # Setup
     chat_id = "-1002988379206"
     mock_client_service.client = mock_telethon_client
@@ -260,8 +260,11 @@ async def test_fetch_history_success(telegram_adapter, mock_client_service, mock
     messages = [mock_telethon_message for _ in range(3)]
 
     async def mock_iter_messages(*args, **kwargs):
-        # Without since/offset_date, reverse should be False (newest first)
-        assert kwargs.get("reverse") is False, "Expected reverse=False when no offset_date"
+        # Verify offset_id is passed (default 0)
+        assert kwargs.get("offset_id", 0) == 0, "Expected offset_id=0 by default"
+        # Verify NO reverse or offset_date params (removed due to incompatibility)
+        assert "reverse" not in kwargs, "reverse should not be passed to iter_messages"
+        assert "offset_date" not in kwargs, "offset_date should not be passed to iter_messages"
         for msg in messages:
             yield msg
 
@@ -285,20 +288,45 @@ async def test_fetch_history_success(telegram_adapter, mock_client_service, mock
 
 @pytest.mark.asyncio
 async def test_fetch_history_with_time_filter(telegram_adapter, mock_client_service, mock_telethon_client, mock_telethon_message):
-    """Test fetching history with since parameter uses reverse=True."""
+    """Test fetching history with since parameter uses local date filtering."""
     # Setup
     chat_id = "-1002988379206"
     since = datetime.utcnow() - timedelta(days=7)
     mock_client_service.client = mock_telethon_client
 
+    # Create messages: one newer than since, one older (should be filtered out locally)
+    newer_msg = Mock(spec=TelethonMessage)
+    newer_msg.id = 12345
+    newer_msg.text = "Newer message"
+    newer_msg.date = datetime.utcnow() - timedelta(days=1)  # 1 day ago (after since)
+    newer_msg.sender_id = 67890
+    newer_msg.sender = Mock()
+    newer_msg.sender.first_name = "John"
+    newer_msg.sender.last_name = "Doe"
+    newer_msg.sender.username = "johndoe"
+    newer_msg.sender.lang_code = "en"
+    newer_msg.sender.bot = False
+
+    older_msg = Mock(spec=TelethonMessage)
+    older_msg.id = 12340
+    older_msg.text = "Older message"
+    older_msg.date = datetime.utcnow() - timedelta(days=10)  # 10 days ago (before since)
+    older_msg.sender_id = 67890
+    older_msg.sender = Mock()
+    older_msg.sender.first_name = "John"
+    older_msg.sender.last_name = "Doe"
+    older_msg.sender.username = "johndoe"
+    older_msg.sender.lang_code = "en"
+    older_msg.sender.bot = False
+
     # Mock iter_messages
     async def mock_iter_messages(*args, **kwargs):
-        # Verify offset_date was passed
-        assert kwargs.get("offset_date") == since, "Expected since date to be passed as offset_date"
-        # Verify reverse=True is used when offset_date is set
-        # This ensures messages AFTER the date are returned, not BEFORE
-        assert kwargs.get("reverse") is True, "Expected reverse=True when offset_date is set"
-        yield mock_telethon_message
+        # Verify NO reverse or offset_date params (removed due to incompatibility)
+        assert "reverse" not in kwargs, "reverse should not be passed to iter_messages"
+        assert "offset_date" not in kwargs, "offset_date should not be passed to iter_messages"
+        # Yield newer first, then older (will be filtered by local date check)
+        yield newer_msg
+        yield older_msg
 
     mock_telethon_client.iter_messages = mock_iter_messages
 
@@ -307,8 +335,9 @@ async def test_fetch_history_with_time_filter(telegram_adapter, mock_client_serv
     async for message_dict in telegram_adapter.fetch_history(chat_id, since=since):
         fetched.append(message_dict)
 
-    # Assert
-    assert len(fetched) == 1, f"Expected 1 message, got {len(fetched)}"
+    # Assert - only newer message should be returned (older filtered out locally)
+    assert len(fetched) == 1, f"Expected 1 message (older filtered), got {len(fetched)}"
+    assert fetched[0]["text"] == "Newer message", f"Expected 'Newer message', got {fetched[0]['text']}"
 
 
 @pytest.mark.asyncio

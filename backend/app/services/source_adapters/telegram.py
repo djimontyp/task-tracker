@@ -185,6 +185,7 @@ class TelegramSourceAdapter(SourceAdapter):
         chat_id: str,
         since: datetime | None = None,
         limit: int | None = None,
+        offset_id: int = 0,
     ) -> AsyncGenerator[dict[str, Any], None]:
         """Fetch historical messages from Telegram chat.
 
@@ -192,8 +193,9 @@ class TelegramSourceAdapter(SourceAdapter):
 
         Args:
             chat_id: Telegram chat ID
-            since: Only fetch messages after this datetime
+            since: Only fetch messages after this datetime (local filtering)
             limit: Maximum number of messages (None = unlimited)
+            offset_id: Message ID to start from (0 = latest, for pagination)
 
         Yields:
             Message dictionaries compatible with Message model
@@ -206,20 +208,22 @@ class TelegramSourceAdapter(SourceAdapter):
                 logger.error("Client not connected, cannot fetch history")
                 return
 
-            logger.info(f"Fetching history from {chat_id}, since={since}, limit={limit}")
+            logger.info(f"Fetching history from {chat_id}, since={since}, limit={limit}, offset_id={offset_id}")
 
             # Iterate over messages
-            # When since is set, use reverse=True to get messages AFTER the date
-            # (without reverse, offset_date returns messages BEFORE the date)
+            # Use offset_id for pagination (NOT offset_date or reverse which are incompatible)
+            # Filter by date locally to avoid Telethon reverse=True issues
             count = 0
             async for message in self.client_service.client.iter_messages(
                 int(chat_id),
-                offset_date=since,
                 limit=limit,
-                reverse=True if since else False,
+                offset_id=offset_id,
             ):
                 # Only process text messages
                 if message.text:
+                    # Local filtering by date
+                    if since and message.date < since:
+                        break  # Reached messages older than since, stop
                     yield self._convert_message(message)
                     count += 1
 

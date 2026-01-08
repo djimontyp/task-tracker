@@ -65,10 +65,11 @@ class TelegramIngestionService:
             # Connect to Telegram (will use existing session if available)
             await client_service.connect()
 
-            # Fetch messages with optional time filter
+            # Fetch messages with optional time filter and pagination
             messages = await client_service.fetch_group_history(
                 chat_id=int(chat_id),
                 limit=limit,
+                offset_id=offset_id,
                 offset_date=offset_date,
             )
 
