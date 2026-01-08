@@ -7,7 +7,7 @@ Uses Telethon Client API (MTProto) for:
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, AsyncGenerator
 
 from telethon.errors import FloodWaitError, AuthKeyError
@@ -207,6 +207,10 @@ class TelegramSourceAdapter(SourceAdapter):
             if not self.client_service.client:
                 logger.error("Client not connected, cannot fetch history")
                 return
+
+            # Ensure since is timezone-aware (Telethon returns UTC-aware datetimes)
+            if since and since.tzinfo is None:
+                since = since.replace(tzinfo=timezone.utc)
 
             logger.info(f"Fetching history from {chat_id}, since={since}, limit={limit}, offset_id={offset_id}")
 

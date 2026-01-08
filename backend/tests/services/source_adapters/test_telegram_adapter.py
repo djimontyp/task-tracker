@@ -7,7 +7,7 @@ Covers:
 - Error handling (rate limits, auth errors)
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, Mock, patch
 from typing import Any
 
@@ -48,11 +48,15 @@ def telegram_adapter(mock_client_service):
 
 @pytest.fixture
 def mock_telethon_message():
-    """Create mock Telethon message."""
+    """Create mock Telethon message.
+
+    Note: Telethon always returns timezone-aware datetimes (UTC),
+    so we use datetime.now(timezone.utc) to match real behavior.
+    """
     message = Mock(spec=TelethonMessage)
     message.id = 12345
     message.text = "Test message"
-    message.date = datetime.utcnow()
+    message.date = datetime.now(timezone.utc)
     message.sender_id = 67890
     message.sender = Mock()
     message.sender.first_name = "John"
@@ -98,7 +102,7 @@ async def test_get_message_count_with_time_filter_exact(telegram_adapter, mock_c
     """Test message count with time filter (estimate via ID difference)."""
     # Setup
     chat_id = "-1002988379206"
-    since = datetime.utcnow() - timedelta(hours=24)
+    since = datetime.now(timezone.utc) - timedelta(hours=24)
     mock_client_service.client = mock_telethon_client
 
     # Mock total count (first call)
@@ -133,7 +137,7 @@ async def test_get_message_count_with_time_filter_no_messages(telegram_adapter, 
     """Test message count with time filter when no messages found after since date."""
     # Setup
     chat_id = "-1002988379206"
-    since = datetime.utcnow() - timedelta(hours=1)  # Very recent, no messages
+    since = datetime.now(timezone.utc) - timedelta(hours=1)  # Very recent, no messages
     mock_client_service.client = mock_telethon_client
 
     # Mock total count
@@ -163,7 +167,7 @@ async def test_get_message_count_with_time_filter_fallback(telegram_adapter, moc
     """Test message count fallback when min_id method fails."""
     # Setup
     chat_id = "-1002988379206"
-    since = datetime.utcnow() - timedelta(days=7)
+    since = datetime.now(timezone.utc) - timedelta(days=7)
     mock_client_service.client = mock_telethon_client
 
     # Mock total count
@@ -291,14 +295,14 @@ async def test_fetch_history_with_time_filter(telegram_adapter, mock_client_serv
     """Test fetching history with since parameter uses local date filtering."""
     # Setup
     chat_id = "-1002988379206"
-    since = datetime.utcnow() - timedelta(days=7)
+    since = datetime.now(timezone.utc) - timedelta(days=7)
     mock_client_service.client = mock_telethon_client
 
     # Create messages: one newer than since, one older (should be filtered out locally)
     newer_msg = Mock(spec=TelethonMessage)
     newer_msg.id = 12345
     newer_msg.text = "Newer message"
-    newer_msg.date = datetime.utcnow() - timedelta(days=1)  # 1 day ago (after since)
+    newer_msg.date = datetime.now(timezone.utc) - timedelta(days=1)  # 1 day ago (after since)
     newer_msg.sender_id = 67890
     newer_msg.sender = Mock()
     newer_msg.sender.first_name = "John"
@@ -310,7 +314,7 @@ async def test_fetch_history_with_time_filter(telegram_adapter, mock_client_serv
     older_msg = Mock(spec=TelethonMessage)
     older_msg.id = 12340
     older_msg.text = "Older message"
-    older_msg.date = datetime.utcnow() - timedelta(days=10)  # 10 days ago (before since)
+    older_msg.date = datetime.now(timezone.utc) - timedelta(days=10)  # 10 days ago (before since)
     older_msg.sender_id = 67890
     older_msg.sender = Mock()
     older_msg.sender.first_name = "John"
@@ -452,7 +456,7 @@ def test_convert_message_minimal_data(telegram_adapter):
     message = Mock(spec=TelethonMessage)
     message.id = 99999
     message.text = "Minimal"
-    message.date = datetime.utcnow()
+    message.date = datetime.now(timezone.utc)
     message.sender_id = 11111
     message.sender = Mock()
     message.sender.first_name = None  # No first name

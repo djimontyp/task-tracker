@@ -8,7 +8,7 @@ IMPORTANT: Requires user authentication (phone number + code), not bot token!
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from core.config import settings
@@ -100,6 +100,10 @@ class TelegramClientService:
         """
         if not self.client:
             raise RuntimeError("Client not connected. Call connect() first.")
+
+        # Ensure offset_date is timezone-aware (Telethon returns UTC-aware datetimes)
+        if offset_date and offset_date.tzinfo is None:
+            offset_date = offset_date.replace(tzinfo=timezone.utc)
 
         logger.info(f"Fetching {limit} messages from chat {chat_id}, offset_id={offset_id}")
 
