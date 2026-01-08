@@ -19,10 +19,11 @@ import {
     Info,
     AlertCircle,
     Clock,
-    Sparkles
+
 } from 'lucide-react'
 import { formatFullDate } from '@/shared/utils/date'
 import { Skeleton } from '@/shared/ui/skeleton'
+import { MessageAnalysisSection } from './MessageAnalysisSection'
 
 export function MessageDetailPanel({ messageId, onClose, onNext, onPrev }: MessageInspectModalProps) {
     const { t } = useTranslation('messages')
@@ -174,23 +175,12 @@ export function MessageDetailPanel({ messageId, onClose, onNext, onPrev }: Messa
                         {/* SIDE COLUMN (Analysis & Context) - Fixed Width on Large Screens */}
                         <div className="w-full xl:w-[400px] 2xl:w-[420px] shrink-0 border-t xl:border-t-0 xl:border-l bg-card/5 p-6 lg:p-8 flex flex-col gap-8">
 
-                            {/* AI Analysis (Prominent) */}
-                            <div className="space-y-3">
-                                <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/70">
-                                    <Sparkles className="w-3.5 h-3.5 text-primary" /> AI Analysis
-                                </h3>
-
-                                {messageData.classification?.reasoning && messageData.classification.reasoning !== "No reasoning available" ? (
-                                    <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-lg p-4 border border-primary/20 shadow-sm text-sm leading-relaxed text-foreground/90 relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none" />
-                                        {messageData.classification.reasoning}
-                                    </div>
-                                ) : (
-                                    <div className="text-sm text-muted-foreground/60 italic px-2">
-                                        No automated reasoning available for this signal.
-                                    </div>
-                                )}
-                            </div>
+                            {/* AI Analysis (Interactive) */}
+                            <MessageAnalysisSection
+                                message={messageData.message}
+                                hasAnalysis={!!messageData.classification}
+                                reasoning={messageData.classification?.reasoning}
+                            />
 
                             {/* Connected Knowledge */}
                             <div className="space-y-3">

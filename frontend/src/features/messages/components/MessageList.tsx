@@ -25,6 +25,7 @@ interface MessageListProps {
     hasMore?: boolean
     onLoadMore?: () => void
     isFetchingNextPage?: boolean
+    total?: number
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -42,20 +43,38 @@ export const MessageList: React.FC<MessageListProps> = ({
     onRetry,
     hasMore,
     onLoadMore,
-    isFetchingNextPage
+    isFetchingNextPage,
+    total
 }) => {
     const { t, i18n } = useTranslation('messages')
+
+    // Ref to ScrollArea container for finding viewport
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+    const [scrollViewport, setScrollViewport] = React.useState<HTMLElement | null>(null)
+
+    // Find ScrollArea viewport after mount
+    useEffect(() => {
+        if (scrollContainerRef.current) {
+            const viewport = scrollContainerRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement
+            if (viewport) {
+                setScrollViewport(viewport)
+            }
+        }
+    }, [])
 
     // Bottom infinite scroll trigger - aggressive prefetch to prevent skeleton flicker
     const { ref: loadMoreRef, inView } = useInView({
         threshold: 0,
-        rootMargin: '600px', // Preload well before hitting bottom (3-4 viewport heights)
+        rootMargin: '1500px', // Preload 1500px before hitting bottom for seamless infinite scroll
+        root: scrollViewport ?? undefined,
+        initialInView: false,
     })
 
     // Top sentinel for "Scroll to Top" button visibility
     const { ref: topRef, inView: isAtTop } = useInView({
         threshold: 0,
-        rootMargin: '100px 0px 0px 0px', // slightly generous
+        rootMargin: '100px 0px 0px 0px',
+        root: scrollViewport,
     })
 
     // Auto-scroll ref map
@@ -182,7 +201,7 @@ export const MessageList: React.FC<MessageListProps> = ({
     }
 
     return (
-        <ScrollArea className="h-full relative">
+        <ScrollArea className="h-full relative" ref={scrollContainerRef}>
             <div className="flex flex-col min-h-full pb-24">
                 {/* Top Sentinel */}
                 <div ref={setTopRef} className="h-px w-full" />
@@ -218,7 +237,14 @@ export const MessageList: React.FC<MessageListProps> = ({
                 ))}
 
                 {/* Infinite scroll trigger / Loader */}
-                <div ref={loadMoreRef} className="py-6 flex justify-center min-h-[60px] items-center">
+                <div ref={loadMoreRef} className="py-6 flex flex-col items-center justify-center min-h-[60px] gap-2">
+                    {/* Progress counter */}
+                    {total !== undefined && total > 0 && (
+                        <span className="text-xs text-muted-foreground/60 tabular-nums">
+                            {messages.length} / {total}
+                        </span>
+                    )}
+
                     {isFetchingNextPage ? (
                         <div className="flex items-center gap-2 text-muted-foreground/50 text-xs">
                             <Loader2 className="h-4 w-4 animate-spin" />

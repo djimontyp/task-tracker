@@ -8,8 +8,8 @@ interface PaginatedResponse<T> {
   items: T[]
   total: number
   page: number
-  size: number
-  pages: number
+  page_size: number
+  total_pages: number
 }
 
 class MessageService {
