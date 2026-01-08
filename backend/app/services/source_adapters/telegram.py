@@ -209,11 +209,14 @@ class TelegramSourceAdapter(SourceAdapter):
             logger.info(f"Fetching history from {chat_id}, since={since}, limit={limit}")
 
             # Iterate over messages
+            # When since is set, use reverse=True to get messages AFTER the date
+            # (without reverse, offset_date returns messages BEFORE the date)
             count = 0
             async for message in self.client_service.client.iter_messages(
                 int(chat_id),
                 offset_date=since,
                 limit=limit,
+                reverse=True if since else False,
             ):
                 # Only process text messages
                 if message.text:

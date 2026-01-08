@@ -94,55 +94,95 @@ async def test_get_message_count_success_no_filter(telegram_adapter, mock_client
 
 
 @pytest.mark.asyncio
-async def test_get_message_count_with_time_filter_small(telegram_adapter, mock_client_service, mock_telethon_client):
-    """Test message count with time filter (result < 100, exact count)."""
+async def test_get_message_count_with_time_filter_exact(telegram_adapter, mock_client_service, mock_telethon_client):
+    """Test message count with time filter (estimate via ID difference)."""
     # Setup
     chat_id = "-1002988379206"
     since = datetime.utcnow() - timedelta(hours=24)
     mock_client_service.client = mock_telethon_client
 
-    # Mock total count
+    # Mock total count (first call)
     mock_total = Mock()
     mock_total.total = 4721
-    mock_telethon_client.get_messages = AsyncMock(return_value=mock_total)
 
-    # Mock filtered sample (47 messages)
-    mock_sample = [Mock(spec=TelethonMessage) for _ in range(47)]
-    mock_telethon_client.get_messages = AsyncMock(side_effect=[mock_total, mock_sample])
+    # Mock first message after 'since' (second call with reverse=True)
+    mock_first_msg = Mock(spec=TelethonMessage)
+    mock_first_msg.id = 1000
+
+    # Mock newest message (third call)
+    mock_newest_msg = Mock(spec=TelethonMessage)
+    mock_newest_msg.id = 1046  # 1046 - 1000 + 1 = 47 messages
+
+    # Setup side_effect: [total, [first_msg], [newest_msg]]
+    mock_telethon_client.get_messages = AsyncMock(side_effect=[mock_total, [mock_first_msg], [mock_newest_msg]])
 
     # Execute
     result = await telegram_adapter.get_message_count(chat_id, since=since)
 
-    # Assert
-    assert result.count == 47, f"Expected 47 (exact), got {result.count}"
-    assert result.is_estimate is False, "Count < 100 should be exact"
+    # Assert - count is newest_id - first_msg_id + 1 = 1046 - 1000 + 1 = 47
+    assert result.count == 47, f"Expected 47, got {result.count}"
+    assert result.is_estimate is True, "ID-based count should be estimate"
     assert result.error is None, f"Expected no error, got {result.error}"
+
+    # Verify calls
+    assert mock_telethon_client.get_messages.call_count == 3, "Expected 3 calls: total, first_msg, newest_msg"
 
 
 @pytest.mark.asyncio
-async def test_get_message_count_with_time_filter_large(telegram_adapter, mock_client_service, mock_telethon_client):
-    """Test message count with time filter (result >= 100, estimate)."""
+async def test_get_message_count_with_time_filter_no_messages(telegram_adapter, mock_client_service, mock_telethon_client):
+    """Test message count with time filter when no messages found after since date."""
     # Setup
     chat_id = "-1002988379206"
-    since = datetime.utcnow() - timedelta(days=30)
+    since = datetime.utcnow() - timedelta(hours=1)  # Very recent, no messages
     mock_client_service.client = mock_telethon_client
 
     # Mock total count
     mock_total = Mock()
     mock_total.total = 4721
-    mock_telethon_client.get_messages = AsyncMock(return_value=mock_total)
 
-    # Mock filtered sample (100 messages = more available)
-    mock_sample = [Mock(spec=TelethonMessage) for _ in range(100)]
-    mock_telethon_client.get_messages = AsyncMock(side_effect=[mock_total, mock_sample])
+    # Mock empty result for first message after 'since'
+    empty_result = []
+
+    # Setup side_effect: [total, empty_result]
+    mock_telethon_client.get_messages = AsyncMock(side_effect=[mock_total, empty_result])
 
     # Execute
     result = await telegram_adapter.get_message_count(chat_id, since=since)
 
     # Assert
-    assert result.count == 4721, f"Expected total as upper bound, got {result.count}"
-    assert result.is_estimate is True, "Count >= 100 should be estimate"
+    assert result.count == 0, f"Expected 0 when no messages after since, got {result.count}"
+    assert result.is_estimate is False, "Count 0 should be exact"
     assert result.error is None, f"Expected no error, got {result.error}"
+
+    # Verify calls
+    assert mock_telethon_client.get_messages.call_count == 2, "Expected 2 calls: total, first_msg (empty)"
+
+
+@pytest.mark.asyncio
+async def test_get_message_count_with_time_filter_fallback(telegram_adapter, mock_client_service, mock_telethon_client):
+    """Test message count fallback when min_id method fails."""
+    # Setup
+    chat_id = "-1002988379206"
+    since = datetime.utcnow() - timedelta(days=7)
+    mock_client_service.client = mock_telethon_client
+
+    # Mock total count
+    mock_total = Mock()
+    mock_total.total = 4721
+
+    # Mock first call (total), then error on second call (reverse lookup)
+    mock_telethon_client.get_messages = AsyncMock(side_effect=[
+        mock_total,
+        ValueError("Test error in reverse lookup")
+    ])
+
+    # Execute
+    result = await telegram_adapter.get_message_count(chat_id, since=since)
+
+    # Assert - should fallback to total with is_estimate=True
+    assert result.count == 4721, f"Expected fallback to total, got {result.count}"
+    assert result.is_estimate is True, "Fallback count should be estimate"
+    assert result.error is None, f"Expected no error (fallback), got {result.error}"
 
 
 @pytest.mark.asyncio
@@ -211,7 +251,7 @@ async def test_get_message_count_client_not_connected(telegram_adapter, mock_cli
 
 @pytest.mark.asyncio
 async def test_fetch_history_success(telegram_adapter, mock_client_service, mock_telethon_client, mock_telethon_message):
-    """Test successful historical message fetching."""
+    """Test successful historical message fetching without time filter (reverse=False)."""
     # Setup
     chat_id = "-1002988379206"
     mock_client_service.client = mock_telethon_client
@@ -220,6 +260,8 @@ async def test_fetch_history_success(telegram_adapter, mock_client_service, mock
     messages = [mock_telethon_message for _ in range(3)]
 
     async def mock_iter_messages(*args, **kwargs):
+        # Without since/offset_date, reverse should be False (newest first)
+        assert kwargs.get("reverse") is False, "Expected reverse=False when no offset_date"
         for msg in messages:
             yield msg
 
@@ -243,7 +285,7 @@ async def test_fetch_history_success(telegram_adapter, mock_client_service, mock
 
 @pytest.mark.asyncio
 async def test_fetch_history_with_time_filter(telegram_adapter, mock_client_service, mock_telethon_client, mock_telethon_message):
-    """Test fetching history with since parameter."""
+    """Test fetching history with since parameter uses reverse=True."""
     # Setup
     chat_id = "-1002988379206"
     since = datetime.utcnow() - timedelta(days=7)
@@ -253,6 +295,9 @@ async def test_fetch_history_with_time_filter(telegram_adapter, mock_client_serv
     async def mock_iter_messages(*args, **kwargs):
         # Verify offset_date was passed
         assert kwargs.get("offset_date") == since, "Expected since date to be passed as offset_date"
+        # Verify reverse=True is used when offset_date is set
+        # This ensures messages AFTER the date are returned, not BEFORE
+        assert kwargs.get("reverse") is True, "Expected reverse=True when offset_date is set"
         yield mock_telethon_message
 
     mock_telethon_client.iter_messages = mock_iter_messages

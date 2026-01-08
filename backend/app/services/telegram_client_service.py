@@ -91,10 +91,10 @@ class TelegramClientService:
         Args:
             chat_id: Group chat ID (e.g., -1002988379206)
             limit: Number of messages to fetch
-            offset_date: Fetch messages before this date
+            offset_date: Fetch messages after this date (oldest first)
 
         Returns:
-            List of message dictionaries
+            List of message dictionaries (sorted oldest to newest when offset_date is set)
         """
         if not self.client:
             raise RuntimeError("Client not connected. Call connect() first.")
@@ -104,10 +104,13 @@ class TelegramClientService:
         messages = []
         try:
             # Fetch messages using Telethon
+            # When offset_date is set, use reverse=True to get messages AFTER the date
+            # (without reverse, offset_date returns messages BEFORE the date)
             async for message in self.client.iter_messages(
                 chat_id,
                 limit=limit,
                 offset_date=offset_date,
+                reverse=True if offset_date else False,
             ):
                 if message.text:  # Only text messages for now
                     messages.append(self._convert_message(message))
