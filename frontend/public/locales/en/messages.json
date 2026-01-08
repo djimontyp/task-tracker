@@ -37,6 +37,9 @@
       "afternoon": "Good afternoon!",
       "evening": "Good evening!"
     },
+    "totalMessages": "{{count}} messages",
+    "totalMessages_one": "{{count}} message",
+    "totalMessages_other": "{{count}} messages",
     "today": "Today",
     "newSignals": "{{count}} new signals",
     "newSignals_one": "{{count}} new signal",

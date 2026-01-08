@@ -1,0 +1,63 @@
+{
+    "sheet": {
+        "title": "Екстракція Знань",
+        "description": "Налаштуйте параметри ШІ для вилучення інсайтів, задач та рішень з ваших повідомлень.",
+        "timePeriod": "Період Часу",
+        "messageFilter": "Фільтр Повідомлень",
+        "aiProvider": "Модель ШІ",
+        "periodAriaLabel": "Обрати {{label}} (Шорткат: {{shortcut}})",
+        "selectScoreFilter": "Оберіть фільтр повідомлень",
+        "selectFilterPlaceholder": "Оберіть фільтр...",
+        "selectAiProvider": "Оберіть модель ШІ",
+        "selectProviderPlaceholder": "Оберіть модель...",
+        "extractingKnowledge": "Екстракція знань...",
+        "periodShortcutHint": "1-4 для вибору періоду",
+        "startShortcutHint": "для початку",
+        "extracting": "Екстракція...",
+        "startExtraction": "Розпочати",
+        "cancel": "Скасувати",
+        "cancelling": "Скасування...",
+        "cancelled": "Скасовано",
+        "periods": {
+            "lastHour": "Остання година",
+            "last24Hours": "Останні 24 години",
+            "last7Days": "Останні 7 днів",
+            "customRange": "Власний період"
+        },
+        "scores": {
+            "all": "Всі повідомлення",
+            "allDescription": "Обробити все (найдовше)",
+            "medium": "Тільки важливе",
+            "mediumDescription": "Пропускати шум (рекомендовано)",
+            "high": "Висока цінність",
+            "highDescription": "Фокус на рішеннях та задачах"
+        },
+        "providers": {
+            "speedSlow": "Повільно",
+            "speedMedium": "Середньо",
+            "speedFast": "Швидко"
+        },
+        "preview": {
+            "title": "Попередній перегляд",
+            "messagesSelected": "Повідомлень до обробки",
+            "ofTotal": "з {{total}} всього",
+            "expectedAtoms": "Очікувані атоми",
+            "knowledgeUnits": "Одиниць знань",
+            "estimatedTime": "Орієнтовний час",
+            "estimatedCost": "Орієнтовна вартість",
+            "free": "Безкоштовно",
+            "messagesCount": "{{count}} повідомлень",
+            "decisionsCount": "~{{count}} атомів знань",
+            "confidence": {
+                "high": "Висока довіра",
+                "medium": "Середня довіра",
+                "low": "Низька довіра"
+            }
+        },
+        "notifications": {
+            "cancelRequested": "Запит на скасування надіслано...",
+            "cancelled": "Екстракцію скасовано",
+            "cancelFailed": "Не вдалося скасувати екстракцію"
+        }
+    }
+}

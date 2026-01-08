@@ -37,6 +37,10 @@
       "afternoon": "Добрий день!",
       "evening": "Доброго вечора!"
     },
+    "totalMessages": "{{count}} повідомлень",
+    "totalMessages_one": "{{count}} повідомлення",
+    "totalMessages_few": "{{count}} повідомлення",
+    "totalMessages_many": "{{count}} повідомлень",
     "today": "Сьогодні",
     "newSignals": "{{count}} нових сигналів",
     "newSignals_one": "{{count}} новий сигнал",

@@ -1,0 +1,63 @@
+{
+    "sheet": {
+        "title": "Knowledge Extraction",
+        "description": "Configure AI parameters to extract insights, tasks, and decisions from your messages.",
+        "timePeriod": "Time Period",
+        "messageFilter": "Message Filter",
+        "aiProvider": "AI Model",
+        "periodAriaLabel": "Select {{label}} (Shortcut: {{shortcut}})",
+        "selectScoreFilter": "Select message filter",
+        "selectFilterPlaceholder": "Select filter...",
+        "selectAiProvider": "Select AI model",
+        "selectProviderPlaceholder": "Select model...",
+        "extractingKnowledge": "Extracting knowledge...",
+        "periodShortcutHint": "1-4 to select period",
+        "startShortcutHint": "to start",
+        "extracting": "Extracting...",
+        "startExtraction": "Start Extraction",
+        "cancel": "Cancel",
+        "cancelling": "Cancelling...",
+        "cancelled": "Cancelled",
+        "periods": {
+            "lastHour": "Last Hour",
+            "last24Hours": "Last 24 Hours",
+            "last7Days": "Last 7 Days",
+            "customRange": "Custom Range"
+        },
+        "scores": {
+            "all": "All Messages",
+            "allDescription": "Process everything (slowest)",
+            "medium": "Signal Only",
+            "mediumDescription": "Skip noise/chatter (recommended)",
+            "high": "High Value Only",
+            "highDescription": "Focus on key decisions & tasks"
+        },
+        "providers": {
+            "speedSlow": "Slow",
+            "speedMedium": "Medium",
+            "speedFast": "Fast"
+        },
+        "preview": {
+            "title": "Extraction Preview",
+            "messagesSelected": "Messages to Process",
+            "ofTotal": "of {{total}} total",
+            "expectedAtoms": "Expected Atoms",
+            "knowledgeUnits": "Knowledge units",
+            "estimatedTime": "Estimated Time",
+            "estimatedCost": "Estimated Cost",
+            "free": "Free",
+            "messagesCount": "{{count}} messages",
+            "decisionsCount": "~{{count}} knowledge atoms",
+            "confidence": {
+                "high": "High Confidence",
+                "medium": "Medium Confidence",
+                "low": "Low Confidence"
+            }
+        },
+        "notifications": {
+            "cancelRequested": "Cancellation requested...",
+            "cancelled": "Extraction cancelled",
+            "cancelFailed": "Failed to cancel extraction"
+        }
+    }
+}
