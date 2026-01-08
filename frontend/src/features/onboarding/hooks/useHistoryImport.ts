@@ -17,7 +17,12 @@ import { MESSAGE_ESTIMATE_QUERY_KEY } from './useMessageEstimate';
  * Start history import
  */
 async function startImport(request: StartImportRequest): Promise<ImportJobResponse> {
-  const response = await apiClient.post<ImportJobResponse>(API_ENDPOINTS.ingestion.telegramImport, request);
+  // Use telegram ingestion endpoint (not telegramImport which doesn't exist)
+  const response = await apiClient.post<ImportJobResponse>(API_ENDPOINTS.ingestion.telegram, {
+    chat_ids: request.chat_ids,
+    depth: request.depth,
+    limit: 10000, // Default limit
+  });
   return response.data;
 }
 
@@ -44,8 +49,8 @@ export interface UseHistoryImportReturn {
   isImporting: boolean;
   /** Whether import can be started */
   canStart: boolean;
-  /** Start import with specified depth */
-  startImport: (depth: ImportDepth) => void;
+  /** Start import with specified depth and chat IDs */
+  startImport: (depth: ImportDepth, chatIds: string[]) => void;
   /** Cancel current import */
   cancelImport: () => void;
   /** Reset to idle state */
@@ -173,7 +178,7 @@ export function useHistoryImport(
   });
 
   const handleStartImport = useCallback(
-    (depth: ImportDepth) => {
+    (depth: ImportDepth, chatIds: string[]) => {
       if (depth === 'skip') {
         // Skip import - mark as completed and notify parent
         setStatus('completed');
@@ -189,9 +194,15 @@ export function useHistoryImport(
         });
         return;
       }
-      startMutation.mutate({ depth });
+
+      if (chatIds.length === 0) {
+        onError?.('Please add at least one chat ID');
+        return;
+      }
+
+      startMutation.mutate({ depth, chat_ids: chatIds });
     },
-    [startMutation, onComplete]
+    [startMutation, onComplete, onError]
   );
 
   const handleCancelImport = useCallback(() => {

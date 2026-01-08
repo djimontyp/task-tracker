@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, Play, Info, AlertTriangle } from 'lucide-react';
+
+const CHAT_IDS_STORAGE_KEY = 'telegram_import_chat_ids';
+import { Download, Play, Info, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/shared/ui/radio-group';
@@ -9,14 +11,14 @@ import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Badge } from '@/shared/ui/badge';
 import { cn } from '@/shared/lib';
 import { semantic } from '@/shared/tokens';
-import { MessageCountDisplay } from './MessageCountDisplay';
+import { ChatIdInput } from './ChatIdInput';
 import { useMessageEstimate } from '../hooks/useMessageEstimate';
 import type { ImportDepth, ImportDepthOption } from '../types';
 import { IMPORT_DEPTH_OPTIONS } from '../types';
 
 export interface HistoryImportSectionProps {
   /** Callback when import is started */
-  onStartImport: (depth: ImportDepth) => void;
+  onStartImport: (depth: ImportDepth, chatIds: string[]) => void;
   /** Whether import button should be disabled */
   disabled?: boolean;
   /** Whether import is currently starting */
@@ -48,6 +50,27 @@ export function HistoryImportSection({
 }: HistoryImportSectionProps) {
   const { t } = useTranslation('onboarding');
   const [selectedDepth, setSelectedDepth] = useState<ImportDepth>('7d');
+  const [chatIds, setChatIds] = useState<string[]>(() => {
+    // Initialize from localStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(CHAT_IDS_STORAGE_KEY);
+      if (saved) {
+        try {
+          return JSON.parse(saved) as string[];
+        } catch {
+          return [];
+        }
+      }
+    }
+    return [];
+  });
+
+  // Save to localStorage when chatIds change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(CHAT_IDS_STORAGE_KEY, JSON.stringify(chatIds));
+    }
+  }, [chatIds]);
 
   const {
     isLoading: isEstimateLoading,
@@ -56,13 +79,24 @@ export function HistoryImportSection({
     retryAfter,
     refetch: refetchEstimate,
     getCountForDepth,
-  } = useMessageEstimate();
+  } = useMessageEstimate({ chatIds });
 
   const selectedOption = IMPORT_DEPTH_OPTIONS.find((opt) => opt.value === selectedDepth);
   const showWarning = selectedOption?.isWarning ?? false;
 
+  // Can start import if we have at least one chat ID (or skipping)
+  const canStartImport = selectedDepth === 'skip' || chatIds.length > 0;
+
+  const handleAddChatId = useCallback((chatId: string) => {
+    setChatIds((prev) => [...prev, chatId]);
+  }, []);
+
+  const handleRemoveChatId = useCallback((chatId: string) => {
+    setChatIds((prev) => prev.filter((id) => id !== chatId));
+  }, []);
+
   const handleStartImport = () => {
-    onStartImport(selectedDepth);
+    onStartImport(selectedDepth, chatIds);
   };
 
   return (
@@ -76,6 +110,44 @@ export function HistoryImportSection({
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {/* Chat ID Input */}
+        <ChatIdInput
+          chatIds={chatIds}
+          onAdd={handleAddChatId}
+          onRemove={handleRemoveChatId}
+          disabled={disabled || isStarting}
+        />
+
+        {/* Total Messages Count with Refresh */}
+        {chatIds.length > 0 && (
+          <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {t('import.estimate.totalMessages')}:
+              </span>
+              {isEstimateLoading ? (
+                <span className="text-sm text-muted-foreground">{t('import.estimate.loading')}</span>
+              ) : isEstimateError ? (
+                <span className="text-sm text-destructive">{t('import.estimate.unavailable')}</span>
+              ) : (
+                <span className="text-sm font-medium">
+                  {(getCountForDepth('all') ?? 0).toLocaleString()} {t('import.estimate.messagesLabel')}
+                </span>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={refetchEstimate}
+              disabled={isEstimateLoading}
+              className="h-8 px-2"
+              aria-label={t('import.estimate.refresh')}
+            >
+              <RefreshCw className={cn('h-4 w-4', isEstimateLoading && 'animate-spin')} />
+            </Button>
+          </div>
+        )}
+
         {/* Depth Selection */}
         <div className="space-y-4">
           <Label className="text-sm font-medium">{t('import.depth.label')}</Label>
@@ -90,12 +162,8 @@ export function HistoryImportSection({
                 key={option.value}
                 option={option}
                 isSelected={selectedDepth === option.value}
-                count={getCountForDepth(option.value)}
-                isLoading={isEstimateLoading}
-                isError={isEstimateError}
-                isRateLimited={isRateLimited}
-                retryAfter={retryAfter}
-                onRetry={refetchEstimate}
+                count={option.value !== 'skip' ? getCountForDepth(option.value) : null}
+                isLoading={isEstimateLoading && chatIds.length > 0}
               />
             ))}
           </RadioGroup>
@@ -152,16 +220,18 @@ export function HistoryImportSection({
         {/* Start Import Button - 44px touch target */}
         <Button
           onClick={handleStartImport}
-          disabled={disabled || isStarting}
+          disabled={disabled || isStarting || !canStartImport}
           className="w-full h-11"
           size="lg"
         >
           <Play className="h-4 w-4 mr-2" aria-hidden="true" />
           {isStarting
             ? t('import.actions.starting')
-            : isEstimateError
-              ? t('import.actions.startAnyway')
-              : t('import.actions.start')}
+            : !canStartImport
+              ? t('import.actions.addChatFirst')
+              : isEstimateError
+                ? t('import.actions.startAnyway')
+                : t('import.actions.start')}
         </Button>
       </CardContent>
     </Card>
@@ -176,23 +246,10 @@ interface DepthOptionProps {
   option: ImportDepthOption;
   isSelected: boolean;
   count: number | null;
-  isLoading: boolean;
-  isError: boolean;
-  isRateLimited: boolean;
-  retryAfter: number | null;
-  onRetry: () => void;
+  isLoading?: boolean;
 }
 
-function DepthOption({
-  option,
-  isSelected,
-  count,
-  isLoading,
-  isError,
-  isRateLimited,
-  retryAfter,
-  onRetry,
-}: DepthOptionProps) {
+function DepthOption({ option, isSelected, count, isLoading = false }: DepthOptionProps) {
   const { t } = useTranslation('onboarding');
 
   return (
@@ -224,15 +281,15 @@ function DepthOption({
         </Label>
       </div>
 
+      {/* Message count for this depth */}
       {option.value !== 'skip' && (
-        <MessageCountDisplay
-          count={count}
-          isLoading={isLoading}
-          isError={isError}
-          isRateLimited={isRateLimited}
-          retryAfter={retryAfter}
-          onRetry={onRetry}
-        />
+        <div className="ml-auto text-sm text-muted-foreground">
+          {isLoading ? (
+            <span>{t('import.estimate.loading')}</span>
+          ) : count !== null ? (
+            <span className="font-medium">{count.toLocaleString()}</span>
+          ) : null}
+        </div>
       )}
     </div>
   );
