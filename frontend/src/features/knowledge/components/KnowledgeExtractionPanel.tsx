@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
@@ -17,11 +16,10 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-  Label,
-  Checkbox,
 } from '@/shared/ui';
 import { Sparkles } from 'lucide-react';
 import { TimeWindowSelector } from '@/features/analysis/components/TimeWindowSelector';
+import { useKnowledgeExtraction } from '@/features/knowledge/hooks/useKnowledgeExtraction';
 import { knowledgeService } from '../api/knowledgeService';
 import { useWebSocket } from '@/shared/hooks';
 import { agentService } from '@/features/agents/api/agentService';
@@ -46,15 +44,19 @@ export function KnowledgeExtractionPanel({
   const [agentConfigs, setAgentConfigs] = useState<AgentConfig[]>([]);
   const [agentConfigsLoading, setAgentConfigsLoading] = useState(true);
   const [agentConfigId, setAgentConfigId] = useState<string>('');
-  const [extracting, setExtracting] = useState(false);
   const [tabMode, setTabMode] = useState<'period' | 'messages'>('period');
   const [timeWindow, setTimeWindow] = useState({ start: '', end: '' });
   const [filterByTopic, setFilterByTopic] = useState(!!topicId);
-  const [progress, setProgress] = useState<ExtractionProgress>({
-    status: 'idle',
-    topics_created: 0,
-    atoms_created: 0,
-    versions_created: 0,
+
+  const {
+    extracting,
+    progress,
+    extractByPeriod,
+    extractByMessages
+  } = useKnowledgeExtraction({
+    onComplete,
+    agentConfigId,
+    topicId: filterByTopic ? topicId : undefined
   });
 
   useEffect(() => {
@@ -79,149 +81,13 @@ export function KnowledgeExtractionPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useWebSocket({
-    topics: ['knowledge'],
-    onMessage: (data: unknown) => {
-      if (!isKnowledgeEvent(data as KnowledgeEvent)) return;
-
-      const event = data as KnowledgeEvent;
-
-      if (event.type === 'knowledge.extraction_started') {
-        setProgress((prev) => ({ ...prev, status: 'running' }));
-        toast.success(t('extraction.notifications.started', { count: event.data?.message_count || 0 }));
-      } else if (event.type === 'knowledge.topic_created') {
-        setProgress((prev) => ({
-          ...prev,
-          topics_created: prev.topics_created + 1,
-        }));
-      } else if (event.type === 'knowledge.atom_created') {
-        setProgress((prev) => ({
-          ...prev,
-          atoms_created: prev.atoms_created + 1,
-        }));
-      } else if (event.type === 'knowledge.version_created') {
-        setProgress((prev) => ({
-          ...prev,
-          versions_created: prev.versions_created + 1,
-        }));
-      } else if (event.type === 'knowledge.extraction_completed') {
-        setProgress((prev) => ({ ...prev, status: 'completed' }));
-        setExtracting(false);
-        const stats = event.data || {};
-
-        // Enhanced notification with CTA to review versions
-        const versionsCreated = stats.versions_created || 0;
-        const atomsCreated = stats.atoms_created || 0;
-        const topicsCreated = stats.topics_created || 0;
-
-        toast.success(
-          t('extraction.notifications.completed', { atoms: atomsCreated, versions: versionsCreated }),
-          {
-            duration: 8000,
-            action: versionsCreated > 0 ? {
-              label: t('extraction.notifications.reviewNow'),
-              onClick: () => navigate('/versions?status=pending')
-            } : undefined,
-            description: topicsCreated > 0 ? t('extraction.notifications.topicsIdentified', { count: topicsCreated }) : undefined,
-          }
-        );
-        onComplete?.();
-      } else if (event.type === 'knowledge.extraction_failed') {
-        setProgress((prev) => ({
-          ...prev,
-          status: 'failed',
-          error: event.data?.error || t('extraction.errors.unknown'),
-        }));
-        setExtracting(false);
-        toast.error(t('extraction.notifications.failed', { error: event.data?.error || t('extraction.errors.unknown') }));
-      }
-    },
-  });
-
-  const detectPeriodType = (start: string, end: string): PeriodType => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const diffHours = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
-
-    if (Math.abs(diffHours - 24) < 1) return 'last_24h';
-    if (Math.abs(diffHours - 24 * 7) < 2) return 'last_7d';
-    if (Math.abs(diffHours - 24 * 30) < 2) return 'last_30d';
-    return 'custom';
+  const handleExtractByPeriod = () => {
+    extractByPeriod(timeWindow.start, timeWindow.end, filterByTopic);
   };
 
-  const handleExtractByPeriod = async () => {
-    if (!agentConfigId) {
-      toast.error(t('extraction.errors.selectAgent'));
-      return;
-    }
-
-    if (!timeWindow.start || !timeWindow.end) {
-      toast.error(t('extraction.errors.selectTimeWindow'));
-      return;
-    }
-
-    setExtracting(true);
-    setProgress({
-      status: 'running',
-      topics_created: 0,
-      atoms_created: 0,
-      versions_created: 0,
-    });
-
-    try {
-      const periodType = detectPeriodType(timeWindow.start, timeWindow.end);
-      const periodRequest: PeriodRequest = {
-        period_type: periodType,
-        ...(periodType === 'custom' && {
-          start_date: new Date(timeWindow.start).toISOString(),
-          end_date: new Date(timeWindow.end).toISOString(),
-        }),
-        ...(filterByTopic && topicId && { topic_id: topicId }),
-      };
-
-      await knowledgeService.triggerExtractionByPeriod(periodRequest, agentConfigId);
-    } catch (error) {
-      console.error('Failed to trigger extraction:', error);
-      setExtracting(false);
-      setProgress((prev) => ({
-        ...prev,
-        status: 'failed',
-        error: error instanceof Error ? error.message : t('extraction.errors.startFailed'),
-      }));
-      toast.error(error instanceof Error ? error.message : t('extraction.errors.startFailed'));
-    }
-  };
-
-  const handleExtractByMessages = async () => {
-    if (!agentConfigId) {
-      toast.error(t('extraction.errors.selectAgent'));
-      return;
-    }
-
-    if (!messageIds || messageIds.length === 0) {
-      toast.error(t('extraction.errors.noMessages'));
-      return;
-    }
-
-    setExtracting(true);
-    setProgress({
-      status: 'running',
-      topics_created: 0,
-      atoms_created: 0,
-      versions_created: 0,
-    });
-
-    try {
-      await knowledgeService.triggerExtractionByMessages(messageIds, agentConfigId);
-    } catch (error) {
-      console.error('Failed to trigger extraction:', error);
-      setExtracting(false);
-      setProgress((prev) => ({
-        ...prev,
-        status: 'failed',
-        error: error instanceof Error ? error.message : t('extraction.errors.startFailed'),
-      }));
-      toast.error(error instanceof Error ? error.message : t('extraction.errors.startFailed'));
+  const handleExtractByMessages = () => {
+    if (messageIds) {
+      extractByMessages(messageIds.map(String));
     }
   };
 

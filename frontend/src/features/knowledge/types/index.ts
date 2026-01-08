@@ -47,6 +47,17 @@ export interface VersionDiff {
 
 export type PeriodType = 'last_24h' | 'last_7d' | 'last_30d' | 'custom';
 
+/**
+ * Extraction status enum matching backend ExtractionStatus
+ */
+export type ExtractionStatus =
+  | 'pending'
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'cancelling'
+  | 'cancelled';
+
 export interface PeriodRequest {
   period_type: PeriodType;
   topic_id?: string;
@@ -55,20 +66,42 @@ export interface PeriodRequest {
 }
 
 export interface KnowledgeExtractionRequest {
-  message_ids?: number[];
+  message_ids?: string[];
   period?: PeriodRequest;
   agent_config_id: string;
+  project_config_id?: string;
+  include_context?: boolean;
+  context_window?: number;
 }
 
 export interface KnowledgeExtractionResponse {
   extraction_id: string;
+  task_id?: string;
   message_count: number;
   message?: string;
   agent_config_id: string;
 }
 
+/**
+ * Full extraction run status from GET /knowledge/extract/{id}
+ */
+export interface ExtractionRun {
+  id: string;
+  task_id?: string;
+  agent_config_id: string;
+  status: ExtractionStatus;
+  cancel_requested: boolean;
+  message_count: number;
+  topics_created: number;
+  atoms_created: number;
+  versions_created: number;
+  error_message?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ExtractionProgress {
-  status: 'idle' | 'running' | 'completed' | 'failed';
+  status: 'idle' | 'running' | 'completed' | 'failed' | 'cancelling' | 'cancelled';
   topics_created: number;
   atoms_created: number;
   versions_created: number;
