@@ -269,7 +269,7 @@ async def ingest_telegram_messages_task(
 
             # Notify WebSocket clients about job start
             await websocket_manager.broadcast(
-                "messages",
+                "ingestion",
                 {
                     "type": "ingestion.started",
                     "data": {
@@ -298,12 +298,33 @@ async def ingest_telegram_messages_task(
 
                 while messages_from_chat < limit:
                     # Fetch messages in batches with optional time filter
-                    messages = await telegram_ingestion_service.fetch_chat_history(
-                        chat_id=chat_id,
-                        limit=min(batch_size, limit - messages_from_chat),
-                        offset_id=offset_id,
-                        offset_date=offset_date,
-                    )
+                    try:
+                        messages = await telegram_ingestion_service.fetch_chat_history(
+                            chat_id=chat_id,
+                            limit=min(batch_size, limit - messages_from_chat),
+                            offset_id=offset_id,
+                            offset_date=offset_date,
+                        )
+                    except Exception as e:
+                        logger.error(f"Failed to fetch messages from {chat_id}: {e}")
+                        # Mark job as failed
+                        job.status = IngestionStatus.failed
+                        job.error_log = {"error": str(e), "timestamp": datetime.now(UTC).isoformat()}
+                        await db.commit()
+
+                        # Broadcast failure
+                        await websocket_manager.broadcast(
+                            "ingestion",
+                            {
+                                "type": "ingestion.failed",
+                                "data": {
+                                    "job_id": job_id,
+                                    "status": "failed",
+                                    "error": str(e),
+                                },
+                            },
+                        )
+                        return f"Ingestion failed: {e}"
 
                     if not messages:
                         logger.info(f"No more messages from chat {chat_id}")
@@ -342,7 +363,7 @@ async def ingest_telegram_messages_task(
 
                     # Send real-time progress updates
                     await websocket_manager.broadcast(
-                        "messages",
+                        "ingestion",
                         {
                             "type": "ingestion.progress",
                             "data": {
@@ -351,6 +372,7 @@ async def ingest_telegram_messages_task(
                                 "messages_fetched": total_fetched,
                                 "messages_stored": total_stored,
                                 "messages_skipped": total_skipped,
+                                "errors_count": total_errors,
                                 "current_chat": chat_idx,
                                 "total_chats": len(chat_ids),
                             },
@@ -376,7 +398,7 @@ async def ingest_telegram_messages_task(
 
             # Broadcast final job status
             await websocket_manager.broadcast(
-                "messages",
+                "ingestion",
                 {
                     "type": "ingestion.completed",
                     "data": {
@@ -413,7 +435,7 @@ async def ingest_telegram_messages_task(
 
                     # Broadcast failure
                     await websocket_manager.broadcast(
-                        "messages",
+                        "ingestion",
                         {
                             "type": "ingestion.failed",
                             "data": {

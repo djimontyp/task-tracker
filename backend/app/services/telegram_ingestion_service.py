@@ -81,13 +81,13 @@ class TelegramIngestionService:
                 f"⚠️  Telegram API credentials not configured: {e}. "
                 f"Please set TELEGRAM_API_ID and TELEGRAM_API_HASH in environment."
             )
-            return []
+            raise
         except RuntimeError as e:
             logger.error(f"⚠️  Telegram authentication required: {e}. Please run authentication setup first.")
-            return []
+            raise
         except Exception as e:
             logger.error(f"Error fetching chat history: {e}")
-            return []
+            raise
         finally:
             # Disconnect after fetching
             if client_service.client:
