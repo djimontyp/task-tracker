@@ -179,7 +179,27 @@ async def seed_config(session: AsyncSession):
         session.add(agent)
         await session.flush()
     else:
-        print("    ✓ Agent config already exists")
+        print("    ✓ Agent config (knowledge_extractor) already exists")
+
+    # 4.1 AgentConfig (scoring_judge) - check if exists
+    print("  Creating scoring_judge config...")
+    result = await session.execute(select(AgentConfig).where(AgentConfig.name == "scoring_judge"))
+    agent_scoring = result.scalar_one_or_none()
+
+    if not agent_scoring:
+        agent_scoring = AgentConfig(
+            name="scoring_judge",
+            description="AI Message Importance Judge",
+            provider_id=provider.id,
+            model_name="qwen3:14b",  # Recommended default for scoring
+            system_prompt="DEPRECATED", # Service uses code-based prompt, but field is required
+            temperature=0.0,
+            is_active=True,
+        )
+        session.add(agent_scoring)
+        await session.flush()
+    else:
+        print("    ✓ Agent config (scoring_judge) already exists")
 
     # 5. ProjectConfig - використовуємо FeodalMe (вже є в базі)
     print("  Checking project config...")
@@ -237,8 +257,11 @@ async def seed_config(session: AsyncSession):
 async def main():
     """Main entry point."""
     database_url = os.getenv(
-        "DATABASE_URL_LOCAL",
-        "postgresql+asyncpg://postgres:postgres@localhost:5555/tasktracker",
+        "DATABASE_URL",
+        os.getenv(
+            "DATABASE_URL_LOCAL",
+            "postgresql+asyncpg://postgres:postgres@localhost:5555/tasktracker",
+        )
     )
 
     print(f"🔌 Connecting to database: {database_url}")
