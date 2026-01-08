@@ -139,6 +139,7 @@ class LLMService:
         config: AgentConfig,
         prompt: str,
         provider_name: str | None = None,
+        provider_id: UUID | None = None,
         dependencies: Any = None,
     ) -> AgentResult[Any]:
         """Create agent and execute prompt in one call.
@@ -150,6 +151,7 @@ class LLMService:
             config: Agent configuration
             prompt: User prompt to execute
             provider_name: Optional provider name
+            provider_id: Optional provider UUID
             dependencies: Optional dependencies for agent
 
         Returns:
@@ -169,6 +171,7 @@ class LLMService:
             session=session,
             config=config,
             provider_name=provider_name,
+            provider_id=provider_id,
         )
 
         logger.info(f"Executing prompt with agent '{config.name}'")

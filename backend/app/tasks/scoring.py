@@ -1,6 +1,7 @@
 import uuid
 from typing import Any
 
+
 from core.taskiq_config import nats_broker
 from langdetect import LangDetectException, detect  # type: ignore[import-untyped]
 from loguru import logger
@@ -8,9 +9,10 @@ from sqlalchemy import desc as sql_desc
 from sqlalchemy import select
 
 from app.database import get_db_session_context
+from app.llm.application.llm_service import LLMService
 from app.llm.application.provider_resolver import ProviderResolver
 from app.models import Message
-from app.services.importance_scorer import ImportanceScorer
+from app.services.llm_importance_scorer import LLMImportanceScorer
 from app.services.provider_crud import ProviderCRUD
 from app.services.websocket_manager import websocket_manager
 from app.tasks.knowledge import embed_messages_batch_task
@@ -18,52 +20,42 @@ from app.tasks.knowledge import embed_messages_batch_task
 
 @nats_broker.task
 async def score_message_task(message_id: uuid.UUID) -> dict[str, Any]:
-    """Background task to score a single message using ImportanceScorer.
+    """Background task to score a single message using LLMImportanceScorer (AI Judge).
 
-    Calculates importance score based on content, author, temporal, and topic factors.
-    Updates message record with score, classification, and noise factors.
-
-    Args:
-        message_id: Message ID to score
-
-    Returns:
-        Dictionary with scoring results:
-            - message_id: Message ID scored
-            - importance_score: Final weighted score (0.0-1.0)
-            - classification: noise/weak_signal/signal
-            - noise_factors: Individual factor scores
-
-    Raises:
-        ValueError: If message not found
-
-    Example:
-        >>> task = await score_message_task.kiq(123)
-        >>> result = await task.wait_result()
-        >>> print(result.return_value["importance_score"])
-        0.75
+    Uses LLM to evaluate message importance, replacing legacy heuristic scoring.
     """
-    logger.info(f"Starting message scoring task for message {message_id}")
+    logger.info(f"Starting AI message scoring task for message {message_id}")
 
     db_context = get_db_session_context()
     db = await anext(db_context)
 
     try:
-        message = await db.get(Message, message_id)
+        # 1. Fetch Message
+        stmt = select(Message).where(Message.id == message_id)
+        result = await db.execute(stmt)
+        message = result.scalar_one_or_none()
+
         if not message:
             raise ValueError(f"Message {message_id} not found")
 
-        scorer = ImportanceScorer()
-        result = await scorer.score_message(message, db)
+        # 2. Setup Services
+        crud = ProviderCRUD(db)  # type: ignore[arg-type]  # type: ignore[arg-type]
+        resolver = ProviderResolver(crud)
+        llm_service = LLMService(provider_resolver=resolver, framework_name="pydantic_ai")
+        scorer = LLMImportanceScorer(llm_service)
 
-        importance_score = result["importance_score"]
-        classification = result["classification"]
-        noise_factors = result["noise_factors"]
+        # 3. Score
+        scoring_result = await scorer.score_message(message, db)
 
-        message.importance_score = importance_score  # type: ignore[assignment]
-        message.noise_classification = classification  # type: ignore[assignment]
-        message.noise_factors = noise_factors  # type: ignore[assignment]
+        importance_score = scoring_result["importance_score"]
+        classification = scoring_result["classification"]
+        noise_factors = scoring_result["noise_factors"]
 
-        # Detect language for batching optimization
+        message.importance_score = importance_score
+        message.noise_classification = classification
+        message.noise_factors = noise_factors
+
+        # Detect language (legacy/utility)
         if message.content and not message.detected_language:
             try:
                 detected_lang = detect(message.content)
@@ -77,8 +69,6 @@ async def score_message_task(message_id: uuid.UUID) -> dict[str, Any]:
 
         # Queue embedding for RAG-ready semantic search
         try:
-            crud = ProviderCRUD(db)
-            resolver = ProviderResolver(crud)
             provider = await resolver.resolve_active(db)
             if provider and provider.id:
                 await embed_messages_batch_task.kiq(
@@ -86,7 +76,6 @@ async def score_message_task(message_id: uuid.UUID) -> dict[str, Any]:
                 )
                 logger.debug(f"Queued embedding for message {message_id}")
         except Exception as embed_err:
-            # Non-critical: RAG will work with available embeddings
             logger.warning(f"Failed to queue embedding for message {message_id}: {embed_err}")
 
         await websocket_manager.broadcast(
@@ -157,7 +146,11 @@ async def score_unscored_messages_task(limit: int = 100) -> dict[str, int]:
         if total_found == 0:
             return {"total_found": 0, "scored": 0, "failed": 0}
 
-        scorer = ImportanceScorer()
+        crud = ProviderCRUD(db)
+        resolver = ProviderResolver(crud)
+        llm_service = LLMService(provider_resolver=resolver, framework_name="pydantic_ai")
+        scorer = LLMImportanceScorer(llm_service)
+        
         scored_count = 0
         failed_count = 0
 
@@ -171,8 +164,9 @@ async def score_unscored_messages_task(limit: int = 100) -> dict[str, int]:
 
                 scored_count += 1
 
-                if idx % 10 == 0:
-                    logger.info(f"Progress: {idx}/{total_found} messages scored")
+                if idx % 5 == 0:
+                    await db.commit()
+                    logger.info(f"Progress: {idx}/{total_found} messages scored and committed")
 
             except Exception as e:
                 logger.error(f"Failed to score message {message.id}: {e}")
