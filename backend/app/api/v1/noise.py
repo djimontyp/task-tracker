@@ -9,8 +9,10 @@ Thresholds are configured via ai_config.message_scoring:
 Also provides endpoints for triggering background scoring tasks.
 """
 
+
 import logging
 from datetime import datetime, timedelta
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import case, func, select
@@ -167,20 +169,20 @@ async def get_noise_stats(
 @router.post(
     "/score/{message_id}",
     summary="Score a specific message",
-    description="Trigger background task to calculate importance score for a message using ImportanceScorer.",
+    description="Trigger background task to calculate AI importance score for a message.",
     status_code=202,
 )
 async def score_message(
-    message_id: int,
+    message_id: UUID,
     session: AsyncSession = Depends(get_session),
-) -> dict[str, str | int]:
+) -> dict[str, str | UUID]:
     """Trigger background scoring task for a specific message.
 
     Validates that the message exists, then queues a background task
-    to calculate importance score based on content, author, temporal, and topic factors.
+    to calculate importance score using AI Judge.
 
     Args:
-        message_id: Message ID to score
+        message_id: Message UUID to score
         session: Database session
 
     Returns:

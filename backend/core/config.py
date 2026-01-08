@@ -54,7 +54,7 @@ class LLMSettings(BaseSettings):
     )
     llm_provider: str = Field(default="ollama", validation_alias=AliasChoices("LLM_PROVIDER", "llm_provider"))
     ollama_model: str = Field(
-        default="mistral-nemo:12b-instruct-2407-q4_k_m",
+        default="qwen3:14b",
         validation_alias=AliasChoices("OLLAMA_MODEL", "ollama_model"),
     )
 
@@ -156,3 +156,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+

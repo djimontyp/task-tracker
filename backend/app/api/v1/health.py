@@ -12,10 +12,13 @@ from app.tasks import score_message_task
 router = APIRouter(tags=["health"])
 
 
+import uuid
+from uuid import UUID
+
 class TestTaskRequest(BaseModel):
     """Request model for triggering test task."""
 
-    message_id: int = Field(default=1, description="Message ID to score")
+    message_id: UUID = Field(default_factory=uuid.uuid4, description="Message ID to score")
 
 
 @router.get(

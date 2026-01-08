@@ -55,6 +55,7 @@ export const API_ENDPOINTS = {
   proposal: (proposalId: string) => buildApiPath(`analysis/proposals/${proposalId}`),
 
   agents: buildApiPath('agents'),
+  agentTestStream: (agentId: string) => buildApiPath(`agents/${agentId}/test-stream`),
   providers: buildApiPath('providers'),
   provider: (providerId: string) => buildApiPath(`providers/${providerId}`),
   ollamaModels: (host: string) => buildApiPath(`providers/ollama/models?host=${encodeURIComponent(host)}`),

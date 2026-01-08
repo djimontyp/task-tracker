@@ -118,6 +118,23 @@ export interface KnowledgeExtractionFailedEvent extends BaseWebSocketEvent {
   }
 }
 
+export interface KnowledgeExtractionCancellingEvent extends BaseWebSocketEvent {
+  type: 'knowledge.extraction_cancelling'
+  data?: {
+    extraction_id?: string
+  }
+}
+
+export interface KnowledgeExtractionCancelledEvent extends BaseWebSocketEvent {
+  type: 'knowledge.extraction_cancelled'
+  data?: {
+    extraction_id?: string
+    topics_created?: number
+    atoms_created?: number
+    versions_created?: number
+  }
+}
+
 export type KnowledgeEvent =
   | KnowledgeExtractionStartedEvent
   | KnowledgeTopicCreatedEvent
@@ -125,6 +142,8 @@ export type KnowledgeEvent =
   | KnowledgeVersionCreatedEvent
   | KnowledgeExtractionCompletedEvent
   | KnowledgeExtractionFailedEvent
+  | KnowledgeExtractionCancellingEvent
+  | KnowledgeExtractionCancelledEvent
 
 // ============================================================================
 // Metrics Events (topic: 'metrics')

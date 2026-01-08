@@ -21,8 +21,13 @@ from .taskiq_config import nats_broker
 
 @nats_broker.on_event(TaskiqEvents.WORKER_STARTUP)
 async def on_worker_startup(state: TaskiqState) -> None:
-    """Initialize WebSocketManager for worker process."""
+    """Initialize WebSocketManager and LLM System(Registry) for worker process."""
     logger.info("🚀 WORKER_STARTUP event triggered!")
+    
+    # Initialize LLM Frameworks (register pydantic_ai etc)
+    from app.llm.startup import initialize_llm_system
+    initialize_llm_system()
+    
     logger.info(
         f"🚀 Initializing WebSocketManager for worker process, NATS servers: {settings.taskiq.taskiq_nats_servers}"
     )

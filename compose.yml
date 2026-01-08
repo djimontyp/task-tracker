@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: pgvector/pgvector:pg15  # PostgreSQL 15 with pgvector extension for vector similarity search
+    image: pgvector/pgvector:pg15 # PostgreSQL 15 with pgvector extension for vector similarity search
     container_name: task-tracker-postgres
     env_file:
       - .env
@@ -8,10 +8,10 @@ services:
       - "5555:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./postgres/init-scripts:/docker-entrypoint-initdb.d:ro  # Auto-run init scripts on first start
+      - ./postgres/init-scripts:/docker-entrypoint-initdb.d:ro # Auto-run init scripts on first start
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d tasktracker"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d tasktracker" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,13 +30,13 @@ services:
     container_name: task-tracker-nats
     ports:
       - "4222:4222"
-      - "8222:8222"  # Monitoring endpoint (remove in production)
-    command: ["--jetstream", "--store_dir", "/data", "--http_port", "8222"]
+      - "8222:8222" # Monitoring endpoint (remove in production)
+    command: [ "--jetstream", "--store_dir", "/data", "--http_port", "8222" ]
     volumes:
       - nats_data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "nats-server", "--version"]
+      test: [ "CMD", "nats-server", "--version" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -55,7 +55,7 @@ services:
       context: .
       dockerfile: ./backend/Dockerfile
     container_name: task-tracker-worker
-    command: ["python", "-m", "taskiq", "worker", "core.taskiq_config:nats_broker", "core.worker"]
+    command: [ "python", "-m", "taskiq", "worker", "core.taskiq_config:nats_broker", "core.worker" ]
     depends_on:
       postgres:
         condition: service_healthy
@@ -66,10 +66,11 @@ services:
       - .env
     environment:
       - TASKIQ_WORKER=true
+
     volumes:
       - ./telegram_sessions:/app/sessions
     healthcheck:
-      test: ["CMD-SHELL", "pgrep -f 'taskiq worker' || exit 1"]
+      test: [ "CMD-SHELL", "pgrep -f 'taskiq worker' || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -118,8 +119,9 @@ services:
       # Allow all origins for local development (mobile/WiFi access)
       # For production, set specific domains in .env: CORS_ORIGINS=https://yourdomain.com
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
+
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -207,7 +209,7 @@ services:
         - action: rebuild
           path: ./frontend/vite.config.ts
     healthcheck:
-      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\" || exit 1"]
+      test: [ "CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\" || exit 1" ]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -237,7 +239,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider --header='Host: localhost' http://127.0.0.1/nginx-health || exit 1"]
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider --header='Host: localhost' http://127.0.0.1/nginx-health || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 3

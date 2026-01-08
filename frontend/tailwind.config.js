@@ -177,6 +177,7 @@ module.exports = {
         "fade-in": "fade-in 0.3s ease-out",
         "fade-in-up": "fade-in-up 0.4s ease-out",
         "spin-slow": "spin 2s linear infinite",
+        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "radar-sweep": "radar-sweep 2s linear infinite",
         "orbit-slow": "orbit 8s linear infinite",
         "orbit-medium": "orbit 6s linear infinite",

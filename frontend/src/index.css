@@ -315,14 +315,14 @@
 
 @layer base {
 
-  /* Reduced motion support */
+  /* Reduced motion support - disable animations but keep smooth transitions */
   @media (prefers-reduced-motion: reduce) {
 
     *,
     *::before,
     *::after {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
+      animation: none !important;
+      transition-duration: 0.15s !important;
     }
   }
 }
