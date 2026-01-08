@@ -23,7 +23,9 @@ import { useScoringConfig } from '@/shared/api/scoringConfig'
 import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
 import { DataTableFacetedFilter } from '@/shared/components/DataTableFacetedFilter'
 import { Columns, List, AlertCircle, HelpCircle, CheckCircle2, Siren, X, Lightbulb, Sparkles } from 'lucide-react'
+import { RunAnalysisAction } from './RunAnalysisAction'
 import { MessageList } from '@/features/messages/components/MessageList'
+import { SmartBatchBanner } from '@/features/messages/components/SmartBatchBanner'
 import { MessageDetailPanel } from '@/features/messages/components/MessageDetailPanel'
 import { MessagesSummaryHeader } from './MessagesSummaryHeader'
 import { messageService } from '@/features/messages/api/messageService'
@@ -116,7 +118,7 @@ const MessagesPage = () => {
     queryFn: ({ pageParam = 1 }) => messageService.getMessages({ ...queryParams, page: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
-      if (lastPage.page < lastPage.pages) {
+      if (lastPage.page < lastPage.total_pages) {
         return lastPage.page + 1
       }
       return undefined
@@ -131,6 +133,9 @@ const MessagesPage = () => {
   const messages = useMemo(() => {
     return data?.pages.flatMap(page => page.items) || []
   }, [data])
+
+  // Get total count from first page (API provides consistent total)
+  const totalMessages = data?.pages[0]?.total
 
   // Compute signal/noise stats for summary header
   const signalNoiseStats = useMemo(() => {
@@ -348,7 +353,7 @@ const MessagesPage = () => {
     <PageWrapper className="h-[calc(100vh-56px-2rem)] overflow-hidden flex flex-col gap-4">
       {/* Header Area */}
       <div className="flex flex-col gap-4 flex-shrink-0">
-        <MessagesSummaryHeader stats={signalNoiseStats} />
+        <MessagesSummaryHeader stats={signalNoiseStats} totalMessages={totalMessages} />
 
         <div className="flex items-center justify-between gap-2 bg-card rounded-md border p-1 shadow-sm">
           <div className="flex-1 min-w-0 overflow-x-auto pl-2 flex items-center gap-2">
@@ -378,6 +383,8 @@ const MessagesPage = () => {
           </div>
 
           <div className="flex items-center gap-2 px-2 border-l">
+            <RunAnalysisAction />
+
             <div className="flex items-center bg-muted/50 p-1 rounded-md">
               <Button
                 variant={layoutMode === 'list' ? 'secondary' : 'ghost'}
@@ -416,6 +423,9 @@ const MessagesPage = () => {
         >
           {/* Left Pane - Message List */}
           <div className={`h-full overflow-hidden flex flex-col ${layoutMode === 'split' ? 'hidden lg:flex' : 'flex'}`}>
+            <div className="px-2 pt-2">
+              <SmartBatchBanner messages={messages} />
+            </div>
             <MessageList
               messages={messages}
               isLoading={isLoading}
@@ -431,6 +441,7 @@ const MessagesPage = () => {
               hasMore={hasNextPage}
               onLoadMore={fetchNextPage}
               isFetchingNextPage={isFetchingNextPage}
+              total={totalMessages}
             />
           </div>
 

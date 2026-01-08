@@ -13,6 +13,7 @@ interface SignalNoiseStats {
 
 interface MessagesSummaryHeaderProps {
   stats: SignalNoiseStats
+  totalMessages?: number
 }
 
 /**
@@ -30,7 +31,7 @@ function getGreetingKey(): 'morning' | 'afternoon' | 'evening' {
  * Humanized summary header for Messages page.
  * Shows friendly greeting with today's signal stats.
  */
-export function MessagesSummaryHeader({ stats }: MessagesSummaryHeaderProps) {
+export function MessagesSummaryHeader({ stats, totalMessages }: MessagesSummaryHeaderProps) {
   const { t } = useTranslation('messages')
 
   const greetingKey = useMemo(() => getGreetingKey(), [])
@@ -130,6 +131,13 @@ export function MessagesSummaryHeader({ stats }: MessagesSummaryHeaderProps) {
     <div className="flex items-center gap-4 w-full">
       {/* Greeting */}
       <span className="text-base font-medium">{t(`summary.greeting.${greetingKey}`)}</span>
+
+      {/* Total messages count */}
+      {totalMessages !== undefined && totalMessages > 0 && (
+        <span className="text-sm text-muted-foreground">
+          {t('summary.totalMessages', { count: totalMessages })}
+        </span>
+      )}
 
       {/* Today's summary - Clickable for Legend */}
       <Popover>
