@@ -12,8 +12,27 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database import get_session
+from sqlmodel import Field, SQLModel
+
 from app.models import LLMProviderCreate, LLMProviderPublic, LLMProviderUpdate, OllamaModelsResponse
 from app.services import OllamaService, ProviderCRUD
+
+
+class GeminiModel(SQLModel):
+    """Schema for single Gemini model information."""
+
+    name: str = Field(description="Model name (e.g., 'gemini-1.5-pro')")
+    display_name: str = Field(description="Human-readable model name")
+    description: str | None = Field(default=None, description="Model description")
+
+
+class GeminiModelsResponse(SQLModel):
+    """Response schema for Gemini models listing."""
+
+    models: list[GeminiModel] = Field(
+        default_factory=list,
+        description="List of available Gemini models",
+    )
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/providers", tags=["providers"])
@@ -261,4 +280,96 @@ async def list_ollama_models(
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"Failed to connect to Ollama at '{host}': {str(e)}",
+        )
+
+
+@router.get(
+    "/gemini/models",
+    response_model=GeminiModelsResponse,
+    summary="List Gemini models",
+    description="Fetch available Gemini models from Google API for model selection.",
+)
+async def list_gemini_models(
+    provider_id: UUID | None = Query(None, description="Provider ID to get API key from database"),
+    api_key: str | None = Query(None, description="Google API key (alternative to provider_id)"),
+    session: AsyncSession = Depends(get_session),
+) -> GeminiModelsResponse:
+    """List available models from Google Gemini API.
+
+    Args:
+        provider_id: UUID of Gemini provider to get API key from DB
+        api_key: Google API key (alternative, for setup before provider is saved)
+        session: Database session
+
+    Returns:
+        List of available Gemini models with metadata
+
+    Raises:
+        HTTPException 400: Neither provider_id nor api_key provided
+        HTTPException 404: Provider not found
+        HTTPException 502: Connection to Google API failed
+        HTTPException 504: Request to Google API timed out
+    """
+    # Get API key from provider if provider_id is given
+    if provider_id:
+        crud = ProviderCRUD(session)
+        decrypted_key = await crud.get_decrypted_api_key(provider_id)
+        if not decrypted_key:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Provider not found or has no API key",
+            )
+        api_key = decrypted_key
+
+    if not api_key or not api_key.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Either provider_id or api_key is required",
+        )
+
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(
+                "https://generativelanguage.googleapis.com/v1beta/models",
+                params={"key": api_key},
+            )
+            response.raise_for_status()
+
+        data = response.json()
+        models: list[GeminiModel] = []
+
+        for m in data.get("models", []):
+            name = m.get("name", "").replace("models/", "")
+            # Only include gemini models
+            if name.startswith("gemini-"):
+                models.append(
+                    GeminiModel(
+                        name=name,
+                        display_name=m.get("displayName", name),
+                        description=m.get("description"),
+                    )
+                )
+
+        logger.info(f"Successfully fetched {len(models)} Gemini models from Google API")
+        return GeminiModelsResponse(models=models)
+
+    except httpx.TimeoutException:
+        raise HTTPException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            detail="Request to Google Gemini API timed out.",
+        )
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 400:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid Google API key",
+            )
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Google API error: {e.response.status_code} - {e.response.text}",
+        )
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Failed to connect to Google API: {str(e)}",
         )

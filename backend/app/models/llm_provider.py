@@ -13,6 +13,7 @@ class ProviderType(str, Enum):
 
     ollama = "ollama"
     openai = "openai"
+    gemini = "gemini"
 
 
 class ValidationStatus(str, Enum):

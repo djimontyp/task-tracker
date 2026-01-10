@@ -58,6 +58,8 @@ class ProviderValidator:
                         await self._validate_ollama(provider)
                     elif provider.type == ProviderType.openai:
                         await self._validate_openai(provider)
+                    elif provider.type == ProviderType.gemini:
+                        await self._validate_gemini(provider)
                     else:
                         raise ValueError(f"Unknown provider type: {provider.type}")
 
@@ -133,14 +135,53 @@ class ProviderValidator:
             ValueError: If API key is not configured
             httpx.HTTPError: If authentication fails
         """
-        # Note: API key is encrypted in database
-        # Actual decryption will be implemented in T032 (CredentialEncryption service)
         if not provider.api_key_encrypted:
             raise ValueError("OpenAI provider requires api_key")
 
-        # TODO: Decrypt API key using CredentialEncryption service (T032)
-        # For now, raise error indicating encryption service needed
-        raise NotImplementedError("OpenAI validation requires CredentialEncryption service (T032)")
+        from app.services.credential_encryption import CredentialEncryption
+
+        encryption = CredentialEncryption()
+        api_key = encryption.decrypt(provider.api_key_encrypted)
+
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            response = await client.get(
+                "https://api.openai.com/v1/models",
+                headers={"Authorization": f"Bearer {api_key}"},
+            )
+            response.raise_for_status()
+
+            data = response.json()
+            if "data" not in data:
+                raise ValueError("Invalid response from OpenAI API")
+
+    async def _validate_gemini(self, provider: LLMProvider) -> None:
+        """Validate Google Gemini provider connectivity.
+
+        Args:
+            provider: Gemini provider configuration
+
+        Raises:
+            ValueError: If API key is not configured or response invalid
+            httpx.HTTPError: If authentication fails
+        """
+        if not provider.api_key_encrypted:
+            raise ValueError("Gemini provider requires api_key")
+
+        from app.services.credential_encryption import CredentialEncryption
+
+        encryption = CredentialEncryption()
+        api_key = encryption.decrypt(provider.api_key_encrypted)
+
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            response = await client.get(
+                "https://generativelanguage.googleapis.com/v1beta/models",
+                params={"key": api_key},
+            )
+            response.raise_for_status()
+
+            data = response.json()
+            if "models" not in data:
+                raise ValueError("Invalid response from Gemini API")
 
     async def close(self) -> None:
         """Close resources (no-op: clients are context-managed)."""

@@ -13,7 +13,11 @@ from app.llm.domain.models import AgentConfig, ProviderConfig
 from app.llm.domain.ports import LLMAgent, ModelFactory
 from app.llm.infrastructure.adapters.pydantic_ai.agent_wrapper import PydanticAIAgentWrapper
 from app.llm.infrastructure.adapters.pydantic_ai.converters import agent_config_to_model_settings
-from app.llm.infrastructure.adapters.pydantic_ai.factories import OllamaModelFactory, OpenAIModelFactory
+from app.llm.infrastructure.adapters.pydantic_ai.factories import (
+    GeminiModelFactory,
+    OllamaModelFactory,
+    OpenAIModelFactory,
+)
 
 
 class PydanticAIFramework:
@@ -43,6 +47,7 @@ class PydanticAIFramework:
         self._factories: dict[str, ModelFactory] = {
             "ollama": OllamaModelFactory(),
             "openai": OpenAIModelFactory(),
+            "gemini": GeminiModelFactory(),
         }
 
     async def create_agent(
