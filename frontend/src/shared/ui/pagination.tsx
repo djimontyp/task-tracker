@@ -1,4 +1,5 @@
 import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
 import { useTranslation } from "react-i18next"
 import { cn } from "@/shared/lib/index"
 import { ButtonProps, buttonVariants } from "@/shared/ui/button"
@@ -39,39 +40,50 @@ PaginationItem.displayName = "PaginationItem"
 
 type PaginationLinkProps = {
   isActive?: boolean
+  asChild?: boolean
 } & Pick<ButtonProps, "size"> &
   React.ComponentProps<"a">
 
 const PaginationLink = ({
   className,
   isActive,
+  asChild = false,
   size = "icon",
   ...props
-}: PaginationLinkProps) => (
-  <a
-    aria-current={isActive ? "page" : undefined}
-    className={cn(
-      buttonVariants({
-        variant: isActive ? "outline" : "ghost",
-        size,
-      }),
-      className
-    )}
-    {...props}
-  />
-)
+}: PaginationLinkProps) => {
+  const Comp = asChild ? Slot : "a"
+  return (
+    <Comp
+      aria-current={isActive ? "page" : undefined}
+      className={cn(
+        buttonVariants({
+          variant: isActive ? "outline" : "ghost",
+          size,
+        }),
+        className
+      )}
+      {...props}
+    />
+  )
+}
 PaginationLink.displayName = "PaginationLink"
+
+type PaginationPreviousProps = {
+  asChild?: boolean
+} & Omit<React.ComponentProps<typeof PaginationLink>, "asChild">
 
 const PaginationPrevious = ({
   className,
+  asChild = false,
   ...props
-}: React.ComponentProps<typeof PaginationLink>) => {
+}: PaginationPreviousProps) => {
   const { t } = useTranslation("common")
   return (
     <PaginationLink
       aria-label={t("pagination.goToPrevious")}
       size="default"
       className={cn("gap-2 pl-2.5", className)}
+      asChild={asChild}
       {...props}
     >
       <ChevronLeft className="h-4 w-4" />
@@ -81,16 +93,22 @@ const PaginationPrevious = ({
 }
 PaginationPrevious.displayName = "PaginationPrevious"
 
+type PaginationNextProps = {
+  asChild?: boolean
+} & Omit<React.ComponentProps<typeof PaginationLink>, "asChild">
+
 const PaginationNext = ({
   className,
+  asChild = false,
   ...props
-}: React.ComponentProps<typeof PaginationLink>) => {
+}: PaginationNextProps) => {
   const { t } = useTranslation("common")
   return (
     <PaginationLink
       aria-label={t("pagination.goToNext")}
       size="default"
       className={cn("gap-2 pr-2.5", className)}
+      asChild={asChild}
       {...props}
     >
       <span>{t("pagination.next")}</span>

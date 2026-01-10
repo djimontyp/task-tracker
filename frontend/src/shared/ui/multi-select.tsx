@@ -63,7 +63,10 @@ export interface MultiSelectProps {
   clearLabel?: string
 }
 
-export function MultiSelect({
+export const MultiSelect = React.forwardRef<
+  HTMLButtonElement,
+  MultiSelectProps
+>(({
   options,
   value,
   onChange,
@@ -75,7 +78,7 @@ export function MultiSelect({
   className,
   removeLabel,
   clearLabel,
-}: MultiSelectProps) {
+}, ref) => {
   const [open, setOpen] = React.useState(false)
 
   const selectedOptions = React.useMemo(
@@ -114,6 +117,7 @@ export function MultiSelect({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          ref={ref}
           variant="outline"
           role="combobox"
           aria-expanded={open}
@@ -223,4 +227,5 @@ export function MultiSelect({
       </PopoverContent>
     </Popover>
   )
-}
+})
+MultiSelect.displayName = "MultiSelect"

@@ -7,7 +7,7 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Paintbrush } from 'lucide-react'
 
-interface ColorPickerPopoverProps {
+export interface ColorPickerPopoverProps {
   color: string
   onColorChange: (color: string) => void
   onAutoPickClick: () => void

@@ -16,7 +16,7 @@ import { useIsMobile } from '@/shared/hooks/use-mobile'
 import { cn } from '@/shared/lib/index'
 import type { DataTableColumnMeta } from './types'
 
-interface DataTableProps<TData> {
+export interface DataTableProps<TData> {
   table: TableType<TData>
   columns: ColumnDef<TData>[]
   emptyMessage?: string

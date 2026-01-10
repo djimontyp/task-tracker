@@ -12,7 +12,7 @@ import {
 import { ChevronRight, ChevronsRight } from 'lucide-react'
 import { Table as TableType } from '@tanstack/react-table'
 
-interface DataTablePaginationProps<TData> {
+export interface DataTablePaginationProps<TData> {
   table: TableType<TData>
   pageSizeOptions?: number[]
 }

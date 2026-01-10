@@ -16,12 +16,14 @@ import {
 import { ChevronDown } from 'lucide-react'
 import { Table as TableType } from '@tanstack/react-table'
 
-interface DataTableToolbarProps<TData> {
+export interface DataTableToolbarProps<TData> {
   table: TableType<TData>
   globalFilter: string
   onGlobalFilterChange: (value: string) => void
   searchPlaceholder?: string
   children?: React.ReactNode
+  /** Show column visibility dropdown. Default: true */
+  showColumnVisibility?: boolean
 }
 
 export function DataTableToolbar<TData>({
@@ -30,6 +32,7 @@ export function DataTableToolbar<TData>({
   onGlobalFilterChange,
   searchPlaceholder,
   children,
+  showColumnVisibility = true,
 }: DataTableToolbarProps<TData>) {
   const { t } = useTranslation('common')
   const [open, setOpen] = React.useState(false)
@@ -54,44 +57,46 @@ export function DataTableToolbar<TData>({
         />
         {children}
       </div>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="flex-shrink-0">
-            {t('dataTable.toolbar.view')}
-            {visibleCount < hidableColumns.length && (
-              <span className="ml-2 rounded bg-muted px-2 text-xs">
-                {visibleCount}/{hidableColumns.length}
-              </span>
-            )}
-            <ChevronDown className="ml-2 h-4 w-4" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent align="end" className="w-48 p-0">
-          <Command>
-            <CommandInput placeholder={t('dataTable.toolbar.searchColumns')} />
-            <CommandList>
-              <CommandEmpty>{t('dataTable.toolbar.noColumnsFound')}</CommandEmpty>
-              {hidableColumns.map((column) => (
-                <CommandItem
-                  key={column.id}
-                  onSelect={() => {
-                    column.toggleVisibility(!column.getIsVisible())
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Checkbox
-                    checked={column.getIsVisible()}
-                    className="mr-2"
-                    aria-hidden="true"
-                    tabIndex={-1}
-                  />
-                  <span className="capitalize">{column.id.replace(/_/g, ' ')}</span>
-                </CommandItem>
-              ))}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      {showColumnVisibility && (
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="flex-shrink-0">
+              {t('dataTable.toolbar.view')}
+              {visibleCount < hidableColumns.length && (
+                <span className="ml-2 rounded bg-muted px-2 text-xs">
+                  {visibleCount}/{hidableColumns.length}
+                </span>
+              )}
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-48 p-0">
+            <Command>
+              <CommandInput placeholder={t('dataTable.toolbar.searchColumns')} />
+              <CommandList>
+                <CommandEmpty>{t('dataTable.toolbar.noColumnsFound')}</CommandEmpty>
+                {hidableColumns.map((column) => (
+                  <CommandItem
+                    key={column.id}
+                    onSelect={() => {
+                      column.toggleVisibility(!column.getIsVisible())
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <Checkbox
+                      checked={column.getIsVisible()}
+                      className="mr-2"
+                      aria-hidden="true"
+                      tabIndex={-1}
+                    />
+                    <span className="capitalize">{column.id.replace(/_/g, ' ')}</span>
+                  </CommandItem>
+                ))}
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      )}
     </div>
   )
 }

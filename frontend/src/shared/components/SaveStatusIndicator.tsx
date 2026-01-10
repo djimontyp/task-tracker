@@ -3,7 +3,7 @@ import { CheckCircle, CloudUpload, AlertCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { SaveStatus } from '@/shared/hooks/useAutoSave'
 
-interface SaveStatusIndicatorProps {
+export interface SaveStatusIndicatorProps {
   status: SaveStatus
   hasUnsavedChanges: boolean
   lastSavedAt: Date | null
