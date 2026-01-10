@@ -24,19 +24,15 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-// Mock hooks
-vi.mock('@/shared/hooks/useProjectLanguage', () => ({
-  useProjectLanguage: () => ({ projectLanguage: 'en' }),
-}))
+// Note: useProjectLanguage hook is no longer used in AtomCard
+// projectLanguage is now passed as prop for better composition
 
-// Mock VersionHistoryList component
-vi.mock('@/features/knowledge/components/VersionHistoryList', () => ({
-  VersionHistoryList: ({ entityType, entityId }: { entityType: string; entityId: string }) => (
-    <div data-testid="version-history-list">
-      Version History for {entityType} {entityId}
-    </div>
-  ),
-}))
+// Mock version history slot component for tests
+const MockVersionHistorySlot = ({ atomId }: { atomId: string }) => (
+  <div data-testid="version-history-list">
+    Version History for atom {atomId}
+  </div>
+)
 
 // Mock LanguageMismatchBadge
 vi.mock('@/shared/components/LanguageMismatchBadge', () => ({
@@ -104,7 +100,12 @@ describe('AtomCard', () => {
     test('version history button has touch target ≥44px', () => {
       const atom = createMockAtom({ pending_versions_count: 2 })
 
-      render(<AtomCard atom={atom} />)
+      render(
+        <AtomCard
+          atom={atom}
+          versionHistorySlot={<MockVersionHistorySlot atomId={atom.id} />}
+        />
+      )
 
       const button = screen.getByRole('button', { name: /view history/i })
       expect(button).toHaveClass('h-11')
@@ -191,12 +192,25 @@ describe('AtomCard', () => {
       expect(screen.queryByText(/pending version/i)).not.toBeInTheDocument()
     })
 
-    test('renders view history button when pending versions exist', () => {
+    test('renders view history button when pending versions exist and slot provided', () => {
+      const atom = createMockAtom({ pending_versions_count: 2 })
+
+      render(
+        <AtomCard
+          atom={atom}
+          versionHistorySlot={<MockVersionHistorySlot atomId={atom.id} />}
+        />
+      )
+
+      expect(screen.getByRole('button', { name: /view history/i })).toBeInTheDocument()
+    })
+
+    test('does not render view history button when slot is not provided', () => {
       const atom = createMockAtom({ pending_versions_count: 2 })
 
       render(<AtomCard atom={atom} />)
 
-      expect(screen.getByRole('button', { name: /view history/i })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /view history/i })).not.toBeInTheDocument()
     })
   })
 
@@ -207,7 +221,12 @@ describe('AtomCard', () => {
       const user = userEvent.setup()
       const atom = createMockAtom({ pending_versions_count: 2 })
 
-      render(<AtomCard atom={atom} />)
+      render(
+        <AtomCard
+          atom={atom}
+          versionHistorySlot={<MockVersionHistorySlot atomId={atom.id} />}
+        />
+      )
 
       const button = screen.getByRole('button', { name: /view history/i })
       await user.click(button)
@@ -222,7 +241,13 @@ describe('AtomCard', () => {
       const onClick = vi.fn()
       const atom = createMockAtom({ pending_versions_count: 2 })
 
-      render(<AtomCard atom={atom} onClick={onClick} />)
+      render(
+        <AtomCard
+          atom={atom}
+          onClick={onClick}
+          versionHistorySlot={<MockVersionHistorySlot atomId={atom.id} />}
+        />
+      )
 
       const button = screen.getByRole('button', { name: /view history/i })
       await user.click(button)
@@ -235,7 +260,12 @@ describe('AtomCard', () => {
       const user = userEvent.setup()
       const atom = createMockAtom({ pending_versions_count: 2 })
 
-      render(<AtomCard atom={atom} />)
+      render(
+        <AtomCard
+          atom={atom}
+          versionHistorySlot={<MockVersionHistorySlot atomId={atom.id} />}
+        />
+      )
 
       // Open dialog
       await user.click(screen.getByRole('button', { name: /view history/i }))

@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import type { Message } from '@/shared/types'
+import i18n from '@/i18n/config'
+import { getLocaleString } from '@/shared/utils/date'
 
 export type MessageList = Message & {
   displayTimestamp: string
@@ -43,7 +45,7 @@ const toTimestamp = (value?: string): number => {
 const enhanceMessage = (message: Message): MessageList => {
   // Use new fields, fallback to deprecated fields for backwards compatibility
   const sentAtIso = normalizeSentAt(message.sent_at || message.timestamp)
-  const displayTimestamp = new Date(sentAtIso).toLocaleString('uk-UA')
+  const displayTimestamp = new Date(sentAtIso).toLocaleString(getLocaleString(i18n.language))
   const displaySource = message.source_name || 'unknown'
 
   return {

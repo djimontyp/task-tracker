@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/shared/lib/api/client';
 import { useWebSocket } from '@/shared/hooks/useWebSocket';
@@ -141,9 +141,16 @@ export function useHistoryImport(
     [jobId, queryClient, onComplete, onError]
   );
 
+  // Memoize topics array to prevent infinite re-subscription loops
+  // When jobId changes, the topics array reference stays stable
+  const wsTopics = useMemo(
+    () => (jobId ? ['ingestion'] : []),
+    [jobId]
+  );
+
   // Subscribe to WebSocket when job is active
   useWebSocket({
-    topics: jobId ? ['ingestion'] : [],
+    topics: wsTopics,
     onMessage: handleWebSocketMessage,
   });
 

@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { WebVitalsCards } from './WebVitalsCards';
 import { WebVitalsChart } from './WebVitalsChart';
 import { useWebVitals, loadWebVitalsHistory, clearWebVitalsHistory } from '../hooks/useWebVitals';
+import { getLocaleString } from '@/shared/utils/date';
 import type { PerformanceHistoryEntry } from '../types';
 import { RefreshCw, Activity } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 
 export const PerformanceDashboard = () => {
-  const { t } = useTranslation('monitoring');
+  const { t, i18n } = useTranslation('monitoring');
   const vitals = useWebVitals();
   const [history, setHistory] = useState<PerformanceHistoryEntry[]>([]);
 
@@ -16,8 +17,12 @@ export const PerformanceDashboard = () => {
     // Load history from localStorage and group by timestamp
     const entries = loadWebVitalsHistory();
 
+    // Take only the last 30 measurements to keep chart readable and continuous
+    // Sort by timestamp descending, take last 30, then the grouping will handle the rest
+    const recentEntries = entries.slice(-90); // ~30 grouped entries (3 metrics per page load)
+
     // Group entries by timestamp (within 1 second window)
-    const grouped = entries.reduce<PerformanceHistoryEntry[]>((acc, entry) => {
+    const grouped = recentEntries.reduce<PerformanceHistoryEntry[]>((acc, entry) => {
       const existing = acc.find((e) => Math.abs(e.timestamp - entry.timestamp) < 1000);
       if (existing) {
         // Use type assertion via unknown for dynamic property assignment
@@ -57,7 +62,7 @@ export const PerformanceDashboard = () => {
         <div className="flex items-center gap-4">
           {vitals.lastUpdated && (
             <span className="text-sm text-muted-foreground">
-              {t('performance.lastUpdated', { time: new Date(vitals.lastUpdated).toLocaleTimeString('uk-UA') })}
+              {t('performance.lastUpdated', { time: new Date(vitals.lastUpdated).toLocaleTimeString(getLocaleString(i18n.language)) })}
             </span>
           )}
           <Button variant="outline" size="sm" onClick={handleClearHistory}>

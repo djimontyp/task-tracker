@@ -32,7 +32,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
   const hasKeywords = data.keywords.length > 0
 
   if (!hasEntities && !hasKeywords) {
-    return <div className="text-xs text-muted-foreground italic">No linked atoms found.</div>
+    return <div className="text-xs text-muted-foreground italic">{t('atomsTab.noLinkedAtoms')}</div>
   }
 
   const renderEntityGroup = (
@@ -75,7 +75,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
       {/* Keywords */}
       {hasKeywords && (
         <div className="pt-2 border-t border-border/50">
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-2 block">Keywords</span>
+          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-2 block">{t('atomsTab.keywordsLabel')}</span>
           <div className="flex flex-wrap gap-1">
             {data.keywords
               .sort((a, b) => b.relevance - a.relevance)
@@ -92,7 +92,7 @@ export function AtomsTab({ data }: AtomsTabProps) {
                       </Badge>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="text-xs">Relevance: {keyword.relevance}%</p>
+                      <p className="text-xs">{t('atomsTab.relevanceLabel')} {keyword.relevance}%</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

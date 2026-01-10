@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
+import { getLocaleString } from '@/shared/utils/date'
 import type { TaskExecutionLog, TaskStatus } from '../types'
 
 interface LiveActivityFeedProps {
@@ -9,7 +10,7 @@ interface LiveActivityFeedProps {
 }
 
 export const LiveActivityFeed = ({ events }: LiveActivityFeedProps) => {
-  const { t } = useTranslation('taskMonitoring')
+  const { t, i18n } = useTranslation('taskMonitoring')
   const feedRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -64,7 +65,7 @@ export const LiveActivityFeed = ({ events }: LiveActivityFeedProps) => {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <time>{formatTimestamp(event.created_at)}</time>
+                  <time>{formatTimestamp(event.created_at, i18n.language)}</time>
                   {event.duration_ms !== null && event.duration_ms !== undefined && (
                     <>
                       <span>•</span>
@@ -111,9 +112,9 @@ function formatTaskName(taskName: string): string {
     .replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
-function formatTimestamp(timestamp: string): string {
+function formatTimestamp(timestamp: string, language: string): string {
   const date = new Date(timestamp)
-  return date.toLocaleTimeString('uk-UA', {
+  return date.toLocaleTimeString(getLocaleString(language), {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',

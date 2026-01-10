@@ -11,6 +11,7 @@ import {
 import { Message } from '@/shared/types'
 import { getImportanceBadge } from '@/shared/utils/statusBadges'
 import { formatMessageDate } from '@/shared/utils/date'
+// eslint-disable-next-line local-rules/no-direct-api-imports -- useScoringConfig is a shared hook from @/shared/api
 import { useScoringConfig } from '@/shared/api/scoringConfig'
 import { User, Lightbulb, X, AlertCircle } from 'lucide-react'
 
@@ -114,7 +115,7 @@ export const MessageListItem: React.FC<MessageListItemProps> = ({
           </TooltipTrigger>
           <TooltipContent side="left" className="text-xs">
             <p className="font-semibold">{isSignal ? t('status.signal') : t('status.noise')}</p>
-            <p className="opacity-80">Score: {message.importance_score ?? 'N/A'}</p>
+            <p className="opacity-80">{t('detailPanel.score', { value: message.importance_score ?? 'N/A' })}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

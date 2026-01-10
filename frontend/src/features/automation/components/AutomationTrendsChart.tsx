@@ -20,8 +20,8 @@ export function AutomationTrendsChart() {
   const [period, setPeriod] = useState<'7d' | '30d' | '90d'>('30d')
   const { data: trends, isLoading } = useAutomationTrends(period)
 
-  const reversedTrends = React.useMemo(() => 
-    trends ? [...trends].reverse() : [], 
+  const reversedTrends = React.useMemo(() =>
+    Array.isArray(trends) ? [...trends].reverse() : [],
     [trends]
   )
 

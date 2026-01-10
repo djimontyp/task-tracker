@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -7,8 +7,17 @@ import {
   Button,
   Badge,
   Spinner,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/shared/ui'
 import { providerService } from '@/features/providers/api'
+import { useProviderValidation } from '@/features/providers/hooks'
 import { LLMProvider, LLMProviderCreate, LLMProviderUpdate, ValidationStatus } from '@/features/providers/types'
 import { toast } from 'sonner'
 import { Pencil, Trash2, Plus, Server } from 'lucide-react'
@@ -16,14 +25,25 @@ import { EmptyState } from '@/shared/patterns'
 import { ProviderForm } from './ProviderForm'
 import { ValidationStatus as ValidationStatusComponent } from '@/features/providers/components'
 
-const POLLING_INTERVAL_MS = 1000
-const MAX_POLLING_ATTEMPTS = 15
-
 const ProviderList = () => {
   const { t } = useTranslation('agents')
+  const { t: tCommon } = useTranslation()
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingProvider, setEditingProvider] = useState<LLMProvider | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+
+  const validationMessages = useMemo(() => ({
+    validating: (action: 'created' | 'updated') => t(`providerList.toast.${action}Validating`),
+    notFound: t('providerList.toast.notFound'),
+    success: t('providerList.toast.validationSuccess'),
+    failed: (error: string) => t('providerList.toast.validationFailed', { error }),
+    timeout: t('providerList.toast.validationTimeout'),
+  }), [t])
+
+  const { pollValidationStatus } = useProviderValidation({
+    messages: validationMessages,
+  })
 
   const { data: providers, isLoading } = useQuery<LLMProvider[]>({
     queryKey: ['providers'],
@@ -35,37 +55,6 @@ const ProviderList = () => {
       return hasActiveValidation ? 2000 : false
     },
   })
-
-  const pollValidationStatus = async (providerId: string, action: 'created' | 'updated') => {
-    // Use toast ID to update the same toast instead of creating multiple
-    const toastId = `provider-validation-${providerId}`
-    toast.loading(t(`providerList.toast.${action}Validating`), { id: toastId })
-
-    for (let attempt = 0; attempt < MAX_POLLING_ATTEMPTS; attempt++) {
-      await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS))
-      await queryClient.refetchQueries({ queryKey: ['providers'] })
-
-      const providers = queryClient.getQueryData<LLMProvider[]>(['providers'])
-      const provider = providers?.find(p => p.id === providerId)
-
-      if (!provider) {
-        toast.error(t('providerList.toast.notFound'), { id: toastId })
-        return
-      }
-
-      if (provider.validation_status === ValidationStatus.CONNECTED) {
-        toast.success(t('providerList.toast.validationSuccess'), { id: toastId })
-        return
-      }
-
-      if (provider.validation_status === ValidationStatus.ERROR) {
-        toast.error(t('providerList.toast.validationFailed', { error: provider.validation_error || t('providerList.toast.unknownError') }), { id: toastId })
-        return
-      }
-    }
-
-    toast.error(t('providerList.toast.validationTimeout'), { id: toastId })
-  }
 
   const createMutation = useMutation({
     mutationFn: (data: LLMProviderCreate) => providerService.createProvider(data),
@@ -114,9 +103,14 @@ const ProviderList = () => {
     setFormOpen(true)
   }
 
-  const handleDelete = (id: string) => {
-    if (window.confirm(t('providerList.confirm.delete'))) {
-      deleteMutation.mutate(id)
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id)
+  }
+
+  const handleConfirmDelete = () => {
+    if (deleteId) {
+      deleteMutation.mutate(deleteId)
+      setDeleteId(null)
     }
   }
 
@@ -186,7 +180,7 @@ const ProviderList = () => {
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => handleDelete(provider.id)}
+                        onClick={() => handleDeleteClick(provider.id)}
                         aria-label={t('providerList.actions.delete')}
                         disabled={deleteMutation.isPending}
                       >
@@ -242,6 +236,23 @@ const ProviderList = () => {
         isEdit={!!editingProvider}
         loading={createMutation.isPending || updateMutation.isPending}
       />
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tCommon('confirmDialog.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {tCommon('confirmDialog.deleteProvider')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tCommon('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              {tCommon('actions.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

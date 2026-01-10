@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, RefreshCw } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -26,7 +26,7 @@ import {
 import { FormField } from '@/shared/patterns'
 import { AgentConfigCreate, AgentConfigUpdate } from '@/features/agents/types'
 import { providerService } from '@/features/providers/api'
-import { useOllamaModels } from '@/features/providers/hooks'
+import { useOllamaModels, useGeminiModels } from '@/features/providers/hooks'
 import { ProviderType, ValidationStatus } from '@/features/providers/types'
 import { projectService } from '@/features/projects/api/projectService'
 
@@ -106,6 +106,8 @@ const AgentForm = ({
 
   const [manualModelInput, setManualModelInput] = useState(false)
   const [basePromptOpen, setBasePromptOpen] = useState(false)
+  const [hasAutoSelectedModel, setHasAutoSelectedModel] = useState(false)
+  const [prevProviderId, setPrevProviderId] = useState(initialData?.provider_id || '')
 
   const { data: providers, isLoading: providersLoading } = useQuery({
     queryKey: ['providers', 'active'],
@@ -130,18 +132,49 @@ const AgentForm = ({
 
   const selectedProvider = providers?.find((p) => p.id === formData.provider_id)
   const isOllamaProvider = selectedProvider?.type === ProviderType.OLLAMA
+  const isGeminiProvider = selectedProvider?.type === ProviderType.GEMINI
   const hasProviderSelected = !!formData.provider_id && !!selectedProvider
 
-  const { models, isLoading: modelsLoading, error: modelsError } = useOllamaModels(
+  // Lazy load models: for editing - don't fetch until user clicks "Change model"
+  // For new agents - don't fetch until user clicks "Load models"
+  const shouldFetchOnMount = !isEdit && !formData.model_name
+  const {
+    models: ollamaModels,
+    isLoading: ollamaModelsLoading,
+    error: ollamaModelsError,
+    triggerFetch: triggerOllamaFetch,
+    hasFetched: ollamaHasFetched,
+  } = useOllamaModels(
     selectedProvider?.base_url || '',
-    hasProviderSelected && isOllamaProvider && !manualModelInput
+    hasProviderSelected && isOllamaProvider && !manualModelInput,
+    shouldFetchOnMount
   )
 
+  // Gemini models - fetch when Gemini provider is selected
+  const {
+    data: geminiModelsData,
+    isLoading: geminiModelsLoading,
+    error: geminiModelsError,
+  } = useGeminiModels(hasProviderSelected && isGeminiProvider ? selectedProvider?.id : undefined)
+
   // Filter out embedding models - they don't support chat API
-  const chatModels = models.filter((model) => {
+  const ollamaChatModels = ollamaModels.filter((model) => {
     const name = model.name.toLowerCase()
     return !name.includes('embed') && !name.includes('minilm')
   })
+
+  // Filter Gemini models to only show chat-capable ones
+  const geminiChatModels = (geminiModelsData?.models ?? []).filter((model) => {
+    const name = model.name.toLowerCase()
+    return !name.includes('embed') && !name.includes('embedding')
+  })
+
+  // Unified models interface
+  const models = isGeminiProvider ? geminiChatModels : ollamaChatModels
+  const modelsLoading = isGeminiProvider ? geminiModelsLoading : ollamaModelsLoading
+  const modelsError = isGeminiProvider ? (geminiModelsError?.message || null) : ollamaModelsError
+  const hasFetched = isGeminiProvider ? !!geminiModelsData : ollamaHasFetched
+  const triggerFetch = isGeminiProvider ? () => {} : triggerOllamaFetch // Gemini auto-fetches
 
   useEffect(() => {
     if (initialData) {
@@ -159,17 +192,24 @@ const AgentForm = ({
     }
   }, [initialData])
 
+  // Track provider_id changes separately to avoid infinite loop
   useEffect(() => {
-    setManualModelInput(false)
-    setFormData((prev) => ({ ...prev, model_name: '' }))
-  }, [formData.provider_id])
-
-  useEffect(() => {
-    if (chatModels.length > 0 && !formData.model_name && !isEdit) {
-      setFormData((prev) => ({ ...prev, model_name: chatModels[0].name }))
+    const currentProviderId = formData.provider_id ?? ''
+    if (currentProviderId !== prevProviderId) {
+      setPrevProviderId(currentProviderId)
+      setManualModelInput(false)
+      setHasAutoSelectedModel(false) // Reset to allow auto-selection for new provider
+      setFormData((prev) => ({ ...prev, model_name: '' }))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatModels, isEdit])
+  }, [formData.provider_id, prevProviderId])
+
+  // Auto-select first model when models load (only for new agents)
+  useEffect(() => {
+    if (models.length > 0 && !formData.model_name && !isEdit && !hasAutoSelectedModel) {
+      setFormData((prev) => ({ ...prev, model_name: models[0].name }))
+      setHasAutoSelectedModel(true)
+    }
+  }, [models, formData.model_name, isEdit, hasAutoSelectedModel])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -229,7 +269,7 @@ const AgentForm = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="model_name">{t('form.fields.modelName.label')} *</Label>
-                {hasProviderSelected && isOllamaProvider && chatModels.length > 0 && (
+                {hasProviderSelected && (isOllamaProvider || isGeminiProvider) && models.length > 0 && (
                   <button
                     type="button"
                     onClick={() => setManualModelInput(!manualModelInput)}
@@ -244,9 +284,36 @@ const AgentForm = ({
                 <div className="px-4 py-2 text-sm border border-input bg-muted rounded-md text-muted-foreground">
                   {t('form.messages.selectProviderFirst')}
                 </div>
-              ) : isOllamaProvider && !manualModelInput ? (
+              ) : (isOllamaProvider || isGeminiProvider) && !manualModelInput ? (
                 <>
-                  {modelsLoading ? (
+                  {/* Lazy loading: show current model with "Change" button if not fetched yet */}
+                  {!hasFetched && formData.model_name ? (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 px-4 py-2 text-sm border border-input bg-background rounded-md">
+                        {formData.model_name}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={triggerFetch}
+                        className="shrink-0"
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        {t('form.actions.changeModel', 'Change')}
+                      </Button>
+                    </div>
+                  ) : !hasFetched && !formData.model_name ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={triggerFetch}
+                      className="w-full justify-start"
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      {t('form.actions.loadModels', 'Load available models')}
+                    </Button>
+                  ) : modelsLoading ? (
                     <div className="flex items-center gap-2 px-4 py-2 text-sm border border-input bg-background rounded-md">
                       <Spinner className="w-4 h-4" />
                       <span className="text-muted-foreground">{t('form.messages.loadingModels')}</span>
@@ -264,7 +331,7 @@ const AgentForm = ({
                         required
                       />
                     </div>
-                  ) : chatModels.length > 0 ? (
+                  ) : models.length > 0 ? (
                     <Select
                       value={formData.model_name}
                       onValueChange={(value) => setFormData({ ...formData, model_name: value })}
@@ -273,7 +340,7 @@ const AgentForm = ({
                         <SelectValue placeholder={t('form.fields.modelName.selectPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
-                        {chatModels.map((model) => (
+                        {models.map((model) => (
                           <SelectItem key={model.name} value={model.name}>
                             {model.name}
                           </SelectItem>

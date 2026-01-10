@@ -1,6 +1,6 @@
 import { API_BASE_PATH, API_ENDPOINTS } from '@/shared/config/api'
 import type { Message } from '@/shared/types'
-import type { MessageQueryParams } from '../types'
+import type { MessageQueryParams, MessageInspectData } from '../types'
 
 const API_BASE_URL = ''
 
@@ -44,6 +44,16 @@ class MessageService {
 
     const data: { items: Message[], total: number } = await response.json()
     return data.items || []
+  }
+
+  async getMessageInspect(messageId: string): Promise<MessageInspectData> {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.messageInspect(messageId)}`)
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch message details: ${response.statusText}`)
+    }
+
+    return response.json()
   }
 }
 

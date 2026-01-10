@@ -18,20 +18,22 @@ import {
   GitMerge,
   Link2,
 } from 'lucide-react'
-import { VersionHistoryList } from '@/features/knowledge/components/VersionHistoryList'
 import { LanguageMismatchBadge } from '@/shared/components/LanguageMismatchBadge'
-import { useProjectLanguage } from '@/shared/hooks/useProjectLanguage'
 import { badges } from '@/shared/tokens/patterns'
 import { MergeAtomDialog } from './MergeAtomDialog'
 import type { Atom, AtomType } from '../types'
 
-interface AtomCardProps {
+export interface AtomCardProps {
   atom: Atom
   className?: string
   onClick?: () => void
   isError?: boolean
   error?: Error
   onRetry?: () => void
+  /** Project language for mismatch detection (defaults to 'uk') */
+  projectLanguage?: string
+  /** Slot for version history component - enables composition over cross-feature imports */
+  versionHistorySlot?: React.ReactNode
 }
 
 const atomTypeIcons: Record<AtomType, React.ComponentType<{ className?: string }>> = {
@@ -46,10 +48,11 @@ const atomTypeIcons: Record<AtomType, React.ComponentType<{ className?: string }
   requirement: FileText,
 }
 
+const DEFAULT_PROJECT_LANGUAGE = 'uk'
+
 const AtomCard = React.forwardRef<HTMLDivElement, AtomCardProps>(
-  ({ atom, className, onClick, isError, error, onRetry }, ref) => {
+  ({ atom, className, onClick, isError, error, onRetry, projectLanguage = DEFAULT_PROJECT_LANGUAGE, versionHistorySlot }, ref) => {
     const { t } = useTranslation('atoms')
-    const { projectLanguage } = useProjectLanguage()
     const [showVersionHistory, setShowVersionHistory] = useState(false)
     const [showMergeDialog, setShowMergeDialog] = useState(false)
 
@@ -193,19 +196,21 @@ const AtomCard = React.forwardRef<HTMLDivElement, AtomCardProps>(
               <Badge className="text-xs bg-semantic-warning text-white hover:bg-semantic-warning/90">
                 {t('card.pendingVersions', { count: pendingVersionsCount, defaultValue: `${pendingVersionsCount} pending version${pendingVersionsCount > 1 ? 's' : ''}` })}
               </Badge>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-11 text-xs"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowVersionHistory(true)
-                }}
-                aria-label={t('card.viewHistory', 'View version history')}
-              >
-                <Clock className="h-3 w-3 mr-2" />
-                {t('card.viewHistory', 'View History')}
-              </Button>
+              {versionHistorySlot && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-11 text-xs"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowVersionHistory(true)
+                  }}
+                  aria-label={t('card.viewHistory', 'View version history')}
+                >
+                  <Clock className="h-3 w-3 mr-2" />
+                  {t('card.viewHistory', 'View History')}
+                </Button>
+              )}
             </div>
           )}
 
@@ -228,21 +233,16 @@ const AtomCard = React.forwardRef<HTMLDivElement, AtomCardProps>(
           )}
         </div>
 
-        <Dialog open={showVersionHistory} onOpenChange={setShowVersionHistory}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{t('card.versionHistoryTitle', { title: atom.title, defaultValue: `Version History - ${atom.title}` })}</DialogTitle>
-            </DialogHeader>
-            <VersionHistoryList
-              entityType="atom"
-              entityId={atom.id}
-              enableBulkActions={true}
-              onSelectVersion={(_version) => {
-                // Version selected - implementation pending
-              }}
-            />
-          </DialogContent>
-        </Dialog>
+        {versionHistorySlot && (
+          <Dialog open={showVersionHistory} onOpenChange={setShowVersionHistory}>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{t('card.versionHistoryTitle', { title: atom.title, defaultValue: `Version History - ${atom.title}` })}</DialogTitle>
+              </DialogHeader>
+              {versionHistorySlot}
+            </DialogContent>
+          </Dialog>
+        )}
 
         {hasSimilar && similarAtomId && (
           <MergeAtomDialog

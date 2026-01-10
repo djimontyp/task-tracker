@@ -1,13 +1,12 @@
-import React, { useEffect, useRef, useMemo } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Message } from '@/shared/types'
 import { MessageListItem } from './MessageListItem'
-import { ScrollArea } from '@/shared/ui/scroll-area'
+import { ScrollContainer } from '@/shared/ui/scroll-container'
 import { useTranslation } from 'react-i18next'
-import { Loader2, AlertCircle, Calendar, ArrowUp } from 'lucide-react'
+import { Loader2, AlertCircle, ArrowUp } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { useInView } from 'react-intersection-observer'
-import { format, isToday, isYesterday } from 'date-fns'
-import { uk, enUS } from 'date-fns/locale'
+import { useGroupedMessages } from '../hooks'
 
 interface MessageListProps {
     messages: Message[]
@@ -26,6 +25,8 @@ interface MessageListProps {
     onLoadMore?: () => void
     isFetchingNextPage?: boolean
     total?: number
+    /** Callback when visible date group changes (for external sticky header) */
+    onVisibleDateChange?: (dateLabel: string | null) => void
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -44,23 +45,19 @@ export const MessageList: React.FC<MessageListProps> = ({
     hasMore,
     onLoadMore,
     isFetchingNextPage,
-    total
+    total,
+    onVisibleDateChange
 }) => {
-    const { t, i18n } = useTranslation('messages')
+    const { t } = useTranslation('messages')
 
-    // Ref to ScrollArea container for finding viewport
+    // Group messages by date with localized labels
+    const groupedMessages = useGroupedMessages(messages)
+
+    // Ref to scroll container (native div, not Radix ScrollArea - fixes Firefox backdrop-filter)
     const scrollContainerRef = useRef<HTMLDivElement | null>(null)
-    const [scrollViewport, setScrollViewport] = React.useState<HTMLElement | null>(null)
 
-    // Find ScrollArea viewport after mount
-    useEffect(() => {
-        if (scrollContainerRef.current) {
-            const viewport = scrollContainerRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement
-            if (viewport) {
-                setScrollViewport(viewport)
-            }
-        }
-    }, [])
+    // scrollViewport is now the container itself
+    const scrollViewport = scrollContainerRef.current
 
     // Bottom infinite scroll trigger - aggressive prefetch to prevent skeleton flicker
     const { ref: loadMoreRef, inView } = useInView({
@@ -93,6 +90,10 @@ export const MessageList: React.FC<MessageListProps> = ({
             onLoadMore?.()
         }
     }, [inView, hasMore, isFetchingNextPage, onLoadMore])
+
+    // Track visible date groups for external sticky header
+    const dateGroupRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+    const visibleDatesRef = useRef<Set<string>>(new Set())
 
     // Auto-scroll to selected item
     useEffect(() => {
@@ -134,40 +135,39 @@ export const MessageList: React.FC<MessageListProps> = ({
         lastSelectedIdRef.current = id
     }
 
-    // Group messages by date
-    const groupedMessages = useMemo(() => {
-        const groups: Record<string, Message[]> = {}
-        const locale = i18n.language === 'uk' ? uk : enUS
+    // Track visible date for external sticky header
+    useEffect(() => {
+        if (!scrollContainerRef.current || !onVisibleDateChange) return
 
-        messages.forEach(msg => {
-            if (!msg.sent_at) return
-            const date = new Date(msg.sent_at)
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(entry => {
+                    const dateLabel = entry.target.getAttribute('data-date-label')
+                    if (!dateLabel) return
 
-            // Human readable keys for sorting/display logic could be separate, 
-            // but for simplicity we'll format the display title here
-            let displayTitle = ''
-            if (isToday(date)) {
-                displayTitle = i18n.language === 'uk' ? 'Сьогодні' : 'Today'
-            } else if (isYesterday(date)) {
-                displayTitle = i18n.language === 'uk' ? 'Вчора' : 'Yesterday'
-            } else {
-                displayTitle = format(date, 'MMMM d, yyyy', { locale })
+                    if (entry.isIntersecting) {
+                        visibleDatesRef.current.add(dateLabel)
+                    } else {
+                        visibleDatesRef.current.delete(dateLabel)
+                    }
+                })
+
+                // Get first visible date (topmost)
+                const dateLabels = groupedMessages.map(g => g.label)
+                const firstVisible = dateLabels.find(label => visibleDatesRef.current.has(label))
+                onVisibleDateChange(firstVisible || null)
+            },
+            {
+                root: scrollContainerRef.current,
+                rootMargin: '0px 0px -90% 0px', // Trigger when group header near top
+                threshold: 0
             }
+        )
 
-            // Actually, let's use the display title as the key to group simple list
-            // Note: This relies on inputs being sorted by date desc usually.
-            // If strict sorting needed, we'd map keys to array and sort.
-            // Assuming messages come sorted.
+        dateGroupRefs.current.forEach((el) => observer.observe(el))
 
-            // To ensure uniqueness properly across years, we should probably stick to ISO key for grouping
-            // and derive title later, but for this quick Pass:
-            if (!groups[displayTitle]) {
-                groups[displayTitle] = []
-            }
-            groups[displayTitle].push(msg)
-        })
-        return groups
-    }, [messages, i18n.language])
+        return () => observer.disconnect()
+    }, [groupedMessages, onVisibleDateChange])
 
     if (isError) {
         return (
@@ -201,21 +201,19 @@ export const MessageList: React.FC<MessageListProps> = ({
     }
 
     return (
-        <ScrollArea className="h-full relative" ref={scrollContainerRef}>
+        <ScrollContainer variant="native" className="relative" ref={scrollContainerRef}>
             <div className="flex flex-col min-h-full pb-24">
                 {/* Top Sentinel */}
                 <div ref={setTopRef} className="h-px w-full" />
 
-                {Object.entries(groupedMessages).map(([dateLabel, msgs]) => (
-                    <div key={dateLabel}>
-                        {/* Sticky Date Header */}
-                        <div className="sticky top-0 z-fixed bg-background/98 backdrop-blur-sm shadow-sm py-2 px-4 border-b border-border/50 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2 transition-all duration-200">
-                            <Calendar className="w-3 h-3 opacity-70" />
-                            {dateLabel}
-                        </div>
-
+                {groupedMessages.map((group) => (
+                    <div
+                        key={group.label}
+                        data-date-label={group.label}
+                        ref={(el) => { if (el) dateGroupRefs.current.set(group.label, el) }}
+                    >
                         <div className="divide-y divide-border/40">
-                            {msgs.map((message) => (
+                            {group.messages.map((message) => (
                                 <div
                                     key={message.id}
                                     ref={(el) => { if (el) itemRefs.current.set(String(message.id), el) }}
@@ -248,14 +246,14 @@ export const MessageList: React.FC<MessageListProps> = ({
                     {isFetchingNextPage ? (
                         <div className="flex items-center gap-2 text-muted-foreground/50 text-xs">
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>Loading more history...</span>
+                            <span>{t('infiniteScroll.loadingMore')}</span>
                         </div>
                     ) : hasMore ? (
-                        <span className="text-[10px] text-muted-foreground/30 uppercase tracking-widest font-medium">Scroll for more</span>
+                        <span className="text-[10px] text-muted-foreground/30 uppercase tracking-widest font-medium">{t('infiniteScroll.scrollForMore')}</span>
                     ) : (
                         <div className="flex flex-col items-center gap-1 opacity-40 py-2">
                             <div className="w-1 h-1 rounded-full bg-border" />
-                            <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">End of history</span>
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">{t('infiniteScroll.endOfHistory')}</span>
                         </div>
                     )}
                 </div>
@@ -271,10 +269,10 @@ export const MessageList: React.FC<MessageListProps> = ({
                         onClick={scrollToTop}
                     >
                         <ArrowUp className="h-4 w-4" />
-                        <span className="text-xs font-medium">{t('actions.scrollToTop', 'Вгору')}</span>
+                        <span className="text-xs font-medium">{t('actions.scrollToTop')}</span>
                     </Button>
                 </div>
             )}
-        </ScrollArea>
+        </ScrollContainer>
     )
 }

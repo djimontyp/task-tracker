@@ -218,5 +218,3 @@ export function ChatIdInput({
     </div>
   );
 }
-
-export default ChatIdInput;

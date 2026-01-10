@@ -10,6 +10,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   MessageSquare,
   FolderOpen,
@@ -56,6 +57,7 @@ export function MinimalOnboardingWizard({
   onNavigate,
   onDismiss,
 }: MinimalOnboardingWizardProps) {
+  const { t } = useTranslation('onboarding')
   const navigate = useNavigate()
   const [isDismissed, setIsDismissed] = useState(false)
 
@@ -64,35 +66,35 @@ export function MinimalOnboardingWizard({
     {
       id: 'sources',
       icon: MessageSquare,
-      title: 'Підключити Telegram',
-      action: 'Connect',
+      title: t('wizard.minimal.steps.sources.title'),
+      action: t('wizard.minimal.steps.sources.action'),
       actionRoute: '/settings?tab=sources',
       status: step1Complete ? 'completed' : 'active',
     },
     {
       id: 'project',
       icon: FolderOpen,
-      title: 'Створити проєкт',
-      action: 'Create',
+      title: t('wizard.minimal.steps.project.title'),
+      action: t('wizard.minimal.steps.project.action'),
       actionRoute: '/projects',
       status: !step1Complete ? 'locked' : step2Complete ? 'completed' : 'active',
     },
     {
       id: 'agent',
       icon: Cpu,
-      title: 'Увімкнути AI',
-      action: 'Enable',
+      title: t('wizard.minimal.steps.agent.title'),
+      action: t('wizard.minimal.steps.agent.action'),
       actionRoute: '/agents',
       status: !step2Complete ? 'locked' : step3Complete ? 'completed' : 'active',
     },
     {
       id: 'import',
       icon: Download,
-      title: 'Імпортувати дані',
-      action: 'Import',
+      title: t('wizard.minimal.steps.import.title'),
+      action: t('wizard.minimal.steps.import.action'),
       status: !step3Complete ? 'locked' : step4Complete ? 'completed' : 'pending',
     },
-  ], [step1Complete, step2Complete, step3Complete, step4Complete])
+  ], [step1Complete, step2Complete, step3Complete, step4Complete, t])
 
   // Reserved for future use (e.g., step navigation)
   const _currentStepIndex = useMemo(() =>
@@ -144,9 +146,9 @@ export function MinimalOnboardingWizard({
               <Sparkles className="h-5 w-5 text-semantic-success" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium">Налаштування завершено</p>
+              <p className="text-sm font-medium">{t('wizard.minimal.collapsed.title')}</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Слухаємо ефір... Збираємо перші дані
+                {t('wizard.minimal.collapsed.description')}
               </p>
             </div>
           </div>
@@ -156,7 +158,7 @@ export function MinimalOnboardingWizard({
             size="icon"
             className="h-8 w-8 shrink-0"
             onClick={handleDismiss}
-            aria-label="Dismiss"
+            aria-label={t('wizard.minimal.dismissAriaLabel')}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -179,7 +181,7 @@ export function MinimalOnboardingWizard({
       {/* Progress indicator */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Налаштування</span>
+          <span>{t('wizard.minimal.progress.label')}</span>
           <span>{Math.round(progress)}%</span>
         </div>
         <Progress value={progress} className="h-1" />
@@ -215,7 +217,7 @@ export function MinimalOnboardingWizard({
                       <div>
                         <h4 className="text-sm font-medium">{step.title}</h4>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Крок {index + 1} з {steps.length}
+                          {t('wizard.minimal.progress.step', { current: index + 1, total: steps.length })}
                         </p>
                       </div>
 
@@ -234,7 +236,7 @@ export function MinimalOnboardingWizard({
                       {/* Pending state (Step 4) */}
                       {step.status === 'pending' && (
                         <p className="text-xs text-muted-foreground italic">
-                          З&apos;явиться автоматично після аналізу
+                          {t('wizard.minimal.pending')}
                         </p>
                       )}
                     </div>
@@ -276,7 +278,7 @@ export function MinimalOnboardingWizard({
           onClick={handleDismiss}
           className="text-xs text-muted-foreground"
         >
-          Пропустити налаштування
+          {t('wizard.minimal.dismiss')}
         </Button>
       </div>
     </div>

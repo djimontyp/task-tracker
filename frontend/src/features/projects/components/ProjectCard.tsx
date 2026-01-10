@@ -6,12 +6,21 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, Badge, Button, Separator, Spinner } from '@/shared/ui'
 import { CardContent } from '@/shared/ui/card'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 import { CompactCard, type CompactCardAction } from '@/shared/patterns'
 import { cn } from '@/shared/lib'
-import { Pencil, Trash2, AlertCircle, RefreshCw } from 'lucide-react'
+import { useLocalStorage, useMediaQuery } from '@/shared/hooks'
+import { Pencil, Trash2, AlertCircle, RefreshCw, ChevronDown, ChevronRight, Layers, Book, User, Calendar } from 'lucide-react'
 import type { ProjectConfig } from '../types'
 
-interface ProjectCardProps {
+interface ProjectCardState {
+  isComponentsOpen: boolean
+  isGlossaryOpen: boolean
+  isRulesOpen: boolean
+  isKeywordsExpanded: boolean
+}
+
+export interface ProjectCardProps {
   project: ProjectConfig
   className?: string
   onEdit?: (project: ProjectConfig) => void
@@ -25,10 +34,27 @@ interface ProjectCardProps {
 export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
   ({ project, className, onEdit, onDelete, isLoading, isError, error, onRetry }, ref) => {
     const { t } = useTranslation('projects')
+    const isDesktop = useMediaQuery('(min-width: 640px)') // sm breakpoint
+
+    // Collapsible states with persistence
+    const [state, setState] = useLocalStorage<ProjectCardState>(`project-card-state-${project.id}`, {
+      isComponentsOpen: false, // Default closed as per user request
+      isGlossaryOpen: false,
+      isRulesOpen: false,
+      isKeywordsExpanded: false,
+    })
+
+    const updateState = (updates: Partial<ProjectCardState>) => {
+      setState((prev) => ({ ...prev, ...updates }))
+    }
+
+    // Helper toggle functions
+    const toggleGlossary = (open: boolean) => updateState({ isGlossaryOpen: open })
+    const toggleKeywords = () => updateState({ isKeywordsExpanded: !state.isKeywordsExpanded })
 
     if (isError) {
       return (
-        <Card ref={ref}>
+        <Card ref={ref} className={className}>
           <CardContent className="p-6">
             <div className="flex flex-col items-center justify-center gap-4 text-center">
               <AlertCircle className="h-8 w-8 text-destructive" />
@@ -50,7 +76,7 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
 
     if (isLoading) {
       return (
-        <Card ref={ref}>
+        <Card ref={ref} className={className}>
           <CardContent className="p-6">
             <div className="flex items-center justify-center">
               <Spinner className="h-6 w-6" />
@@ -60,31 +86,13 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
       )
     }
 
-    // Build actions for CompactCard
-    const primaryAction: CompactCardAction | undefined = onEdit
-      ? {
-          label: t('card.actions.edit', 'Edit'),
-          icon: <Pencil className="h-4 w-4" />,
-          onClick: () => onEdit(project),
-        }
-      : undefined
-
-    const secondaryActions: CompactCardAction[] = []
-    if (onDelete) {
-      secondaryActions.push({
-        label: t('card.actions.delete', 'Delete'),
-        icon: <Trash2 className="h-4 w-4" />,
-        onClick: () => onDelete(project.id),
-        variant: 'destructive',
-      })
-    }
-
-    const statusBadge = (
+    // Status Badge Component
+    const StatusBadge = () => (
       <Badge
         variant="outline"
         className={
           project.is_active
-            ? 'bg-semantic-success text-white border-semantic-success'
+            ? 'bg-semantic-success/10 text-semantic-success border-semantic-success/20'
             : 'bg-muted text-muted-foreground border-border'
         }
       >
@@ -92,197 +100,191 @@ export const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
       </Badge>
     )
 
-    const compactContent = project.description ? (
-      <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
-    ) : null
+    // MOBILE VIEW (CompactCard)
+    if (!isDesktop) {
+      const primaryAction: CompactCardAction | undefined = onEdit
+        ? {
+          label: t('card.actions.edit', 'Edit'),
+          icon: <Pencil className="h-4 w-4" />,
+          onClick: () => onEdit(project),
+        }
+        : undefined
 
-    return (
-      <>
-        {/* Compact variant - mobile only (hidden on sm and above) */}
+      const secondaryActions: CompactCardAction[] = []
+      if (onDelete) {
+        secondaryActions.push({
+          label: t('card.actions.delete', 'Delete'),
+          icon: <Trash2 className="h-4 w-4" />,
+          onClick: () => onDelete(project.id),
+          variant: 'destructive',
+        })
+      }
+
+      const compactContent = project.description ? (
+        <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
+      ) : null
+
+      return (
         <CompactCard
+          ref={ref}
           title={project.name}
-          badge={statusBadge}
+          badge={<StatusBadge />}
           primaryAction={primaryAction}
           secondaryActions={secondaryActions.length > 0 ? secondaryActions : undefined}
           content={compactContent}
           className={className}
         />
+      )
+    }
 
-        {/* Default variant - desktop (hidden below sm) */}
-        <Card ref={ref} className={cn('p-4 hover:shadow-md transition-shadow hidden sm:block', className)}>
-      <div className="space-y-4">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2 min-w-0">
-              <h3 className="text-lg font-semibold truncate">{project.name}</h3>
-              <Badge variant="outline" className={project.is_active ? 'bg-semantic-success text-white border-semantic-success' : 'bg-muted text-muted-foreground border-border'}>
-                {project.is_active ? t('status.active') : t('status.inactive')}
-              </Badge>
+    // DESKTOP VIEW (Card)
+    return (
+      <Card ref={ref} className={cn('p-4 hover:shadow-md transition-shadow flex flex-col h-full', className)}>
+        <div className="space-y-4 flex-1">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2 min-w-0">
+                <h3 className="text-lg font-semibold truncate text-foreground/90">{project.name}</h3>
+                <StatusBadge />
+              </div>
+              {project.description && (
+                <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed" title={project.description}>
+                  {project.description}
+                </p>
+              )}
             </div>
-            {project.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
-            )}
-          </div>
-        </div>
 
-        {/* Keywords */}
-        {project.keywords.length > 0 && (
-          <div>
-            <div className="text-sm font-medium mb-2">{t('card.keywords')}</div>
-            <div className="flex flex-wrap gap-2">
-              {project.keywords.map((keyword, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {keyword}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Components */}
-        {project.components.length > 0 && (
-          <div className="space-y-2">
-            <div className="text-sm font-medium">{t('card.components')}</div>
-            <div className="space-y-2">
-              {project.components.map((component, index) => (
-                <div
-                  key={`${component.name}-${index}`}
-                  className="rounded border p-2 text-xs space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm">{component.name}</span>
-                    {component.description && (
-                      <Badge variant="outline" className="text-2xs">
-                        {component.description}
-                      </Badge>
-                    )}
-                  </div>
-                  {component.keywords.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {component.keywords.map((keyword, keywordIndex) => (
-                        <Badge key={keywordIndex} variant="outline" className="text-2xs">
-                          {keyword}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Glossary */}
-        {Object.keys(project.glossary).length > 0 && (
-          <div className="space-y-2">
-            <div className="text-sm font-medium">{t('card.glossary')}</div>
-            <div className="space-y-2 text-xs text-muted-foreground">
-              {Object.entries(project.glossary).map(([term, definition]) => (
-                <div key={term} className="flex gap-2 min-w-0">
-                  <span className="font-medium text-foreground flex-shrink-0">{term}:</span>
-                  <span className="line-clamp-1">{definition}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Priority Rules */}
-        {project.priority_rules && Object.keys(project.priority_rules).length > 0 && (
-          <div className="space-y-2">
-            <div className="text-sm font-medium">{t('card.priorityRules')}</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-              {(['critical_keywords', 'high_keywords', 'medium_keywords', 'low_keywords'] as const).map(
-                (key) => {
-                  const keywords = project.priority_rules?.[key] ?? []
-                  if (!keywords.length) return null
-                  const labelMap: Record<typeof key, string> = {
-                    critical_keywords: t('card.priority.critical'),
-                    high_keywords: t('card.priority.high'),
-                    medium_keywords: t('card.priority.medium'),
-                    low_keywords: t('card.priority.low'),
-                  }
-                  return (
-                    <div key={key} className="space-y-2">
-                      <div className="font-medium text-muted-foreground">{labelMap[key]}</div>
-                      <div className="flex flex-wrap gap-2">
-                        {keywords.map((keyword, index) => (
-                          <Badge key={index} variant="outline" className="text-2xs">
-                            {keyword}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                },
+            {/* Desktop Actions (Top Right) */}
+            <div className="flex items-center gap-1 shrink-0">
+              {onEdit && (
+                <Button variant="ghost" size="icon" onClick={() => onEdit(project)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                  <Pencil className="h-4 w-4" />
+                  <span className="sr-only">{t('card.actions.edit')}</span>
+                </Button>
+              )}
+              {onDelete && (
+                <Button variant="ghost" size="icon" onClick={() => onDelete(project.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">{t('card.actions.delete')}</span>
+                </Button>
               )}
             </div>
           </div>
-        )}
 
-        {/* Assignees & PM */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div>
-            <div className="text-sm font-medium mb-2">{t('card.defaultAssignees')}</div>
-            <div className="flex flex-wrap gap-2">
-              {project.default_assignee_ids.length === 0 ? (
-                <span className="text-muted-foreground">{t('card.none')}</span>
-              ) : (
-                project.default_assignee_ids.map((id) => (
-                  <Badge key={id} variant="outline" className="text-2xs bg-accent/10">
-                    #{id}
+          <Separator />
+
+          {/* Keywords */}
+          {project.keywords.length > 0 && (
+            <div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                {t('card.keywords')}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {project.keywords.slice(0, state.isKeywordsExpanded ? undefined : 5).map((keyword) => (
+                  <Badge key={keyword} variant="secondary" className="font-normal">
+                    {keyword}
                   </Badge>
-                ))
-              )}
+                ))}
+                {project.keywords.length > 5 && (
+                  <button
+                    onClick={toggleKeywords}
+                    className="inline-flex items-center justify-center rounded-md border border-input bg-background px-2 py-0.5 text-xs font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    {state.isKeywordsExpanded ? t('card.keywords.showLess') : `+${project.keywords.length - 5}`}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer / Collapsibles */}
+        <div className="mt-4 pt-4 border-t space-y-2">
+          {/* Components Section */}
+          {project.components.length > 0 && (
+            <Collapsible
+              open={state.isComponentsOpen}
+              onOpenChange={(open) => updateState({ isComponentsOpen: open })}
+              className="border rounded-md px-2 py-2 bg-muted/30"
+            >
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-between w-full text-sm font-medium hover:text-primary transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-muted-foreground" />
+                    <span>{t('card.components')}</span>
+                  </div>
+                  {state.isComponentsOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <div className="space-y-2">
+                  {project.components.map((comp) => (
+                    <div key={comp.name} className="bg-background rounded-md p-2 border text-sm shadow-sm">
+                      <div className="font-medium">{comp.name}</div>
+                      {comp.description && (
+                        <div className="text-xs text-muted-foreground mt-1">{comp.description}</div>
+                      )}
+                      {comp.keywords.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {comp.keywords.map((keyword) => (
+                            <Badge key={keyword} variant="secondary" className="text-[10px] h-5">
+                              {keyword}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+
+          {/* Collapsible Glossary */}
+          {Object.keys(project.glossary).length > 0 && (
+            <Collapsible open={state.isGlossaryOpen} onOpenChange={toggleGlossary} className="border rounded-md px-3 py-2 bg-muted/30">
+              <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium hover:text-primary transition-colors">
+                <div className="flex items-center gap-2">
+                  <Book className="h-4 w-4 text-muted-foreground" />
+                  <span>{t('card.glossary')} <span className="text-muted-foreground ml-1">({Object.keys(project.glossary).length})</span></span>
+                </div>
+                {state.isGlossaryOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-2">
+                <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-xs">
+                  {Object.entries(project.glossary).map(([term, definition]) => (
+                    <React.Fragment key={term}>
+                      <dt className="font-semibold text-foreground">{term}:</dt>
+                      <dd className="text-muted-foreground break-words">{definition}</dd>
+                    </React.Fragment>
+                  ))}
+                </dl>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+
+          <div className="mt-auto pt-4">
+            <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <User className="h-3.5 w-3.5" />
+                <span>
+                  {project.default_assignee_ids.length > 0
+                    ? `${project.default_assignee_ids.length} ${t('card.assignees', 'Assignees')}`
+                    : t('card.noAssignees', 'No Assignees')
+                  }
+                </span>
+              </div>
+              <div className="flex items-center gap-2 justify-end">
+                <Calendar className="h-3.5 w-3.5" />
+                <span>{new Date(project.updated_at).toLocaleDateString()}</span>
+              </div>
             </div>
           </div>
-          <div>
-            <div className="text-sm font-medium mb-2">{t('card.projectManager')}</div>
-            <Badge variant="outline" className="text-2xs">
-              {t('card.user', { id: project.pm_user_id })}
-            </Badge>
-          </div>
         </div>
-
-        <Separator className="my-2" />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{t('card.version', { version: project.version })}</span>
-          <span>{t('card.updated', { date: new Date(project.updated_at).toLocaleString() })}</span>
-        </div>
-
-        {/* Actions */}
-        {(onEdit || onDelete) && (
-          <div className="flex gap-2 pt-4 border-t">
-            {onEdit && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onEdit(project)}
-                disabled={isLoading}
-                className="flex-1"
-              >
-                <Pencil className="h-4 w-4 mr-2" />
-                {t('card.actions.edit')}
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() => onDelete(project.id)}
-                disabled={isLoading}
-                aria-label={t('card.actions.delete')}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        )}
-      </div>
-    </Card>
-    </>
-  )
-})
+      </Card>
+    )
+  }
+)
 
 ProjectCard.displayName = 'ProjectCard'

@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/shared/ui/select'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { getLocaleString } from '@/shared/utils/date'
 import type { TaskHistoryResponse, HistoryFilters, TaskStatus } from '../types'
 
 interface TaskHistoryTableProps {
@@ -34,7 +35,7 @@ export const TaskHistoryTable = ({
   onPageChange,
   availableTaskNames = [],
 }: TaskHistoryTableProps) => {
-  const { t } = useTranslation('taskMonitoring')
+  const { t, i18n } = useTranslation('taskMonitoring')
   const [filters, setFilters] = useState<HistoryFilters>({})
   const [expandedRow, setExpandedRow] = useState<number | null>(null)
 
@@ -133,7 +134,7 @@ export const TaskHistoryTable = ({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {log.started_at ? formatTimestamp(log.started_at) : '—'}
+                      {log.started_at ? formatTimestamp(log.started_at, i18n.language) : '—'}
                     </TableCell>
                     <TableCell className="text-sm">
                       {log.duration_ms !== null ? formatDuration(log.duration_ms) : '—'}
@@ -233,9 +234,9 @@ function formatTaskName(taskName: string): string {
     .replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
-function formatTimestamp(timestamp: string): string {
+function formatTimestamp(timestamp: string, language: string): string {
   const date = new Date(timestamp)
-  return date.toLocaleString('uk-UA', {
+  return date.toLocaleString(getLocaleString(language), {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
     Dialog,
@@ -19,7 +19,7 @@ import { API_ENDPOINTS } from '@/shared/config/api'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
 
 export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: MessageInspectModalProps) {
-    const { t } = useTranslation('messages')
+    const { t, i18n } = useTranslation('messages')
     const [isLoading, setIsLoading] = useState(true)
     const [messageData, setMessageData] = useState<MessageInspectData | null>(null)
     const [error, setError] = useState<string | null>(null)
@@ -52,6 +52,14 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
         fetchMessageDetails()
     }, [messageId, t])
 
+    const handleApproveAndNext = useCallback(() => {
+        // TODO: Implement actual approval logic here when API is ready
+        toast.success(t('inspectModal.toast.approved'), {
+            description: t('inspectModal.toast.autoNext')
+        })
+        if (onNext) onNext()
+    }, [t, onNext])
+
     // Keyboard shortcuts
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -71,22 +79,14 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [onNext, onPrev, messageData])
-
-    const handleApproveAndNext = () => {
-        // TODO: Implement actual approval logic here when API is ready
-        toast.success(t('inspectModal.toast.approved'), {
-            description: t('inspectModal.toast.autoNext')
-        })
-        if (onNext) onNext()
-    }
+    }, [onNext, onPrev, handleApproveAndNext])
 
     const handleReassignTopic = () => {
         toast.info(t('inspectModal.toast.reassignNotImplemented'))
     }
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleString('en-US', {
+        return new Date(dateString).toLocaleString(i18n.language, {
             month: 'short',
             day: 'numeric',
             year: 'numeric',
@@ -163,7 +163,7 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
                                     <section>
                                         <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
                                             {t('inspectModal.tabs.classification')}
-                                            <span className="text-xs font-normal text-muted-foreground bg-muted px-1 py-0.5 rounded">Auto</span>
+                                            <span className="text-xs font-normal text-muted-foreground bg-muted px-1 py-0.5 rounded">{t('inspectLabels.auto')}</span>
                                         </h3>
                                         <ClassificationTab data={messageData.classification} />
                                     </section>
@@ -172,7 +172,7 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
                                     <section>
                                         <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
                                             {t('inspectModal.tabs.atoms')}
-                                            <span className="text-xs font-normal text-muted-foreground bg-muted px-1 py-0.5 rounded">Editable</span>
+                                            <span className="text-xs font-normal text-muted-foreground bg-muted px-1 py-0.5 rounded">{t('inspectLabels.editable')}</span>
                                         </h3>
                                         <div className="bg-card rounded-lg border shadow-sm">
                                             <AtomsTab data={messageData.atoms} />
@@ -212,13 +212,13 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
                             <span className="flex items-center gap-1">
                                 <kbd className="bg-background border rounded px-1 min-w-[1.2em] text-center">⌘</kbd>
                                 <kbd className="bg-background border rounded px-1 min-w-[1.2em] text-center">Enter</kbd>
-                                <span>Approve</span>
+                                <span>{t('inspectLabels.approve')}</span>
                             </span>
                             <span className="w-px h-3 bg-border/50"></span>
                             <span className="flex items-center gap-1">
                                 <kbd className="bg-background border rounded px-1 min-w-[1.2em] text-center">J</kbd>
                                 <kbd className="bg-background border rounded px-1 min-w-[1.2em] text-center">K</kbd>
-                                <span>Nav</span>
+                                <span>{t('inspectLabels.nav')}</span>
                             </span>
                         </div>
 
@@ -228,7 +228,7 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
                                 size="icon"
                                 onClick={onPrev}
                                 disabled={!onPrev}
-                                aria-label="Previous message (K)"
+                                aria-label={t('inspectModal.aria.previousMessage')}
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
@@ -237,7 +237,7 @@ export function MessageInspectModal({ messageId, onClose, onNext, onPrev }: Mess
                                 size="icon"
                                 onClick={onNext}
                                 disabled={!onNext}
-                                aria-label="Next message (J)"
+                                aria-label={t('inspectModal.aria.nextMessage')}
                             >
                                 <ChevronRight className="h-4 w-4" />
                             </Button>

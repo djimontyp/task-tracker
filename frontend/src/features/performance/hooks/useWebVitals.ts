@@ -60,11 +60,15 @@ export const useWebVitals = () => {
 
   useEffect(() => {
     // Register all Core Web Vitals observers
-    onLCP(handleMetric);
-    onINP(handleMetric);
-    onCLS(handleMetric);
-    onFCP(handleMetric);
-    onTTFB(handleMetric);
+    // Using reportAllChanges: true for metrics that can report preliminary values
+    // INP excluded - it requires user interaction and doesn't support reportAllChanges well
+    const reportAllOptions = { reportAllChanges: true };
+
+    onLCP(handleMetric, reportAllOptions);
+    onINP(handleMetric); // INP only fires after user interaction - no reportAllChanges
+    onCLS(handleMetric, reportAllOptions);
+    onFCP(handleMetric, reportAllOptions);
+    onTTFB(handleMetric, reportAllOptions);
 
     // Note: web-vitals callbacks don't return cleanup functions
     // The observers are automatically cleaned up when the page unloads

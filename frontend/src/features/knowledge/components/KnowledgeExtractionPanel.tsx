@@ -6,6 +6,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  Checkbox,
+  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -20,13 +22,9 @@ import {
 import { Sparkles } from 'lucide-react';
 import { TimeWindowSelector } from '@/features/analysis/components/TimeWindowSelector';
 import { useKnowledgeExtraction } from '@/features/knowledge/hooks/useKnowledgeExtraction';
-import { knowledgeService } from '../api/knowledgeService';
-import { useWebSocket } from '@/shared/hooks';
 import { agentService } from '@/features/agents/api/agentService';
 import type { AgentConfig } from '@/features/agents/types/agent';
-import type { ExtractionProgress, PeriodType, PeriodRequest } from '../types';
 import { toast } from 'sonner';
-import { isKnowledgeEvent, type KnowledgeEvent } from '@/shared/types/websocket';
 
 interface KnowledgeExtractionPanelProps {
   messageIds?: number[];
@@ -40,7 +38,6 @@ export function KnowledgeExtractionPanel({
   onComplete,
 }: KnowledgeExtractionPanelProps) {
   const { t } = useTranslation('atoms');
-  const navigate = useNavigate();
   const [agentConfigs, setAgentConfigs] = useState<AgentConfig[]>([]);
   const [agentConfigsLoading, setAgentConfigsLoading] = useState(true);
   const [agentConfigId, setAgentConfigId] = useState<string>('');

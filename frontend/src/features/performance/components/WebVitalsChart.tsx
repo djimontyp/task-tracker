@@ -1,13 +1,16 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Legend } from 'recharts';
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
   type ChartConfig,
 } from '@/shared/ui/chart';
+import { getLocaleString } from '@/shared/utils/date';
 import type { PerformanceHistoryEntry } from '../types';
 import { TrendingUp } from 'lucide-react';
 
@@ -16,7 +19,7 @@ interface WebVitalsChartProps {
 }
 
 export const WebVitalsChart = ({ data }: WebVitalsChartProps) => {
-  const { t } = useTranslation('monitoring');
+  const { t, i18n } = useTranslation('monitoring');
 
   const chartConfig: ChartConfig = {
     LCP: { label: t('webVitals.chart.metrics.LCP'), color: 'hsl(var(--chart-1))' },
@@ -26,14 +29,16 @@ export const WebVitalsChart = ({ data }: WebVitalsChartProps) => {
 
   const formattedData = useMemo(
     () =>
-      [...data].map((entry) => ({
-        ...entry,
-        time: new Date(entry.timestamp).toLocaleTimeString('uk-UA', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-      })).reverse(),
-    [data]
+      [...data]
+        .sort((a, b) => a.timestamp - b.timestamp) // Sort oldest to newest (left to right)
+        .map((entry) => ({
+          ...entry,
+          time: new Date(entry.timestamp).toLocaleTimeString(getLocaleString(i18n.language), {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        })),
+    [data, i18n.language]
   );
 
   if (data.length === 0) {
@@ -67,7 +72,7 @@ export const WebVitalsChart = ({ data }: WebVitalsChartProps) => {
             <XAxis dataKey="time" tickLine={false} axisLine={false} tickMargin={10} />
             <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `${v}ms`} />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <Legend />
+            <ChartLegend content={<ChartLegendContent />} />
             <Area
               type="monotone"
               dataKey="LCP"

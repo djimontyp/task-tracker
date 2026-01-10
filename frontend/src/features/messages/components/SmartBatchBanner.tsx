@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Sparkles, Brain, ArrowRight } from 'lucide-react'
 import { Button } from '@/shared/ui'
 import { Message } from '@/features/messages/types'
@@ -11,6 +12,8 @@ interface SmartBatchBannerProps {
 }
 
 export const SmartBatchBanner: React.FC<SmartBatchBannerProps> = ({ messages }) => {
+    const { t } = useTranslation('messages')
+
     // 1. Identify "Oil" (High signal, no topics)
     const potentialInsights = useMemo(() => {
         return messages.filter(m =>
@@ -31,7 +34,7 @@ export const SmartBatchBanner: React.FC<SmartBatchBannerProps> = ({ messages }) 
             const agent = agents.find(a => a.name === 'knowledge_extractor') || agents[0]
 
             if (!agent) {
-                toast.error("No active agent found")
+                toast.error(t('smartBatch.noAgentFound'))
                 return
             }
 
@@ -41,9 +44,9 @@ export const SmartBatchBanner: React.FC<SmartBatchBannerProps> = ({ messages }) 
                 { includeContext: true, contextWindow: 3 } // Batch context might be smaller
             )
 
-            toast.success("Batch extraction started")
-        } catch (e) {
-            console.error(e)
+            toast.success(t('smartBatch.extractionStarted'))
+        } catch {
+            // Error handled by extractByMessages internally
         }
     }
 
@@ -52,7 +55,7 @@ export const SmartBatchBanner: React.FC<SmartBatchBannerProps> = ({ messages }) 
             <div className="mb-4 p-3 rounded-lg border border-primary/20 bg-primary/5 flex items-center gap-3 animate-pulse">
                 <Brain className="h-4 w-4 text-primary animate-spin" />
                 <span className="text-sm font-medium text-primary">
-                    Extracting knowledge from {potentialInsights.length} messages...
+                    {t('smartBatch.extractingProgress', { count: potentialInsights.length })}
                 </span>
             </div>
         )
@@ -69,11 +72,11 @@ export const SmartBatchBanner: React.FC<SmartBatchBannerProps> = ({ messages }) 
                     </div>
                     <div className="flex flex-col">
                         <span className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
-                            {potentialInsights.length} potential insights detected
+                            {t('smartBatch.potentialInsights', { count: potentialInsights.length })}
                             <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
                         </span>
                         <span className="text-xs text-muted-foreground">
-                            High-signal messages waiting to be turned into knowledge.
+                            {t('smartBatch.waitingDescription')}
                         </span>
                     </div>
                 </div>
@@ -83,7 +86,7 @@ export const SmartBatchBanner: React.FC<SmartBatchBannerProps> = ({ messages }) 
                     onClick={handleBatchExtract}
                     className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm gap-2 text-xs h-8"
                 >
-                    Capture Knowledge
+                    {t('smartBatch.captureKnowledge')}
                     <ArrowRight className="h-3 w-3 opacity-70" />
                 </Button>
             </div>

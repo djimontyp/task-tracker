@@ -86,8 +86,7 @@ export function AutomationOnboardingWizard() {
       toast.success('Automation activated successfully!', { id: toastId })
       resetWizard()
       navigate('/automation/dashboard')
-    } catch (error) {
-      console.error('Failed to activate automation:', error)
+    } catch {
       toast.error('Failed to activate automation', { id: toastId })
     } finally {
       setIsActivating(false)

@@ -1,7 +1,18 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Button, Spinner } from '@/shared/ui'
+import {
+  Button,
+  Spinner,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/shared/ui'
 import { agentService } from '@/features/agents/api'
 import { AgentConfig, AgentConfigCreate, AgentConfigUpdate } from '@/features/agents/types'
 import { toast } from 'sonner'
@@ -14,12 +25,14 @@ import { AgentTestDialog } from './AgentTestDialog'
 
 const AgentList = () => {
   const { t } = useTranslation('agents')
+  const { t: tCommon } = useTranslation()
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingAgent, setEditingAgent] = useState<AgentConfig | null>(null)
   const [copyingAgent, setCopyingAgent] = useState<Partial<AgentConfigCreate> | null>(null)
   const [managingAgent, setManagingAgent] = useState<AgentConfig | null>(null)
   const [testingAgent, setTestingAgent] = useState<AgentConfig | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { data: agents, isLoading } = useQuery<AgentConfig[]>({
     queryKey: ['agents'],
@@ -63,19 +76,19 @@ const AgentList = () => {
     },
   })
 
-  const handleCreate = () => {
+  const handleCreate = useCallback(() => {
     setEditingAgent(null)
     setCopyingAgent(null)
     setFormOpen(true)
-  }
+  }, [])
 
-  const handleEdit = (agent: AgentConfig) => {
+  const handleEdit = useCallback((agent: AgentConfig) => {
     setEditingAgent(agent)
     setCopyingAgent(null)
     setFormOpen(true)
-  }
+  }, [])
 
-  const handleCopy = (agent: AgentConfig) => {
+  const handleCopy = useCallback((agent: AgentConfig) => {
     const copyData: Partial<AgentConfigCreate> = {
       name: `${agent.name} (Copy)`,
       description: agent.description,
@@ -89,29 +102,34 @@ const AgentList = () => {
     setCopyingAgent(copyData)
     setEditingAgent(null)
     setFormOpen(true)
-  }
+  }, [])
 
-  const handleDelete = (id: string) => {
-    if (window.confirm(t('confirm.deleteAgent'))) {
-      deleteMutation.mutate(id)
+  const handleDeleteClick = useCallback((id: string) => {
+    setDeleteId(id)
+  }, [])
+
+  const handleConfirmDelete = useCallback(() => {
+    if (deleteId) {
+      deleteMutation.mutate(deleteId)
+      setDeleteId(null)
     }
-  }
+  }, [deleteId, deleteMutation])
 
-  const handleManageTasks = (agent: AgentConfig) => {
+  const handleManageTasks = useCallback((agent: AgentConfig) => {
     setManagingAgent(agent)
-  }
+  }, [])
 
-  const handleTest = (agent: AgentConfig) => {
+  const handleTest = useCallback((agent: AgentConfig) => {
     setTestingAgent(agent)
-  }
+  }, [])
 
-  const handleSubmit = (data: AgentConfigCreate | AgentConfigUpdate) => {
+  const handleSubmit = useCallback((data: AgentConfigCreate | AgentConfigUpdate) => {
     if (editingAgent) {
       updateMutation.mutate({ id: editingAgent.id, data })
     } else {
       createMutation.mutate(data as AgentConfigCreate)
     }
-  }
+  }, [editingAgent, updateMutation, createMutation])
 
   if (isLoading) {
     return (
@@ -154,7 +172,7 @@ const AgentList = () => {
               agent={agent}
               onEdit={handleEdit}
               onCopy={handleCopy}
-              onDelete={handleDelete}
+              onDelete={handleDeleteClick}
               onManageTasks={handleManageTasks}
               onTest={handleTest}
               isDeleting={deleteMutation.isPending}
@@ -164,6 +182,7 @@ const AgentList = () => {
       </div>
 
       <AgentForm
+        key={editingAgent?.id || copyingAgent?.name || 'create'}
         open={formOpen}
         onClose={() => {
           setFormOpen(false)
@@ -187,6 +206,23 @@ const AgentList = () => {
         open={!!testingAgent}
         onClose={() => setTestingAgent(null)}
       />
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tCommon('confirmDialog.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {tCommon('confirmDialog.deleteAgent')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tCommon('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              {tCommon('actions.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

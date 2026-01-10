@@ -7,6 +7,14 @@ import {
   Button,
   Badge,
   Spinner,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/shared/ui'
 import { taskService } from '@/features/agents/api'
 import { TaskConfig, TaskConfigCreate, TaskConfigUpdate } from '@/features/agents/types'
@@ -17,9 +25,11 @@ import { TaskForm } from './TaskForm'
 
 const TaskList = () => {
   const { t } = useTranslation('agents')
+  const { t: tCommon } = useTranslation()
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<TaskConfig | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { data: tasks, isLoading } = useQuery<TaskConfig[]>({
     queryKey: ['task-configs'],
@@ -73,9 +83,14 @@ const TaskList = () => {
     setFormOpen(true)
   }
 
-  const handleDelete = (id: string) => {
-    if (window.confirm(t('taskList.confirm.delete'))) {
-      deleteMutation.mutate(id)
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id)
+  }
+
+  const handleConfirmDelete = () => {
+    if (deleteId) {
+      deleteMutation.mutate(deleteId)
+      setDeleteId(null)
     }
   }
 
@@ -147,7 +162,7 @@ const TaskList = () => {
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => handleDelete(task.id)}
+                        onClick={() => handleDeleteClick(task.id)}
                         aria-label={t('taskList.actions.delete')}
                         disabled={deleteMutation.isPending}
                       >
@@ -205,6 +220,23 @@ const TaskList = () => {
         isEdit={!!editingTask}
         loading={createMutation.isPending || updateMutation.isPending}
       />
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tCommon('confirmDialog.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {tCommon('confirmDialog.deleteTask')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tCommon('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              {tCommon('actions.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

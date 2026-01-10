@@ -125,7 +125,6 @@ export function CreateAtomDialog({
     } catch (error) {
       const message = error instanceof Error ? error.message : t('createDialog.errors.unknown')
       toast.error(t('createDialog.errors.createFailed', { error: message }))
-      console.error('Failed to create atom:', error)
     } finally {
       setIsSubmitting(false)
     }

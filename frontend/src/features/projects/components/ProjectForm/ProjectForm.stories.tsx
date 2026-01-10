@@ -3,8 +3,8 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { ProjectForm } from './ProjectForm'
-import type { ProjectConfig } from '../types'
+import { ProjectForm } from './index'
+import type { ProjectConfig } from '../../types'
 
 const meta: Meta<typeof ProjectForm> = {
   title: 'Features/Projects/ProjectForm',

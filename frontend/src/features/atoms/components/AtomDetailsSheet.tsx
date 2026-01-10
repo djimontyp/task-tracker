@@ -94,19 +94,19 @@ export const AtomDetailsSheet: React.FC<AtomDetailsSheetProps> = ({
               </Badge>
               {atom.confidence && (
                 <Badge variant="secondary" className="text-xs">
-                  {Math.round(atom.confidence * 100)}% Confidence
+                  {Math.round(atom.confidence * 100)}% {t('atomDetails.confidence')}
                 </Badge>
               )}
             </div>
             {/* Status Indicators */}
              {atom.user_approved && (
                 <Badge className="bg-semantic-success text-white hover:bg-semantic-success">
-                    <CheckCircle className="mr-1 h-3 w-3" /> Approved
+                    <CheckCircle className="mr-1 h-3 w-3" /> {t('atomDetails.approved')}
                 </Badge>
             )}
             {atom.archived && (
                 <Badge variant="destructive">
-                    <XCircle className="mr-1 h-3 w-3" /> Rejected
+                    <XCircle className="mr-1 h-3 w-3" /> {t('atomDetails.rejected')}
                 </Badge>
             )}
           </div>
@@ -135,7 +135,7 @@ export const AtomDetailsSheet: React.FC<AtomDetailsSheetProps> = ({
                 <div className="space-y-1">
                     <span className="flex items-center text-xs text-muted-foreground">
                         <Calendar className="mr-2 h-3.5 w-3.5" />
-                        Created
+                        {t('card.created')}
                     </span>
                     <p className="text-sm font-medium">
                         {format(new Date(atom.created_at), 'MMM d, yyyy HH:mm')}
@@ -145,10 +145,10 @@ export const AtomDetailsSheet: React.FC<AtomDetailsSheetProps> = ({
                  <div className="space-y-1">
                     <span className="flex items-center text-xs text-muted-foreground">
                          <MessageSquare className="mr-2 h-3.5 w-3.5" />
-                         Source
+                         {t('card.source')}
                     </span>
                     <p className="text-sm font-medium text-primary hover:underline cursor-pointer">
-                        View Message
+                        {t('atomDetails.viewMessage')}
                     </p>
                 </div>
             </div>
@@ -158,13 +158,13 @@ export const AtomDetailsSheet: React.FC<AtomDetailsSheetProps> = ({
                 <div className="bg-semantic-warning/10 p-4 rounded-lg border border-semantic-warning/20">
                     <div className="flex items-center gap-2 text-semantic-warning mb-2">
                         <Clock className="h-4 w-4" />
-                        <span className="font-semibold text-sm">Version History</span>
+                        <span className="font-semibold text-sm">{t('atomDetails.versionHistory')}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                        There are {atom.pending_versions_count} pending versions waiting for review.
+                        {t('atomDetails.pendingVersions', { count: atom.pending_versions_count })}
                     </p>
                     <Button variant="link" className="h-auto p-0 text-semantic-warning text-xs mt-2">
-                        Review Changes
+                        {t('atomDetails.reviewChanges')}
                     </Button>
                 </div>
              )}
@@ -181,7 +181,7 @@ export const AtomDetailsSheet: React.FC<AtomDetailsSheetProps> = ({
                 disabled={isRejecting}
               >
                 {isRejecting ? <span className="animate-spin mr-2">⏳</span> : <XCircle className="mr-2 h-4 w-4" />}
-                Reject
+                {t('actions.reject')}
               </Button>
               <Button
                 className="flex-1 sm:flex-none bg-semantic-success hover:bg-semantic-success/90 text-white"
@@ -189,7 +189,7 @@ export const AtomDetailsSheet: React.FC<AtomDetailsSheetProps> = ({
                 disabled={isApproving}
               >
                 {isApproving ? <span className="animate-spin mr-2">⏳</span> : <CheckCircle className="mr-2 h-4 w-4" />}
-                Approve
+                {t('actions.approve')}
               </Button>
             </SheetFooter>
         )}

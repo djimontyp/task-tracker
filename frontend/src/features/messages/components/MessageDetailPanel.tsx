@@ -8,7 +8,7 @@ import { Separator } from '@/shared/ui/separator'
 import { AtomsTab } from './AtomsTab'
 import type { MessageInspectModalProps, MessageInspectData } from '@/features/messages/types'
 import { toast } from 'sonner'
-import { API_ENDPOINTS } from '@/shared/config/api'
+import { messageService } from '../api/messageService'
 import {
     X,
     ChevronLeft,
@@ -35,13 +35,7 @@ export function MessageDetailPanel({ messageId, onClose, onNext, onPrev }: Messa
         refetch
     } = useQuery<MessageInspectData, Error>({
         queryKey: ['messageInspect', messageId],
-        queryFn: async () => {
-            const response = await fetch(API_ENDPOINTS.messageInspect(messageId!))
-            if (!response.ok) {
-                throw new Error(`Failed to fetch message details: ${response.statusText}`)
-            }
-            return response.json()
-        },
+        queryFn: () => messageService.getMessageInspect(messageId!),
         enabled: !!messageId,
         staleTime: 30_000, // 30 seconds - message details don't change often
         // Keep previous data during navigation to prevent skeleton flicker
@@ -60,7 +54,7 @@ export function MessageDetailPanel({ messageId, onClose, onNext, onPrev }: Messa
     if (!messageId) {
         return (
             <div className="h-full w-full flex items-center justify-center text-muted-foreground border-l border-border/50 bg-background/50">
-                <p className="text-sm">Select a message to investigate</p>
+                <p className="text-sm">{t('detailPanel.selectMessage')}</p>
             </div>
         )
     }
@@ -71,24 +65,24 @@ export function MessageDetailPanel({ messageId, onClose, onNext, onPrev }: Messa
             {/* Sticky Header: Navigation & Close - ALWAYS VISIBLE */}
             <div className="flex items-center justify-between px-6 py-3 border-b bg-background/95 backdrop-blur z-sticky shrink-0 h-[60px]">
                 <div className="flex items-center gap-4">
-                    <Button size="icon" variant="ghost" className="-ml-2" onClick={onClose} aria-label="Close panel">
+                    <Button size="icon" variant="ghost" className="-ml-2" onClick={onClose} aria-label={t('detailPanel.aria.closePanel')}>
                         <X className="h-5 w-5" />
                     </Button>
 
                     {/* Navigation */}
                     <div className="flex items-center rounded-md border bg-muted/30">
-                        <Button variant="ghost" size="icon" className="rounded-none rounded-l-md" onClick={onPrev} disabled={!onPrev} aria-label="Previous message">
+                        <Button variant="ghost" size="icon" className="rounded-none rounded-l-md" onClick={onPrev} disabled={!onPrev} aria-label={t('detailPanel.aria.previousMessage')}>
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
                         <Separator orientation="vertical" className="h-11" />
-                        <Button variant="ghost" size="icon" className="rounded-none rounded-r-md" onClick={onNext} disabled={!onNext} aria-label="Next message">
+                        <Button variant="ghost" size="icon" className="rounded-none rounded-r-md" onClick={onNext} disabled={!onNext} aria-label={t('detailPanel.aria.nextMessage')}>
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-muted-foreground mr-2">Message Analysis</span>
+                    <span className="text-sm font-medium text-muted-foreground mr-2">{t('detailPanel.headerTitle')}</span>
                     {messageData && (
                         <span className="text-[10px] font-mono text-muted-foreground opacity-50 hidden sm:inline-block bg-muted px-2 py-1 rounded">
                             {messageData.message.id.slice(-8)}
@@ -123,7 +117,7 @@ export function MessageDetailPanel({ messageId, onClose, onNext, onPrev }: Messa
                             {/* 1. Author & Header Section */}
                             <div className="flex items-start gap-4 pb-6 border-b border-border/40">
                                 {messageData.message.avatar_url ? (
-                                    <img src={messageData.message.avatar_url} alt="Avatar" className="w-12 h-12 rounded-full ring-2 ring-border shadow-sm object-cover" />
+                                    <img src={messageData.message.avatar_url} alt={t('detailPanel.aria.avatar')} className="w-12 h-12 rounded-full ring-2 ring-border shadow-sm object-cover" />
                                 ) : (
                                     <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center ring-2 ring-border shadow-sm">
                                         <User className="w-6 h-6 text-muted-foreground" />
@@ -132,7 +126,7 @@ export function MessageDetailPanel({ messageId, onClose, onNext, onPrev }: Messa
                                 <div className="flex-1 min-w-0 pt-1">
                                     <div className="flex items-center justify-between gap-4">
                                         <h2 className="text-xl font-bold text-foreground truncate leading-tight">
-                                            {messageData.message.author_name || 'Unknown Source'}
+                                            {messageData.message.author_name || t('detailPanel.unknownSource')}
                                         </h2>
                                         <span className="text-sm text-muted-foreground whitespace-nowrap">
                                             {formatFullDate(messageData.message.sent_at)}
@@ -155,20 +149,20 @@ export function MessageDetailPanel({ messageId, onClose, onNext, onPrev }: Messa
                                             messageData.classification.importance_score >= 50 ? 'border-status-pending/30 text-status-pending bg-status-pending/5' :
                                                 'border-status-connected/30 text-status-connected bg-status-connected/5'}
                                     `}>
-                                        Score: {messageData.classification.importance_score}
+                                        {t('detailPanel.score', { value: messageData.classification.importance_score })}
                                     </Badge>
                                 )}
 
                                 {messageData.classification?.noise_classification && (
                                     <Badge variant="outline" className="text-[10px] h-5 px-2 font-normal bg-muted/20 text-muted-foreground border-transparent">
-                                        Type: {messageData.classification.noise_classification}
+                                        {t('detailPanel.type', { value: messageData.classification.noise_classification })}
                                     </Badge>
                                 )}
                             </div>
 
                             {/* Content Body */}
                             <div className="text-base md:text-lg leading-relaxed text-foreground/90 whitespace-pre-wrap break-words font-sans max-w-4xl">
-                                {messageData.message.content || <span className="text-muted-foreground italic">No content</span>}
+                                {messageData.message.content || <span className="text-muted-foreground italic">{t('detailPanel.noContent')}</span>}
                             </div>
                         </div>
 
@@ -185,7 +179,7 @@ export function MessageDetailPanel({ messageId, onClose, onNext, onPrev }: Messa
                             {/* Connected Knowledge */}
                             <div className="space-y-3">
                                 <h4 className="text-xs font-bold text-muted-foreground/70 uppercase tracking-widest flex items-center gap-2">
-                                    <Lightbulb className="w-3.5 h-3.5" /> Connected Knowledge
+                                    <Lightbulb className="w-3.5 h-3.5" /> {t('detailPanel.connectedKnowledge')}
                                 </h4>
                                 <div className="bg-background/50 rounded-lg border border-border/40 p-1">
                                     <AtomsTab data={messageData.atoms} />
@@ -195,11 +189,11 @@ export function MessageDetailPanel({ messageId, onClose, onNext, onPrev }: Messa
                             {/* Detailed Metadata */}
                             <div className="space-y-3">
                                 <h3 className="text-xs font-bold text-muted-foreground/70 uppercase tracking-widest flex items-center gap-2">
-                                    <Info className="w-3.5 h-3.5" /> Technical Details
+                                    <Info className="w-3.5 h-3.5" /> {t('detailPanel.technicalDetails')}
                                 </h3>
                                 <div className="grid grid-cols-1 gap-2 text-xs">
                                     <div className="flex justify-between items-center bg-background/50 p-2 rounded border border-border/40">
-                                        <span className="text-muted-foreground">ID</span>
+                                        <span className="text-muted-foreground">{t('detailPanel.idLabel')}</span>
                                         <span className="font-mono text-[10px] opacity-70">{messageData.message.id}</span>
                                     </div>
                                 </div>
@@ -209,7 +203,7 @@ export function MessageDetailPanel({ messageId, onClose, onNext, onPrev }: Messa
                             <div className="mt-auto pt-6 border-t border-border/20">
                                 <details className="group">
                                     <summary className="text-[10px] font-medium text-muted-foreground uppercase cursor-pointer hover:text-foreground list-none flex items-center gap-2 transition-colors">
-                                        <Clock className="w-3 h-3" /> Processing Log
+                                        <Clock className="w-3 h-3" /> {t('detailPanel.processingLog')}
                                     </summary>
                                     <div className="mt-3 text-[10px] font-mono text-muted-foreground/80 space-y-2 pl-4 border-l border-border/30 ml-1">
                                         {messageData.history?.map((h, i) => (
