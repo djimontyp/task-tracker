@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Input, Button, Badge, Spinner } from '@/shared/ui'
+import { Input, Button, Badge, Spinner, Checkbox } from '@/shared/ui'
 import { Card } from '@/shared/components'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
@@ -174,7 +174,7 @@ const VersionsPage = () => {
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-2/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={t('versionsPage.searchPlaceholder')}
               value={searchQuery}
@@ -182,12 +182,15 @@ const VersionsPage = () => {
               className="pl-10"
             />
             {searchQuery && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-4 top-2/2 -translate-y-1/2"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                aria-label="Clear search"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-              </button>
+                <X className="h-4 w-4 text-muted-foreground" />
+              </Button>
             )}
           </div>
 
@@ -250,15 +253,14 @@ const VersionsPage = () => {
                 <div className="space-y-4">
                   <div className="flex items-start justify-between gap-2">
                     {statusFilter === 'pending' && (
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={selectedVersions.some(v => v.id === version.id)}
-                        onChange={(e) => {
-                          e.stopPropagation()
-                          handleSelectVersion(version, e.target.checked)
+                        onCheckedChange={(checked) => {
+                          handleSelectVersion(version, checked === true)
                         }}
                         onClick={(e) => e.stopPropagation()}
-                        className="mt-2"
+                        className="mt-1"
+                        aria-label={`Select ${version.entityName}`}
                       />
                     )}
                     <div className="flex-1 min-w-0">

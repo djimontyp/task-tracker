@@ -1,15 +1,4 @@
-import { useMemo, useEffect } from 'react'
-import {
-  LayoutGrid,
-  Cpu,
-  Mail,
-  MessageSquare,
-  List,
-  Folder,
-  Atom,
-  ClipboardList,
-  Gauge,
-} from 'lucide-react'
+import { useMemo, useEffect, useRef, ReactNode } from 'react'
 import { useUiStore } from '@/shared/store/uiStore'
 import {
   Sidebar,
@@ -19,9 +8,9 @@ import {
 } from '@/shared/ui/sidebar'
 import type { SidebarCounts } from '@/shared/api/statsService'
 import { Logo } from '@/shared/components/Logo'
+import { defaultNavGroups } from '@/shared/config/navigation'
 import { NavMain } from './NavMain'
 import type { NavGroup } from './types'
-import { GlobalKnowledgeExtractionDialog } from '@/features/knowledge/components/GlobalKnowledgeExtractionDialog'
 
 // Helper to get unique key for React (prefer labelKey, fallback to label)
 function getGroupKey(group: NavGroup): string {
@@ -33,70 +22,43 @@ interface AppSidebarProps {
   counts?: SidebarCounts
   currentPath: string
   className?: string
+  /** Custom navigation groups. Defaults to defaultNavGroups from config. */
+  navGroups?: NavGroup[]
+  /** Slot for knowledge extraction dialog (injected from MainLayout to avoid boundary violation) */
+  knowledgeExtractionSlot?: ReactNode
 }
 
-const navGroups: NavGroup[] = [
-  {
-    labelKey: 'sidebar.groups.dataManagement',
-    items: [
-      { path: '/dashboard', labelKey: 'sidebar.items.overview', icon: LayoutGrid },
-      { path: '/executive-summary', labelKey: 'sidebar.items.executiveSummary', icon: ClipboardList },
-      { path: '/messages', labelKey: 'sidebar.items.messages', icon: Mail },
-      { path: '/atoms', labelKey: 'sidebar.items.atoms', icon: Atom },
-      { path: '/topics', labelKey: 'sidebar.items.topics', icon: MessageSquare },
-    ],
-  },
-  // DORMANT: AI Operations (F014 Noise Filtering) - приховано до v1.1+
-  // {
-  //   labelKey: 'sidebar.groups.aiOperations',
-  //   items: [
-  //     { path: '/noise-filtering', labelKey: 'sidebar.items.noiseFiltering', icon: FunnelIcon },
-  //   ],
-  //   action: true,
-  // },
-  {
-    labelKey: 'sidebar.groups.aiSetup',
-    items: [
-      { path: '/agents', labelKey: 'sidebar.items.agents', icon: Cpu },
-      { path: '/agent-tasks', labelKey: 'sidebar.items.taskTemplates', icon: List },
-      { path: '/projects', labelKey: 'sidebar.items.projects', icon: Folder },
-    ],
-  },
-  {
-    labelKey: 'sidebar.groups.monitoring',
-    items: [
-      { path: '/performance', labelKey: 'sidebar.items.performance', icon: Gauge },
-    ],
-  },
-  // DORMANT: Automation (F015, F016) - приховано до v1.2+
-  // {
-  //   labelKey: 'sidebar.groups.automation',
-  //   items: [
-  //     { path: '/automation/dashboard', labelKey: 'sidebar.items.overview', icon: SparklesIcon },
-  //     { path: '/automation/rules', labelKey: 'sidebar.items.rules', icon: Cog6ToothIcon },
-  //     { path: '/automation/scheduler', labelKey: 'sidebar.items.scheduler', icon: CalendarIcon },
-  //   ],
-  // },
-]
-
-export function AppSidebar({ mobile = false, counts: _counts, currentPath, className }: AppSidebarProps) {
-  const groups = useMemo(() => navGroups, [])
-  const { expandedGroups, setExpandedGroup } = useUiStore()
+export function AppSidebar({
+  mobile = false,
+  counts: _counts,
+  currentPath,
+  className,
+  navGroups = defaultNavGroups,
+  knowledgeExtractionSlot,
+}: AppSidebarProps) {
+  const groups = useMemo(() => navGroups, [navGroups])
+  const { setExpandedGroup } = useUiStore()
   const { state } = useSidebar() // For logo collapsed state
+  const initializedGroupsRef = useRef<Set<string>>(new Set())
 
-  // Auto-expand groups containing active item
+  // Auto-expand groups containing active item (runs once per group)
   useEffect(() => {
     groups.forEach((group) => {
       const groupKey = getGroupKey(group)
+
+      // Skip if already initialized this group
+      if (initializedGroupsRef.current.has(groupKey)) return
+
       const hasActiveItem = group.items.some((item) =>
         item.path === '/dashboard' ? currentPath === '/dashboard' : currentPath.startsWith(item.path)
       )
 
-      if (hasActiveItem && expandedGroups[groupKey] === undefined) {
+      if (hasActiveItem) {
+        initializedGroupsRef.current.add(groupKey)
         setExpandedGroup(groupKey, true)
       }
     })
-  }, [currentPath, groups, expandedGroups, setExpandedGroup])
+  }, [currentPath, groups, setExpandedGroup])
 
   // DORMANT: AI Operations group приховано
   // const aiOperationsGroup = groups.find((g) => g.label === 'AI Operations')
@@ -120,9 +82,11 @@ export function AppSidebar({ mobile = false, counts: _counts, currentPath, class
                   ))}
                 </div>
               </div>
-              <div className="px-4 mt-2">
-                <GlobalKnowledgeExtractionDialog />
-              </div>
+              {knowledgeExtractionSlot && (
+                <div className="px-4 mt-2">
+                  {knowledgeExtractionSlot}
+                </div>
+              )}
             </>
           )}
           */}
@@ -144,12 +108,14 @@ export function AppSidebar({ mobile = false, counts: _counts, currentPath, class
 
       <SidebarContent>
         <NavMain groups={groups} currentPath={currentPath} />
-        {/* Enable Knowledge Extraction globally */}
-        <div className="mt-auto px-4 pb-4">
-          <div className="pt-4 border-t border-sidebar-border">
-            <GlobalKnowledgeExtractionDialog />
+        {/* Knowledge Extraction slot (injected from MainLayout) */}
+        {knowledgeExtractionSlot && (
+          <div className="mt-auto px-4 pb-4">
+            <div className="pt-4 border-t border-sidebar-border">
+              {knowledgeExtractionSlot}
+            </div>
           </div>
-        </div>
+        )}
       </SidebarContent>
 
     </Sidebar>

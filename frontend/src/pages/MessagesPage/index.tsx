@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
-import { Button } from '@/shared/ui'
+import { Button, Tabs, TabsList, TabsTrigger } from '@/shared/ui'
 import { PageWrapper } from '@/shared/primitives'
 import { toast } from 'sonner'
 import { apiClient } from '@/shared/lib/api/client'
@@ -22,8 +22,7 @@ import { createColumns } from './columns'
 import { useScoringConfig } from '@/shared/api/scoringConfig'
 import { DataTableToolbar } from '@/shared/components/DataTableToolbar'
 import { DataTableFacetedFilter } from '@/shared/components/DataTableFacetedFilter'
-import { Columns, List, AlertCircle, HelpCircle, CheckCircle2, Siren, X, Lightbulb, Sparkles } from 'lucide-react'
-import { RunAnalysisAction } from './RunAnalysisAction'
+import { Columns, List, AlertCircle, HelpCircle, CheckCircle2, Siren, X, Lightbulb, Sparkles, Calendar } from 'lucide-react'
 import { MessageList } from '@/features/messages/components/MessageList'
 import { SmartBatchBanner } from '@/features/messages/components/SmartBatchBanner'
 import { MessageDetailPanel } from '@/features/messages/components/MessageDetailPanel'
@@ -35,13 +34,8 @@ import { KnowledgeExtractionPanel } from '@/features/knowledge/components/Knowle
 
 type LayoutMode = 'list' | 'split'
 
-// Importance options for filter
-const importanceOptions = [
-  { label: 'Critical', value: 'critical', icon: Siren },
-  { label: 'High', value: 'high', icon: AlertCircle },
-  { label: 'Medium', value: 'medium', icon: HelpCircle },
-  { label: 'Low', value: 'low', icon: CheckCircle2 },
-]
+// Stable topics array - defined outside component to prevent re-renders
+const WEBSOCKET_TOPICS: string[] = ['noise_filtering']
 
 const MessagesPage = () => {
   const { t } = useTranslation('messages')
@@ -50,6 +44,18 @@ const MessagesPage = () => {
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('list')
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null)
   const [showExtractionDialog, setShowExtractionDialog] = useState(false)
+  const [visibleDate, setVisibleDate] = useState<string | null>(null)
+
+  // Importance options for filter - stable reference
+  // Note: t function identity changes on language switch, which is intentional
+  // Using empty deps would cause stale translations
+  const importanceOptions = useMemo(() => [
+    { label: t('importanceLevels.critical'), value: 'critical', icon: Siren },
+    { label: t('importanceLevels.high'), value: 'high', icon: AlertCircle },
+    { label: t('importanceLevels.medium'), value: 'medium', icon: HelpCircle },
+    { label: t('importanceLevels.low'), value: 'low', icon: CheckCircle2 },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [t('importanceLevels.critical')])
 
   // Fetch scoring config for dynamic thresholds
   const { data: scoringConfig } = useScoringConfig()
@@ -134,6 +140,17 @@ const MessagesPage = () => {
     return data?.pages.flatMap(page => page.items) || []
   }, [data])
 
+  // Refs for stable access without triggering re-renders
+  // These refs are used by effects and callbacks to access current values
+  const messagesRef = React.useRef(messages)
+  const selectedMessageIdRef = React.useRef(selectedMessageId)
+  const rowSelectionRef = React.useRef(rowSelection)
+
+  // Keep refs in sync (synchronous, no effect trigger)
+  messagesRef.current = messages
+  selectedMessageIdRef.current = selectedMessageId
+  rowSelectionRef.current = rowSelection
+
   // Get total count from first page (API provides consistent total)
   const totalMessages = data?.pages[0]?.total
 
@@ -150,23 +167,27 @@ const MessagesPage = () => {
     }
   }, [messages])
 
+  // WebSocket handler - stable callback (useWebSocket uses refs internally)
+  const handleWebSocketMessage = useCallback((data: unknown) => {
+    const message = data as { topic: string; event: string }
+    if (message.topic === 'noise_filtering') {
+      if (message.event === 'message_scored' || message.event === 'batch_scored') {
+        // Soft invalidation - marks data as stale but keeps showing it
+        // Next user interaction will trigger background refetch
+        queryClient.invalidateQueries({
+          queryKey: ['messages'],
+          refetchType: 'none' // Don't auto-refetch, just mark stale
+        })
+      }
+    }
+  }, [queryClient])
+
   // WebSocket for real-time message scoring updates
   // Use refetchType: 'none' to prevent skeleton flicker - data updates silently in background
+  // Note: topics array is converted to string key internally by useWebSocket
   useWebSocket({
-    topics: ['noise_filtering'],
-    onMessage: (data) => {
-      const message = data as { topic: string; event: string }
-      if (message.topic === 'noise_filtering') {
-        if (message.event === 'message_scored' || message.event === 'batch_scored') {
-          // Soft invalidation - marks data as stale but keeps showing it
-          // Next user interaction will trigger background refetch
-          queryClient.invalidateQueries({
-            queryKey: ['messages'],
-            refetchType: 'none' // Don't auto-refetch, just mark stale
-          })
-        }
-      }
-    },
+    topics: WEBSOCKET_TOPICS,
+    onMessage: handleWebSocketMessage,
   })
 
   // Handle highlight param from search navigation
@@ -174,11 +195,14 @@ const MessagesPage = () => {
     if (highlightMessageId) {
       setSelectedMessageId(highlightMessageId)
       setLayoutMode('split')
-      const newParams = new URLSearchParams(searchParams)
-      newParams.delete('highlight')
-      setSearchParams(newParams, { replace: true })
+      // Remove highlight param from URL after processing
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev)
+        newParams.delete('highlight')
+        return newParams
+      }, { replace: true })
     }
-  }, [highlightMessageId, searchParams, setSearchParams])
+  }, [highlightMessageId, setSearchParams])
 
 
   const hasActiveFilters = columnFilters.length > 0 || globalFilter !== ''
@@ -195,6 +219,8 @@ const MessagesPage = () => {
     checkboxClickHandlerRef.current?.(rowId, event)
   }, [])
 
+  // Columns memo - t dependency is intentional for i18n updates
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const columns = useMemo(
     () =>
       createColumns({
@@ -204,7 +230,9 @@ const MessagesPage = () => {
         scoringConfig,
         t,
       }),
-    [hasActiveFilters, handleReset, handleCheckboxClick, scoringConfig, t]
+    // Using stable string from t() to detect language changes without t identity issues
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [hasActiveFilters, handleReset, handleCheckboxClick, scoringConfig, t('columns.author')]
   )
 
   const table = useReactTable({
@@ -244,24 +272,28 @@ const MessagesPage = () => {
   }, [queryClient])
 
   // Prefetch adjacent messages when current selection changes
+  // Uses messagesRef to avoid re-running on every messages array change
   useEffect(() => {
-    if (!selectedMessageId || messages.length === 0) return
+    if (!selectedMessageId) return
 
-    const idx = messages.findIndex(m => String(m.id) === selectedMessageId)
+    const currentMessages = messagesRef.current
+    if (currentMessages.length === 0) return
+
+    const idx = currentMessages.findIndex(m => String(m.id) === selectedMessageId)
     if (idx === -1) return
 
     // Prefetch next 2 messages
-    if (idx < messages.length - 1) {
-      prefetchMessageInspect(String(messages[idx + 1].id))
+    if (idx < currentMessages.length - 1) {
+      prefetchMessageInspect(String(currentMessages[idx + 1].id))
     }
-    if (idx < messages.length - 2) {
-      prefetchMessageInspect(String(messages[idx + 2].id))
+    if (idx < currentMessages.length - 2) {
+      prefetchMessageInspect(String(currentMessages[idx + 2].id))
     }
     // Prefetch previous message
     if (idx > 0) {
-      prefetchMessageInspect(String(messages[idx - 1].id))
+      prefetchMessageInspect(String(currentMessages[idx - 1].id))
     }
-  }, [selectedMessageId, messages, prefetchMessageInspect])
+  }, [selectedMessageId, prefetchMessageInspect])
 
   // Handlers for Master-Detail interactions
   const handleMessageSelect = (id: string, _shiftKey: boolean) => {
@@ -283,29 +315,38 @@ const MessagesPage = () => {
     setLayoutMode('list')
   }
 
-  const handleNextMessage = () => {
-    const idx = messages.findIndex(m => String(m.id) === selectedMessageId)
-    if (idx !== -1 && idx < messages.length - 1) {
-      setSelectedMessageId(String(messages[idx + 1].id))
+  const handleNextMessage = useCallback(() => {
+    const currentMessages = messagesRef.current
+    const currentId = selectedMessageIdRef.current
+    const idx = currentMessages.findIndex(m => String(m.id) === currentId)
+    if (idx !== -1 && idx < currentMessages.length - 1) {
+      setSelectedMessageId(String(currentMessages[idx + 1].id))
     }
-  }
+  }, [])
 
-  const handlePrevMessage = () => {
-    const idx = messages.findIndex(m => String(m.id) === selectedMessageId)
+  const handlePrevMessage = useCallback(() => {
+    const currentMessages = messagesRef.current
+    const currentId = selectedMessageIdRef.current
+    const idx = currentMessages.findIndex(m => String(m.id) === currentId)
     if (idx > 0) {
-      setSelectedMessageId(String(messages[idx - 1].id))
+      setSelectedMessageId(String(currentMessages[idx - 1].id))
     }
-  }
+  }, [])
 
   // Keyboard Navigation for List (J/K) & Selection (X)
+  // Uses refs to avoid re-attaching listener on every state change
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
+      const currentMessages = messagesRef.current
+      const currentSelectedId = selectedMessageIdRef.current
+      const currentRowSelection = rowSelectionRef.current
+
       if (e.key === 'j' || e.key === 'ArrowDown') {
         e.preventDefault()
-        if (!selectedMessageId && messages.length > 0) {
-          setSelectedMessageId(String(messages[0].id))
+        if (!currentSelectedId && currentMessages.length > 0) {
+          setSelectedMessageId(String(currentMessages[0].id))
         } else {
           handleNextMessage()
         }
@@ -314,19 +355,18 @@ const MessagesPage = () => {
         handlePrevMessage()
       } else if (e.key === 'x') {
         // Toggle selection for current item
-        if (selectedMessageId) {
+        if (currentSelectedId) {
           e.preventDefault()
-          const isSelected = !!rowSelection[selectedMessageId]
+          const isSelected = !!currentRowSelection[currentSelectedId]
           setRowSelection(prev => {
             const newSelection = { ...prev }
             if (isSelected) {
-              delete newSelection[selectedMessageId]
+              delete newSelection[currentSelectedId]
             } else {
-              newSelection[selectedMessageId] = true
+              newSelection[currentSelectedId] = true
             }
             return newSelection
           })
-          // Optional: Auto-advance after selection like Gmail? Maybe later.
         }
       } else if (e.key === 'Escape') {
         handleClosePanel()
@@ -337,14 +377,14 @@ const MessagesPage = () => {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedMessageId, messages, rowSelection])
+  }, [handleNextMessage, handlePrevMessage])
 
   // Topics options
   const topicOptions = useMemo(() => {
     if (!topicsData) return []
-    return topicsData.map((t: any) => ({
-      label: t.name || t.title || 'Unknown',
-      value: t.id || t.name,
+    return topicsData.map((topic: { id?: string | number; name?: string; title?: string }) => ({
+      label: topic.name || topic.title || 'Unknown',
+      value: topic.id || topic.name,
     }))
   }, [topicsData])
 
@@ -355,13 +395,14 @@ const MessagesPage = () => {
       <div className="flex flex-col gap-4 flex-shrink-0">
         <MessagesSummaryHeader stats={signalNoiseStats} totalMessages={totalMessages} />
 
-        <div className="flex items-center justify-between gap-2 bg-card rounded-md border p-1 shadow-sm">
-          <div className="flex-1 min-w-0 overflow-x-auto pl-2 flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex-1 min-w-0 overflow-x-auto flex items-center gap-2">
             <DataTableToolbar
               table={table as never}
               globalFilter={globalFilter}
               onGlobalFilterChange={setGlobalFilter}
               searchPlaceholder={t('filters.searchPlaceholder', 'Введіть текст для пошуку...')}
+              showColumnVisibility={false}
             >
               {/* Faceted Filters */}
               {table.getColumn('topic_name') && (
@@ -382,34 +423,18 @@ const MessagesPage = () => {
             </DataTableToolbar>
           </div>
 
-          <div className="flex items-center gap-2 px-2 border-l">
-            <RunAnalysisAction />
-
-            <div className="flex items-center bg-muted/50 p-1 rounded-md">
-              <Button
-                variant={layoutMode === 'list' ? 'secondary' : 'ghost'}
-                size="sm"
-                className="h-8 px-2"
-                onClick={() => setLayoutMode('list')}
-                aria-label={t('layout.listView', 'List View')}
-                aria-pressed={layoutMode === 'list'}
-              >
+          <Tabs value={layoutMode} onValueChange={(v) => setLayoutMode(v as LayoutMode)}>
+            <TabsList>
+              <TabsTrigger value="list">
                 <List className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">List</span>
-              </Button>
-              <Button
-                variant={layoutMode === 'split' ? 'secondary' : 'ghost'}
-                size="sm"
-                className="h-8 px-2"
-                onClick={() => setLayoutMode('split')}
-                aria-label={t('layout.splitView', 'Split View')}
-                aria-pressed={layoutMode === 'split'}
-              >
+                {t('layout.list')}
+              </TabsTrigger>
+              <TabsTrigger value="split">
                 <Columns className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Split</span>
-              </Button>
-            </div>
-          </div>
+                {t('layout.split')}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
@@ -422,27 +447,40 @@ const MessagesPage = () => {
             `}
         >
           {/* Left Pane - Message List */}
-          <div className={`h-full overflow-hidden flex flex-col ${layoutMode === 'split' ? 'hidden lg:flex' : 'flex'}`}>
-            <div className="px-2 pt-2">
+          <div className={`h-full flex-col overflow-hidden ${layoutMode === 'split' ? 'hidden lg:flex' : 'flex'}`}>
+            <div className="px-2 pt-2 shrink-0">
               <SmartBatchBanner messages={messages} />
             </div>
-            <MessageList
-              messages={messages}
-              isLoading={isLoading}
-              selectedId={selectedMessageId}
-              selectedIds={rowSelection}
-              onSelect={handleMessageSelect}
-              onToggleSelect={(id, checked) => setRowSelection(prev => ({ ...prev, [id]: checked }))}
-              onCreateAtom={handleCreateAtom}
-              onDismiss={handleDismiss}
-              onPrefetch={prefetchMessageInspect}
-              isError={isError}
-              error={error as Error} // Cast to Error
-              hasMore={hasNextPage}
-              onLoadMore={fetchNextPage}
-              isFetchingNextPage={isFetchingNextPage}
-              total={totalMessages}
-            />
+
+            {/* Sticky Date Header - outside overflow for glass effect (Firefox compat) */}
+            {visibleDate && (
+              <div className="shrink-0 bg-background/60 backdrop-blur-md shadow-sm py-2 px-4 border-b border-border/50 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
+                <Calendar className="w-3 h-3 opacity-70" />
+                {visibleDate}
+              </div>
+            )}
+
+            {/* Scrollable message list */}
+            <div className="flex-1 min-h-0 h-full">
+              <MessageList
+                messages={messages}
+                isLoading={isLoading}
+                selectedId={selectedMessageId}
+                selectedIds={rowSelection}
+                onSelect={handleMessageSelect}
+                onToggleSelect={(id, checked) => setRowSelection(prev => ({ ...prev, [id]: checked }))}
+                onCreateAtom={handleCreateAtom}
+                onDismiss={handleDismiss}
+                onPrefetch={prefetchMessageInspect}
+                isError={isError}
+                error={error as Error}
+                hasMore={hasNextPage}
+                onLoadMore={fetchNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                total={totalMessages}
+                onVisibleDateChange={setVisibleDate}
+              />
+            </div>
           </div>
 
           {/* Right Pane - Detail Panel */}
@@ -483,7 +521,7 @@ const MessagesPage = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 rounded-full hover:bg-violet-500/10 hover:text-violet-600 px-3 text-muted-foreground transition-colors"
+                className="h-8 rounded-full hover:bg-accent/10 hover:text-accent-foreground px-3 text-muted-foreground transition-colors"
                 onClick={() => {
                   // This should trigger the extraction dialog
                   setShowExtractionDialog(true)

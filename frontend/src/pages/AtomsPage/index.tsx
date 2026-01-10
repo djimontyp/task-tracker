@@ -30,6 +30,8 @@ import { EmptyState } from '@/shared/patterns'
 import { atomService } from '@/features/atoms/api/atomService'
 import { AtomCard } from '@/features/atoms/components/AtomCard'
 import { AtomDetailsSheet } from '@/features/atoms/components/AtomDetailsSheet'
+import { VersionHistoryList } from '@/features/knowledge/components/VersionHistoryList'
+import { useProjectLanguage } from '@/shared/hooks/useProjectLanguage'
 import type { Atom, AtomType } from '@/features/atoms/types'
 import { AtomsSmartFilters, type AtomCounts } from './AtomsSmartFilters'
 import { useAtomFilterParams } from './useAtomFilterParams'
@@ -54,6 +56,9 @@ const AtomsPage: React.FC = () => {
   const [expandedAtomId, setExpandedAtomId] = useState<string | null>(null)
   const [viewAtom, setViewAtom] = useState<Atom | null>(null)
   const atomRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+
+  // Project language for atom cards
+  const { projectLanguage } = useProjectLanguage()
 
   // Smart Filters - URL-synchronized status filter
   const { statusFilter, setStatusFilter } = useAtomFilterParams()
@@ -394,6 +399,17 @@ const AtomsPage: React.FC = () => {
                           <AtomCard
                             atom={atom}
                             onClick={() => setViewAtom(atom)}
+                            projectLanguage={projectLanguage}
+                            versionHistorySlot={
+                              <VersionHistoryList
+                                entityType="atom"
+                                entityId={atom.id}
+                                enableBulkActions={true}
+                                onSelectVersion={() => {
+                                  // Version selected - implementation pending
+                                }}
+                              />
+                            }
                           />
                         </div>
 

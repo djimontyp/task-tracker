@@ -25,6 +25,9 @@ import type { ExtractionProgress, PeriodType, PeriodRequest } from '@/features/k
 import { toast } from 'sonner';
 import { isKnowledgeEvent, type KnowledgeEvent } from '@/shared/types/websocket';
 
+// Stable topics array - defined outside component to prevent re-renders
+const WEBSOCKET_TOPICS: string[] = ['knowledge'];
+
 /**
  * Compact action button that opens a sheet for quick knowledge extraction.
  * Shows inline in the Messages page toolbar.
@@ -75,7 +78,7 @@ export function RunAnalysisAction() {
 
   // Listen for extraction progress via WebSocket
   useWebSocket({
-    topics: ['knowledge'],
+    topics: WEBSOCKET_TOPICS,
     onMessage: (data: unknown) => {
       if (!isKnowledgeEvent(data as KnowledgeEvent)) return;
 

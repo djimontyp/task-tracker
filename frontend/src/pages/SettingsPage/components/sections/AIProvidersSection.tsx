@@ -5,16 +5,17 @@
  * Uses Sheet for adding/editing providers.
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Bot, Cpu, Plus, Sparkles } from 'lucide-react';
+import { Bot, Cpu, Plus, Sparkles, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/shared/ui/button';
 import { getHardwareAlias } from '@/shared/utils/hardwareAlias';
 
 import { providerService } from '@/features/providers/api';
+import { useProviderValidation } from '@/features/providers/hooks';
 import {
   LLMProvider,
   LLMProviderCreate,
@@ -39,6 +40,8 @@ function getProviderIcon(
       return Sparkles;
     case 'ollama':
       return Cpu;
+    case 'gemini':
+      return Zap;
     default:
       return Bot;
   }
@@ -81,9 +84,6 @@ function getStatusLabel(
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════
 
-const POLLING_INTERVAL_MS = 1000;
-const MAX_POLLING_ATTEMPTS = 15;
-
 export function AIProvidersSection() {
   const { t } = useTranslation('settings');
   const queryClient = useQueryClient();
@@ -91,6 +91,20 @@ export function AIProvidersSection() {
   const [editingProvider, setEditingProvider] = useState<LLMProvider | null>(
     null
   );
+
+  const validationMessages = useMemo(() => ({
+    validating: (action: 'created' | 'updated') =>
+      t('providers.validation.started', `Provider ${action}. Validating...`),
+    notFound: t('providers.validation.notFound', 'Provider not found'),
+    success: t('providers.validation.success', 'Provider validated successfully!'),
+    failed: (error: string) =>
+      t('providers.validation.failed', 'Validation failed: ') + error,
+    timeout: t('providers.validation.timeout', 'Validation timeout. Check status.'),
+  }), [t]);
+
+  const { pollValidationStatus } = useProviderValidation({
+    messages: validationMessages,
+  });
 
   const { data: providers, isLoading } = useQuery<LLMProvider[]>({
     queryKey: ['providers'],
@@ -104,53 +118,6 @@ export function AIProvidersSection() {
       return hasActiveValidation ? 2000 : false;
     },
   });
-
-  const pollValidationStatus = async (
-    providerId: string,
-    action: 'created' | 'updated'
-  ) => {
-    // Use toast ID to update the same toast instead of creating multiple
-    const toastId = `provider-validation-${providerId}`;
-    toast.loading(
-      t('providers.validation.started', `Provider ${action}. Validating...`),
-      { id: toastId }
-    );
-
-    for (let attempt = 0; attempt < MAX_POLLING_ATTEMPTS; attempt++) {
-      await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL_MS));
-      await queryClient.refetchQueries({ queryKey: ['providers'] });
-
-      const providers = queryClient.getQueryData<LLMProvider[]>(['providers']);
-      const provider = providers?.find((p) => p.id === providerId);
-
-      if (!provider) {
-        toast.error(t('providers.validation.notFound', 'Provider not found'), { id: toastId });
-        return;
-      }
-
-      if (provider.validation_status === ValidationStatusEnum.CONNECTED) {
-        toast.success(
-          t('providers.validation.success', 'Provider validated successfully!'),
-          { id: toastId }
-        );
-        return;
-      }
-
-      if (provider.validation_status === ValidationStatusEnum.ERROR) {
-        toast.error(
-          t('providers.validation.failed', 'Validation failed: ') +
-            (provider.validation_error || 'Unknown error'),
-          { id: toastId }
-        );
-        return;
-      }
-    }
-
-    toast.error(
-      t('providers.validation.timeout', 'Validation timeout. Check status.'),
-      { id: toastId }
-    );
-  };
 
   const createMutation = useMutation({
     mutationFn: (data: LLMProviderCreate) =>

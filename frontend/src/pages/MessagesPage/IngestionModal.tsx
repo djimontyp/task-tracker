@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -42,6 +42,10 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
   const [loading, setLoading] = useState(false)
   const [fetchingGroups, setFetchingGroups] = useState(false)
 
+  // Store t in ref to avoid recreating fetchGroups on language change
+  const tRef = React.useRef(t)
+  tRef.current = t
+
   const fetchGroups = useCallback(async () => {
     setFetchingGroups(true)
     try {
@@ -58,16 +62,16 @@ export function IngestionModal({ open, onClose, onSuccess }: IngestionModalProps
         setGroups(groupsList)
       } else {
         logger.warn('No groups found in settings')
-        toast.warning(t('common:toast.warning.noGroups'))
+        toast.warning(tRef.current('common:toast.warning.noGroups'))
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
       logger.error('Failed to fetch groups:', message)
-      toast.error(t('common:toast.error.loadFailed', { entity: 'Telegram groups' }))
+      toast.error(tRef.current('common:toast.error.loadFailed', { entity: 'Telegram groups' }))
     } finally {
       setFetchingGroups(false)
     }
-  }, [t])
+  }, [])
 
   useEffect(() => {
     logger.debug('IngestionModal open state changed:', open)

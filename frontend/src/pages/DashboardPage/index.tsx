@@ -236,28 +236,51 @@ const DashboardPage = () => {
     [createProjectMutation]
   )
 
+  // Memoize presenter props to prevent unnecessary re-renders
+  // These objects were being recreated on every render, causing potential infinite loops
+  const metricsProps = useMemo(
+    () => ({
+      data: metrics.data,
+      isLoading: metrics.isLoading,
+      error: metrics.error,
+    }),
+    [metrics.data, metrics.isLoading, metrics.error]
+  )
+
+  const insightsProps = useMemo(
+    () => ({
+      data: insights.data,
+      isLoading: insights.isLoading,
+      error: insights.error,
+    }),
+    [insights.data, insights.isLoading, insights.error]
+  )
+
+  const topicsProps = useMemo(
+    () => ({
+      data: topics.data,
+      isLoading: topics.isLoading,
+      error: topics.error,
+    }),
+    [topics.data, topics.isLoading, topics.error]
+  )
+
+  // focusAtoms uses stable mock data - memoize with empty deps
+  const focusAtomsProps = useMemo(
+    () => ({
+      data: mockFocusAtoms,
+      isLoading: false,
+      error: null,
+    }),
+    []
+  )
+
   return (
     <DashboardPresenter
-      metrics={{
-        data: metrics.data,
-        isLoading: metrics.isLoading,
-        error: metrics.error,
-      }}
-      insights={{
-        data: insights.data,
-        isLoading: insights.isLoading,
-        error: insights.error,
-      }}
-      topics={{
-        data: topics.data,
-        isLoading: topics.isLoading,
-        error: topics.error,
-      }}
-      focusAtoms={{
-        data: mockFocusAtoms,
-        isLoading: false,
-        error: null,
-      }}
+      metrics={metricsProps}
+      insights={insightsProps}
+      topics={topicsProps}
+      focusAtoms={focusAtomsProps}
       trendData={trendData}
       trendLoading={trendLoading}
       activityData={activityData}

@@ -5,14 +5,21 @@ import {
   Card,
   CardContent,
   Button,
-  Badge,
   Spinner,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/shared/ui'
 import { taskService } from '@/features/agents/api'
 import { TaskConfig, TaskConfigCreate, TaskConfigUpdate } from '@/features/agents/types'
 import { toast } from 'sonner'
-import { Pencil, Trash2, Plus } from 'lucide-react'
-import { TaskForm } from '@/features/agents/components'
+import { Plus } from 'lucide-react'
+import { TaskForm, TaskTemplateCard } from '@/features/agents/components'
 import { PageWrapper } from '@/shared/primitives'
 
 const AgentTasksPage = () => {
@@ -21,6 +28,7 @@ const AgentTasksPage = () => {
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<TaskConfig | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { data: tasks, isLoading } = useQuery<TaskConfig[]>({
     queryKey: ['task-configs'],
@@ -74,9 +82,14 @@ const AgentTasksPage = () => {
     setFormOpen(true)
   }
 
-  const handleDelete = (id: string) => {
-    if (window.confirm(t('confirmation.delete'))) {
-      deleteMutation.mutate(id)
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id)
+  }
+
+  const handleConfirmDelete = () => {
+    if (deleteId) {
+      deleteMutation.mutate(deleteId)
+      setDeleteId(null)
     }
   }
 
@@ -117,73 +130,12 @@ const AgentTasksPage = () => {
           </Card>
         ) : (
           tasks?.map((task) => (
-            <Card key={task.id} className="card-interactive">
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg">{task.name}</h3>
-                      {task.description && (
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {task.description}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => handleEdit(task)}
-                        aria-label={t('actions.editTask')}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => handleDelete(task.id)}
-                        aria-label={t('actions.deleteTask')}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">{t('card.schemaFields')}</span>
-                      <div className="mt-2 space-x-2">
-                        {task.response_schema?.properties ? (
-                          Object.keys(task.response_schema.properties).map(
-                            (field) => (
-                              <Badge key={field} variant="outline" className="text-xs">
-                                {field}
-                              </Badge>
-                            )
-                          )
-                        ) : (
-                          <span className="text-xs text-muted-foreground">
-                            {t('card.noFields')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-2">
-                      <span className="text-muted-foreground">{t('card.status')}</span>
-                      <Badge variant={task.is_active ? 'default' : 'secondary'}>
-                        {task.is_active ? t('status.active') : t('status.inactive')}
-                      </Badge>
-                    </div>
-
-                    <div className="text-xs text-muted-foreground">
-                      {t('card.created')} {new Date(task.created_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <TaskTemplateCard
+              key={task.id}
+              task={task}
+              onEdit={handleEdit}
+              onDelete={handleDeleteClick}
+            />
           ))
         )}
       </div>
@@ -199,6 +151,23 @@ const AgentTasksPage = () => {
         isEdit={!!editingTask}
         loading={createMutation.isPending || updateMutation.isPending}
       />
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tCommon('confirmDialog.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {tCommon('confirmDialog.deleteTask')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tCommon('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              {tCommon('actions.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageWrapper>
   )
 }

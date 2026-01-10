@@ -27,7 +27,7 @@ import {
 import { PageWrapper } from '@/shared/primitives'
 
 const NoiseFilteringDashboard = () => {
-  const { t } = useTranslation('noiseFiltering')
+  const { t, i18n } = useTranslation('noiseFiltering')
   const { t: tCommon } = useTranslation()
   const queryClient = useQueryClient()
   const [batchScoringLimit] = useState(100)
@@ -104,12 +104,12 @@ const NoiseFilteringDashboard = () => {
   const chartData = useMemo(() => {
     if (!stats) return []
     return stats.trend.map(d => ({
-      date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: new Date(d.date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' }),
       [t('chart.signal')]: d.signal,
       [t('chart.noise')]: d.noise,
       [t('chart.weakSignal')]: d.weak_signal,
     }))
-  }, [stats, t])
+  }, [stats, t, i18n.language])
 
   return (
     <PageWrapper variant="fullWidth">

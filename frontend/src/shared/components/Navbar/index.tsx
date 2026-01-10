@@ -8,6 +8,7 @@ import { NavUser } from '@/shared/components/NavUser';
 import { UniversalThemeIcon, TooltipIconButton } from '@/shared/components';
 import { MobileSearch } from '@/shared/components/MobileSearch';
 import { NavBreadcrumbs } from '@/shared/layouts/MainLayout/NavBreadcrumbs';
+import { useScrolled } from '@/shared/hooks';
 import type { NavbarProps } from './types';
 
 /**
@@ -35,10 +36,12 @@ export function Navbar({
   onToggleAdminMode,
   user,
   searchComponent,
+  scrollContainerRef,
 }: NavbarProps) {
   const { t } = useTranslation();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const { toggleSidebar } = useSidebar();
+  const isScrolled = useScrolled({ threshold: 10, elementRef: scrollContainerRef });
 
   const getThemeLabel = () => {
     switch (theme) {
@@ -56,9 +59,13 @@ export function Navbar({
   return (
     <nav
       className={cn(
-        'z-modal w-full',
-        'bg-background border-b border-border',
-        !isDesktop && 'fixed top-0 left-0 right-0'
+        'z-fixed w-full transition-all duration-200',
+        // Desktop: glassmorphism on scroll
+        isDesktop && (isScrolled
+          ? 'bg-background/60 backdrop-blur-md border-b border-border/40 shadow-sm'
+          : 'bg-background border-b border-border'),
+        // Mobile: always glassmorphism (fixed navbar)
+        !isDesktop && 'fixed top-0 left-0 right-0 bg-background/60 backdrop-blur-md border-b border-border/40 shadow-sm'
       )}
     >
       {/* Desktop: Single row with 3 zones */}

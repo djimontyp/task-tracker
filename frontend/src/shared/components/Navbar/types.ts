@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import type { BreadcrumbSegment } from '@/shared/layouts/MainLayout/useBreadcrumbs';
 
 /**
@@ -45,4 +45,7 @@ export interface NavbarProps {
 
   // Search component (injected to avoid circular deps)
   searchComponent?: ReactNode;
+
+  // Scroll container ref for glassmorphism effect on desktop
+  scrollContainerRef?: RefObject<HTMLElement>;
 }

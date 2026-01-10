@@ -4,16 +4,17 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription, Skeleton } f
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import type { MessageTrendPoint } from '../types'
 
-// Custom dot for the last point
+// Custom dot for the last point only (index 0 since data is reversed)
 const LastPointDot = (props: {
     cx?: number
     cy?: number
     index?: number
 }) => {
     const { cx, cy, index } = props
-    // Show dot on the first point (today) since data is reversed
-    if (index !== 0) return null
-    if (cx === undefined || cy === undefined) return null
+    // Show dot only on the first point (today) since data is reversed
+    if (index !== 0 || cx === undefined || cy === undefined) {
+        return null
+    }
 
     return (
         <g>
@@ -183,7 +184,9 @@ export const TrendChart: React.FC<TrendChartProps> = ({
                                     dataKey="signal"
                                     stroke="transparent"
                                     fill="transparent"
-                                    dot={(props) => <LastPointDot {...props} />}
+                                    dot={({ cx, cy, index, key }: { cx?: number; cy?: number; index?: number; key?: string }) => (
+                                        <LastPointDot key={key} cx={cx} cy={cy} index={index} />
+                                    )}
                                     isAnimationActive={false}
                                 />
                             </AreaChart>

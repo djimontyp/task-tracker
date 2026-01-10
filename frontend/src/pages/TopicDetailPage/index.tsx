@@ -15,8 +15,7 @@ import { VersionHistoryList, VersionDiffViewer, KnowledgeExtractionPanel } from 
 import { ConsumerMessageModal } from '@/features/messages/components'
 import { renderTopicIcon } from '@/features/topics/utils/renderIcon'
 import { SimilarTopicsSection } from '@/features/topics/components'
-import { useDebounce } from '@/shared/hooks'
-import { useWebSocket } from '@/shared/hooks'
+import { useDebounce, useWebSocket, useProjectLanguage } from '@/shared/hooks'
 import type { Topic } from '@/features/topics/types'
 import type { Atom } from '@/features/atoms/types'
 import type { Message } from '@/shared/types'
@@ -25,10 +24,11 @@ import { toast } from 'sonner'
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
 const TopicDetailPage = () => {
-  const { t } = useTranslation(['topics', 'common'])
+  const { t, i18n } = useTranslation(['topics', 'common'])
   const { topicId } = useParams<{ topicId: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { projectLanguage } = useProjectLanguage()
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -239,7 +239,7 @@ const TopicDetailPage = () => {
     if (seconds < 10) return 'just now'
     if (seconds < 60) return `${seconds}s ago`
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    return date.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })
   }
 
   const renderSaveStatus = () => {
@@ -499,7 +499,7 @@ const TopicDetailPage = () => {
             <div>
               <div className="text-xs font-medium text-muted-foreground mb-2">{t('detail.created')}</div>
               <div className="text-sm">
-                {new Date(topic.created_at).toLocaleDateString('en-US', {
+                {new Date(topic.created_at).toLocaleDateString(i18n.language, {
                   year: 'numeric',
                   month: 'short',
                   day: 'numeric',
@@ -509,7 +509,7 @@ const TopicDetailPage = () => {
             <div>
               <div className="text-xs font-medium text-muted-foreground mb-2">{t('detailPage.metadata.lastUpdated')}</div>
               <div className="text-sm">
-                {new Date(topic.updated_at).toLocaleDateString('en-US', {
+                {new Date(topic.updated_at).toLocaleDateString(i18n.language, {
                   year: 'numeric',
                   month: 'short',
                   day: 'numeric',
@@ -562,7 +562,21 @@ const TopicDetailPage = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {atoms.map((atom) => (
-                <AtomCard key={atom.id} atom={atom} />
+                <AtomCard
+                  key={atom.id}
+                  atom={atom}
+                  projectLanguage={projectLanguage}
+                  versionHistorySlot={
+                    <VersionHistoryList
+                      entityType="atom"
+                      entityId={atom.id}
+                      enableBulkActions={true}
+                      onSelectVersion={() => {
+                        // Version selected - implementation pending
+                      }}
+                    />
+                  }
+                />
               ))}
             </div>
           )}
@@ -608,7 +622,7 @@ const TopicDetailPage = () => {
                         </p>
                       </div>
                       <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {new Date(message.sent_at).toLocaleString('uk-UA', {
+                        {new Date(message.sent_at).toLocaleString(i18n.language, {
                           month: 'short',
                           day: 'numeric',
                           hour: '2-digit',

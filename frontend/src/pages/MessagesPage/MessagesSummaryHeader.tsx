@@ -63,10 +63,10 @@ export function MessagesSummaryHeader({ stats, totalMessages }: MessagesSummaryH
     <PopoverContent className="w-80 p-0 overflow-hidden shadow-lg border-border/60" align="end">
       <div className="bg-muted/30 px-4 py-3 border-b border-border/40">
         <h4 className="font-semibold text-xs uppercase tracking-wider text-foreground">
-          {t('legend.title', 'Signal Quality & Scoring')}
+          {t('legend.title')}
         </h4>
         <p className="text-[10px] text-muted-foreground mt-0.5">
-          How AI analyzes message value
+          {t('legend.subtitle')}
         </p>
       </div>
       <div className="p-4 space-y-4">
@@ -75,11 +75,11 @@ export function MessagesSummaryHeader({ stats, totalMessages }: MessagesSummaryH
             <div className="w-1.5 h-1.5 rounded-full bg-status-error shadow-[0_0_8px_hsl(var(--status-error)/0.4)] mt-2 shrink-0" />
             <div className="flex-1 space-y-0.5">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">Critical Signal</span>
-                <span className="text-[10px] font-mono bg-status-error/10 text-status-error px-2 rounded-sm">&gt;80</span>
+                <span className="text-sm font-medium text-foreground">{t('legend.levels.critical.label')}</span>
+                <span className="text-[10px] font-mono bg-status-error/10 text-status-error px-2 rounded-sm">{t('legend.levels.critical.score')}</span>
               </div>
               <p className="text-xs text-muted-foreground leading-snug">
-                Highly important updates, blockers, or key decisions. Requires immediate attention.
+                {t('legend.levels.critical.description')}
               </p>
             </div>
           </div>
@@ -88,11 +88,11 @@ export function MessagesSummaryHeader({ stats, totalMessages }: MessagesSummaryH
             <div className="w-1.5 h-1.5 rounded-full bg-status-pending shadow-[0_0_8px_hsl(var(--status-pending)/0.4)] mt-2 shrink-0" />
             <div className="flex-1 space-y-0.5">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">Medium Signal</span>
-                <span className="text-[10px] font-mono bg-status-pending/10 text-status-pending px-2 rounded-sm">&gt;50</span>
+                <span className="text-sm font-medium text-foreground">{t('legend.levels.medium.label')}</span>
+                <span className="text-[10px] font-mono bg-status-pending/10 text-status-pending px-2 rounded-sm">{t('legend.levels.medium.score')}</span>
               </div>
               <p className="text-xs text-muted-foreground leading-snug">
-                Valuable context, progress updates, or relevant discussions.
+                {t('legend.levels.medium.description')}
               </p>
             </div>
           </div>
@@ -101,11 +101,11 @@ export function MessagesSummaryHeader({ stats, totalMessages }: MessagesSummaryH
             <div className="w-1.5 h-1.5 rounded-full bg-status-connected shadow-[0_0_8px_hsl(var(--status-connected)/0.4)] mt-2 shrink-0" />
             <div className="flex-1 space-y-0.5">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">Valid Signal</span>
-                <span className="text-[10px] font-mono bg-status-connected/10 text-status-connected px-2 rounded-sm">Base</span>
+                <span className="text-sm font-medium text-foreground">{t('legend.levels.valid.label')}</span>
+                <span className="text-[10px] font-mono bg-status-connected/10 text-status-connected px-2 rounded-sm">{t('legend.levels.valid.score')}</span>
               </div>
               <p className="text-xs text-muted-foreground leading-snug">
-                Meaningful communication contributing to the project knowledge.
+                {t('legend.levels.valid.description')}
               </p>
             </div>
           </div>
@@ -114,11 +114,11 @@ export function MessagesSummaryHeader({ stats, totalMessages }: MessagesSummaryH
             <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 mt-2 shrink-0" />
             <div className="flex-1 space-y-0.5">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">Noise</span>
-                <span className="text-[10px] font-mono bg-muted px-2 rounded-sm">&lt;10</span>
+                <span className="text-sm font-medium text-foreground">{t('legend.levels.noise.label')}</span>
+                <span className="text-[10px] font-mono bg-muted px-2 rounded-sm">{t('legend.levels.noise.score')}</span>
               </div>
               <p className="text-xs text-muted-foreground leading-snug">
-                Casual chatter, logistics, or low-context messages.
+                {t('legend.levels.noise.description')}
               </p>
             </div>
           </div>
@@ -142,7 +142,7 @@ export function MessagesSummaryHeader({ stats, totalMessages }: MessagesSummaryH
       {/* Today's summary - Clickable for Legend */}
       <Popover>
         <PopoverTrigger asChild>
-          <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" title={t('summary.legendHint', 'Click to see Signal Quality Legend')}>
+          <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" title={t('summary.legendHint')}>
             <span className="text-muted-foreground select-none">{t('summary.today')}:</span>
 
             {hasSignals && (
@@ -179,7 +179,7 @@ export function MessagesSummaryHeader({ stats, totalMessages }: MessagesSummaryH
           <PopoverTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground h-8 px-2 hover:bg-muted/50">
               <HelpCircle className="h-4 w-4" />
-              <span className="text-xs font-medium hidden sm:inline">{t('summary.legend', 'Legend')}</span>
+              <span className="text-xs font-medium hidden sm:inline">{t('summary.legend')}</span>
             </Button>
           </PopoverTrigger>
           {LegendContent}

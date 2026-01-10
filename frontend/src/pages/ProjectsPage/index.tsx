@@ -5,12 +5,25 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Spinner, Button, Card, Input } from '@/shared/ui'
+import {
+  Spinner,
+  Button,
+  Card,
+  Input,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/shared/ui'
 import { projectService } from '@/features/projects/api/projectService'
 import { ProjectCard, ProjectForm } from '@/features/projects/components'
 import type { ProjectConfig, ProjectListResponse } from '@/features/projects/types'
 import { toast } from 'sonner'
-import { Plus, Search, Folder } from 'lucide-react'
+import { Plus, Search, Folder, AlertTriangle } from 'lucide-react'
 import { EmptyState } from '@/shared/patterns'
 import { PageWrapper } from '@/shared/primitives'
 
@@ -21,6 +34,7 @@ const ProjectsPage = () => {
   const [formOpen, setFormOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<ProjectConfig | undefined>(undefined)
   const [searchQuery, setSearchQuery] = useState('')
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const {
     data: projectsResponse,
@@ -124,9 +138,14 @@ const ProjectsPage = () => {
     setFormOpen(true)
   }
 
-  const handleDelete = (projectId: string) => {
-    if (window.confirm(t('confirmation.delete'))) {
-      deleteMutation.mutate(projectId)
+  const handleDeleteClick = (projectId: string) => {
+    setDeleteId(projectId)
+  }
+
+  const handleConfirmDelete = () => {
+    if (deleteId) {
+      deleteMutation.mutate(deleteId)
+      setDeleteId(null)
     }
   }
 
@@ -153,8 +172,7 @@ const ProjectsPage = () => {
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <Card className="p-6 border-destructive">
           <div className="flex items-start gap-4">
-            {/* eslint-disable-next-line local-rules/no-hardcoded-text */}
-            <div className="text-destructive text-lg" aria-hidden="true">⚠️</div>
+            <AlertTriangle className="h-6 w-6 text-destructive shrink-0" aria-hidden="true" />
             <div>
               <p className="font-semibold text-destructive mb-2">{t('errors.loadingFailed')}</p>
               <p className="text-sm text-muted-foreground">
@@ -167,31 +185,64 @@ const ProjectsPage = () => {
     )
   }
 
+  // Calculate stats
+  const activeProjects = projects.filter(p => p.is_active).length
+  const totalKeywords = projects.reduce((acc, p) => acc + p.keywords.length, 0)
+  const totalComponents = projects.reduce((acc, p) => acc + p.components.length, 0)
+
   return (
     <PageWrapper variant="fullWidth">
-      {/* Actions toolbar */}
-      <div className="flex justify-end">
-        <Button onClick={handleCreate} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          {t('actions.createProject')}
-        </Button>
+      {/* Header & Stats */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">{t('title', 'Projects')}</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            {t('subtitle', 'Manage classification rules and knowledge organization')}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button onClick={handleCreate} size="default">
+            <Plus className="h-4 w-4 mr-2" />
+            {t('actions.createProject')}
+          </Button>
+        </div>
+      </div>
+
+      {/* Metrics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="p-4 flex flex-col justify-between hover:bg-muted/5 transition-colors">
+          <span className="text-xs text-muted-foreground font-medium uppercase">{t('stats.total', 'Total Projects')}</span>
+          <span className="text-2xl font-bold">{totalProjects}</span>
+        </Card>
+        <Card className="p-4 flex flex-col justify-between hover:bg-muted/5 transition-colors">
+          <span className="text-xs text-muted-foreground font-medium uppercase">{t('stats.active', 'Active')}</span>
+          <span className="text-2xl font-bold text-semantic-success">{activeProjects}</span>
+        </Card>
+        <Card className="p-4 flex flex-col justify-between hover:bg-muted/5 transition-colors">
+          <span className="text-xs text-muted-foreground font-medium uppercase">{t('stats.components', 'Components')}</span>
+          <span className="text-2xl font-bold">{totalComponents}</span>
+        </Card>
+        <Card className="p-4 flex flex-col justify-between hover:bg-muted/5 transition-colors">
+          <span className="text-xs text-muted-foreground font-medium uppercase">{t('stats.keywords', 'Keywords')}</span>
+          <span className="text-2xl font-bold">{totalKeywords}</span>
+        </Card>
       </div>
 
       {/* Search */}
-      <Card className="p-4">
-        <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-muted-foreground" />
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t('search.placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1"
+            className="pl-8 bg-background"
           />
         </div>
-        <div className="text-sm text-muted-foreground mt-2">
+        <div className="text-xs text-muted-foreground ml-auto">
           {t('search.showing', { filtered: filteredProjects.length, total: totalProjects })}
         </div>
-      </Card>
+      </div>
 
       {/* Projects List */}
       {filteredProjects.length === 0 ? (
@@ -214,18 +265,35 @@ const ProjectsPage = () => {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-8">
           {filteredProjects.map((project) => (
             <ProjectCard
               key={project.id}
               project={project}
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={handleDeleteClick}
               isLoading={deleteMutation.isPending}
             />
           ))}
         </div>
       )}
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tCommon('confirmDialog.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {tCommon('confirmDialog.deleteProject')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tCommon('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              {tCommon('actions.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <ProjectForm
         open={formOpen}

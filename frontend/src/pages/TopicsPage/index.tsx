@@ -196,8 +196,8 @@ const TopicsPage = () => {
     try {
       const result = await topicService.suggestColor(topicId)
       updateColorMutation.mutate({ topicId, color: result.suggested_color })
-    } catch (error) {
-      console.error('Failed to suggest color:', error)
+    } catch {
+      // Error handled silently - color suggestion is non-critical
     }
   }
 
@@ -252,7 +252,7 @@ const TopicsPage = () => {
 
       <div className="flex gap-4 items-center flex-wrap">
         <div className="flex-1 max-w-md relative">
-          <Search className="absolute left-4 top-2/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             ref={searchInputRef}
             placeholder={t('filters.search')}
@@ -265,7 +265,7 @@ const TopicsPage = () => {
               variant="ghost"
               size="icon"
               onClick={() => setSearchQuery('')}
-              className="absolute right-2 top-2/2 -translate-y-1/2"
+              className="absolute right-2 top-1/2 -translate-y-1/2"
               aria-label={t('filters.clearSearch', 'Clear search')}
             >
               <X className="h-5 w-5" />

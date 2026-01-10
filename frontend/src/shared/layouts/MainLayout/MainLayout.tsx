@@ -13,6 +13,7 @@ import { SearchContainer } from '@/features/search/components'
 import { statsService, type SidebarCounts } from '@/shared/api/statsService'
 import { Navbar } from '@/shared/components/Navbar'
 import { topicService } from '@/features/topics/api/topicService'
+import { GlobalKnowledgeExtractionDialog } from '@/features/knowledge/components/GlobalKnowledgeExtractionDialog'
 import { useNavbarData, type UseNavbarDataConfig } from './useNavbarData'
 
 interface MainLayoutProps {
@@ -25,6 +26,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const { isAdminMode, toggleAdminMode } = useAdminMode()
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const initialMountRef = useRef(true)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Close sidebar on mobile on initial mount (prevents overlay blocking content)
   useEffect(() => {
@@ -116,7 +118,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         // Desktop: Grid layout (full-height sidebar + navbar offset)
         <div className="grid grid-cols-[auto_1fr] w-full h-screen overflow-hidden">
           {/* Column 1: Sidebar (auto width: 256px expanded or 56px collapsed) */}
-          <AppSidebar counts={sidebarCounts} currentPath={location.pathname} />
+          <AppSidebar
+            counts={sidebarCounts}
+            currentPath={location.pathname}
+            knowledgeExtractionSlot={<GlobalKnowledgeExtractionDialog />}
+          />
 
           {/* Column 2: Navbar + Content */}
           <div className="grid grid-rows-[56px_1fr] overflow-hidden">
@@ -125,16 +131,17 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               {...navbarData}
               isDesktop={true}
               searchComponent={<SearchContainer />}
+              scrollContainerRef={scrollContainerRef}
             />
 
             {/* Row 2: Main content (fills remaining space, max-width for 4K readability) */}
-            <SidebarInset className="overflow-auto">
-              <main
+            <SidebarInset ref={scrollContainerRef} className="overflow-auto">
+              <div
                 id="main-content"
                 className="px-4 lg:px-6 xl:px-8 2xl:px-10 py-4 w-full max-w-screen-2xl mx-auto"
               >
                 {children}
-              </main>
+              </div>
             </SidebarInset>
           </div>
 
@@ -157,15 +164,20 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetContent side="left" className="p-0 w-[280px]">
-              <AppSidebar mobile counts={sidebarCounts} currentPath={location.pathname} />
+              <AppSidebar
+                mobile
+                counts={sidebarCounts}
+                currentPath={location.pathname}
+                knowledgeExtractionSlot={<GlobalKnowledgeExtractionDialog />}
+              />
             </SheetContent>
           </Sheet>
 
           {/* pt-[104px]: navbar row1 (56px) + row2 breadcrumbs (~48px) */}
           <div className="flex flex-col min-h-screen pt-[104px] md:pt-16 overflow-x-hidden">
-            <main id="main-content" className="flex flex-1 flex-col gap-4 p-2 md:p-4 max-w-full">
+            <div id="main-content" className="flex flex-1 flex-col gap-4 p-2 md:p-4 max-w-full">
               {children}
-            </main>
+            </div>
 
             <AdminPanel visible={isAdminMode}>
               <div className="text-sm text-muted-foreground">
