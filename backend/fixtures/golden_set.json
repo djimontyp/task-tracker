@@ -1,0 +1,1121 @@
+{
+  "version": "1.0",
+  "created_by": "claude-opus-4",
+  "created_at": "2026-01-09",
+  "human_reviewed": false,
+  "description": "Golden Set for LLM quality testing - 50 real messages from Pulse Radar production",
+
+  "tolerance_presets": {
+    "high_confidence": {
+      "score_band": 0.15,
+      "score_warning": 0.25,
+      "classification_strict": true
+    },
+    "medium_confidence": {
+      "score_band": 0.20,
+      "score_warning": 0.30,
+      "classification_strict": false
+    },
+    "low_confidence": {
+      "score_band": 0.35,
+      "score_warning": 0.45,
+      "classification_strict": false
+    }
+  },
+
+  "messages": [
+    {
+      "id": "28d81aa0-763b-40e6-b2a2-66cb7f313a09",
+      "content": "\ud83d\ude04",
+      "length": 1,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.05,
+        "confidence": "high",
+        "classification": "noise",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Emoji only - pure noise"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_be_below": 0.20
+      }
+    },
+    {
+      "id": "a2e226a8-78f4-46f0-a5ac-af141764d56c",
+      "content": "\u0443\u0440\u0430",
+      "length": 3,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.08,
+        "confidence": "high",
+        "classification": "noise",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Exclamation - no information value"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_be_below": 0.25
+      }
+    },
+    {
+      "id": "9c05a4df-9faf-4568-bac9-84362630bc89",
+      "content": "\u043d\u0435\u043c\u0430",
+      "length": 4,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.10,
+        "confidence": "high",
+        "classification": "noise",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Single word without context"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_be_below": 0.25
+      }
+    },
+    {
+      "id": "bd2b8bd9-2ddd-429b-95f1-1726d240759e",
+      "content": "\u0430 \u043e\u043a",
+      "length": 4,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.10,
+        "confidence": "high",
+        "classification": "noise",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Acknowledgment only"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_be_below": 0.25
+      }
+    },
+    {
+      "id": "af665f8a-d158-4117-be25-def6031b2b98",
+      "content": "\u0430\u0445\u0430\u0445\u0430\u0445\u0430",
+      "length": 7,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.05,
+        "confidence": "high",
+        "classification": "noise",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Laughter - pure noise"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_be_below": 0.20
+      }
+    },
+    {
+      "id": "12a67bf2-26f0-484e-bc18-6655e1c87c6e",
+      "content": "\u0442\u0430 \u0439\u043e\u043f\u0442\u0430",
+      "length": 8,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.08,
+        "confidence": "high",
+        "classification": "noise",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Exclamation/slang"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_be_below": 0.25
+      }
+    },
+    {
+      "id": "26503ba4-3447-4329-b562-85688c079fed",
+      "content": "\u043a\u0438\u043d\u044c \u0442\u0430\u0441\u043a\u0443",
+      "length": 10,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.35,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Request for task link - some action but no details"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["noise", "weak"]
+      }
+    },
+    {
+      "id": "25d1d18d-b8de-4600-9d76-f886295ed4e5",
+      "content": "\u0442\u0438 \u0437\u043c\u043e\u0436\u0435\u0448?",
+      "length": 10,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.30,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Question without context"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["noise", "weak"]
+      }
+    },
+    {
+      "id": "1d1904ac-7979-4574-9f40-dd9a78da5fda",
+      "content": "\u042f \u0432\u0436\u0435 \u0442\u0435\u0449\u0449\u0443",
+      "length": 11,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.15,
+        "confidence": "medium",
+        "classification": "noise",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Status update with typo, low info"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "classification_alternatives": ["noise", "weak"]
+      }
+    },
+    {
+      "id": "58999b76-3702-4fd7-b49c-378293f8e0ea",
+      "content": "\u0443 \u0437'\u0457\u0434\u0430\u0454\u0442\u044c\u0441\u044f",
+      "length": 12,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.45,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": ["UI"],
+        "notes": "Possible UI bug but lacks context - something is being cut off"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "1535b5ac-2e5f-419a-98c3-b3867a9add05",
+      "content": "\u0422\u0430\u043a\u043e\u0436 \u0441\u043c\u0456\u0448\u043d\u0435\ud83d\ude01",
+      "length": 13,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.08,
+        "confidence": "high",
+        "classification": "noise",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Comment/reaction"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_be_below": 0.25
+      }
+    },
+    {
+      "id": "d1759e45-2e32-4313-bf23-8fe5729f4838",
+      "content": "\u0442\u0430\u043c \u0454 \u0435\u043d\u0432\u0438 \u0442\u0456",
+      "length": 13,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.40,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": ["DevOps"],
+        "notes": "Technical info about env vars but incomplete"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "54b63e4e-4698-4008-a4fe-cbdb000413c0",
+      "content": "\u0434\u0435\u0432 \u0447\u0438 \u0441\u0442\u0435\u0439\u0434\u0436?",
+      "length": 14,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.50,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": ["DevOps"],
+        "notes": "Environment question - debugging context"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "102daa50-22df-4ee6-b4bd-d3e8cf12ad02",
+      "content": "\u043e\u043d\u0431\u043e\u0440\u0434\u0456\u043d\u0433 \u0437\u0430\u0432\u0438\u0441",
+      "length": 15,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.70,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "problem",
+            "title": "Onboarding hangs/freezes",
+            "key_phrases": ["\u043e\u043d\u0431\u043e\u0440\u0434\u0456\u043d\u0433", "\u0437\u0430\u0432\u0438\u0441"]
+          }
+        ],
+        "expected_topics": ["Onboarding", "Bugs"],
+        "notes": "Clear bug report - onboarding flow is hanging"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "must_have_atom_type": "problem"
+      }
+    },
+    {
+      "id": "7cd1690b-186a-4ff2-9523-babcc4c3abaf",
+      "content": "\u044f \u043d\u0430\u043f\u0438\u0448\u0443 \u0457\u043c \u043f\u0440\u043e \u0446\u0435",
+      "length": 18,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.25,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Promise of action without details"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["noise", "weak"]
+      }
+    },
+    {
+      "id": "b31cfb82-a183-4870-9b90-aadca19d45f5",
+      "content": "\u0430\u043d\u0443 \u043f\u0435\u0440\u0435\u0432\u0456\u0434\u043a\u0440\u0438\u0439 \u0430\u043f\u043a\u0443",
+      "length": 20,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.45,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": ["Support"],
+        "notes": "Debug instruction - restart app"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "97fb446e-054b-4829-91f5-fc212fb7cf48",
+      "content": "\u0437\u0456 \u0441\u0442\u043e\u0440\u0456\u043d\u043a\u0438 \u0432\u0456\u0434\u0433\u0443\u043a\u0456\u0432",
+      "length": 20,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.30,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Context fragment - response to a question"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["noise", "weak"]
+      }
+    },
+    {
+      "id": "2720c02b-729e-48e3-bee0-fff56f8d4eba",
+      "content": "\u0441\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0449\u0435 \u0440\u0430\u0437 \u043f\u043b\u0456\u0437",
+      "length": 21,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.35,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": ["Support"],
+        "notes": "Support instruction - retry"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["noise", "weak"]
+      }
+    },
+    {
+      "id": "1a26ae95-bf02-40bd-8b24-28f726e0be9e",
+      "content": "\u041c\u0438\u043a\u0438\u0442\u0430 \u043c\u043e\u0436\u0435 \u043f\u0440\u0438\u0441\u0442\u0443\u043f\u0430\u0442\u0438?",
+      "length": 23,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.55,
+        "confidence": "medium",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "question",
+            "title": "Mykyta ready to start?",
+            "key_phrases": ["\u041c\u0438\u043a\u0438\u0442\u0430", "\u043f\u0440\u0438\u0441\u0442\u0443\u043f\u0430\u0442\u0438"]
+          }
+        ],
+        "expected_topics": ["Team"],
+        "notes": "Task assignment question"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "bc9c4227-10fe-4a06-9b1e-08227ff5db52",
+      "content": "\u0440\u043e\u0437\u043f\u0438\u0448\u0456\u0442\u044c \u043f\u043b\u0456\u0437 \u044f\u043a \u0432\u0438\u0433\u043b\u044f\u0434\u0430\u0454",
+      "length": 26,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.50,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Request for details/description"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "64ba4cb1-b706-48d8-8a77-59f1bb6360a6",
+      "content": "@Maks_Naumenko @senechyn_a",
+      "length": 26,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.15,
+        "confidence": "high",
+        "classification": "noise",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Mentions only - no content"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_be_below": 0.30
+      }
+    },
+    {
+      "id": "4e40c9fd-c555-48ba-bf9e-50a1d2b2294e",
+      "content": "\u043d\u0443 \u0446\u0435 \u043d\u0430\u043f\u0435\u0432\u043d\u043e \u043f\u043e\u043a\u0438 \u043d\u0430\u0439\u043a\u0440\u0430\u0449\u0435",
+      "length": 27,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.30,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Opinion without context"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["noise", "weak"]
+      }
+    },
+    {
+      "id": "9838c572-fa51-4b87-aa29-02f97ee7b7b2",
+      "content": "https://fex.net/uk/s/amtppbk",
+      "length": 28,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.40,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "File sharing link without description"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["noise", "weak", "signal"]
+      }
+    },
+    {
+      "id": "372e6c57-f3c0-4466-ba55-eb8f9da42e34",
+      "content": "\u0449\u0435 \u0431 \u0441\u0443\u043f\u0435\u0440\u0430 @OlyaBusol  \ud83d\udc40 \ud83d\udc49\ud83d\udc48",
+      "length": 28,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.45,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": ["Team", "CRM"],
+        "notes": "Request to add super admin role"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "72ded618-9ec4-4a7e-80c9-2d3570377517",
+      "content": "\u041c\u0435\u043d\u0456 \u043d\u0430 \u043b\u0435\u043d\u0434\u0456 \u0442\u0440\u043e\u0448\u043a\u0438 \u043b\u0438\u0448\u0438\u043b\u043e\u0441\u044c",
+      "length": 29,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.50,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": ["Frontend", "Landing"],
+        "notes": "Status update on landing page work"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "50e933f8-961b-4266-8eb0-8671985190d0",
+      "content": "\u0430 \u043c\u0438 \u043d\u0430\u0437\u0432\u0438 \u0436 \u0437\u0430\u0440\u0430\u0437 \u0441\u043a\u043e\u0440\u043e\u0447\u0443\u0454\u043c\u043e",
+      "length": 29,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.55,
+        "confidence": "medium",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "question",
+            "title": "Name truncation approach",
+            "key_phrases": ["\u043d\u0430\u0437\u0432\u0438", "\u0441\u043a\u043e\u0440\u043e\u0447\u0443\u0454\u043c\u043e"]
+          }
+        ],
+        "expected_topics": ["UI", "UX"],
+        "notes": "Question about current approach to truncating names"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "b9949ee2-56ae-4dd9-a4f4-84dcefb9d027",
+      "content": "\u0437\u0430\u0440\u0430\u0437 \u0434\u043e\u0434\u0430\u043c \u041c\u0438\u043a\u0438\u0442\u0443 \u0432 \u0441\u0440\u043c \u0441\u0443\u043f\u0435\u0440\u043e\u043c)",
+      "length": 33,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.60,
+        "confidence": "medium",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "task",
+            "title": "Add Mykyta as super admin to CRM",
+            "key_phrases": ["\u041c\u0438\u043a\u0438\u0442\u0443", "\u0441\u0440\u043c", "\u0441\u0443\u043f\u0435\u0440"]
+          }
+        ],
+        "expected_topics": ["CRM", "Team"],
+        "notes": "Action item with clear intent"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "14aec21e-c88e-43d4-8952-886dafe8b869",
+      "content": "\u0430 \u043d\u0430 \u044f\u043a\u0438\u0439 \u0456\u0432\u0435\u043d\u0442 \u0446\u044f \u043f\u043e\u043c\u0438\u043b\u043a\u0430 \u0432\u043f\u0430\u043b\u0430?",
+      "length": 33,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.65,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "question",
+            "title": "Which event triggered the error?",
+            "key_phrases": ["\u0456\u0432\u0435\u043d\u0442", "\u043f\u043e\u043c\u0438\u043b\u043a\u0430"]
+          }
+        ],
+        "expected_topics": ["Debugging", "Backend"],
+        "notes": "Debug question - important for troubleshooting"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "must_have_atom_type": "question"
+      }
+    },
+    {
+      "id": "3da06548-a3dd-4c1d-9349-7f8d1d74e4f0",
+      "content": "\u0456 \u044f\u043a \u0441\u0430\u043c\u0435 \u043d\u0435 \u043f\u0440\u043e\u0445\u043e\u0434\u0438\u0442\u044c \u0437\u0430\u043f\u0438\u0442 \u0434\u043e \u043d\u0438\u0445",
+      "length": 35,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.60,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "question",
+            "title": "How does the request fail?",
+            "key_phrases": ["\u0437\u0430\u043f\u0438\u0442", "\u043d\u0435 \u043f\u0440\u043e\u0445\u043e\u0434\u0438\u0442\u044c"]
+          }
+        ],
+        "expected_topics": ["Debugging", "Integration"],
+        "notes": "Debug question about request failure"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "9599b90a-18ac-42dd-980a-babb21ff211d",
+      "content": "\u043c\u0435\u043d\u0456 \u0446\u044f \u0456\u0434\u0435\u044f \u043d\u0435 \u0434\u0443\u0436\u0435 \u043f\u043e\u0434\u043e\u0431\u0430\u0454\u0442\u044c\u0441\u044f )))",
+      "length": 36,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.45,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Opinion/pushback without details"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "9fa93f4f-1d66-417a-a85d-9b05aa8117aa",
+      "content": "\u043d\u0430\u0447\u0435 \u0432\u0441\u0435 \u043e\u043a)\u044f\u043a\u0449\u043e \u041c\u0438\u043a\u0438\u0442\u0430 \u0437\u043c\u0456\u043d\u0438\u0432 \u0442\u0435\u043a\u0441\u0442)",
+      "length": 37,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.40,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Conditional confirmation"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["noise", "weak"]
+      }
+    },
+    {
+      "id": "db3a5f89-bfeb-4e3c-96ef-5a398c66c3ad",
+      "content": "\u0432\u043e\u043d\u0438 \u044f\u043a \u0440\u0430\u0437 \u0442\u043e\u0447\u043d\u043e \u043d\u0435 \u0437\u043d\u0430\u044e\u0442\u044c))) \u0446\u0435 \u0436 \u0434\u0456\u044f",
+      "length": 39,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.35,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": ["Diia", "Integration"],
+        "notes": "Comment about third-party (Diia) limitations"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["noise", "weak"]
+      }
+    },
+    {
+      "id": "aa2b60dd-ea2a-4a84-b710-69e5ec346d6c",
+      "content": "\u044f \u0436\u0456\u043d\u043e\u0447\u043a\u0430 34 \u0441\u043a\u043e\u0440\u043e 35, \u043c\u0435\u043d\u0456 \u0442\u0440\u0435\u0431\u0430 \u043a\u043d\u043e\u043f\u043a\u0438",
+      "length": 40,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.30,
+        "confidence": "low",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Off-topic/joke about age and needing buttons - context unclear"
+      },
+      "tolerance": {
+        "score_band": 0.35,
+        "classification_alternatives": ["noise", "weak", "signal"]
+      }
+    },
+    {
+      "id": "1a761803-7e18-40a3-bf1e-61dfd8f5cdca",
+      "content": "\u043c\u043e\u0436\u0435 \u0449\u043e\u0441\u044c \u0442\u0438\u043f\u0443 \"\u043d\u0435\u043c\u0430\u0454 \u0432\u0456\u0434\u0433\u0443\u043a\u0456\u0432 \u0434\u043b\u044f \u0432\u0456\u0434\u043f\u043e\u0432\u0456\u0434\u0435\u0439\"",
+      "length": 46,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.65,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "insight",
+            "title": "Empty state text suggestion for reviews",
+            "key_phrases": ["\u043d\u0435\u043c\u0430\u0454 \u0432\u0456\u0434\u0433\u0443\u043a\u0456\u0432"]
+          }
+        ],
+        "expected_topics": ["UX", "Copy"],
+        "notes": "UX copy suggestion - concrete proposal"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "must_have_atom_type": "insight"
+      }
+    },
+    {
+      "id": "f74abc5a-9f34-48e3-b3a2-a5fe501bcf99",
+      "content": "\u0421\u043a\u043e\u0440\u043e \u0431\u0443\u0434\u0435\u043c \u043d\u0430 \u043c\u043e\u0457\u0439 \u0434\u0456\u043b\u044f\u043d\u0446\u0456 \u0442\u0435\u0441\u0442\u0438\u0442\u0438\ud83d\ude01\u0442\u0430 \u043d\u0430\u0447\u0435 \u043d\u0456",
+      "length": 46,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.45,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": ["Testing"],
+        "notes": "Testing plans - informal"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "e4e5ad6d-39d3-49c9-81df-5941d52d3698",
+      "content": "\u0410 \u043b\u0430\u043f\u043a\u0438 \u043c\u0438 \u0441\u0442\u0430\u0432\u0438\u043c\u043e?) \u0423 \u041f\u0440\u043e\u043c\u0435\u0442\u0435\u044f \u0437\u0430\u0439\u0432\u0438\u0439 \u0432\u0456\u0434\u0441\u0442\u0443\u043f\ud83d\ude07",
+      "length": 47,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.60,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "problem",
+            "title": "Extra spacing in Prometheus display",
+            "key_phrases": ["\u041f\u0440\u043e\u043c\u0435\u0442\u0435\u044f", "\u0437\u0430\u0439\u0432\u0438\u0439 \u0432\u0456\u0434\u0441\u0442\u0443\u043f"]
+          }
+        ],
+        "expected_topics": ["UI", "Bugs"],
+        "notes": "UI bug report with specific location"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "must_have_atom_type": "problem"
+      }
+    },
+    {
+      "id": "d2b4042a-a249-4431-a26d-ab0a6d0befaa",
+      "content": "\u0437\u0430\u043a\u0440\u0438\u043b\u0430 \u0432\u0441\u0456 \u0437\u0430\u0434\u0430\u0447\u0456 \u043f\u043e \u0440\u0435\u0439\u0442\u0438\u043d\u0433\u0443, \u0431\u043e \u0432\u0438 \u0441\u0430\u043c\u0456 \u043d\u0435 \u0437\u0430\u043a\u0440\u0438\u043b\u0438",
+      "length": 53,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.55,
+        "confidence": "medium",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "task",
+            "title": "Closed all rating tasks",
+            "key_phrases": ["\u0437\u0430\u043a\u0440\u0438\u043b\u0430", "\u0437\u0430\u0434\u0430\u0447\u0456", "\u0440\u0435\u0439\u0442\u0438\u043d\u0433"]
+          }
+        ],
+        "expected_topics": ["Tasks", "Rating"],
+        "notes": "Task completion status with context"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "ca5d6953-2338-4f18-8c5c-de5763201140",
+      "content": "\u0446\u0435 \u043d\u0456\u043a\u0443\u0434\u0438  \u0456 \u044f\u043a\u0440\u0430\u0437 \u0437\u0430\u0434\u0430\u0447\u0430 \u0446\u0456\u0454\u0457 \u0448\u0442\u0443\u043a\u0438 \u0432\u0456\u0434\u043a\u0438\u0434\u0430\u0442\u0438 \u0448\u0443\u043c \u0456 \u0431\u0430\u0447\u0438\u0442\u0438 \u0449\u043e \u043f\u043e \u043f\u0440\u043e\u0454\u043a\u0442\u0443",
+      "length": 75,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.70,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "insight",
+            "title": "Purpose of noise filtering feature",
+            "key_phrases": ["\u0432\u0456\u0434\u043a\u0438\u0434\u0430\u0442\u0438 \u0448\u0443\u043c", "\u043f\u0440\u043e\u0454\u043a\u0442\u0443"]
+          }
+        ],
+        "expected_topics": ["Product", "Noise Filtering"],
+        "notes": "Product insight - explains feature purpose"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "must_have_atom_type": "insight"
+      }
+    },
+    {
+      "id": "f2a41b4d-471c-4f66-bc98-98702b79e3b3",
+      "content": "\u0432 \u043c\u0435\u043d\u0435 \u043d\u0435 \u043f\u0440\u0430\u0446\u044e\u0454 \u0447\u0435\u0440\u0435\u0437 \u0434\u0456\u044e\n\u043f\u0440\u043e\u0441\u0442\u043e \u0432\u0456\u0434\u043a\u0440\u0438\u0432\u0430\u0454\u0442\u044c\u0441\u044f \u0433\u043e\u043b\u043e\u0432\u043d\u0430 \u0441\u0442\u043e\u0440\u0456\u043d\u043a\u0430 \u0434\u0456\u0457 \u043f\u043e \u0440\u0435\u0434\u0456\u0440\u0435\u043a\u0442\u0443",
+      "length": 81,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.75,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "problem",
+            "title": "Diia auth redirects to main page instead of completing login",
+            "key_phrases": ["\u043d\u0435 \u043f\u0440\u0430\u0446\u044e\u0454", "\u0434\u0456\u044e", "\u0440\u0435\u0434\u0456\u0440\u0435\u043a\u0442"]
+          }
+        ],
+        "expected_topics": ["Diia", "Authentication", "Bugs"],
+        "notes": "Clear bug report with reproduction steps"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "must_have_atom_type": "problem"
+      }
+    },
+    {
+      "id": "a9dfdfa5-b182-4ece-88f1-52299571dcb4",
+      "content": "\u0442\u0430 \u0442\u0430\u043c \u0442\u0456 \u043a\u043d\u043e\u043f\u043a\u0438 \u043f\u0440\u0438\u0431\u0438\u0440\u0430\u044e\u0442\u044c\u0441\u044f \u043d\u0430 \u0430\u043d\u0434\u0440\u043e \u0432 \u043d\u0430\u043b\u0430\u0448\u0442\u0443\u0432\u0430\u043d\u043d\u044f\u0445, \u0442\u0430\u043c \u0436\u0435 \u043f\u043e \u0441\u0442\u0430\u043d\u0434\u0430\u0440\u0442\u0443 \u0439\u0434\u0443\u0442\u044c \u0432\u0441\u044e\u0434\u0438 \u0436\u0435\u0441\u0442\u0438",
+      "length": 93,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.55,
+        "confidence": "medium",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "insight",
+            "title": "Android nav buttons can be hidden in settings, gestures are default",
+            "key_phrases": ["\u043a\u043d\u043e\u043f\u043a\u0438", "\u0430\u043d\u0434\u0440\u043e", "\u0436\u0435\u0441\u0442\u0438"]
+          }
+        ],
+        "expected_topics": ["Android", "UX"],
+        "notes": "How-to explanation about Android settings"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "7acf6e4e-64d4-47b0-bceb-9d9febf18165",
+      "content": "\u0430\u0431\u043e \u0432\u043f\u0438\u0441\u0430\u0442\u0438 \u0404\u0414\u0420\u041f\u041e\u0423 \u0437\u0430\u043c\u0456\u0441\u0442\u044c \u043d\u0430\u0437\u0432\u0438 \u043a\u043e\u043c\u043f\u0430\u043d\u0456\u0457, \u0431\u043e \u043d\u0430\u0437\u0432\u0430 \u0434\u0443\u0436\u0435 \u0434\u043e\u0432\u0433\u0430 \u043c\u043e\u0436\u0435 \u0431\u0443\u0442\u0438, \u0456 \u043f\u0440\u0438 \u043a\u043b\u0456\u043a\u0443 \u043d\u0430 \u0454\u0434\u0440\u043f\u043e\u0443 \u043f\u043e\u043a\u0430\u0437\u0443\u0432\u0430\u0442\u0438 \u043d\u0430\u0437\u0432\u0443 \u043a\u043e\u043c\u043f\u0430\u043d\u0456\u0457\n\n@sofipet",
+      "length": 131,
+      "bucket": "long",
+      "ground_truth": {
+        "importance_score": 0.80,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "insight",
+            "title": "Show EDRPOU code instead of long company name, reveal name on click",
+            "key_phrases": ["\u0404\u0414\u0420\u041f\u041e\u0423", "\u043d\u0430\u0437\u0432\u0430", "\u0434\u043e\u0432\u0433\u0430"]
+          }
+        ],
+        "expected_topics": ["UX", "CRM"],
+        "notes": "Concrete UX improvement suggestion with implementation detail"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "must_have_atom_type": "insight"
+      }
+    },
+    {
+      "id": "31633b3a-540f-4850-8a8e-438238ea6b02",
+      "content": "@sofipet \u0432 \u043d\u0430\u0441 \u0432 \u0447\u0430\u0442\u0430\u0445 \u0432 \u041a\u041f \u043d\u0435 \u043c\u043e\u0436\u043d\u0430 \u0432\u0438\u0434\u044f\u043b\u044f\u0442\u0438 \u043d\u0430\u0434\u0456\u0441\u043b\u0430\u043d\u0456 \u043f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f. \u043c\u043e\u0436\u0435 \u0432\u0430\u0440\u0442\u043e \u043f\u043e\u0434\u0443\u043c\u0430\u0442\u0438 \u043d\u0430\u0434 \u0432\u043f\u0440\u043e\u0432\u0430\u0434\u0436\u0435\u043d\u043d\u044f\u043c \u0442\u0430\u043a\u043e\u0457 \u043c\u043e\u0436\u043b\u0438\u0432\u043e\u0441\u0442\u0456? \u0449\u043e \u0434\u0443\u043c\u0430\u0454\u0448?",
+      "length": 136,
+      "bucket": "long",
+      "ground_truth": {
+        "importance_score": 0.85,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "question",
+            "title": "Consider adding message deletion in KP chats",
+            "key_phrases": ["\u0432\u0438\u0434\u044f\u043b\u044f\u0442\u0438", "\u043f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f", "\u041a\u041f"]
+          },
+          {
+            "type": "insight",
+            "title": "Chat messages cannot be deleted in KP",
+            "key_phrases": ["\u043d\u0435 \u043c\u043e\u0436\u043d\u0430 \u0432\u0438\u0434\u044f\u043b\u044f\u0442\u0438"]
+          }
+        ],
+        "expected_topics": ["Chat", "Features", "KP"],
+        "notes": "Feature request with clear problem statement"
+      },
+      "tolerance": {
+        "score_band": 0.15
+      }
+    },
+    {
+      "id": "4d8c8907-bf74-4b37-a56d-92b2d560a1f2",
+      "content": "\u0442\u0430, \u0430\u043b\u0435 \u043d\u0430\u043f\u0440\u0438\u043a\u043b\u0430\u0434 \u0456\u0441\u0442\u043e\u0440\u0456\u044f \u0437 \u043d\u0430\u0434\u0441\u0438\u043b\u0430\u043d\u043d\u044f\u043c \u043a\u043e\u043d\u0442\u0430\u043a\u0442\u043d\u0438\u0445 \u0434\u0430\u043d\u0438\u0445, \u044f\u043a\u0449\u043e \u043b\u044e\u0434\u0438\u043d\u0430 \u0431\u0430\u0436\u0430\u0454 \u0441\u0442\u0435\u0440\u0442\u0438 \u0446\u044e \u0456\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0456\u044e\n\u043c\u043e\u0436\u043b\u0438\u0432\u043e \u0434\u043e\u0434\u0430\u0442\u0438 \u043c\u043e\u0436\u043b\u0438\u0432\u0456\u0441\u0442\u044c \u0441\u0430\u043c\u0435 \u043d\u0430 \u0446\u0435 \u043f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f",
+      "length": 146,
+      "bucket": "long",
+      "ground_truth": {
+        "importance_score": 0.80,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "insight",
+            "title": "Allow deleting contact data messages for privacy",
+            "key_phrases": ["\u043a\u043e\u043d\u0442\u0430\u043a\u0442\u043d\u0438\u0445 \u0434\u0430\u043d\u0438\u0445", "\u0441\u0442\u0435\u0440\u0442\u0438"]
+          }
+        ],
+        "expected_topics": ["Privacy", "Features", "Chat"],
+        "notes": "Privacy-focused feature suggestion with use case"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "must_have_atom_type": "insight"
+      }
+    },
+    {
+      "id": "1e9c1162-4cf4-4079-b5b9-3ccbe105c4da",
+      "content": "\u0410\u0430\u0430\u0430, \u043d\u0443 \u043b\u0430\u043d\u0430. \u0410\u043b\u0435 \u0406\u0433\u043e\u0440 \u043c\u0456\u0433 \u0431\u0438 \u0457\u0445 \u0456 \u043f\u0456\u0434\u0447\u0438\u0441\u0442\u0438\u0442\u0438, \u0442\u0456 \u043a\u043d\u043e\u043f\u043a\u0438. \u0425\u043e\u0447\u0430 \u0437 \u043e\u0433\u043b\u044f\u0434\u0443 \u043d\u0430 \u0442\u0435, \u0448\u043e \u0432\u0456\u043d \u0432 \u043e\u0441\u0442\u0430\u043d\u043d\u0456\u0439 \u043c\u043e\u043c\u0435\u043d\u0442 \u0442\u043e\u0439 \u0432\u0456\u0434\u043e\u0441 \u0434\u043e\u0434\u0430\u0432\u0430\u0432, \u043c\u043e\u0436\u043d\u0430 \u0439\u043e\u043c\u0443 \u0446\u0435 \u043f\u0440\u043e\u0441\u0442\u0438\u0442\u0438",
+      "length": 146,
+      "bucket": "long",
+      "ground_truth": {
+        "importance_score": 0.40,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": ["Team"],
+        "notes": "Informal team discussion, low actionable value"
+      },
+      "tolerance": {
+        "score_band": 0.25,
+        "classification_alternatives": ["noise", "weak"]
+      }
+    },
+    {
+      "id": "e2bb5ee9-d1aa-4ccc-a11d-14dd419f6d13",
+      "content": "https://investor.coursera.com/news/news-details/2025/Coursera-to-Combine-with-Udemy-to-Empower-the-Global-Workforce-with-Skills-for-the-AI-Era/default.aspx",
+      "length": 155,
+      "bucket": "long",
+      "ground_truth": {
+        "importance_score": 0.60,
+        "confidence": "medium",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "insight",
+            "title": "Coursera + Udemy merger news",
+            "key_phrases": ["Coursera", "Udemy", "Combine"]
+          }
+        ],
+        "expected_topics": ["Industry News", "EdTech"],
+        "notes": "Industry news link - potentially relevant depending on context"
+      },
+      "tolerance": {
+        "score_band": 0.25,
+        "classification_alternatives": ["weak", "signal"]
+      }
+    },
+    {
+      "id": "096d4f7e-3e7d-4b9d-96bb-3fcd424b0ed8",
+      "content": "\u0442\u0430 \u0448\u043e\u0441\u044c \u0432\u0438 \u0432\u0436\u0435 \u0437\u0430\u0431\u0430\u0433\u0430\u0442\u043e \u043b\u043e\u0433\u0456\u043a\u0438 \u044f\u043a\u043e\u0457\u0441\u044c \u043d\u0435\u043f\u043e\u0442\u0440\u0456\u0431\u043d\u043e\u0457 \u0432\u0438\u0434\u0443\u043c\u0443\u0454\u0442\u0435) \u0442\u0440\u0435\u0431\u0430 \u0440\u043e\u0437\u0443\u043c\u0456\u0442\u0438, \u0449\u043e \u0446\u0435 \u0432 \u043f\u0435\u0440\u0448\u0443 \u0447\u0435\u0440\u0433\u0443 \u043d\u0435 \u043c\u0435\u0441\u0435\u043d\u0434\u0436\u0435\u0440, \u0430 \u043f\u0440\u043e\u0441\u0442\u043e \u0441\u043f\u043e\u0441\u0456\u0431 \u0437\u043a\u043e\u043d\u0442\u0430\u043a\u0442\u0443\u0432\u0430\u0442\u0438 \u0437 \u0432\u043b\u0430\u0441\u043d\u0438\u043a\u043e\u043c \u0434\u0456\u043b\u044f\u043d\u043a\u0438",
+      "length": 160,
+      "bucket": "long",
+      "ground_truth": {
+        "importance_score": 0.65,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "decision",
+            "title": "Product scope: not a messenger, just contact channel with land owners",
+            "key_phrases": ["\u043d\u0435 \u043c\u0435\u0441\u0435\u043d\u0434\u0436\u0435\u0440", "\u0437\u043a\u043e\u043d\u0442\u0430\u043a\u0442\u0443\u0432\u0430\u0442\u0438", "\u0432\u043b\u0430\u0441\u043d\u0438\u043a\u043e\u043c"]
+          }
+        ],
+        "expected_topics": ["Product", "Architecture"],
+        "notes": "Product philosophy/scope definition - important context"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "must_have_atom_type": "decision"
+      }
+    },
+    {
+      "id": "e1d42dbc-807e-4bb0-944e-223e3dad02a9",
+      "content": "\u041c\u043e\u0436\u043d\u0430 \u043f\u0435\u0440\u0435\u0439\u0442\u0438 \u0432 \u0434\u0430\u043d\u0456 \u043f\u043e \u0434\u0456\u043b\u044f\u043d\u0446\u0456 \u0456 \u0433\u043b\u044f\u043d\u0443\u0442\u0438. \u0410\u043b\u0435 \u0437\u0430\u0443\u0432\u0430\u0436\u0435\u043d\u043d\u044f \u0441\u043b\u0443\u0448\u043d\u0435. @sofipet \u043c\u043e\u0436\u0435 \u0434\u043e\u0434\u0430\u043c\u043e \u0434\u0435\u0441\u044c \u0432\u0456\u0434\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u043d\u044f \u0441\u0430\u043c\u0435 \u0404\u0414\u0420\u041f\u041e\u0423, \u0449\u043e\u0431 \u0441\u043f\u0456\u0432\u0440\u043e\u0431\u0456\u0442\u043d\u0438\u043a \u0437\u043d\u0430\u0432, \u043d\u0430 \u0440\u0430\u0445\u0443\u043d\u043e\u043a \u043a\u043e\u0433\u043e \u043f\u0438\u0448\u0435 \u0432\u0456\u0434\u043f\u043e\u0432\u0456\u0434\u044c?",
+      "length": 172,
+      "bucket": "long",
+      "ground_truth": {
+        "importance_score": 0.75,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "insight",
+            "title": "Display EDRPOU so employee knows which company they're replying to",
+            "key_phrases": ["\u0404\u0414\u0420\u041f\u041e\u0423", "\u0441\u043f\u0456\u0432\u0440\u043e\u0431\u0456\u0442\u043d\u0438\u043a", "\u0432\u0456\u0434\u043f\u043e\u0432\u0456\u0434\u044c"]
+          },
+          {
+            "type": "question",
+            "title": "Add EDRPOU display somewhere in UI?",
+            "key_phrases": ["\u0434\u043e\u0434\u0430\u043c\u043e", "\u0432\u0456\u0434\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u043d\u044f"]
+          }
+        ],
+        "expected_topics": ["UX", "CRM"],
+        "notes": "Feature discussion with acknowledgment of valid point"
+      },
+      "tolerance": {
+        "score_band": 0.15
+      }
+    },
+    {
+      "id": "75d3d200-d123-4c12-92d1-60bacd4525b8",
+      "content": "\u0442\u0430\u043a \u043f\u0440\u043e\u0431\u043b\u0435\u043c\u0443 \u0431\u0430\u0447\u0443 Viber sending failed for +380937727563: 403 Client Error: Forbidden for url: https://api-gateway.kyivstar.ua/rest/v1beta/viber/transaction. Falling back to SMS.",
+      "length": 178,
+      "bucket": "long",
+      "ground_truth": {
+        "importance_score": 0.90,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "problem",
+            "title": "Viber sending fails with 403 Forbidden, falling back to SMS",
+            "key_phrases": ["Viber", "403", "Forbidden", "Falling back to SMS"]
+          }
+        ],
+        "expected_topics": ["Viber", "Integration", "Kyivstar", "Bugs"],
+        "notes": "Clear error report with stack trace and impact (SMS fallback)"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_have_atom_type": "problem"
+      }
+    },
+    {
+      "id": "6ec20de1-275f-40da-8df7-8d34e5beba12",
+      "content": "@OlyaBusol @ShchukinMykyta \u0434\u0430\u0432\u0430\u0439\u0442\u0435 \u043d\u0430 \u0437\u0430\u0432\u0442\u0440\u0430 \u0437\u0430\u043f\u043b\u0430\u043d\u0443\u0454\u043c\u043e \u0442\u0430\u043a\u043e\u0436 \u043e\u0431\u0433\u043e\u0432\u043e\u0440\u0435\u043d\u043d\u044f \u0442\u043e\u0433\u043e, \u044f\u043a \u043d\u0430\u043c \u0437\u043c\u0435\u043d\u0448\u0438\u0442\u0438 \u043a\u0456\u043b\u044c\u043a\u0456\u0441\u0442\u044c \u0441\u043c\u0441\u043e\u043a \u043f\u0440\u0438 \u043b\u043e\u0433\u0456\u043d\u0456. \u0411\u043e \u0432 \u043d\u0430\u0441 \u0437\u0430\u0440\u0430\u0437 \u0457\u0445 \u043f\u043e 80\u041a \u043d\u0430 \u043c\u0456\u0441\u044f\u0446\u044c. \u0428\u043e\u0441\u044c \u0442\u0440\u043e\u0448\u043a\u0438 \u0434\u043e\u0445\u0443\u0430 ))",
+      "length": 180,
+      "bucket": "long",
+      "ground_truth": {
+        "importance_score": 0.92,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "problem",
+            "title": "80K SMS per month for login - too many",
+            "key_phrases": ["80\u041a", "\u0441\u043c\u0441\u043e\u043a", "\u043b\u043e\u0433\u0456\u043d\u0456"]
+          },
+          {
+            "type": "task",
+            "title": "Plan meeting to discuss reducing SMS count during login",
+            "key_phrases": ["\u0437\u0430\u043f\u043b\u0430\u043d\u0443\u0454\u043c\u043e", "\u0437\u043c\u0435\u043d\u0448\u0438\u0442\u0438", "\u0441\u043c\u0441\u043e\u043a"]
+          }
+        ],
+        "expected_topics": ["SMS", "Costs", "Authentication"],
+        "notes": "Critical cost issue with clear metric (80K/month) and action plan"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_have_atom_type": "problem"
+      }
+    },
+    {
+      "id": "c20b8ffe-9bd4-49fc-98d2-27ad3ba3907c",
+      "content": "HTTPError\nEvents (total)\nUsers (90d)\nLevel: Error\n404 Client Error: Not Found for url: https://api2s.diia.gov.ua/api/v1/acquirers/offer-request/status?otp=dc1f3231-c8d0-4035-a56c-b91f29ac87ed&requestI",
+      "length": 200,
+      "bucket": "long",
+      "ground_truth": {
+        "importance_score": 0.88,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "problem",
+            "title": "Diia API 404 error on offer-request status endpoint",
+            "key_phrases": ["404", "diia.gov.ua", "offer-request"]
+          }
+        ],
+        "expected_topics": ["Diia", "Integration", "Bugs"],
+        "notes": "Error log with API endpoint - integration issue with Diia"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_have_atom_type": "problem"
+      }
+    }
+  ],
+
+  "extraction_batches": [
+    {
+      "id": "batch_signals",
+      "description": "Batch of clear signal messages for extraction quality testing",
+      "message_ids": [
+        "102daa50-22df-4ee6-b4bd-d3e8cf12ad02",
+        "75d3d200-d123-4c12-92d1-60bacd4525b8",
+        "6ec20de1-275f-40da-8df7-8d34e5beba12",
+        "f2a41b4d-471c-4f66-bc98-98702b79e3b3"
+      ],
+      "ground_truth": {
+        "expected_topics_count": {"min": 3, "max": 6},
+        "expected_atoms_count": {"min": 4, "max": 8},
+        "must_have_topics": ["Bugs"],
+        "must_have_atom_types": ["problem"]
+      }
+    },
+    {
+      "id": "batch_mixed",
+      "description": "Mixed batch with noise, weak and signals",
+      "message_ids": [
+        "28d81aa0-763b-40e6-b2a2-66cb7f313a09",
+        "a2e226a8-78f4-46f0-a5ac-af141764d56c",
+        "26503ba4-3447-4329-b562-85688c079fed",
+        "14aec21e-c88e-43d4-8952-886dafe8b869",
+        "1a761803-7e18-40a3-bf1e-61dfd8f5cdca"
+      ],
+      "ground_truth": {
+        "expected_topics_count": {"min": 1, "max": 3},
+        "expected_atoms_count": {"min": 2, "max": 4},
+        "notes": "Should filter out noise, extract from signals only"
+      }
+    }
+  ],
+
+  "statistics": {
+    "total_messages": 50,
+    "by_classification": {
+      "noise": 12,
+      "weak": 20,
+      "signal": 18
+    },
+    "by_confidence": {
+      "high": 28,
+      "medium": 20,
+      "low": 2
+    },
+    "by_bucket": {
+      "short": 15,
+      "medium": 25,
+      "long": 10
+    }
+  }
+}

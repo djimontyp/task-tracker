@@ -4,15 +4,24 @@ Provides CRUD endpoints for managing agent configurations, task assignments,
 and agent testing functionality.
 """
 
+import json
 import logging
+from collections.abc import AsyncIterator
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
 from pydantic_ai.exceptions import ModelHTTPError
 from sqlalchemy.exc import IntegrityError
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.schemas.agent import AgentTestRequest, AgentTestResponse
+from app.api.v1.schemas.golden_set import (
+    GoldenSetTestProgress,
+    GoldenSetTestReport,
+    GoldenSetTestRequest,
+)
+from app.schemas.agent_stats import AgentStats
 from app.database import get_session
 from app.models import (
     AgentConfigCreate,
@@ -23,6 +32,8 @@ from app.models import (
 )
 from app.services import AgentCRUD, AssignmentCRUD
 from app.services.agent_service import AgentTestService
+from app.services.agent_stats_service import AgentStatsService
+from app.services.golden_set_service import GoldenSetTestService
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/agents", tags=["agents"])
@@ -147,6 +158,47 @@ async def get_agent(
         )
 
     return agent
+
+
+@router.get(
+    "/{agent_id}/stats",
+    response_model=AgentStats,
+    summary="Get agent statistics",
+    description="Get real-time performance statistics for an agent (Vital Signs).",
+)
+async def get_agent_stats(
+    agent_id: UUID,
+    session: AsyncSession = Depends(get_session),
+) -> AgentStats:
+    """Get agent statistics.
+
+    Calculates:
+    - Last Active (Recency)
+    - Success Rate (Reliability)
+    - 24h Load (Volume)
+    - Avg Duration (Performance)
+
+    Args:
+        agent_id: Agent UUID
+        session: Database session
+
+    Returns:
+        Agent statistics object
+    
+    Raises:
+        HTTPException 404: Agent not found
+    """
+    # Verify agent exists first
+    crud = AgentCRUD(session)
+    agent = await crud.get_agent(agent_id)
+    if not agent:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Agent with ID '{agent_id}' not found",
+        )
+        
+    stats_service = AgentStatsService(session)
+    return await stats_service.get_stats(agent_id)
 
 
 @router.put(
@@ -433,3 +485,123 @@ async def test_agent(
         # Handle unexpected errors
         logger.error(f"Failed to test agent {agent_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Agent test failed: {str(e)}")
+
+
+@router.post(
+    "/{agent_id}/golden-set-test",
+    response_model=GoldenSetTestReport,
+    summary="Run Golden Set test",
+    description="Run agent against predefined test messages with ground truth labels.",
+)
+async def run_golden_set_test(
+    agent_id: UUID,
+    request: GoldenSetTestRequest,
+    session: AsyncSession = Depends(get_session),
+) -> GoldenSetTestReport:
+    """Run Golden Set test against an agent.
+
+    Tests the agent's scoring accuracy using predefined messages with
+    ground truth labels. Returns detailed metrics including pass/fail
+    rates and classification accuracy.
+
+    Args:
+        agent_id: Agent UUID to test
+        request: Test configuration (mode: quick/medium)
+        session: Database session
+
+    Returns:
+        Complete test report with metrics and failures
+
+    Raises:
+        HTTPException 404: Agent or provider not found
+        HTTPException 400: Invalid configuration
+        HTTPException 500: Test execution failed
+    """
+    service = GoldenSetTestService(session)
+
+    try:
+        report = await service.run_test(
+            agent_id=agent_id,
+            mode=request.mode,
+            golden_set_path=request.golden_set_path,
+        )
+        logger.info(
+            f"Golden Set test completed for agent '{agent_id}': "
+            f"verdict={report.verdict}, pass={report.scoring_pass}/{report.total_messages}"
+        )
+        return report
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except ValueError as e:
+        if "not found" in str(e):
+            raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Golden Set test failed for agent {agent_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Golden Set test failed: {str(e)}")
+
+
+@router.post(
+    "/{agent_id}/golden-set-test-stream",
+    summary="Run Golden Set test with streaming",
+    description="Run agent test with real-time progress updates via SSE.",
+    response_class=StreamingResponse,
+)
+async def run_golden_set_test_stream(
+    agent_id: UUID,
+    request: GoldenSetTestRequest,
+    session: AsyncSession = Depends(get_session),
+) -> StreamingResponse:
+    """Run Golden Set test with streaming progress updates.
+
+    Returns Server-Sent Events (SSE) stream with progress updates
+    for each message, followed by the final report.
+
+    Event types:
+    - progress: GoldenSetTestProgress for each scored message
+    - complete: GoldenSetTestReport as final event
+    - error: Error message if test fails
+
+    Args:
+        agent_id: Agent UUID to test
+        request: Test configuration (mode: quick/medium)
+        session: Database session
+
+    Returns:
+        SSE stream with progress and final report
+    """
+    service = GoldenSetTestService(session)
+
+    async def generate_events() -> AsyncIterator[str]:
+        """Generate SSE events for test progress."""
+        try:
+            async for item in service.run_test_streaming(
+                agent_id=agent_id,
+                mode=request.mode,
+                golden_set_path=request.golden_set_path,
+            ):
+                if isinstance(item, GoldenSetTestProgress):
+                    yield f"event: progress\ndata: {item.model_dump_json()}\n\n"
+                elif isinstance(item, GoldenSetTestReport):
+                    yield f"event: complete\ndata: {item.model_dump_json()}\n\n"
+                    logger.info(
+                        f"Golden Set streaming test completed for agent '{agent_id}': "
+                        f"verdict={item.verdict}"
+                    )
+        except ValueError as e:
+            error_data = json.dumps({"error": str(e)})
+            yield f"event: error\ndata: {error_data}\n\n"
+        except Exception as e:
+            logger.error(f"Golden Set streaming test failed for agent {agent_id}: {e}", exc_info=True)
+            error_data = json.dumps({"error": f"Test failed: {str(e)}"})
+            yield f"event: error\ndata: {error_data}\n\n"
+
+    return StreamingResponse(
+        generate_events(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )

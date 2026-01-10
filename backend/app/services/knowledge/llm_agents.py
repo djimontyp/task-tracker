@@ -4,7 +4,9 @@ import logging
 
 from langdetect import detect  # type: ignore[import-untyped]
 from langdetect.lang_detect_exception import LangDetectException  # type: ignore[import-untyped]
+from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.providers.google import GoogleProvider
 from pydantic_ai.providers.ollama import OllamaProvider
 from pydantic_ai.providers.openai import OpenAIProvider
 
@@ -184,7 +186,7 @@ def validate_output_language(text: str, expected_language: str) -> bool:
 
 def build_model_instance(
     agent_config: AgentConfig, provider: LLMProvider, api_key: str | None = None
-) -> OpenAIChatModel:
+) -> OpenAIChatModel | GoogleModel:
     """Build pydantic-ai model instance from provider configuration.
 
     Args:
@@ -222,5 +224,17 @@ def build_model_instance(
             provider=openai_provider,
         )
 
+    elif provider.type == ProviderType.gemini:
+        if not api_key:
+            raise ValueError(
+                f"Provider '{provider.name}' requires a Google API key. Gemini providers must have an API key configured."
+            )
+
+        google_provider = GoogleProvider(api_key=api_key)
+        return GoogleModel(
+            model_name=agent_config.model_name,
+            provider=google_provider,
+        )
+
     else:
-        raise ValueError(f"Unsupported provider type: {provider.type}. Supported types: ollama, openai")
+        raise ValueError(f"Unsupported provider type: {provider.type}. Supported types: ollama, openai, gemini")

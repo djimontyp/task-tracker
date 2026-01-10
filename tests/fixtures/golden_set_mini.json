@@ -1,0 +1,124 @@
+{
+  "version": "1.0-mini",
+  "description": "Mini Golden Set - 5 diverse messages for quick testing",
+
+  "messages": [
+    {
+      "id": "28d81aa0-763b-40e6-b2a2-66cb7f313a09",
+      "content": "\ud83d\ude04",
+      "length": 1,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.05,
+        "confidence": "high",
+        "classification": "noise",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Emoji only - pure noise"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_be_below": 0.20
+      }
+    },
+    {
+      "id": "26503ba4-3447-4329-b562-85688c079fed",
+      "content": "\u043a\u0438\u043d\u044c \u0442\u0430\u0441\u043a\u0443",
+      "length": 10,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.35,
+        "confidence": "medium",
+        "classification": "weak",
+        "expected_atoms": [],
+        "expected_topics": [],
+        "notes": "Request for task link - some action but no details"
+      },
+      "tolerance": {
+        "score_band": 0.20,
+        "classification_alternatives": ["noise", "weak"]
+      }
+    },
+    {
+      "id": "102daa50-22df-4ee6-b4bd-d3e8cf12ad02",
+      "content": "\u043e\u043d\u0431\u043e\u0440\u0434\u0456\u043d\u0433 \u0437\u0430\u0432\u0438\u0441",
+      "length": 15,
+      "bucket": "short",
+      "ground_truth": {
+        "importance_score": 0.70,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "problem",
+            "title": "Onboarding hangs/freezes",
+            "key_phrases": ["\u043e\u043d\u0431\u043e\u0440\u0434\u0456\u043d\u0433", "\u0437\u0430\u0432\u0438\u0441"]
+          }
+        ],
+        "expected_topics": ["Onboarding", "Bugs"],
+        "notes": "Clear bug report - onboarding flow is hanging"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "must_have_atom_type": "problem"
+      }
+    },
+    {
+      "id": "f2a41b4d-471c-4f66-bc98-98702b79e3b3",
+      "content": "\u0432 \u043c\u0435\u043d\u0435 \u043d\u0435 \u043f\u0440\u0430\u0446\u044e\u0454 \u0447\u0435\u0440\u0435\u0437 \u0434\u0456\u044e\n\u043f\u0440\u043e\u0441\u0442\u043e \u0432\u0456\u0434\u043a\u0440\u0438\u0432\u0430\u0454\u0442\u044c\u0441\u044f \u0433\u043e\u043b\u043e\u0432\u043d\u0430 \u0441\u0442\u043e\u0440\u0456\u043d\u043a\u0430 \u0434\u0456\u0457 \u043f\u043e \u0440\u0435\u0434\u0456\u0440\u0435\u043a\u0442\u0443",
+      "length": 81,
+      "bucket": "medium",
+      "ground_truth": {
+        "importance_score": 0.75,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "problem",
+            "title": "Diia auth redirects to main page instead of completing login",
+            "key_phrases": ["\u043d\u0435 \u043f\u0440\u0430\u0446\u044e\u0454", "\u0434\u0456\u044e", "\u0440\u0435\u0434\u0456\u0440\u0435\u043a\u0442"]
+          }
+        ],
+        "expected_topics": ["Diia", "Authentication", "Bugs"],
+        "notes": "Clear bug report with reproduction steps"
+      },
+      "tolerance": {
+        "score_band": 0.15,
+        "must_have_atom_type": "problem"
+      }
+    },
+    {
+      "id": "75d3d200-d123-4c12-92d1-60bacd4525b8",
+      "content": "\u0442\u0430\u043a \u043f\u0440\u043e\u0431\u043b\u0435\u043c\u0443 \u0431\u0430\u0447\u0443 Viber sending failed for +380937727563: 403 Client Error: Forbidden for url: https://api-gateway.kyivstar.ua/rest/v1beta/viber/transaction. Falling back to SMS.",
+      "length": 178,
+      "bucket": "long",
+      "ground_truth": {
+        "importance_score": 0.90,
+        "confidence": "high",
+        "classification": "signal",
+        "expected_atoms": [
+          {
+            "type": "problem",
+            "title": "Viber sending fails with 403 Forbidden, falling back to SMS",
+            "key_phrases": ["Viber", "403", "Forbidden", "Falling back to SMS"]
+          }
+        ],
+        "expected_topics": ["Viber", "Integration", "Kyivstar", "Bugs"],
+        "notes": "Clear error report with stack trace and impact (SMS fallback)"
+      },
+      "tolerance": {
+        "score_band": 0.10,
+        "must_have_atom_type": "problem"
+      }
+    }
+  ],
+
+  "statistics": {
+    "total_messages": 5,
+    "by_classification": {
+      "noise": 1,
+      "weak": 1,
+      "signal": 3
+    }
+  }
+}

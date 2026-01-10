@@ -16,7 +16,7 @@ from app.services.provider_crud import ProviderCRUD
 logger = logging.getLogger(__name__)
 
 
-def provider_to_config(provider: LLMProvider, crud: ProviderCRUD) -> ProviderConfig:
+async def provider_to_config(provider: LLMProvider, crud: ProviderCRUD) -> ProviderConfig:
     """Convert database LLMProvider to domain ProviderConfig.
 
     Args:
@@ -26,10 +26,15 @@ def provider_to_config(provider: LLMProvider, crud: ProviderCRUD) -> ProviderCon
     Returns:
         Domain provider configuration
     """
+    # Get decrypted API key for providers that need it (OpenAI, Gemini)
+    api_key = None
+    if provider.id and provider.api_key_encrypted:
+        api_key = await crud.get_decrypted_api_key(provider.id)
+
     return ProviderConfig(
         provider_type=provider.type.value,
         base_url=provider.base_url,
-        api_key=None,
+        api_key=api_key,
         timeout=None,
         max_retries=None,
         metadata=None,
@@ -120,7 +125,7 @@ class LLMService:
             f"Creating agent '{config.name}' with provider '{provider.name}' using framework '{self.framework_name}'"
         )
 
-        provider_config = provider_to_config(provider, self.provider_resolver.crud)
+        provider_config = await provider_to_config(provider, self.provider_resolver.crud)
 
         try:
             agent = await self.framework.create_agent(config=config, provider_config=provider_config)

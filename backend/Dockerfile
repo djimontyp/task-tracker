@@ -43,6 +43,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY backend/app ./app
 COPY backend/core ./core
 COPY backend/alembic ./alembic
+COPY backend/fixtures ./fixtures
 
 # Create non-root user for security
 RUN groupadd --gid 1001 --system appgroup && \

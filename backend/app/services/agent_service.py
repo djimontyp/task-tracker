@@ -206,6 +206,21 @@ class AgentTestService:
 
         start_time = time.time()
 
+        # Create tracking record for metrics
+        from datetime import datetime, UTC
+        from app.models.knowledge_extraction_run import KnowledgeExtractionRun, ExtractionStatus
+
+        run_record = KnowledgeExtractionRun(
+            agent_config_id=agent.id,
+            status=ExtractionStatus.running,
+            started_at=datetime.now(UTC),
+            message_count=1, # Treat test prompt as 1 message unit
+            task_id="manual_test", # Marker to distinguish from background jobs
+        )
+        self.session.add(run_record)
+        await self.session.commit()
+        await self.session.refresh(run_record)
+
         try:
             # Use PromptedOutput for Ollama to avoid Python repr parsing issues
             # Ollama models work better with prompted mode than tool-based structured output
@@ -245,6 +260,34 @@ class AgentTestService:
 
             elapsed_time = time.time() - start_time
 
+            # Update run record with success stats
+            extraction_output = result.data
+            
+            # Extract usage
+            try:
+                usage = result.usage()
+                tokens_prompt = usage.request_tokens
+                tokens_completion = usage.response_tokens
+                tokens_total = usage.total_tokens
+            except Exception:
+                tokens_prompt = 0
+                tokens_completion = 0
+                tokens_total = 0
+
+            run_record.status = ExtractionStatus.completed
+            run_record.completed_at = datetime.now(UTC)
+            run_record.topics_created = len(extraction_output.topics)
+            run_record.atoms_created = len(extraction_output.atoms)
+            
+            # Save token usage
+            run_record.tokens_prompt = tokens_prompt
+            run_record.tokens_completion = tokens_completion
+            run_record.tokens_total = tokens_total
+            
+            # We don't save links/messages in test mode, so keep those 0
+            
+            await self.session.commit()
+
             # Extract response text as proper JSON
             response_text = result.output.model_dump_json()
 
@@ -263,6 +306,13 @@ class AgentTestService:
 
         except Exception as e:
             elapsed_time = time.time() - start_time
+            
+            # Update run record with error
+            run_record.status = ExtractionStatus.failed
+            run_record.completed_at = datetime.now(UTC)
+            run_record.error = str(e)[:2000]
+            await self.session.commit()
+
             logger.error(
                 f"Agent test failed for '{agent.name}' after {elapsed_time:.2f}s: {e}",
                 exc_info=True,
