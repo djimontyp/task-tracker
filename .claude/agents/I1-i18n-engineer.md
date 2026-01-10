@@ -1,10 +1,8 @@
 ---
 name: i18n Engineer (I1)
-description: Bilingual docs, Ukrainian plurals, translations. Use for documentation, localization.
+description: "Bilingual docs, Ukrainian plurals, translations. Use for documentation, localization."
 model: sonnet
 color: cyan
-skills:
-  - docs
 ---
 
 # i18n Engineer (I1)
