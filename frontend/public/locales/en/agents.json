@@ -46,7 +46,9 @@
     "actions": {
       "cancel": "Cancel",
       "create": "Create",
-      "update": "Update"
+      "update": "Update",
+      "changeModel": "Change",
+      "loadModels": "Load available models"
     }
   },
   "testDialog": {
@@ -134,7 +136,14 @@
       "maxTokens": "Max Tokens:",
       "systemPrompt": "System Prompt:",
       "status": "Status:"
-    }
+    },
+    "noDescription": "No description",
+    "metrics": {
+      "last": "Last",
+      "success": "Success",
+      "time": "Time"
+    },
+    "systemPromptLabel": "System Prompt"
   },
   "list": {
     "title": "AI Agents",
@@ -171,7 +180,8 @@
       "type": {
         "label": "Provider type",
         "ollama": "Ollama",
-        "openai": "OpenAI"
+        "openai": "OpenAI",
+        "gemini": "Google Gemini"
       },
       "baseUrl": {
         "label": "Base URL"
@@ -291,5 +301,69 @@
   },
   "confirm": {
     "deleteAgent": "Are you sure you want to delete this agent?"
+  },
+  "goldenSetTest": {
+    "title": "Golden Set Test",
+    "description": "Test agent against predefined messages with known correct answers",
+    "modes": {
+      "messageCount": "{{count}} messages"
+    },
+    "mode": {
+      "label": "Test Mode",
+      "quick": "Quick",
+      "quickDesc": "30 messages (~2 min)",
+      "medium": "Medium",
+      "mediumDesc": "50 messages (~4 min)"
+    },
+    "actions": {
+      "run": "Run Test",
+      "running": "Testing...",
+      "runAgain": "Run Again",
+      "close": "Close"
+    },
+    "progress": {
+      "testing": "Testing message",
+      "of": "of"
+    },
+    "results": {
+      "testedMessages": "{{count}} messages tested",
+      "model": "Model",
+      "verdict": {
+        "acceptable": "Acceptable",
+        "needsImprovement": "Needs Improvement",
+        "failed": "Failed"
+      },
+      "scoring": {
+        "title": "Scoring",
+        "pass": "Pass",
+        "warning": "Warning",
+        "fail": "Fail"
+      },
+      "classification": {
+        "title": "Classification",
+        "exact": "Exact",
+        "alternative": "Alternative",
+        "mismatch": "Mismatch"
+      },
+      "performance": {
+        "title": "Performance",
+        "duration": "Duration",
+        "avgDeviation": "Avg Deviation",
+        "maxDeviation": "Max Deviation"
+      },
+      "failures": {
+        "title": "Failures ({{count}})",
+        "content": "Content",
+        "expected": "Expected",
+        "actual": "Actual",
+        "diff": "Diff",
+        "status": "Status",
+        "limitNote": "Showing first 10 of {{total}} failures"
+      }
+    },
+    "toast": {
+      "success": "Test completed",
+      "error": "Test failed"
+    }
   }
 }

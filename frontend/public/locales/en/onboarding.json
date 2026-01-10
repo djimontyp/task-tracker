@@ -91,6 +91,37 @@
       "slackComingSoon": "Slack integration coming soon!",
       "importHistory": "Import History",
       "skip": "Skip"
+    },
+    "minimal": {
+      "steps": {
+        "sources": {
+          "title": "Connect Telegram",
+          "action": "Connect"
+        },
+        "project": {
+          "title": "Create project",
+          "action": "Create"
+        },
+        "agent": {
+          "title": "Enable AI",
+          "action": "Enable"
+        },
+        "import": {
+          "title": "Import data",
+          "action": "Import"
+        }
+      },
+      "progress": {
+        "label": "Setup",
+        "step": "Step {{current}} of {{total}}"
+      },
+      "collapsed": {
+        "title": "Setup complete",
+        "description": "Listening... Collecting first data"
+      },
+      "pending": "Will appear automatically after analysis",
+      "dismiss": "Skip setup",
+      "dismissAriaLabel": "Dismiss"
     }
   },
   "import": {

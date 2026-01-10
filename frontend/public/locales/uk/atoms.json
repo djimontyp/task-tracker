@@ -240,5 +240,16 @@
       "addedTitle": "Додано",
       "removedTitle": "Видалено"
     }
+  },
+  "atomDetails": {
+    "confidence": "Впевненість",
+    "approved": "Затверджено",
+    "rejected": "Відхилено",
+    "viewMessage": "Переглянути повідомлення",
+    "versionHistory": "Історія версій",
+    "pendingVersions_one": "{{count}} версія очікує перегляду.",
+    "pendingVersions_few": "{{count}} версії очікують перегляду.",
+    "pendingVersions_many": "{{count}} версій очікують перегляду.",
+    "reviewChanges": "Переглянути зміни"
   }
 }

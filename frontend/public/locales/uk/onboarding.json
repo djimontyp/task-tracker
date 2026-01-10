@@ -91,6 +91,37 @@
       "slackComingSoon": "Інтеграція Slack скоро буде доступна!",
       "importHistory": "Імпорт історії",
       "skip": "Пропустити"
+    },
+    "minimal": {
+      "steps": {
+        "sources": {
+          "title": "Підключити Telegram",
+          "action": "Підключити"
+        },
+        "project": {
+          "title": "Створити проєкт",
+          "action": "Створити"
+        },
+        "agent": {
+          "title": "Увімкнути AI",
+          "action": "Увімкнути"
+        },
+        "import": {
+          "title": "Імпортувати дані",
+          "action": "Імпорт"
+        }
+      },
+      "progress": {
+        "label": "Налаштування",
+        "step": "Крок {{current}} з {{total}}"
+      },
+      "collapsed": {
+        "title": "Налаштування завершено",
+        "description": "Слухаємо ефір... Збираємо перші дані"
+      },
+      "pending": "З'явиться автоматично після аналізу",
+      "dismiss": "Пропустити налаштування",
+      "dismissAriaLabel": "Закрити"
     }
   },
   "import": {

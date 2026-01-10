@@ -236,5 +236,14 @@
       "addedTitle": "Added",
       "removedTitle": "Removed"
     }
+  },
+  "atomDetails": {
+    "confidence": "Confidence",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "viewMessage": "View Message",
+    "versionHistory": "Version History",
+    "pendingVersions": "There are {{count}} pending versions waiting for review.",
+    "reviewChanges": "Review Changes"
   }
 }

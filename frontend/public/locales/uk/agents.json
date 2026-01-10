@@ -46,7 +46,9 @@
     "actions": {
       "cancel": "Скасувати",
       "create": "Створити",
-      "update": "Оновити"
+      "update": "Оновити",
+      "changeModel": "Змінити",
+      "loadModels": "Завантажити доступні моделі"
     }
   },
   "testDialog": {
@@ -122,11 +124,11 @@
   },
   "card": {
     "actions": {
-      "edit": "Редагувати агента",
-      "copy": "Копіювати агента",
+      "edit": "Редагувати",
+      "copy": "Копіювати",
       "manageTasks": "Керувати завданнями",
-      "test": "Тестувати агента",
-      "delete": "Видалити агента"
+      "test": "Тестувати",
+      "delete": "Видалити"
     },
     "fields": {
       "model": "Модель:",
@@ -134,7 +136,14 @@
       "maxTokens": "Макс. токенів:",
       "systemPrompt": "Системний промпт:",
       "status": "Статус:"
-    }
+    },
+    "noDescription": "Без опису",
+    "metrics": {
+      "last": "Останній",
+      "success": "Успіх",
+      "time": "Час"
+    },
+    "systemPromptLabel": "Системний промпт"
   },
   "list": {
     "title": "AI Агенти",
@@ -171,7 +180,8 @@
       "type": {
         "label": "Тип провайдера",
         "ollama": "Ollama",
-        "openai": "OpenAI"
+        "openai": "OpenAI",
+        "gemini": "Google Gemini"
       },
       "baseUrl": {
         "label": "Базова URL"
@@ -291,5 +301,75 @@
   },
   "confirm": {
     "deleteAgent": "Ви впевнені, що хочете видалити цього агента?"
+  },
+  "goldenSetTest": {
+    "title": "Тест Golden Set",
+    "description": "Тестування агента на заздалегідь визначених повідомленнях з відомими правильними відповідями",
+    "modes": {
+      "messageCount_one": "{{count}} повідомлення",
+      "messageCount_few": "{{count}} повідомлення",
+      "messageCount_many": "{{count}} повідомлень",
+      "messageCount_other": "{{count}} повідомлень"
+    },
+    "mode": {
+      "label": "Режим тесту",
+      "quick": "Швидкий",
+      "quickDesc": "30 повідомлень (~2 хв)",
+      "medium": "Середній",
+      "mediumDesc": "50 повідомлень (~4 хв)"
+    },
+    "actions": {
+      "run": "Запустити тест",
+      "running": "Тестування...",
+      "runAgain": "Запустити знову",
+      "close": "Закрити"
+    },
+    "progress": {
+      "testing": "Тестування повідомлення",
+      "of": "з"
+    },
+    "results": {
+      "testedMessages_one": "{{count}} повідомлення протестовано",
+      "testedMessages_few": "{{count}} повідомлення протестовано",
+      "testedMessages_many": "{{count}} повідомлень протестовано",
+      "testedMessages_other": "{{count}} повідомлень протестовано",
+      "model": "Модель",
+      "verdict": {
+        "acceptable": "Прийнятно",
+        "needsImprovement": "Потребує покращення",
+        "failed": "Провалено"
+      },
+      "scoring": {
+        "title": "Оцінювання",
+        "pass": "Пройшло",
+        "warning": "Попередження",
+        "fail": "Провал"
+      },
+      "classification": {
+        "title": "Класифікація",
+        "exact": "Точно",
+        "alternative": "Альтернатива",
+        "mismatch": "Невідповідність"
+      },
+      "performance": {
+        "title": "Продуктивність",
+        "duration": "Тривалість",
+        "avgDeviation": "Сер. відхилення",
+        "maxDeviation": "Макс. відхилення"
+      },
+      "failures": {
+        "title": "Невдачі ({{count}})",
+        "content": "Зміст",
+        "expected": "Очікувано",
+        "actual": "Фактично",
+        "diff": "Різниця",
+        "status": "Статус",
+        "limitNote": "Показано перші 10 з {{total}} невдач"
+      }
+    },
+    "toast": {
+      "success": "Тест завершено",
+      "error": "Тест не вдався"
+    }
   }
 }

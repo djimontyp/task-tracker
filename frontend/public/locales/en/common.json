@@ -151,6 +151,14 @@
     "unsavedChanges": "You have unsaved changes. Continue?",
     "logout": "Are you sure you want to log out?"
   },
+  "confirmDialog": {
+    "deleteTitle": "Confirm Deletion",
+    "deleteDescription": "This action cannot be undone. Are you sure you want to proceed?",
+    "deleteAgent": "Are you sure you want to delete this agent?",
+    "deleteTask": "Are you sure you want to delete this task?",
+    "deleteProvider": "Are you sure you want to delete this provider?",
+    "deleteProject": "Are you sure you want to delete this project?"
+  },
   "pagination": {
     "previous": "Previous",
     "next": "Next",
@@ -474,6 +482,12 @@
     "noResultsDescription": "No topics or messages match your search for \"{{query}}\". Try different keywords or check your spelling.",
     "topics": "Topics ({{count}})",
     "messages": "Messages ({{count}})"
+  },
+  "loader": {
+    "analyzing": "Analyzing context...",
+    "loading": "Loading messages...",
+    "connecting": "Checking connection...",
+    "processing": "Processing data..."
   },
   "versionsPage": {
     "searchPlaceholder": "Search by entity name...",

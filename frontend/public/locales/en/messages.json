@@ -48,7 +48,45 @@
     "needsAttention_one": "{{count}} needs attention",
     "needsAttention_other": "{{count}} need attention",
     "allClear": "All clear",
-    "noMessages": "All quiet - perfect time for coffee"
+    "noMessages": "All quiet - perfect time for coffee",
+    "legend": "Legend",
+    "legendHint": "Click to see Signal Quality Legend"
+  },
+  "legend": {
+    "title": "Signal Quality & Scoring",
+    "subtitle": "How AI analyzes message value",
+    "levels": {
+      "critical": {
+        "label": "Critical Signal",
+        "score": ">80",
+        "description": "Highly important updates, blockers, or key decisions. Requires immediate attention."
+      },
+      "medium": {
+        "label": "Medium Signal",
+        "score": ">50",
+        "description": "Valuable context, progress updates, or relevant discussions."
+      },
+      "valid": {
+        "label": "Valid Signal",
+        "score": "Base",
+        "description": "Meaningful communication contributing to the project knowledge."
+      },
+      "noise": {
+        "label": "Noise",
+        "score": "<10",
+        "description": "Casual chatter, logistics, or low-context messages."
+      }
+    }
+  },
+  "layout": {
+    "list": "List",
+    "split": "Split"
+  },
+  "importanceLevels": {
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
   },
   "list": {
     "title": "Message list",
@@ -120,7 +158,23 @@
     "markAsRead": "Mark as Read",
     "markAsUnread": "Mark as Unread",
     "refresh": "Refresh",
-    "updateAuthors": "Update Authors"
+    "updateAuthors": "Update Authors",
+    "extract": "Extract"
+  },
+  "analysis": {
+    "title": "AI Knowledge Extraction",
+    "selectAgent": "Select Agent",
+    "context": "Context",
+    "processing": "Processing...",
+    "running": "Running ({{count}} items)",
+    "identifyingTopics": "Identifying topics...",
+    "extractingAtoms": "Extracting atoms...",
+    "finalizing": "Finalizing...",
+    "completed": "Extraction Completed",
+    "topics": "Topics",
+    "atoms": "Atoms",
+    "rerun": "Rerun Extraction",
+    "ready_to_extract": "Ready to extract knowledge from this message."
   },
   "ingestion": {
     "title": "Import messages",
@@ -305,9 +359,16 @@
     "panels": {
       "rawData": "Raw Data",
       "analysis": "Analysis"
+    },
+    "aria": {
+      "previousMessage": "Previous message (K)",
+      "nextMessage": "Next message (J)"
     }
   },
   "atomsTab": {
+    "noLinkedAtoms": "No linked atoms found.",
+    "keywordsLabel": "Keywords",
+    "relevanceLabel": "Relevance:",
     "extractedEntities": "Extracted Entities",
     "noEntitiesDetected": "No entities detected in this message",
     "entities": {
@@ -365,5 +426,66 @@
     "tryAgain": "Try Again",
     "retryAriaLabel": "Retry loading messages",
     "errorDetails": "Error Details (Dev Only)"
+  },
+  "detailPanel": {
+    "selectMessage": "Select a message to investigate",
+    "headerTitle": "Message Analysis",
+    "unknownSource": "Unknown Source",
+    "score": "Score: {{value}}",
+    "type": "Type: {{value}}",
+    "noContent": "No content",
+    "connectedKnowledge": "Connected Knowledge",
+    "technicalDetails": "Technical Details",
+    "idLabel": "ID",
+    "processingLog": "Processing Log",
+    "aria": {
+      "closePanel": "Close panel",
+      "previousMessage": "Previous message",
+      "nextMessage": "Next message",
+      "avatar": "User avatar"
+    }
+  },
+  "status": {
+    "signal": "Signal",
+    "noise": "Noise"
+  },
+  "dateGroups": {
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "infiniteScroll": {
+    "loadingMore": "Loading more history...",
+    "scrollForMore": "Scroll for more",
+    "endOfHistory": "End of history"
+  },
+  "inspectLabels": {
+    "auto": "Auto",
+    "editable": "Editable",
+    "approve": "Approve",
+    "nav": "Nav"
+  },
+  "actions": {
+    "analyze": "Analyze",
+    "archive": "Archive",
+    "delete": "Delete",
+    "star": "Star",
+    "unstar": "Unstar",
+    "markAsRead": "Mark as Read",
+    "markAsUnread": "Mark as Unread",
+    "refresh": "Refresh",
+    "updateAuthors": "Update Authors",
+    "extract": "Extract",
+    "retry": "Retry",
+    "scrollToTop": "To top"
+  },
+  "smartBatch": {
+    "noAgentFound": "No active agent found",
+    "extractionStarted": "Batch extraction started",
+    "extractingProgress": "Extracting knowledge from {{count}} messages...",
+    "potentialInsights": "{{count}} potential insights detected",
+    "potentialInsights_one": "{{count}} potential insight detected",
+    "potentialInsights_other": "{{count}} potential insights detected",
+    "waitingDescription": "High-signal messages waiting to be turned into knowledge.",
+    "captureKnowledge": "Capture Knowledge"
   }
 }

@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/shared/ui/chart'
@@ -33,8 +34,9 @@ export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
     },
     ref
   ) => {
-    const chartData = React.useMemo(() => 
-      reverseData ? [...data].reverse() : data, 
+    const { i18n } = useTranslation()
+    const chartData = React.useMemo(() =>
+      reverseData ? [...data].reverse() : data,
       [data, reverseData]
     )
     return (
@@ -58,7 +60,7 @@ export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
                     // Format date if it's a date string
                     const date = new Date(value)
                     if (!isNaN(date.getTime())) {
-                      return date.toLocaleDateString('uk-UA', { month: 'short', day: 'numeric' })
+                      return date.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
                     }
                     return value.slice(0, 10)
                   }

@@ -51,7 +51,45 @@
     "needsAttention_few": "{{count}} потребують уваги",
     "needsAttention_many": "{{count}} потребують уваги",
     "allClear": "Все під контролем",
-    "noMessages": "Тиша в ефірі - саме час для кави"
+    "noMessages": "Тиша в ефірі - саме час для кави",
+    "legend": "Легенда",
+    "legendHint": "Натисніть для перегляду легенди якості сигналу"
+  },
+  "legend": {
+    "title": "Якість сигналу та оцінювання",
+    "subtitle": "Як AI аналізує цінність повідомлень",
+    "levels": {
+      "critical": {
+        "label": "Критичний сигнал",
+        "score": ">80",
+        "description": "Важливі оновлення, блокери або ключові рішення. Потребує негайної уваги."
+      },
+      "medium": {
+        "label": "Середній сигнал",
+        "score": ">50",
+        "description": "Цінний контекст, оновлення прогресу або релевантні обговорення."
+      },
+      "valid": {
+        "label": "Валідний сигнал",
+        "score": "Базовий",
+        "description": "Значуща комунікація, що збагачує знання про проєкт."
+      },
+      "noise": {
+        "label": "Шум",
+        "score": "<10",
+        "description": "Невимушена розмова, логістика або повідомлення з низьким контекстом."
+      }
+    }
+  },
+  "layout": {
+    "list": "Список",
+    "split": "Розділений"
+  },
+  "importanceLevels": {
+    "critical": "Критична",
+    "high": "Висока",
+    "medium": "Середня",
+    "low": "Низька"
   },
   "list": {
     "title": "Список повідомлень",
@@ -123,7 +161,23 @@
     "markAsRead": "Позначити як прочитане",
     "markAsUnread": "Позначити як непрочитане",
     "refresh": "Оновити",
-    "updateAuthors": "Оновити авторів"
+    "updateAuthors": "Оновити авторів",
+    "extract": "Витягти"
+  },
+  "analysis": {
+    "title": "AI екстракція знань",
+    "selectAgent": "Оберіть агента",
+    "context": "Контекст",
+    "processing": "Обробка...",
+    "running": "Виконується ({{count}} елементів)",
+    "identifyingTopics": "Визначення тем...",
+    "extractingAtoms": "Витягання атомів...",
+    "finalizing": "Завершення...",
+    "completed": "Екстракція завершена",
+    "topics": "Теми",
+    "atoms": "Атоми",
+    "rerun": "Повторити екстракцію",
+    "ready_to_extract": "Готовий витягти знання з цього повідомлення."
   },
   "ingestion": {
     "title": "Імпорт повідомлень",
@@ -308,9 +362,16 @@
     "panels": {
       "rawData": "Сирі дані",
       "analysis": "Аналіз"
+    },
+    "aria": {
+      "previousMessage": "Попереднє повідомлення (K)",
+      "nextMessage": "Наступне повідомлення (J)"
     }
   },
   "atomsTab": {
+    "noLinkedAtoms": "Пов'язаних атомів не знайдено.",
+    "keywordsLabel": "Ключові слова",
+    "relevanceLabel": "Релевантність:",
     "extractedEntities": "Витягнуті сутності",
     "noEntitiesDetected": "У цьому повідомленні не виявлено сутностей",
     "entities": {
@@ -368,5 +429,67 @@
     "tryAgain": "Спробувати ще",
     "retryAriaLabel": "Повторити завантаження повідомлень",
     "errorDetails": "Деталі помилки (тільки для розробників)"
+  },
+  "detailPanel": {
+    "selectMessage": "Виберіть повідомлення для аналізу",
+    "headerTitle": "Аналіз повідомлення",
+    "unknownSource": "Невідоме джерело",
+    "score": "Оцінка: {{value}}",
+    "type": "Тип: {{value}}",
+    "noContent": "Немає вмісту",
+    "connectedKnowledge": "Пов'язані знання",
+    "technicalDetails": "Технічні деталі",
+    "idLabel": "ID",
+    "processingLog": "Журнал обробки",
+    "aria": {
+      "closePanel": "Закрити панель",
+      "previousMessage": "Попереднє повідомлення",
+      "nextMessage": "Наступне повідомлення",
+      "avatar": "Аватар користувача"
+    }
+  },
+  "status": {
+    "signal": "Сигнал",
+    "noise": "Шум"
+  },
+  "dateGroups": {
+    "today": "Сьогодні",
+    "yesterday": "Вчора"
+  },
+  "infiniteScroll": {
+    "loadingMore": "Завантаження історії...",
+    "scrollForMore": "Прокрутіть для більшого",
+    "endOfHistory": "Кінець історії"
+  },
+  "inspectLabels": {
+    "auto": "Авто",
+    "editable": "Редаговане",
+    "approve": "Затвердити",
+    "nav": "Навігація"
+  },
+  "actions": {
+    "analyze": "Аналізувати",
+    "archive": "Архівувати",
+    "delete": "Видалити",
+    "star": "Додати зірку",
+    "unstar": "Прибрати зірку",
+    "markAsRead": "Позначити як прочитане",
+    "markAsUnread": "Позначити як непрочитане",
+    "refresh": "Оновити",
+    "updateAuthors": "Оновити авторів",
+    "extract": "Витягти",
+    "retry": "Повторити",
+    "scrollToTop": "Вгору"
+  },
+  "smartBatch": {
+    "noAgentFound": "Активного агента не знайдено",
+    "extractionStarted": "Пакетну екстракцію розпочато",
+    "extractingProgress": "Витягування знань з {{count}} повідомлень...",
+    "potentialInsights": "{{count}} потенційних інсайтів виявлено",
+    "potentialInsights_one": "{{count}} потенційний інсайт виявлено",
+    "potentialInsights_few": "{{count}} потенційних інсайти виявлено",
+    "potentialInsights_many": "{{count}} потенційних інсайтів виявлено",
+    "waitingDescription": "Повідомлення з високим сигналом очікують на перетворення в знання.",
+    "captureKnowledge": "Зберегти знання"
   }
 }

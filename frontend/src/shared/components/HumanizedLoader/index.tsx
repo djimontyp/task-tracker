@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 import Spinner from '@/shared/ui/Spinner/Spinner'
 import { cn } from '@/shared/lib/utils'
 import { loading, transitions } from '@/shared/tokens'
@@ -26,20 +28,25 @@ export interface HumanizedLoaderProps {
   className?: string
 }
 
-const defaultMessages: Record<HumanizedLoaderVariant, string> = {
-  analyzing: 'Analyzing context...',
-  loading: 'Loading messages...',
-  connecting: 'Checking connection...',
-  processing: 'Processing data...',
-}
-
 export function HumanizedLoader({
   variant,
   message,
   size = 'md',
   className,
 }: HumanizedLoaderProps) {
-  const displayMessage = message ?? defaultMessages[variant]
+  const { t } = useTranslation('common')
+
+  // Get default message for variant (no useMemo to avoid t() dependency issues)
+  const getDefaultMessage = (v: HumanizedLoaderVariant): string => {
+    switch (v) {
+      case 'analyzing': return t('loader.analyzing')
+      case 'loading': return t('loader.loading')
+      case 'connecting': return t('loader.connecting')
+      case 'processing': return t('loader.processing')
+    }
+  }
+
+  const displayMessage = message ?? getDefaultMessage(variant)
 
   return (
     <div
