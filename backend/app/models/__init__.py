@@ -5,6 +5,7 @@ from .agent_config import (
     AgentConfigCreate,
     AgentConfigPublic,
     AgentConfigUpdate,
+    AgentType,
 )
 from .agent_project_link import (
     AgentProjectLink,
@@ -228,6 +229,7 @@ __all__ = [
     "AgentConfigCreate",
     "AgentConfigPublic",
     "AgentConfigUpdate",
+    "AgentType",
     # Agent-Project Link
     "AgentProjectLink",
     "AgentProjectLinkCreate",

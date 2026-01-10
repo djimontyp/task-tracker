@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.models import (
     AgentConfig,
+    AgentType,
     LLMProvider,
     ProjectConfig,
     Source,
@@ -159,9 +160,10 @@ async def seed_config(session: AsyncSession):
     else:
         print("    ✓ LLM provider already exists")
 
-    # 4. AgentConfig (knowledge_extractor) - check if exists
-    print("  Creating agent config...")
+    # 4. AgentConfig (knowledge_extractor) - system agent
+    print("  Creating knowledge_extractor system agent...")
     from app.services.knowledge.llm_agents import KNOWLEDGE_EXTRACTION_PROMPT_UK
+    from app.db.seed_default_agent import IMPORTANCE_SCORER_SYSTEM_PROMPT
 
     result = await session.execute(select(AgentConfig).where(AgentConfig.name == "knowledge_extractor"))
     agent = result.scalar_one_or_none()
@@ -169,37 +171,57 @@ async def seed_config(session: AsyncSession):
     if not agent:
         agent = AgentConfig(
             name="knowledge_extractor",
-            description="Default knowledge extraction agent for processing messages and extracting topics/atoms",
+            description="System agent for extracting topics and atoms from messages",
             provider_id=provider.id,
             model_name="llama3.2",
             system_prompt=KNOWLEDGE_EXTRACTION_PROMPT_UK,
             temperature=0.3,
             is_active=True,
+            agent_type=AgentType.system,
+            is_system_prompt_locked=True,
+            is_output_schema_locked=True,
         )
         session.add(agent)
         await session.flush()
     else:
-        print("    ✓ Agent config (knowledge_extractor) already exists")
+        # Upgrade existing agent to system type if needed
+        if agent.agent_type != AgentType.system:
+            agent.agent_type = AgentType.system
+            agent.is_system_prompt_locked = True
+            agent.is_output_schema_locked = True
+            print("    ↑ Upgraded knowledge_extractor to system agent")
+        else:
+            print("    ✓ Agent config (knowledge_extractor) already exists")
 
-    # 4.1 AgentConfig (scoring_judge) - check if exists
-    print("  Creating scoring_judge config...")
-    result = await session.execute(select(AgentConfig).where(AgentConfig.name == "scoring_judge"))
+    # 4.1 AgentConfig (importance_scorer) - system agent
+    print("  Creating importance_scorer system agent...")
+    result = await session.execute(select(AgentConfig).where(AgentConfig.name == "importance_scorer"))
     agent_scoring = result.scalar_one_or_none()
 
     if not agent_scoring:
         agent_scoring = AgentConfig(
-            name="scoring_judge",
-            description="AI Message Importance Judge",
+            name="importance_scorer",
+            description="System agent for scoring message importance and triage",
             provider_id=provider.id,
             model_name="qwen3:14b",  # Recommended default for scoring
-            system_prompt="DEPRECATED", # Service uses code-based prompt, but field is required
+            system_prompt=IMPORTANCE_SCORER_SYSTEM_PROMPT,
             temperature=0.0,
             is_active=True,
+            agent_type=AgentType.system,
+            is_system_prompt_locked=True,
+            is_output_schema_locked=True,
         )
         session.add(agent_scoring)
         await session.flush()
     else:
-        print("    ✓ Agent config (scoring_judge) already exists")
+        # Upgrade existing agent to system type if needed
+        if agent_scoring.agent_type != AgentType.system:
+            agent_scoring.agent_type = AgentType.system
+            agent_scoring.is_system_prompt_locked = True
+            agent_scoring.is_output_schema_locked = True
+            print("    ↑ Upgraded importance_scorer to system agent")
+        else:
+            print("    ✓ Agent config (importance_scorer) already exists")
 
     # 5. ProjectConfig - використовуємо FeodalMe (вже є в базі)
     print("  Checking project config...")

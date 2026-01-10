@@ -17,14 +17,16 @@ async def main():
     db_context = get_db_session_context()
     db = await anext(db_context)
     
-    # Check DB Content
-    stmt = select(DBAgentConfig).where(DBAgentConfig.name == "scoring_judge")
+    # Check DB Content (agent renamed from scoring_judge to importance_scorer)
+    stmt = select(DBAgentConfig).where(DBAgentConfig.name == "importance_scorer")
     result = await db.execute(stmt)
     config = result.scalar_one_or_none()
     print(f"DB Config Found: {config is not None}")
     if config:
         print(f"Model in DB: {config.model_name}")
         print(f"Provider ID in DB: {config.provider_id}")
+        print(f"Agent Type: {config.agent_type}")
+        print(f"System Prompt Locked: {config.is_system_prompt_locked}")
 
     # Check Service Logic
     crud = ProviderCRUD(db)

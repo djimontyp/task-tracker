@@ -72,7 +72,8 @@ class LLMImportanceScorer:
         )
 
         # Config First: Try to load agent configuration from DB
-        stmt = select(DBAgentConfig).where(DBAgentConfig.name == "scoring_judge")
+        # Note: Agent renamed from "scoring_judge" to "importance_scorer" in seed_default_agent.py
+        stmt = select(DBAgentConfig).where(DBAgentConfig.name == "importance_scorer")
         result = await db_session.execute(stmt)
         db_agent_config = result.scalar_one_or_none()
 
@@ -99,8 +100,8 @@ class LLMImportanceScorer:
 
         # Configure Agent (Domain Object)
         agent_config = AgentConfig(
-            name="scoring_judge",
-            description="AI Message Importance Judge",
+            name="importance_scorer",
+            description="System agent for scoring message importance and triage",
             model_name=model_name,
             system_prompt=system_prompt,
             output_type=ScoringAnalysis,

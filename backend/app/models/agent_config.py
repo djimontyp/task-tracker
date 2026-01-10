@@ -1,10 +1,22 @@
 """Agent Configuration model for managing AI agent definitions."""
 
 from datetime import UTC, datetime
+from enum import Enum
 from uuid import UUID, uuid4
 
 from sqlalchemy import Column, DateTime, Text, func
 from sqlmodel import Field, SQLModel
+
+
+class AgentType(str, Enum):
+    """Agent type classification.
+
+    - system: Built-in agents with locked prompts (ImportanceScorer, KnowledgeExtractor)
+    - custom: User-created agents with full customization
+    """
+
+    system = "system"
+    custom = "custom"
 
 
 class AgentConfig(SQLModel, table=True):
@@ -64,6 +76,20 @@ class AgentConfig(SQLModel, table=True):
 
     # Status
     is_active: bool = Field(default=True, description="Agent is active")
+
+    # System Agent Fields
+    agent_type: AgentType = Field(
+        default=AgentType.custom,
+        description="Agent type: 'system' (built-in, limited editing) or 'custom' (user-created)",
+    )
+    is_system_prompt_locked: bool = Field(
+        default=False,
+        description="If true, system_prompt cannot be modified (for system agents)",
+    )
+    is_output_schema_locked: bool = Field(
+        default=False,
+        description="If true, output schema cannot be modified (for system agents)",
+    )
 
     # Timestamps
     created_at: datetime = Field(
@@ -144,5 +170,8 @@ class AgentConfigPublic(SQLModel):
     temperature: float | None = None
     max_tokens: int | None = None
     is_active: bool
+    agent_type: AgentType = AgentType.custom
+    is_system_prompt_locked: bool = False
+    is_output_schema_locked: bool = False
     created_at: datetime
     updated_at: datetime
