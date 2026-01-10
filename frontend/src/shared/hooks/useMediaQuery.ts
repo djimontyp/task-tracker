@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react'
 
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false)
+  const [matches, setMatches] = useState(() => {
+    // Initialize with actual value to avoid hydration mismatch
+    if (typeof window !== 'undefined') {
+      return window.matchMedia(query).matches
+    }
+    return false
+  })
 
   useEffect(() => {
     const media = window.matchMedia(query)
 
-    if (media.matches !== matches) {
-      setMatches(media.matches)
-    }
+    // Set initial value (handles query changes)
+    setMatches(media.matches)
 
     const listener = (event: MediaQueryListEvent) => {
       setMatches(event.matches)
@@ -17,7 +22,7 @@ export function useMediaQuery(query: string): boolean {
     media.addEventListener('change', listener)
 
     return () => media.removeEventListener('change', listener)
-  }, [matches, query])
+  }, [query]) // Only re-run when query changes, NOT when matches changes
 
   return matches
 }

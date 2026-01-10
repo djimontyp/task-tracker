@@ -125,9 +125,18 @@ afterEach(() => {
 })
 
 describe('useWebSocket with Provider', () => {
+  // Helper to advance timers past debounce delay
+  const advancePastDebounce = async () => {
+    await act(async () => {
+      vi.advanceTimersByTime(100) // 50ms debounce + buffer
+    })
+  }
+
   describe('Connection via Provider', () => {
-    it('creates WebSocket connection when topic is subscribed', () => {
+    it('creates WebSocket connection when topic is subscribed', async () => {
       renderHook(() => useWebSocket({ topics: ['test'] }), { wrapper })
+
+      await advancePastDebounce()
 
       expect(MockWebSocket.instances.length).toBe(1)
     })
@@ -139,7 +148,7 @@ describe('useWebSocket with Provider', () => {
       expect(MockWebSocket.instances.length).toBe(0)
     })
 
-    it('includes topics in URL when provided', () => {
+    it('includes topics in URL when provided', async () => {
       renderHook(() =>
         useWebSocket({
           topics: ['analysis', 'proposals'],
@@ -147,15 +156,19 @@ describe('useWebSocket with Provider', () => {
         { wrapper }
       )
 
+      await advancePastDebounce()
+
       const ws = MockWebSocket.lastInstance
       expect(ws.url).toContain('topics=analysis,proposals')
     })
 
-    it('sets isConnected to true when connection opens', () => {
+    it('sets isConnected to true when connection opens', async () => {
       const { result } = renderHook(() =>
         useWebSocket({ topics: ['test'] }),
         { wrapper }
       )
+
+      await advancePastDebounce()
 
       expect(result.current.isConnected).toBe(false)
 
@@ -167,13 +180,15 @@ describe('useWebSocket with Provider', () => {
       expect(result.current.connectionState).toBe('connected')
     })
 
-    it('calls onConnect callback when connection opens', () => {
+    it('calls onConnect callback when connection opens', async () => {
       const onConnect = vi.fn()
 
       renderHook(() =>
         useWebSocket({ topics: ['test'], onConnect }),
         { wrapper }
       )
+
+      await advancePastDebounce()
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -184,13 +199,15 @@ describe('useWebSocket with Provider', () => {
   })
 
   describe('Message Handling', () => {
-    it('calls onMessage callback with parsed data', () => {
+    it('calls onMessage callback with parsed data', async () => {
       const onMessage = vi.fn()
 
       renderHook(() =>
         useWebSocket({ topics: ['test'], onMessage }),
         { wrapper }
       )
+
+      await advancePastDebounce()
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -205,13 +222,15 @@ describe('useWebSocket with Provider', () => {
       expect(onMessage).toHaveBeenCalledWith(testData)
     })
 
-    it('handles malformed JSON gracefully', () => {
+    it('handles malformed JSON gracefully', async () => {
       const onMessage = vi.fn()
 
       renderHook(() =>
         useWebSocket({ topics: ['test'], onMessage }),
         { wrapper }
       )
+
+      await advancePastDebounce()
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -228,11 +247,13 @@ describe('useWebSocket with Provider', () => {
       expect(onMessage).not.toHaveBeenCalled()
     })
 
-    it('responds to ping messages with pong', () => {
+    it('responds to ping messages with pong', async () => {
       renderHook(() =>
         useWebSocket({ topics: ['test'] }),
         { wrapper }
       )
+
+      await advancePastDebounce()
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -249,13 +270,15 @@ describe('useWebSocket with Provider', () => {
       )
     })
 
-    it('does not pass ping messages to onMessage callback', () => {
+    it('does not pass ping messages to onMessage callback', async () => {
       const onMessage = vi.fn()
 
       renderHook(() =>
         useWebSocket({ topics: ['test'], onMessage }),
         { wrapper }
       )
+
+      await advancePastDebounce()
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -276,11 +299,13 @@ describe('useWebSocket with Provider', () => {
   // where one WebSocketProvider wraps all components.
 
   describe('Cleanup', () => {
-    it('unsubscribes on unmount', () => {
+    it('unsubscribes on unmount', async () => {
       const { unmount } = renderHook(() =>
         useWebSocket({ topics: ['test'] }),
         { wrapper }
       )
+
+      await advancePastDebounce()
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -290,7 +315,7 @@ describe('useWebSocket with Provider', () => {
 
       // After unmount and cleanup delay, connection should close
       // because no subscriptions remain
-      act(() => {
+      await act(async () => {
         vi.advanceTimersByTime(200)
       })
 
@@ -299,11 +324,13 @@ describe('useWebSocket with Provider', () => {
   })
 
   describe('Manual Controls', () => {
-    it('send() sends JSON data when connected', () => {
+    it('send() sends JSON data when connected', async () => {
       const { result } = renderHook(() =>
         useWebSocket({ topics: ['test'] }),
         { wrapper }
       )
+
+      await advancePastDebounce()
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -320,17 +347,20 @@ describe('useWebSocket with Provider', () => {
       )
     })
 
-    it('send() does nothing when not connected', () => {
+    it('send() does nothing when not connected', async () => {
       const { result } = renderHook(() =>
         useWebSocket({ topics: ['test'] }),
         { wrapper }
       )
 
-      // Don't open connection
+      await advancePastDebounce()
+
+      // Don't open connection - just try to send while in CONNECTING state
       act(() => {
         result.current.send({ type: 'test' })
       })
 
+      // send() should not have been called because WebSocket is not OPEN
       expect(MockWebSocket.lastInstance.send).not.toHaveBeenCalled()
     })
   })
@@ -341,6 +371,8 @@ describe('useWebSocket with Provider', () => {
         useWebSocket({ topics: ['test'] }),
         { wrapper }
       )
+
+      await advancePastDebounce()
 
       // Initial connection
       act(() => {
@@ -363,11 +395,13 @@ describe('useWebSocket with Provider', () => {
       expect(MockWebSocket.instances.length).toBeGreaterThan(initialInstanceCount)
     })
 
-    it('sets state to reconnecting when connection closes', () => {
+    it('sets state to reconnecting when connection closes', async () => {
       const { result } = renderHook(() =>
         useWebSocket({ topics: ['test'] }),
         { wrapper }
       )
+
+      await advancePastDebounce()
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -382,7 +416,7 @@ describe('useWebSocket with Provider', () => {
       expect(result.current.connectionState).toBe('reconnecting')
     })
 
-    it('calls onDisconnect callback when connection closes', () => {
+    it('calls onDisconnect callback when connection closes', async () => {
       const onDisconnect = vi.fn()
 
       renderHook(() =>
@@ -392,6 +426,8 @@ describe('useWebSocket with Provider', () => {
         }),
         { wrapper }
       )
+
+      await advancePastDebounce()
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
@@ -412,6 +448,8 @@ describe('useWebSocket with Provider', () => {
         { wrapper }
       )
 
+      await advancePastDebounce()
+
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()
       })
@@ -430,6 +468,8 @@ describe('useWebSocket with Provider', () => {
         useWebSocket({ topics: ['test'] }),
         { wrapper }
       )
+
+      await advancePastDebounce()
 
       act(() => {
         MockWebSocket.lastInstance.simulateOpen()

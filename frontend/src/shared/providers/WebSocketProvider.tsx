@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   useCallback,
+  useMemo,
   type ReactNode,
 } from 'react'
 import { toast } from 'sonner'
@@ -340,7 +341,17 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     setConnectionState('disconnected')
   }, [clearTimers])
 
-  // Debounced reconnect with new topics (wait for all subscriptions to settle)
+  // Refs for functions to break circular dependencies
+  const connectRef = useRef(connect)
+  const disconnectRef = useRef(disconnect)
+  const getActiveTopicsRef = useRef(getActiveTopics)
+
+  // Keep refs updated (synchronous, no effect trigger)
+  connectRef.current = connect
+  disconnectRef.current = disconnect
+  getActiveTopicsRef.current = getActiveTopics
+
+  // Stable schedule function using refs - avoids dependency cycles entirely
   const scheduleTopicsUpdate = useCallback(() => {
     // Clear existing debounce timer
     if (topicsDebounceRef.current) {
@@ -351,7 +362,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     topicsDebounceRef.current = setTimeout(() => {
       if (!isMountedRef.current) return
 
-      const topics = getActiveTopics()
+      const topics = getActiveTopicsRef.current()
       const topicsKey = topics.sort().join(',')
 
       // Check if topics actually changed
@@ -365,26 +376,26 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
 
       if (topics.length === 0) {
         // No subscriptions, disconnect
-        disconnect()
+        disconnectRef.current()
         return
       }
 
       // If connected, reconnect to update topics in URL
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         logger.debug('[WS Provider] Reconnecting to update topics:', topics)
-        disconnect()
+        disconnectRef.current()
         // Small delay before reconnecting
         setTimeout(() => {
           if (isMountedRef.current) {
-            connect()
+            connectRef.current()
           }
         }, 50)
       } else if (!isConnectingRef.current) {
         // Not connected, just connect
-        connect()
+        connectRef.current()
       }
     }, 50)
-  }, [getActiveTopics, disconnect, connect])
+  }, []) // Empty deps - uses refs for all dependencies
 
   // Subscribe to topics
   const subscribe = useCallback(
@@ -437,14 +448,19 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     }
   }, [disconnect])
 
-  const value: WebSocketContextValue = {
-    connectionState,
-    isConnected: connectionState === 'connected',
-    connectionId,
-    subscribe,
-    unsubscribe,
-    send,
-  }
+  // Memoize context value to prevent unnecessary re-renders of consumers
+  // Only changes when connection state, connectionId, or function refs change
+  const value = useMemo<WebSocketContextValue>(
+    () => ({
+      connectionState,
+      isConnected: connectionState === 'connected',
+      connectionId,
+      subscribe,
+      unsubscribe,
+      send,
+    }),
+    [connectionState, connectionId, subscribe, unsubscribe, send]
+  )
 
   return (
     <WebSocketContext.Provider value={value}>
