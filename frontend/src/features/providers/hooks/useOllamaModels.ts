@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { providerService } from '../api/providerService'
 import { OllamaModel } from '../types'
 
@@ -6,6 +6,8 @@ interface UseOllamaModelsResult {
   models: OllamaModel[]
   isLoading: boolean
   error: string | null
+  triggerFetch: () => void
+  hasFetched: boolean
 }
 
 const isValidUrl = (url: string): boolean => {
@@ -18,13 +20,30 @@ const isValidUrl = (url: string): boolean => {
   }
 }
 
-export const useOllamaModels = (host: string, enabled: boolean = true): UseOllamaModelsResult => {
+/**
+ * Hook to fetch Ollama models with optional lazy loading.
+ *
+ * @param host - Ollama server URL
+ * @param enabled - Whether fetching is enabled
+ * @param fetchOnMount - If false, models won't load until triggerFetch() is called
+ */
+export const useOllamaModels = (
+  host: string,
+  enabled: boolean = true,
+  fetchOnMount: boolean = true
+): UseOllamaModelsResult => {
   const [models, setModels] = useState<OllamaModel[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [shouldFetch, setShouldFetch] = useState(fetchOnMount)
+
+  const triggerFetch = useCallback(() => {
+    setShouldFetch(true)
+  }, [])
 
   useEffect(() => {
-    if (!enabled || !isValidUrl(host)) {
+    if (!enabled || !shouldFetch || !isValidUrl(host)) {
+      if (!shouldFetch) return
       setModels([])
       setError(null)
       setIsLoading(false)
@@ -64,7 +83,7 @@ export const useOllamaModels = (host: string, enabled: boolean = true): UseOllam
       clearTimeout(timeoutId)
       controller.abort()
     }
-  }, [host, enabled])
+  }, [host, enabled, shouldFetch])
 
-  return { models, isLoading, error }
+  return { models, isLoading, error, triggerFetch, hasFetched: shouldFetch }
 }

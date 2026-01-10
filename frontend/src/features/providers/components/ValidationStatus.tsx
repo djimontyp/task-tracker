@@ -2,7 +2,7 @@ import { Badge } from '@/shared/ui'
 import { ValidationStatus as Status } from '@/features/providers/types'
 import { CheckCircle, XCircle, Loader2, Clock } from 'lucide-react'
 
-interface ValidationStatusProps {
+export interface ValidationStatusProps {
   status: Status
   error?: string
 }

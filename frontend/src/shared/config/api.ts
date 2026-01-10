@@ -59,6 +59,7 @@ export const API_ENDPOINTS = {
   providers: buildApiPath('providers'),
   provider: (providerId: string) => buildApiPath(`providers/${providerId}`),
   ollamaModels: (host: string) => buildApiPath(`providers/ollama/models?host=${encodeURIComponent(host)}`),
+  geminiModels: buildApiPath('providers/gemini/models'),
   projects: buildApiPath('projects'),
   project: (projectId: string) => buildApiPath(`projects/${projectId}`),
   topics: buildApiPath('topics'),

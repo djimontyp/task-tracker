@@ -12,6 +12,7 @@ import type {
   LLMProviderCreate,
   LLMProviderUpdate,
   OllamaModelsResponse,
+  GeminiModelsResponse,
 } from '../types'
 
 class ProviderService {
@@ -124,6 +125,34 @@ class ProviderService {
         }
         const detail = error.response?.data?.detail
         throw new Error(detail || 'Failed to fetch Ollama models')
+      }
+      throw error
+    }
+  }
+
+  async fetchGeminiModels(providerId: string): Promise<GeminiModelsResponse> {
+    try {
+      const response = await apiClient.get<GeminiModelsResponse>(
+        API_ENDPOINTS.geminiModels,
+        { params: { provider_id: providerId } }
+      )
+      return response.data
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 400) {
+          throw new Error('Provider ID is required')
+        }
+        if (error.response?.status === 404) {
+          throw new Error('Provider not found or has no API key')
+        }
+        if (error.response?.status === 502) {
+          throw new Error('Cannot connect to Gemini API')
+        }
+        if (error.response?.status === 504) {
+          throw new Error('Request timeout. Gemini API is not responding')
+        }
+        const detail = error.response?.data?.detail
+        throw new Error(detail || 'Failed to fetch Gemini models')
       }
       throw error
     }

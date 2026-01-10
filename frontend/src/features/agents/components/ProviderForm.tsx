@@ -107,6 +107,7 @@ const ProviderForm = ({
               <SelectContent>
                 <SelectItem value={ProviderType.OLLAMA}>{t('providerForm.fields.type.ollama')}</SelectItem>
                 <SelectItem value={ProviderType.OPENAI}>{t('providerForm.fields.type.openai')}</SelectItem>
+                <SelectItem value={ProviderType.GEMINI}>{t('providerForm.fields.type.gemini')}</SelectItem>
               </SelectContent>
             </Select>
           </FormField>
@@ -123,7 +124,7 @@ const ProviderForm = ({
             </FormField>
           )}
 
-          {formData.type === ProviderType.OPENAI && (
+          {(formData.type === ProviderType.OPENAI || formData.type === ProviderType.GEMINI) && (
             <FormField
               label={t('providerForm.fields.apiKey.label')}
               id="api_key"

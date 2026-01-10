@@ -7,6 +7,7 @@
 export enum ProviderType {
   OLLAMA = "ollama",
   OPENAI = "openai",
+  GEMINI = "gemini",
 }
 
 export enum ValidationStatus {
@@ -58,4 +59,14 @@ export interface OllamaModelsResponse {
 
 export interface OllamaModelsErrorResponse {
   detail: string;
+}
+
+export interface GeminiModel {
+  name: string;
+  display_name: string;
+  description?: string;
+}
+
+export interface GeminiModelsResponse {
+  models: GeminiModel[];
 }
