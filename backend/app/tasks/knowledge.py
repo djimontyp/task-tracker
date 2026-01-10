@@ -322,10 +322,11 @@ async def extract_knowledge_from_messages_task(
         )
 
         # Pass session for RAG context lookup
-        extraction_output = await service.extract_knowledge(messages, session=db)
+        extraction_output, usage_stats = await service.extract_knowledge(messages, session=db)
 
         logger.info(
-            f"LLM extraction completed: {len(extraction_output.topics)} topics, {len(extraction_output.atoms)} atoms"
+            f"LLM extraction completed: {len(extraction_output.topics)} topics, {len(extraction_output.atoms)} atoms. "
+            f"Usage: {usage_stats}"
         )
 
         # CHECKPOINT 2: After LLM, before save
@@ -369,6 +370,9 @@ async def extract_knowledge_from_messages_task(
                 atoms_created=len(saved_atoms),
                 links_created=links_created,
                 messages_processed=len(messages),
+                tokens_prompt=usage_stats.get("prompt_tokens", 0),
+                tokens_completion=usage_stats.get("completion_tokens", 0),
+                tokens_total=usage_stats.get("total_tokens", 0),
             )
 
         # Embed new atoms (messages are embedded during scoring for RAG)

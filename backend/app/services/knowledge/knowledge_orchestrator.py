@@ -164,7 +164,7 @@ class KnowledgeOrchestrator:
         self,
         messages: Sequence[Message],
         session: AsyncSession | None = None,
-    ) -> KnowledgeExtractionOutput:
+    ) -> tuple[KnowledgeExtractionOutput, dict[str, int]]:
         """Extract topics and atoms from message batch using LLM.
 
         Uses language-specific prompts and validates output language.
@@ -227,11 +227,12 @@ class KnowledgeOrchestrator:
         # Use language-specific system prompt
         system_prompt = get_extraction_prompt(self.language)
 
-        extraction_output = await self._run_extraction(
+        result = await self._run_extraction(
             model=model,
             system_prompt=system_prompt,
             prompt=prompt,
         )
+        extraction_output = result.data
 
         # Validate output language
         if not self._validate_extraction_language(extraction_output):
@@ -241,11 +242,12 @@ class KnowledgeOrchestrator:
             )
             # Retry with strengthened prompt (max 1 retry)
             strengthened_prompt = get_strengthened_prompt(self.language)
-            extraction_output = await self._run_extraction(
+            result = await self._run_extraction(
                 model=model,
                 system_prompt=strengthened_prompt,
                 prompt=prompt,
             )
+            extraction_output = result.data
 
             # Log if still mismatched after retry
             if not self._validate_extraction_language(extraction_output):
@@ -258,14 +260,26 @@ class KnowledgeOrchestrator:
             f"{len(extraction_output.atoms)} atoms extracted"
         )
 
-        return extraction_output
+        # Extract usage stats
+        try:
+            usage = result.usage()
+            usage_dict = {
+                "prompt_tokens": usage.request_tokens,
+                "completion_tokens": usage.response_tokens,
+                "total_tokens": usage.total_tokens
+            }
+        except Exception:
+            logger.warning("Failed to extract usage stats from PydanticAI result")
+            usage_dict = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+
+        return extraction_output, usage_dict
 
     async def _run_extraction(
         self,
         model: "OpenAIChatModel",
         system_prompt: str,
         prompt: str,
-    ) -> KnowledgeExtractionOutput:
+    ) -> Any:
         """Run single extraction attempt with given prompt.
 
         Uses PromptedOutput for Ollama providers to ensure reliable JSON parsing.
@@ -319,7 +333,7 @@ class KnowledgeOrchestrator:
 
         try:
             result = await agent.run(prompt, model_settings=model_settings_obj)
-            return result.output
+            return result
 
         except Exception as e:
             logger.error(

@@ -61,6 +61,11 @@ class KnowledgeExtractionRun(IDMixin, TimestampMixin, SQLModel, table=True):
     atoms_created: int = Field(default=0, description="Atoms created")
     links_created: int = Field(default=0, description="Atom links created")
 
+    # Resource Usage (Phase 2)
+    tokens_prompt: int | None = Field(default=None, description="Prompt tokens used")
+    tokens_completion: int | None = Field(default=None, description="Completion tokens used")
+    tokens_total: int | None = Field(default=None, description="Total tokens used")
+
     # Lifecycle timestamps
     started_at: datetime | None = Field(
         default=None,
