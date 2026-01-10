@@ -13,6 +13,8 @@ import type {
   AgentTaskAssignment,
   AgentTaskAssignmentCreate,
   AgentTaskAssignmentWithDetails,
+  AgentStats,
+  GoldenSetTestReport,
 } from '../types'
 
 interface AgentTestResponse {
@@ -140,6 +142,28 @@ class AgentService {
         limit: params?.limit,
       },
     })
+    return response.data
+  }
+
+  /**
+   * Get agent real-time statistics
+   */
+  async getAgentStats(id: string): Promise<AgentStats> {
+    const response = await apiClient.get<AgentStats>(`${API_ENDPOINTS.agents}/${id}/stats`)
+    return response.data
+  }
+
+  /**
+   * Run golden set test for agent (synchronous)
+   */
+  async runGoldenSetTest(
+    agentId: string,
+    mode: 'quick' | 'medium' = 'quick'
+  ): Promise<GoldenSetTestReport> {
+    const response = await apiClient.post<GoldenSetTestReport>(
+      `${API_ENDPOINTS.agents}/${agentId}/golden-set-test`,
+      { mode }
+    )
     return response.data
   }
 }
