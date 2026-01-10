@@ -14,7 +14,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
-LOCALES_DIR = Path(__file__).parent / "frontend" / "public" / "locales"
+LOCALES_DIR = Path(__file__).parent.parent / "frontend" / "public" / "locales"
 LANGUAGES = ["uk", "en"]
 PLACEHOLDER_PATTERNS = [
     re.compile(r"TODO", re.IGNORECASE),
